@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ApiFetchError } from "@/lib/api-error";
+import { canRetryCoachTurnError } from "@shared/coach-turn-error";
 import { buildCoachTranscriptErrorItem } from "./coach-transcript-model";
 import { resolveCoachVisibleErrorMessage } from "./coach-visible-error";
 
@@ -28,6 +29,7 @@ const TRANSCRIPT_COPY: Record<string, string> = {
 
 const TURN_COPY = {
   modelUnavailable: "The model is temporarily unavailable.",
+  questionStale: "This question has expired.",
   aborted: "The request was interrupted.",
   business: "The request could not be completed.",
   internal: "Something went wrong on our end.",
@@ -106,6 +108,13 @@ describe("resolveCoachVisibleErrorMessage", () => {
         translate(),
       ),
     ).toBe(TURN_COPY.invalidStructuredOutput);
+  });
+
+  it("explains an expired question and disables retry of the same answer", () => {
+    expect(resolveCoachVisibleErrorMessage("question_stale", translate())).toBe(
+      TURN_COPY.questionStale,
+    );
+    expect(canRetryCoachTurnError("question_stale")).toBe(false);
   });
 });
 

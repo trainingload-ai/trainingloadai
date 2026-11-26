@@ -1,100 +1,141 @@
 ---
-title: Training Impulse (TRIMP)
-description: TRIMP estimates internal training load from heart rate and duration, especially when power or pace-based load is unavailable.
-keywords: ["TRIMP", "Training Impulse", "Banister TRIMP", "heart rate training load", "internal training load", "Training Load"]
+title: "Qu’est-ce que le TRIMP ? Formule de charge d’entraînement par fréquence cardiaque"
+description: "Le TRIMP (Training Impulse) convertit la fréquence cardiaque et la durée en charge d’entraînement interne. Découvrez la formule de Banister, les zones d’Edwards et quand le TRIMP surpasse le TSS."
+keywords:
+  [
+    "TRIMP",
+    "training impulse",
+    "TRIMP Banister",
+    "charge d'entraînement fréquence cardiaque",
+    "TRIMP Edwards",
+    "charge d'entraînement interne",
+  ]
 ---
 
-# Training Impulse (TRIMP)
+# Qu’est-ce que le TRIMP ? Formule de charge d’entraînement par fréquence cardiaque
 
-**Training Impulse (TRIMP)** is a method proposed by Dr. Eric W. Banister in 1975 (refined in 1991) to quantify **internal training load**.
+Le **TRIMP** (Training Impulse) est un score de charge d’entraînement basé sur la fréquence cardiaque. Il multiplie la durée par une pondération d’intensité non linéaire afin que les minutes intenses comptent davantage que les minutes faciles. Banister a publié cette méthode en 1975 puis l’a affinée en 1991 pour quantifier la **charge d’entraînement interne** lorsque la puissance ou une allure fiable fait défaut.
 
-Where power and pace describe external work, TRIMP uses **heart rate and duration** to estimate the body’s internal response. It addresses a practical question: **how do we combine heart rate and time into a single load score when power is unavailable or not appropriate?**
+Alors que la puissance et l’allure mesurent le travail externe, le TRIMP utilise la **fréquence cardiaque et la durée** pour estimer la réponse interne de l’organisme. Il répond à une question concrète : **comment combiner la fréquence cardiaque et le temps en un score de charge unique quand la puissance n’est pas disponible ou pas adaptée ?**
 
-## Core Concept
+## Principe fondamental
 
-The basic logic is: **Load = Duration × Intensity**.
+La logique de base est simple : **Charge = Durée × Intensité**.
 
-In TRIMP, “intensity” is not just average heart rate; it reflects the **non-linear** response associated with higher heart rates.
--   Going from 130 to 140 bpm adds relatively little stress.
--   Going from 180 to 190 bpm (near maximal) usually produces a much larger internal response.
+Dans le TRIMP, l’« intensité » ne se résume pas à la fréquence cardiaque moyenne : elle tient compte du caractère **non linéaire** du stress à haute fréquence cardiaque.
 
-Banister introduced an exponential weighting so high-heart-rate work contributes more than low-heart-rate work of the same duration.
+- Passer de 130 à 140 bpm ajoute relativement peu de contrainte.
+- Passer de 180 à 190 bpm (proche du maximum) déclenche une réponse interne beaucoup plus forte.
 
-## Formula (Banister TRIMP)
+Banister a donc introduit une pondération exponentielle afin que le travail à haute fréquence cardiaque pèse nettement plus qu’un effort facile de même durée.
 
-Trainingload.ai can use the classic **Banister TRIMP (exponential model)** when the required heart-rate inputs are available:
+## Formule (TRIMP de Banister)
+
+Trainingload.ai utilise le **TRIMP de Banister (modèle exponentiel)** classique dès que les données cardiaques nécessaires sont disponibles :
 
 ```text
 TRIMP = t_min * HR_ratio * 0.64 * exp(k * HR_ratio)
 ```
 
-Where:
--   $t_{min}$ = duration (minutes)
--   $HR_{ratio}$ = heart rate reserve ratio (HRR ratio)
+Où :
 
-    ```text
-    HR_ratio = (HR_avg - HR_rest) / (HR_max - HR_rest)
-    ```
+- $t_{min}$ = durée (en minutes)
+- $HR_{ratio}$ = ratio de réserve cardiaque (ratio HRR)
 
--   $e$ = Euler’s number (2.718…)
--   $k$ = sex coefficient (male **1.92**, female **1.67**) reflecting different lactate-threshold responses at high HR.
+  ```text
+  HR_ratio = (HR_avg - HR_rest) / (HR_max - HR_rest)
+  ```
 
-### Example
-Assume a male athlete (HRmax 200, HRrest 50):
-1.  **Easy run 1h @ 140 bpm** (HR_ratio = 0.6):
+- $e$ = nombre d’Euler (2,718…)
+- $k$ = coefficient selon le sexe (homme **1,92**, femme **1,67**), reflétant des réponses lactiques différentes à haute fréquence cardiaque.
 
-    ```text
-    TRIMP ≈ 60 * 0.6 * 0.64 * exp(1.92 * 0.6) ≈ 72
-    ```
+### Exemple
 
-2.  **Hard effort 1h @ 185 bpm** (HR_ratio = 0.9):
+Prenons un athlète masculin (FCmax 200, FCrepos 50) :
 
-    ```text
-    TRIMP ≈ 60 * 0.9 * 0.64 * exp(1.92 * 0.9) ≈ 194
-    ```
+1. **Sortie facile 1 h à 140 bpm** (HR_ratio = 0,6) :
 
-Even at the same duration, TRIMP at high intensity can be ~3× the low-intensity value, showing the non-linear effect of intensity.
+   ```text
+   TRIMP ≈ 60 * 0.6 * 0.64 * exp(1.92 * 0.6) ≈ 72
+   ```
 
-## Variants and Evolution
+2. **Effort soutenu 1 h à 185 bpm** (HR_ratio = 0,9) :
 
-Beyond Banister’s model, other variants exist. Trainingload.ai supports these depending on data availability:
+   ```text
+   TRIMP ≈ 60 * 0.9 * 0.64 * exp(1.92 * 0.9) ≈ 194
+   ```
 
-| Variant | Full Name | Core Signal | Pros / Cons |
+À durée identique, le TRIMP à haute intensité représente près de 3 fois celui de la séance facile, illustrant l’effet non linéaire de l’intensité.
+
+## Variantes et évolutions
+
+Au-delà du modèle de Banister, d’autres variantes existent. Trainingload.ai les prend en charge selon les données disponibles :
+
+| Variante | Nom complet | Signal principal | Avantages / Limites |
 | :--- | :--- | :--- | :--- |
-| **TRIMP** | **Banister TRIMP** | **Exponentially weighted HR** | ⭐⭐⭐⭐ Useful for steady aerobic work when HR data is reliable. Less sensitive to short intervals. |
-| **TRIMP_zone** | **Edwards TRIMP** | **HR zone accumulation** | ⭐⭐⭐ Simple and intuitive. Splits HR into 5 zones with weights (e.g., Z1=1, Z5=5). Boundary effects are a drawback. |
-| **TRIMP_avg** | **Average HR** | **Average HR** | ⭐⭐ Too simple. Uses `Time * HR_avg` and ignores the cost of high intensity, easily underestimating hard sessions. |
-| **sRPE** | **Session RPE** | **Subjective rating** | ⭐ Fallback. $Time \times RPE(1-10)$. Useful without HR data, but depends on honest self-reporting. |
+| **TRIMP** | **TRIMP de Banister** | **FC pondérée exponentiellement** | ⭐⭐⭐⭐ Pertinent pour le travail aérobie régulier avec des données FC fiables. Moins sensible aux intervalles très courts. |
+| **TRIMP_zone** | **TRIMP d’Edwards** | **Cumul par zones FC** | ⭐⭐⭐ Simple et intuitif. Découpe la FC en 5 zones pondérées (ex. Z1=1, Z5=5). Effets de seuil aux frontières de zones. |
+| **TRIMP_avg** | **FC moyenne** | **FC moyenne** | ⭐⭐ Trop simpliste. Utilise `Time * HR_avg` et ignore le surcoût de la haute intensité, sous-estimant les séances dures. |
+| **sRPE** | **Session RPE** | **Évaluation subjective** | ⭐ Solution de repli. $Time \times RPE(1-10)$. Utile sans capteur FC, mais dépend de la justesse du ressenti déclaré. |
 
-## Typical Use Cases
+## Cas d’usage typiques
 
-### 1. A data source for PMC
-For sports where power is hard to obtain (swimming, trail running, gym work), TRIMP can be a practical alternative input for calculating [ATL (Fatigue)](/docs/metrics/pmc/acute-training-load) and [CTL (Fitness)](/docs/metrics/pmc/chronic-training-load).
--   **TSS** is typically used for cycling/road running.
--   **TRIMP** can be used for any aerobic activity.
+### 1. Une source de données pour le PMC
 
-## How Trainingload.ai uses TRIMP
+Pour les sports où la puissance est difficile à mesurer (natation, trail, musculation/renforcement), le TRIMP offre une source de charge pratique pour alimenter l’[ATL](/fr/docs/metrics/pmc/acute-training-load) et la [CTL](/fr/docs/metrics/pmc/chronic-training-load).
 
-Trainingload.ai treats TRIMP as an internal-load input. It is especially useful when power, reliable pace, or structured workout targets are missing. In plan review, TRIMP can help explain why a session felt costly even if external output was modest.
+- Le **TSS** est généralement utilisé en cyclisme et en course sur route.
+- Le **TRIMP** peut s’appliquer à toute activité aérobie.
 
-TRIMP is most useful when it is interpreted with context:
+## Comment Trainingload.ai utilise le TRIMP
 
--   compare it with RPE and notes from the athlete;
--   watch heat, dehydration, and cardiac drift;
--   avoid using it alone for short sprint or anaerobic interval sessions.
+Trainingload.ai considère le TRIMP comme une mesure de charge interne. Il est particulièrement précieux lorsque la puissance, une allure fiable ou des cibles de séance structurées font défaut. Lors de la revue du plan, le TRIMP aide à expliquer pourquoi une séance a paru coûteuse malgré une production externe modeste.
 
-### 2. Review HR and RPE mismatch
-If your **TRIMP/RPE ratio** looks abnormal:
--   **Normal**: high TRIMP corresponds to high RPE.
--   **Abnormal**: TRIMP is high but RPE is low (HR drift from dehydration or illness), or TRIMP is low but RPE is high (HR won’t rise—often seen in parasympathetic overreaching).
+Le TRIMP donne le meilleur de lui-même lorsqu’il est lu en contexte :
 
-## Limitations
+- comparez-le au RPE et aux notes de l’athlète ;
+- tenez compte de la chaleur, de la déshydratation et de la dérive cardiaque ;
+- évitez de vous y fier seul pour des sprints brefs ou des intervalles anaérobies courts.
 
-1.  **Cardiac lag**: in 30-second all-out sprints, power peaks immediately but HR may rise slowly and only catch up later. TRIMP can underestimate short anaerobic interval load.
-2.  **Environmental noise**: heat, dehydration, caffeine, and lack of sleep can elevate HR (cardiac drift), inflating TRIMP—your heart beats faster, but it doesn’t mean your muscles did more work.
-3.  **Non-specificity**: 100 TRIMP from swimming vs. running places very different musculoskeletal stress; TRIMP can’t distinguish mechanical load.
+### 2. Repérer un décalage entre FC et RPE
 
-## References
+Si votre **ratio TRIMP/RPE** semble inhabituel :
 
--   [Fellrnr: TRIMP Explained](https://fellrnr.com/wiki/TRIMP)
--   Banister, E.W. (1991). Modeling Elite Athletic Performance. In: MacDougall, J.D., Wenger, H.A., Green, H.J. (eds) Physiological Testing of the High-Performance Athlete.
+- **Normal** : un TRIMP élevé va de pair avec un RPE élevé.
+- **Anormal** : un TRIMP élevé avec un RPE faible (dérive cardiaque due à la déshydratation ou à un début d’infection), ou un TRIMP faible avec un RPE élevé (la FC ne monte plus — signe fréquent de surmenage parasympathique).
+
+## Limites
+
+1. **Inertie cardiaque** : sur des sprints maximaux de 30 secondes, la puissance grimpe instantanément tandis que la FC monte avec retard. Le TRIMP peut donc sous-estimer la charge des intervalles anaérobies courts.
+2. **Bruit environnemental** : la chaleur, la déshydratation, la caféine et le manque de sommeil font monter la FC (dérive cardiaque) et gonflent le TRIMP — votre cœur bat plus vite, sans que vos muscles aient produit davantage de travail mécanique.
+3. **Absence de spécificité mécanique** : 100 points de TRIMP en natation et 100 points en course à pied n’imposent pas du tout la même contrainte musculo-squelettique ; le TRIMP ne distingue pas la charge mécanique.
+
+## FAQ
+
+### Qu’est-ce que le TRIMP à l’entraînement ?
+
+Le TRIMP est un score d’impulsion d’entraînement : durée × intensité cardiaque, avec une pondération plus forte pour les minutes intenses. Il estime la charge interne, contrairement au TSS de puissance à vélo qui mesure le travail externe.
+
+### Comment calculer le TRIMP de Banister ?
+
+On applique la formule : minutes × ratio de réserve cardiaque × 0,64 × exp(k × ratio FC). Le ratio FC vaut (FC moyenne − FC repos) / (FC max − FC repos), avec `k` égal à 1,92 pour les hommes et 1,67 pour les femmes.
+
+### TRIMP vs TSS : lequel choisir ?
+
+Utilisez le TSS dès que la puissance ou une allure de course fiable est disponible. Utilisez le TRIMP lorsque la séance repose sur la fréquence cardiaque — natation, trail, salle de sport ou toute activité aérobie sans charge externe fiable.
+
+### Pourquoi le TRIMP peut-il sous-estimer les intervalles courts ?
+
+La fréquence cardiaque réagit plus lentement que la puissance. Un sprint de 30 secondes fait bondir la puissance immédiatement, mais la FC monte tardivement, si bien que le TRIMP sous-estime le travail anaérobie court. Associez-le au RPE ou à un score de puissance/allure.
+
+## Étapes suivantes
+
+- [Piloter votre charge d’entraînement avec CTL, ATL et TSB dans votre plan](/fr/training-load)
+- Comparer les scores de séance avec le [Training Stress Score](/fr/docs/metrics/training-load/training-stress-score)
+- [Calculer vos zones de fréquence cardiaque](/fr/heart-rate-zones-calculator)
+- [Utiliser la revue du Coach IA pour ajuster la charge d’entraînement en toute sécurité](/fr/ai-training-plan)
+
+## Références
+
+- [Fellrnr: TRIMP Explained](https://fellrnr.com/wiki/TRIMP)
+- Banister, E.W. (1991). Modeling Elite Athletic Performance. In: MacDougall, J.D., Wenger, H.A., Green, H.J. (eds) Physiological Testing of the High-Performance Athlete.

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { DialogClose } from "@/components/ui/dialog";
 import {
   Confirmation,
   ConfirmationActions,
@@ -31,10 +32,17 @@ import {
   isCalendarDate,
   parseScheduleConstraints,
 } from "@shared/plan-calendar";
-import type { PlanProposalPresentation } from "@shared/plan-proposal";
+import { calendarAdjustmentRecoveryKeys, CalendarAdjustmentState, planProposalComparisonKind, type PlanProposalPresentation } from "@shared/plan-proposal";
 import { parsePlanQualityContract } from "@shared/plan-quality";
 import { safeParseCoachPlanDraftData } from "@shared/ai-coach-schema";
 import { CoachPlanDraftCalendarPreview } from "../coach-plan-draft-calendar-preview";
+import { CoachSchedulePreviewContext } from "../coach-preview-panel";
+import { CalendarAdjustmentControls, CalendarAdjustmentUnavailableNotice } from "../../calendar/components/calendar-adjustment-controls";
+import { useCalendarAdjustment } from "../../calendar/components/use-calendar-adjustments";
+import { CoachScheduleReview } from "./coach-schedule-comparison";
+import { CoachPlanChangeComparison } from "./coach-plan-change-comparison";
+import { CoachPlanProposalContext } from "./coach-plan-proposal-context";
+import { CoachPlanReviewCard } from "./coach-plan-review-card";
 import { getRestoredStartDecisionApply } from "../coach-plan-decision-state";
 import { rejectCoachDecision } from "@/api/ai-coach";
 import { parseRollingStartSettings } from "@shared/rolling-plan";
@@ -231,6 +239,12 @@ function getPlanProposalPresentation(
       return [
         {
           name,
+          beforeName: asText(row.beforeName) || undefined,
+          beforeSportType: asText(row.beforeSportType) || undefined,
+          workoutId: asText(row.workoutId) || undefined,
+          beforeScheduledDate: isCalendarDate(row.beforeScheduledDate)
+            ? row.beforeScheduledDate
+            : undefined,
           ...(["CHANGED", "ADDED", "DELETED", "PRESERVED"].includes(
             asText(row.changeKind),
           )
@@ -254,6 +268,11 @@ function getPlanProposalPresentation(
       ? value.warnings.map(asText).filter(Boolean)
       : [],
   };
+}
+
+export function hasCoachPlanReview(result: CoachDecisionDraftToolResult) {
+  const proposal = getPlanProposalPresentation(result);
+  return Boolean(proposal && proposal.mode !== "START");
 }
 
 function CoachScheduleRules({
@@ -600,16 +619,38 @@ export function CoachDecisionDraftCard({
   onConfirm?: (decisionId: string) => void;
 }) {
   const t = useTranslations("AiCoachPage.decision");
+  const schedulePreview = React.useContext(CoachSchedulePreviewContext);
   const [showAllProposalRows, setShowAllProposalRows] = React.useState(false);
   const [isCancelling, setIsCancelling] = React.useState(false);
   const [isCancelled, setIsCancelled] = React.useState(false);
   const [cancelFailed, setCancelFailed] = React.useState(false);
-  const applied = Boolean(isApplied || result.state === "APPLIED");
+  const actionLockRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!confirmDisabled && !isCancelling) {
+      actionLockRef.current = false;
+    }
+  }, [confirmDisabled, isCancelling]);
+  const moveCopy = useTranslations("CalendarMove");
+  const workspaceCopy = useTranslations("AiCoachPage.workspace");
+  const schedulePlanId = result.decisionType === "PLAN_SCHEDULE" ? asText(result.payload?.planId) : "";
+  const adjustmentId = asText(result.payload?.calendarAdjustmentId) || result.decisionId;
+  const latestVersion = useCalendarAdjustment(schedulePlanId, schedulePlanId && schedulePreview ? adjustmentId : undefined).data;
+  const historical = Boolean(latestVersion?.decisionId && latestVersion.decisionId !== result.decisionId);
+  const historicalVersionId = historical ? asText(result.payload?.previewId) : undefined;
+  const historicalVersion = useCalendarAdjustment(schedulePlanId,
+    historicalVersionId ? adjustmentId : undefined, historicalVersionId).data;
+  const version = historical ? historicalVersion : latestVersion;
+  const applied = Boolean(isApplied || result.state === "APPLIED" || (!historical && version?.state === CalendarAdjustmentState.Applied));
   const restoredApply = !isApplied
     ? getRestoredStartDecisionApply(result)
     : null;
   const superseded = !applied && result.state === "SUPERSEDED";
-  const rejected = !applied && (isCancelled || result.state === "REJECTED");
+  const rejected =
+    !applied &&
+    (isCancelled ||
+      result.state === "REJECTED" ||
+      (!historical && version?.state === CalendarAdjustmentState.Discarded) ||
+      schedulePreview?.cancelledDecisionId === result.decisionId);
   const approved = !rejected && (applied || result.state === "APPROVED");
   const isHighRisk = result.riskTier === "HIGH";
   const proposal = getPlanProposalPresentation(result);
@@ -619,12 +660,349 @@ export function CoachDecisionDraftCard({
   const selectedOptions = (result.options ?? []).filter(
     (option) => option.isSelected,
   );
-  const proposalRows = proposal
-    ? showAllProposalRows
-      ? proposal.rows
-      : proposal.rows.slice(0, 10)
-    : [];
-  const draftCard = (
+  const proposalRows = proposal ? [...proposal.rows].sort((left, right) =>
+    Number(planProposalComparisonKind(left, proposal.mode, proposal.effectiveFrom) === "PRESERVED") -
+    Number(planProposalComparisonKind(right, proposal.mode, proposal.effectiveFrom) === "PRESERVED"),
+  ) : [];
+  const latestBlocked = latestVersion && calendarAdjustmentRecoveryKeys(latestVersion)?.length === 0;
+  const openSchedule = schedulePreview ? () => schedulePreview.open(result.decisionId) : undefined;
+  if (historical) {
+    const proposalVersion = historicalVersion?.presentation ?? proposal;
+    if (proposalVersion) return (
+      <CoachPlanReviewCard
+        proposal={proposalVersion}
+        status={t("supersededTitle")}
+        footer={!latestBlocked && openSchedule ? (
+          <DialogClose asChild><Button size="sm" variant="secondary" onClick={openSchedule}>
+            {moveCopy("viewLatestAdjustment")}
+          </Button></DialogClose>
+        ) : undefined}
+      >
+        <CoachScheduleReview proposal={proposalVersion} />
+      </CoachPlanReviewCard>
+    );
+  }
+  const recoveryKeys = version ? calendarAdjustmentRecoveryKeys(version) : null;
+  if (version && (version.isVersioned || recoveryKeys)) {
+    if (recoveryKeys?.length === 0)
+      return <CalendarAdjustmentUnavailableNotice adjustment={version} onViewSchedule={openSchedule} />;
+    return (
+      <CoachPlanReviewCard
+        proposal={version.presentation}
+        status={moveCopy(`adjustmentStates.${version.state}`)}
+        footer={(close) => <>
+          {openSchedule ? (
+            <DialogClose asChild><Button size="sm" variant="secondary" onClick={openSchedule}>
+              {workspaceCopy("openCalendar")}
+            </Button></DialogClose>
+          ) : null}
+          <CalendarAdjustmentControls adjustment={version}
+            onOpenRecovery={openSchedule ? () => { close(); openSchedule(); } : undefined}
+            disabled={confirmDisabled || schedulePreview?.isEditingAdjustment?.(version.id)} />
+        </>}
+      >
+        <CoachScheduleReview proposal={version.presentation} />
+      </CoachPlanReviewCard>
+    );
+  }
+
+  const scheduleProposal = proposal?.mode === "SCHEDULE" && schedulePreview
+    ? version?.presentation ?? proposal
+    : undefined;
+  const canOpenSchedule = scheduleProposal && openSchedule && !applied && !rejected && !superseded &&
+    scheduleProposal.rows.some((row) => row.changeKind && row.changeKind !== "PRESERVED");
+  const readyVersion = scheduleProposal && !applied && !rejected && !superseded && version?.state === CalendarAdjustmentState.Ready
+    ? version : undefined;
+  const proposalStatus = applied ? t("appliedBadge") : superseded ? t("supersededTitle")
+    : rejected ? t("rejectedTitle") : approved ? t("approvedTitle") : moveCopy("adjustmentStates.READY");
+
+  const confirmation = (
+    superseded ? (
+      <p role="status" className="text-xs text-muted-foreground">
+        {t("supersededTitle")}
+      </p>
+    ) : showConfirmControls && (onConfirm || approved || rejected) ? (
+      <Confirmation
+        approval={{
+          id: result.decisionId,
+          approved: rejected ? false : approved ? true : undefined,
+        }}
+        state={
+          rejected
+            ? "output-denied"
+            : applied
+              ? "output-available"
+              : approved
+                ? "approval-responded"
+                : "approval-requested"
+        }
+        className="w-full bg-transparent p-0 dark:bg-transparent"
+        aria-label={t("suggestionTitle")}
+      >
+        <ConfirmationRequest>
+          <p className="text-xs leading-5 text-muted-foreground">
+            {t("confirmHint")}
+          </p>
+        </ConfirmationRequest>
+        <ConfirmationAccepted>
+          <p
+            role="status"
+            className="flex items-center gap-2 text-xs leading-5 text-muted-foreground"
+          >
+            <CheckCircle2 className="size-3.5 shrink-0" />
+            {applied ? t("appliedTitle") : t("approvedHint")}
+          </p>
+        </ConfirmationAccepted>
+        <ConfirmationRejected>
+          <p
+            role="status"
+            className="flex items-center gap-2 text-xs leading-5 text-muted-foreground"
+          >
+            <CircleX className="size-3.5 shrink-0" />
+            {t("rejectedHint")}
+          </p>
+        </ConfirmationRejected>
+        {cancelFailed && (
+          <p role="alert" className="text-xs text-destructive">
+            {t("rejectFailed")}
+          </p>
+        )}
+        <ConfirmationActions>
+          {proposal ? (
+            <ConfirmationAction
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={confirmDisabled || isCancelling || schedulePreview?.isEditingAdjustment?.(result.decisionId)}
+              onClick={() => {
+                if (actionLockRef.current) return;
+                actionLockRef.current = true;
+                setIsCancelling(true);
+                setCancelFailed(false);
+                void rejectCoachDecision(
+                  result.decisionId,
+                  "user_cancelled_plan_proposal",
+                )
+                  .then(() => setIsCancelled(true))
+                  .catch(() => setCancelFailed(true))
+                  .finally(() => {
+                    actionLockRef.current = false;
+                    setIsCancelling(false);
+                  });
+              }}
+            >
+              {t("cancelButton")}
+            </ConfirmationAction>
+          ) : null}
+          <ConfirmationAction
+            type="button"
+            size="sm"
+            disabled={confirmDisabled || isCancelling || schedulePreview?.isEditingAdjustment?.(result.decisionId)}
+            onClick={() => {
+              if (actionLockRef.current) return;
+              actionLockRef.current = true;
+              onConfirm?.(result.decisionId);
+            }}
+          >
+            {proposal?.mode === "SCHEDULE"
+              ? t("applyScheduleButton")
+              : proposal?.mode === "START"
+                ? t("applyStartButton")
+                : proposal?.mode === "SUPERSEDE"
+                  ? t("applySupersessionButton")
+                  : proposal
+                    ? t("applyAdaptationButton")
+                    : t("confirmButton")}
+          </ConfirmationAction>
+        </ConfirmationActions>
+      </Confirmation>
+    ) : null
+  );
+  const details = (
+    <div className="space-y-2.5">
+      {scheduleProposal ? (
+        <CoachScheduleReview proposal={scheduleProposal} initialMove={schedulePreview?.initialMove} />
+      ) : proposal ? (
+          <>
+            {proposal.rolling ? (
+              <RollingStartSummary
+                rolling={proposal.rolling}
+                pending={!applied}
+              />
+            ) : null}
+            {(proposal.mode === "START" || proposal.mode === "SCHEDULE") &&
+            proposal.calendarDraft &&
+            proposal.startDate &&
+            proposal.calendarTimeZone ? (
+              <CoachPlanDraftCalendarPreview
+                windowOnly={Boolean(proposal.rolling)}
+                generationWindow={
+                  proposal.rolling
+                    ? {
+                        from: proposal.rolling.generatedFrom,
+                        through: proposal.rolling.generatedThrough,
+                      }
+                    : undefined
+                }
+                draft={proposal.calendarDraft}
+                startDate={
+                  proposal.calendarDraftStartDate ?? proposal.startDate
+                }
+                calendarTimeZone={proposal.calendarTimeZone}
+                scheduleConstraints={proposal.scheduleConstraints}
+              />
+            ) : null}
+            <CoachScheduleRules proposal={proposal} />
+            {proposal.relatedCalendarConflicts?.length ? (
+              <div className="flex min-w-0 flex-col gap-2 rounded-md bg-muted px-3 py-3">
+                <CoachCard.SectionTitle>
+                  {t("relatedCalendarConflicts")}
+                </CoachCard.SectionTitle>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {t("relatedCalendarUnmanaged")}
+                </p>
+                <ul className="flex min-w-0 list-disc flex-col gap-1 pl-4 text-xs leading-5">
+                  {proposal.relatedCalendarConflicts.map(
+                    (conflict, index) => (
+                      <li
+                        key={`${conflict.workoutId}:${conflict.code}:${index}`}
+                        className="min-w-0 break-words"
+                      >
+                        <time dateTime={conflict.date}>{conflict.date}</time>
+                        {" · "}
+                        <span>{conflict.name || t("workoutName")}</span>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </div>
+            ) : null}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {(proposal.mode === "START" || proposal.mode === "SCHEDULE"
+                ? ([
+                    "total",
+                    "changed",
+                    "added",
+                    "deleted",
+                    "preserved",
+                    "protected",
+                  ] as const)
+                : (["total", "changed", "preserved", "skipped"] as const)
+              ).map((key) => (
+                <div
+                  key={key}
+                  className="rounded-md bg-background/80 px-3 py-2 dark:bg-background/45"
+                >
+                  <div className="text-mobile-caption pc:text-[11px] text-muted-foreground">
+                    {t(key)}
+                  </div>
+                  <div className="mt-0.5 text-sm font-semibold text-foreground">
+                    {proposal.counts[key]}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {proposalRows.length ? (
+              <div className="space-y-2.5">
+                <CoachCard.SectionTitle>{t("changePreview")}</CoachCard.SectionTitle>
+                <CoachPlanChangeComparison
+                  rows={showAllProposalRows ? proposalRows : proposalRows.slice(0, 10)}
+                  mode={proposal.mode}
+                  effectiveFrom={proposal.effectiveFrom}
+                  footer={proposalRows.length > 10 ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      aria-expanded={showAllProposalRows}
+                      onClick={() => setShowAllProposalRows((value) => !value)}
+                    >
+                      {showAllProposalRows ? <ChevronUp /> : <ChevronDown />}
+                      {showAllProposalRows ? t("showLess") : t("showAll")}
+                    </Button>
+                  ) : null}
+                />
+              </div>
+            ) : null}
+            <CoachPlanProposalContext proposal={proposal} />
+            {proposal.warnings.map((warning) => (
+              <div
+                key={warning}
+                className="rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200"
+              >
+                {warning}
+              </div>
+            ))}
+          </>
+        ) : null}
+      {workoutDrafts.map((draft, index) => (
+        <WorkoutDraftPreview
+          key={`${asText(draft.name)}:${asNumber(draft.weekIndex)}:${asNumber(draft.dayIndex)}:${index}`}
+          dto={draft}
+          pending={!approved && !rejected}
+        />
+      ))}
+      {!proposal && previewRows.length > 0 ? (
+        <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
+          <CoachCard.SectionTitle>
+            {t("changePreview")}
+          </CoachCard.SectionTitle>
+          {previewRows.map((row) => (
+            <CoachCard.MetaRow
+              key={`${row.label}:${row.value}`}
+              label={row.label}
+            >
+              {row.value}
+            </CoachCard.MetaRow>
+          ))}
+        </div>
+      ) : null}
+      {!proposal && selectedOptions.length > 0 ? (
+        <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
+          <CoachCard.SectionTitle>
+            {t("selectedOption")}
+          </CoachCard.SectionTitle>
+          {selectedOptions.map((option) => (
+            <div
+              key={option.optionKey}
+              className="text-mobile-caption pc:text-xs leading-5 text-foreground"
+            >
+              {option.title || option.optionKey}
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {result.rationale ? (
+        <div className="px-1 pt-1 text-xs leading-5 text-muted-foreground">
+          <CoachCard.SectionTitle className="mb-1">
+            {t("whyThis")}
+          </CoachCard.SectionTitle>
+          <p>{result.rationale}</p>
+        </div>
+      ) : null}
+    </div>
+  );
+  const reviewConfirmation = !scheduleProposal || !schedulePreview?.confirmInPreview ? confirmation : null;
+  const draftCard = proposal && proposal.mode !== "START" ? (
+    <CoachPlanReviewCard
+      proposal={scheduleProposal ?? proposal}
+      status={proposalStatus}
+      footer={canOpenSchedule || readyVersion || reviewConfirmation ? (
+        <>
+          {canOpenSchedule ? (
+            <DialogClose asChild><Button size="sm" variant="secondary" onClick={openSchedule}>
+              {workspaceCopy("openCalendar")}
+            </Button></DialogClose>
+          ) : null}
+          {readyVersion ? <CalendarAdjustmentControls adjustment={readyVersion}
+            disabled={confirmDisabled || schedulePreview?.isEditingAdjustment?.(readyVersion.id)} />
+            : reviewConfirmation}
+        </>
+      ) : undefined}
+    >
+      {details}
+    </CoachPlanReviewCard>
+  ) : (
     <CoachCard
       tone={workoutDrafts.length ? "neutral" : isHighRisk ? "warning" : "info"}
       icon={
@@ -665,346 +1043,9 @@ export function CoachDecisionDraftCard({
         )
       }
       dense={dense}
-      footer={
-        superseded ? (
-          <p role="status" className="text-xs text-muted-foreground">
-            {t("supersededTitle")}
-          </p>
-        ) : showConfirmControls && (onConfirm || approved || rejected) ? (
-          <Confirmation
-            approval={{
-              id: result.decisionId,
-              approved: rejected ? false : approved ? true : undefined,
-            }}
-            state={
-              rejected
-                ? "output-denied"
-                : applied
-                  ? "output-available"
-                  : approved
-                    ? "approval-responded"
-                    : "approval-requested"
-            }
-            className="w-full bg-transparent p-0 dark:bg-transparent"
-            aria-label={t("suggestionTitle")}
-          >
-            <ConfirmationRequest>
-              <p className="text-xs leading-5 text-muted-foreground">
-                {t("confirmHint")}
-              </p>
-            </ConfirmationRequest>
-            <ConfirmationAccepted>
-              <p
-                role="status"
-                className="flex items-center gap-2 text-xs leading-5 text-muted-foreground"
-              >
-                <CheckCircle2 className="size-3.5 shrink-0" />
-                {applied ? t("appliedTitle") : t("approvedHint")}
-              </p>
-            </ConfirmationAccepted>
-            <ConfirmationRejected>
-              <p
-                role="status"
-                className="flex items-center gap-2 text-xs leading-5 text-muted-foreground"
-              >
-                <CircleX className="size-3.5 shrink-0" />
-                {t("rejectedHint")}
-              </p>
-            </ConfirmationRejected>
-            {cancelFailed && (
-              <p role="alert" className="text-xs text-destructive">
-                {t("rejectFailed")}
-              </p>
-            )}
-            <ConfirmationActions>
-              {proposal ? (
-                <ConfirmationAction
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  disabled={confirmDisabled || isCancelling}
-                  onClick={() => {
-                    setIsCancelling(true);
-                    setCancelFailed(false);
-                    void rejectCoachDecision(
-                      result.decisionId,
-                      "user_cancelled_plan_proposal",
-                    )
-                      .then(() => setIsCancelled(true))
-                      .catch(() => setCancelFailed(true))
-                      .finally(() => setIsCancelling(false));
-                  }}
-                >
-                  {t("cancelButton")}
-                </ConfirmationAction>
-              ) : null}
-              <ConfirmationAction
-                type="button"
-                size="sm"
-                disabled={confirmDisabled || isCancelling}
-                onClick={() => onConfirm?.(result.decisionId)}
-              >
-                {proposal?.mode === "SCHEDULE"
-                  ? t("applyScheduleButton")
-                  : proposal?.mode === "START"
-                    ? t("applyStartButton")
-                    : proposal?.mode === "SUPERSEDE"
-                      ? t("applySupersessionButton")
-                      : proposal
-                        ? t("applyAdaptationButton")
-                        : t("confirmButton")}
-              </ConfirmationAction>
-            </ConfirmationActions>
-          </Confirmation>
-        ) : null
-      }
+      footer={confirmation}
     >
-      <div className="space-y-2.5">
-        {proposal ? (
-          <>
-            {proposal.rolling ? (
-              <RollingStartSummary
-                rolling={proposal.rolling}
-                pending={!applied}
-              />
-            ) : null}
-            {(proposal.mode === "START" || proposal.mode === "SCHEDULE") &&
-            proposal.calendarDraft &&
-            proposal.startDate &&
-            proposal.calendarTimeZone ? (
-              <CoachPlanDraftCalendarPreview
-                windowOnly={Boolean(proposal.rolling)}
-                generationWindow={
-                  proposal.rolling
-                    ? {
-                        from: proposal.rolling.generatedFrom,
-                        through: proposal.rolling.generatedThrough,
-                      }
-                    : undefined
-                }
-                draft={proposal.calendarDraft}
-                startDate={
-                  proposal.calendarDraftStartDate ?? proposal.startDate
-                }
-                calendarTimeZone={proposal.calendarTimeZone}
-                scheduleConstraints={proposal.scheduleConstraints}
-              />
-            ) : null}
-            <CoachScheduleRules proposal={proposal} />
-            {proposal.relatedCalendarConflicts?.length ? (
-              <div className="flex min-w-0 flex-col gap-2 rounded-md bg-muted px-3 py-3">
-                <CoachCard.SectionTitle>
-                  {t("relatedCalendarConflicts")}
-                </CoachCard.SectionTitle>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  {t("relatedCalendarUnmanaged")}
-                </p>
-                <ul className="flex min-w-0 list-disc flex-col gap-1 pl-4 text-xs leading-5">
-                  {proposal.relatedCalendarConflicts.map((conflict, index) => (
-                    <li
-                      key={`${conflict.workoutId}:${conflict.code}:${index}`}
-                      className="min-w-0 break-words"
-                    >
-                      <time dateTime={conflict.date}>{conflict.date}</time>
-                      {" · "}
-                      <span>{conflict.name || t("workoutName")}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {(proposal.mode === "START" || proposal.mode === "SCHEDULE"
-                ? ([
-                    "total",
-                    "changed",
-                    "added",
-                    "deleted",
-                    "preserved",
-                    "protected",
-                  ] as const)
-                : (["total", "changed", "preserved", "skipped"] as const)
-              ).map((key) => (
-                <div
-                  key={key}
-                  className="rounded-md bg-background/80 px-3 py-2 dark:bg-background/45"
-                >
-                  <div className="text-mobile-caption pc:text-[11px] text-muted-foreground">
-                    {t(key)}
-                  </div>
-                  <div className="mt-0.5 text-sm font-semibold text-foreground">
-                    {proposal.counts[key]}
-                  </div>
-                </div>
-              ))}
-            </div>
-            {proposal.facts.length ? (
-              <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
-                <CoachCard.SectionTitle>{t("evidence")}</CoachCard.SectionTitle>
-                {proposal.facts.map((fact, index) => (
-                  <CoachCard.MetaRow
-                    key={`${fact.type}:${fact.label}:${index}`}
-                    label={fact.label}
-                  >
-                    {fact.value == null ? "—" : String(fact.value)}
-                  </CoachCard.MetaRow>
-                ))}
-              </div>
-            ) : null}
-            <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
-              {proposal.estimatedLoadDelta != null ? (
-                <CoachCard.MetaRow label={t("loadDelta")}>
-                  {proposal.estimatedLoadDelta > 0 ? "+" : ""}
-                  {proposal.estimatedLoadDelta}
-                </CoachCard.MetaRow>
-              ) : null}
-              <CoachCard.MetaRow label={t("syncImpact")}>
-                {proposal.mode === "START" || proposal.mode === "SCHEDULE"
-                  ? t(
-                      proposal.mode === "SCHEDULE"
-                        ? "scheduleSyncImpact"
-                        : "startSyncImpact",
-                    )
-                  : proposal.syncImpact || "—"}
-              </CoachCard.MetaRow>
-              {proposal.effectiveFrom ? (
-                <CoachCard.MetaRow label={t("startDate")}>
-                  {proposal.effectiveFrom}
-                </CoachCard.MetaRow>
-              ) : null}
-            </div>
-            <div className="space-y-3 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
-              <CoachCard.SectionTitle>
-                {t("changePreview")}
-              </CoachCard.SectionTitle>
-              {proposalRows.map((row, index) => (
-                <div
-                  key={`${row.name}:${row.scheduledDate}:${index}`}
-                  className="pt-1 first:pt-0"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 text-xs font-medium text-foreground">
-                      {row.name}
-                      {row.protectedReason ? (
-                        <span className="ml-2 text-muted-foreground">
-                          {t(
-                            (
-                              {
-                                OUTSIDE_RANGE: "protectedOutsideRange",
-                                PLAN_STATUS: "protectedPlanStatus",
-                                WORKOUT_STATUS: "protectedWorkoutStatus",
-                                ACTIVITY_LINKED: "protectedActivityLinked",
-                                HISTORY: "protectedHistory",
-                                PENDING_SUPERSESSION: "protectedSuccessor",
-                              } as Record<string, string>
-                            )[row.protectedReason] ?? "protected",
-                          )}
-                        </span>
-                      ) : null}
-                      {row.changeKind ? (
-                        <span className="ml-2 text-muted-foreground">
-                          {t(
-                            (
-                              {
-                                CHANGED: "changed",
-                                ADDED: "added",
-                                DELETED: "deleted",
-                                PRESERVED: "preserved",
-                              } as const
-                            )[row.changeKind],
-                          )}
-                        </span>
-                      ) : null}
-                    </div>
-                    <span className="shrink-0 text-[11px] text-muted-foreground">
-                      {[row.scheduledDate, row.sportType]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </span>
-                  </div>
-                  <div className="mt-1 whitespace-pre-line text-xs leading-5 text-muted-foreground">
-                    {row.before} → {row.after}
-                  </div>
-                  {row.rationale ? (
-                    <div className="mt-1 text-[11px] leading-4 text-muted-foreground">
-                      {row.rationale}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-              {proposal.rows.length > 10 ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 px-1.5"
-                  onClick={() => setShowAllProposalRows((value) => !value)}
-                >
-                  {showAllProposalRows ? (
-                    <ChevronUp className="mr-1 h-3.5 w-3.5" />
-                  ) : (
-                    <ChevronDown className="mr-1 h-3.5 w-3.5" />
-                  )}
-                  {showAllProposalRows ? t("showLess") : t("showAll")}
-                </Button>
-              ) : null}
-            </div>
-            {proposal.warnings.map((warning) => (
-              <div
-                key={warning}
-                className="rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200"
-              >
-                {warning}
-              </div>
-            ))}
-          </>
-        ) : null}
-        {workoutDrafts.map((draft, index) => (
-          <WorkoutDraftPreview
-            key={`${asText(draft.name)}:${asNumber(draft.weekIndex)}:${asNumber(draft.dayIndex)}:${index}`}
-            dto={draft}
-            pending={!approved && !rejected}
-          />
-        ))}
-        {!proposal && previewRows.length > 0 ? (
-          <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
-            <CoachCard.SectionTitle>
-              {t("changePreview")}
-            </CoachCard.SectionTitle>
-            {previewRows.map((row) => (
-              <CoachCard.MetaRow
-                key={`${row.label}:${row.value}`}
-                label={row.label}
-              >
-                {row.value}
-              </CoachCard.MetaRow>
-            ))}
-          </div>
-        ) : null}
-        {!proposal && selectedOptions.length > 0 ? (
-          <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
-            <CoachCard.SectionTitle>
-              {t("selectedOption")}
-            </CoachCard.SectionTitle>
-            {selectedOptions.map((option) => (
-              <div
-                key={option.optionKey}
-                className="text-mobile-caption pc:text-xs leading-5 text-foreground"
-              >
-                {option.title || option.optionKey}
-              </div>
-            ))}
-          </div>
-        ) : null}
-        {result.rationale ? (
-          <div className="px-1 pt-1 text-xs leading-5 text-muted-foreground">
-            <CoachCard.SectionTitle className="mb-1">
-              {t("whyThis")}
-            </CoachCard.SectionTitle>
-            <p>{result.rationale}</p>
-          </div>
-        ) : null}
-      </div>
+      {details}
     </CoachCard>
   );
   return (

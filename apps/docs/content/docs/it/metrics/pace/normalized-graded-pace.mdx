@@ -1,84 +1,84 @@
 ---
 title: Normalized Graded Pace (NGP)
-description: Normalized Graded Pace converts variable running pace and terrain into a steady flat-equivalent intensity used for rTSS and run analysis.
-keywords: ["NGP", "Normalized Graded Pace", "GAP", "Grade Adjusted Pace", "rTSS", "running TSS", "normalized pace"]
+description: "Il Normalized Graded Pace trasforma passo variabile e dislivello della corsa in un'intensità equivalente in piano a ritmo costante, usata per rTSS e analisi delle sessioni."
+keywords: ["NGP", "Normalized Graded Pace", "GAP", "Grade Adjusted Pace", "rTSS", "TSS corsa", "passo normalizzato"]
 ---
 
 # Normalized Graded Pace (NGP)
 
-**Normalized Graded Pace (NGP)** is an intensity metric for running. It builds on **[GAP (Grade Adjusted Pace)](/docs/metrics/pace/grade-adjusted-pace)**, and the logic is similar to cycling’s **[NP (Normalized Power)](/docs/metrics/power/normalized-power)**.
+Il **Normalized Graded Pace (NGP)** è una metrica di intensità per la corsa. Si basa sul **[GAP (Grade Adjusted Pace)](/it/docs/metrics/pace/grade-adjusted-pace)** e segue una logica analoga a quella della **[NP (Normalized Power)](/it/docs/metrics/power/normalized-power)** nel ciclismo.
 
-In plain terms:
--   **GAP** answers: “What flat-ground pace is equivalent to this uphill/downhill pace?” (instant/segment-level equivalence).
--   **NGP** answers: “For this variable run (changes in grade and speed), what steady flat pace would have similar physiological cost?” (whole-run equivalence).
+In termini semplici:
+-   Il **GAP** risponde a: «Quale passo in piano equivale a questo tratto in salita o in discesa?» (equivalenza istantanea o di segmento).
+-   Il **NGP** risponde a: «Per questa corsa variabile (con cambi di pendenza e velocità), quale passo costante in piano avrebbe avuto un costo fisiologico simile?» (equivalenza sull'intera sessione).
 
-## Core idea
+## Idea di base
 
-Physiological cost (glycogen use, lactate accumulation, overall metabolic stress) is **non-linear** with intensity.
+Il costo fisiologico (consumo di glicogeno, accumulo di lattato, stress metabolico complessivo) varia in modo **non lineare** rispetto all'intensità.
 
-> **Example**:
-> A steady 5:00/km run is usually less stressful than “half the time at 4:00/km + half the time at 6:00/km”.
-> Even though both average to 5:00/km, the second run’s **NGP** may be meaningfully faster, reflecting the higher physiological cost of the surges.
+> **Esempio**:
+> Una corsa costante a 5:00/km è di solito meno impegnativa rispetto a «metà del tempo a 4:00/km + metà del tempo a 6:00/km».
+> Anche se entrambe hanno una media di 5:00/km, il **NGP** della seconda corsa sarà sensibilmente più veloce, riflettendo il costo fisiologico maggiore dei cambi di ritmo.
 
-## Computation
+## Calcolo
 
-NGP is computed from a grade-adjusted intensity stream, then displayed back as a pace.
+Il NGP viene calcolato a partire da una serie di intensità corrette per la pendenza, per poi essere riconvertito in passo per la visualizzazione.
 
-### Normalization
+### Normalizzazione
 
-Because pace is a time value (smaller means faster), Trainingload.ai converts GAP into a speed/intensity equivalent before weighting. Then it applies an NP-like normalization:
+Poiché il passo è un valore temporale (un numero più piccolo indica una corsa più veloce), Trainingload.ai converte prima il GAP in un equivalente di velocità/intensità, quindi applica una normalizzazione analoga alla NP:
 
-1.  **Convert**: turn GAP pace into speed or intensity.
-2.  **Smooth**: compute a 30-second rolling average.
-3.  **Weight**: apply 4th-power weighting to emphasize harder segments.
-4.  **Average + root**: take the mean and then the 4th root.
-5.  **Display**: convert the result back to pace for readability.
+1.  **Conversione**: trasforma il passo GAP in velocità o intensità.
+2.  **Smussamento**: calcola una media mobile su 30 secondi.
+3.  **Ponderazione**: applica una potenza alla 4ª per dare maggior peso ai tratti più intensi.
+4.  **Media + radice**: calcola la media e poi la radice quarta.
+5.  **Visualizzazione**: riconverte il risultato in passo per una lettura immediata.
 
 ```text
 NGP_intensity = 4th_root( (1/N) * sum_{i=1..N} (GAP_intensity_rolling(i))^4 )
 ```
 
-## Typical applications
+## Applicazioni principali
 
-### 1. Add context for trail and mountain effort
-On hilly terrain, average pace can look very slow. NGP helps reveal that your actual effort may not have dropped.
--   **Example**: a mountainous trail run averages 10:00/km.
--   **NGP**: could be much faster, better reflecting the metabolic stress your body felt.
+### 1. Contestualizzare lo sforzo su trail e montagna
+Su percorsi ricchi di dislivello, il passo medio può sembrare molto lento. Il NGP aiuta a mostrare che l'impegno reale non è affatto calato.
+-   **Esempio**: un trail in montagna ha un passo medio di 10:00/km.
+-   **NGP**: può risultare molto più veloce, rispecchiando meglio lo stress metabolico realmente sostenuto dal tuo organismo.
 
-### 2. Basis for rTSS
-Trainingload.ai uses NGP to compute **rTSS (Running Training Stress Score)**. The formula structure is similar to cycling TSS:
+### 2. Base per l'rTSS
+Trainingload.ai utilizza il NGP per calcolare l'**rTSS (Running Training Stress Score)**. La struttura della formula è simile a quella del TSS ciclistico:
 
-When NGP and FTPa are displayed as min/km pace, convert them to speed first. In speed terms:
+Quando NGP e FTPa sono espressi come passo in min/km, vanno prima convertiti in velocità. In termini di velocità:
 
 ```text
 IF = Speed_NGP / Speed_FTPa
 ```
 
-Using NGP helps keep running load comparable across different terrains.
+Usare il NGP aiuta a mantenere confrontabile il carico di allenamento della corsa su terreni diversi.
 
-## Metric comparison
+## Confronto tra metriche
 
-| Metric | Full name | Meaning | When to use |
+| Metrica | Nome completo | Significato | Quando usarla |
 | :--- | :--- | :--- | :--- |
-| **Avg Pace** | Average Pace | Actual average pace | Flat steady runs, finish-time estimation |
-| **Avg GAP** | Average GAP | Average grade-adjusted pace | Rolling routes without big surges |
-| **NGP** | Normalized Graded Pace | Normalized grade-adjusted pace | Trails, intervals, complex terrain, and rTSS |
+| **Passo medio** | Average Pace | Passo medio reale | Corse costanti in piano, stima del tempo finale |
+| **GAP medio** | Average GAP | Media del passo corretto per la pendenza | Percorsi ondulati senza grandi strappi di ritmo |
+| **NGP** | Normalized Graded Pace | Passo corretto per la pendenza e normalizzato | Trail, ripetute, terreni complessi e calcolo dell'rTSS |
 
-## How Trainingload.ai uses NGP
+## Come Trainingload.ai utilizza il NGP
 
--   **Use as a terrain-aware intensity reference**: NGP is often more informative than average pace on hilly or variable runs.
--   **Compute running load**: NGP is a key input for rTSS because it reflects terrain and intensity variation.
--   **Use with VI**: compute **VI (Variability Index) = NGP / Avg GAP**.
-    -   If VI is close to 1.0, the effort was steady.
-    -   If VI > 1.05, it likely reflects intervals or very complex terrain.
+-   **Riferimento di intensità sensibile al terreno**: il NGP è spesso più informativo del passo medio nelle corse collinari o con variazioni di ritmo.
+-   **Calcolo del carico di corsa**: il NGP è un input chiave dell'rTSS perché integra sia il terreno sia la variabilità dell'intensità.
+-   **Uso insieme al VI**: calcola **VI (Variability Index) = NGP / Avg GAP**.
+    -   Se il VI è vicino a 1,0, lo sforzo è stato costante.
+    -   Se il VI > 1,05, probabilmente hai svolto ripetute o corso su terreno molto irregolare.
 
-## Related docs
+## Documentazione correlata
 
-- [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace)
-- [Pace Zones](/docs/metrics/pace/zones)
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score)
+- [Grade Adjusted Pace (GAP)](/it/docs/metrics/pace/grade-adjusted-pace)
+- [Zone di passo](/it/docs/metrics/pace/zones)
+- [Training Stress Score (TSS)](/it/docs/metrics/training-load/training-stress-score)
 
-## References
+## Riferimenti
 
 -   [TrainingPeaks: What is Normalized Graded Pace?](https://help.trainingpeaks.com/hc/en-us/articles/204071804-Normalized-Graded-Pace-NGP-)
--   *Normalized Graded Pace (NGP) is a registered trademark of Peaksware, LLC.*
+-   *Normalized Graded Pace (NGP) è un marchio registrato di Peaksware, LLC.*

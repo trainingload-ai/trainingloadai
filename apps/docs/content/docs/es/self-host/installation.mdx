@@ -1,0 +1,158 @@
+---
+title: Inicio rápido de autohospedaje
+description: Verifica una versión firmada de Trainingload.ai, instala la instancia local, reclama la cuenta Owner y crea la primera copia de seguridad verificada.
+seoTitle: "Instala Trainingload.ai autohospedado con versión firmada"
+seoDescription: "Sigue la guía de inicio rápido para autohospedar Trainingload.ai en Linux, macOS o Windows: verifica la versión, instala con seguridad, crea la cuenta y haz una copia."
+keywords:
+  [
+    "instalar Trainingload.ai",
+    "inicio rápido de autohospedaje",
+    "paquete de versión firmado",
+    "autohospedaje con Docker Compose",
+  ]
+---
+
+# Inicio rápido de autohospedaje
+
+## Resultado esperado
+
+Terminarás con una instancia local de Trainingload.ai en marcha, una cuenta Owner reclamada, una comprobación de salud satisfactoria y una primera copia de seguridad verificada.
+
+## Antes de empezar
+
+Prepara uno de estos sistemas compatibles:
+
+- Ubuntu 24.04 en `amd64` o `arm64`;
+- macOS en Apple Silicon con Docker Desktop;
+- Windows 11 en `amd64` con Docker Desktop usando WSL2 y contenedores Linux.
+
+El equipo también necesita:
+
+- Node.js 22 o posterior;
+- Docker Engine y Docker Compose v2;
+- Cosign compatible con `verify-blob --bundle`;
+- al menos 2 CPU, 2 GiB de memoria y 5 GiB de disco libre para Core Local.
+
+Descarga el archivo de versión exacta, su archivo de suma de comprobación y su paquete de firma de suma de comprobación desde la página oficial de [GitHub Releases](https://github.com/trainingload-ai/trainingloadai/releases). No utilices un clon del código fuente ni un archivo sin versión como despliegue de producción.
+
+El directorio de datos predeterminado es `./data` dentro de la versión extraída. Si necesitas un disco dedicado u otra ruta, lee [Elige la ruta local de datos](/es/docs/self-host/configuration#choose-the-local-data-path) antes de ejecutar el instalador.
+
+## Instalar en Linux, macOS o WSL2
+
+### 1. Verifica el archivo descargado
+
+Ejecuta estos comandos en el directorio que contiene los tres archivos descargados:
+
+```bash
+version='<exact-version>'
+archive="trainingload-selfhost-$version.tar.gz"
+identity="https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$version"
+
+cosign verify-blob \
+  --bundle "$archive.sha256.bundle.json" \
+  --certificate-identity "$identity" \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  "$archive.sha256"
+```
+
+Después verifica la suma de comprobación del archivo con el comando correspondiente a tu sistema:
+
+```bash
+# Linux o WSL2
+sha256sum -c "$archive.sha256"
+
+# macOS
+shasum -a 256 -c "$archive.sha256"
+```
+
+Continúa únicamente cuando tanto la verificación de firma como la suma de comprobación tengan éxito.
+
+### 2. Extrae e inspecciona el plan de instalación
+
+```bash
+tar -xzf "$archive"
+cd "trainingload-selfhost-$version"
+./install.sh --dry-run --json
+```
+
+La simulación (`dry-run`) verifica la firma del paquete interno, los requisitos del equipo, la versión exacta, la configuración, la ruta de datos y el plan de ciclo de vida. Continúa solo cuando el resultado JSON contenga `"ok": true`.
+
+### 3. Instala la instancia
+
+```bash
+./install.sh --json
+```
+
+El instalador genera secretos locales protegidos, prepara el directorio de datos declarado, arranca imágenes fijadas por digest, ejecuta las migraciones de base de datos y espera a que los servicios requeridos estén listos.
+
+## Instalar en Windows 11
+
+Usa PowerShell en el directorio que contiene los archivos descargados:
+
+```powershell
+$Version = '<exact-version>'
+$Archive = "trainingload-selfhost-$Version.tar.gz"
+$Identity = "https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$Version"
+
+cosign verify-blob `
+  --bundle "$Archive.sha256.bundle.json" `
+  --certificate-identity $Identity `
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' `
+  "$Archive.sha256"
+
+$Expected = ((Get-Content "$Archive.sha256" -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+$Actual = (Get-FileHash $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($Actual -ne $Expected) { throw 'Release archive checksum mismatch' }
+
+tar.exe -xzf $Archive
+Set-Location "trainingload-selfhost-$Version"
+.\install.ps1 --dry-run --json
+.\install.ps1 --json
+```
+
+Continúa en PowerShell solo si el resultado de `--dry-run` contiene `"ok": true`.
+
+## Crea una cuenta local
+
+La instalación predeterminada escucha únicamente en `127.0.0.1`. Cuando los servicios estén listos, abre `http://localhost:43210` en el mismo ordenador. La pantalla inicial solo pide un nombre de usuario; no se requiere correo electrónico ni contraseña. Al enviarlo se crea el único Owner, se establece una sesión local y pasas directamente a la configuración inicial. Si esa sesión caduca más adelante, abrir la aplicación restaura la sesión para el mismo Owner.
+
+El acceso sin contraseña solo está habilitado cuando el origen del sitio, el enlace del Cliente y la dirección de confianza del cliente están en loopback y la petición procede del navegador en el mismo origen. No se guarda ninguna contraseña vacía en la base de datos.
+
+Para acceder desde otro ordenador, mantén la instancia enlazada a loopback y utiliza un túnel SSH hacia `localhost:43210`. La aplicación pública ofrece configuración de nombre de usuario y restauración de sesión local; no incluye las páginas de correo, contraseña, registro ni OAuth de Cloud. No publiques directamente en internet una instancia sin contraseña.
+
+## Qué ocurre después
+
+El sitio predeterminado se abre en `http://localhost:43210`. Los datos de PostgreSQL, los archivos subidos, las cachés, las copias de seguridad y los registros de operaciones permanecen bajo la raíz de datos declarada. El Cliente es el único servicio publicado; la documentación se despliega por separado. El uso inicial no requiere ninguna clave de IA ni de plataforma de entrenamiento. Más adelante, el único Owner puede configurar IA BYOK, una clave API personal de Intervals.icu y Garmin Personal API.
+
+## Verifica la instalación
+
+Ejecuta las comprobaciones de solo lectura y luego crea la primera copia de seguridad verificada:
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host backup --output first-verified-backup --dry-run --json
+./self-host backup --output first-verified-backup --json
+```
+
+La instalación está lista cuando:
+
+- `status` y `doctor` devuelven `"ok": true`;
+- puedes entrar en la instancia en la dirección configurada del sitio;
+- la copia de seguridad contiene un `backup-result.json` correcto y supera su paso de verificación.
+
+Mueve la copia de seguridad verificada a un almacenamiento cifrado en un dominio de fallo independiente. Una copia guardada solo en el mismo disco no ofrece protección suficiente frente a fallos.
+
+## Solución de problemas
+
+- **El instalador rechaza el sistema anfitrión:** no omitas la comprobación de plataforma; usa una de las combinaciones de equipo admitidas.
+- **Falla la verificación de firma o suma de comprobación:** detente y vuelve a descargar todos los archivos de la misma versión exacta.
+- **Docker no está disponible:** confirma que Docker está ejecutándose con Compose v2 y backend de contenedores Linux.
+- **El puerto ya está en uso:** configura otro enlace y puerto compatibles antes de arrancar la instancia.
+- **Falla la comprobación de disponibilidad:** ejecuta `./self-host doctor --json`; no sustituyas los comandos de ciclo de vida por comandos `docker compose` escritos a mano.
+
+Para códigos de error estables y pasos seguros de recuperación, consulta [Solución de problemas de autohospedaje](/es/docs/self-host/troubleshooting).
+
+## Próximo paso
+
+Continúa con [Configuración](/es/docs/self-host/configuration) para elegir la exposición de red y activar opcionalmente un proveedor de IA BYOK. Después revisa [Gestionar tu instancia](/es/docs/self-host/operations) antes de importar datos importantes.

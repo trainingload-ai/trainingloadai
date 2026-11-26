@@ -6,7 +6,6 @@ import { CoachComposer } from "./coach-assistant-composer";
 
 const runtime = vi.hoisted(() => ({
   isRunning: false,
-  isDesktopSelfHost: false,
   messages: [
     {
       role: "assistant",
@@ -28,11 +27,6 @@ vi.mock("./coach-chat-provider", () => ({
     select(runtime),
   useCoachActions: () => runtime,
 }));
-vi.mock("@/hooks/use-runtime-environment", () => ({
-  useRuntimeEnvironment: () => ({
-    isDesktopSelfHost: runtime.isDesktopSelfHost,
-  }),
-}));
 beforeEach(() => {
   vi.stubGlobal(
     "ResizeObserver",
@@ -49,18 +43,13 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe.each(
-  (["start", "footer", "embedded"] as const).flatMap((variant) =>
-    [[variant, false], [variant, true]] as const,
-  ),
-)(
-  "%s composer (desktop=%s)",
-  (variant, desktop) => {
+describe.each(["start", "footer", "embedded"] as const)(
+  "%s composer",
+  (variant) => {
     it.each([false, true])(
       "omits the status strip while retaining controls (running=%s)",
       (running) => {
         runtime.isRunning = running;
-        runtime.isDesktopSelfHost = desktop;
         const { container } = render(
           <NextIntlClientProvider locale="zh" messages={messages}>
             <CoachComposer variant={variant} />
@@ -78,13 +67,20 @@ describe.each(
           form.querySelector("[data-coach-context-trigger]"),
         ).not.toBeNull();
         if (running) {
-          fireEvent.click(screen.getByRole("button", { name: "停止" }));
+          const stop = screen.getByRole("button", { name: "停止" });
+          expect(stop).toHaveTextContent(/^$/);
+          fireEvent.click(stop);
           expect(runtime.stop).toHaveBeenCalledOnce();
         } else {
+          const send = screen.getByRole("button", { name: "发送" });
+          expect(send).toBeVisible();
+          expect(send).toBeDisabled();
+          expect(send).toHaveTextContent(/^$/);
           fireEvent.change(screen.getByRole("textbox"), {
             target: { value: "查看最近训练" },
           });
-          fireEvent.click(screen.getByRole("button", { name: "发送" }));
+          expect(send).toBeEnabled();
+          fireEvent.click(send);
           expect(runtime.append).toHaveBeenCalledWith("查看最近训练");
         }
       },

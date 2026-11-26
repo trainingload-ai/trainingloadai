@@ -34,7 +34,7 @@ export const trainingAnalysisQueryProperties = {
     type: 'string',
     enum: [...TRAINING_ANALYSIS_SOURCES, ...EXPLORATION_SOURCES],
     description:
-      'ACTIVITIES for workout statistics; PMC for load/ATL/CTL/TSB; METRICS for stored fitness or body history, including VO2_MAX, FTP, CP, heart-rate/pace thresholds, HEIGHT and WEIGHT. ACTIVITY_SERIES: 1–3 activities, signal measures and optional alignment/second range (no date range). ZONE_DISTRIBUTION: date range, zoneType, optional comparison period. PLAN_EXECUTION: date range, optional planId, measures DURATION_MIN/DISTANCE_KM/LOAD and DAY/WEEK/MONTH/WORKOUT grouping. RELATIONSHIP: exactly 2 measures with ACTIVITY date range, SAMPLE activity IDs, or METRIC_HISTORY date range for same-day body/fitness records. Other sources require from/to/groupBy/measures.',
+      'ACTIVITIES for workout statistics; PMC for load/ATL/CTL/TSB; METRICS for stored fitness or body history, including VO2_MAX, FTP, CP, heart-rate/pace thresholds, HEIGHT and WEIGHT. ACTIVITY_SERIES: 1–3 activities, signal measures and optional alignment/second range (no date range). POWER_DURATION: one activity ID or from/to and at least one sport, optionally a comparison range. ZONE_DISTRIBUTION: date range, zoneType, optional comparison period. PLAN_EXECUTION: date range, optional planId, measures DURATION_MIN/DISTANCE_KM/LOAD and DAY/WEEK/MONTH/WORKOUT grouping. RELATIONSHIP: exactly 2 measures with ACTIVITY date range, SAMPLE activity IDs, or METRIC_HISTORY date range for same-day body/fitness records. Other sources require from/to/groupBy/measures.',
   },
   from: {
     type: 'string',

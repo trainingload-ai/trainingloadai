@@ -21,6 +21,9 @@ import {
 } from '@shared/coach-turn-error';
 import { coachFailureReceiptContext } from './coach-failure-receipt';
 import { safeParseCoachQuestionReplyLikeToolResultPayload } from '@shared/ai-coach-schema';
+import { isCalendarDate } from '@shared/plan-calendar';
+import { coachPlanCalendarBlock } from './coach-plan-calendar';
+import { currentDecisionConfirmation } from './coach-workout-change';
 
 export type StoredCoachMessageRow = {
   role: AiCoachMessageRole;
@@ -77,13 +80,31 @@ function isReasoningMessagePart(value: unknown): boolean {
   );
 }
 
+function isCoachMetricCard(part: unknown): boolean {
+  if (!isRecord(part)) return false;
+  const tool = part.type === 'data-coach-tool' ? part.data : part.type === 'tool_use' ? part : null;
+  if (!isRecord(tool)) return false;
+  if (tool.name === 'CoachHealthVisualization') return true;
+  return tool.name === 'TrainingVisualization' && isRecord(tool.input) &&
+    (tool.input.detail != null || tool.input.observedAt != null);
+}
+
+export function hasStoredCoachMetricCard(message: unknown): boolean {
+  if (isStoredCoachUiMessageEnvelope(message)) {
+    return message.parts.some(isCoachMetricCard) || hasStoredCoachMetricCard(message.legacyMessage);
+  }
+  return isRecord(message) && Array.isArray(message.content) && message.content.some(isCoachMetricCard);
+}
+
 /** 对客户端历史响应移除旧数据中的原始推理；数据库副本仍可供 provider 连续性使用。 */
 function sanitizeStoredPartForClient(
   part: unknown,
   lang?: string,
+  includeMetricCards = true,
 ): Record<string, unknown> | null {
   if (!part || typeof part !== 'object' || Array.isArray(part)) return null;
   if (isReasoningMessagePart(part)) return null;
+  if (!includeMetricCards && isCoachMetricCard(part)) return null;
   const record = part as Record<string, unknown>;
   if (
     record.type === 'data-coach-activity' &&
@@ -113,6 +134,7 @@ function sanitizeStoredPartForClient(
 export function sanitizeStoredCoachMessageForClient(
   message: unknown,
   lang?: string,
+  includeMetricCards = true,
 ): unknown {
   if (!message || typeof message !== 'object' || Array.isArray(message)) {
     return message;
@@ -128,21 +150,26 @@ export function sanitizeStoredCoachMessageForClient(
   } = record;
   const content = Array.isArray(record.content)
     ? record.content
-        .map((block) => sanitizeStoredPartForClient(block, lang))
+        .map((block) => sanitizeStoredPartForClient(block, lang, includeMetricCards))
         .filter((block): block is Record<string, unknown> => block !== null)
     : record.content;
 
   if (isStoredCoachUiMessageEnvelope(message)) {
+    const calendar = readLegacyPlanCalendarPart(message);
     return {
       ...withoutReasoning,
-      parts: message.parts
-        .map((part) => sanitizeStoredPartForClient(part, lang))
-        .filter((part): part is Record<string, unknown> => part !== null),
+      parts: [
+        ...message.parts
+          .map((part) => sanitizeStoredPartForClient(part, lang, includeMetricCards))
+          .filter((part): part is Record<string, unknown> => part !== null),
+        ...(calendar ? [calendar] : []),
+      ],
       ...(message.legacyMessage !== undefined
         ? {
             legacyMessage: sanitizeStoredCoachMessageForClient(
               message.legacyMessage,
               lang,
+              includeMetricCards,
             ),
           }
         : {}),
@@ -152,6 +179,52 @@ export function sanitizeStoredCoachMessageForClient(
   return {
     ...withoutReasoning,
     ...(Array.isArray(record.content) ? { content } : {}),
+  };
+}
+
+function readLegacyPlanCalendarPart(message: StoredCoachUiMessageEnvelope) {
+  if (
+    message.role !== 'assistant' ||
+    !Array.isArray(message.providerHistory) ||
+    !message.parts.some((part) =>
+      isRecord(part) && part.type === 'data-coach-run' &&
+      isRecord(part.data) && part.data.status === 'completed',
+    ) ||
+    message.parts.some((part) => isRecord(part) && part.type === 'data-coach-tool')
+  ) return null;
+
+  const blocks = message.providerHistory.flatMap((row) =>
+    isRecord(row) && isRecord(row.message) && Array.isArray(row.message.content)
+      ? row.message.content.filter(isRecord)
+      : [],
+  );
+  const read = blocks.reverse().find((block) =>
+    block.type === 'tool_use' &&
+    (block.name === 'plan_by_id' || block.name === 'plan.by_id') &&
+    typeof block.id === 'string' && isRecord(block.input) &&
+    block.input.includeAllWorkouts === true &&
+    isCalendarDate(block.input.calendarFrom) &&
+    isCalendarDate(block.input.calendarTo) &&
+    block.input.calendarFrom <= block.input.calendarTo,
+  );
+  if (!read || typeof read.id !== 'string' || !isRecord(read.input)) return null;
+  const result = blocks.find((block) =>
+    block.type === 'tool_result' && block.tool_use_id === read.id && !block.is_error,
+  );
+  let output: unknown = result?.content;
+  if (typeof output === 'string') {
+    try {
+      output = JSON.parse(output);
+    } catch {
+      return null;
+    }
+  }
+  const calendar = coachPlanCalendarBlock(read.id, read.input, output);
+  if (!calendar || calendar.input.planId !== read.input.planId) return null;
+  return {
+    type: 'data-coach-tool',
+    id: calendar.id,
+    data: { toolCallId: calendar.id, name: calendar.name, input: calendar.input },
   };
 }
 
@@ -574,7 +647,6 @@ function isClientContextToolResult(block: CoachUserToolResultBlock): boolean {
     block.tool_use_id === 'client:activity_ai_analysis_context' ||
     block.tool_use_id === 'client:today_suggestion_context' ||
     block.tool_use_id === 'client:pmc_projection_context' ||
-    block.tool_use_id === 'client:coach_decision_confirm' ||
     block.tool_use_id === 'client:coach_decision_rebase' ||
     Boolean(coachQuestionResponseContext(block)) ||
     Boolean(savedPlanDraftContext(block))
@@ -591,6 +663,31 @@ function isAssistantMessageBody(
 function isUserMessageBody(value: unknown): value is CoachUserMessageBody {
   const content = (value as { content?: unknown } | null)?.content;
   return Array.isArray(content);
+}
+
+export function isRollingPlanBrief(
+  current: CoachUserMessageBody | null | undefined,
+  history: readonly StoredCoachMessageRow[],
+): boolean {
+  const messages = [
+    current,
+    ...history
+      .filter((row) => row.role === 'USER')
+      .reverse()
+      .map((row) => getStoredCoachLegacyMessage(row.message)),
+  ];
+  for (const message of messages) {
+    if (!isUserMessageBody(message)) continue;
+    for (const block of message.content) {
+      if (block.type !== 'tool_result' || typeof block.content !== 'object') continue;
+      const content = block.content as { kind?: unknown; payload?: { planningMode?: unknown } } | null;
+      if (content?.kind === 'coach_plan_draft_saved') return false;
+      if (block.tool_use_id === 'client:ai_plan_seed' && content?.kind === 'ai_plan_seed') {
+        return content.payload?.planningMode === 'ROLLING';
+      }
+    }
+  }
+  return false;
 }
 
 function openAiToolCallFromToolUse(
@@ -723,6 +820,9 @@ function buildOpenAiUserAndToolMessages(args: {
               'Plan creation selections:',
               stableJson(block.content),
               'These schedule fields were already provided; do not ask for them again.',
+              ...(isRollingPlanBrief({ content: [block] }, [])
+                ? ['The athlete chose a continuous plan with no end date. Use periodWeeks=1 for the initial preview only. Assess the full goal and training evidence, then draft one starter week. Saving that draft does not start it.']
+                : []),
               'Treat sportTypes as a multi-select plan mix. Strength preference is binding: INCLUDE requires separate strength workouts, EXCLUDE forbids them, and AUTO allows them only when recovery and the total weekly schedule permit.',
               'Athlete facts must come from the plan-context read when available, rather than being re-asked.',
               'Only when personalizationReadiness is none should you ask for the minimum self-reported baseline needed before drafting.',
@@ -757,19 +857,6 @@ function buildOpenAiUserAndToolMessages(args: {
               content: buildCoachUserContext('today_suggestion', context),
             } satisfies ChatCompletionMessageParam)
           : null;
-      }
-      if (block.tool_use_id === 'client:coach_decision_confirm') {
-        return {
-          role: 'user',
-          content: buildCoachUserContext(
-            'decision_confirmation',
-            [
-              'The user confirmed this exact selected decision:',
-              stableJson(block.content),
-              'Use its reference only to apply the confirmed decision; do not display the reference.',
-            ].join('\n'),
-          ),
-        } satisfies ChatCompletionMessageParam;
       }
       return {
         role: 'user',
@@ -964,6 +1051,20 @@ export function buildHistoryMessages(args: {
       args.provider,
       row === latestFailureReceiptRow,
     );
+  }
+  const confirmation = currentDecisionConfirmation(args.currentUserMessage);
+  if (confirmation?.assistantMessageId) {
+    out.push({
+      role: 'user',
+      content: buildCoachUserContext(
+        'decision_confirmation',
+        [
+          'The user confirmed this exact selected decision:',
+          stableJson(confirmation),
+          'Apply this existing decision with coach_decision_apply. Use the exact visible user confirmation. Do not display the internal references.',
+        ].join('\n'),
+      ),
+    });
   }
   out.push(
     ...buildOpenAiUserAndToolMessages({

@@ -1,5 +1,6 @@
 import { AiService } from '../ai.service';
 import { streamCoachAnswer } from '../core/tool-loop-agent.runtime';
+import type { CoachQueryYield } from '../core/coach-query-yield';
 
 jest.mock('../core/coach-upstream.adapter', () => ({
   ...jest.requireActual('../core/coach-upstream.adapter'),
@@ -32,7 +33,7 @@ function fixture() {
     },
     prisma: { aiCoachMessage: { findFirst } },
   });
-  const run = async (prompt: string, extra: Record<string, unknown> = {}) => {
+  const reply = async (prompt: string, extra: Record<string, unknown> = {}) => {
     const stream = await service.coachStream({
       session: { user: { id: 'athlete' } },
       sid: 'session',
@@ -41,12 +42,15 @@ function fixture() {
       signal: new AbortController().signal,
       ...extra,
     } as never);
-    for await (const _event of stream) {
-      /* drain */
-    }
+    const events: CoachQueryYield[] = [];
+    for await (const event of stream) events.push(event);
+    return events;
+  };
+  const run = async (prompt: string, extra?: Record<string, unknown>) => {
+    await reply(prompt, extra);
     return jest.mocked(streamCoachAnswer).mock.calls.at(-1)![0];
   };
-  return { run, protocolReply, findFirst };
+  return { service, run, reply, protocolReply, findFirst };
 }
 
 describe('AiService continuation ownership', () => {
@@ -83,6 +87,134 @@ describe('AiService continuation ownership', () => {
       (await f.run('今天调整跑步计划', { intent: 'plan-followup' })).activeSkill
         ?.name,
     ).toBe('plan-followup');
+  });
+
+  it.each([{ intent: 'plan-builder' }, {}])('re-reads changed facts before publishing a plan question with entry %j', async (entry) => {
+    const f = fixture();
+    const oldFacts = {
+      date: '2026-11-20',
+      timezone: 'UTC',
+      status: 'AVAILABLE',
+      revision: 'before',
+      health: null,
+      memory: null,
+      limitations: [],
+      training: { activityRevision: 'no-runs' },
+    };
+    const latestFacts = {
+      ...oldFacts,
+      revision: 'after',
+      training: { activityRevision: 'synced-runs' },
+    };
+    const build = jest
+      .fn(async () => latestFacts)
+      .mockResolvedValueOnce(oldFacts);
+    const bindFactScope = jest.fn(async () => undefined);
+    Object.assign(f.service, {
+      userService: { getPreferredTimezone: async () => 'UTC' },
+      factContext: { build },
+      coachRuns: { bindFactScope },
+    });
+    const question = {
+      id: 'baseline',
+      header: 'Running background',
+      question: 'How many days do you run?',
+      options: [
+        { value: 'one', label: 'One', description: 'One day a week' },
+        { value: 'two', label: 'Two', description: 'Two days a week' },
+      ],
+    };
+    const terminal = {
+      type: 'result',
+      subtype: 'success',
+      is_error: false,
+      result: '',
+    } as const;
+    jest
+      .mocked(streamCoachAnswer)
+      .mockImplementationOnce(async function* () {
+        yield {
+          type: 'assistant',
+          message: {
+            content: [
+              {
+                type: 'tool_use',
+                id: 'old-question',
+                name: 'AskUserQuestion',
+                input: {
+                  questions: [question],
+                  metadata: { skill: 'plan-builder' },
+                },
+              },
+            ],
+          },
+        };
+        yield terminal;
+      })
+      .mockImplementationOnce(async function* ({ ctx }) {
+        ctx.planQuestionReview!.decisions = [
+          {
+            id: 'baseline',
+            outcome: 'ANSWERED',
+            reason: 'Recently synced activities answer the baseline question.',
+          },
+        ];
+        yield {
+          type: 'assistant',
+          message: {
+            content: [
+              {
+                type: 'tool_use',
+                id: 'draft',
+                name: 'PresentCoachPlanDraft',
+                input: { title: 'Starter week' },
+              },
+            ],
+          },
+        };
+        yield terminal;
+      });
+    const prompt = 'Build an eight-week running plan with my current training.';
+    const events = await f.reply(prompt, {
+      ...entry,
+      runtimeRunId: 'run',
+      currentUserMessageId: 'input',
+      operationId: 'operation',
+    });
+    expect(events.map((event) => event.type)).toEqual(['assistant', 'result']);
+    expect(JSON.stringify(events)).toContain('PresentCoachPlanDraft');
+    expect(JSON.stringify(events)).not.toContain('old-question');
+    expect(streamCoachAnswer).toHaveBeenCalledTimes(2);
+    expect(jest.mocked(streamCoachAnswer).mock.calls[0][0].activeSkill?.name).toBe(
+      entry.intent,
+    );
+    const nextCall = jest.mocked(streamCoachAnswer).mock.calls[1][0];
+    expect(nextCall.ctx).toMatchObject({
+      sid: 'session',
+      aiOperationId: 'operation',
+      currentUserMessageId: 'input',
+      planQuestionReview: { questions: [question] },
+    });
+    expect(nextCall.coachFacts).toBe(latestFacts);
+    expect(
+      nextCall.tools.find(({ name }) => name === 'plan.suitability_assess')
+        ?.parameters,
+    ).toMatchObject({
+      required: expect.arrayContaining(['questionReview']),
+      properties: {
+        questionReview: {
+          items: { properties: { id: { enum: ['baseline'] } } },
+        },
+      },
+    });
+    expect(JSON.stringify(nextCall.messages)).toContain(prompt);
+    expect(JSON.stringify(nextCall.messages)).toContain(
+      'Changed evidence: training.',
+    );
+    expect(bindFactScope.mock.calls).toEqual([
+      ['athlete', 'run', expect.objectContaining({ revision: 'before' })],
+      ['athlete', 'run', expect.objectContaining({ revision: 'after' })],
+    ]);
   });
 
   it('restores the persisted question owner and its original question', async () => {

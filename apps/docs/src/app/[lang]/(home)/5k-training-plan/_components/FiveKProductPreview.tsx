@@ -1,3 +1,4 @@
+import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import Image from "next/image";
 import { ProductBrowserChrome } from "@/components/ProductBrowserChrome";
 import { publicDemoDestination } from "@/lib/public-demo-url";
@@ -72,7 +73,8 @@ function previewAsset(
     | "mobile-coach-dark",
   locale: PreviewLocale,
 ) {
-  return `/5k-training-plan/${surface}-v2-${locale}.png`;
+  const path = `/5k-training-plan/${surface}-v2-${locale}.png`;
+  return surface.startsWith("web-") ? productScreenshotUrl(path) : path;
 }
 
 function planPreviewAsset(
@@ -85,7 +87,7 @@ function planPreviewAsset(
     planSlug === "half-marathon-training-plan" ||
     planSlug === "marathon-training-plan"
   ) {
-    return `/${planSlug}/${surface}-v2-${locale}.png`;
+    return productScreenshotUrl(`/${planSlug}/${surface}-v2-${locale}.png`);
   }
   return previewAsset(surface, locale);
 }

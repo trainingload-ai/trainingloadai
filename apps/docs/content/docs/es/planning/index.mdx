@@ -1,0 +1,74 @@
+---
+title: Planes y sesiones
+description: Aprende cómo representa Trainingload.ai los planes, las sesiones programadas, la estructura de resistencia y fuerza, la carga esperada y los vínculos con actividades completadas.
+keywords:
+  [
+    "planes de Trainingload.ai",
+    "sesiones estructuradas",
+    "ciclo de vida del plan de entrenamiento",
+  ]
+---
+
+# Planes y sesiones
+
+Trainingload.ai trata el plan de entrenamiento como un espacio de trabajo activo, no como un PDF estático. Un plan contiene sesiones con fecha fija o relativa; cada sesión puede incluir estructura legible por máquina, notas humanas, carga esperada, estado de ejecución y vínculos a actividades completadas.
+
+## El modelo de planificación
+
+<Mermaid
+  chart={`flowchart TD
+  Goal["Objetivo y restricciones"] --> Plan["Plan de entrenamiento"]
+  Plan --> Workout["Sesión programada"]
+  Workout --> Structure["Estructura de resistencia o fuerza"]
+  Structure --> Expected["Carga esperada"]
+  Workout --> Activity["Vínculo con actividad completada"]
+  Activity --> Actual["Carga real y ejecución"]
+  Expected --> Review["Revisión del plan"]
+  Actual --> Review
+  Review --> Adjustment["Ajuste confirmado"]
+  Adjustment --> Plan`}
+/>
+
+## Estados del plan
+
+- **Borrador (`Draft`)** — plan editable en construcción. Úsalo para revisarlo antes de empezar a ejecutarlo.
+- **Activo (`Active`)** — plan actual con fecha de inicio y contexto de ejecución diaria.
+- **Pausado (`Paused`)** — detenido temporalmente conservando el plan y su historial.
+- **Completado (`Completed`)** — plan finalizado de forma intencionada.
+- **Cancelado (`Canceled`)** — plan terminado sin haberse completado según lo previsto.
+
+Lee [Gestionar el estado y las importaciones del plan](/es/docs/planning/plan-lifecycle) antes de cambiar el estado de un plan que ya tiene actividades completadas vinculadas.
+
+## Tipos de estructura de sesión
+
+### Resistencia
+
+Las sesiones de resistencia contienen calentamiento, trabajo principal, recuperación, repeticiones y pasos relacionados con prescripciones de tiempo o distancia y objetivos opcionales como zonas, ritmo, velocidad, potencia, cadencia o frecuencia cardíaca.
+
+Usa la [guía del editor manual de sesiones](/es/docs/planning/manual-workout-editor) para la edición visual dentro de la app, el [Editor y constructor de sesiones](/es/workout-editor) para redactar un borrador público o el [DSL de sesiones de resistencia](/es/docs/planning/workout-dsl) para reglas compactas en texto.
+
+### Fuerza
+
+Las sesiones de fuerza contienen ejercicios y grupos de series. El trabajo puede prescribirse por repeticiones o por tiempo, con carga abierta, peso fijo, porcentaje de 1RM, peso corporal, esfuerzo y descanso donde corresponda.
+
+Usa [Sesiones de fuerza](/es/docs/planning/strength-workouts) para el flujo visual o [DSL de sesiones de fuerza](/es/docs/planning/strength-workout-dsl) para el modo Reglas paso a paso.
+
+## Carga esperada frente a carga real
+
+La carga esperada se calcula únicamente cuando la estructura de la sesión, los umbrales y los objetivos aportan suficiente señal. La carga real procede de la actividad completada y de la prioridad de fuentes de carga configurada.
+
+Ambos valores responden a preguntas distintas:
+
+- Esperada: «¿Qué estrés pretendía generar este plan?»
+- Real: «¿Qué estrés produjo realmente la sesión completada?»
+
+No fuerces un valor de carga esperada inventando un umbral o un objetivo. Un valor desconocido explícito es más seguro que una falsa precisión.
+
+## Orden de aprendizaje recomendado
+
+1. [Crear un plan de entrenamiento](/es/docs/guide/create-training-plan)
+2. [Guía del editor manual de sesiones](/es/docs/planning/manual-workout-editor)
+3. [DSL de sesiones de fuerza](/es/docs/planning/strength-workout-dsl), si programas sesiones de fuerza
+4. [Gestionar el estado y las importaciones del plan](/es/docs/planning/plan-lifecycle)
+5. [Gestionar un plan activo](/es/docs/guide/manage-active-plan)
+6. [Entrenador con IA](/es/docs/guide/ai-coach)

@@ -1,112 +1,103 @@
 ---
-title: Power
-description: What power is in endurance training, how cycling and running power are measured or estimated, and how Trainingload.ai uses power for zones, TSS, FTP, CP, NP, and VI.
+title: 파워 (Power)
+description: 지구력 훈련에서 파워의 의미, 사이클링·러닝 파워의 측정 및 추정 원리, 그리고 Trainingload.ai가 존·TSS·FTP·CP·NP·VI에 파워를 활용하는 방식을 설명합니다.
 keywords:
-  - "power training"
-  - "cycling power"
-  - "running power"
-  - "estimated power"
-  - "power zones"
+  - "파워 훈련"
+  - "사이클링 파워"
+  - "러닝 파워"
+  - "추정 파워"
+  - "파워 존"
   - "FTP"
-  - "normalized power"
+  - "정규화 파워"
 ---
 
-# Power
+# 파워 (Power)
 
-Power is one of the most direct ways to describe exercise intensity. In physics, power is defined as the work done per unit of time.
+파워(Power)는 운동 강도를 가장 직접적으로 표현하는 방법 중 하나입니다. 물리학에서 파워는 단위 시간당 수행한 일(Work)로 정의됩니다.
 
 $$
 P = W / t = (F * d) / t = F * v
 $$
 
-Where:
-- `P` is Power (Watts).
-- `W` is Work (Joules).
-- `t` is Time (Seconds).
-- `F` is Force (Newtons).
-- `v` is Velocity (m/s).
+각 기호의 의미는 다음과 같습니다.
+- `P`: 파워 (와트, Watts)
+- `W`: 일 (줄, Joules)
+- `t`: 시간 (초, Seconds)
+- `F`: 힘 (뉴턴, Newtons)
+- `v`: 속도 (m/s)
 
-In cycling, this roughly means that power rises when you apply more force to the pedals and/or turn them faster.
+사이클링에 적용해 보면, 페달을 더 강한 힘으로 밟거나 더 빠르게 돌릴수록 파워가 높아진다는 뜻입니다.
 
-## Why power is useful
+## 파워가 유용한 이유
 
-Compared to heart rate or pace, power has several practical advantages:
+심박수나 페이스와 비교할 때 파워는 다음과 같은 실용적 장점을 가집니다.
 
-1.  **Fast response**: heart rate lags behind intensity changes, while power responds almost immediately.
-2.  **Clear external output**: heart rate is influenced by stress, caffeine, sleep, temperature, and dehydration; power describes the work rate being produced.
-3.  **Useful for load models**: power is a key input for FTP, CP, IF, TSS, NP, and VI.
-4.  **Helpful across terrain**: uphill or into a headwind, pace may slow, but power can help keep effort more consistent.
+1. **즉각적인 반응**: 심박수는 강도 변화에 지연(lag)이 있지만, 파워는 거의 즉시 반응합니다.
+2. **명확한 외부 출력**: 심박수는 스트레스, 카페인, 수면, 기온, 탈수의 영향을 받지만, 파워는 실제로 만들어 낸 기계적 작업률을 직접 보여 줍니다.
+3. **훈련 부하 모델의 핵심**: FTP, CP, IF, TSS, NP, VI 계산의 핵심 입력값입니다.
+4. **지형과 바람에 강함**: 오르막이나 맞바람에서 페이스는 느려지지만, 파워를 기준으로 삼으면 노력도를 훨씬 일정하게 유지할 수 있습니다.
 
-Power is still not the whole story. Sensor quality, calibration, drivetrain losses, wind, surface, running form, fatigue, and heat can all affect interpretation. Trainingload.ai reads power alongside heart rate, pace, RPE, and recent load.
+물론 파워가 전부는 아닙니다. 센서 품질, 영점 보정, 구동계 손실, 바람, 노면, 러닝 폼, 피로, 더위 등이 해석에 영향을 줍니다. Trainingload.ai는 파워를 심박수, 페이스, RPE, 최근 훈련 부하와 함께 종합적으로 해석합니다.
 
-## Estimated Power
+## 추정 파워 (Estimated Power)
 
-Not everyone owns an expensive power meter. Trainingload.ai supports estimating power using physical models.
+모든 선수가 파워미터를 보유하고 있는 것은 아닙니다. Trainingload.ai는 물리 모델로 파워를 추정할 수 있습니다. 추정치는 별도의 `calculatedPower` 시계열에 저장되며, 파워미터로 직접 측정한 `power` 데이터로 위장해 표시하지 않습니다.
 
-### Estimation Principles
+버전 1은 명시적으로 평지 모델입니다. 경사도를 무시하고 속도, 체중, 버전 고정 파라미터를 사용합니다. 전체 샘플의 50% 이상에 유효한 실측 파워가 포함되어 있으면 항상 실측 파워가 우선합니다.
 
-#### Cycling power estimation
+### 추정 원리
 
-When you ride outdoors, your power output is mainly used to overcome:
+#### 사이클링 파워 추정
+
+야외 라이딩 시 페달링 파워는 주로 다음 저항을 이겨 내는 데 쓰입니다.
 
 $$
-P_total = P_gravity + P_rolling + P_air + P_acceleration + P_loss
+P_{calculated} = (P_{rolling} + P_{air}) / (1 - drivetrainLoss)
 $$
 
-1.  **Gravity (P_gravity)**: overcoming gravity while climbing (often the largest term on climbs).
-    -   Depends on: total weight (rider + bike), grade, speed.
-2.  **Rolling resistance (P_rolling)**: friction between tires and the road.
-    -   Depends on: total weight, road roughness (Crr), speed.
-3.  **Air resistance (P_air)**: overcoming aerodynamic drag (often dominant on flats at high speed).
-    -   Depends on: drag coefficient (CdA), air density, cube of relative wind speed.
-4.  **Acceleration (P_acceleration)**: energy to change speed (change in kinetic energy).
-5.  **Drivetrain loss (P_loss)**: mechanical losses in chain, hubs, etc. (typically ~2–5%).
+버전 1은 구름 저항(rolling resistance), 공기 저항(aerodynamic drag), 구동계 손실(drivetrain loss)을 반영한 평지 정상 상태 Gribble 구조를 사용합니다. 자전거 무게, Crr, CdA, 공기 밀도, 구동계 손실은 버전별 기본값을 적용하며, 경사도·가속도·실시간 바람은 의도적으로 제외합니다.
 
-### Prerequisites for useful estimates
+### 유용한 추정을 위한 전제 조건
 
-The usefulness of estimated power depends heavily on input data quality:
-- **Body and bike weight**: should be set as reliably as possible.
-- **GPS precision**: grade data has a huge impact, and GPS elevation is often noisy.
-- **Environmental factors**: models typically cannot observe wind direction (tailwind/headwind) or road surface conditions, so errors increase in windy conditions.
+추정 파워의 정확도는 입력 데이터 품질에 크게 좌우됩니다.
+- **체중 및 자전거 무게**: 가능한 한 정확하게 입력해야 합니다.
+- **GPS 속도 정밀도**: 속도 노이즈가 추정치에 그대로 반영됩니다.
+- **환경 요인**: 모델은 보통 풍향(순풍/맞바람)이나 노면 상태를 관측할 수 없으므로 바람이 강한 날에는 오차가 커집니다.
 
-Despite limitations, estimated power can be a useful reference for trends, especially on long steady climbs.
+추정 파워는 파워미터 실측값과 동일하게 보기보다, 동일한 모델 내에서의 추세 비교 용도로 활용하는 것이 적절합니다.
 
-#### Running power estimation
+#### 러닝 파워 추정
 
-Running power estimation differs from cycling. There is no drivetrain-measured mechanical output; it’s closer to a modeled estimate of metabolic output required to sustain a given speed and grade.
+러닝 파워 추정은 사이클링과 다릅니다. 구동계에서 직접 측정되는 기계적 출력이 없으므로, 주어진 속도를 유지하는 데 필요한 대사적 출력을 모델로 추정한 값입니다.
 
-In Trainingload.ai, when a run is missing power data, we estimate and fill a power series based on **speed, grade, and body weight** (so power zones and related metrics can still be computed).
+러닝 활동에 신뢰할 수 있는 실측 파워가 없으면 Trainingload.ai는 **속도, 체중, 신장**을 기반으로 별도의 추정치를 생성합니다. 버전 1은 평지 에너지 비용을 사용하며 경사도는 반영하지 않습니다.
 
-A common approach is to estimate an “energy cost per distance” at a given grade (`J/kg/m`), then multiply by speed and weight to get watts:
+일반적인 접근은 특정 경사도에서의 “거리당 에너지 비용”(`J/kg/m`)을 추정한 뒤 속도와 체중을 곱해 와트를 구하는 방식입니다.
 
 $$
 Power(W) = Cost(J/kg/m) * Speed(m/s) * Weight(kg)
 $$
 
-Where `Cost` is a function of grade `i` (as a decimal, e.g. 5% = 0.05). A commonly used form is:
+버전 1은 평지 비용 `3.6 J/kg/m`에 속도 의존적 효율성과 공기역학적 비용을 더해 계산합니다.
 
-$$
-Cost(i) = 155.4 i^5 - 30.4 i^4 - 43.3 i^3 + 46.3 i^2 + 19.5 i + 3.6
-$$
+**유용한 추정을 위한 전제 조건** (러닝에도 동일하게 적용됩니다):
 
-**Prerequisites for useful estimates** (running also applies):
+- **신뢰할 수 있는 속도**: GPS 속도 흔들림이 추정치를 직접 왜곡합니다.
+- **정확한 체중**: 와트 수치는 체중에 정비례합니다.
+- **근사치로서의 한계**: 바람, 노면 반발력, 러닝 폼, 가감속 변동 등은 완전히 포착하기 어렵습니다. 절대 측정치보다는 추세와 비교 용도로 활용하세요.
 
-- **Reliable speed and grade**: GPS speed jitter and elevation noise can amplify grade errors and distort the estimate.
-- **Accurate body weight**: watts scale linearly with weight.
-- **Approximation**: wind, surface compliance, running form, acceleration/variability, etc. are hard to fully capture. Use it for trends and comparisons, not as an absolute measurement.
+## Trainingload.ai의 파워 활용 방식
 
-## How Trainingload.ai uses power
+- **강도 존 설정**: 실측 파워를 기준으로 FTP, CP, 파워 존을 설정합니다.
+- **훈련 부하 계산**: 공식 파워 기반 훈련 부하와 최고 기록은 실측 파워만 사용하며, 추정 파워는 선수 능력 지표에 영향을 주지 않습니다.
+- **페이싱 리뷰**: VI와 NP를 통해 주행이 일정했는지, 급가속이 잦았는지 점검합니다.
+- **누락 맥락 보완**: 파워 차트와 실시간 기록 화면에는 추정치임을 명확히 표시해 보여 줄 수 있습니다. 러닝 GOVSS도 같은 모델 계열을 사용하지만 자체 역치 및 시간 창 계산을 수행합니다.
 
-- **Set intensity zones**: power anchors FTP, CP, and power zones.
-- **Calculate load**: NP, IF, and TSS use power to estimate training dose.
-- **Review pacing**: VI and NP help show whether an effort was steady or surge-heavy.
-- **Fill missing context**: estimated power can keep analysis available when direct power is missing, while still being treated as a model estimate.
+## 관련 도구 및 문서
 
-## Related tools and docs
-
-- [Estimate FTP training load from an activity file](/ftp-calculator)
-- [Fit Critical Power for training load planning](/critical-power-calculator)
-- [Calculate power training load zones](/power-zones-calculator)
-- [Functional Threshold Power](/docs/metrics/power/functional-threshold-power)
-- [Critical Power](/docs/metrics/power/critical-power)
-- [Normalized Power](/docs/metrics/power/normalized-power)
+- [활동 파일로 FTP 훈련 부하 추정하기](/ko/ftp-calculator)
+- [훈련 부하 계획을 위한 임계 파워(CP) 피팅하기](/ko/critical-power-calculator)
+- [파워 훈련 부하 존 계산하기](/ko/power-zones-calculator)
+- [기능적 역치 파워 (FTP)](/ko/docs/metrics/power/functional-threshold-power)
+- [임계 파워 (CP)](/ko/docs/metrics/power/critical-power)
+- [정규화 파워 (NP)](/ko/docs/metrics/power/normalized-power)

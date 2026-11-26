@@ -50,6 +50,49 @@
           "exclusiveMinimum": 0,
           "maximum": 1440
         },
+        "maxMinutesByIsoWeekday": {
+          "type": "object",
+          "description": "Combined session time limits for particular weekdays. Keys are ISO weekdays (1 Monday to 7 Sunday). For weekdays up to 45 minutes and Saturday up to 90, use the actual weekday limits and a daily ceiling of 90. Omit for uniform availability.",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "1": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1440
+            },
+            "2": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1440
+            },
+            "3": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1440
+            },
+            "4": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1440
+            },
+            "5": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1440
+            },
+            "6": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1440
+            },
+            "7": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1440
+            }
+          }
+        },
         "allowedDays": {
           "type": "array",
           "description": "Allowed 1-based day offsets within each plan week, not ISO weekday numbers.",

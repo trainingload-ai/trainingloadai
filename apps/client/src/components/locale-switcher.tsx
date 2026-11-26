@@ -21,8 +21,10 @@ import {
 export default function LocaleSwitcher({
   ariaLabel,
   reloadOnLocaleChange = false,
+  inCollapsedSidebar,
 }: {
   ariaLabel: string;
+  inCollapsedSidebar?: boolean;
   reloadOnLocaleChange?: boolean;
 }) {
   const locale = useLocale();
@@ -54,7 +56,11 @@ export default function LocaleSwitcher({
   }
 
   return (
-    <LocaleSwitcherSelect ariaLabel={ariaLabel} defaultValue={locale}>
+    <LocaleSwitcherSelect
+      ariaLabel={ariaLabel}
+      defaultValue={locale}
+      inCollapsedSidebar={inCollapsedSidebar}
+    >
       {routing.locales.map((cur) => (
         <DropdownMenuItem key={cur} onClick={() => onSelectChange(cur)}>
           {localeNativeLabel(cur)}

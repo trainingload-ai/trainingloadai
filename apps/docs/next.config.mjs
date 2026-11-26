@@ -4,6 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 import { fileURLToPath } from "node:url";
 import { withSentryConfig } from "@sentry/nextjs";
 import { createSiteSecurityHeaders } from "./security-headers.mjs";
+import { PRODUCT_SCREENSHOT_SEARCH } from "./src/lib/product-screenshot-url.mjs";
 import {
   isDocsTelemetryEnabled,
   isSelfHostedDocs,
@@ -88,6 +89,17 @@ const config = {
     root: repoRoot,
   },
   images: {
+    localPatterns: [
+      { pathname: "/**", search: "" },
+      ...[
+        "/5k-training-plan/web-*.png",
+        "/10k-training-plan/web-*.png",
+        "/half-marathon-training-plan/web-*.png",
+        "/marathon-training-plan/web-*.png",
+        "/css-calculator/web-plan-dark-*.webp",
+        "/ftp-calculator/web-pmc.webp",
+      ].map((pathname) => ({ pathname, search: PRODUCT_SCREENSHOT_SEARCH })),
+    ],
     remotePatterns: [
       {
         protocol: "https",

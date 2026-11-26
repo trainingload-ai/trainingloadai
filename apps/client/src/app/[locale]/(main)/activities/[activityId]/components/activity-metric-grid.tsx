@@ -9,10 +9,10 @@ interface ActivityMetricGridProps {
 }
 
 const desktopColumnClasses = {
-  3: "md:grid-cols-3",
-  4: "md:grid-cols-4",
-  5: "md:grid-cols-5",
-  6: "md:grid-cols-6",
+  3: "@min-[42rem]/activity-metrics:grid-cols-3",
+  4: "@min-[42rem]/activity-metrics:grid-cols-4",
+  5: "@min-[42rem]/activity-metrics:grid-cols-5",
+  6: "@min-[42rem]/activity-metrics:grid-cols-6",
 } as const;
 
 const isLastRow = (index: number, itemCount: number, columns: number) =>
@@ -30,43 +30,44 @@ export function ActivityMetricGrid({
   const items = React.Children.toArray(children);
 
   return (
-    <div
-      className={cn(
-        "grid grid-cols-2 items-stretch",
-        variant === "divided" ? "overflow-hidden" : "gap-0 overflow-visible",
-        variant === "cards"
-          ? "overflow-hidden rounded-md bg-muted/55 md:grid-cols-3 xl:grid-cols-6"
-          : desktopColumnClasses[desktopColumns],
-        className,
-      )}
-    >
-      {items.map((item, index) => {
-        const isMobileRowEnd = (index + 1) % 2 === 0;
-        const isDesktopRowEnd = (index + 1) % desktopColumns === 0;
-        const itemKey = React.isValidElement(item) ? item.key : null;
+    <div className="@container/activity-metrics w-full min-w-0">
+      <div
+        className={cn(
+          "grid grid-cols-2 items-stretch",
+          variant === "cards"
+            ? "rounded-md bg-muted/55 @min-[28rem]/activity-metrics:grid-cols-3 @min-[44rem]/activity-metrics:grid-cols-6"
+            : ["overflow-hidden", desktopColumnClasses[desktopColumns]],
+          className,
+        )}
+      >
+        {items.map((item, index) => {
+          const isMobileRowEnd = (index + 1) % 2 === 0;
+          const isDesktopRowEnd = (index + 1) % desktopColumns === 0;
+          const itemKey = React.isValidElement(item) ? item.key : null;
 
-        return (
-          <div
-            key={itemKey ?? index}
-            className={cn(
-              "min-w-0",
-              variant === "cards"
-                ? "overflow-hidden bg-transparent"
-                : [
-                    "border-b border-r border-neutral-200/70 bg-card dark:border-neutral-800",
-                    isMobileRowEnd && "border-r-0",
-                    isLastRow(index, items.length, 2) && "border-b-0",
-                    isDesktopRowEnd ? "md:border-r-0" : "md:border-r",
-                    isLastRow(index, items.length, desktopColumns)
-                      ? "md:border-b-0"
-                      : "md:border-b",
-                  ],
-            )}
-          >
-            {item}
-          </div>
-        );
-      })}
+          return (
+            <div
+              key={itemKey ?? index}
+              className={cn(
+                "min-w-0",
+                variant === "divided" && [
+                  "border-b border-r border-neutral-200/70 bg-card dark:border-neutral-800",
+                  isMobileRowEnd && "border-r-0",
+                  isLastRow(index, items.length, 2) && "border-b-0",
+                  isDesktopRowEnd
+                    ? "@min-[42rem]/activity-metrics:border-r-0"
+                    : "@min-[42rem]/activity-metrics:border-r",
+                  isLastRow(index, items.length, desktopColumns)
+                    ? "@min-[42rem]/activity-metrics:border-b-0"
+                    : "@min-[42rem]/activity-metrics:border-b",
+                ],
+              )}
+            >
+              {item}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,158 @@
+---
+title: Configurare un'istanza self-host
+description: Scegli il percorso dati locale, controlla l'esposizione di rete e configura un provider AI compatibile con OpenAI gestito dall'Owner.
+---
+
+# Configurare un'istanza self-host
+
+Scegli la posizione dei dati e la porta di accesso locale prima dell'installazione. Dopo l'installazione, puoi selezionare o cambiare provider AI direttamente nelle impostazioni dell'applicazione.
+
+## Prima di iniziare
+
+- Usa solo le impostazioni dichiarate nel file `.env.example` del pacchetto di release e nello schema dell'istanza.
+- Esegui sempre il corrispondente comando con `--dry-run --json` prima di qualsiasi modifica al ciclo di vita.
+- Non incollare `.env.selfhost`, password, chiavi API o token in chat, issue o trascrizioni di terminale condivise.
+- La directory dati esistente contiene le tue registrazioni di allenamento. Non sostituirla né svuotarla manualmente.
+
+## Scegli il percorso dati locale [#choose-the-local-data-path]
+
+Il percorso predefinito è `./data` dentro la directory della release. Contiene dati PostgreSQL, file caricati, registri operativi, backup e cache. L'applicazione monta i caricamenti da quel percorso dell'host in `/data/uploads`; non serve un servizio separato di object storage.
+
+Per scegliere un altro percorso prima della prima installazione:
+
+1. Nella directory della release estratta e verificata, crea una configurazione privata dell'istanza dal modello incluso:
+
+   ```bash
+   umask 077
+   cp .env.example .env.selfhost
+   chmod 600 .env.selfhost
+   ```
+
+2. Genera in locale tre valori diversi da 32 byte con `openssl rand -hex 32`, quindi sostituisci i tre segnaposto dei secret in `.env.selfhost`. L'installer normale esegue automaticamente questo passaggio.
+3. Rimuovi il commento da `SELF_HOST_DATA_ROOT` e impostalo su un percorso dedicato, ad esempio:
+
+   ```dotenv
+   SELF_HOST_DATA_ROOT=/srv/trainingload-data
+   ```
+
+4. Esegui la simulazione (`--dry-run`) dell'installer e prosegui solo se restituisce `"ok": true`:
+
+   ```bash
+   ./install.sh --dry-run --json
+   ./install.sh --json
+   ```
+
+La destinazione può non esistere ancora oppure essere dedicata a questa istanza. La CLI di gestione rifiuta radici del filesystem, directory padre della release, sottodirectory della release firmata, link simbolici non sicuri e file esistenti non correlati.
+
+Non cambiare `SELF_HOST_DATA_ROOT` su un'istanza già in esecuzione come scorciatoia per spostare i file. Spostare un'istanza esistente richiede un backup verificato e un ripristino su una nuova destinazione inizializzata.
+
+## Controlla l'esposizione di rete
+
+Per impostazione predefinita viene pubblicata solo la porta HTTP del Client su loopback:
+
+```dotenv
+SELF_HOST_SITE_ADDRESS=http://localhost:43210
+SELF_HOST_HTTP_BIND=127.0.0.1
+SELF_HOST_HTTP_PORT=43210
+```
+
+Per scegliere un'altra porta libera, modifica sia l'indirizzo del sito sia la porta HTTP. Mantieni PostgreSQL e il Server nella rete privata di Compose. Per accedere da un altro computer, usa un tunnel SSH mantenendo locale l'origine nel browser. Il pacchetto dell'applicazione non include Caddy, porte HTTPS o un profilo Docs.
+
+Valida le modifiche a livello host tramite il comando del ciclo di vita:
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+./self-host doctor --json
+```
+
+### Percorso delle richieste locali
+
+Accedi all'applicazione nel browser all'indirizzo locale configurato. Il database e i servizi interni dell'applicazione non richiedono porte pubbliche. Non esporli mai su internet per aggirare un problema di connessione.
+
+## Il tuo account personale
+
+Inserisci un nome utente alla prima apertura, poi segui la configurazione guidata. Un'istanza è destinata a una sola persona; non supporta la registrazione pubblica né più account.
+
+Il self-hosting utilizza un account locale invece della registrazione Cloud o del login tramite social. Una sessione locale scaduta viene ripristinata automaticamente. Confermare l'eliminazione dell'account rimuove i dati di quell'account e, al termine, riporta l'istanza alla configurazione del nome utente. Gestisci separatamente backup e configurazione dell'istanza: eliminare un account non rimuove quei file.
+
+## Collega Intervals.icu [#connect-intervalsicu]
+
+In self-host, Intervals.icu si collega tramite la **chiave API personale** dell'Owner. Non sono richiesti né supportati client OAuth, redirect URI o webhook di Intervals.icu.
+
+Il self-host supporta anche [Garmin Personal API](/it/docs/self-host/garmin-personal-api). COROS MCP non è abilitato. Nessuna delle due connessioni personali richiede secret aggiuntivi sull'host.
+
+Per collegare Intervals.icu:
+
+1. Apri [Impostazioni di Intervals.icu](https://intervals.icu/settings) e copia la chiave API personale in fondo alla pagina. Il pulsante **Ottieni chiave API** nella finestra di connessione del Client apre direttamente questa pagina.
+2. Scegli **Intervals.icu** nel passaggio di importazione attività della configurazione iniziale, oppure apri in seguito **Account → Connessioni di terze parti → Intervals.icu**.
+3. Inserisci la chiave API, scegli le direzioni di sincronizzazione necessarie per attività, allenamenti pianificati, wellness e impostazioni sport, poi salva.
+4. Esegui una sincronizzazione manuale e verifica l'ora dell'ultima sincronizzazione e il risultato importato.
+
+La [documentazione Open API di Intervals.icu](https://www.intervals.icu/features/open-api/) indica che ogni utente può chiamare l'API REST con una chiave API personale, includendo caricamento/download di attività, dati wellness e allenamenti pianificati. La chiave viene inviata solo al tuo Server locale. Il Server la cifra con AES-256-GCM usando un secret di integrazione dedicato generato durante l'installazione, salva il testo cifrato in PostgreSQL e non restituisce mai la chiave in chiaro nelle risposte API successive.
+
+Non si tratta di una funzionalità offline. Una volta abilitata, il Server locale si collega direttamente a `intervals.icu` e legge o invia dati secondo le direzioni selezionate. La chiave appartiene al singolo utente Intervals.icu: non inserirla in variabili d'ambiente condivise e non incollarla in log, issue o chat.
+
+I backup contengono il testo cifrato della chiave API, ma i secret dell'istanza devono essere conservati separatamente in un luogo sicuro. Ripristina i secret originali di autenticazione e integrazione insieme al database affinché le credenziali salvate restino decifrabili. Gli strumenti di gestione non stampano né esportano questi secret. Consulta `BACKUP_RESTORE.md` nel pacchetto di release per la procedura completa.
+
+## Configura l'AI nel Client [#configure-ai-in-the-client]
+
+L'AI è disattivata per impostazione predefinita. L'ultimo passaggio della configurazione iniziale propone direttamente la configurazione AI BYOK invece della schermata di consenso del provider Cloud di Trainingload.ai; puoi anche saltarlo e configurare l'AI in seguito:
+
+1. Apri il Client locale.
+2. Apri **Configura il tuo servizio AI** durante la configurazione iniziale, oppure in seguito **Impostazioni → AI self-hosted**.
+3. Scegli OpenAI, DeepSeek, OpenRouter, DashScope oppure **Custom OpenAI-compatible**.
+4. Inserisci la chiave API del provider quando configuri o cambi provider e compila sia il modello standard sia il modello di ragionamento. La Base URL può restare vuota per i provider integrati così da usare il loro endpoint predefinito, ma è obbligatoria per un provider custom OpenAI-compatible.
+5. Salva, poi apri una funzionalità AI e verifica una richiesta.
+
+Usa identificativi di modello supportati dal tuo provider. Le Base URL remote devono usare HTTPS. Un endpoint locale in LAN può usare HTTP solo se conosci e controlli direttamente quel percorso di rete.
+
+Una chiave API di OpenAI è distinta da un abbonamento ChatGPT Plus o Pro. Un abbonamento ChatGPT non può essere inserito come chiave API e non include l'uso delle API per questa istanza.
+
+### Come viene conservata la chiave
+
+- Il browser invia la chiave solo al tuo `server` locale.
+- Il server deriva una chiave di cifratura dal secret di autenticazione dell'istanza e salva la chiave del provider in PostgreSQL con AES-256-GCM.
+- Le risposte API successive indicano solo se una chiave è configurata e non restituiscono mai la chiave in chiaro.
+- Le impostazioni AI salvate nell'applicazione si applicano subito e hanno priorità sulle impostazioni tramite variabili d'ambiente.
+- Selezionare **Nessuno** elimina la credenziale del provider salvata e disattiva l'AI.
+
+Ripristina il secret di autenticazione originale dell'istanza insieme al database. Un secret diverso non può decifrare credenziali AI o stati di autenticazione esistenti; verifica la configurazione originale prima del riavvio.
+
+### Dati che lasciano l'host
+
+Puoi usare attività, piani e analisi con l'AI disattivata. Quando abiliti un provider AI esterno, la domanda e le informazioni di allenamento necessarie per rispondere vengono inviate a quel provider. Verifica prima i suoi termini di conservazione, privacy, localizzazione e fatturazione.
+
+Il self-hosting non utilizza abbonamenti né crediti AI di Trainingload.ai Cloud. La sezione **Utilizzo AI** spiega come viene fatturato l'uso del tuo provider. Controlla il consumo API reale, il saldo e le fatture nella dashboard di quel provider.
+
+## Diagnostica facoltativa per gli strumenti file pubblici
+
+Imposta `PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED=true` in `.env.selfhost` per conservare i file originali quando uno strumento file pubblico incontra un errore server. Il valore predefinito è `false`. I file acquisiti possono contenere dati GPS o altri dati personali. Restano in `data/operations/public-upload-failures`, sono esclusi dai backup e vengono eliminati dopo 72 ore o prima se viene raggiunto il limite di spazio o di numero di file.
+
+## Fallback tramite variabili d'ambiente per provisioning automatico
+
+Lo schema della release accetta comunque gruppi completi di provider in `.env.selfhost` per il provisioning non presidiato. Si tratta di un fallback, non del percorso interattivo consigliato. Il Client non rivela mai una chiave definita nell'ambiente e l'Owner deve inserire una nuova chiave quando passa dalla configurazione gestita da ambiente a quella gestita dal Client.
+
+## Verifica
+
+- `./self-host doctor --json` restituisce `"ok": true` dopo le modifiche a livello host.
+- La directory dati contiene il marcatore dell'istanza e le sottodirectory attese, senza file non correlati.
+- La pagina delle impostazioni AI è visibile solo all'Owner dell'istanza.
+- Dopo aver salvato le impostazioni AI, il campo viene svuotato e la pagina mostra solo che una chiave è configurata.
+- La pagina delle connessioni di terze parti in self-host mostra Intervals.icu e Garmin Personal API (flussi tramite chiave API, senza OAuth). COROS MCP non compare come disponibile.
+- La pagina **Utilizzo AI** non mostra checkout di abbonamento, saldi crediti o pacchetti crediti e non richiama endpoint `/billing/*`.
+- Dopo aver salvato una chiave Intervals.icu, il campo viene svuotato, compaiono solo gli ultimi quattro caratteri e la sincronizzazione manuale va a buon fine.
+- Disattivare l'AI impedisce nuove chiamate al provider senza influire sulle funzionalità non AI del prodotto.
+
+## Risoluzione dei problemi
+
+- **La directory dati viene rifiutata:** scegli un percorso vuoto e dedicato fuori dall'albero della release; non aggirare i controlli su marcatori o link simbolici.
+- **La sezione impostazioni AI non compare:** verifica che l'istanza sia in self-host e di aver effettuato l'accesso come Owner configurato.
+- **Un nuovo provider richiede nuovamente la chiave:** il cambio di provider richiede intenzionalmente una credenziale nuova.
+- **L'AI ha smesso di funzionare dopo il ripristino:** ripristina il secret di autenticazione originale dell'istanza prima di riavviare.
+- **Intervals.icu ha smesso di funzionare dopo il ripristino:** verifica che il secret di integrazione originale sia stato ripristinato insieme al database.
+- **Il modello viene rifiutato dal provider:** copia l'identificativo esatto del modello dall'account del provider e verifica che la chiave abbia accesso a quel modello.
+
+## Prossimo passo
+
+Leggi [Gestione dell'istanza](/it/docs/self-host/operations) e pianifica un backup verificato. In caso di errori, prosegui con [Risoluzione dei problemi](/it/docs/self-host/troubleshooting).

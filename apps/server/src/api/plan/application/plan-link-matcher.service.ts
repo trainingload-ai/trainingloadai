@@ -4,12 +4,14 @@ import { Interval } from '@nestjs/schedule';
 import { createHash } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { UserService } from '@/api/user/user.service';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { ActivityReadService } from '../../activity/activity-read.service';
 import { PlanRepository } from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
+import { CoachContextService } from './coach-context.service';
 import {
   resolveActivityCalendarDayStr,
   scheduledDateFromCalendar,
@@ -46,7 +48,7 @@ const ACTIVITY_SELECT = {
       source: true,
       autoMarkedWorkoutDone: true,
       planWorkout: {
-        select: { status: true, plan: { select: { status: true } } },
+        select: { planId: true, status: true, plan: { select: { status: true } } },
       },
     },
   },
@@ -60,6 +62,7 @@ const WORKOUT_INCLUDE = {
     select: { id: true, source: true, activityId: true },
   },
 } satisfies Prisma.PlanWorkoutInclude;
+const MATCH_REGISTRATION_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 type Workout = Prisma.PlanWorkoutGetPayload<{
   include: typeof WORKOUT_INCLUDE;
 }>;
@@ -98,6 +101,7 @@ export class PlanLinkMatcherService {
     private readonly activityRead: ActivityReadService,
     private readonly users: UserQueryService,
     @Optional() private readonly events?: EventEmitter2,
+    @Optional() private readonly coachContext?: CoachContextService,
   ) {}
 
   private async timezone(userId: string) {
@@ -135,6 +139,7 @@ export class PlanLinkMatcherService {
     // Match the association lock order before the state's foreign-key write.
     const persisted = await withSerializableRetry(() =>
       this.prisma.$transaction(async (tx) => {
+        await acquireHashtextAdvisoryXactLock(tx, activity.userId);
         if (!(await this.links.lockLinkTargets(activityId, null, tx)))
           return false;
         await this.links.putMatchState(
@@ -203,6 +208,9 @@ export class PlanLinkMatcherService {
     const result = await withSerializableRetry(() =>
       this.prisma.$transaction(
         async (tx) => {
+          // Acquire the per-user advisory lock before day/row locks to match the
+          // outer lock order used by plan and coach-decision writes.
+          await acquireHashtextAdvisoryXactLock(tx, userId);
           await this.links.lockMatchDay(userId, day, tx);
           const activityWhere: Prisma.ActivityWhereInput = {
             userId,
@@ -307,9 +315,17 @@ export class PlanLinkMatcherService {
                 (workout.status === 'DONE' &&
                   inferredWorkouts.has(workout.id))),
           );
+          const completedLinks = new Map(
+            workouts
+              .filter((workout) => workout.status === 'DONE' && workout.links.length === 1)
+              .map((workout) => [workout.links[0].id, workout.id]),
+          );
           const decision = matchWorkoutDay(
             activities.map((activity) => ({
               id: activity.id,
+              linkedWorkoutId: activity.planWorkoutLinks.length === 1
+                ? completedLinks.get(activity.planWorkoutLinks[0].id)
+                : undefined,
               sportType: activity.sportType,
               sportDefinitionCode: activity.sportDefinitionCode,
               durationSeconds:
@@ -359,10 +375,31 @@ export class PlanLinkMatcherService {
                   await this.workouts.updateMany(
                     {
                       where: { id: link.planWorkoutId, status: 'DONE' },
-                      data: { status: 'PLANNED', completedAt: null },
+                      data: {
+                        status: 'PLANNED',
+                        completedAt: null,
+                        revision: { increment: 1 },
+                      },
                     },
                     tx,
                   );
+              }
+              const detachedPlanId = (
+                link.planWorkout as { planId?: string | null } | undefined
+              )?.planId;
+              if (detachedPlanId && this.coachContext) {
+                await this.coachContext.appendEvent({
+                  tx,
+                  userId,
+                  planId: detachedPlanId,
+                  type: 'WORKOUT_LINKED',
+                  source: 'system',
+                  payload: {
+                    action: 'auto_match_unlink',
+                    workoutId: link.planWorkoutId,
+                    activityId: activity.id,
+                  },
+                });
               }
               changed = true;
             }
@@ -395,6 +432,33 @@ export class PlanLinkMatcherService {
                 },
                 tx,
               );
+              if (workout.planId && this.coachContext) {
+                await this.coachContext.appendEvent({
+                  tx,
+                  userId,
+                  planId: workout.planId,
+                  type: 'WORKOUT_LINKED',
+                  source: 'system',
+                  payload: {
+                    action: 'auto_match_link',
+                    workoutId,
+                    activityId: activity.id,
+                    autoMarkedWorkoutDone: true,
+                  },
+                });
+                await this.coachContext.appendEvent({
+                  tx,
+                  userId,
+                  planId: workout.planId,
+                  type: 'WORKOUT_COMPLETED',
+                  source: 'system',
+                  payload: {
+                    action: 'auto_mark_done_on_link',
+                    workoutId,
+                    activityId: activity.id,
+                  },
+                });
+              }
               changed = true;
             }
             const review = decision.reviews.find(
@@ -457,7 +521,7 @@ export class PlanLinkMatcherService {
     }
   }
 
-  @OnEvent(PLAN_WORKOUTS_CHANGED_EVENT)
+  @OnEvent(PLAN_WORKOUTS_CHANGED_EVENT, { suppressErrors: false })
   async onWorkoutsChanged(event: PlanWorkoutsChangedEvent) {
     if (event.reason === 'automatic_matching') return;
     const [workouts, states] = await Promise.all([
@@ -506,7 +570,7 @@ export class PlanLinkMatcherService {
     for (const day of days) await this.requestDay(event.userId, day);
   }
 
-  /** Repairs missed post-commit wakeups; only feature-owned states are revisited, never a historical backfill. */
+  /** Repairs missed wakeups for tracked matches and recently available activities. */
   @Interval(60_000)
   async rescanPendingMatches() {
     if (this.sweeping) return;
@@ -537,8 +601,38 @@ export class PlanLinkMatcherService {
         take: 100,
         select: { activityId: true },
       });
-      for (const state of states)
-        await this.tryAutoLinkForActivity(state.activityId);
+      // A failed initial transaction leaves no match state. The persisted
+      // activity can still be discovered after a process restart.
+      const cutoff = new Date(Date.now() - MATCH_REGISTRATION_LOOKBACK_MS);
+      const unregistered = await this.activityRead.findMany({
+        where: {
+          state: 1,
+          mergedIntoActivityId: null,
+          startTime: { not: null },
+          workoutMatchState: null,
+          planWorkoutLinks: { none: { unlinkedAt: null } },
+          OR: [
+            { processingStatus: 'READY', processingUpdatedAt: { gte: cutoff } },
+            { status: 'FINISHED', startTime: { gte: cutoff } },
+          ],
+        },
+        orderBy: { id: 'asc' },
+        take: 25,
+        select: { id: true },
+      });
+      let deferred = 0;
+      for (const activityId of [
+        ...states.map((state) => state.activityId),
+        ...unregistered.map((activity) => activity.id),
+      ]) {
+        try {
+          await this.tryAutoLinkForActivity(activityId);
+        } catch {
+          deferred++;
+        }
+      }
+      if (deferred)
+        this.logger.warn(`Workout matching rescan deferred count=${deferred}`);
     } catch {
       this.logger.warn('Workout matching rescan deferred');
     } finally {

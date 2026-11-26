@@ -1,0 +1,95 @@
+---
+title: Solução de problemas
+description: Diagnostique problemas comuns no Trainingload.ai ligados a login, sincronização, processamento de atividades, planos, gravação no celular, Treinador de IA e métricas ausentes.
+keywords:
+  [
+    "solução de problemas Trainingload.ai",
+    "falha na sincronização de atividade",
+    "erro no plano de treino",
+  ]
+---
+
+# Solução de problemas
+
+Comece pelo sintoma observável. Evite reconectar provedores, excluir atividades ou recriar planos antes de saber em qual etapa ocorreu a falha.
+
+## Loops de login ou autorização
+
+1. Confirme se o navegador ou aplicativo móvel consegue acessar o serviço.
+2. Conclua o fluxo OAuth na mesma sessão de navegador em que ele foi iniciado.
+3. Verifique se a conta possui outro método de login disponível antes de desconectar um existente.
+4. Atualize a página de login e tente novamente uma vez.
+
+Se a autorização no provedor for concluída, mas o Trainingload.ai ainda exibir o status desconectado, reabra o diálogo do provedor e verifique se há erro de callback ou de permissão.
+
+## Uma atividade sincronizada está faltando
+
+1. Confirme se o treino existe no provedor de origem.
+2. Verifique o estado da conexão com o provedor.
+3. Execute uma sincronização manual ou ação de reconciliação se disponível.
+4. Aguarde o lote de importação terminar.
+5. Busque em Atividades por data e esporte.
+
+Não desconecte e reconecte repetidamente; isso pode criar tarefas de importação sobrepostas sem resolver um problema de permissão na origem.
+
+## A atividade aparece, mas a análise está incompleta
+
+Uma atividade pode aparecer antes que todos os gráficos derivados fiquem prontos. Atualize após o término do processamento. Se apenas uma família de métricas estiver ausente, inspecione os fluxos de origem:
+
+- Análise de frequência cardíaca precisa de amostras de frequência cardíaca.
+- Análise de potência precisa de amostras de potência e de um contexto adequado de esporte/perfil.
+- Visualizações de trajeto e elevação precisam de dados de GPS/elevação.
+- Análise de ritmo e distância precisa de dados válidos de distância e tempo.
+
+## Uma métrica parece errada
+
+Verifique, nesta ordem:
+
+1. Tipo de esporte e definição de esporte.
+2. Unidades e fuso horário.
+3. Valor do limiar e data de vigência.
+4. Modelo de zonas e limites personalizados.
+5. Prioridade selecionada da fonte de carga.
+6. Fluxos brutos da atividade.
+
+Alterar um limiar pode afetar a interpretação de cálculos posteriores. Registre o motivo da mudança em vez de ajustar o valor até que um único treino pareça ideal.
+
+## Não consigo salvar um treino
+
+Para treinos de resistência, verifique se cada etapa estruturada tem duração ou distância válida e um alvo compatível. Para treinos de força, verifique se:
+
+- Existe ao menos um exercício.
+- Todo exercício tem um nome.
+- Todo exercício tem ao menos um grupo de séries.
+- Todo exercício inclui ao menos uma série de trabalho.
+
+O editor exibe uma mensagem de validação no seu idioma e mantém o rascunho inválido aberto para correção.
+
+## O plano foi alterado em outro lugar
+
+Se o aplicativo reportar conflito de versão ou de estado, outra solicitação modificou o plano depois que sua tela carregou. Atualize o plano, confira o estado mais recente e aplique a edição novamente. Não repita às cegas uma ação destrutiva desatualizada.
+
+## A gravação no celular não terminou de sincronizar
+
+Mantenha o aplicativo instalado e evite limpar o armazenamento local enquanto a recuperação for possível. Reabra a tela de gravação, deixe o aplicativo restaurar a sessão e reconecte-se à rede. Veja [Gravação no celular](/pt-BR/docs/guide/mobile-recording).
+
+## O Treinador de IA não consegue concluir uma solicitação
+
+- Encurte pedidos muito extensos ou divida-os em etapas.
+- Confirme que o plano ou a atividade ainda existe e está acessível.
+- Revise os limites de uso.
+- Se uma ação estruturada falhar na validação, descreva a alteração pretendida em linguagem simples e tente novamente.
+- Nunca aplique um ajuste que você não consiga verificar na pré-visualização de antes e depois.
+
+## Colete evidências úteis
+
+Ao reportar um problema, inclua:
+
+- Horário aproximado e fuso horário.
+- Web ou celular, sistema operacional e versão do app ou navegador.
+- A página ou fluxo afetado — nunca credenciais.
+- Hash ID da atividade, ID do plano ou nome do provedor quando seguro.
+- Texto exato da mensagem de erro exibida.
+- Uma captura de tela com dados pessoais ocultados.
+
+Não inclua senhas, tokens OAuth, chaves de API nem coordenadas exatas da sua residência.

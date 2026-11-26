@@ -1,0 +1,50 @@
+---
+title: 連線 AI 用戶端
+description: 選擇 ChatGPT、Codex、Claude Code、Claude Desktop、Cursor、VS Code 或 opencode 的連線指南。
+---
+
+# 連線 AI 用戶端
+
+所有用戶端皆使用相同的遠端 Streamable HTTP 端點：
+
+```text
+https://api.trainingload.ai/mcp
+```
+
+TrainingLoad 採用 OAuth 2.1 自動探索、PKCE S256、重新整理權杖（refresh token）輪替，以及資源綁定存取權杖（resource-bound access token）。請勿將 API 金鑰或存取權杖寫入設定檔中。
+
+## 選擇您的用戶端
+
+| 用戶端 | 最快設定路徑 | 完整指南 |
+| --- | --- | --- |
+| ChatGPT | 於 Plugins 中新增自訂 MCP 伺服器 | [ChatGPT](/zh-hant/docs/mcp/clients/chatgpt) |
+| Codex | `codex mcp add trainingload --url https://api.trainingload.ai/mcp` | [Codex](/zh-hant/docs/mcp/clients/codex) |
+| Claude Code | `claude mcp add --transport http --scope user trainingload https://api.trainingload.ai/mcp` | [Claude Code](/zh-hant/docs/mcp/clients/claude-code) |
+| Claude Desktop | Customize → Connectors → Add custom connector | [Claude Desktop](/zh-hant/docs/mcp/clients/claude-desktop) |
+| Cursor | 將遠端伺服器加入 `~/.cursor/mcp.json` | [Cursor](/zh-hant/docs/mcp/clients/cursor) |
+| VS Code | MCP: Add Server → HTTP | [VS Code](/zh-hant/docs/mcp/clients/vscode) |
+| opencode | 在 `opencode.json` 中新增 `remote` 項目 | [opencode](/zh-hant/docs/mcp/clients/opencode) |
+
+## 預設權限
+
+建議的初始授權範圍如下：
+
+```text
+openid profile email offline_access profile:read activity:read training:read plan:read competition:read
+```
+
+`health:read` 刻意未包含在預設授權中。僅在您希望用戶端讀取精簡後的每日健康摘要時，才另行加入此權限。
+
+## 所有用戶端通用的驗收檢查
+
+1. 能力目錄應包含 24 個工具、3 項資源與 3 個提示詞。未授予 `health:read` 時，健康工具仍可保持可見，作為增量授權的入口。
+2. 提問：「使用 TrainingLoad 摘要我目前的訓練狀態，並說明所使用的日期與時區。」
+3. 用戶端應呼叫 `get_training_snapshot`，且不可要求您貼上權杖。
+4. 回覆應明確區分缺失值與零值，並顯示 TrainingLoad 的工具呼叫紀錄。
+5. 再詢問一個週期比較問題，確認用戶端能夠呼叫 `compare_training_periods`。
+
+## 撤銷或重新連線
+
+開啟 TrainingLoad 帳號授權頁面，即可檢視各用戶端的權限範圍、近期使用紀錄，或撤銷授權。若撤銷後用戶端仍顯示舊狀態，請在用戶端中斷連線或清除該 MCP 伺服器的 OAuth 工作階段，再重新連線。
+
+若連線或授權失敗，請參閱[疑難排解](/zh-hant/docs/mcp/troubleshooting)。

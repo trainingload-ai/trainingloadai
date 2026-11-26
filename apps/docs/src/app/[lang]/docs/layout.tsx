@@ -4,7 +4,10 @@ import { Suspense, type CSSProperties, type ReactNode } from "react";
 import { baseOptions } from "@/app/layout.config";
 import { source } from "@/lib/source";
 import { DocsHeader } from "@/components/DocsHeader";
-import { docsSidebarComponents } from "@/components/DocsSidebarComponents";
+import {
+  docsSidebarComponents,
+  DocsSidebarFooter,
+} from "@/components/DocsSidebarComponents";
 
 const docsShellStyle = {
   "--fd-banner-height": "3.5rem",
@@ -53,8 +56,13 @@ export default async function Layout({
       <DocsLayout
         tree={tree}
         {...options}
+        i18n={false}
         nav={{ ...options.nav, enabled: false }}
-        sidebar={{ components: docsSidebarComponents }}
+        themeSwitch={{ enabled: false }}
+        sidebar={{
+          components: docsSidebarComponents,
+          footer: <DocsSidebarFooter />,
+        }}
         // githubUrl removed (private for now)
         // links={[
         //   {

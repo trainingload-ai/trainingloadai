@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   collapsed: false,
   pathname: "/",
   replace: vi.fn(),
+  push: vi.fn(),
+  canAccess: true,
   searchParams: new URLSearchParams(),
   aiState: "enabled",
   isDesktopSelfHost: false,
@@ -18,7 +20,13 @@ vi.mock("@/hooks/use-runtime-environment", () => ({
 }));
 
 vi.mock("@/components/TopBar", () => ({
-  TopBar: () => <div data-testid="sidebar-account-menu" />,
+  TopBar: ({ settingsControl }: { settingsControl: React.ReactNode }) => (
+    <div data-testid="sidebar-account-menu">{settingsControl}</div>
+  ),
+}));
+
+vi.mock("@/components/notifications/NotificationDrawer", () => ({
+  NotificationDrawer: () => <button>Notifications</button>,
 }));
 
 vi.mock("@/api/runtime-capabilities", () => ({
@@ -29,8 +37,27 @@ vi.mock("@/api/runtime-capabilities", () => ({
 
 vi.mock("next/dynamic", () => ({
   default: () =>
-    function MockCoachHistory({ activeSid }: { activeSid: string }) {
-      return <div data-testid="coach-history">{activeSid}</div>;
+    function MockCoachHistory({
+      activeSid,
+      heading,
+      onSelectSession,
+      onNewChat,
+    }: {
+      activeSid: string;
+      heading: React.ReactNode;
+      onSelectSession: (id: string) => void;
+      onNewChat: () => void;
+    }) {
+      return (
+        <div data-testid="coach-history">
+          {heading}
+          {activeSid}
+          <button onClick={() => onSelectSession("session-124")}>
+            Another chat
+          </button>
+          <button onClick={onNewChat}>New chat</button>
+        </div>
+      );
     },
 }));
 
@@ -49,7 +76,7 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
   usePathname: () => mocks.pathname,
-  useRouter: () => ({ replace: mocks.replace }),
+  useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
 }));
 
 vi.mock("next-intl", () => ({
@@ -89,6 +116,7 @@ vi.mock("@/hooks/use-persisted-sidebar-collapsed", () => ({
 
 vi.mock("@deployment/managed-ui", () => ({
   useAccessNavigationGuard: () => ({
+    canAccess: mocks.canAccess,
     guardNavigation: vi.fn(),
     pricingOpen: false,
     setPricingOpen: vi.fn(),
@@ -104,6 +132,8 @@ beforeEach(() => {
   mocks.aiState = "enabled";
   mocks.isDesktopSelfHost = false;
   mocks.replace.mockReset();
+  mocks.push.mockReset();
+  mocks.canAccess = true;
   window.history.replaceState({}, "", "/");
   const values = new Map<string, string>();
   Object.defineProperty(window, "localStorage", {
@@ -121,82 +151,57 @@ beforeEach(() => {
   });
 });
 
-describe("Sidebar app spaces", () => {
-  it("adds the account menu only for desktop self-host", () => {
-    const view = render(<Sidebar />);
-    expect(
-      screen.queryByTestId("sidebar-account-menu"),
-    ).not.toBeInTheDocument();
-    view.unmount();
-    mocks.isDesktopSelfHost = true;
+describe("workspace sidebar", () => {
+  it.each([false, true])(
+    "keeps training links, account and chats together in the workspace (native: %s)",
+    (native) => {
+      mocks.isDesktopSelfHost = native;
+      render(<Sidebar />);
+      const navigation = screen.getByRole("navigation", {
+        name: "Primary navigation",
+      });
+      expect(
+        [...navigation.querySelectorAll("a")].map((link) => link.textContent),
+      ).toEqual(["Home", "Plan", "Calendar", "Activities", "Overview"]);
+      expect(screen.getByTestId("sidebar-account-menu")).toBeInTheDocument();
+      expect(screen.getByTestId("coach-history")).toBeInTheDocument();
+    },
+  );
+
+  it("shows only the Coach access entry when membership is required", () => {
+    mocks.canAccess = false;
     render(<Sidebar />);
-    expect(screen.getByTestId("sidebar-account-menu")).toBeInTheDocument();
-  });
-  it("keeps desktop product navigation in the rail and only renders a secondary pane in Coach", () => {
-    mocks.isDesktopSelfHost = true;
-    const product = render(<Sidebar />);
-    for (const name of ["Home", "Plan", "Calendar", "Activities", "Overview"]) {
-      expect(screen.getByRole("link", { name })).toBeInTheDocument();
-    }
-    expect(screen.queryByText("Trainingload.ai")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Coach" })).toBeInTheDocument();
     expect(screen.queryByTestId("coach-history")).not.toBeInTheDocument();
-    product.unmount();
-    mocks.pathname = "/ai-coach";
-    render(<Sidebar />);
-    expect(screen.getByText("Trainingload.ai Personal")).toBeInTheDocument();
-    expect(screen.getByTestId("coach-history")).toBeInTheDocument();
   });
 
-  it("hides the coach workspace when the server disables AI", () => {
+  it("hides the coach workspace in web mode when the server disables AI", () => {
     mocks.aiState = "disabled";
     render(<Sidebar />);
-
     expect(
       screen.queryByRole("link", { name: "Coach" }),
     ).not.toBeInTheDocument();
   });
 
-  it("keeps Coach at the top of the desktop rail when AI is not configured", () => {
+  it("keeps the Coach setup entry in the native app when AI is not configured", () => {
     mocks.isDesktopSelfHost = true;
     mocks.aiState = "disabled";
     render(<Sidebar />);
-
-    const navigation = screen.getByRole("navigation", {
-      name: "Primary navigation",
-    });
-    expect(navigation.querySelector("a")).toBe(
-      screen.getByRole("link", { name: "Coach" }),
-    );
-    expect(
-      screen.queryByRole("link", { name: "Training tools" }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("shows product navigation in the training space", () => {
-    render(<Sidebar />);
-
-    expect(
-      screen.getByRole("navigation", { name: "Switch workspace" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("navigation", { name: "Primary navigation" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Coach" })).toBeInTheDocument();
     expect(screen.queryByTestId("coach-history")).not.toBeInTheDocument();
   });
 
-  it("stacks the workspace switcher vertically when the sidebar is collapsed", () => {
+  it("keeps named navigation icons when collapsed", () => {
     mocks.collapsed = true;
-
     render(<Sidebar />);
-
-    const switcher = screen.getByRole("navigation", {
-      name: "Switch workspace",
-    });
-    expect(switcher.firstElementChild).toHaveClass("grid-cols-1");
-    expect(screen.getByRole("link", { name: "Training" })).toHaveClass(
-      "min-h-9",
-    );
-    expect(screen.getByRole("link", { name: "Coach" })).toHaveClass("min-h-9");
+    expect(
+      screen.getByRole("link", { name: "Home" }).closest("aside"),
+    ).toHaveStyle({ width: "48px" });
+    expect(screen.getByRole("link", { name: "Coach" })).toBeInTheDocument();
+    expect(screen.queryByTestId("coach-history")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("separator", { name: "Resize sidebar" }),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps Plan selected throughout the official-plan route tree", () => {
@@ -218,7 +223,7 @@ describe("Sidebar app spaces", () => {
       { key: "ArrowRight" },
     );
 
-    expect(window.localStorage.getItem("sidebar:width:v2")).toBe("232");
+    expect(window.localStorage.getItem("sidebar:width:v2")).toBe("212");
   });
 
   it("persists the width after dragging the resize handle", () => {
@@ -234,11 +239,11 @@ describe("Sidebar app spaces", () => {
       get: () => Number.parseFloat(sidebar?.style.width || "0"),
     });
 
-    fireEvent.mouseDown(separator, { button: 0, clientX: 224 });
-    fireEvent.mouseMove(window, { clientX: 280 });
-    fireEvent.mouseUp(window, { clientX: 280 });
+    fireEvent.mouseDown(separator, { button: 0, clientX: 204 });
+    fireEvent.mouseMove(window, { clientX: 260 });
+    fireEvent.mouseUp(window, { clientX: 260 });
 
-    expect(window.localStorage.getItem("sidebar:width:v2")).toBe("280");
+    expect(window.localStorage.getItem("sidebar:width:v2")).toBe("260");
   });
 
   it("keeps the same width when switching from training to coach", () => {
@@ -254,11 +259,11 @@ describe("Sidebar app spaces", () => {
 
     expect(
       screen.getByRole("separator", { name: "Resize sidebar" }),
-    ).toHaveAttribute("aria-valuenow", "232");
-    expect(window.localStorage.getItem("sidebar:width:v2")).toBe("232");
+    ).toHaveAttribute("aria-valuenow", "212");
+    expect(window.localStorage.getItem("sidebar:width:v2")).toBe("212");
   });
 
-  it("replaces product navigation with conversations in the coach space", () => {
+  it("keeps the training navigation available in Coach", () => {
     mocks.pathname = "/ai-coach";
     mocks.searchParams = new URLSearchParams("sid=session-123");
 
@@ -268,8 +273,8 @@ describe("Sidebar app spaces", () => {
       "session-123",
     );
     expect(
-      screen.queryByRole("navigation", { name: "Primary navigation" }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("navigation", { name: "Primary navigation" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Settings" })).toBeInTheDocument();
   });
 
@@ -285,17 +290,27 @@ describe("Sidebar app spaces", () => {
     );
   });
 
-  it("opens Coach as a new chat instead of restoring the last session", () => {
-    window.localStorage.setItem("ai_coach_sid", "session-123");
-
+  it("opens chats from a training page without carrying unrelated query parameters", () => {
+    mocks.pathname = "/calendar";
+    mocks.searchParams = new URLSearchParams("date=2026-11-22");
     render(<Sidebar />);
+    fireEvent.click(screen.getByRole("button", { name: "Another chat" }));
+    expect(mocks.push).toHaveBeenCalledWith("/ai-coach?sid=session-124");
+    fireEvent.click(screen.getByRole("button", { name: "New chat" }));
+    expect(mocks.push).toHaveBeenLastCalledWith("/ai-coach");
+  });
 
-    const coachLink = screen.getByRole("link", { name: "Coach" });
-    expect(coachLink).toHaveAttribute("href", "/ai-coach");
-
-    fireEvent.click(coachLink);
-
-    expect(window.localStorage.getItem("ai_coach_sid")).toBeNull();
-    expect(mocks.replace).toHaveBeenCalledWith("/ai-coach", { scroll: false });
+  it("leaves the current session open when clicking the Coach heading", () => {
+    mocks.pathname = "/ai-coach";
+    mocks.searchParams = new URLSearchParams("sid=session-123");
+    render(<Sidebar />);
+    fireEvent.click(screen.getByRole("link", { name: "Coach" }));
+    expect(mocks.replace).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("link", { name: "Coach" }).querySelector("svg"),
+    ).toBeNull();
+    expect(screen.getByTestId("coach-history")).toHaveTextContent(
+      "session-123",
+    );
   });
 });

@@ -96,7 +96,7 @@
   },
   "nav": {
     "blog": "블로그",
-    "aiPlans": "AI Coach",
+    "aiPlans": "AI 코치",
     "features": "기능",
     "trainingLoad": "훈련 부하",
     "tools": "도구",
@@ -206,7 +206,7 @@
       "rpeScale": "RPE 운동 강도 척도",
       "appComparisons": "앱 비교"
     },
-    "aiPlans": "AI Coach",
+    "aiPlans": "AI 코치",
     "blog": "블로그",
     "documentation": "문서",
     "alternatives": "Training load app alternatives",
@@ -3269,6 +3269,18 @@
           "title": "한 플랫폼에 묶이지 않음",
           "description": "오픈 소스와 완전한 셀프 호스팅 문서로 오래 사용할 수 있고, 커뮤니티도 검토하고 개선하며 기여할 수 있습니다."
         }
+      ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "훈련 데이터를 Trainingload.ai 안에만 둘 필요는 없습니다.",
+      "description": "한 번만 연결하면 ChatGPT, Codex, Claude, Cursor, VS Code에서 Trainingload.ai의 계획, 활동, 부하, 대회 정보를 조회할 수 있습니다. AI는 읽기만 가능하며 데이터를 수정할 수 없고, 모든 도구 호출과 응답이 투명하게 표시됩니다.",
+      "primary": "MCP 알아보기",
+      "secondary": "연결 가이드",
+      "points": [
+        "24개 읽기 전용 도구",
+        "도구 호출 과정 공개",
+        "언제든 권한 해제 가능"
       ]
     }
   },

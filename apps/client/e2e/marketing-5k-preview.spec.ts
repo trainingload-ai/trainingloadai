@@ -21,6 +21,7 @@ const distanceConfig = {
 } as const;
 const requestedMarketingDistance = process.env.MARKETING_PLAN_DISTANCE ?? "5k";
 const selfHostReadmeCapture = process.env.SELF_HOST_README_CAPTURE === "1";
+const docsCaptureDirectory = process.env.DOCS_CAPTURE_DIRECTORY;
 
 if (!(requestedMarketingDistance in distanceConfig)) {
   throw new Error(
@@ -252,7 +253,7 @@ const captureCopy = Object.fromEntries(
 ) as typeof fiveKCaptureCopy;
 
 function fixtureIdentity(locale: CaptureLocale) {
-  return selfHostReadmeCapture
+  return selfHostReadmeCapture || docsCaptureDirectory
     ? {
         membershipPlan: "FREE" as const,
         userName: locale === "zh" || locale === "zh-hant" ? "运动员" : "Athlete",
@@ -262,7 +263,7 @@ function fixtureIdentity(locale: CaptureLocale) {
 }
 
 function fixtureSessions(locale: CaptureLocale) {
-  if (!selfHostReadmeCapture) return undefined;
+  if (!selfHostReadmeCapture && !docsCaptureDirectory) return undefined;
   const title =
     locale === "zh"
       ? "5K 训练复盘"
@@ -314,6 +315,7 @@ function createWorkouts(locale: CaptureLocale) {
     return {
       id: `marketing-5k-workout-${index + 1}`,
       planId,
+      revision: 1,
       weekIndex,
       dayIndex,
       dayOffset,
@@ -340,7 +342,7 @@ function createWorkouts(locale: CaptureLocale) {
   });
 }
 
-async function openMarketingPlan(
+async function mockMarketingPlan(
   page: Page,
   locale: CaptureLocale,
   theme: "light" | "dark" = "light",
@@ -353,6 +355,7 @@ async function openMarketingPlan(
   }, theme);
   await openCoachFixture(page, undefined, {
     ...fixtureIdentity(locale),
+    sessions: fixtureSessions(locale),
     navigate: false,
   });
   const plan = {
@@ -375,6 +378,14 @@ async function openMarketingPlan(
       /^\/api\/proxy/,
       "",
     );
+    if (path === "/api/access/features") {
+      return route.fulfill({ json: { schemaVersion: 1, features: { "ai.planAdvice": { allowed: true } } } });
+    }
+    if (path === "/ai/plan-execution-advice") {
+      return route.fulfill({
+        json: { data: { summary: copy.todayAdvice, tags: copy.todayTags, source: "cache" } },
+      });
+    }
     if (path === "/competition-impact/current") {
       return route.fulfill({
         json: {
@@ -434,14 +445,26 @@ async function openMarketingPlan(
     return route.fallback();
   });
 
-  await page.goto(`/${locale}/plans/${planId}`);
-  await expect(page.getByText(copy.planTitle, { exact: true })).toBeVisible();
+  return { copy, workouts, plan };
+}
+
+async function openMarketingPlan(
+  page: Page,
+  locale: CaptureLocale,
+  theme: "light" | "dark" = "light",
+  destination = `/plans/${planId}`,
+) {
+  const fixture = await mockMarketingPlan(page, locale, theme);
+  await page.goto(`/${locale}${destination}`);
+  if (destination !== "/plans/create") {
+    await expect(page.getByText(fixture.copy.planTitle, { exact: true }).filter({ visible: true }).first()).toBeVisible();
+  }
   await page.addStyleTag({
     content:
       ".tsqd-parent-container,nextjs-portal{display:none!important}.touch-pan-y>div{opacity:1!important;transform:none!important}*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important}",
   });
   await page.waitForTimeout(500);
-  return { copy, workouts, plan };
+  return fixture;
 }
 
 async function openMarketingHome(
@@ -449,7 +472,7 @@ async function openMarketingHome(
   locale: CaptureLocale,
   theme: "light" | "dark" = "light",
 ) {
-  const { copy, workouts, plan } = await openMarketingPlan(page, locale, theme);
+  const { copy, workouts, plan } = await mockMarketingPlan(page, locale, theme);
   const homeWorkouts = workouts.map((workout) => ({
     id: workout.id,
     planId: workout.planId,
@@ -467,6 +490,9 @@ async function openMarketingHome(
     sessionIndex: workout.sessionIndex,
     linkedActivityTitle: null,
     estimatedLoad: workout.estimatedLoad,
+    structureKind: workout.structureKind,
+    structure: workout.structure,
+    summary: workout.summary,
   }));
   const currentWeekWorkouts = homeWorkouts.filter(
     (workout) => workout.weekIndex === plan.currentWeekIndex,
@@ -593,6 +619,7 @@ async function openMarketingHome(
           data: currentWeekWorkouts.map((workout, index) => ({
             date: workout.scheduledDate,
             value: index < 2 ? 32 + index * 8 : 0,
+            activityCount: index < 2 ? 1 : 0,
             fitness: 50 + index,
             fatigue: 45 + index,
             form: 5,
@@ -632,6 +659,133 @@ async function openMarketingHome(
   });
   await page.waitForTimeout(800);
   return { copy };
+}
+
+async function openMarketingCalendar(
+  page: Page,
+  locale: CaptureLocale,
+  theme: "light" | "dark",
+  includeRecordedRun = false,
+) {
+  const { copy, workouts } = await mockMarketingPlan(page, locale, theme);
+  await page.route("**/*", async (route) => {
+    const url = new URL(route.request().url());
+    const path = url.pathname.replace(/^\/api\/proxy/, "");
+    if (path === "/plans/scheduled-workouts") {
+      return route.fulfill({
+        json: {
+          data: {
+            inPlan: workouts.map((workout) => ({
+              ...workout,
+              scheduledDate: workout.scheduledDate.slice(0, 10),
+            })),
+            independent: [],
+          },
+        },
+      });
+    }
+    if (path === "/pmc/data") {
+      return route.fulfill({
+        json: {
+          data: workouts.slice(0, 12).map((workout, index) => ({
+            date: workout.scheduledDate,
+            value: 28 + index * 3,
+            fitness: 42 + index,
+            fatigue: 48 + index,
+            form: -6,
+          })),
+        },
+      });
+    }
+    if (path === "/activities") {
+      const activityDate = "2026-10-30";
+      const startDate = url.searchParams.get("startDate") ?? "";
+      const endDate = url.searchParams.get("endDate") ?? "";
+      const showRun = includeRecordedRun && startDate <= activityDate && activityDate <= endDate;
+      return route.fulfill({
+        json: {
+          data: {
+            activities: showRun
+              ? [{
+                  id: 501,
+                  hashId: "marketing-morning-run",
+                  activityName: copy.recentActivity,
+                  sportType: "RUN",
+                  startTime: "2026-10-30T01:30:00.000Z",
+                  duration: 1980,
+                  distance: 5100,
+                  load: 36,
+                  status: "READY",
+                }]
+              : [],
+            total: showRun ? 1 : 0,
+          },
+        },
+      });
+    }
+    if (path === `/plans/${planId}/calendar-adjustments`) {
+      return route.fulfill({ json: { data: [] } });
+    }
+    if (path === "/competition-events") {
+      return route.fulfill({ json: { data: { events: [] } } });
+    }
+    return route.fallback();
+  });
+
+  await page.goto(`/${locale}/calendar`);
+  await expect(
+    page
+      .getByText(`${copy.workoutNames[2]} · ${copy.week(4)}`, {
+        exact: true,
+      })
+      .first(),
+  ).toBeVisible({ timeout: 30_000 });
+  await page.addStyleTag({
+    content:
+      ".tsqd-parent-container,nextjs-portal{display:none!important}.touch-pan-y>div{opacity:1!important;transform:none!important}*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important}",
+  });
+  await page.waitForTimeout(500);
+  return { copy, workouts };
+}
+
+async function openMarketingCoach(
+  page: Page,
+  locale: CaptureLocale,
+  theme: "light" | "dark",
+) {
+  const copy = captureCopy[locale];
+  await page.clock.setFixedTime(new Date("2026-10-30T03:00:00Z"));
+  await page.addInitScript((selectedTheme) => {
+    localStorage.setItem("theme", selectedTheme);
+  }, theme);
+  await openCoachFixture(
+    page,
+    [
+      {
+        id: "marketing-coach-user",
+        role: "user",
+        content: copy.coachQuestion,
+        createdAt: "2026-10-30T03:00:00.000Z",
+      },
+      {
+        id: "marketing-coach-assistant",
+        role: "assistant",
+        content: copy.coachAnswer,
+        createdAt: "2026-10-30T03:01:00.000Z",
+      },
+    ],
+    {
+      navigate: false,
+      sessions: fixtureSessions(locale),
+      ...fixtureIdentity(locale),
+    },
+  );
+  await page.goto(`/${locale}/ai-coach?sid=coach-stream-fixture`);
+  await expect(page.getByText(copy.coachAnswer, { exact: true }).first()).toBeVisible();
+  await page.addStyleTag({
+    content:
+      ".tsqd-parent-container,nextjs-portal{display:none!important}*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important}",
+  });
 }
 
 const outputDirectory = resolve(
@@ -693,62 +847,7 @@ for (const locale of captureLocales) {
     test(`capture the real ${theme} Web calendar with deterministic ${marketingDistance} data · ${locale}`, async ({
       page,
     }) => {
-      const { copy, workouts } = await openMarketingPlan(page, locale, theme);
-      await page.route("**/*", async (route) => {
-        const path = new URL(route.request().url()).pathname.replace(
-          /^\/api\/proxy/,
-          "",
-        );
-        if (path === "/plans/scheduled-workouts") {
-          return route.fulfill({
-            json: {
-              data: {
-                inPlan: workouts.map((workout) => ({
-                  ...workout,
-                  scheduledDate: workout.scheduledDate.slice(0, 10),
-                })),
-                independent: [],
-              },
-            },
-          });
-        }
-        if (path === "/pmc/data") {
-          return route.fulfill({
-            json: {
-              data: workouts.slice(0, 12).map((workout, index) => ({
-                date: workout.scheduledDate,
-                value: 28 + index * 3,
-                fitness: 42 + index,
-                fatigue: 48 + index,
-                form: -6,
-              })),
-            },
-          });
-        }
-        if (path === "/activities") {
-          return route.fulfill({
-            json: { data: { activities: [], total: 0 } },
-          });
-        }
-        if (path === "/competition-events") {
-          return route.fulfill({ json: { data: { events: [] } } });
-        }
-        return route.fallback();
-      });
-
-      await page.goto(`/${locale}/calendar`);
-      await expect(
-        page
-          .getByText(`${copy.workoutNames[2]} · ${copy.week(4)}`, {
-            exact: true,
-          })
-          .first(),
-      ).toBeVisible({ timeout: 30_000 });
-      await page.addStyleTag({
-        content:
-          ".tsqd-parent-container,nextjs-portal{display:none!important}.touch-pan-y>div{opacity:1!important;transform:none!important}*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important}",
-      });
-      await page.waitForTimeout(500);
+      await openMarketingCalendar(page, locale, theme);
       if (theme === "dark") {
         await expect(page.locator("html")).toHaveClass(/dark/);
       }
@@ -762,96 +861,95 @@ for (const locale of captureLocales) {
     });
   }
 
-  test(`capture the real Web coach with deterministic ${marketingDistance} context · ${locale}`, async ({
-    page,
-  }) => {
-    const copy = captureCopy[locale];
-    await page.clock.setFixedTime(new Date("2026-10-30T03:00:00Z"));
-    await openCoachFixture(
+  for (const theme of ["light", "dark"] as const) {
+    test(`capture the real ${theme} Web coach with deterministic ${marketingDistance} context · ${locale}`, async ({
       page,
-      [
-        {
-          id: "marketing-coach-user",
-          role: "user",
-          content: copy.coachQuestion,
-          createdAt: "2026-10-30T03:00:00.000Z",
-        },
-        {
-          id: "marketing-coach-assistant",
-          role: "assistant",
-          content: copy.coachAnswer,
-          createdAt: "2026-10-30T03:01:00.000Z",
-        },
-      ],
-      {
-        readyText: copy.coachAnswer,
-        sessions: fixtureSessions(locale),
-        ...fixtureIdentity(locale),
-      },
-    );
-    if (locale !== "zh") {
-      await page.goto(`/${locale}/ai-coach?sid=coach-stream-fixture`);
-      await expect(
-        page.getByText(copy.coachAnswer, { exact: true }).first(),
-      ).toBeVisible();
-    }
-    await page.addStyleTag({
-      content:
-        ".tsqd-parent-container,nextjs-portal{display:none!important}*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important}",
+    }) => {
+      await openMarketingCoach(page, locale, theme);
+      await expect(page.locator("html")).toHaveClass(new RegExp(theme));
+      await page.screenshot({
+        path: resolve(
+          outputDirectory,
+          `web-coach${theme === "dark" ? "-dark" : ""}-v2-${assetLocale(locale)}.png`,
+        ),
+        fullPage: false,
+      });
     });
-    await page.screenshot({
-      path: resolve(outputDirectory, `web-coach-v2-${assetLocale(locale)}.png`),
-      fullPage: false,
-    });
-  });
+  }
+}
 
-  test(`capture the real dark Web coach with deterministic ${marketingDistance} context · ${locale}`, async ({
-    page,
-  }) => {
-    const copy = captureCopy[locale];
-    await page.clock.setFixedTime(new Date("2026-10-30T03:00:00Z"));
-    await page.addInitScript(() => {
-      localStorage.setItem("theme", "dark");
-    });
-    await openCoachFixture(
-      page,
-      [
-        {
-          id: "marketing-coach-user",
-          role: "user",
-          content: copy.coachQuestion,
-          createdAt: "2026-10-30T03:00:00.000Z",
-        },
-        {
-          id: "marketing-coach-assistant",
-          role: "assistant",
-          content: copy.coachAnswer,
-          createdAt: "2026-10-30T03:01:00.000Z",
-        },
-      ],
-      {
-        readyText: copy.coachAnswer,
-        sessions: fixtureSessions(locale),
-        ...fixtureIdentity(locale),
-      },
-    );
-    if (locale !== "zh") {
-      await page.goto(`/${locale}/ai-coach?sid=coach-stream-fixture`);
-      await expect(
-        page.getByText(copy.coachAnswer, { exact: true }).first(),
-      ).toBeVisible();
+if (docsCaptureDirectory) {
+  test.describe("documentation screenshots", () => {
+    test.use({ viewport: { width: 1280, height: 960 }, timezoneId: "Asia/Shanghai" });
+
+    for (const locale of ["en", "zh"] as const) {
+      for (const theme of ["light", "dark"] as const) {
+        const suffix = `${theme === "dark" ? "-dark" : ""}-${locale}.png`;
+        const capture = async (page: Page, name: string) => {
+          await expect(page.locator("html")).toHaveClass(new RegExp(theme));
+          await expect(page.locator("#workspace-sidebar")).toBeVisible();
+          await page.evaluate(() => document.fonts.ready);
+          await page.screenshot({
+            path: resolve(docsCaptureDirectory, name + suffix),
+            animations: "disabled",
+            style: ".tsqd-parent-container,nextjs-portal{display:none!important}",
+          });
+        };
+
+        test(`home · ${theme} · ${locale}`, async ({ page }) => {
+          await openMarketingHome(page, locale, theme);
+          await capture(page, "getting-started-home");
+        });
+
+        test(`calendar and adjustment · ${theme} · ${locale}`, async ({ page }) => {
+          const { copy, workouts } = await openMarketingCalendar(page, locale, theme, true);
+          const date = "2026-10-30";
+          const day = page.getByRole("button", { name: date, exact: true });
+          await expect(day).toHaveAttribute("aria-pressed", "true");
+          const workout = workouts.find((item) => item.scheduledDate.startsWith(date))!;
+          await expect(page.getByRole("button", { name: workout.name, exact: true }).first()).toBeVisible();
+          await capture(page, "calendar-plan-actual");
+
+          const activityTab = page.getByRole("button", { name: locale === "en" ? "Activities" : "活动", exact: true });
+          const recording = page.getByText(copy.recentActivity, { exact: true }).filter({ visible: true }).first();
+          await expect(async () => {
+            if (!(await recording.isVisible())) await activityTab.click();
+            await expect(recording).toBeVisible({ timeout: 1500 });
+          }).toPass({ timeout: 10000 });
+          await capture(page, "calendar-activity-details");
+
+          const adjustment = locale === "en" ? "Adjust schedule" : "调整课表";
+          await day.click({ button: "right", position: { x: 12, y: 10 } });
+          await expect(page.getByRole("menuitem", { name: adjustment, exact: true })).toBeVisible();
+          await capture(page, "calendar-adjustment-entry");
+          await page.getByRole("menuitem", { name: adjustment, exact: true }).click();
+          const editor = page.locator("[data-calendar-proposal]");
+          const planned = editor.getByRole("button", { name: workout.name, exact: true });
+          await expect(planned).toBeVisible();
+          await planned.dragTo(editor.locator('[data-calendar-date="2026-10-31"]').filter({ visible: true }));
+          await expect(editor.locator('[data-calendar-change="after"]')).toBeVisible();
+          await capture(page, "calendar-adjustment-draft");
+        });
+
+        test(`coach · ${theme} · ${locale}`, async ({ page }) => {
+          await openMarketingCoach(page, locale, theme);
+          await capture(page, "ai-coach-contextual-review");
+        });
+
+        test(`active plan · ${theme} · ${locale}`, async ({ page }) => {
+          const { copy } = await openMarketingPlan(page, locale, theme, "/plan");
+          await expect(page.getByText(copy.todayAdvice, { exact: true }).filter({ visible: true }).first()).toBeVisible();
+          await capture(page, "plan-active-summary");
+        });
+
+        test(`create plan · ${theme} · ${locale}`, async ({ page }) => {
+          await openMarketingPlan(page, locale, theme, "/plans/create");
+          await expect(
+            page.getByRole("heading", { name: locale === "en" ? "Generate a training plan with AI" : "AI 创建计划", exact: true }),
+          ).toBeVisible();
+          await capture(page, "plan-create-paths");
+        });
+      }
     }
-    await expect(page.locator("html")).toHaveClass(/dark/);
-    await page.addStyleTag({
-      content:
-        ".tsqd-parent-container,nextjs-portal{display:none!important}*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important}",
-    });
-    await page.screenshot({
-      path: resolve(
-        outputDirectory,
-        `web-coach-dark-v2-${assetLocale(locale)}.png`,
-      ),
-      fullPage: false,
-    });
   });
 }

@@ -1,98 +1,132 @@
 ---
-title: Intensity Factor (IF)
-description: Intensity Factor (IF) compares workout intensity with threshold and helps interpret how hard a session was relative to current fitness.
-keywords: ["IF", "Intensity Factor", "intensity factor", "NP", "FTP", "TSS", "Tempo", "Sweet Spot", "training intensity"]
+title: "강도 계수 (IF)란? 사이클링과 러닝에서의 활용"
+description: "강도 계수(IF)는 정규화 파워를 FTP로 나눈 비율입니다. IF로 라이딩과 러닝의 강도를 읽고, 훈련 존을 확인하며, TSS를 결정하는 원리를 알아보세요."
+keywords:
+  [
+    "강도 계수",
+    "Intensity Factor",
+    "사이클링 IF",
+    "NP/FTP",
+    "러닝 강도 계수",
+    "IF 훈련 존",
+  ]
 ---
 
-# Intensity Factor (IF)
+# 강도 계수 (IF)란? 사이클링과 러닝에서의 활용
 
-**Intensity Factor (IF)** measures the **relative intensity** of a workout compared with your current **[FTP (Functional Threshold Power)](/docs/metrics/power/functional-threshold-power)** or a sport-specific threshold.
+**강도 계수(Intensity Factor, IF)**는 역치 대비 훈련 강도를 나타내는 비율로, [정규화 파워(NP)](/ko/docs/metrics/power/normalized-power) ÷ [FTP](/ko/docs/metrics/power/functional-threshold-power)로 계산합니다. “이번 세션이 내 능력 대비 얼마나 힘들었는가?”에 답해 주므로, 똑같은 150 W 라이딩이라도 어떤 선수에게는 가벼운 회복 주행이고 다른 선수에게는 전력 주행인 차이를 정확히 구분해 줍니다.
 
-It answers “How hard was this session?”—and makes training intensity comparable across athletes with different ability levels.
+즉, 체력 수준이 서로 다른 선수들 사이에서도 상대적인 훈련 강도를 공정하게 비교할 수 있게 해 주는 지표입니다.
 
-## Calculation Formula
+## 계산 공식
 
-IF is the ratio of [Normalized Power (NP)](/docs/metrics/power/normalized-power) to [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power):
+IF는 [정규화 파워(NP)](/ko/docs/metrics/power/normalized-power)와 [기능적 역치 파워(FTP)](/ko/docs/metrics/power/functional-threshold-power)의 비율입니다.
 
 $$
 IF = \frac{NP}{FTP}
 $$
 
-**Example**:
--   Suppose your FTP is 200 W.
--   You complete a ride with NP = 150 W.
--   Then $IF = 150 / 200 = 0.75$.
+**예시**:
+- FTP가 200 W라고 가정합니다.
+- NP = 150 W로 라이딩을 완료했습니다.
+- 이때 $IF = 150 / 200 = 0.75$가 됩니다.
 
-> **Note**: the same logic applies to running (using rFTP and NGP). Heart rate is generally less precise than power due to **lag and drift**.
+> **참고**: 러닝에도 동일한 논리가 적용됩니다(rFTP 또는 NGP 사용). 심박수는 **지연과 드리프트** 때문에 파워보다 정밀도가 떨어지는 편입니다.
 
-### IF calculation in running
+### 러닝에서의 IF 계산
 
-For running, we usually use **rFTP (running threshold power)** or **CP (Critical Power)** as the baseline:
+러닝 파워를 사용하는 경우 보통 **rFTP(러닝 역치 파워)**나 **CP(임계 파워)**를 기준값으로 사용합니다.
 
 $$
 IF_{run} = \frac{RunPower}{CP}
 $$
 
-Or, if using pace:
+페이스를 사용하는 경우의 공식은 다음과 같습니다.
 
 $$
 IF_{pace} = \frac{NGP}{ThresholdPace}
 $$
 
-*Note: [NGP (Normalized Graded Pace)](/docs/metrics/pace/normalized-graded-pace) is a grade-adjusted normalized pace.*
+*참고: [NGP(정규화 경사도 페이스)](/ko/docs/metrics/pace/normalized-graded-pace)는 경사도가 보정된 정규화 페이스입니다.*
 
-## Why focus on IF?
+## IF에 주목해야 하는 이유
 
-### 1. Cross-athlete comparison
-- **Absolute power**: a pro can ride 200 W easily; a beginner may ride 200 W all-out. Watts alone don’t reflect effort.
-- **Relative intensity (IF)**: if both athletes have IF = 0.75, they’re doing the same relative aerobic endurance work.
+### 1. 선수 간 공정한 비교
+- **절대 파워**: 프로 선수에게 200 W는 가벼운 강도이지만 초보자에게는 전력일 수 있습니다. 와트 수치만으로는 노력의 크기를 알 수 없습니다.
+- **상대 강도 (IF)**: 두 선수의 IF가 똑같이 0.75라면, 둘 다 본인 능력 대비 같은 수준의 유산소 지구력 훈련을 수행한 것입니다.
 
-### 2. Identify training zones
-IF is the fastest way to see which intensity domain a session sits in:
+### 2. 훈련 존 즉시 파악
+IF는 세션이 어느 강도 영역에 해당하는지 가장 빠르게 확인하는 수단입니다.
 
-| IF range | Training zone | Typical description |
+| IF 범위 | 훈련 존 | 대표적인 설명 |
 | :--- | :--- | :--- |
-| **< 0.75** | **Z1 / Z2** | **Recovery / aerobic endurance**. Easy to moderate work, often used for base or recovery sessions. |
-| **0.75 - 0.85** | **Z3 / Sweet Spot** | **Tempo / sweet spot**. Moderately hard and sustainable for many athletes, depending on duration and sport. |
-| **0.85 - 0.95** | **Z4** | **Threshold**. Very hard, near FTP; common in intervals or time trials. |
-| **0.95 - 1.05** | **Z5** | **VO2max**. Very high-intensity work, usually performed in shorter intervals. |
-| **> 1.05** | **Z6 / Z7** | **Anaerobic / sprint**. Short bursts; usually only in short races or tests. |
+| **< 0.75** | **Z1 / Z2** | **회복 / 유산소 지구력**. 가볍거나 편안한 강도로 기반 훈련이나 회복 세션에 주로 사용됩니다. |
+| **0.75 - 0.85** | **Z3 / 스위트 스팟** | **템포 / 스위트 스팟**. 종목과 시간에 따라 비교적 오래 지속할 수 있는 중상 강도입니다. |
+| **0.85 - 0.95** | **Z4** | **역치**. FTP 부근의 매우 강한 강도로, 인터벌이나 타임트라이얼에서 흔히 나타납니다. |
+| **0.95 - 1.05** | **Z5** | **VO2max**. 매우 높은 강도로, 주로 짧은 인터벌 형태로 수행합니다. |
+| **> 1.05** | **Z6 / Z7** | **무산소 / 스프린트**. 짧은 폭발적 출력으로 단거리 레이스나 테스트에서 주로 나타납니다. |
 
-## Typical application scenarios
+## 주요 활용 시나리오
 
-### 1. Validate FTP settings
-If you hold **IF ≈ 1.1** for a full **solo 1-hour time trial (TT)** (i.e., NP is 1.1× FTP), your **FTP may be set too low**.
-- **Why**: FTP is commonly treated as the highest power you can sustain near steady state for about an hour. If IF stays well above 1.0 for a full hour, your threshold estimate likely needs review.
+### 1. FTP 설정 검증
+**단독 1시간 타임트라이얼(TT)** 전체에서 **IF ≈ 1.1**(즉, NP가 FTP의 1.1배)을 유지했다면 **FTP가 실제보다 너무 낮게 설정**되어 있을 가능성이 높습니다.
+- **이유**: FTP는 대체로 약 1시간 동안 거의 일정하게 유지할 수 있는 최고 파워로 간주합니다. 1시간 내내 IF가 1.0을 크게 웃돈다면 역치 추정치를 재검토해야 합니다.
 
-### 2. Race pacing strategy
-In long endurance events, controlling IF helps protect late-race pacing and nutrition:
+### 2. 레이스 페이싱 전략
+장거리 지구력 경기에서 IF를 통제하면 후반부 페이스 유지와 보급 전략을 지키는 데 큰 도움이 됩니다.
 
-| Race type | Target IF range | Risk note |
+| 레이스 유형 | 목표 IF 범위 | 리스크 참고 |
 | :--- | :--- | :--- |
-| **Ironman** | **0.65 - 0.75** | Higher bike intensity can increase run and nutrition risk. |
-| **Half Ironman (70.3)** | **0.75 - 0.85** | The upper end is aggressive and depends heavily on run durability. |
-| **Olympic-distance** | **0.85 - 0.95** | Near-threshold bike; leave margin for the run. |
+| **아이언맨 (풀코스)** | **0.65 - 0.75** | 사이클 강도가 이보다 높으면 이어지는 런 구간과 보급 실패 위험이 커집니다. |
+| **하프 아이언맨 (70.3)** | **0.75 - 0.85** | 상단 구간은 공격적인 전략이며 런 내구성에 크게 좌우됩니다. |
+| **올림픽 코스** | **0.85 - 0.95** | 역치에 가까운 사이클 주행이므로 런 구간을 위한 여력을 남겨야 합니다. |
 
-### 3. A core building block of Training Stress Score (TSS)
-IF is a multiplier in **[TSS](./training-stress-score)**—it sets how fast TSS accumulates:
+### 3. 훈련 스트레스 점수(TSS)의 핵심 구성 요소
+IF는 **[TSS](./training-stress-score)**의 핵심 승수로서 TSS가 얼마나 빠르게 누적되는지를 결정합니다.
 
 $$
 TSS = \frac{t \times NP \times IF}{FTP \times 3600} \times 100
 $$
 
-- A small increase in IF raises TSS a lot (the formula effectively involves an $IF^2$ relationship).
+- IF가 조금만 올라가도 TSS는 크게 상승합니다(공식상 실질적으로 $IF^2$에 비례).
 
-## Trainingload.ai recommendations
+## Trainingload.ai 권장 사항
 
-Trainingload.ai uses IF to interpret the character of a workout, not just its total load:
+Trainingload.ai는 총부하뿐 아니라 훈련의 성격을 해석하는 데 IF를 활용합니다.
 
-1.  **Match IF to the session goal**: aerobic base sessions should usually stay controlled; threshold or VO2max sessions are intentionally higher.
-2.  **Be cautious with very short sessions**: for workouts shorter than roughly 20 minutes, IF can look unusually high and should not be interpreted the same way as a long steady session.
-3.  **Review threshold settings**: if easy sessions frequently show IF above 0.8, either the workout is not as easy as intended or your threshold estimate may need recalibration.
+1. **세션 목표에 맞는 IF 유지**: 유산소 기반 세션은 절제된 IF를 유지하고, 역치나 VO2max 세션은 의도적으로 높게 가져가세요.
+2. **매우 짧은 세션 주의**: 약 20분 미만의 짧은 훈련에서는 IF가 비정상적으로 높게 보일 수 있으므로 장시간 지속주와 같은 기준으로 해석하지 마세요.
+3. **역치 설정 점검**: 이지 세션인데도 IF가 자주 0.8을 넘는다면 실제로 너무 강하게 훈련하고 있거나 역치 설정을 다시 보정해야 할 때입니다.
 
-## Limitations
+## 한계점
 
--   **Bias in short, intense sessions**: for very short workouts (e.g., ~10 minutes), NP behavior can make IF look unusually high.
--   **Depends on a reliable FTP**: if FTP is outdated or wrong, IF loses meaning.
+- **짧은 고강도 세션의 편향**: 약 10분 내외의 매우 짧은 훈련에서는 NP 계산 특성상 IF가 유난히 높게 나올 수 있습니다.
+- **정확한 FTP 의존성**: FTP가 오래되었거나 부정확하면 IF 수치의 의미도 함께 떨어집니다.
 
-> Normalized Power (NP), Intensity Factor (IF), and Training Stress Score (TSS) are registered trademarks of [Peaksware, LLC](https://trainingpeaks.com/).
+## 자주 묻는 질문
+
+### 강도 계수(IF)란 무엇인가요?
+
+강도 계수는 `NP ÷ FTP`(러닝에서는 `NGP ÷ 역치 페이스`)입니다. 대부분의 선수에게 IF 0.75는 잘 통제된 유산소 세션이고, IF 1.0 부근은 약 1시간 동안의 역치 강도 노력에 해당합니다.
+
+### 사이클링 훈련에서 IF는 어떻게 활용하나요?
+
+라이딩이 의도한 존에 머물렀는지 확인하고, 장거리 레이스 페이스를 설계하며, FTP가 너무 낮게 설정되지 않았는지 점검하는 데 활용합니다(1시간 내내 IF ≈ 1.1을 유지했다면 대개 FTP가 과소평가된 상태입니다).
+
+### 러닝에도 IF를 적용할 수 있나요?
+
+네, 러닝 역치 파워/CP 또는 NGP와 역치 페이스를 이용해 적용할 수 있습니다. 심박수 기반 IF는 심박 지연과 드리프트 때문에 정밀도가 낮습니다.
+
+### IF가 변하면 TSS는 어떻게 달라지나요?
+
+TSS는 $IF^2$에 비례해 증가합니다. 운동 시간을 늘리는 것보다 IF를 조금 올리는 쪽이 부하를 훨씬 크게 키우며, 잘못된 FTP가 IF와 TSS를 동시에 왜곡하는 이유도 여기에 있습니다.
+
+## 다음 단계
+
+- [훈련 스트레스 점수(TSS) 계산 방법 보기](/ko/docs/metrics/training-load/training-stress-score)
+- [시간, NP, FTP로 TSS 계산하기](/ko/tss-calculator)
+- [활동 파일로 FTP 추정하기](/ko/ftp-calculator)
+- [파워 훈련 부하 존 계산하기](/ko/power-zones-calculator)
+- [훈련 플랜에서 CTL, ATL, TSB로 훈련 부하 관리하기](/ko/training-load)
+
+> Normalized Power (NP), Intensity Factor (IF), Training Stress Score (TSS)는 [Peaksware, LLC](https://trainingpeaks.com/)의 등록 상표입니다.

@@ -59,7 +59,7 @@ export function MainPageSkeleton() {
           <Skeleton className="h-11 w-full rounded-md" />
         </div>
 
-        <main className="order-3 flex min-w-0 flex-col gap-3 md:gap-4 md:col-start-1 md:row-span-3 md:row-start-1 md:order-none">
+        <div className="order-3 flex min-w-0 flex-col gap-3 md:gap-4 md:col-start-1 md:row-span-3 md:row-start-1 md:order-none">
           <PanelSkeleton>
             <div className="mb-3 flex items-center justify-between">
               <Skeleton className="h-4 w-32" />
@@ -81,7 +81,7 @@ export function MainPageSkeleton() {
               <ListItemSkeleton />
             </div>
           </PanelSkeleton>
-        </main>
+        </div>
 
         <PanelSkeleton className="order-4 md:col-start-2 md:row-start-2 md:order-none">
           <Skeleton className="mb-3 h-4 w-24" />

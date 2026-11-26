@@ -1,93 +1,102 @@
 ---
-title: Getting Started
-description: "Learn the core Trainingload.ai workflow: set up your profile, bring in training data, review load, manage plans, and ask the AI coach for context-aware guidance."
-keywords: ["Trainingload.ai guide", "getting started", "training load app", "AI coach", "training plan"]
+title: Deine erste Aktivität importieren
+description: Verbinde eine Trainingsplattform oder lade eine Trainingsdatei hoch und öffne anschließend die importierte Aktivität für deine erste Analyse.
+seoTitle: "Schnellstart: Erste Aktivität importieren | Trainingload.ai"
+seoDescription: "Verbinde eine Trainingsplattform oder lade FIT-, TCX- oder GPX-Dateien hoch, um deine erste Aktivität zu importieren und Details sowie Trainingsbelastung zu sehen."
+keywords: ["Trainingload.ai Schnellstart", "erste Aktivität importieren", "Einheiten importieren", "FIT-Datei hochladen"]
 ---
 
-# Getting Started
+# Deine erste Aktivität importieren [#get-started-with-your-first-activity]
 
-Trainingload.ai is built around a simple loop:
+Importiere eine Aufzeichnung von deiner Sportuhr, deinem Radcomputer oder einer Trainingsplattform, um Aktivitätsdetails, Diagramme und Trainingsbelastung in Trainingload.ai zu sehen. Diese Anleitung führt dich durch die Plattformsynchronisierung und den Datei-Upload in der Web-App.
 
-1. Set up your athlete profile and thresholds.
-2. Import or sync completed workouts.
-3. Review training load, intensity, and recovery signals.
-4. Create or activate a training plan.
-5. Use AI Coach to review execution and adjust the plan when needed.
+## Bevor du beginnst
 
-The product is most useful when plans and real workouts stay connected. A workout file on its own tells you what happened; a plan-linked workout tells you whether the training matched the intent.
+[Öffne Trainingload.ai](https://app.trainingload.ai/en) und melde dich mit deinem eigenen Konto an. Wenn du selbst hostest, öffne stattdessen deine eigene Instanz. Um die Oberfläche zuerst kennenzulernen, kannst du [die Demo ansehen](https://demo.trainingload.ai/en).
 
-## 1. Set up your account
+## 1. Importweg wählen [#2-choose-one-route-for-the-first-activity]
 
-After signing in, open **Settings** or **Me** and check:
+| Synchronisierungsmethode | Anleitung |
+| --- | --- |
+| Synchronisierung über eine Drittanbieter-Plattform (Strava, Garmin, Intervals.icu) | [Plattform verbinden](#connect-a-training-platform) |
+| Synchronisierung über Aktivitätsdateien (FIT, TCX, GPX) | [Trainingsdatei hochladen](#upload-a-workout-file) |
+| Synchronisierung über dein Smartphone | [Anleitung zur Smartphone-Synchronisierung lesen](/de/docs/guide/account-permissions-and-usage#2-review-mobile-permissions-and-data-sources) |
 
-- Time zone, because calendar days and reminders depend on it.
-- Unit preference, so distance, pace, power, and elevation display correctly.
-- Language and theme preferences.
-- Athlete profile values such as body weight and sport preferences.
+Informationen zu unterstützten Verbindungen beim Self-Hosting findest du unter [Konfiguration](/de/docs/self-host/configuration). Du kannst alternativ jederzeit den unten beschriebenen Datei-Upload nutzen.
 
-## 2. Add thresholds and zones
+## 2. Aufzeichnung importieren [#3-import-and-wait-for-processing]
 
-Trainingload.ai uses threshold settings to calculate intensity and load. Add the values you know first; you can refine them later.
+### Option 1: Trainingsplattform verbinden [#connect-a-training-platform]
 
-- Cycling: FTP, CP, and power zones.
-- Running: threshold pace, heart-rate zones, and pace zones.
-- Heart rate: max HR, resting HR, or LTHR when available.
+1. Öffne das Kontomenü unten in der Seitenleiste, wähle **Konto** und scrolle zu **Drittanbieter-Verbindungen**.
+2. Wähle die Plattform, auf der deine Aufzeichnungen liegen, und folge dem Verbindungsdialog.
+3. Nutze bei Bedarf die Option für den Erstimport oder eine manuelle Synchronisierung.
+4. Öffne **Aktivitäten** in der Seitenleiste, um die synchronisierten Aufzeichnungen zu finden.
 
-For the full setup flow, see [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones).
+Jede Plattform unterstützt einen eigenen historischen Zeitraum. Die genauen Schritte für Verbindung und Verlaufsimport findest du unter [Strava, Garmin und weitere Plattformen verbinden](/de/docs/guide/connect-third-party-platforms).
 
-If you are unsure, start with the calculators and update the values after a recent test or race:
+<DocsScreenshot
+  id="integrations-connections"
+  title="Trainingsplattform auswählen"
+  description="Scrolle unter Konto zu Drittanbieter-Verbindungen und wähle die Plattform mit deinen Aufzeichnungen."
+  route="Seitenleiste Kontomenü → Konto → Drittanbieter-Verbindungen"
+  demoLabel="Plattformen in der Demo ansehen"
+/>
 
-- [Estimate FTP training load from an activity file](/ftp-calculator)
-- [Fit Critical Power for training load planning](/critical-power-calculator)
-- [Calculate heart-rate training load zones](/heart-rate-zones-calculator)
-- [Calculate VDOT to calibrate running training load](/vdot-calculator)
+### Option 2: Trainingsdatei hochladen [#upload-a-workout-file]
 
-## 3. Bring in completed workouts
+Exportiere eine FIT-, TCX- oder GPX-Datei von deiner Uhr, deinem Radcomputer oder deiner Trainingsplattform und gehe dann so vor:
 
-You can import activity files or connect a supported platform. Trainingload.ai analyzes the activity, computes metrics, and makes the workout available in the activity feed, dashboard, calendar, and AI Coach context.
+1. Klicke in der linken Seitenleiste auf **Aktivitäten**, um die Aktivitäten-Seite zu öffnen.
+2. Klicke in der Karte **Aktivitätsdateien hochladen** ganz rechts auf **Aktivitätsdateien auswählen**.
 
-Supported file-based workflow:
+<DocsScreenshot
+  id="activity-upload-location"
+  title="Upload-Schaltfläche unter Aktivitäten finden"
+  description="Klicke in der linken Seitenleiste auf Aktivitäten und dann in der rechten Karte auf Aktivitätsdateien auswählen."
+  route="Linke Seitenleiste: Aktivitäten → Rechte Karte: Aktivitätsdateien auswählen"
+  demoLabel="Aktivitäten in der Demo ansehen"
+/>
 
-- Upload GPX / TCX / FIT files.
-- Review duplicate warnings when they appear.
-- Wait for the import batch to finish processing.
-- Open the activity detail page once analysis is ready.
+3. Ziehe die gewünschten Dateien in den Dialog oder klicke in den Auswahlbereich, um sie auszuwählen.
+4. Klicke unten rechts im Dialog auf **Hochladen**.
 
-## 4. Review your training load
+<DocsScreenshot
+  id="activity-import-entry"
+  title="Dateien auswählen und hochladen"
+  description="Ziehe Dateien in den Dialog oder klicke zur Auswahl und bestätige unten rechts mit Hochladen."
+  route="Upload-Dialog: Dateien auswählen → Hochladen"
+  demoLabel="Aktivitäten in der Demo ansehen"
+/>
 
-Use the dashboard and PMC pages to understand the training trend:
+Nach dem Hochladen öffnet sich der Fortschrittsdialog für den Import. Sobald der Import abgeschlossen ist, kehre zu **Aktivitäten** zurück, um deine Aufzeichnungen zu sehen. Falls eine Duplikat-Warnung erscheint, kannst du die bestehende Aufzeichnung behalten, statt dieselbe Einheit doppelt zu importieren. Weitere Hilfe findest du unter [Aktivitätsdateien hochladen](/de/docs/guide/upload-activity-files).
 
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score) for session load.
-- [CTL](/docs/metrics/pmc/chronic-training-load) for longer-term load.
-- [ATL](/docs/metrics/pmc/acute-training-load) for recent fatigue.
-- [TSB](/docs/metrics/pmc/training-stress-balance) for freshness/form context.
+## 3. Importierte Aktivität öffnen [#4-verify-the-first-recorded-result]
 
-Treat these as evidence, not verdicts. The best decisions usually combine load, workout quality, sleep, soreness, and the goal of the current training block.
+Suche die Einheit nach Datum unter **Aktivitäten** und öffne ihre Details. Dort siehst du Dauer, Distanz, Trainingsbelastung sowie alle Diagramme und Routen, die deine Aufzeichnung enthält. Eine Einführung in alle Bereiche bietet [Aktivitätsdetails](/de/docs/guide/activity-detail).
 
-## 5. Create a plan
+Eine frisch importierte Aktivität befindet sich eventuell noch in der Verarbeitung. Warte, bis die Analyse abgeschlossen ist, bevor du alle Ergebnisse bewertest. Herzfrequenz-, Leistungs- und Routendiagramme setzen die entsprechenden Messdaten voraus; eine Aufzeichnung ohne GPS zeigt keine Karte.
 
-Open **Plans** to create a plan manually or with AI. A useful plan should include:
+## Häufige Fragen
 
-- Goal and date range.
-- Sport type.
-- Weekly structure.
-- Individual workouts with clear intent.
-- Expected load when enough target information is available.
+### Ich habe eine Plattform verbunden, sehe aber keine Aktivitäten
 
-Once a plan is active, the **Plan** page becomes your daily training workspace.
+Prüfe, ob die Plattform wirklich verbunden ist, und kontrolliere die Datumsfilter unter Aktivitäten. Ältere Einheiten erfordern manchmal einen separaten Verlaufsimport. Nutze dafür die Optionen der jeweiligen Plattform oder exportiere eine Trainingsdatei und lade sie direkt in Trainingload.ai hoch.
 
-## 6. Use AI Coach
+### Meine Aktivität zeigt keine Herzfrequenz oder Route
 
-AI Coach can discuss your training with context from workouts, plans, and load trends. Good questions include:
+Warte, bis die Verarbeitung abgeschlossen ist. Wenn die Originaldatei keine Herzfrequenz-, Leistungs- oder GPS-Daten enthält, erscheinen die zugehörigen Diagramme nicht. Zeigt die Quellplattform diese Messwerte an, exportiere die Originaldatei und lade sie erneut hoch.
 
-- “How did this week compare with my plan?”
-- “Should I adjust tomorrow’s workout?”
-- “Why did my long run feel harder than expected?”
-- “Which session should I prioritize if I only have four days this week?”
+### Die Aktivität erscheint am falschen Datum
 
-AI suggestions that change a plan should be reviewed before applying. Trainingload.ai is designed to keep the final decision visible to you.
+Prüfe deine Konto-Zeitzone und die Startzeit der Aufzeichnung. Einstellungen für Zeitzone und Einheiten findest du unter [Profil, Schwellenwerte und Zonen](/de/docs/guide/profile-thresholds-zones).
 
-## Continue with product workflows
+### Warum kann ich in der Demo nichts hochladen?
 
-- [Manage training load with CTL, ATL, and TSB in your plan](/training-load)
-- [Use AI coach review to adjust training load safely](/ai-training-plan)
+Die Demo dient zum Erkunden mit Beispieldaten. Um eigene Aufzeichnungen zu importieren, [öffne die Haupt-App](https://app.trainingload.ai/en) und melde dich mit deinem eigenen Konto an.
+
+## Nächste Schritte [#5-choose-the-next-task]
+
+- [Veränderungen der Trainingsbelastung auswerten](/de/docs/guide/pmc-forecast)
+- [Einen Trainingsplan erstellen](/de/docs/guide/create-training-plan)
+- [Den KI-Coach zu dieser Einheit fragen](/de/docs/guide/ai-coach)

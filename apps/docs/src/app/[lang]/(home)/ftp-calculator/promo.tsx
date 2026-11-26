@@ -1,5 +1,6 @@
 "use client";
 
+import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import { useEffect } from "react";
 import Image from "next/image";
 import { ArrowRight, Target } from "lucide-react";
@@ -38,7 +39,7 @@ const PHONE_SRC: Record<string, string> = {
   "zh-hant": "/ftp-calculator/phone-zh-hant.webp",
 };
 
-const WEB_SRC = "/ftp-calculator/web-pmc.webp";
+const WEB_SRC = productScreenshotUrl("/ftp-calculator/web-pmc.webp");
 
 export function FtpFooterCta({ lang }: { lang: string }) {
   const t = useTranslations("estimateCp.page.footerCta");

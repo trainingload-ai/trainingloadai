@@ -526,6 +526,8 @@ const WorkoutPlanChartComponent: React.FC<{
       values: (_u, ticks) => ticks.map((v) => (Number(v) / 100).toFixed(1)),
     };
 
+    // Reserve space for centered time labels at both ends of the axis.
+    const timeLabelPadding = 24;
     const padding: [number, number, number, number] = hideAxes
       ? [4, 4, 4, 4]
       : compact
@@ -537,9 +539,9 @@ const WorkoutPlanChartComponent: React.FC<{
           ]
         : [
             DEFAULT_PADDING[0],
-            DEFAULT_PADDING[1],
+            timeLabelPadding,
             Math.max(DEFAULT_PADDING[2], 28),
-            Math.min(DEFAULT_PADDING[3], 10),
+            timeLabelPadding,
           ];
 
     return {

@@ -169,6 +169,8 @@ export type PlanExecutionContext = {
     tsb: number | null;
     currentWeekLoad: number | null;
     previousWeekLoad: number | null;
+    /** Compares completed days this week with the same weekdays last week. */
+    weekToDateLoadChangePercent?: number;
     /** 锚点往前 7 天，最旧在前。缺日补 0。 */
     dailyLoadLast7d: number[];
     restDaysLast14d: number | null;
@@ -1208,6 +1210,9 @@ export class PlanExecutionContextService {
       tsb: roundNumber(latestPmc?.TSB),
       currentWeekLoad: week.current,
       previousWeekLoad: week.previous,
+      ...(week.changePercent !== undefined
+        ? { weekToDateLoadChangePercent: week.changePercent }
+        : {}),
       dailyLoadLast7d: this.dailyLoadLast7d(anchorDate, rows),
       restDaysLast14d: Math.max(0, 14 - activeDays),
     };
@@ -1219,7 +1224,7 @@ export class PlanExecutionContextService {
   private weekLoad(
     anchorDate: string,
     rows: Array<{ date: Date; dailyValue: number }>,
-  ): { current: number; previous: number } {
+  ): { current: number; previous: number; changePercent?: number } {
     const anchor = scheduledDateFromCalendar(anchorDate);
     const day = anchor.getUTCDay() || 7;
     const currentStart = new Date(anchor.getTime());
@@ -1230,15 +1235,41 @@ export class PlanExecutionContextService {
     previousStart.setUTCDate(previousStart.getUTCDate() - 7);
     const previousEnd = new Date(currentStart.getTime());
     previousEnd.setUTCDate(previousEnd.getUTCDate() - 1);
+    const previousCutoff = new Date(anchor.getTime());
+    previousCutoff.setUTCDate(previousCutoff.getUTCDate() - 7);
     let current = 0;
     let previous = 0;
+    let currentToDate = 0;
+    let previousToDate = 0;
+    const coveredDates = new Set<string>();
     for (const row of rows) {
       const value = Number.isFinite(row.dailyValue) ? row.dailyValue : 0;
-      if (row.date >= currentStart && row.date <= currentEnd) current += value;
-      if (row.date >= previousStart && row.date <= previousEnd)
+      const inCurrentWeek = row.date >= currentStart && row.date <= currentEnd;
+      const inPreviousWeek =
+        row.date >= previousStart && row.date <= previousEnd;
+      if (inCurrentWeek) current += value;
+      if (inPreviousWeek) {
         previous += value;
+      }
+      if (!Number.isFinite(row.dailyValue) || row.dailyValue < 0) continue;
+      if (inCurrentWeek && row.date < anchor) {
+        currentToDate += value;
+        coveredDates.add(ymdFromDate(row.date));
+      } else if (inPreviousWeek && row.date < previousCutoff) {
+        previousToDate += value;
+        coveredDates.add(ymdFromDate(row.date));
+      }
     }
-    return { current: Math.round(current), previous: Math.round(previous) };
+    return {
+      current: Math.round(current),
+      previous: Math.round(previous),
+      ...(coveredDates.size === (day - 1) * 2 && previousToDate > 0
+        ? {
+            changePercent:
+              ((currentToDate - previousToDate) / previousToDate) * 100,
+          }
+        : {}),
+    };
   }
 
   /** 锚点往前 7 天的日负荷，最旧在前。缺日补 0，长度固定为 7。 */

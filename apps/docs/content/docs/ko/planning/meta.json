@@ -1,4 +1,11 @@
 {
-  "title": "Planning",
-  "pages": ["workout-dsl"]
+  "title": "훈련 플랜과 워크아웃",
+  "pages": [
+    "index",
+    "plan-lifecycle",
+    "manual-workout-editor",
+    "strength-workouts",
+    "strength-workout-dsl",
+    "workout-dsl"
+  ]
 }

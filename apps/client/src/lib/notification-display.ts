@@ -143,18 +143,21 @@ export function resolveNotificationDisplay(
     };
   }
 
-  if (kind === "REVIEW_DIGEST") {
-    const d = (item.data ?? {}) as ReviewDigestData;
-    const type =
-      d.type === "WEEKLY" || d.type === "MONTHLY" || d.type === "PLAN"
-        ? d.type
-        : "DAILY";
+  const { type } = (item.data ?? {}) as ReviewDigestData;
+  if (
+    kind === "REVIEW_DIGEST" &&
+    (type === "DAILY" || type === "WEEKLY" || type === "MONTHLY" || type === "PLAN")
+  ) {
+    const intro = item.digestId
+      ? item.bodyMarkdown?.split(/^##\s/m, 1)[0]?.trim()
+      : undefined;
     return {
       // Review notifications can outlive the locale that was stored when the
       // worker created them. Render known titles in the current UI locale so
       // old notifications and locale changes do not produce mixed languages.
       title: t(`reviewReadyTitles.${type}`),
       bodyMarkdown: item.bodyMarkdown,
+      preview: intro ? getNotificationPreview(intro) : undefined,
       eyebrow: t("templates.reviewDigest"),
       tone: "insight",
       summary: [

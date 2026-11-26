@@ -1,0 +1,120 @@
+---
+title: Web und Mobil
+description: Verstehe, wie die Trainingload.ai Web-App und die mobile App Daten teilen, und wähle die passende Oberfläche für Planung, Aufzeichnung, Analyse und deinen Trainingsalltag.
+keywords:
+  ["Trainingload.ai mobil", "Trainingload.ai Web-App", "Web und Mobil synchronisieren"]
+---
+
+# Web und Mobil
+
+Die Cloud-Web-App und die iPhone-App nutzen dasselbe Konto. Nach dem Speichern und Synchronisieren arbeitest du auf dem anderen Gerät nahtlos mit deinen Trainingsplänen, Aktivitäten, Profildaten, Coach-Gesprächen und Benachrichtigungen weiter.
+
+Diese Seite beschreibt die Cloud-Version. Beim Self-Hosting folge der [Installationsanleitung](/de/docs/self-host/installation), um die App im Browser zu nutzen. Eine Apple-Watch-App wird derzeit nicht unterstützt.
+
+## Vor dem Gerätewechsel
+
+- Melde dich auf beiden Geräten mit demselben Trainingload.ai-Konto an.
+- Prüfe Zeitzone und Einheiten in deinem Profil – Kalendertage und angezeigte Werte hängen davon ab.
+- Speichere laufende Änderungen, bevor du denselben Trainingsplan oder dasselbe Profilfeld auf dem anderen Gerät öffnest.
+- Halte eine Netzwerkverbindung bereit für Trainingspläne, KI-Coach, Importe und verarbeitete Analysen.
+
+## Wann du die Web-App nutzen solltest
+
+- Beim Erstellen oder Prüfen mehrwöchiger Trainingspläne.
+- Beim Bearbeiten strukturierter Ausdauer- oder Krafttrainingseinheiten.
+- Beim Vergleichen detaillierter Diagramme, Karten, Leistungs-, Pace-, Herzfrequenz- oder PMC-Verläufe.
+- Beim Verwalten von Drittanbieter-Verbindungen und historischen Importen.
+- Beim Durchsehen umfangreicher Aktivitätenlisten oder beim Suchen älterer Einheiten.
+
+## Wann du die mobile App nutzen solltest
+
+- Zum Prüfen von Heute, Kalender, Coach, Plan oder Ich im laufenden Trainingstag.
+- Zum Aufzeichnen einer Outdoor-Einheit direkt mit dem Smartphone.
+- Zum sofortigen Prüfen einer absolvierten Einheit direkt nach dem Speichern.
+- Zum Verknüpfen einer absolvierten Aktivität mit einer geplanten Einheit.
+- Zum Aktualisieren deines aktuellen Zustands, zum Prüfen von Benachrichtigungen oder zum Abrufen deines Plans unterwegs.
+
+<DocsScreenshot
+  id="web-mobile-navigation"
+  title="Mobile Navigation"
+  description="Heute, Kalender, Coach, Plan und Ich decken den täglichen Ablauf deines Kontos auf dem Smartphone ab."
+  route="Haupt-Tabs"
+  platform="mobile"
+/>
+
+## Was synchronisiert wird
+
+| Daten | Web | Mobil | Hinweise |
+| --- | --- | --- | --- |
+| Profil, Einheiten, Zeitzone | Lesen und bearbeiten | Lesen und bearbeiten | Kalendertage richten sich nach der Zeitzone. |
+| Aktivitäten und Analyse | Vollständige Details | Tages- und Detailansichten | Die Verarbeitung kann erst nach dem ersten Erscheinen der Aktivität fertig werden. |
+| Pläne und Einheiten | Vollständiges Erstellen und Bearbeiten | Ansehen, erstellen, ausführen und verknüpfen | Komplexe Bearbeitungen gelingen im Web meist schneller. |
+| KI-Coach | Sitzungen und Aktionen | Sitzungen und Aktionen | Übernommene Änderungen wirken auf denselben Plan. |
+| Benachrichtigungen und Auswertungen | Verfügbar | Verfügbar | Die Auswertungs-Automatisierung nutzt deine Kontoeinstellungen. |
+| Anbieter-Verbindungen | Vollständige Verwaltung | Ausgewählte Verbindungs- und Berechtigungsabläufe | Die Verfügbarkeit hängt von Anbieter und Plattform ab. |
+
+## Aktualisierungs- und Konfliktregeln
+
+Wenn du denselben Trainingsplan oder dasselbe Profilfeld auf zwei Geräten bearbeitest, gilt die zuletzt erfolgreich gespeicherte Änderung. Vor einer weiteren Bearbeitung:
+
+1. Kehre zur Listen- oder Detailansicht zurück.
+2. Ziehe auf dem Smartphone zum Aktualisieren nach unten oder lade im Web neu.
+3. Prüfe, ob der aktuellste Stand angezeigt wird.
+4. Nimm erst dann die nächste Änderung vor.
+
+Plan-Updates können eine veraltete Bearbeitung ablehnen, wenn zwischenzeitlich eine andere Anfrage denselben Eintrag geändert hat. Lade den Plan neu und wende deine gewünschte Änderung auf den aktuellen Stand an, statt wiederholt die veraltete Version abzusenden.
+
+## Arbeit auf einem anderen Gerät fortsetzen
+
+1. Schließe die aktuelle Aktion auf dem ersten Gerät ab und speichere sie.
+2. Öffne die passende Listen- oder Detailansicht auf dem zweiten Gerät.
+3. Ziehe mobil zum Aktualisieren nach unten oder lade die Seite im Web neu.
+4. Prüfe Zeitstempel der Aktivität, Planversion oder den eben geänderten Profilwert.
+5. Bearbeite erst weiter, wenn der aktuelle Serverstand sichtbar ist.
+
+## Verhalten ohne Internetverbindung
+
+Die mobile Aufzeichnung speichert deine laufende Einheit lokal und stellt unterbrochene Aufzeichnungen nach Möglichkeit wieder her. Serverbasierte Ansichten benötigen jedoch eine Netzwerkverbindung, um aktuelle Pläne, KI-Antworten und verarbeitete Analysen abzurufen.
+
+Nach dem Wiederverbinden:
+
+- Lass den Upload der Aufzeichnung oder des Imports vollständig durchlaufen.
+- Starte keinen doppelten Upload für dieselbe Einheit.
+- Prüfe, ob die Aktivität genau einmal unter Aktivitäten erscheint.
+- Öffne die Aktivität und warte kurz, falls die Analyse noch verarbeitet wird.
+
+## Synchronisierung überprüfen
+
+- Beide Oberflächen zeigen dieselben Profileinheiten und dieselbe Zeitzone.
+- Eine absolvierte Aktivität erscheint genau einmal mit identischer Startzeit und Quelle.
+- Der aktive Trainingsplan und die nächste Einheit zeigen denselben Status und die letzte Änderung.
+- Eine über den KI-Coach übernommene Änderung erscheint auf dem anderen Gerät im selben Trainingsplan.
+- Benachrichtigungen und abgeschlossene Auswertungen springen nach dem Aktualisieren nicht wieder auf ungelesen.
+
+## Fehlerbehebung
+
+### Ein Gerät zeigt ältere Daten an
+
+Kehre zur Listen- oder Detailansicht zurück und aktualisiere die Ansicht. Prüfe Internetverbindung und Kontoanmeldung auf beiden Geräten. Bearbeite die veraltete Ansicht nicht, bevor der aktuelle Serverstand geladen ist.
+
+### Eine Planbearbeitung meldet einen Versionskonflikt
+
+Eine andere erfolgreiche Anfrage hat den Plan zuerst verändert. Lade den Plan neu, vergleiche die aktuelle Einheit mit deiner geplanten Änderung und übernimm sie auf Basis der neuen Version erneut.
+
+### Eine mobile Aufzeichnung fehlt im Web
+
+Lass die mobile App geöffnet bzw. aktiv, bis der Upload abgeschlossen ist, und aktualisiere anschließend die Aktivitäten-Seite im Web. Ist die Aktivität sichtbar, aber Diagramme fehlen noch, läuft die Verarbeitung noch – lade keine zweite Kopie hoch.
+
+### Anbietereinstellungen unterscheiden sich zwischen den Geräten
+
+Nutze im Web **Konto → Drittanbieter-Verbindungen** für die vollständige Verwaltung. Mobil stehen je nach Plattform nur ausgewählte Autorisierungs- oder Berechtigungsschritte zur Verfügung.
+
+### Kalendertage weichen ab
+
+Vergleiche die Konto-Zeitzone auf beiden Geräten sowie die aufgezeichnete Startzeit der Aktivität. Korrigiere zuerst die Profileinstellung, bevor du eine Einheit verschiebst oder neu anlegst.
+
+## Nächste Schritte
+
+- Zeichne Einheiten mit dem Smartphone auf: [Mobile Aufzeichnung](/de/docs/guide/mobile-recording).
+- Erstelle und absolviere Pläne unterwegs: [Mobile Pläne und Krafttraining](/de/docs/guide/mobile-plans-and-strength).
+- Durchlaufe die komplette Kontoeinrichtung unter [Erste Schritte](/de/docs/guide/getting-started).

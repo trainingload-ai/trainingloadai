@@ -4,7 +4,7 @@ import type { Request, Response } from 'express';
 import { auth } from '@/auth';
 import { getDeploymentOAuthMetadataHandlers } from '@/auth/deployment-oauth-metadata';
 import { OAuthBearerService } from './oauth-bearer.service';
-import { MCP_DEFAULT_SCOPES, MCP_READ_SCOPES } from './oauth-scopes';
+import { MCP_ACTIVITY_IMPORT_SCOPE, MCP_DEFAULT_SCOPES, MCP_PLAN_WRITE_SCOPES, MCP_READ_SCOPES } from './oauth-scopes';
 import { RequiresRuntimeCapability } from '@/runtime-capabilities/requires-runtime-capability.decorator';
 
 function toWebRequest(req: Request) {
@@ -101,7 +101,7 @@ export class OAuthMetadataController {
       authorization_servers: [`${baseUrl}/auth`],
       scopes_supported:
         resourcePath === '/mcp'
-          ? [...MCP_READ_SCOPES]
+          ? [...MCP_READ_SCOPES, ...MCP_PLAN_WRITE_SCOPES, MCP_ACTIVITY_IMPORT_SCOPE]
           : [...MCP_DEFAULT_SCOPES],
       bearer_methods_supported: ['header'],
     });

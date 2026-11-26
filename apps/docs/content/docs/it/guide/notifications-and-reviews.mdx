@@ -1,0 +1,92 @@
+---
+title: Notifiche e automazione delle revisioni
+description: Gestisci le notifiche di Trainingload.ai e scegli quali revisioni di attività, giornaliere, settimanali, mensili e di piano l'AI può eseguire automaticamente.
+keywords:
+  ["revisione allenamento AI", "automazione revisioni", "notifiche Trainingload.ai"]
+---
+
+# Notifiche e automazione delle revisioni
+
+Usa le notifiche per controllare gli esiti delle importazioni e le revisioni completate. Con l'automazione delle revisioni attiva, le revisioni idonee — giornaliere, settimanali o mensili — possono essere generate senza doverle richiedere ogni volta manualmente.
+
+## Prima di attivare l'automazione
+
+- Imposta il fuso orario corretto per i confini giornalieri, settimanali e mensili.
+- Importa le attività con regolarità e mantieni aggiornato il piano attivo.
+- Collega le attività completate quando vuoi che venga revisionata l'esecuzione del piano.
+- Controlla piano di abbonamento e disponibilità di utilizzo AI.
+
+## Tipi di notifiche
+
+Le notifiche possono includere messaggi generali di sistema, aggiornamenti dei piani di allenamento continui e revisioni di allenamento completate. Le finestre di importazione possono anche avvisarti che arriverà una notifica al termine di un batch in background, così non devi tenere aperta la finestra.
+
+Da Notifiche puoi:
+
+- Aprire la revisione o la destinazione collegata.
+- Segnare una singola notifica come letta.
+- Segnare tutte le notifiche come lette.
+
+Segnare una notifica come letta non elimina l'attività, il piano o la sessione del Coach AI sottostanti.
+
+## Leggere una revisione dell'allenamento
+
+Le revisioni giornaliere elencano le attività del giorno precedente, le revisioni settimanali riassumono l'ultima settimana conclusa per sport e le revisioni mensili raggruppano l'ultimo mese solare completato per settimana. Quando disponibili, gli approfondimenti del Coach evidenziano cosa è andato bene, cosa tenere d'occhio e un focus per il periodo successivo. Seleziona un'attività citata per verificare il record originale.
+
+Le revisioni settimanali mostrano anche i giorni di allenamento, la durata media delle sessioni e il carico di allenamento quando disponibile. Più sessioni nello stesso giorno contano come un unico giorno di allenamento.
+
+Durata del sonno, HRV e frequenza cardiaca a riposo compaiono quando i record sono disponibili. Le revisioni giornaliere utilizzano i dati di recupero del giorno successivo e la tua baseline recente quando calcolabile. Le revisioni settimanali e mensili mostrano quanti giorni sono stati registrati e confrontano il periodo con quello precedente quando i valori sono comparabili.
+
+Sul web, barre appaiate confrontano i due periodi. Le tabelle conservano i valori numerici e mostrano la variazione percentuale per numero di sessioni, durata e metriche di recupero comparabili quando il valore precedente è superiore a zero.
+
+## Configurare l'automazione delle revisioni
+
+Apri **Account → Automazione revisioni AI** sul web oppure il pannello account equivalente su mobile.
+
+<DocsScreenshot
+  id="review-automation-mobile"
+  title="Automazione revisioni AI"
+  description="Scegli quali revisioni idonee di attività, giornaliere, settimanali, mensili e di piano possono essere eseguite automaticamente."
+  route="Profilo → Automazione revisioni AI"
+  platform="mobile"
+/>
+
+Gli interruttori disponibili possono includere:
+
+- Revisione attività.
+- Revisione giornaliera.
+- Revisione settimanale.
+- Revisione mensile.
+- Revisione del piano.
+
+La disponibilità dell'automazione dipende dal piano di abbonamento e dai limiti di utilizzo AI. Attivare un interruttore autorizza quella categoria di revisione, ma non garantisce un risultato utile se mancano i dati di attività o di piano necessari.
+
+## Assicurati che la revisione disponga dei tuoi dati
+
+Prima di affidarti all'automazione:
+
+1. Controlla il fuso orario, perché i confini giornalieri e settimanali dipendono da esso.
+2. Importa con costanza le attività completate.
+3. Mantieni aggiornato il piano attivo.
+4. Collega le attività completate agli allenamenti pianificati.
+5. Aggiungi l'RPE di sessione o il contesto dello stato attuale quando utile.
+
+## Avviare manualmente una revisione
+
+Dove l'app espone i controlli manuali di revisione, puoi richiedere una revisione per l'ultimo giorno, settimana o mese completati senza cambiare la programmazione automatica. I job di revisione vengono eseguiti in background: attendi il completamento prima di inviare una nuova richiesta.
+
+## Verifica il risultato
+
+- Gli interruttori salvati restano attivi alla riapertura delle impostazioni.
+- Una revisione completata genera una notifica o una voce nel Coach.
+- Aprire la notifica porta alla revisione attesa.
+- La revisione fa riferimento alla finestra temporale, al piano o all'attività corretti.
+
+## Risoluzione dei problemi
+
+Se una revisione non compare, verifica diritti dell'account, utilizzo AI, fuso orario, disponibilità dei dati e se il job in background è ancora in corso. Per errori legati alle azioni strutturate consulta [Risoluzione dei problemi](/it/docs/guide/troubleshooting).
+
+Richiedere nuovamente la revisione non aggiunge attività mancanti e può consumare utilizzo AI. Assicurati che le attività siano state importate ed elaborate. Se una revisione è già in generazione, attendi il risultato.
+
+## Prossimo passo
+
+Leggi [Coach AI](/it/docs/guide/ai-coach) per capire sessioni di revisione, schede strutturate, bozze di piano e modifiche confermabili.

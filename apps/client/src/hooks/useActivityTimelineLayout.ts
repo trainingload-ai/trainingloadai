@@ -83,7 +83,7 @@ export function normalizeTimelineLayout(
   };
 }
 
-export function useActivityTimelineLayout(running: boolean) {
+export function useActivityTimelineLayout(running: boolean, persist = true) {
   const key = `activity-timeline-layout-v1:${running ? "RUN" : "CYCLING"}`;
   const [layout, setLayout] = useState(() => defaultTimelineLayout(running));
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
@@ -99,12 +99,12 @@ export function useActivityTimelineLayout(running: boolean) {
     setLoadedKey(key);
   }, [key, running]);
   useEffect(() => {
-    if (loadedKey !== key) return;
+    if (!persist || loadedKey !== key) return;
     try {
       getBrowserLocalStorage().setItem(key, JSON.stringify(layout));
     } catch {
       /* Preserve the in-memory layout. */
     }
-  }, [layout, key, loadedKey]);
+  }, [layout, key, loadedKey, persist]);
   return { layout, setLayout };
 }

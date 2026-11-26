@@ -26,7 +26,7 @@ const ActivityNotFound = () => {
             <Button
               variant="outline"
               onClick={() => router.back()}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 tablet:hidden"
             >
               <ArrowLeft className="h-4 w-4" />
               {t("backButton")}

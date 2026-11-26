@@ -1,0 +1,138 @@
+---
+title: Einheit mit der Timeline analysieren
+description: Nutze die Desktop-Aktivitäts-Timeline von Trainingload.ai, um synchronisierte Diagramme zu prüfen, Trainingsabschnitte zu markieren, Bereichsstatistiken zu vergleichen und die Belastung auf der Route zu verorten.
+seoTitle: "Aktivitäts-Timeline und Segmentanalyse | Trainingload.ai"
+seoDescription: "Folge dem Timeline-Workflow für Laufen und Radfahren: Abschnitt wählen, Statistiken und Route prüfen, Diagramme konfigurieren und Analysesegmente speichern."
+keywords: ["Aktivitäts-Timeline", "Segmentanalyse", "Lauf-Intervallanalyse", "Radsport-Diagramme", "Trainingload.ai Timeline"]
+---
+
+# Einheit mit der Timeline analysieren
+
+Die Timeline richtet alle aufgezeichneten Datenreihen einer Aktivität an einer gemeinsamen horizontalen Achse aus. So kannst du einen einzelnen Moment untersuchen oder Pace, Leistung, Herzfrequenz, Tritt-/Schrittfrequenz und Route für einen ausgewählten Abschnitt direkt vergleichen. Bereichsstatistiken und Einzelpunktwerte beantworten dabei unterschiedliche Fragen.
+
+Diese Anleitung gilt für das **Desktop-Web** beim Laufen und Radfahren. Welche Diagramme verfügbar sind, hängt von den aufgezeichneten Daten der Aktivität ab. Für den übergeordneten Auswertungsablauf beginne mit den [Aktivitätsdetails](/de/docs/guide/activity-detail).
+
+## Beispiel öffnen
+
+[Demo-Aktivität zum 10-km-Wettkampf öffnen](https://demo.trainingload.ai/en/activities/17921623926005309429) und unterhalb der Route auf **Timeline** klicken. Die Aktivität öffnet zunächst in der Übersicht. Da die Demo schreibgeschützt ist, ist das Speichern eigener Segmente dort deaktiviert.
+
+Warte bei deinen eigenen Aktivitäten ab, bis die Verarbeitung abgeschlossen ist, und prüfe, ob aufgezeichnete Zeitreihendaten vorhanden sind. Aktivitäten mit reinen Zusammenfassungswerten bieten keine synchronisierte Timeline. Indoor-Einheiten können auch ohne GPS nutzbare Diagramme enthalten. Kontrolliere Sportart, Schwellenwerte und Einheiten, bevor du die Daten interpretierst.
+
+## 1. Gesamte Aktivität lesen
+
+Nach dem Öffnen von **Timeline** findest du oben die Segmentköpfe, links die Kennzahlensteuerung und Bereichsstatistiken sowie rechts die ausgerichteten Diagramme. Die horizontale Achse startet im Zeitmodus. Sofern Standortdaten vorhanden sind, bleibt die Route oberhalb der Tabs sichtbar.
+
+Lange Aktivitäten reichen über die sichtbare Diagrammbreite hinaus. Scrolle horizontal, um spätere Abschnitte anzusehen. Die Bereichsstatistiken beschreiben weiterhin die gesamte Aktivität, solange du keinen Teilbereich markierst.
+
+Zu Beginn beziehen sich **Durchschnitt**, **Min** und **Max** auf der linken Seite auf die gesamte Einheit. Kennzahlen ohne nutzbare Messwerte können fehlen, und Lücken in einer Datenreihe erscheinen als Unterbrechungen im Diagramm.
+
+<DocsScreenshot
+  id="activity-timeline-full"
+  title="Mit der gesamten Aktivität und ausgerichteten Diagrammen starten"
+  description="Die linke Spalte fasst den aktuellen Bereich zusammen. Alle Diagramme teilen dieselbe horizontale Position, sodass sich die Belastung direkt über Pace, Herzfrequenz und Schrittfrequenz vergleichen lässt."
+  imageAlt="Vollständige Wettkampf-Timeline mit ausgerichteten Diagrammen und Bereichsstatistiken der gesamten Aktivität"
+  route="Aktivitätsdetails → Timeline"
+  demoLabel="Dieses Timeline-Beispiel öffnen"
+/>
+
+## 2. Einen einzelnen Moment untersuchen
+
+Bewege den Mauszeiger über ein Diagramm und lies in jedem Diagramm den schwebenden Messwert an derselben horizontalen Position ab. Bei vorhandenen GPS-Daten markiert die Karte gleichzeitig die entsprechende Stelle auf der Strecke.
+
+Mit einem Klick fixierst du eine Position. Verlässt der Mauszeiger die Diagramme, verschwinden die temporären Hover-Werte wieder. Die Bereichsstatistiken links bleiben an der gesamten Aktivität oder dem gewählten Bereich ausgerichtet.
+
+Du kannst das Positions-Steuerelement der Timeline fokussieren und mit der linken und rechten Pfeiltaste einzelne Messpunkte ansteuern – oder mit **Pos1** (**Home**) und **Ende** (**End**) an die Bereichsgrenzen springen. Sobald das Steuerelement den Fokus verliert, werden die Tastatur-Anzeigen ausgeblendet.
+
+| Frage | Wo du nachsiehst |
+| --- | --- |
+| Was wurde in genau diesem Moment aufgezeichnet? | Der Einzelpunktwert direkt im jeweiligen Diagramm. |
+| Was war für diesen Abschnitt typisch? | Der Durchschnitt in den linken Bereichsstatistiken. |
+| Wo lagen die gültigen aufgezeichneten Extremwerte? | Minimum und Maximum für denselben Bereich. |
+
+## 3. Einen Abschnitt markieren und vergleichen
+
+Du kannst eine aufgezeichnete Runde auswählen oder selbst einen eigenen Bereich aufziehen.
+
+1. Klicke auf einen Segmentkopf, um dieses Segment hervorzuheben und seine Statistiken zu aktualisieren. Ein erneuter Klick hebt die Auswahl wieder auf.
+2. Für einen eigenen Bereich ziehst du horizontal über ein Diagramm und lässt los. Die gemeinsame Diagrammansicht zoomt automatisch auf deine Auswahl.
+3. Vergleiche Durchschnitt, Minimum und Maximum des markierten Bereichs mit der sichtbaren Kurve. Bewege den Mauszeiger darüber, um einzelne Messpunkte darin zu prüfen.
+4. Kontrolliere bei vorhandenen GPS-Daten den hervorgehobenen Streckenabschnitt auf der Karte, um genau zu sehen, wo diese Belastung stattgefunden hat.
+
+<DocsScreenshot
+  id="activity-timeline-selection"
+  title="Ausgewählten Belastungsabschnitt mit der Route vergleichen"
+  description="Die Auswahl eines Segments aktualisiert die Bereichsstatistiken und hebt das passende Diagrammintervall sowie den Streckenabschnitt hervor. Hover-Werte bleiben getrennt von der Bereichszusammenfassung."
+  imageAlt="Ausgewähltes Wettkampfsegment mit aktualisierten Bereichsstatistiken und hervorgehobenem Streckenabschnitt"
+  route="Aktivitätsdetails → Timeline → Segment auswählen"
+  demoLabel="Dieselbe Demo-Aktivität prüfen"
+/>
+
+Prüfe bei einer langen gleichmäßigen Belastung, ob Pace oder Leistung stabil bleiben, während sich die Herzfrequenz verändert. Vergleiche bei wiederholten Intervallen Belastungsphasen und Erholungsabschnitte mit dem Trainingsziel der Einheit. Erkläre das Muster immer über Dauer, Gelände, Stopps und die verfügbaren Sensordaten.
+
+## 4. Zur gesamten Aktivität zurückkehren oder Achse wechseln
+
+Öffne **Timeline-Optionen** neben **Segmente** und wähle **Gesamte Aktivität anzeigen**, um die Auswahl aufzuheben und die Gesamtansicht wiederherzustellen. Ein Doppelklick in ein Diagramm oder die Taste **Escape** setzt Auswahl und Zoom ebenfalls zurück.
+
+Im selben Menü wechselst du die **Horizontale Achse** zwischen **Zeit** und **Distanz**. Für die Distanzachse ist eine nutzbare kumulierte Distanzaufzeichnung erforderlich. Ein markierter Abschnitt behält beim Achsenwechsel seine ursprünglichen Zeitgrenzen bei.
+
+## 5. Diagramme konfigurieren
+
+Klicke auf einen Kennzahlnamen – etwa **Pace** oder **Herzfrequenz** –, um dessen Einstellungen zu öffnen. Dort kannst du verfügbare Kennzahl, Linienfarbe, Diagrammhöhe und Glättung anpassen. Über **Nach oben**, **Nach unten** oder **Diagramm entfernen** ordnest du die sichtbaren Reihen nach Bedarf.
+
+Mit **Diagramm hinzufügen** ganz unten blendest du eine weitere verfügbare Datenreihe ein. Du kannst dieselbe Kennzahl auch mehrfach hinzufügen, um beispielsweise Rohdaten und geglättete Kurve direkt zu vergleichen. **Erweitern** öffnet eine vergrößerte Ansicht eines einzelnen Diagramms.
+
+Die Glättung verändert ausschließlich die dargestellte Kurve. Einzelpunktwerte und Bereichsstatistiken behalten ihre Bedeutung auf Basis der aufgezeichneten Daten. Das Diagrammlayout wird in den Einstellungen dieses Browsers gespeichert und verändert die Quellaktivität nicht.
+
+## 6. Analysesegmente im eigenen Konto bearbeiten
+
+Nutze **Segmente bearbeiten**, wenn du andere Analyseabschnitte als die vom Gerät aufgezeichneten Runden brauchst. Dafür ist ein angemeldetes Konto mit Bearbeitungsrechten für diese Aktivität erforderlich.
+
+1. Öffne **Segmente bearbeiten** und prüfe Name, Start und Ende jedes Segments.
+2. Benenne ein Segment um oder passe seine Grenzen an. Der Editor bietet je nach Stelle auch **Segment in Lücke einfügen**, **In der Mitte teilen**, **Mit nächstem zusammenführen** und **Entfernen**.
+3. Halte alle Grenzen innerhalb der Aktivität – jeder Start muss vor dem Ende liegen und Segmente dürfen sich nicht überschneiden.
+4. Klicke auf **Segmente speichern** und prüfe anschließend die aktualisierten Segmentstatistiken. **Abbrechen** schließt den Entwurf ohne Speichern.
+
+Gespeicherte Analysesegmente lassen Originaldatei, Geräterunden und Gesamtbelastung der Aktivität unverändert. Geänderte Grenzen berechnen die Statistiken dieses Bereichs aus den aufgezeichneten Datenreihen neu. **Geräterunden wiederherstellen** setzt die Definitionen im Editor auf die ursprünglichen Rundenbereiche zurück, die du anschließend speichern kannst.
+
+Wenn ein anderes Fenster die Definitionen zwischenzeitlich geändert hat, schließe den Editor und öffne ihn erneut, um die neueste Version zu laden, bevor du weiterbearbeitest. Schlägt das Speichern fehl, bleibt dein Entwurf für einen erneuten Versuch erhalten. In der öffentlichen Demo ist dieser Bearbeitungs-Workflow deaktiviert.
+
+## Ergebnis überprüfen
+
+Prüfe nach der Auswahl eines Abschnitts, ob Grenzen, Bereichsstatistiken und Streckenabschnitt tatsächlich denselben Teil der Aktivität abbilden. Stelle anschließend die Gesamtansicht wieder her und kontrolliere, dass die Statistiken wieder die gesamte Aktivität umfassen. Wenn du Analysesegmente in deinem Konto gespeichert hast, öffne die Aktivität erneut und prüfe, ob die Definitionen erhalten bleiben.
+
+## Häufige Fragen
+
+### Warum ändern sich die Zahlen auf der linken Seite nicht, wenn ich die Maus bewege?
+
+Sie fassen die gesamte Aktivität oder den ausgewählten Bereich zusammen. Nutze die schwebenden Diagrammwerte für den konkreten Punkt unter dem Mauszeiger.
+
+### Warum erscheinen Lücken oder Bindestriche?
+
+Eine fehlende Datenreihe, eine Aufzeichnungslücke oder ein ungültiger Wert kann eine Lücke oder einen Bindestrich erzeugen. Aufgezeichnete Nullwerte bei Geschwindigkeit, Tritt-/Schrittfrequenz oder Leistung können gültig sein. Ein Stillstand besitzt jedoch keine nutzbare Pace, und fehlende Herzfrequenzwerte werden nicht durch null ersetzt.
+
+### Warum weicht eine Runde ab, nachdem ich ihre Grenzen bearbeitet habe?
+
+Eine unveränderte Geräterunde kann ihre importierte Zusammenfassung verwenden. Ein geändertes oder benutzerdefiniertes Analysesegment wird dagegen aus den gültigen aufgezeichneten Messwerten dieses Bereichs neu berechnet. Datenabdeckung und gewählte Grenzen beeinflussen das Ergebnis.
+
+### Warum ist ein Leistungswert als „Geschätzt“ gekennzeichnet?
+
+Diese Datenreihe basiert auf geschätzter Leistung. Berücksichtige diese Quelle, wenn du Werte mit einer Powermeter-Aufzeichnung vergleichst oder die Intensität bewertest.
+
+### Warum hebt die Route den ausgewählten Bereich nicht hervor?
+
+Möglicherweise fehlen für diesen Zeitabschnitt gültige GPS-Daten, oder die Karte ist momentan nicht verfügbar. Nutze die aufgezeichneten Diagramme weiter und prüfe den Kartenstatus separat.
+
+### Warum sehe ich die Timeline nicht auf meinem Smartphone?
+
+Dieser Workflow steht im Desktop-Web zur Verfügung. Nutze auf dem Smartphone die mobilen Aktivitätsdetails und Datendiagramme für die von App und Sportart unterstützten Ansichten, oder öffne die Aktivität am Desktop.
+
+### Was tun, wenn ein Diagramm nicht geladen werden kann?
+
+Nutze die angebotene Aktion zum erneuten Versuch. Bereits geladene andere Diagramme bleiben weiter nutzbar. Schlägt eine Aktualisierung fehl, behält die Seite unter Umständen den vorherigen Stand bei und zeigt diesen Hinweis an. Unterscheide fehlende Daten immer von einer fehlgeschlagenen Anfrage.
+
+## Weiterlesen
+
+- [Aktivitätsdetails](/de/docs/guide/activity-detail)
+- [Aerobes Decoupling](/de/docs/metrics/heart-rate/aerobic-decoupling)
+- [Profil, Schwellenwerte und Zonen](/de/docs/guide/profile-thresholds-zones)
+- [Wöchentlicher Trainingsrückblick](/de/docs/workflow/weekly-review)

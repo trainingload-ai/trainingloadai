@@ -1,146 +1,146 @@
 ---
-title: Heart Rate Zones
-description: "Heart rate zones for endurance training, including Karvonen HRR, LTHR-based Joe Friel zones, and Max HR fallback zones."
-keywords: ["Heart Rate Zones", "heart rate zones calculator", "Karvonen heart rate zones", "HRR", "LTHR zones", "Max HR", "Joe Friel"]
+title: Zones de fréquence cardiaque
+description: "Zones de fréquence cardiaque pour l’entraînement d’endurance, incluant le modèle de Karvonen (HRR), les zones de Joe Friel basées sur la LTHR et le modèle de repli basé sur la FC max."
+keywords: ["Zones de fréquence cardiaque", "calculateur zones fréquence cardiaque", "zones Karvonen", "HRR", "zones LTHR", "FC max", "Joe Friel"]
 ---
 
-# Heart Rate Zones
+# Zones de fréquence cardiaque
 
-**Heart rate zones** translate heart-rate data into practical intensity ranges. They are useful for understanding **internal training load** because heart rate reflects how your body responds to work, not just how fast or hard you moved.
+Les **zones de fréquence cardiaque** traduisent vos données cardiaques en plages d’intensité concrètes. Elles sont précieuses pour comprendre votre **charge d’entraînement interne**, car la fréquence cardiaque reflète la réponse réelle de votre organisme à l’effort, et pas seulement votre vitesse ou votre puissance.
 
-Heart-rate zones are most useful when interpreted with pace, power, temperature, fatigue, hydration, and perceived effort. Trainingload.ai supports three mainstream models so the zone system can match the data you actually have.
+Les zones de fréquence cardiaque prennent toute leur valeur lorsqu’on les interprète avec l’allure, la puissance, la température, la fatigue, l’hydratation et l’effort perçu. Trainingload.ai prend en charge trois modèles reconnus afin d’adapter le système de zones aux données dont vous disposez réellement.
 
-## Model overview
+## Vue d’ensemble des modèles
 
-Trainingload.ai can select an appropriate model based on what data you have:
+Trainingload.ai sélectionne le modèle le mieux adapté à vos données :
 
-1.  **Karvonen**: a practical default. Uses heart-rate reserve (HRR), adapts to individual differences, and works well when resting HR is available.
-2.  **Joe Friel**: a threshold-based model. Anchored on lactate-threshold heart rate (LTHR), useful when you have a reliable LTHR estimate.
-3.  **Max HR**: a simple fallback. Used when resting HR or LTHR is missing.
+1. **Karvonen** : un choix par défaut équilibré. S’appuie sur la réserve de fréquence cardiaque (HRR), s’adapte aux différences individuelles et fonctionne très bien dès que la FC au repos est renseignée.
+2. **Joe Friel** : un modèle basé sur le seuil. Ancré sur la fréquence cardiaque au seuil lactique (LTHR), idéal si vous disposez d’une estimation fiable de votre LTHR.
+3. **FC max (Max HR)** : un modèle de repli simple. Utilisé lorsque la FC au repos et la LTHR ne sont pas disponibles.
 
 ---
 
-## 1. Karvonen model (HRR-based)
+## 1. Modèle de Karvonen (basé sur la HRR)
 
-This is the **default model** in Trainingload.ai. The Karvonen formula (Martti Karvonen) introduces **Heart Rate Reserve (HRR)**.
+C’est le **modèle par défaut** dans Trainingload.ai. La formule de Karvonen (Martti Karvonen) introduit la **réserve de fréquence cardiaque (HRR — Heart Rate Reserve)**.
 
-### Core idea
-Don’t only use maximum heart rate—also use **resting heart rate**.
+### Principe clé
+Ne vous basez pas uniquement sur la fréquence cardiaque maximale — intégrez aussi la **fréquence cardiaque au repos**.
 $$
 HRR = HR_{max} - HR_{rest}
 $$
-Then:
+Puis :
 $$
 TargetHR = (HRR \times Intensity\%) + HR_{rest}
 $$
--   **Adapts with fitness**: as you get fitter, resting HR often drops and HRR grows. That changes zone boundaries in a way that tracks improvements.
--   **Why it’s the default**: compared with Max HR, it uses resting HR (a useful fitness signal). Compared with the Joe Friel model, it does not require a demanding threshold test. It offers a good balance of personalization and usability.
+- **Évolue avec votre forme** : à mesure que votre condition s’améliore, votre FC au repos baisse souvent et votre HRR augmente, ce qui ajuste automatiquement les bornes de vos zones.
+- **Pourquoi c’est le modèle par défaut** : par rapport au modèle FC max, il intègre la FC au repos (un indicateur utile de condition physique). Par rapport au modèle Joe Friel, il n’exige pas de test de seuil éprouvant. Il offre un bon équilibre entre personnalisation et simplicité.
 
-### Zone definitions
-Uses a classic **5-zone system**:
+### Définition des zones
+Utilise un **système classique à 5 zones** :
 
-| Zone | Name | Intensity % (HRR) | Typical feel | Training goal |
+| Zone | Nom | Intensité % (HRR) | Sensation typique | Objectif d’entraînement |
 | :--- | :--- | :--- | :--- | :--- |
-| **Zone 1** | **Warm Up / Recovery** | 50% - 60% | Easy conversation | Warm-up, recovery, gentle circulation. |
-| **Zone 2** | **Fat Burn / Aerobic** | 60% - 70% | Deeper breathing | Aerobic base; commonly used for easy volume. |
-| **Zone 3** | **Aerobic** | 70% - 80% | Talking is harder | Improve aerobic endurance and cardiovascular capacity. |
-| **Zone 4** | **Anaerobic** | 80% - 90% | Short phrases only | Improve high-intensity tolerance and durability. |
-| **Zone 5** | **VO2 Max** | 90% - 100% | No talking | Very hard efforts; only sustainable briefly. |
+| **Zone 1** | **Échauffement / Récupération** | 50 % - 60 % | Conversation facile | Échauffement, récupération, activation douce. |
+| **Zone 2** | **Endurance / Aérobie** | 60 % - 70 % | Respiration plus ample | Base aérobie ; volume facile d’endurance fondamentale. |
+| **Zone 3** | **Aérobie soutenu** | 70 % - 80 % | Parler devient plus difficile | Développer l’endurance aérobie et la capacité cardiovasculaire. |
+| **Zone 4** | **Anaérobie** | 80 % - 90 % | Phrases courtes uniquement | Améliorer la tolérance aux hautes intensités et la résistance. |
+| **Zone 5** | **VO2 Max** | 90 % - 100 % | Impossible de parler | Efforts très intenses, soutenables brièvement. |
 
-### When to use it
--   **Most athletes**: from general fitness to advanced runners.
--   **Tracking fitness**: reflects changes in resting HR over time.
+### Quand l’utiliser
+- **Pour la plupart des athlètes** : de la remise en forme aux coureurs confirmés.
+- **Suivi de la condition physique** : reflète l’évolution de la FC au repos dans le temps.
 
-### Limitations
--   **High-intensity accuracy**: in Z4–Z5, HRR-based zones can be less precise than threshold-based zones because it doesn’t anchor directly to a metabolic breakpoint.
--   **Data quality**: requires a reliable resting HR measurement (often best measured upon waking, before getting out of bed).
+### Limites
+- **Précision à haute intensité** : en Z4–Z5, les zones basées sur la HRR peuvent être moins précises que les zones ancrées sur un seuil métabolique réel.
+- **Qualité des données** : demande une mesure fiable de la FC au repos (idéalement prise au réveil, avant de se lever).
 
 ---
 
-## 2. Joe Friel model (LTHR-based)
+## 2. Modèle de Joe Friel (basé sur la LTHR)
 
-This is a **threshold-based model** for structured endurance training.
+C’est un **modèle basé sur le seuil**, conçu pour l’entraînement d’endurance structuré.
 
-### Core idea
-All zones anchor to your **Lactate Threshold Heart Rate (LTHR)**.
--   **Physiology**: the HR around the point where lactate accumulation begins to outpace clearance (often near the anaerobic threshold).
--   **Why it can be more specific**: two people can share the same Max HR but have very different threshold HRs due to training. Anchoring zones on LTHR can reduce that mismatch, especially around threshold work.
+### Principe clé
+Toutes les zones sont ancrées sur votre **fréquence cardiaque au seuil lactique (LTHR)**.
+- **Physiologie** : correspond approximativement à la FC à partir de laquelle la production de lactate dépasse sa capacité d’élimination (proche du seuil anaérobie).
+- **Pourquoi il peut être plus précis** : deux athlètes peuvent avoir la même FC max mais une FC au seuil très différente selon leur niveau d’entraînement. Ancrer les zones sur la LTHR réduit ce décalage, en particulier autour du travail au seuil.
 
-### Zone definitions
-Uses a more granular **7-zone system**:
+### Définition des zones
+Utilise un **système plus fin à 7 zones** :
 
-| Zone | Code | Name | % LTHR | RPE | Adaptation / training goal |
+| Zone | Code | Nom | % LTHR | RPE | Adaptation / objectif d’entraînement |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Zone 1** | **Z1** | **Recovery** | < 81% | < 2 | Active recovery; minimal fatigue. |
-| **Zone 2** | **Z2** | **Aerobic** | 81% - 89% | 2 - 3 | Aerobic base; improve fat oxidation and durability. |
-| **Zone 3** | **Z3** | **Tempo** | 90% - 93% | 3 - 4 | Mixed aerobic/glycolytic; marathon / half-marathon style intensity. |
-| **Zone 4** | **Z4** | **SubThreshold** | 94% - 99% | 4 - 5 | Work near threshold; improve lactate clearance and sustainable pace. |
-| **Zone 5a** | **Z5a** | **SuperThreshold** | 100% - 102% | 5 - 6 | Slightly above threshold; time trial / ~10K intensity. |
-| **Zone 5b** | **Z5b** | **VO2max** | 103% - 106% | 7 - 8 | Raise aerobic ceiling; very hard intervals. |
-| **Zone 5c** | **Z5c** | **Anaerobic** | > 106% | 9 - 10 | Short maximal bursts; phosphagen + anaerobic glycolysis. |
+| **Zone 1** | **Z1** | **Récupération** | < 81 % | < 2 | Récupération active ; fatigue minimale. |
+| **Zone 2** | **Z2** | **Aérobie** | 81 % - 89 % | 2 - 3 | Base aérobie ; oxydation des lipides et durabilité. |
+| **Zone 3** | **Z3** | **Tempo** | 90 % - 93 % | 3 - 4 | Intensité mixte aérobie/glycolytique ; allure marathon / semi-marathon. |
+| **Zone 4** | **Z4** | **Sous-seuil** | 94 % - 99 % | 4 - 5 | Travail proche du seuil ; clairance du lactate et allure soutenable. |
+| **Zone 5a** | **Z5a** | **Sur-seuil** | 100 % - 102 % | 5 - 6 | Légèrement au-dessus du seuil ; intensité contre-la-montre / ~10 km. |
+| **Zone 5b** | **Z5b** | **VO2max** | 103 % - 106 % | 7 - 8 | Élever le plafond aérobie ; intervalles très soutenus. |
+| **Zone 5c** | **Z5c** | **Anaérobie** | > 106 % | 9 - 10 | Efforts brefs maximaux ; filière phosphagène + glycolyse anaérobie. |
 
-### When to use it
--   **Serious endurance athletes**: triathlon, cycling, marathon.
--   **Structured training**: useful when you follow complex plans (e.g., Sweet Spot work near the Z3/Z4 boundary).
+### Quand l’utiliser
+- **Athlètes d’endurance réguliers** : triathlon, cyclisme, marathon.
+- **Entraînement structuré** : utile lorsque vous suivez un plan d’entraînement précis (par exemple du travail Sweet Spot à la frontière Z3/Z4).
 
-### Limitations
--   **Testing cost**: getting a good LTHR often requires a hard 30-minute time trial, which can be difficult and is not ideal for many beginners.
--   **Drift/variation**: LTHR can change with fitness and fatigue; re-test every 4–6 weeks if you rely on it.
+### Limites
+- **Coût du test** : déterminer une LTHR fiable demande souvent un contre-la-montre exigeant de 30 minutes, difficile à réaliser et peu adapté aux débutants.
+- **Évolution / dérive** : la LTHR varie avec la forme et la fatigue ; pensez à la réévaluer toutes les 4 à 6 semaines si vous vous y fiez.
 
 ---
 
-## 3. Max HR model (fallback)
+## 3. Modèle FC max (solution de repli)
 
-This is the simplest and most traditional model. When you have neither **LTHR** nor **resting HR** configured, Trainingload.ai falls back to Max HR to keep basic calculations available.
+C’est le modèle le plus simple et le plus classique. Lorsque ni la **LTHR** ni la **FC au repos** ne sont configurées, Trainingload.ai se rabat sur la FC max afin de maintenir des calculs de base.
 
-### Core idea
-Zones are direct percentages of Max HR, without individual adjustment.
+### Principe clé
+Les zones correspondent directement à des pourcentages de la FC max, sans ajustement individuel.
 $$
 TargetHR = HR_{max} \times Intensity\%
 $$
 
-### Zone definitions
-Uses a rough **5-zone system** (note: these percentages differ from Karvonen):
+### Définition des zones
+Utilise un **système simplifié à 5 zones** (attention : ces pourcentages diffèrent de Karvonen) :
 
-| Zone | Name | Intensity % (MHR) | Potential issue |
+| Zone | Nom | Intensité % (FC max) | Limite potentielle |
 | :--- | :--- | :--- | :--- |
-| **Zone 1** | **Very Light** | 50% - 60% | For very fit athletes, this can even be near resting HR. |
-| **Zone 2** | **Light** | 60% - 70% | Often below a true aerobic zone; may underload training. |
-| **Zone 3** | **Moderate** | 70% - 80% | Broad “aerobic zone” that can mix multiple intensity domains. |
-| **Zone 4** | **Hard** | 80% - 90% | Doesn’t isolate threshold well; can make intensity distribution harder to control. |
-| **Zone 5** | **Maximum** | 90% - 100% | Only indicates near-max effort. |
+| **Zone 1** | **Très léger** | 50 % - 60 % | Chez les athlètes très entraînés, cette plage peut se situer près de la FC au repos. |
+| **Zone 2** | **Léger** | 60 % - 70 % | Souvent en dessous d’une vraie zone aérobie ; risque de sous-charger l’entraînement. |
+| **Zone 3** | **Modéré** | 70 % - 80 % | Large « zone aérobie » qui mélange parfois plusieurs domaines d’intensité. |
+| **Zone 4** | **Difficile** | 80 % - 90 % | Isole mal le seuil ; rend la répartition d’intensité plus difficile à contrôler. |
+| **Zone 5** | **Maximal** | 90 % - 100 % | Indique uniquement un effort proche du maximum. |
 
-### When to use it
--   **Beginners**: very little data or structure.
--   **Fallback**: prevents missing-data failures.
+### Quand l’utiliser
+- **Débutants** : peu de données ou de structure d’entraînement au départ.
+- **Solution de repli** : évite les blocages lorsque certaines données manquent.
 
-### Limitations
--   **Huge individual variance**: effectively ignores resting HR differences.
--   **Max HR estimation error**: “220 - age” has large error (often ±10–12 bpm or more).
--   **Recommendation**: add resting HR (and/or LTHR) and use Karvonen or Joe Friel as soon as practical.
+### Limites
+- **Forte variabilité individuelle** : ignore complètement les écarts de FC au repos.
+- **Erreur d’estimation de la FC max** : la formule « 220 - âge » présente une grande marge d’erreur (souvent ±10 à 12 bpm ou plus).
+- **Recommandation** : renseignez votre FC au repos (et/ou votre LTHR) pour passer à Karvonen ou Joe Friel dès que possible.
 
 ---
 
-## Summary recommendation
+## Recommandation de choix
 
-| If you are… | Recommended model | Why |
+| Votre profil | Modèle recommandé | Pourquoi |
 | :--- | :--- | :--- |
-| **General fitness / advancing runner** | **Karvonen** | Practical default; balances usability and personalization; adapts with resting HR changes. |
-| **Serious runner / triathlete** | **Joe Friel** | Useful when you need tighter control around threshold and above. |
-| **Complete beginner** | **Max HR** | Fallback; start moving first, then collect better data for upgrades. |
+| **Remise en forme / coureur en progression** | **Karvonen** | Modèle par défaut équilibré ; simple et personnalisé ; s’adapte aux variations de FC au repos. |
+| **Coureur confirmé / triathlète** | **Joe Friel** | Utile pour un pilotage fin autour du seuil et au-delà. |
+| **Grand débutant** | **FC max** | Solution de repli ; commencez à bouger, puis affinez avec de meilleures données. |
 
-## How Trainingload.ai uses heart-rate zones
+## Comment Trainingload.ai utilise les zones de fréquence cardiaque
 
-Trainingload.ai uses heart-rate zones as one layer of the training picture:
+Trainingload.ai utilise les zones de fréquence cardiaque comme l’une des couches de lecture de votre entraînement :
 
-- **Internal load context**: compare planned intensity with the body’s actual response.
-- **Session review**: flag easy runs or rides that drifted into higher zones because of heat, fatigue, terrain, or pacing.
-- **Zone distribution**: check whether a week is mostly easy, threshold-heavy, or skewed toward high intensity.
-- **Model selection**: use Karvonen when resting HR is available, LTHR zones when a threshold estimate is reliable, and Max HR as a fallback.
+- **Contexte de charge interne** : comparer l’intensité prévue à la réponse réelle de votre corps.
+- **Analyse de séance** : repérer les sorties faciles qui ont dérivé vers des zones plus hautes à cause de la chaleur, de la fatigue, du relief ou d’une allure trop rapide.
+- **Répartition par zone** : vérifier si une semaine est majoritairement facile, chargée au seuil ou orientée haute intensité.
+- **Sélection du modèle** : utiliser Karvonen lorsque la FC au repos est renseignée, les zones LTHR quand un seuil fiable existe, et la FC max en dernier recours.
 
-## Related tools and docs
+## Outils et documentation associés
 
-- [Calculate heart-rate training load zones](/fr/heart-rate-zones-calculator)
+- [Calculer vos zones de fréquence cardiaque](/fr/heart-rate-zones-calculator)
 - [Calculateur gratuit de fréquence cardiaque maximale — comparer les formules FC max](/fr/max-heart-rate-calculator)
-- [Lactate Threshold](/fr/docs/metrics/physiology/lactate-threshold)
+- [Seuil lactique](/fr/docs/metrics/physiology/lactate-threshold)
 - [Training Impulse (TRIMP)](/fr/docs/metrics/training-load/training-impulse)

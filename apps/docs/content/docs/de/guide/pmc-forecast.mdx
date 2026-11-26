@@ -1,0 +1,146 @@
+---
+title: PMC-Verlauf und Prognosen lesen
+description: Nutze die Seite Fitness-Management in Trainingload.ai, um CTL, ATL und TSB zu vergleichen, einzelne Tage zu prüfen, aufgezeichnete Belastung von Prognosen zu trennen und den KI-Coach im passenden Kontext zu fragen.
+seoTitle: "PMC-Verlauf und Prognosen richtig lesen | Trainingload.ai"
+seoDescription: "Folge dem PMC-Workflow: Sportart wählen, CTL, ATL und TSB prüfen, Tagesbelastung und Prognoseannahmen verstehen sowie fehlende Vorhersagen richtig einordnen."
+keywords: ["PMC Prognose", "CTL ATL TSB", "Fitness Ermüdung Form", "Trainingsbelastung Prognose", "Trainingload.ai Anleitung"]
+---
+
+# PMC-Verlauf und Prognosen lesen
+
+Das PMC (Performance Management Chart) bringt aufgezeichnete Trainingsbelastung und einen bedingten Ausblick an einem Ort zusammen. Nutze es, um zu verstehen, wie sich deine Trainingsbelastung entwickelt hat und was verfügbare zukünftige Eingaben erwarten lassen. Eine Prognose ist eine Schätzung auf Basis dieser Eingaben – sie bestätigt weder, dass eine Einheit bereits stattgefunden hat, noch garantiert sie, dass eine bestimmte Trainingsentscheidung richtig ist.
+
+[Fitness-Management in der Demo öffnen](https://demo.trainingload.ai/en/pmc). Die öffentliche Demo ist schreibgeschützt. Wähle nach dem Öffnen die gewünschte Sportart aus. Die Screenshots mit Prognosekurven verwenden Beispieldaten aus der App; die aktuellen Werte und die Verfügbarkeit einer Prognose in der Demo hängen vom jeweils aktuellen Datenstand ab.
+
+## Bevor du beginnst
+
+- Importiere absolvierte Aktivitäten und warte, bis deren Trainingsbelastung vollständig berechnet ist.
+- Prüfe Sportartzuordnung, Schwellenwerte, Einstellungen der Belastungsquellen und Konto-Zeitzone.
+- Für planbasierte Prognosen brauchst du terminierte Einheiten mit nutzbarer erwarteter Belastung. Ein Entwurf oder eine nicht terminierte Einheit liefert nicht automatisch eine zukünftige Tagesbelastung.
+- Halte aufgezeichnetes Training, geplantes Training und geschätzte Trainingsgewohnheiten sauber auseinander, wenn du das Diagramm auswertest.
+
+## 1. Fitness-Management öffnen und Sportart wählen
+
+Öffne **PMC / Fitness-Management** über die Analysewerkzeuge. Oben rechts wählst du unter **Sportart** zwischen Alle Sportarten, Laufen, Radfahren oder Schwimmen. Die drei Karten für die aktuellen Werte und das Diagramm beziehen sich genau auf diesen Bereich.
+
+Beginne bei der Analyse eines konkreten Trainingsblocks am besten mit einer einzelnen Sportart. Prüfe den Filter erneut, wenn du zwischen Dashboard, PMC und den zugehörigen Aktivitäten wechselst.
+
+Die Hauptseite des PMC zeigt normalerweise 60 Tage Verlauf sowie einen Ausblick über bis zu 28 Tage in die Zukunft. Sie stellt jeweils eine ausgewählte Kennzahl mit der Tagesbelastung darunter dar.
+
+<DocsScreenshot
+  id="pmc-forecast-overview"
+  title="Aktuelle Werte, gewählte Kennzahl und Tagesbelastung im Blick"
+  description="Synthetisches Laufbeispiel. Aktuelle CTL-, ATL- und TSB-Werte stehen über dem Diagramm. Durchgezogene aufgezeichnete Werte und gestrichelte Prognosewerte teilen dieselbe Zeitachse mit der Tagesbelastung darunter."
+  imageSrc="/docs/analysis/en/pmc-forecast-overview.webp"
+  imageAlt="Lauf-PMC-Beispiel mit drei Karten für aktuelle Werte, aufgezeichnetem und prognostiziertem TSB sowie täglicher Trainingsbelastung"
+  route="Analyse → PMC → Laufen"
+/>
+
+## 2. Zuerst die aktuellen Werte lesen, dann den Ausblick
+
+Betrachte immer alle drei Karten gemeinsam.
+
+| Wert | Was er beschreibt | Was er nicht beweist |
+| --- | --- | --- |
+| Fitness / CTL | Langfristig aufgebaute Trainingsbelastung | Eine tatsächlich gemessene Leistungssteigerung. |
+| Ermüdung / ATL | Das schneller reagierende Signal der jüngsten Belastung | Eine Diagnose, wie müde du dich fühlst. |
+| Form / TSB | Das Verhältnis zwischen langfristiger und kurzfristiger Belastung | Garantierte Einsatzbereitschaft für Einheit oder Wettkampf. |
+
+Die Karten beschreiben den aktuell aufgezeichneten Stand. Wenn du mit dem Mauszeiger über ein zukünftiges Datum fährst, werden sie nicht durch Prognosewerte ersetzt. Details zur Berechnung findest du unter [CTL](/de/docs/metrics/pmc/chronic-training-load), [ATL](/de/docs/metrics/pmc/acute-training-load) und [TSB](/de/docs/metrics/pmc/training-stress-balance).
+
+## 3. Kennzahlen wechseln und ein einzelnes Datum prüfen
+
+1. Wähle oberhalb des Diagramms **Form**, **Fitness** oder **Ermüdung**.
+2. Bewege den Mauszeiger über das gewünschte Datum. Der Tooltip zeigt Datum, Status (aufgezeichnet oder prognostiziert), CTL, ATL, TSB und die Tagesbelastung.
+3. Lies bei einem zukünftigen Datum neben dem Zahlenwert unbedingt auch die angezeigte Berechnungsgrundlage.
+4. Vergleiche die Kurvenkennzahl mit dem Tagesbelastungs-Panel am selben Datum – Kurvenverlauf und Tagesbelastung sind unterschiedliche Größen.
+
+Das Diagramm lässt sich auch per Tastatur bedienen: Fokussiere es und navigiere mit der linken und rechten Pfeiltaste von Tag zu Tag. Mit **Escape** blendest du den Tooltip wieder aus. Auf Touchscreens tippst du ein Datum direkt im Diagramm an.
+
+<DocsScreenshot
+  id="pmc-forecast-date"
+  title="Zukünftiges Datum und seine Belastungsbasis prüfen"
+  description="Synthetisches Laufbeispiel. Das ausgewählte Zukunftsdatum ist als Prognostiziert markiert und zeigt seine Belastungsgrundlage. Die oberen Karten bleiben beim aktuellen aufgezeichneten Stand."
+  imageSrc="/docs/analysis/en/pmc-forecast-date.webp"
+  imageAlt="PMC-Fitness-Diagramm mit Tooltip für ein zukünftiges Datum inkl. prognostizierter CTL-, ATL-, TSB-Werte, Tagesbelastung und Grundlage"
+  route="PMC → Fitness → Datum prüfen"
+/>
+
+## 4. Aufgezeichneten Verlauf von bedingten Prognosen trennen
+
+Nutze die Legende und die Markierung **Heute** zur Orientierung. Aufgezeichnete Werte erscheinen als durchgezogene Linie, verfügbare Zukunftsprognosen als gestrichelte Linie. Im Tagesbelastungs-Panel werden aufgezeichnete Tage als gefüllte Balken und zukünftige Tage heller dargestellt.
+
+Die reguläre Prognose priorisiert nutzbares geplantes Training. Wo kein anwendbarer Planeintrag vorliegt, kann sie auf ein ausreichend aktuelles, nutzbares Trainingsmuster zurückgreifen. Prüfe im Tooltip, welche Grundlage für ein Datum gilt.
+
+| Angezeigte Grundlage | So ordnest du sie ein |
+| --- | --- |
+| Geplantes Training | Die zukünftige Belastung stammt aus den anwendbaren geplanten Einheiten. |
+| Jüngste Trainingsgewohnheiten | Die Prognose nutzt eine Schätzung deines jüngsten Trainingsmusters – es handelt sich um keine neue Einheit im Kalender. |
+| Trainingspause | Das angezeigte Szenario geht für diese Tage von keinem zusätzlichen Training aus. |
+| Keine Prognose | Die verfügbaren Eingaben erlauben für dieses Datum keinen belastbaren Wert. |
+
+Das Öffnen des Diagramms plant weder Training noch speichert es eine Planänderung. Ein Tag ohne geplante Einheit ist nicht automatisch ein bestätigter Ruhetag, und fehlende Belastung darf niemals als Nullbelastung gelesen werden.
+
+Bricht eine Prognose mitten im Ausblick ab, bleiben nachfolgende Tage leer, weil sie auf dem fehlenden früheren Eingabewert aufbauen. Der Import neuer Aktivitäten oder Änderungen am Zeitplan können den Ausblick verändern.
+
+## 5. Einen leeren Zukunftsbereich verstehen
+
+Historische Werte bleiben auch dann wertvoll, wenn keine Prognosekurve verfügbar ist. Häufige Ursachen sind eine kurze oder veraltete Trainingshistorie, fehlende aufgezeichnete Belastungen oder geplante Einheiten ohne nutzbare erwartete Belastung.
+
+<DocsScreenshot
+  id="pmc-forecast-unavailable"
+  title="Aufgezeichneter Verlauf bleibt auch ohne Prognose sichtbar"
+  description="Die öffentliche Demo zum Aufnahmezeitpunkt. Der aufgezeichnete Verlauf ist sichtbar, während der Zukunftsbereich keine nutzbare Kurve enthält. Ein leerer Prognosebereich sagt kein Training von null voraus."
+  imageSrc="/docs/analysis/en/pmc-forecast-unavailable.webp"
+  imageAlt="PMC der öffentlichen Demo mit aufgezeichnetem Verlauf und leerem Zukunftsbereich nach Heute"
+  route="Demo → PMC"
+/>
+
+Prüfe Datum und Sportartfilter und kontrolliere anschließend jüngste Aktivitäten und den zugehörigen Zeitplan. Zeigt ein Tooltip **Keine Prognose verfügbar**, nimm diese Unsicherheit ernst. Meldet die Seite **Aktualisierung fehlgeschlagen; zeige vorheriges Ergebnis**, siehst du den letzten erfolgreichen Stand statt einer frischen Aktualisierung. Bei einem fehlgeschlagenen ersten Ladevorgang steht **Erneut versuchen** bereit.
+
+## 6. Den Coach mit diesem Kontext fragen
+
+Klicke oben auf der Seite auf **Coach fragen**. Der Link übergibt die gewählte Sportart und den Ausblickskontext direkt an den KI-Coach. Prüfe die vorbereitete Frage vor dem Absenden – das bloße Öffnen ändert noch nichts an deinem Training.
+
+Ergänze dein konkretes Anliegen, zum Beispiel einen plötzlichen Belastungsanstieg oder die Platzierung einer geplanten Schlüsseleinheit. Prüfe Aktivitäten und Zukunftsannahmen in der Antwort und folge bei jedem Plan- oder Einheitenvorschlag dem regulären Bestätigungsablauf.
+
+Für eine marathonspezifische Auswertung lies weiter unter [PMC für Marathon-Anpassungen nutzen](/de/docs/guide/pmc-marathon-adjustment).
+
+## Das Dashboard für ein engeres Zeitfenster nutzen
+
+Die Dashboard-Karten für Fitness, Ermüdung und Form öffnen jeweils eine Einzelansicht dieser Kennzahl mit Verlaufstabs für **7**, **14**, **30** und **60** Tage. Das sichtbare Zukunftsfenster richtet sich nach dem gewählten Tab (maximal 30 Tage) und unterscheidet sich damit vom breiteren Ausblick der PMC-Hauptseite.
+
+Wähle das passende Zeitfenster, bevor du das Diagramm bewertest, und trenne stets sauber zwischen aktuellem Wert und ausgewähltem Zukunftsdatum.
+
+## Ergebnis überprüfen
+
+Du solltest Sportart, Datum, Kennzahl, Status (aufgezeichnet oder prognostiziert) und Belastungsgrundlage des untersuchten Punkts klar benennen können. Eine fundierte Erklärung verknüpft die Kurve mit echten Aktivitäten oder geplanten Eingaben und macht sichtbar, wo Daten fehlen.
+
+## Häufige Fragen
+
+### Warum ändern sich die oberen Karten nicht, wenn ich die Zukunft ansehe?
+
+Sie zeigen immer die aktuellen aufgezeichneten Werte. Nutze für ausgewählte Zukunftsdaten den Tooltip im Diagramm.
+
+### Warum hat sich die Prognose geändert, nachdem ich eine Einheit absolviert habe?
+
+Tatsächliche Belastung und Planverknüpfung aktualisieren die Eingaben. Prüfe, ob die Aktivität fertig verarbeitet und mit der richtigen geplanten Einheit verknüpft ist, bevor du Ergebnisse vergleichst.
+
+### Warum zeigt eine Dashboard-Karte ein anderes Zeitfenster?
+
+Ihr Verlaufs-Tab steuert zugleich ein kürzeres sichtbares Prognosefenster, während die PMC-Hauptseite einen eigenen breiteren Bereich nutzt. Vergleiche immer dieselbe Sportart und dasselbe Datum statt nur die optische Position im Diagramm.
+
+### Kann ich im Diagramm verschiedene Prognoseszenarien auswählen?
+
+Die Hauptseite bietet die Auswahl von Sportart und Kennzahl und wählt im normalen Aufruf automatisch die anwendbaren Plan- und Gewohnheitseingaben. Einzelne Coach- oder geteilte Links können ein anderes Szenario übergeben. Lies daher immer die angezeigte Grundlage am Datum, statt in jeder Ansicht dieselben Annahmen vorauszusetzen.
+
+### Beweisen die farbigen TSB-Bereiche, dass ich einsatzbereit bin?
+
+Sie sind Orientierungsbänder zur Einordnung des Belastungskontexts. Sie erfassen nicht alle Faktoren, die deine tatsächliche Tagesform oder Leistungsfähigkeit bestimmen.
+
+## Weiterlesen
+
+- [Aktivitätsdetails](/de/docs/guide/activity-detail)
+- [Wöchentlicher Trainingsrückblick](/de/docs/workflow/weekly-review)
+- [Effektive VO2max im Ausdauertraining verstehen](/de/docs/guide/effective-vo2max-for-endurance)
+- [KI-Coach](/de/docs/guide/ai-coach)

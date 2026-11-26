@@ -4,10 +4,13 @@ import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 
 import { useLocale, useTranslations } from "next-intl";
 import { Activity, Heart, Layers, Zap } from "lucide-react";
-import { useState } from "react";
+import { useContext, useId, useState } from "react";
+import { CoachPreviewCard } from "./cards/coach-preview-card";
 import { CoachCard } from "./cards/CoachCard";
+import { CoachLocalPreviewContext } from "./coach-preview-panel";
 import { formatPaceSeconds } from "@/app/[locale]/(main)/account/component/user-profile-metric-model";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useStore } from "@/lib/store";
 
 export type ZoneMetricKey = "pace" | "heartRate" | "power";
 
@@ -131,13 +134,14 @@ function sortMetricKeys(
 
 function formatPaceBoundarySeconds(
   raw: number | undefined,
+  baseDistanceMeters: number,
   paceDistanceMeters: number,
 ) {
   if (raw === undefined || !Number.isFinite(raw) || raw <= 0) return undefined;
   // `resolvePaceZoneSettings` returns pace boundaries as sec/m.
   // Backward compatibility: if value is already a large seconds-per-lap number,
   // avoid multiplying again.
-  const seconds = raw > 20 ? raw : raw * Math.max(1, paceDistanceMeters);
+  const seconds = (raw > 20 ? raw / baseDistanceMeters : raw) * paceDistanceMeters;
   if (!Number.isFinite(seconds) || seconds <= 0) return undefined;
   return seconds;
 }
@@ -145,11 +149,12 @@ function formatPaceBoundarySeconds(
 function formatNumericBoundary(
   metric: ZoneMetricKey,
   n: number | undefined,
+  baseDistanceMeters: number,
   paceDistanceMeters: number,
 ) {
   if (n === undefined || !Number.isFinite(n)) return "—";
   if (metric === "pace") {
-    const seconds = formatPaceBoundarySeconds(n, paceDistanceMeters);
+    const seconds = formatPaceBoundarySeconds(n, baseDistanceMeters, paceDistanceMeters);
     const s = formatPaceSeconds(seconds);
     return s || "—";
   }
@@ -167,29 +172,32 @@ function ZoneRangeTable({
   metric,
   bundle,
   unitSuffix,
+  baseDistanceMeters,
   paceDistanceMeters,
 }: {
   metric: ZoneMetricKey;
   bundle: MetricBundle;
   unitSuffix: string;
+  baseDistanceMeters: number;
   paceDistanceMeters: number;
 }) {
   const t = useTranslations("AiCoachPage");
   const zones = [...(bundle.zones ?? [])].sort((a, b) => a.order - b.order);
 
   return (
-    <div className="overflow-x-auto rounded-md bg-background/70 dark:bg-background/40">
+    <div role="region" tabIndex={0} aria-label={metricLabel(t, metric)}
+      className="overflow-x-auto rounded-md bg-background/70 dark:bg-background/40">
       <table className="w-full min-w-[220px] text-mobile-caption pc:text-[11px]">
         <thead>
           <tr className="bg-muted/40 text-left text-muted-foreground">
-            <th className="px-2 py-1.5 font-medium">
+            <th scope="col" className="px-2 py-1.5 font-medium">
               {t("readCards.zoneRanges.colZone")}
             </th>
-            <th className="px-2 py-1.5 font-medium tabular-nums">
+            <th scope="col" className="px-2 py-1.5 font-medium tabular-nums">
               {t("readCards.zoneRanges.colMin")}
               {unitSuffix ? ` ${unitSuffix}` : ""}
             </th>
-            <th className="px-2 py-1.5 font-medium tabular-nums">
+            <th scope="col" className="px-2 py-1.5 font-medium tabular-nums">
               {t("readCards.zoneRanges.colMax")}
               {unitSuffix ? ` ${unitSuffix}` : ""}
             </th>
@@ -221,10 +229,10 @@ function ZoneRangeTable({
                   </div>
                 </td>
                 <td className="px-2 py-1.5 tabular-nums text-foreground">
-                  {formatNumericBoundary(metric, z.min, paceDistanceMeters)}
+                  {formatNumericBoundary(metric, z.min, baseDistanceMeters, paceDistanceMeters)}
                 </td>
                 <td className="px-2 py-1.5 tabular-nums text-foreground">
-                  {formatNumericBoundary(metric, z.max, paceDistanceMeters)}
+                  {formatNumericBoundary(metric, z.max, baseDistanceMeters, paceDistanceMeters)}
                 </td>
               </tr>
             );
@@ -256,7 +264,9 @@ function ZoneRangesBody({
   sportUpper: string;
 }) {
   const t = useTranslations("AiCoachPage");
-  const paceDistanceMeters = sportUpper === "SWIM" ? 100 : 1000;
+  const imperial = useStore((state) => state.systemUnit) === "imperial" && sportUpper !== "SWIM";
+  const baseDistanceMeters = sportUpper === "SWIM" ? 100 : 1000;
+  const paceDistanceMeters = imperial ? 1609.344 : baseDistanceMeters;
   const [selectedMetric, setSelectedMetric] = useState<ZoneMetricKey>(
     sortedKeys.includes(defaultTab) ? defaultTab : sortedKeys[0]!,
   );
@@ -269,7 +279,7 @@ function ZoneRangesBody({
     m === "pace"
       ? sportUpper === "SWIM"
         ? t("readCards.zoneRanges.unitPace100m")
-        : t("readCards.zoneRanges.unitPace")
+        : t(imperial ? "readCards.zoneRanges.unitPaceMi" : "readCards.zoneRanges.unitPace")
       : m === "heartRate"
         ? t("readCards.zoneRanges.unitHr")
         : t("readCards.zoneRanges.unitPower");
@@ -311,6 +321,7 @@ function ZoneRangesBody({
             metric={metric}
             bundle={metricBundle(payload[metric])}
             unitSuffix={unitFor(metric)}
+            baseDistanceMeters={baseDistanceMeters}
             paceDistanceMeters={paceDistanceMeters}
           />
         </TabsContent>
@@ -335,52 +346,74 @@ function normalizeFocusMetric(raw: unknown): ZoneMetricKey | null {
 export function ProfileZoneRangesCard({ payload }: { payload: unknown }) {
   const locale = useLocale();
   const t = useTranslations("AiCoachPage");
+  const openPreview = useContext(CoachLocalPreviewContext);
+  const id = useId();
+  const imperial = useStore((state) => state.systemUnit) === "imperial";
   const o = asRecord(payload);
   if (!o || o.kind !== "profile_zone_ranges") return null;
 
   const sport = String(o.sportType ?? "").trim();
   const sportUpper = sport.toUpperCase();
   const avail = availableMetrics(o);
-  const sortedKeys = sortMetricKeys(avail, sportUpper, o.priority);
+  const sortedKeys = sortMetricKeys(avail, sportUpper, o.availablePriority ?? o.priority);
   const focus = normalizeFocusMetric(o.focusMetric);
-  const defaultTab =
-    focus && sortedKeys.includes(focus) ? focus : (sortedKeys[0] ?? "pace");
+  const recommended = normalizeFocusMetric(o.recommendedMetric);
+  const defaultTab = [focus, recommended].find((metric) => metric && sortedKeys.includes(metric)) ?? sortedKeys[0];
   const sportLabel = ["RUN", "CYCLING", "SWIM"].includes(sportUpper)
     ? t(`readCards.zoneRanges.sports.${sportUpper}`)
     : sport || t("readCards.zoneRanges.sports.UNKNOWN");
-  const metricSummary = new Intl.ListFormat(locale, {
-    style: "short",
-    type: "conjunction",
-  }).format(sortedKeys.map((metric) => metricLabel(t, metric)));
+  const sportTitle = t("readCards.zoneRanges.title", { sport: sportLabel });
+  const title = defaultTab ? metricLabel(t, defaultTab) : sportTitle;
+  const detail = defaultTab ? <ZoneRangesBody sortedKeys={sortedKeys} payload={o}
+    defaultTab={defaultTab} sportUpper={sportUpper} /> : null;
 
+  if (!openPreview) {
+    const metricSummary = new Intl.ListFormat(locale, {
+      style: "short",
+      type: "conjunction",
+    }).format(sortedKeys.map((metric) => metricLabel(t, metric)));
+    return (
+      <CoachCard tone="neutral" icon={<Layers className="size-4" />} title={sportTitle}
+        subtitle={metricSummary ? t("readCards.zoneRanges.summary", { metrics: metricSummary }) : undefined}
+        dense collapsible={Boolean(detail)} defaultCollapsed hideDetailsHeader
+        toggleAriaLabel={t("readCards.zoneRanges.toggleDetails")}>
+        {detail ?? <p className="mt-2 text-mobile-caption text-muted-foreground pc:text-xs">{t("readCards.zoneRanges.empty")}</p>}
+      </CoachCard>
+    );
+  }
+
+  const bundle = defaultTab ? metricBundle(o[defaultTab]) : null;
+  const zones = [...(bundle?.zones ?? [])].sort((a, b) => a.order - b.order);
+  const shown = zones.length > 7 ? zones.slice(0, 6) : zones;
+  const baseDistance = sportUpper === "SWIM" ? 100 : 1000;
+  const paceDistance = imperial && sportUpper !== "SWIM" ? 1609.344 : baseDistance;
+  const unit = defaultTab === "power" ? "W" : defaultTab === "heartRate" ? "bpm"
+    : defaultTab === "pace" ? sportUpper === "SWIM" ? "min/100m" : imperial ? "min/mi" : "min/km" : undefined;
+  const icon = defaultTab === "heartRate" ? Heart : defaultTab === "power" ? Zap : defaultTab === "pace" ? Activity : Layers;
   return (
-    <CoachCard
-      tone="neutral"
-      icon={<Layers className="h-4 w-4" />}
-      title={t("readCards.zoneRanges.title", { sport: sportLabel })}
-      subtitle={
-        metricSummary
-          ? t("readCards.zoneRanges.summary", { metrics: metricSummary })
-          : undefined
-      }
-      dense
-      collapsible={sortedKeys.length > 0}
-      defaultCollapsed
-      hideDetailsHeader
-      toggleAriaLabel={t("readCards.zoneRanges.toggleDetails")}
-    >
-      {sortedKeys.length === 0 ? (
-        <p className="mt-2 text-mobile-caption pc:text-xs text-muted-foreground">
-          {t("readCards.zoneRanges.empty")}
-        </p>
-      ) : (
-        <ZoneRangesBody
-          sortedKeys={sortedKeys}
-          payload={o}
-          defaultTab={defaultTab}
-          sportUpper={sportUpper}
-        />
-      )}
-    </CoachCard>
+    <CoachPreviewCard icon={icon} title={title}
+      subtitle={[sportLabel, bundle?.benchmark, unit].filter(Boolean).join(" · ")}
+      actionLabel={t("readCards.zoneRanges.toggleDetails")}
+      onOpen={detail ? () => openPreview(id, title, detail) : undefined}>
+      {defaultTab ? (
+        <ul className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,3.5rem),1fr))] gap-1.5">
+          {shown.map((zone, index) => {
+            const label = zone.name?.match(/^Z\d+/i)?.[0] ?? `Z${zone.order}`;
+            const min = formatNumericBoundary(defaultTab, zone.min, baseDistance, paceDistance);
+            const max = formatNumericBoundary(defaultTab, zone.max, baseDistance, paceDistance);
+            const color = zone.color && /^#[\da-f]{6}$/i.test(zone.color)
+              ? zone.color : ZONE_FALLBACK_COLORS[index % ZONE_FALLBACK_COLORS.length];
+            return (
+              <li key={zone.order} className="min-w-0 space-y-1">
+                <span aria-hidden className="block h-1 rounded-full" style={{ backgroundColor: color }} />
+                <span className="block text-xs font-semibold">{label}</span>
+                <span className="block break-words text-[11px] tabular-nums text-muted-foreground">{min} – {max}</span>
+              </li>
+            );
+          })}
+          {shown.length < zones.length ? <li className="self-center text-center text-xs text-muted-foreground">+{zones.length - shown.length}</li> : null}
+        </ul>
+      ) : <p className="text-sm text-muted-foreground">{t("readCards.zoneRanges.empty")}</p>}
+    </CoachPreviewCard>
   );
 }

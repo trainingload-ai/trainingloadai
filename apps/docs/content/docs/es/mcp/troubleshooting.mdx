@@ -1,0 +1,43 @@
+---
+title: Solución de problemas de MCP
+description: Diagnostica problemas de descubrimiento, OAuth, alcances (scopes), herramientas, tiempos de espera y caché obsoleta en TrainingLoad MCP.
+---
+
+# Solución de problemas de MCP
+
+## El cliente no puede descubrir el servidor
+
+Confirma que la URL sea exactamente `https://api.trainingload.ai/mcp`, incluido `/mcp`. El cliente debe admitir Streamable HTTP remoto. Las redes corporativas deben permitir tráfico HTTPS tanto hacia `api.trainingload.ai` como hacia las páginas de autorización de TrainingLoad.
+
+## OAuth no se abre o vuelve al cliente con un error
+
+- Inicia el proceso desde la acción de conexión del cliente en lugar de reutilizar una URL de autorización antigua.
+- Confirma que el cliente admite descubrimiento OAuth y PKCE S256.
+- Comprueba que la redirección de retorno llegue a la misma instancia del cliente que inició la autorización.
+- Si el verificador de autorización no está disponible temporalmente, espera el intervalo indicado en `Retry-After` antes de volver a intentarlo.
+
+## Falta una herramienta
+
+El servidor filtra `tools/list` según los permisos de la cuenta y las banderas de despliegue. `get_health_summary` permanece visible antes de conceder `health:read` para que llamarla active la autorización incremental. Si falta otra herramienta, vuelve a conectar tras confirmar que tu cuenta y el despliegue están habilitados; no añadas manualmente un token bearer.
+
+## `INSUFFICIENT_SCOPE`
+
+Utiliza la acción de reconectar o autorizar del cliente y aprueba el alcance (scope) solicitado. Si el cliente ignora el desafío MCP `mcp/www_authenticate`, elimina la conexión y vuelve a añadirla para que solicite el conjunto completo de alcances (scopes) de solo lectura deseado.
+
+## Resultados vacíos
+
+Un resultado vacío significa que no hay datos almacenados que coincidan en ese rango de fechas. No significa carga de entrenamiento cero, ausencia de entrenamiento ni estado saludable o normal. Comprueba la zona horaria devuelta por la herramienta y el rango consultado, y amplía el rango dentro del límite documentado si corresponde.
+
+## `CAPABILITY_TIMEOUT`, cancelación o límite de tasa
+
+- `CAPABILITY_TIMEOUT`: acorta el rango de fechas o reduce `limit` y vuelve a intentarlo una vez.
+- `CAPABILITY_CANCELLED`: el cliente canceló o se desconectó; inicia una nueva solicitud.
+- Límite de tasa: espera el intervalo de reintento devuelto. No repitas solicitudes en bucle rápido.
+
+## El cliente sigue mostrando herramientas antiguas
+
+Actualiza o restablece la caché de herramientas MCP de ese cliente. En ChatGPT, una aplicación de espacio de trabajo publicada puede conservar una instantánea congelada de herramientas hasta que un administrador la actualice. En VS Code, ejecuta **MCP: Reset Cached Tools**. Si es necesario, elimina el servidor y vuelve a conectarlo.
+
+## Los datos parecen inseguros o pertenecen a otra cuenta
+
+Deja de usar la conexión y revócala de inmediato desde TrainingLoad. Anota el nombre del cliente, la hora aproximada y el ID de solicitud, y contacta con soporte. No compartas el token de acceso ni la carga útil completa.

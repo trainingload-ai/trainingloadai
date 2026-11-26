@@ -6,7 +6,6 @@ import type { CreatePlanDto } from './dto/create-plan.dto';
 import type { UpdatePlanDto } from './dto/update-plan.dto';
 import type { LinkPlanWorkoutActivityDto } from './dto/link-plan-workout-activity.dto';
 import type { ReplaceActivityPlanLinkDto } from './dto/replace-activity-plan-link.dto';
-import type { CreateScheduledWorkoutDto } from './dto/create-scheduled-workout.dto';
 
 /**
  * Plan 对外门面。实现在 Lifecycle / WorkoutCommand / ActivityLink。
@@ -108,8 +107,8 @@ export class PlanService {
     return this.lifecycle.cancelPlan(userId, planId, reason, meta, options);
   }
 
-  deletePlan(userId: string, planId: string) {
-    return this.lifecycle.deletePlan(userId, planId);
+  deletePlan(...args: Parameters<PlanLifecycleService['deletePlan']>) {
+    return this.lifecycle.deletePlan(...args);
   }
 
   listScheduledWorkouts(
@@ -120,8 +119,24 @@ export class PlanService {
     return this.workoutCommands.listScheduledWorkouts(userId, start, end);
   }
 
-  createIndependentWorkout(userId: string, dto: CreateScheduledWorkoutDto) {
-    return this.workoutCommands.createIndependentWorkout(userId, dto);
+  createIndependentWorkout(...args: Parameters<PlanWorkoutCommandService['createIndependentWorkout']>) {
+    return this.workoutCommands.createIndependentWorkout(...args);
+  }
+
+  createIndependentWorkoutDraft(...args: Parameters<PlanWorkoutCommandService['createIndependentWorkoutDraft']>) {
+    return this.workoutCommands.createIndependentWorkoutDraft(...args);
+  }
+
+  getIndependentWorkoutDraft(...args: Parameters<PlanWorkoutCommandService['getIndependentWorkoutDraft']>) {
+    return this.workoutCommands.getIndependentWorkoutDraft(...args);
+  }
+
+  transitionIndependentWorkoutDraft(...args: Parameters<PlanWorkoutCommandService['transitionIndependentWorkoutDraft']>) {
+    return this.workoutCommands.transitionIndependentWorkoutDraft(...args);
+  }
+
+  updateIndependentWorkout(...args: Parameters<PlanWorkoutCommandService['updateIndependentWorkout']>) {
+    return this.workoutCommands.updateIndependentWorkout(...args);
   }
 
   getIndependentWorkoutDetail(userId: string, workoutId: string) {

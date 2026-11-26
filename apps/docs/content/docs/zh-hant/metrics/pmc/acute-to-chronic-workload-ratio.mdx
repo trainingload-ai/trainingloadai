@@ -1,130 +1,84 @@
 ---
-title: 急慢性負荷比（ACWR）
-description: 瞭解 Trainingload.ai 如何使用當日疲勞與體能計算 ACWR，以及如何將比值用於負荷檢查，而不將它誤認為傷病或準備度預測。
-keywords:
-  - "急慢性負荷比"
-  - "ACWR"
-  - "A:C Ratio"
-  - "ATL 除以 CTL"
-  - "訓練負荷變化"
-  - "耦合 ACWR"
+title: 急性：慢性負荷比（ACWR）
+description: 了解 Trainingload.ai 如何以同日疲勞（ATL）與體能（CTL）計算 ACWR，以及為何此比值應作為負荷回顧工具而非受傷預測。
+keywords: ["ACWR", "急性慢性負荷比", "A:C 比", "ATL 除以 CTL", "耦合式 ACWR", "訓練負荷變化"]
 ---
 
 import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
 
-# 什麼是急慢性負荷比（ACWR）
+# 什麼是急性：慢性負荷比（ACWR）？
 
-**急慢性負荷比（ACWR）**用來比較模型化近期負荷與長期負荷。在 Trainingload.ai 中，頁面顯示的 A:C 數值，是當日[疲勞（ATL）](/zh-hant/docs/metrics/pmc/acute-training-load)除以當日[體能（CTL）](/zh-hant/docs/metrics/pmc/chronic-training-load)。
+**ACWR（Acute:Chronic Workload Ratio）**用來比較模型推算的近期負荷與長期負荷。在 Trainingload.ai 中，A:C 比值等於同日的[疲勞（ATL）](/zh-hant/docs/metrics/pmc/acute-training-load)除以同日的[體能（CTL）](/zh-hant/docs/metrics/pmc/chronic-training-load)。
 
-ACWR 可以協助定位近期負荷相對於長期趨勢發生了多大變化，但它不能預測傷病或準備度，也不直接測量適應、疲勞、恢復或醫療風險。
+這個比值能標示出近期負荷結構的變化，但 ACWR 並不是受傷或準備度預測指標。它不會直接量測身體適應、生理疲勞、恢復狀態或醫療風險。
 
 <div className="my-6 max-w-sm w-full mx-auto">
   <AcRatioStatPreviewCard
     value="1.12"
     metricLabel="A:C"
     valuePopoverTitle="A:C 數值"
-    valuePopoverBody="Trainingload.ai 使用當日疲勞（ATL）除以當日體能（CTL），比較快速與慢速指數負荷模型。"
-    rangePopoverTitle="介面分段"
-    rangePopoverBody="介面使用 <0.8、0.8–1.3、1.3–1.5 與 ≥1.5 四段協助定位變化。這些分段不是安全界線或傷病機率。"
+    valuePopoverBody="Trainingload.ai 以同日疲勞（ATL）除以同日體能（CTL）計算。"
+    rangePopoverTitle="介面區段"
+    rangePopoverBody="介面使用 <0.8、0.8–1.3、1.3–1.5 與 ≥1.5 作為回顧提示，而非安全上限或受傷機率。"
     helpTitle="相對負荷"
-    details="先查看 ATL、CTL 的絕對值與來源活動，再結合訓練完成品質、疼痛、生病、睡眠與主觀狀態。"
+    details="解讀比值前，請先檢視 ATL、CTL 與來源活動。"
   />
 </div>
 
-_範例數值僅供介面預覽。_
+_範例數值僅供介面預覽參考。_
 
-## ACWR 的數值來源
+## 公式與資料來源
 
-ACWR 沒有獨立的活動負荷輸入。Trainingload.ai 會先依活動資料與負荷來源優先順序計算每日負荷，再維護兩條指數負荷曲線：
-
-- ATL 預設使用 7 天時間常數，近期負荷的影響較大。
-- CTL 預設使用 42 天時間常數，變化速度較慢。
-- ATL 與 CTL 使用同一組每日負荷，因此活動缺漏、重複、閾值或負荷來源變更，都可能改變 ACWR。
-- ACWR 是無單位比值，不會保留 ATL 與 CTL 的絕對規模。
-
-## 公式
-
-Trainingload.ai 先按照與 Intervals.icu 一致的指數時間常數口徑，計算當日 ATL 與 CTL：
+ATL 與 CTL 使用同一組每日訓練負荷序列：
 
 ```text
 decay_ATL = exp(-1 / 7)
 decay_CTL = exp(-1 / 42)
-
 ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
 CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
-```
 
-接著計算：
-
-```text
 ACWR_today = ATL_today / CTL_today
 ```
 
-例如，當日 ATL 為 60、CTL 為 50 時，ACWR 為 `60 / 50 = 1.20`。當 CTL 為零時，產品回傳 `0`，以避免除以零。
+若今日 ATL 為 60、CTL 為 50，則 ACWR 為 `1.20`。當 CTL 為 0 時，系統會回傳 `0` 以避免除以零。
 
-## Trainingload.ai 使用哪一種 ACWR
+活動紀錄、閾值設定與負荷來源優先順序的變動，都可能同時影響分子與分母。ACWR 為無單位比值，會隱藏原本的絕對負荷規模。
 
-「ACWR」並不代表唯一演算法。研究與產品可能採用不同的負荷輸入、時間窗口和平均方式，因此同名指標未必能直接比較。
+## 這是哪一種 ACWR？
 
-Trainingload.ai 目前使用的是**耦合的 PMC 指數比值**：
+ACWR 並沒有單一標準演算法。Trainingload.ai 採用的是**耦合式 PMC 指數比值**：今日負荷同時進入 ATL 與 CTL，且兩條曲線均使用指數衰減時間常數。
 
-- 當日負荷會同時進入 ATL 與 CTL。
-- 分子與分母使用指數時間常數，而不是固定窗口的簡單平均。
-- 它不是「最近 7 天總負荷 ÷ 最近 28 天每週平均負荷」。
-- 它也不是從長期窗口排除最近 7 天的解耦 ACWR。
+它並非簡單的「最近 7 天 ÷ 最近 28 天週平均」，也不是將近期視窗從長期視窗中剔除的解耦式（uncoupled）變體。因此，來自其他演算法、運動項目、族群或負荷來源的門檻不可直接套用。
 
-因此，來自其他 ACWR 演算法、運動項目或負荷來源的研究閾值，不能直接當作 Trainingload.ai 數值的驗證界線。
+## 如何解讀比值
 
-## 如何理解 ACWR
+- **大於 1**：ATL 高於 CTL。
+- **接近 1**：ATL 與 CTL 相近，但這不代表訓練狀態最佳。
+- **小於 1**：ATL 低於 CTL。
 
-- **ACWR 大於 1**：當日 ATL 高於 CTL，近期模型負荷高於長期模型水準。
-- **ACWR 接近 1**：ATL 與 CTL 接近；這不表示訓練量最佳，也不表示生理狀態平衡。
-- **ACWR 小於 1**：當日 ATL 低於 CTL，近期模型負荷低於長期模型水準。
+請務必同時查看分子與分母。`ATL 12 / CTL 10` 與 `ATL 120 / CTL 100` 的結果都是 1.20，但兩者的絕對負荷規模天差地遠。新帳號或 CTL 極低的初期階段，只要完成一次訓練也可能出現偏高的比值。
 
-比值必須與分子和分母一起看。例如 `ATL 12 / CTL 10` 與 `ATL 120 / CTL 100` 都等於 1.20，但兩者的絕對負荷與運動員情境完全不同。新帳號、歷史資料不足或長期負荷很低時，一次訓練也可能產生很大的比值。
+介面目前呈現四個區段：`<0.8`、`0.8–<1.3`、`1.3–<1.5` 與 `≥1.5`。這些僅是協助回顧相對負荷變化的顯示規則，並不能證明處於「最佳」、「安全」、「危險」、「訓練不足」或「過度訓練」狀態。
 
-## 介面分段如何使用
+## 實務回顧方式
 
-| 介面分段 | 產品界線 | 可以確定的模型關係 |
-| --- | ---: | --- |
-| 較低 | `< 0.8` | ATL 明顯低於 CTL。 |
-| 接近基準 | `0.8–<1.3` | ATL 與 CTL 相對接近。 |
-| 升高 | `1.3–<1.5` | ATL 相對 CTL 更高。 |
-| 最高分段 | `≥ 1.5` | ATL 相對 CTL 的差距更大。 |
-
-這些分段只是介面上的檢查提示。現有研究所使用的演算法與人群差異很大，而且 ACWR 與傷病之間的因果關係尚未建立。因此，這些分段不能證明某個數值「最佳」「安全」「危險」「訓練不足」或「過度訓練」。
-
-## 實際檢查流程
-
-1. 確認 ACWR、ATL 與 CTL 對應同一天。
-2. 同時查看 ATL、CTL 的絕對值，尤其注意 CTL 很小的情況。
-3. 在 PMC 圖表中找出比值從哪一天開始變化。
-4. 回到具體活動，核對負荷、運動類型、日期與感測器資料。
-5. 檢查 FTP、LTHR、配速閾值或負荷來源優先順序是否變更。
-6. 加入課程完成品質、主觀疲勞、睡眠、疼痛、生病與過往傷病等模型外資訊。
+先確認 ACWR、ATL 與 CTL 對應的是同一日期，接著檢視兩者的絕對數值，回頭追溯造成變動的具體活動，並確認閾值與負荷來源優先順序是否曾被修改。最後再結合課表執行品質、睡眠、疼痛、生病訊號、主觀疲勞與過往傷病史，才決定是否調整訓練計畫。
 
 <DocsToolCtaCard
-  title="在 Trainingload.ai 中追查 A:C 的變化"
-  description={
-    <>
-      從比值回到疲勞、體能與具體活動，再結合運動員的主觀與健康訊號做訓練決策。
-    </>
-  }
-  primary={{ href: "/zh-hant/features", label: "查看訓練負荷分析 →" }}
-  secondary={{
-    href: "/zh-hant/docs/metrics/pmc/chronic-training-load",
-    label: "繼續瞭解體能（CTL）",
-  }}
+  title="在 Trainingload.ai 中追溯 A:C 變化"
+  description="從比值回到疲勞（ATL）、體能（CTL）以及背後的實際訓練活動。"
+  primary={{ href: "/zh-hant/features", label: "探索訓練負荷分析 →" }}
+  secondary={{ href: "/zh-hant/docs/metrics/pmc/chronic-training-load", label: "了解體能（CTL）" }}
 />
 
 ## 參考資料
 
-- [Intervals.icu 開發者對體能與疲勞指數公式的說明](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
-- [Gabbett（2016）：訓練—傷病預防悖論](https://doi.org/10.1136/bjsports-2015-095788)
-- [Windt 與 Gabbett（2019）：ACWR 的數學耦合問題](https://doi.org/10.1136/bjsports-2017-098925)
-- [Maupin 等人（2020）：ACWR 與運動傷病關係的系統性回顧](https://doi.org/10.2147/OAJSM.S231405)
-- [Impellizzeri 等人（2020）：ACWR 的概念問題與根本缺陷](https://doi.org/10.1123/ijspp.2019-0864)
-- [Wang 等人（2020）：從 ACWR 得到的活動與傷病分析教訓](https://doi.org/10.1007/s40279-020-01280-1)
+- [Intervals.icu developer explanation of the Fitness and Fatigue formulas](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [Gabbett (2016): The training—injury prevention paradox](https://doi.org/10.1136/bjsports-2015-095788)
+- [Windt and Gabbett (2019): Mathematical coupling in ACWR](https://doi.org/10.1136/bjsports-2017-098925)
+- [Maupin et al. (2020): Systematic review of ACWR and injury risk](https://doi.org/10.2147/OAJSM.S231405)
+- [Impellizzeri et al. (2020): Conceptual issues and fundamental pitfalls](https://doi.org/10.1123/ijspp.2019-0864)
+- [Wang et al. (2020): Lessons learned from ACWR](https://doi.org/10.1007/s40279-020-01280-1)
 
 ## 相關頁面
 

@@ -1,0 +1,283 @@
+---
+title: Kraft-Workout-DSL
+description: Erstelle und validiere eine komplette Krafteinheit in Trainingload.ai im Regelmodus mit Übungen, Satzgruppen, Last, RPE oder RIR und Satzpause.
+keywords:
+  [
+    "Trainingload.ai Kraft-DSL",
+    "Krafteinheit Regeln",
+    "Übungen Sätze Syntax",
+  ]
+---
+
+# Kraft-Workout-DSL
+
+Die Kraft-DSL ist die Textform des Krafteinheiten-Builders. Nutze sie, wenn du eine Einheit von einem Coach übernimmst, mehrere Satzgruppen schnell anpassen möchtest oder die genaue Struktur prüfen willst, die Trainingload.ai speichert. Sie beschreibt genau eine statische Einheit; jede Übung enthält eine oder mehrere Aufwärm- oder Arbeitssatzgruppen.
+
+## Bevor du startest
+
+- Öffne eine bearbeitbare Einheit und wähle **Krafttraining** als Sportart.
+- Wechsle auf den Tab **Regeln**. Der Tab **Manuell** bearbeitet dieselbe Struktur visuell.
+- Kläre vorab, welche Lasten bekannt sind. Nutze `open`, statt Gewichte oder Prozentwerte zu erfinden.
+- Hinterlege Coaching-Erklärungen in den Einheiten-Notizen. Die DSL enthält ausschließlich die Trainingsvorgabe, keinen Fließtext.
+
+## Mit der kleinsten gültigen Einheit starten
+
+Füge Folgendes unter **Regeln** ein:
+
+```text
+exercise "Goblet Squat" equipment dumbbell {
+  work 3x8 open rir 3 rest 90s
+}
+```
+
+Wähle danach **Eingabe validieren**. Dieses Beispiel bedeutet:
+
+- eine Übung namens „Goblet Squat“;
+- Ausrüstung: Kurzhantel (`dumbbell`);
+- drei Arbeitssätze mit je acht Wiederholungen;
+- keine feste Gewichtsvorgabe;
+- drei Wiederholungen in Reserve (RIR 3);
+- 90 Sekunden Pause nach jedem Satz.
+
+Jede gültige Einheit benötigt mindestens eine Übung. Jede Übung braucht einen nicht leeren Namen in Anführungszeichen und mindestens eine `work`-Zeile.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Editor aus dem Planzeitplan öffnen"
+  description="Wechsle im Manuellen Plan-Builder zur Datumsauswahl und wähle am gewünschten Tag + Einheit."
+  route="Pläne → Manueller Plan-Builder → Datumsauswahl → + Einheit"
+/>
+
+<DocsScreenshot
+  id="strength-dsl-rules-input"
+  title="Kraft-DSL im Regelmodus"
+  description="Eine gültige Einheit mit zwei Übungen nach der Validierung samt gespeicherter Struktur in der Kraftvorschau."
+  route="Pläne → Manuelle Einheit → Krafttraining → Regeln"
+/>
+
+## Dokumentaufbau verstehen
+
+Eine vollständige Einheit hat drei Ebenen:
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+```
+
+1. `duration` und `session rpe` beschreiben die gesamte Einheit. Beide sind optional und dürfen jeweils höchstens einmal vorkommen.
+2. `exercise "…" {` eröffnet einen Übungsblock. Die schließende Klammer `}` beendet ihn.
+3. `warmup`- und `work`-Zeilen beschreiben Satzgruppen innerhalb dieser Übung.
+
+Leerzeilen sind erlaubt. Kommentare und gewöhnlicher Fließtext sind nicht Teil der Grammatik.
+
+## Einheitsweite Angaben hinzufügen
+
+Setze diese Zeilen vor die erste Übung:
+
+```text
+duration 50m
+session rpe 6
+```
+
+`duration` akzeptiert Sekunden, Minuten oder Stunden, z. B. `45s`, `50m` oder `1.5h`. Gemeint ist die geplante Dauer der gesamten Einheit, nicht eines einzelnen Satzes.
+
+`session rpe` akzeptiert eine Zahl von 1 bis 10 und beschreibt die geplante Gesamtbeanspruchung der Einheit. Das unterscheidet sich von `rpe` in einer Satzgruppen-Zeile, das die Zielanstrengung dieser konkreten Sätze angibt.
+
+## Eine Übung anlegen
+
+Die Grundform lautet:
+
+```text
+exercise "Romanian Deadlift" {
+  work 3x8 open rir 2 rest 2m
+}
+```
+
+Der Übungsname muss in doppelten Anführungszeichen stehen und darf nicht leer sein. Namen können in deiner gewünschten Sprache stehen. Ein doppeltes Anführungszeichen im Namen wird als `\"` und ein Backslash als `\\` maskiert.
+
+Die Ausrüstung ist optional:
+
+```text
+exercise "Romanian Deadlift" equipment barbell {
+```
+
+Ein Ausrüstungscode darf Klein- und Großbuchstaben, Ziffern, Bindestriche und Unterstriche enthalten. Beim Speichern wird der Code auf Kleinbuchstaben normalisiert. Verwende nach Möglichkeit konsistente Codes wie `barbell`, `dumbbell`, `bodyweight`, `cable` oder `machine`.
+
+## Eine Satzgruppe schreiben
+
+Für gut lesbare, kanonische DSL empfiehlt sich diese Reihenfolge:
+
+```text
+work PRESCRIPTION LOAD EFFORT rest DURATION
+```
+
+Pflicht sind nur `warmup` oder `work` sowie die Vorgabe (`PRESCRIPTION`). Fehlt die Lastangabe, wird standardmäßig `open` angenommen – das explizite Schreiben von `open` macht die Absicht jedoch klarer. Anstrengung und Pause sind optional.
+
+| Bestandteil | Akzeptierte Form                         | Beispiel                                              |
+| ----------- | ---------------------------------------- | ----------------------------------------------------- |
+| Satztyp     | `warmup` oder `work`                     | `work`                                                |
+| Vorgabe     | feste Wdh., Bereich, AMRAP oder Zeit     | `3x5`, `3x8-12`, `1x5+`, `3x45s`                      |
+| Last        | offen, Gewicht, Prozent 1RM, Körpergew.  | `open`, `weight 80kg`, `weight 75%1rm`, `bodyweight`  |
+| Anstrengung | RPE oder RIR                             | `rpe 7`, `rir 2`                                      |
+| Pause       | Zeit nach `rest`                         | `rest 90s`, `rest 3m`                                 |
+
+Eine Übung darf mehrere Satzgruppen enthalten:
+
+```text
+exercise "Back Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+```
+
+Aufwärmgruppen sind optional. Mindestens eine Arbeitssatzgruppe ist jedoch Pflicht – eine Übung, die nur `warmup`-Zeilen enthält, ist ungültig.
+
+## Wiederholungs- oder Zeitvorgabe wählen
+
+| Ziel                   | Syntax   | Bedeutung                                              |
+| ---------------------- | -------- | ------------------------------------------------------ |
+| Feste Wiederholungen   | `3x5`    | 3 Sätze mit je 5 Wiederholungen                        |
+| Wiederholungsbereich   | `3x8-12` | 3 Sätze mit je 8 bis 12 Wiederholungen                 |
+| AMRAP                  | `1x5+`   | 1 Satz mit AMRAP-Markierung und Basis von 5 Wdh.       |
+| Zeitsatz in Sekunden   | `3x45s`  | 3 Sätze à 45 Sekunden                                  |
+| Zeitsatz in Minuten    | `2x1.5m` | 2 Sätze à 90 Sekunden                                  |
+
+Satzanzahl und Wiederholungswerte müssen positiv sein. Bei einem Bereich steht immer der kleinere Wert zuerst.
+
+## Last wählen
+
+### Offene Last
+
+```text
+work 3x10 open rir 3 rest 90s
+```
+
+Nutze `open`, wenn du das Gewicht am Trainingstag selbst wählen möchtest oder keine belastbare Trainingshistorie vorliegt.
+
+### Festes Gewicht
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x5 weight 175lb rpe 7 rest 3m
+```
+
+Schreibe Zahl und `kg` bzw. `lb` ohne Leerzeichen dazwischen.
+
+### Prozent des 1RM
+
+```text
+work 4x4 weight 80%1rm rest 3m
+```
+
+Nutze diese Form nur, wenn für die Übung ein bekanntes, aktuelles 1RM vorliegt. Zulässig sind Prozentwerte größer als 0 und höchstens 100.
+
+### Körpergewicht und Körpergewicht-Offset
+
+```text
+work 3x8 bodyweight rir 2 rest 90s
+work 3x6 bodyweight +10kg rpe 8 rest 2m
+work 3x8 bodyweight -20kg rir 2 rest 2m
+```
+
+`+10kg` steht für Zusatzgewicht. `-20kg` steht für Unterstützung (z. B. Klimmzugband oder Maschine), die die effektive Körpergewichtslast verringert.
+
+## RPE oder RIR wählen
+
+Verwende pro Satzgruppen-Zeile immer nur ein Anstrengungsmodell:
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x8 open rir 2 rest 2m
+```
+
+- `rpe` akzeptiert Werte von 1–10.
+- `rir` akzeptiert Werte von 0–10.
+- Verwende nicht beide Angaben in derselben Zeile.
+
+RPE und RIR sind Steuerungshinweise, keine automatische Gewichtsberechnung. `rpe 7` führt nicht dazu, dass Trainingload.ai ein Gewicht erfindet oder automatisch anpasst.
+
+## Eine vollständige Einheit aufbauen
+
+Übungsnamen sind Nutzerinhalte und müssen daher nicht auf Englisch stehen. Die DSL-Schlüsselwörter bleiben dagegen Englisch, da sie die feste Grammatik bilden.
+
+```text
+duration 45m
+session rpe 6
+
+exercise "Barbell Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+
+exercise "Push-up" equipment bodyweight {
+  work 3x8-12 bodyweight rir 2 rest 90s
+}
+
+exercise "Plank" equipment bodyweight {
+  work 3x45s bodyweight rest 60s
+}
+```
+
+Dieses Beispiel erzeugt drei Übungen: eine Kniebeuge mit Gewicht und fester Wiederholungszahl, eine Körpergewichtsübung mit Wiederholungsbereich sowie eine zeitbasierte Halteübung.
+
+## Validieren, vergleichen und speichern
+
+1. Wähle **Eingabe validieren**.
+2. Lies immer zuerst den obersten gemeldeten Zeilenfehler, bevor du weitere Zeilen änderst.
+3. Vergleiche die Kraftvorschau mit der geplanten Anzahl an Übungen und Arbeitssätzen.
+4. Wechsle bei Bedarf auf **Manuell**, um die geparsten Felder visuell zu kontrollieren.
+5. Kehre zu **Regeln** zurück und prüfe, ob die normalisierte DSL inhaltlich noch exakt deiner Absicht entspricht.
+6. Wähle **Entwurf speichern**, öffne die Einheit erneut und prüfe sie ein weiteres Mal.
+
+Bei der Normalisierung werden Schlüsselwörter, Ausrüstungscodes und Einheiten unter Umständen kleingeschrieben oder ein explizites `open` ergänzt. Das verändert die Einheit nicht. Eine geänderte Übung, Satzanzahl, Vorgabe, Last, Anstrengung oder Pause hingegen schon.
+
+## Was die DSL nicht unterstützt
+
+Die Kraft-DSL ist eine statische Einheitsvorgabe. Verwende darin keines der folgenden Elemente:
+
+- `if/else` oder ausführbare Logik;
+- wöchentliche Progressions- oder Deload-Regeln;
+- verschachtelte Übungsblöcke;
+- kommagetrennte Attribute;
+- ausführbare Progressionsskripte;
+- Notizen oder Coaching-Absätze.
+
+Lege sprachliche Hinweise in den Einheiten-Notizen ab. Belasse nicht unterstützte externe Skripte in ihrem Ursprungssystem, statt sie verfälscht umzuschreiben.
+
+## Einheit überprüfen
+
+- Als Sportart ist **Krafttraining** gewählt, keine Ausdauersportart.
+- Jede Übung hat einen nicht leeren Namen in Anführungszeichen.
+- Jede Übung enthält mindestens eine `work`-Gruppe.
+- Wiederholungsbereiche sind vom kleineren zum größeren Wert geordnet.
+- Jede Satzgruppe nutzt höchstens eine Lastangabe und ein Anstrengungsmodell.
+- Die Vorschau zeigt die beabsichtigten Übungen und Arbeitssätze.
+- Nach dem erneuten Öffnen bleibt die gespeicherte Einheit inhaltlich unverändert.
+
+## Fehlerbehebung
+
+| Fehler oder Symptom                                        | Lösung                                                                                                 |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Exercise name cannot be empty                              | Setze einen nicht leeren Namen in doppelte Anführungszeichen, z. B. `exercise "Back Squat" {`.         |
+| Strength workout requires at least one exercise            | Füge mindestens einen vollständigen `exercise`-Block hinzu.                                            |
+| Exercise requires at least one work set                    | Füge eine `work`-Zeile hinzu; reine Aufwärmgruppen ergeben keine gültige Übung.                        |
+| Invalid set prescription                                   | Nutze `3x5`, `3x8-12`, `1x5+` oder eine Zeitform wie `3x45s`.                                          |
+| Maximum reps must be greater than or equal to minimum reps | Ändere z. B. `3x12-8` in `3x8-12`.                                                                     |
+| Use either RPE or RIR, not both                            | Entferne eines der beiden Anstrengungsziele aus der Satzgruppen-Zeile.                                 |
+| Invalid weight                                             | Schreibe `weight 80kg`, `weight 175lb` oder `weight 80%1rm` ohne Leerzeichen im Wert.                  |
+| Unsupported set attribute                                  | Entferne Fließtext, Kommas, unbekannte Schlüsselwörter oder dynamische Logik aus der Satzzeile.        |
+| Exercise is missing a closing brace                        | Ergänze eine schließende Klammer `}` nach der letzten Satzgruppe der Übung.                            |
+| Sportartwechsel leert oder ersetzt den Editor              | Kopiere oder speichere die DSL vor dem Wechsel, da Ausdauer und Kraft eigene Strukturen verwenden.     |
+
+## Nächste Schritte
+
+- Nutze [Krafteinheiten](/de/docs/planning/strength-workouts) für den visuellen Builder und Grundlagen der Trainingsgestaltung.
+- Lies [Manueller Einheiten-Editor](/de/docs/planning/manual-workout-editor), um den Regelmodus und den manuellen Modus zu vergleichen.
+- Füge die Einheit über [Trainingsplan erstellen](/de/docs/guide/create-training-plan) zu einem Plan hinzu.

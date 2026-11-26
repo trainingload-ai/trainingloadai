@@ -235,7 +235,7 @@ export async function transcodeTrackFile(
         { filename: options.filename },
       );
     }
-    assertTrackFileConvertible(source, targetFormat);
+    assertTrackFileConvertible(source, targetFormat, sourceFormat);
     const content = await trackSwap.encodeActivity(source, {
       format: targetFormat,
     });

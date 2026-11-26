@@ -1,8 +1,18 @@
+import { Suspense } from "react";
 import { headers } from "next/headers";
 import { getV2HomeServer } from "@/api/v2-home";
 import V2HomePageClient from "./home/V2HomePageClient";
+import { HomePageSkeleton } from "./_home/HomePageSkeleton";
 
-export default async function LocaleHomePage() {
+export default function LocaleHomePage() {
+  return (
+    <Suspense fallback={<HomePageSkeleton />}>
+      <HomeWithServerData />
+    </Suspense>
+  );
+}
+
+async function HomeWithServerData() {
   try {
     const requestHeaders = await headers();
     const initialData = await getV2HomeServer(requestHeaders);

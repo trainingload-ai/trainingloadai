@@ -6,30 +6,31 @@ import type { Activity } from "@/api/activities";
 import type { PlanWorkout } from "@/api/plans";
 import {
   getPlanWorkoutDisplayKind,
-  type PlanWorkoutDisplayKind,
+  getPlanWorkoutStatusLabel,
 } from "@/components/plan/detail/plan-detail-utils";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import {
+  CalendarDateContextMenu,
+  CalendarWorkoutContextMenu,
+  type CalendarCreateKind,
+} from "./calendar-context-actions";
+import {
+  CALENDAR_WORKOUT_DRAG,
+  type CalendarProposalMark,
+  canMoveCalendarWorkout,
+} from "./calendar-move-model";
+import { calendarProposalStyle } from "./calendar-proposal-appearance";
+import { calendarDropDayClass, type CalendarDropAppearance } from "./calendar-workout-drop";
+import { CalendarWorkoutPreview, calendarWorkoutStatusClassName } from "./CalendarWorkoutPreview";
 
-function workoutStatusClassName(kind: PlanWorkoutDisplayKind) {
-  switch (kind) {
-    case "done":
-      return "border-[hsl(var(--emerald-500))] bg-[hsl(var(--emerald-100)/0.9)] text-[hsl(var(--emerald-900))] dark:border-[hsl(var(--emerald-400))] dark:bg-[hsl(var(--emerald-500)/0.2)] dark:text-[hsl(var(--emerald-100))]";
-    case "incomplete":
-      return "border-[hsl(var(--amber-500))] bg-[hsl(var(--amber-100)/0.95)] text-[hsl(var(--amber-900))] dark:border-[hsl(var(--amber-400))] dark:bg-[hsl(var(--amber-500)/0.2)] dark:text-[hsl(var(--amber-100))]";
-    case "inProgress":
-      return "border-[hsl(var(--sky-500))] bg-[hsl(var(--sky-100)/0.95)] text-[hsl(var(--sky-900))] dark:border-[hsl(var(--sky-400))] dark:bg-[hsl(var(--sky-500)/0.2)] dark:text-[hsl(var(--sky-100))]";
-    case "moved":
-      return "border-[hsl(var(--violet-300)/0.45)] bg-[hsl(var(--violet-50)/0.3)] text-muted-foreground opacity-60 dark:border-[hsl(var(--violet-400)/0.25)] dark:bg-[hsl(var(--violet-500)/0.06)]";
-    case "skipped":
-      return "border-neutral-300/55 bg-neutral-100/40 text-muted-foreground opacity-55 dark:border-neutral-700/50 dark:bg-muted/15";
-    default:
-      return "border-[hsl(var(--teal-500))] bg-[hsl(var(--teal-100)/0.95)] text-[hsl(var(--teal-900))] dark:border-[hsl(var(--teal-400))] dark:bg-[hsl(var(--teal-500)/0.2)] dark:text-[hsl(var(--teal-100))]";
-  }
-}
+export type CalendarWorkoutPresentation = {
+  caption?: string;
+  mark?: CalendarProposalMark;
+  contextMenu?: (trigger: React.ReactElement) => React.ReactElement;
+};
 
 type CalendarDayButtonProps = {
-  notGenerated?: boolean;
   date: Dayjs;
   isCurrentMonth: boolean;
   isToday: boolean;
@@ -41,10 +42,23 @@ type CalendarDayButtonProps = {
   inPlanRange?: boolean;
   onSelect: () => void;
   onSelectWorkout?: (workout: PlanWorkout) => void;
+  workoutDrag?: {
+    acceptsDropEvent: boolean;
+    appearance?: CalendarDropAppearance;
+    onStart: (workout: PlanWorkout) => void;
+    onHover: () => void;
+    onLeave: () => void;
+    onDrop: (workoutId: string) => void;
+  };
+  presentWorkout?: (workout: PlanWorkout) => CalendarWorkoutPresentation;
+  onCreate?: (kind: CalendarCreateKind) => void;
+  onAdjustSchedule?: () => void;
+  createWorkoutOnly?: boolean;
+  onRequestMove?: (workout: PlanWorkout, trigger?: HTMLElement | null) => void;
+  getMoveWorkout?: (workout: PlanWorkout) => PlanWorkout | undefined;
 };
 
 export function CalendarDayButton({
-  notGenerated,
   date,
   isCurrentMonth,
   isToday,
@@ -52,65 +66,128 @@ export function CalendarDayButton({
   activities = [],
   planWorkouts = [],
   competitionLaneCount = 0,
-  tss = 0,
+  tss,
   inPlanRange = false,
   onSelect,
   onSelectWorkout,
+  workoutDrag,
+  presentWorkout,
+  onCreate,
+  onAdjustSchedule,
+  createWorkoutOnly,
+  onRequestMove,
+  getMoveWorkout,
 }: CalendarDayButtonProps) {
   const t = useTranslations("CalendarExperience");
-  const rollingT = useTranslations("RollingPlan");
-  const hasPlan = planWorkouts.length > 0;
-  const primaryPlanWorkout = planWorkouts[0];
-  const planDetailTitle =
-    primaryPlanWorkout?.notes?.trim() ||
-    primaryPlanWorkout?.name?.trim() ||
-    primaryPlanWorkout?.text?.trim() ||
-    t("plannedTraining");
-  const getSportLabel = React.useCallback(
-    (sportType?: string) => {
-      switch (sportType) {
-        case "RUN":
-          return t("sportLabels.run");
-        case "CYCLING":
-          return t("sportLabels.cycling");
-        case "SWIM":
-          return t("sportLabels.swim");
-        case "STRENGTH":
-          return t("sportLabels.strength");
-        default:
-          return t("sportLabels.other");
-      }
-    },
-    [t],
-  );
-  const primaryWorkoutKind = primaryPlanWorkout
-    ? getPlanWorkoutDisplayKind(primaryPlanWorkout)
-    : "upcoming";
-  const primaryWorkoutLabel = t("sportTrainingName", {
-    sport: getSportLabel(primaryPlanWorkout?.sportType),
-  });
+  const tPlan = useTranslations("V2PlanDetailPage");
+  const renderWorkout = (workout: PlanWorkout) => {
+    const title = workout.name?.trim() || t("plannedTraining");
+    const status = getPlanWorkoutDisplayKind(workout);
+    const presentation = presentWorkout?.(workout);
+    const mark = presentation?.mark;
+    const source = getMoveWorkout ? getMoveWorkout(workout) : workout;
+    const draggable = Boolean(workoutDrag && canMoveCalendarWorkout(source));
+    const interaction = {
+      "data-calendar-workout": workout.id,
+      draggable,
+      onDragStart: draggable && workoutDrag && source
+        ? (event: React.DragEvent<HTMLElement>) => {
+            event.dataTransfer.setData(CALENDAR_WORKOUT_DRAG, source.id);
+            event.dataTransfer.effectAllowed = "move";
+            event.currentTarget.focus({ preventScroll: true });
+            workoutDrag.onStart(source);
+          }
+        : undefined,
+      onClick: (event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation();
+        if (onSelectWorkout) onSelectWorkout(workout);
+        else onSelect();
+      },
+    };
+    const dragClass = draggable && "cursor-grab active:cursor-grabbing";
+    const card = (
+      <button
+        {...interaction}
+        type="button"
+        data-calendar-change={mark?.side}
+        style={calendarProposalStyle(mark, "card")}
+        aria-label={presentation?.caption ? `${title} · ${presentation.caption}` : title}
+        aria-description={mark ? undefined : getPlanWorkoutStatusLabel(tPlan, status)}
+        className={cn(
+          "pointer-events-auto flex min-w-0 flex-col gap-1 rounded-xs p-1 text-start hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:brightness-110",
+          !mark && calendarWorkoutStatusClassName(status),
+          dragClass,
+        )}
+      >
+        <CalendarWorkoutPreview workout={workout} title={title} caption={presentation?.caption} />
+      </button>
+    );
+    if (presentation?.contextMenu) return presentation.contextMenu(card);
+    return onCreate && !createWorkoutOnly ? (
+      <CalendarWorkoutContextMenu workout={workout} trigger={card} onMove={onRequestMove} />
+    ) : card;
+  };
 
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
+  const dateKey = date.format("YYYY-MM-DD");
+  const dropHandlers = {
+    "data-calendar-date": dateKey,
+    "data-workout-drop": workoutDrag?.appearance,
+    onDragOver: workoutDrag?.acceptsDropEvent
+      ? (event: React.DragEvent<HTMLElement>) => {
+          if (!event.dataTransfer.types.includes(CALENDAR_WORKOUT_DRAG)) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+          workoutDrag.onHover();
+        }
+      : undefined,
+    onDragLeave: workoutDrag?.appearance === "target"
+      ? (event: React.DragEvent<HTMLElement>) => {
+          const next = event.relatedTarget;
+          if (next instanceof Node && event.currentTarget.contains(next)) return;
+          workoutDrag.onLeave();
+        }
+      : undefined,
+    onDrop: workoutDrag?.acceptsDropEvent
+      ? (event: React.DragEvent<HTMLElement>) => {
+          const workoutId = event.dataTransfer.getData(CALENDAR_WORKOUT_DRAG);
+          if (!workoutId) return;
+          event.preventDefault();
+          workoutDrag.onDrop(workoutId);
+        }
+      : undefined,
+  };
+  const dropClass = workoutDrag?.appearance && calendarDropDayClass[workoutDrag.appearance];
+  const withDateMenu = (cell: React.ReactElement) =>
+    onCreate ? <CalendarDateContextMenu trigger={cell} onCreate={onCreate} workoutOnly={createWorkoutOnly} onAdjustSchedule={onAdjustSchedule} /> : cell;
+
+  const dayCell = (
+    <div
+      {...dropHandlers}
+      tabIndex={onCreate ? -1 : undefined}
       className={cn(
-        "group relative flex h-[100px] flex-col items-center rounded-md p-1 text-center transition-all md:h-[112px] md:items-stretch md:px-2.5 md:py-2 md:text-left",
-        "touch-manipulation select-none",
+        "group relative flex min-h-[100px] min-w-0 flex-col items-center rounded-md p-1 text-center transition-[background-color,box-shadow] duration-200 ease-out md:min-h-[112px] md:items-stretch md:px-2.5 md:py-2 md:text-left",
+        "touch-manipulation select-none ring-inset",
         isSelected
           ? "bg-card text-foreground ring-2 ring-ring"
           : inPlanRange
             ? "bg-[hsl(var(--emerald-100)/0.75)] text-foreground hover:bg-[hsl(var(--emerald-100)/0.9)] dark:bg-[hsl(var(--emerald-900)/0.32)] dark:hover:bg-[hsl(var(--emerald-900)/0.42)]"
             : "bg-card text-foreground hover:bg-secondary",
         !isCurrentMonth && !isSelected && "bg-secondary",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        dropClass,
       )}
     >
-      <div className="relative z-10 flex w-full items-start justify-between gap-2">
+      <button
+        type="button"
+        aria-label={dateKey}
+        aria-pressed={isSelected}
+        onClick={onSelect}
+        className="absolute inset-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+      />
+      <div className="pointer-events-none relative z-10 flex w-full items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "text-[15px] font-semibold tracking-tight md:text-[15px]",
+              "text-[15px] font-semibold tracking-tight transition-colors duration-200 ease-out md:text-[15px]",
               isCurrentMonth || isSelected
                 ? "text-foreground"
                 : "text-muted-foreground",
@@ -129,36 +206,19 @@ export function CalendarDayButton({
             />
           ) : null}
         </div>
-        <div
-          className={cn(
-            "text-mobile-unit pc:text-[10px] font-semibold tabular-nums",
-            tss > 0 ? "text-load" : "text-muted-foreground",
-          )}
-        >
-          {tss > 0 ? Math.round(tss) : "--"}
-        </div>
-      </div>
-
-      <div className="relative z-10 mt-auto flex min-h-1 items-center justify-center gap-1 md:hidden">
-        {hasPlan ? (
-          <span
+        {tss !== undefined ? (
+          <div
             className={cn(
-              "h-1.5 w-4 rounded-full bg-slate-300 opacity-90 dark:bg-slate-700",
+              "text-mobile-unit pc:text-[10px] font-semibold tabular-nums",
+              tss > 0 ? "text-load" : "text-muted-foreground",
             )}
-          />
-        ) : null}
-
-        {activities.length > 0 ? (
-          <span
-            className="text-mobile-micro font-semibold leading-none text-muted-foreground pc:text-[9px]"
-            aria-label={`${t("activityTab")} +${activities.length}`}
           >
-            +{activities.length}
-          </span>
+            {tss > 0 ? Math.round(tss) : "--"}
+          </div>
         ) : null}
       </div>
 
-      <div className="relative z-10 hidden md:flex md:h-full md:flex-col">
+      <div className="pointer-events-none relative z-10 flex w-full min-w-0 flex-col">
         <div
           className="mt-1 flex flex-1 flex-col gap-1"
           style={
@@ -167,45 +227,9 @@ export function CalendarDayButton({
               : undefined
           }
         >
-          {notGenerated && !hasPlan ? <span className="text-mobile-caption pc:text-[11px] text-muted-foreground">{rollingT("notGenerated")}</span> : null}
-          {hasPlan ? (
-            <div
-              role={onSelectWorkout ? "button" : undefined}
-              tabIndex={onSelectWorkout ? 0 : undefined}
-              onClick={
-                onSelectWorkout && primaryPlanWorkout
-                  ? (event) => {
-                      event.stopPropagation();
-                      onSelectWorkout(primaryPlanWorkout);
-                    }
-                  : undefined
-              }
-              onKeyDown={
-                onSelectWorkout && primaryPlanWorkout
-                  ? (event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        onSelectWorkout(primaryPlanWorkout);
-                      }
-                    }
-                  : undefined
-              }
-              className={cn(
-                "rounded-r-xs border-l-2 px-1.5 py-1 text-mobile-caption pc:text-[11px] font-medium",
-                workoutStatusClassName(primaryWorkoutKind),
-                onSelectWorkout && "cursor-pointer hover:text-foreground",
-              )}
-              title={`${primaryWorkoutLabel} · ${planDetailTitle}`}
-            >
-              <div className="truncate">{primaryWorkoutLabel}</div>
-              {planWorkouts.length > 1 ? (
-                <div className="mt-0.5 text-mobile-unit pc:text-[10px] text-muted-foreground">
-                  +{planWorkouts.length - 1} {t("trainingTab")}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+          {planWorkouts.map((workout) => (
+            <React.Fragment key={workout.id}>{renderWorkout(workout)}</React.Fragment>
+          ))}
 
           {activities.length > 0 ? (
             <div className="flex h-5 min-w-0 items-center truncate whitespace-nowrap rounded-md bg-muted px-2 text-mobile-unit pc:text-[10px] font-semibold text-secondary-foreground md:text-mobile-caption">
@@ -214,6 +238,7 @@ export function CalendarDayButton({
           ) : null}
         </div>
       </div>
-    </button>
+    </div>
   );
+  return withDateMenu(dayCell);
 }

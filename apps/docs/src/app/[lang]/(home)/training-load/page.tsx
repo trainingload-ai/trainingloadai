@@ -1,3 +1,4 @@
+import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
@@ -86,7 +87,9 @@ export default async function TrainingLoadPage({
   const appUrl = `https://app.trainingload.ai/${lang}`;
   const pageUrl = `${siteUrl}${prefix}/training-load`;
   const screenshotLocale = ["zh", "zh-hant", "ja"].includes(lang) ? lang : "en";
-  const productScreenshot = `/5k-training-plan/web-home-dark-v2-${screenshotLocale}.png`;
+  const productScreenshot = productScreenshotUrl(
+    `/5k-training-plan/web-home-dark-v2-${screenshotLocale}.png`,
+  );
   const ui = t.raw("ui") as Record<string, string>;
   const loop = t.raw("loop") as string[][];
   const cards = t.raw("cards") as string[][];

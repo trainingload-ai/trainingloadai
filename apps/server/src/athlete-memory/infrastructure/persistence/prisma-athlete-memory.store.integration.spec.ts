@@ -144,6 +144,66 @@ describe('Athlete Memory PostgreSQL invariants', () => {
     expect(await prisma.athleteMemoryEvent.count()).toBe(1);
   });
 
+  it('excludes only evidence from the input already present in the turn', async () => {
+    const userId = 'athlete-a';
+    const current = await source(userId, '-current');
+    const other = await source(userId, '-other');
+    const asOf = new Date();
+    const excluded = current.message.id;
+    const readFingerprint = () => store.ambientFingerprint(userId, asOf, excluded);
+    const readFacts = () => store.findFacts({
+      userId,
+      statuses: ['ACTIVE'],
+      ambientAsOf: asOf,
+      excludeSourceMessageId: excluded,
+      take: 10,
+    });
+    const publish = (input: typeof current, claim: string) => store.applyOperations({
+      jobId: input.job.id,
+      leaseOwner: 'test-worker',
+      userId,
+      sourceMessageId: input.message.id,
+      sourceHash: 'a'.repeat(64),
+      assertedAt: input.message.createdAt,
+      timezone: 'Asia/Shanghai',
+      model: 'test-model',
+      policyVersion: 'athlete-memory-v1',
+      decision: {},
+      operations: [{
+        ...createOperation,
+        kind: 'CONSTRAINT',
+        category: 'schedule_constraint',
+        claim,
+        decayProfile: 'STABLE',
+      }],
+    });
+
+    const initial = await readFingerprint();
+    expect(await store.contextInputStatus(userId, excluded)).toEqual([
+      { id: other.job.id, status: 'RUNNING' },
+    ]);
+
+    await publish(current, 'Train three times a week');
+    expect(await readFingerprint()).toBe(initial);
+    expect(await readFacts()).toEqual([]);
+    expect(await store.ambientFingerprint(userId, asOf)).not.toBe(initial);
+
+    await publish(other, 'No training on Mondays');
+    expect(await readFingerprint()).not.toBe(initial);
+    expect((await readFacts()).map((fact) => fact.claim)).toEqual(['No training on Mondays']);
+
+    const ownFact = await prisma.athleteMemoryFact.findFirstOrThrow({
+      where: { evidence: { some: { sourceMessageId: excluded } } },
+    });
+    await store.correctFact({
+      userId,
+      factId: ownFact.id,
+      expectedVersion: ownFact.version,
+      claim: 'Train twice a week',
+    });
+    expect((await readFacts()).map((fact) => fact.claim)).toContain('Train twice a week');
+  });
+
   it('rejects cross-user targets and preserves the original fact', async () => {
     const first = await source('athlete-a', '-a');
     await store.applyOperations({

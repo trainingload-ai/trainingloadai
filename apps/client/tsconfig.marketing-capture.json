@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.coach-e2e.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": ".next-marketing-capture/cache/tsconfig.tsbuildinfo"
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next-marketing-capture/types/**/*.ts"
+  ]
+}

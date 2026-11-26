@@ -1,5 +1,6 @@
 "use client";
 
+import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
@@ -81,7 +82,7 @@ const HOME_PREVIEW_COPY: Record<PreviewLocale, PreviewCopy> = {
   },
   "zh-hant": {
     webAlt: "Trainingload.ai Web 首頁展示今日建議、目前計畫與訓練狀態",
-    mobileAlt: "Trainingload.ai iOS 今日頁展示智慧建議、當天訓練與本週負荷",
+    mobileAlt: "Trainingload.ai iOS 今日頁展示今日建議、當天訓練與本週負荷",
   },
   ja: {
     webAlt:
@@ -123,13 +124,13 @@ function previewAssets(
 
   if (surface === "analysis") {
     return {
-      web: `/5k-training-plan/web-plan${suffix}-v2-${locale}.png`,
+      web: productScreenshotUrl(`/5k-training-plan/web-plan${suffix}-v2-${locale}.png`),
       mobile: `/5k-training-plan/mobile-analysis${suffix}-v2-${locale}.png`,
     };
   }
 
   return {
-    web: `/5k-training-plan/web-${surface}${suffix}-v2-${locale}.png`,
+    web: productScreenshotUrl(`/5k-training-plan/web-${surface}${suffix}-v2-${locale}.png`),
     mobile: `/5k-training-plan/mobile-${surface}${suffix}-v2-${locale}.png`,
   };
 }
@@ -198,6 +199,13 @@ function ProductScreens({
   const appPath = APP_PATH_BY_SURFACE[surface];
   const destination = publicDemoDestination(lang, appPath);
 
+  const altSeparator =
+    locale === "zh" || locale === "zh-hant"
+      ? "；"
+      : locale === "ja"
+        ? " / "
+        : "; ";
+
   return (
     <figure
       className={[
@@ -206,7 +214,7 @@ function ProductScreens({
           ? "max-w-[1080px] pb-[7%] pr-[7.5%]"
           : "max-w-[860px] pb-[7%] pr-[7%]",
       ].join(" ")}
-      aria-label={`${copy.webAlt}；${copy.mobileAlt}`}
+      aria-label={`${copy.webAlt}${altSeparator}${copy.mobileAlt}`}
     >
       <ProductBrowserWindow
         address={destination.address}

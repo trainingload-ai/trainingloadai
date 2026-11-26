@@ -3,7 +3,15 @@
 import { getRestoredPlanDecisionApply } from "@shared/plan-proposal-receipt";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 import { useChat, type UseChatHelpers } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { z } from "zod";
@@ -28,6 +36,7 @@ import { resolveCoachVisibleErrorMessage } from "./coach-visible-error";
 import type { CoachUiMessage, CoachUiDataParts } from "@/lib/ai-coach-ui-parts";
 import {
   aiCoachMessagesQueryKey,
+  fetchCoachSessionMessages,
   invalidateCoachSessionLists,
 } from "@/api/ai-coach";
 import { allocateClientCoachSid } from "./coach-sid-model";
@@ -52,6 +61,7 @@ import {
 } from "./coach-runtime-entry";
 import { CoachSeedAutoStarter } from "./coach-seed-auto-starter";
 import { CoachThread } from "./coach-thread";
+import { CoachConversationWorkspace } from "./coach-conversation-workspace";
 import { readAiOperationFromSse } from "./coach-operation-event";
 import {
   readStoredSessionIntent,
@@ -60,9 +70,15 @@ import {
   writeStoredThinkingEnabled,
 } from "./coach-runtime-storage";
 import { markCoachMessagesStale } from "./coach-message-cache";
-import { COACH_TURN_ERROR_PART_TYPE } from "@shared/coach-turn-error";
+import { coachRowsToUiMessages } from "./coach-rows-to-ui-messages";
+import {
+  COACH_QUESTION_STALE_ERROR_CODE,
+  COACH_TURN_ERROR_PART_TYPE,
+} from "@shared/coach-turn-error";
 
 export type CoachConversationRuntimeProps = {
+  children?: ReactNode;
+  threadContainer?: HTMLElement | null;
   sid: string;
   initialMessages: CoachUiMessage[];
   variant?: "page" | "embedded";
@@ -79,6 +95,8 @@ export type CoachConversationRuntimeProps = {
 };
 
 export function CoachRuntimeProvider({
+  children,
+  threadContainer,
   sid,
   initialMessages,
   variant = "page",
@@ -112,6 +130,8 @@ export function CoachRuntimeProvider({
   // The server streamed an inline failure part for the current turn; the card
   // in the transcript is the error state, so skip the banner and toast.
   const inlineTurnErrorRef = useRef(false);
+  const staleQuestionRef = useRef(false);
+  const historyRefreshRef = useRef<AbortController | null>(null);
   const chatRef = useRef<UseChatHelpers<CoachUiMessage> | null>(null);
   const mountedRef = useRef(false);
   const entryRef = useRef(entry);
@@ -140,6 +160,7 @@ export function CoachRuntimeProvider({
     () => () => {
       operationPollAbortRef.current?.abort();
       operationPollAbortRef.current = null;
+      historyRefreshRef.current?.abort();
     },
     [],
   );
@@ -238,6 +259,8 @@ export function CoachRuntimeProvider({
         };
       },
       fetch: async (input, init) => {
+        historyRefreshRef.current?.abort();
+        staleQuestionRef.current = false;
         setTurnError(null);
         inlineTurnErrorRef.current = false;
         const activeSid = await ensureSessionForSend();
@@ -447,6 +470,10 @@ export function CoachRuntimeProvider({
     onData: (part) => {
       if (part.type !== COACH_TURN_ERROR_PART_TYPE) return;
       inlineTurnErrorRef.current = true;
+      if (part.data.code === COACH_QUESTION_STALE_ERROR_CODE) {
+        staleQuestionRef.current = true;
+        setTurnError(turnErrorT("questionStale"));
+      }
       const currentSid = sidRef.current;
       if (currentSid) clearPendingAiOperation("COACH_SESSION", currentSid);
     },
@@ -479,7 +506,9 @@ export function CoachRuntimeProvider({
       toast.error(visibleError);
     },
     onFinish: ({ message, isAbort, isDisconnect, isError }) => {
-      if (isAbort || isDisconnect || isError) {
+      const staleQuestion = staleQuestionRef.current;
+      staleQuestionRef.current = false;
+      if (!staleQuestion && (isAbort || isDisconnect || isError)) {
         // This is a local presentation of a lost connection, not a fabricated
         // completion. Reopening obtains the producer's authoritative snapshot.
         const endedAt = new Date().toISOString();
@@ -527,7 +556,8 @@ export function CoachRuntimeProvider({
           ),
         );
       }
-      if (!isAbort && !isDisconnect && !isError) onTurnFinishedRef.current?.();
+      if (!staleQuestion && !isAbort && !isDisconnect && !isError)
+        onTurnFinishedRef.current?.();
       invalidateCoachSessionLists(queryClient);
       void queryClient.invalidateQueries({
         queryKey: queryKeys.ai.usageSummary(),
@@ -541,7 +571,20 @@ export function CoachRuntimeProvider({
         persistSidRef.current?.(pendingSid);
       }
       const currentSid = sidRef.current;
-      if (currentSid) {
+      if (currentSid && staleQuestion) {
+        const refresh = new AbortController();
+        historyRefreshRef.current = refresh;
+        void fetchCoachSessionMessages(currentSid, refresh.signal)
+          .then((rows) => {
+            if (refresh.signal.aborted || sidRef.current !== currentSid) return;
+            queryClient.setQueryData(aiCoachMessagesQueryKey(currentSid), rows);
+            chatRef.current?.setMessages(coachRowsToUiMessages(rows));
+          })
+          .catch(() => {
+            if (!refresh.signal.aborted)
+              void markCoachMessagesStale(queryClient, currentSid);
+          });
+      } else if (currentSid) {
         // The current turn is owned by the in-memory SSE runtime. Persistence
         // is history/refresh state only, so never refetch or remount the live
         // transcript at turn completion.
@@ -586,7 +629,7 @@ export function CoachRuntimeProvider({
     runtime.setMessages((current) =>
       reconcilePlanDecisionStates(current, persistedDecisionStates),
     );
-  }, [entry, persistedDecisionStates, runtime.setMessages]);
+  }, [entry?.key, persistedDecisionStates, runtime.setMessages]);
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -598,6 +641,17 @@ export function CoachRuntimeProvider({
     };
   }, []);
 
+  const thread = (
+    <CoachThread
+      sessionId={sid}
+      isLoading={creatingSession}
+      turnError={turnError}
+      thinkingEnabled={thinkingEnabled}
+      onThinkingEnabledChange={updateThinkingEnabled}
+      onPrepareTurnRetry={prepareTurnRetry}
+      variant={variant}
+    />
+  );
   return (
     <CoachChatProvider
       chat={runtime}
@@ -615,14 +669,14 @@ export function CoachRuntimeProvider({
           branchContextRef={branchContextRef}
         />
       ) : null}
-      <CoachThread
-        isLoading={creatingSession}
-        turnError={turnError}
-        thinkingEnabled={thinkingEnabled}
-        onThinkingEnabledChange={updateThinkingEnabled}
-        onPrepareTurnRetry={prepareTurnRetry}
-        variant={variant}
-      />
+      {threadContainer === undefined
+        ? variant === "page"
+          ? <CoachConversationWorkspace sid={sid}>{thread}</CoachConversationWorkspace>
+          : thread
+        : threadContainer
+          ? createPortal(thread, threadContainer)
+          : null}
+      {children}
     </CoachChatProvider>
   );
 }

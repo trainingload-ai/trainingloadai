@@ -419,6 +419,25 @@ export function fitnessAdoptionMessageKey(result: FitnessAssessmentResult) {
     ? "adoption.maxHr"
     : "adoption.estimate";
 }
+
+export function isFitnessApplyOptionExpired(option: FitnessApplyOption, now: number) {
+  return Date.parse(option.expiresAt) <= now;
+}
+
+export function canRecomputeFitnessResult(result: FitnessAssessmentResult, now: number) {
+  if (
+    result.reasonCode === "AMBIGUOUS_SCOPE" ||
+    result.reasonCode === "PROTOCOL_UNKNOWN" ||
+    result.reasonCode === "METHOD_UNAVAILABLE" ||
+    result.reasonCode === "SCOPE_UNSUPPORTED"
+  ) return false;
+
+  const expired = !result.application && result.applyOptions.length > 0 &&
+    result.applyOptions.every((option) => isFitnessApplyOptionExpired(option, now));
+  return expired || result.preparationStatus !== "READY" ||
+    result.candidates.some((candidate) => candidate.metric === "VDOT");
+}
+
 export function fitnessDateTime(
   value: string,
   locale: string,

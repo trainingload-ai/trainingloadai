@@ -1,5 +1,11 @@
 {
-  "title": "計劃",
-  "pages": ["manual-workout-editor", "workout-dsl"]
+  "title": "計畫與訓練課表",
+  "pages": [
+    "index",
+    "plan-lifecycle",
+    "manual-workout-editor",
+    "strength-workouts",
+    "strength-workout-dsl",
+    "workout-dsl"
+  ]
 }
-

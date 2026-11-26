@@ -1,142 +1,187 @@
 ---
-title: Profile, Thresholds, and Zones
-description: Set up athlete profile values, thresholds, load-source priority, and training zones so Trainingload.ai can interpret workouts, plans, and AI Coach context more accurately.
-keywords: ["athlete profile", "training thresholds", "training zones", "load source priority", "Trainingload.ai settings"]
+title: Perfil, limiares e zonas
+description: Configure os valores do perfil de atleta, limiares, prioridade de fonte de carga e zonas de treino para que o Trainingload.ai interprete treinos, planos e o contexto do Treinador de IA com mais precisão.
+keywords:
+  [
+    "perfil de atleta",
+    "limiares de treino",
+    "zonas de treino",
+    "prioridade de fonte de carga",
+    "configurações Trainingload.ai",
+  ]
 ---
 
-# Profile, Thresholds, and Zones
+# Perfil, limiares e zonas
 
-Profile, thresholds, and zones are the calibration layer of Trainingload.ai. They help the product interpret your workouts, estimate load, build useful charts, and give AI Coach enough context to avoid generic advice.
+Configure seu perfil, limiares e zonas de treino para que estimativas de carga, gráficos de zonas e orientações do treinador reflitam a sua realidade. Treinos com potência precisam de um FTP adequado, por exemplo, enquanto zonas de frequência cardíaca dependem do valor de referência e do modelo escolhido.
 
-You do not need every field on day one. Start with the values you trust, then refine them after tests, races, or consistent training data.
+Você não precisa preencher todos os campos no primeiro dia. Comece com os valores em que confia e refine-os após testes, provas ou semanas consistentes de dados de treino.
 
-## Basic profile
+## Antes de começar
 
-Basic profile values affect display, calendar logic, and some physiology-related calculations.
+- Use valores atuais obtidos em um teste recente confiável, prova, dispositivo ou com seu treinador.
+- Saiba quais esportes e sensores você realmente utiliza.
+- Não copie limiares nem zonas de outro atleta.
+- Registre a data e o método por trás de um valor quando o histórico importar.
 
-Check:
+## Fluxo de calibração
 
-- **Time zone**: used for calendar days, review windows, and date-based training views.
-- **Unit system**: controls how distance, pace, elevation, and related values are displayed.
-- **Body weight**: useful for relative power and weight-related metrics.
-- **Height, birthday, and gender**: used where age, body-size context, or demographic reference ranges are relevant.
-- **Primary sport**: helps choose sport-specific defaults and display choices.
+1. Defina fuso horário, unidades e dados básicos do perfil.
+2. Informe apenas limiares atuais sustentados por evidências.
+3. Escolha a prioridade de fonte de carga conforme a confiabilidade dos seus sensores.
+4. Selecione ou defina zonas separadamente para cada esporte relevante.
+5. Salve e revise uma atividade recente com status Pronto para confirmar unidades, zonas e contexto de carga.
 
-If your time zone is wrong, a workout may appear on the wrong training day. Fix time zone before judging calendar or review summaries.
+<DocsScreenshot
+  id="profile-thresholds-calibration"
+  title="Calibração de perfil e limiares"
+  description="Configure primeiro fuso horário e unidades; depois informe limiares atuais, prioridade de fonte de carga e zonas por esporte."
+  route="Conta → Perfil e zonas"
+/>
 
-## Key thresholds
+## Perfil básico
 
-Thresholds convert raw workout data into intensity and load.
+Os valores básicos do perfil influenciam a exibição, a lógica do calendário e alguns cálculos fisiológicos.
 
-Common fields include:
+Verifique:
 
-- **FTP**: functional threshold power, mainly used for cycling power intensity and power-based load.
-- **CP**: critical power, useful for power-duration and critical-power-based analysis.
-- **W' / W Prime**: finite work capacity above critical power.
-- **Pmax**: peak power context for power profiling.
-- **LTHR**: lactate threshold heart rate, useful for heart-rate zones and threshold-oriented HR analysis.
-- **Max heart rate**: used by max-HR-based zones and some heart-rate comparisons.
-- **Resting heart rate**: used with max HR for heart-rate reserve.
-- **CS**: critical speed, used for pace or speed benchmarks.
-- **TP**: threshold pace or threshold speed context, depending on sport and display.
+- **Fuso horário**: usado nos dias do calendário, janelas de revisão e visualizações baseadas em data.
+- **Sistema de unidades**: controla como distância, ritmo, elevação e valores relacionados são exibidos.
+- **Peso corporal**: útil para potência relativa e métricas ligadas ao peso.
+- **Altura, data de nascimento e gênero**: usados onde idade, porte físico ou faixas demográficas de referência são relevantes.
+- **Esporte principal**: ajuda a definir padrões e preferências de exibição específicas do esporte.
 
-Use the latest reliable value, not the best value you have ever seen. Thresholds should represent what you can currently sustain in training decisions.
+Se o fuso horário estiver errado, um treino pode aparecer no dia incorreto. Corrija o fuso horário antes de avaliar o calendário ou resumos de revisão.
 
-## Load-source priority
+## Principais limiares
 
-Trainingload.ai can derive activity load from different signals. Your load-source priority tells the system which signal to prefer when more than one is available.
+Limiares transformam dados brutos de treino em intensidade e carga.
 
-Available sources include:
+Campos comuns incluem:
 
-- **Power**.
-- **Heart rate**.
-- **Pace**.
-- **Session RPE**.
+- **FTP**: potência no limiar funcional, usada principalmente para intensidade e carga baseada em potência no ciclismo.
+- **CP**: potência crítica, útil para análises de potência-duração e baseadas em potência crítica.
+- **W' / W Prime**: capacidade finita de trabalho acima da potência crítica.
+- **Pmax**: contexto de potência de pico para perfil de potência.
+- **LTHR**: frequência cardíaca no limiar de lactato, útil para zonas de FC e análises voltadas ao limiar.
+- **Frequência cardíaca máxima**: usada em zonas baseadas na FC máxima e em algumas comparações de frequência cardíaca.
+- **Frequência cardíaca de repouso**: usada junto com a FC máxima para calcular a reserva de frequência cardíaca.
+- **CS**: velocidade crítica, usada como referência de ritmo ou velocidade.
+- **TP**: ritmo ou velocidade de limiar, conforme o esporte e a exibição.
 
-A practical default is to put the most reliable sensor first:
+Use o valor confiável mais recente, não o melhor valor que você já atingiu na vida. Limiares devem representar o que você consegue sustentar hoje nas decisões de treino.
 
-- Cycling with a reliable power meter: power first.
-- Running without power: pace or heart rate first, depending on terrain and data quality.
-- Indoor or sensor-limited sessions: heart rate or session RPE may be more useful.
+## Prioridade de fonte de carga
 
-Changing load-source priority can change historical load interpretation. Do it when your data quality or training setup changes, not as a way to make a single workout look better.
+O Trainingload.ai pode calcular a carga de uma atividade a partir de sinais diferentes. A prioridade de fonte de carga informa ao sistema qual sinal preferir quando mais de um está disponível.
 
-## Zone models
+As fontes disponíveis incluem:
 
-Training zones group intensity into ranges you can use in charts, workout targets, and review.
+- **Potência**.
+- **Frequência cardíaca**.
+- **Ritmo**.
+- **RPE da sessão**.
 
-Trainingload.ai supports model-based and custom zones:
+Um padrão prático é colocar o sensor mais confiável em primeiro lugar:
 
-- **Heart rate zones** can use max HR, heart-rate reserve, LTHR, or custom values.
-- **Power zones** can use FTP, CP, or custom values.
-- **Pace zones** can use CS or custom values.
+- Ciclismo com medidor de potência confiável: potência primeiro.
+- Corrida sem potência: ritmo ou frequência cardíaca primeiro, conforme o terreno e a qualidade dos dados.
+- Sessões indoor ou com poucos sensores: frequência cardíaca ou RPE da sessão costumam ser mais úteis.
 
-Zone models are shortcuts, not universal truth. If your coach uses a specific model, match that model. If you have lab or field-test zones, custom zones may be the better choice.
+Alterar a prioridade de fonte de carga pode mudar a interpretação do histórico de carga. Faça isso quando a qualidade dos dados ou sua configuração de treino mudar — não para tentar fazer um único treino parecer melhor.
 
-## Sport-specific zones
+## Modelos de zonas
 
-Zones can differ by sport. Running, cycling, and swimming should not always share the same interpretation.
+As zonas de treino agrupam a intensidade em faixas úteis para gráficos, alvos de treino e revisões.
 
-Examples:
+O Trainingload.ai oferece zonas baseadas em modelos e zonas personalizadas:
 
-- Cycling power zones depend on cycling power benchmarks.
-- Running pace zones depend on running speed or pace benchmarks.
-- Swimming pace zones are usually expressed per 100 m.
-- Heart-rate response can differ across running, cycling, and swimming.
+- **Zonas de frequência cardíaca** podem usar FC máxima, reserva de frequência cardíaca, LTHR ou valores personalizados.
+- **Zonas de potência** podem usar FTP, CP ou valores personalizados.
+- **Zonas de ritmo** podem usar CS ou valores personalizados.
 
-Set zones for the sports you actually train. Missing zones do not block activity import, but charts, workout targets, and AI Coach explanations may be less specific.
+Modelos de zonas são atalhos, não verdades absolutas. Se o seu treinador usa um modelo específico, acompanhe esse modelo. Se você fez avaliação em laboratório ou teste de campo confiável, zonas personalizadas costumam ser a melhor escolha.
 
-## Custom zones
+## Zonas específicas por esporte
 
-Use custom zones when:
+As zonas podem variar entre esportes. Corrida, ciclismo e natação nem sempre compartilham a mesma interpretação.
 
-- Your coach has already defined your zones.
-- You tested in a lab or with a trusted protocol.
-- Model-generated zones do not match your training reality.
-- You need sport-specific ranges that the default model does not capture.
+Exemplos:
 
-Custom zones are entered as absolute values:
+- Zonas de potência no ciclismo dependem de referências de potência no ciclismo.
+- Zonas de ritmo na corrida dependem de referências de velocidade ou ritmo na corrida.
+- Zonas de ritmo na natação normalmente são expressas por 100 m.
+- A resposta da frequência cardíaca pode variar entre corrida, ciclismo e natação.
 
-- Power in watts.
-- Heart rate in bpm.
-- Running pace in seconds per kilometer.
-- Swimming pace in seconds per 100 m.
+Configure zonas para os esportes que você realmente pratica. A ausência de zonas não impede a importação de atividades, mas gráficos, alvos de treino e explicações do Treinador de IA podem ficar menos específicos.
 
-Keep zone names short and ordered. Clear labels make charts and AI Coach context easier to read.
+## Zonas personalizadas
 
-## When to update thresholds
+Use zonas personalizadas quando:
 
-Update thresholds when there is enough evidence that your current settings are no longer representative.
+- Seu treinador já definiu suas zonas.
+- Você realizou testes em laboratório ou com um protocolo confiável.
+- As zonas geradas por modelos não refletem a realidade do seu treino.
+- Você precisa de faixas específicas do esporte que o modelo padrão não cobre.
 
-Good reasons:
+Zonas personalizadas são inseridas em valores absolutos:
 
-- A recent test produced a credible new value.
-- A race performance clearly changes your current benchmark.
-- Several weeks of workouts show sustained improvement or decline.
-- A device or measurement method changed.
-- You returned from a long break, illness, or injury.
+- Potência em watts.
+- Frequência cardíaca em bpm.
+- Ritmo de corrida em segundos por quilômetro.
+- Ritmo de natação em segundos por 100 m.
 
-Avoid updating thresholds after one unusually good or bad day. Threshold changes should explain a pattern, not chase noise.
+Mantenha os nomes das zonas curtos e ordenados. Rótulos claros facilitam a leitura dos gráficos e o contexto do Treinador de IA.
 
-## How this affects AI Coach
+## Quando atualizar os limiares
 
-AI Coach can use profile values, thresholds, zones, and load-source priority as context.
+Atualize os limiares quando houver evidência suficiente de que os valores atuais deixaram de ser representativos.
 
-Better setup helps AI Coach answer questions such as:
+Bons motivos:
 
-- Whether a workout matched the intended intensity.
-- Whether load is rising too quickly.
-- Whether a planned workout looks appropriate after recent fatigue.
-- Whether a pace, heart-rate, or power target is realistic.
+- Um teste recente gerou um novo valor confiável.
+- O desempenho em uma prova alterou claramente sua referência atual.
+- Várias semanas de treino mostram melhora ou queda sustentada.
+- Houve mudança de dispositivo ou método de medição.
+- Você retornou de uma pausa longa, doença ou lesão.
 
-If key values are missing, AI Coach may still help, but it should be more cautious and may ask follow-up questions.
+Evite atualizar limiares após um único dia excepcionalmente bom ou ruim. Mudanças de limiar devem explicar um padrão, não perseguir ruído.
 
-## Related pages
+## Como isso afeta o Treinador de IA
+
+O Treinador de IA pode usar dados do perfil, limiares, zonas e prioridade de fonte de carga como contexto.
+
+Uma configuração mais precisa ajuda o Treinador de IA a responder perguntas como:
+
+- Se um treino correspondeu à intensidade planejada.
+- Se a carga está subindo rápido demais.
+- Se um treino planejado parece adequado diante da fadiga recente.
+- Se um alvo de ritmo, frequência cardíaca ou potência é realista.
+
+Se valores essenciais estiverem ausentes, o Treinador de IA ainda pode ajudar, mas será mais cauteloso e poderá fazer perguntas complementares.
+
+## Verifique a configuração
+
+- As datas do calendário correspondem ao dia local de treino do atleta.
+- Distância, ritmo, peso e elevação usam as unidades desejadas.
+- Os gráficos de zonas usam o esporte e a referência escolhidos.
+- A fonte de carga de uma atividade recente segue a prioridade configurada quando há dados necessários.
+- Limiares ou zonas citados em uma resposta do Treinador de IA coincidem com o que está salvo.
+
+## Solução de problemas
+
+- **Uma atividade mudou de dia:** corrija o fuso horário da conta e confira o horário original de início e o fuso horário da origem.
+- **As zonas parecem fáceis ou difíceis demais:** confirme referência, modelo, esporte e unidades antes de editar limites individuais.
+- **A carga mudou após alterar configurações:** identifique qual limiar ou prioridade de fonte mudou; a interpretação histórica pode ser atualizada mesmo que a atividade em si não tenha mudado.
+- **O ritmo de natação parece errado:** verifique se o valor está em segundos por 100 m, e não em unidades de ritmo de corrida.
+- **Um campo é desconhecido:** deixe-o em branco até ter evidência confiável, em vez de chutar.
+
+## Próximos passos
 
 - [Calculadora gratuita de frequência cardíaca máxima](/pt-BR/max-heart-rate-calculator)
-- [Getting Started](/docs/guide/getting-started)
-- [Connect Data](/docs/guide/connect-data)
-- [Activity Detail](/docs/guide/activity-detail)
-- [Create a Training Plan](/docs/guide/create-training-plan)
-- [AI Coach](/docs/guide/ai-coach)
-- [Training Load](/docs/metrics/training-load)
+- [Importe sua primeira atividade](/pt-BR/docs/guide/getting-started)
+- [Conectar dados de treino](/pt-BR/docs/guide/connect-data)
+- [Detalhes da atividade](/pt-BR/docs/guide/activity-detail)
+- [Criar um plano de treino](/pt-BR/docs/guide/create-training-plan)
+- [Treinador de IA](/pt-BR/docs/guide/ai-coach)
+- [Carga de treino](/pt-BR/docs/metrics/training-load)

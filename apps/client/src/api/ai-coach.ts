@@ -1,5 +1,10 @@
 import type { WorkoutMatchingReview } from "@shared/workout-matching";
 import type { QueryClient } from "@tanstack/react-query";
+import type {
+  PlanCalendarMovePreview,
+  PlanCalendarMoveRefreshResult,
+} from "@shared/plan-proposal";
+import { apiFetch } from "@/lib/api";
 import { getApiBaseUrl, getRegion } from "@/lib/config";
 import {
   queryKeys,
@@ -54,6 +59,24 @@ export async function cancelCoachRun(
     );
 }
 
+export function refreshCoachCalendarMove(sid: string, previousConfirmationId?: string) {
+  return apiFetch<PlanCalendarMoveRefreshResult>(
+    `/ai/coach/sessions/${encodeURIComponent(sid)}/calendar-move/refresh`,
+    {
+      method: "POST",
+      body: JSON.stringify({ previousConfirmationId }),
+      suppressErrorToast: true,
+    },
+  );
+}
+
+export function fetchCoachCalendarMove(sid: string) {
+  return apiFetch<PlanCalendarMovePreview>(
+    `/ai/coach/sessions/${encodeURIComponent(sid)}/calendar-move`,
+    { suppressErrorToast: true },
+  );
+}
+
 export type CoachSessionListItem = {
   id: string;
   title: string | null;
@@ -79,6 +102,7 @@ export async function fetchCoachSessionsPage(
   take = 20,
   kind: "chat" | "review" = "chat",
   reviewScope?: "daily" | "weekly" | "monthly",
+  options?: { query?: string; signal?: AbortSignal },
 ): Promise<CoachSessionsPage | undefined> {
   // 会话列表支持分页加载，侧栏和历史页共用这一个接口封装。
   const params = new URLSearchParams();
@@ -86,12 +110,14 @@ export async function fetchCoachSessionsPage(
   params.set("offset", String(offset));
   params.set("kind", kind);
   if (reviewScope) params.set("reviewScope", reviewScope);
+  if (options?.query) params.set("q", options.query);
 
   const response = await fetch(
     `${getApiBaseUrl()}/ai/coach/sessions?${params.toString()}`,
     {
       headers: coachHeaders(),
       credentials: "include",
+      signal: options?.signal,
     },
   );
 
@@ -241,6 +267,7 @@ export type CoachMessageRow = {
 
 export async function fetchCoachSessionMessages(
   sid: string,
+  signal?: AbortSignal,
 ): Promise<CoachMessageRow[]> {
   // 新建会话可能先有 sid、后有消息行，404 在前端视为“空会话”。
   const enc = encodeURIComponent(sid);
@@ -249,6 +276,7 @@ export async function fetchCoachSessionMessages(
     {
       headers: coachHeaders(),
       credentials: "include",
+      signal,
     },
   );
 

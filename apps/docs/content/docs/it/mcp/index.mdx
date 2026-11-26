@@ -1,0 +1,52 @@
+---
+title: TrainingLoad MCP
+description: Connetti in modo sicuro il tuo account TrainingLoad a ChatGPT, Codex, Claude, Cursor, VS Code e opencode.
+---
+
+# TrainingLoad MCP
+
+Connetti i tuoi dati di allenamento a ChatGPT, Codex, Claude o a un altro client AI compatibile con TrainingLoad MCP. Chiedi informazioni sul carico recente, sul completamento del piano, sui trend di performance o sui problemi di sincronizzazione senza copiare manualmente i singoli record delle attività. MCP legge i dati, ma non modifica il tuo programma di allenamento.
+
+**URL del server:** `https://api.trainingload.ai/mcp`
+
+Non serve alcuna chiave API. Il client apre OAuth di TrainingLoad, dove puoi verificare il nome del client e gli scope richiesti. Puoi revocare l'accesso in qualsiasi momento dal tuo account.
+
+## Informazioni di allenamento che puoi consultare
+
+| Domanda | Funzionalità principali |
+| --- | --- |
+| Qual è il mio stato di allenamento attuale? | Snapshot dell'allenamento, indicatori di readiness, serie del carico |
+| Cosa è cambiato tra due blocchi di allenamento? | Confronto tra periodi, ripartizione per sport, statistiche delle attività e costanza |
+| La mia forma fisica nella corsa, nel ciclismo o nel nuoto sta cambiando? | Trend di forma fisica, zone di allenamento, record personali |
+| Quanto fedelmente sto seguendo il mio piano? | Individuazione e riepilogo dei piani, allenamenti pianificati, dettaglio della sessione, aderenza basata sullo stato |
+| Quali allenamenti ho completato? | Elenco delle attività, dettaglio con dati ridotti per la privacy, tempo nelle zone e riepiloghi di lap/split |
+| Quali gare mi aspettano? | Elenco delle gare e dettaglio degli eventi legati al tuo account |
+| Perché un provider non si sincronizza? | Stato delle connessioni e della sincronizzazione |
+| Il mio contesto di benessere è cambiato? | Riepilogo giornaliero della salute autorizzato separatamente |
+
+Consulta il [Riferimento agli strumenti](/it/docs/mcp/tools) per ogni campo e scope. I client possono inoltre scoprire tre [risorse e prompt](/it/docs/mcp/resources-and-prompts) integrati per l'interpretazione delle metriche, i limiti di sicurezza e i flussi di analisi ripetibili.
+
+## Domande da provare
+
+- «Confronta il volume e il carico di questa settimana con quelli della settimana scorsa. Quali attività spiegano le variazioni principali?»
+- «Quanto del piano di questa settimana ho completato e quali sessioni non hanno ancora un'attività collegata?»
+- «Come sono cambiate le mie metriche recenti di corsa? Quali date non hanno dati confrontabili?»
+
+Quando leggi una risposta, controlla l'intervallo di date, le attività citate e gli eventuali dati mancanti. I trend aiutano a impostare una discussione sull'allenamento, ma non costituiscono una diagnosi medica.
+
+## Limiti da conoscere prima di connettersi
+
+- **In sola lettura:** i client non possono modificare attività, piani, gare, profili, connessioni o account.
+- **Solo i tuoi dati:** i client possono interrogare esclusivamente i record appartenenti al tuo account autorizzato.
+- **Riepiloghi di allenamento:** gli strumenti non forniscono tracce GPS precise, flussi grezzi dei sensori, credenziali dei provider o file FIT completi.
+- **Permesso salute separato:** `health:read` non è incluso per impostazione predefinita.
+- **Accesso revocabile:** rimuovi il permesso di un client dal tuo account quando non lo usi più.
+
+## Inizia da qui
+
+- [Scopri come funziona una richiesta](/it/docs/mcp/how-it-works)
+- [Copia prompt pratici](/it/docs/mcp/use-cases)
+- [Scegli un client e connettiti](/it/docs/mcp/connect)
+- [Esamina tutti gli strumenti](/it/docs/mcp/tools)
+- [Scopri risorse e prompt](/it/docs/mcp/resources-and-prompts)
+- [Leggi i limiti di sicurezza e privacy](/it/docs/mcp/security)

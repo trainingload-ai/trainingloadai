@@ -33,7 +33,27 @@ const month = {
     objective: 'Build consistency without catch-up training.',
     loadRange: null,
     durationMinutesRange: { min: 60, max: 120 },
-    weekFocus: [{ weekStart: '2026-11-16', focus: 'Easy training' }],
+    runningDistanceKmRange: { min: 10, max: 18 },
+    weekFocus: [
+      {
+        weekStart: '2026-11-16',
+        focus: 'Easy training',
+        loadRange: null,
+        durationMinutesRange: { min: 20, max: 40 },
+      },
+      {
+        weekStart: '2026-11-23',
+        focus: 'Progress if recovered',
+        loadRange: null,
+        durationMinutesRange: { min: 30, max: 60 },
+      },
+      {
+        weekStart: '2026-11-30',
+        focus: 'Ease into the next month',
+        loadRange: null,
+        durationMinutesRange: { min: 10, max: 20 },
+      },
+    ],
   },
 };
 const weekInput: RollingPlanCandidateInput = {
@@ -80,6 +100,11 @@ const week = {
 function runtime(result: unknown, usageReported = true) {
   const ai = Object.create(AiService.prototype) as AiService;
   const checkpoint = jest.fn(async () => undefined);
+  const beginBilling = jest.fn(async () => ({
+    replay: false,
+    operation: { status: 'STARTED' },
+  }));
+  const recordUsageEvent = jest.fn(async () => undefined);
   const projector = {
     run: {
       runId: 'run-rolling',
@@ -113,7 +138,7 @@ function runtime(result: unknown, usageReported = true) {
   });
   Object.defineProperties(ai, {
     getCoachModel: { value: () => 'provider-test' },
-    coachStream: { value: stream },
+    runCoachTurn: { value: stream },
     coachRuns: {
       value: {
         beginBackground: jest.fn(async () => ({
@@ -132,10 +157,7 @@ function runtime(result: unknown, usageReported = true) {
     },
     operations: {
       value: {
-        begin: jest.fn(async () => ({
-          replay: false,
-          operation: { status: 'STARTED' },
-        })),
+        begin: beginBilling,
         get: async () => null,
         heartbeat: async () => undefined,
         markDelivered: async () => ({ status: 'RUNNING' }),
@@ -143,7 +165,7 @@ function runtime(result: unknown, usageReported = true) {
         fail: async () => undefined,
       },
     },
-    aiUsage: { value: { recordUsageEvent: async () => undefined } },
+    aiUsage: { value: { recordUsageEvent } },
   });
   const guard = new ReviewModelCallGuard();
   return {
@@ -152,10 +174,24 @@ function runtime(result: unknown, usageReported = true) {
     guard,
     stream,
     checkpoint,
+    beginBilling,
+    recordUsageEvent,
   };
 }
 
 describe('RollingPlanCandidateService', () => {
+  beforeEach(() => {
+    jest.replaceProperty(process, 'env', {
+      ...process.env,
+      AI_PROVIDER: 'openai',
+      OPENAI_DEFAULT_MODEL: 'provider-test',
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('returns a month candidate and its durable run without pretending unknown actual load is zero', async () => {
     const { service } = runtime(month);
     await expect(service.propose(input)).resolves.toEqual({
@@ -180,13 +216,34 @@ describe('RollingPlanCandidateService', () => {
     expect(stream).not.toHaveBeenCalled();
   });
 
-  it('keeps the fixed read-only envelope, both required evidence gates and user funding in the production task', async () => {
+  it.each([
+    { request: input, result: month },
+    { request: weekInput, result: week },
+    {
+      request: { ...weekInput, kind: 'ADJUST' as const },
+      result: { ...week, kind: 'ADJUST' },
+    },
+  ])(
+    'records platform usage for automatic $request.kind runs without starting a user charge',
+    async ({ request, result }) => {
+      const { service, stream, beginBilling, recordUsageEvent } =
+        runtime(result);
+      await service.propose(request);
+
+      expect(beginBilling).not.toHaveBeenCalled();
+      expect(stream.mock.calls[0][0]).toMatchObject({ platformFunded: true });
+      expect(recordUsageEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ operationId: null, entityId: request.jobId }),
+      );
+    },
+  );
+
+  it('keeps the fixed read-only envelope and both required evidence gates in the production task', async () => {
     const { service, stream } = runtime(month);
     await service.propose(input);
     const turn = stream.mock.calls[0][0];
     expect(turn).toMatchObject({
       executionMode: 'background',
-      platformFunded: false,
       activeSkillName: 'rolling-plan',
       resumeHistory: false,
     });
@@ -351,6 +408,17 @@ describe('RollingPlanCandidateService', () => {
     });
     await expect(service.propose(input)).rejects.toMatchObject({
       code: 'ROLLING_CANDIDATE_INVALID',
+    });
+  });
+
+  it('rejects a monthly target the week segments cannot collectively reach', async () => {
+    const { service } = runtime({
+      ...month,
+      strategy: { ...month.strategy, durationMinutesRange: { min: 150, max: 180 } },
+    });
+    await expect(service.propose(input)).rejects.toMatchObject({
+      code: 'ROLLING_CANDIDATE_INVALID',
+      reason: expect.stringContaining('durationMinutesRange'),
     });
   });
 

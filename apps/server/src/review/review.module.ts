@@ -22,6 +22,8 @@ import { AiDataConsentModule } from '@/ai-data-consent/ai-data-consent.module';
 import { ReviewModelCallGuard } from './review-model-call-guard';
 import { AthleteStateDecisionService } from './athlete-state-decision.service';
 import { AthleteStateMemoryDecisionInvalidationService } from './athlete-state-memory-decision-invalidation.service';
+import { ActivityAiReviewModule } from '@/api/activity/activity-ai-review.module';
+import { HealthDataModule } from '@/health-data/health-data.module';
 
 /**
  * 复盘模块：活动摘要 Digest + Coach Runtime（计划执行思考）。
@@ -53,6 +55,8 @@ import { AthleteStateMemoryDecisionInvalidationService } from './athlete-state-m
     PMCModule,
     ReviewDigestQueryModule,
     AiDataConsentModule,
+    ActivityAiReviewModule,
+    HealthDataModule,
     // ScheduleModule.forRoot() 只由 Managed/Self-host 组合入口初始化。
     ScheduleModule,
   ],

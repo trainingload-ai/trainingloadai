@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 import { calendarIsoWeekday } from "@shared/plan-calendar";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -11,6 +12,12 @@ import {
 import type { PlanSportType } from "@/api/plans";
 import { WorkoutRenderer } from "@/components/workout/WorkoutRenderer";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +53,8 @@ type Props = {
   weekIndex1: number;
   dayIndex1: number;
   calendarDate?: string;
+  allowRemoteWorkoutDetails?: boolean;
+  presentation?: "dialog" | "embedded-dialog" | "panel";
   onCloseAutoFocus?: (event: Event) => void;
 };
 
@@ -57,13 +66,15 @@ export function CoachPlanDraftWorkoutDialog({
   weekIndex1,
   dayIndex1,
   calendarDate,
+  allowRemoteWorkoutDetails = true,
+  presentation = "dialog",
   onCloseAutoFocus,
 }: Props) {
   const titleId = useId();
   const t = useTranslations("AiCoachPage.planDraft");
   const tWe = useTranslations("WorkoutEditor");
   const tSports = useTranslations("SportCatalog");
-  const { data: userZones } = useUserZones(open);
+  const { data: userZones } = useUserZones(open && allowRemoteWorkoutDetails);
   const zoneColorsBySport = useMemo(
     () =>
       new Map<string, ReturnType<typeof workoutZoneColorsFromSettings>>(
@@ -114,12 +125,14 @@ export function CoachPlanDraftWorkoutDialog({
                   summary: workout.summary,
                   warnings: [],
                 }
-              : await parseWorkoutDefinition({
-                  kind: workout.structureKind ?? "ENDURANCE",
-                  version: 1,
-                  source: "TEXT",
-                  text,
-                });
+              : allowRemoteWorkoutDetails
+                ? await parseWorkoutDefinition({
+                    kind: workout.structureKind ?? "ENDURANCE",
+                    version: 1,
+                    source: "TEXT",
+                    text,
+                  })
+                : null;
           return {
             key: `${workout.weekIndex}-${workout.dayIndex}-${workout.sessionIndex ?? 1}`,
             workout,
@@ -145,7 +158,7 @@ export function CoachPlanDraftWorkoutDialog({
     return () => {
       cancelled = true;
     };
-  }, [open, workouts]);
+  }, [open, workouts, allowRemoteWorkoutDetails]);
 
   const weekdayKey = String(
     Math.min(
@@ -187,6 +200,137 @@ export function CoachPlanDraftWorkoutDialog({
     return tSports("families.UNKNOWN");
   };
 
+  const sessionLabel = sessionMultiple
+    ? t("workoutDialogSessionCount", { count: workouts.length })
+    : tWe("title.sessionLabel", { session: headerOrdinal });
+  const sessionPosition = `${tWe("title.weekLabel", { week: weekIndex1 })} · ${weekdayShort} · ${sessionLabel}`;
+  const title = `${tWe("title.view")} · ${sessionPosition}`;
+
+  function renderWorkout({ definition, parseError }: ParsedWorkoutState, sport: PlanSportType) {
+    if (parseError) {
+      return <p className="p-3 text-sm text-destructive">{parseError}</p>;
+    }
+    if (!definition) {
+      return <p className="p-3 text-sm text-muted-foreground">{t("workoutDialogNoChart")}</p>;
+    }
+    return (
+      <WorkoutRenderer
+        workout={{
+          structureKind: definition.kind,
+          structure: definition.structure,
+          summary: definition.summary,
+          blocks: definition.structure.kind === "ENDURANCE" ? definition.structure.blocks : null,
+          text: definition.text,
+          sportType: sport,
+        }}
+        density="DETAIL"
+        zoneColors={zoneColorsBySport.get(sport)}
+      />
+    );
+  }
+
+  if (presentation !== "dialog") {
+    if (!open) return null;
+
+    const heading = firstWorkout?.name?.trim() || tWe("title.view");
+    const metadata = `${sessionPosition} · ${sportLabel(headerSport, firstWorkout?.structureKind, firstWorkout?.sportDefinitionCode)}`;
+    const content = (
+      <CardContent className="min-h-0 space-y-5 overflow-y-auto overscroll-contain px-4 pb-4 pt-2 sm:px-5">
+        {parsedWorkouts.length === 0 ? (
+          <p role="status" className="py-4 text-sm text-muted-foreground">
+            {loading ? t("workoutDialogLoading") : t("workoutDialogNoChart")}
+          </p>
+        ) : (
+          parsedWorkouts.map((item) => {
+            const sport = normalizeCoachDraftSportType(item.workout.sportType);
+            const notes = item.workout.notes?.trim();
+            const text = item.workout.text?.trim();
+            return (
+              <div key={item.key} className="min-w-0 space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">{t("workoutDialogIntensity")}</h3>
+                  <div className="min-w-0 rounded-md bg-muted/45">
+                    {renderWorkout(item, sport)}
+                  </div>
+                </div>
+                {notes ? (
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium">{t("workoutDialogNotes")}</h3>
+                    <p className="whitespace-pre-wrap wrap-anywhere text-sm leading-relaxed text-muted-foreground">
+                      {notes}
+                    </p>
+                  </div>
+                ) : null}
+                {text ? (
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="group -ms-2 gap-1.5 px-2 text-muted-foreground"
+                      >
+                        <ChevronDown aria-hidden="true" className="group-data-[state=open]:rotate-180" />
+                        {t("workoutDialogDsl")}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <pre className="mt-1 whitespace-pre-wrap wrap-anywhere rounded-md bg-muted/45 p-3 font-mono text-xs leading-relaxed">
+                        {text}
+                      </pre>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ) : null}
+              </div>
+            );
+          })
+        )}
+      </CardContent>
+    );
+
+    if (presentation === "panel") {
+      return (
+        <section aria-labelledby={titleId} className="flex min-h-0 flex-col">
+          <Card className="flex min-h-0 flex-col bg-muted/45">
+            <CardHeader className="shrink-0 space-y-2 px-4 pb-2 pt-3 sm:px-5">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="-ms-2 w-fit gap-1.5 px-2 text-muted-foreground"
+                autoFocus
+                onClick={() => onOpenChange(false)}
+              >
+                <ArrowLeft aria-hidden="true" />
+                {t("workoutDialogBackToCalendar")}
+              </Button>
+              <h2 id={titleId} className="wrap-anywhere text-base font-semibold leading-snug">{heading}</h2>
+              <p className="text-sm text-muted-foreground">{metadata}</p>
+            </CardHeader>
+            {content}
+          </Card>
+        </section>
+      );
+    }
+
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent
+          aria-labelledby={titleId}
+          aria-describedby={`${titleId}-context`}
+          onCloseAutoFocus={onCloseAutoFocus}
+          className="flex max-h-[calc(100dvh-0.5rem)] w-full flex-col gap-0 overflow-hidden border-0 p-0 pc:max-h-[calc(100dvh-1.5rem)] pc:max-w-[42rem] pc:p-0"
+        >
+          <DialogHeader className="shrink-0 space-y-1 px-4 pb-2 pt-4 pe-16 text-start sm:px-5 sm:pe-16">
+            <DialogTitle id={titleId} className="wrap-anywhere text-base leading-snug">{heading}</DialogTitle>
+            <p id={`${titleId}-context`} className="text-sm text-muted-foreground">{metadata}</p>
+          </DialogHeader>
+          {content}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -197,9 +341,7 @@ export function CoachPlanDraftWorkoutDialog({
         <div className="shrink-0 space-y-3 border-b border-border/60 p-3">
           <DialogHeader className="space-y-0 text-left">
             <DialogTitle id={titleId} className="text-base leading-snug">
-              {sessionMultiple
-                ? `${tWe("title.view")} · ${tWe("title.weekLabel", { week: weekIndex1 })} · ${weekdayShort} · ${t("workoutDialogSessionCount", { count: workouts.length })}`
-                : `${tWe("title.view")} · ${tWe("title.weekLabel", { week: weekIndex1 })} · ${weekdayShort} · ${tWe("title.sessionLabel", { session: headerOrdinal })}`}
+              {title}
             </DialogTitle>
           </DialogHeader>
           {!sessionMultiple ? (
@@ -233,7 +375,8 @@ export function CoachPlanDraftWorkoutDialog({
           ) : (
             <div className="flex flex-col gap-4 p-3">
               {parsedWorkouts.map(
-                ({ key, workout, definition, parseError }) => {
+                (item) => {
+                  const { key, workout } = item;
                   const text = workout.text?.trim() ?? "";
                   const sport = normalizeCoachDraftSportType(
                     workout?.sportType,
@@ -306,31 +449,7 @@ export function CoachPlanDraftWorkoutDialog({
                               {t("workoutDialogIntensity")}
                             </div>
                             <div className="min-h-0 overflow-hidden bg-muted/45 dark:bg-muted/40">
-                              {parseError ? (
-                                <p className="p-3 text-sm text-destructive">
-                                  {parseError}
-                                </p>
-                              ) : definition ? (
-                                <WorkoutRenderer
-                                  workout={{
-                                    structureKind: definition.kind,
-                                    structure: definition.structure,
-                                    summary: definition.summary,
-                                    blocks:
-                                      definition.structure.kind === "ENDURANCE"
-                                        ? definition.structure.blocks
-                                        : null,
-                                    text: definition.text,
-                                    sportType: sport,
-                                  }}
-                                  density="DETAIL"
-                                  zoneColors={zoneColorsBySport.get(sport)}
-                                />
-                              ) : (
-                                <p className="p-3 text-sm text-muted-foreground">
-                                  {t("workoutDialogNoChart")}
-                                </p>
-                              )}
+                              {renderWorkout(item, sport)}
                             </div>
                           </div>
                         </div>

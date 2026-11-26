@@ -340,6 +340,25 @@ describe('START decision confirmation / PostgreSQL', () => {
     };
     return { planId, binding, preview, draft, confirmation, message, session };
   }
+  it.each([false, true])(
+    'rejects a persisted card approval after its preview expired (schedule: %s)',
+    async (schedule) => {
+      const p = await proposal(false, schedule);
+      const before = await prisma.planWorkout.findMany({ where: { planId: p.planId } });
+      await prisma.planProposalPreview.update({
+        where: { id: p.preview.previewId },
+        data: { expiresAt: new Date(0) },
+      });
+
+      await expect(coach.approveDecision(p.confirmation)).rejects.toThrow('Plan proposal has expired');
+      await expect(prisma.coachDecision.findUniqueOrThrow({
+        where: { id: p.draft.decision.id },
+      })).resolves.toMatchObject({ state: 'PROPOSED', approvedAt: null });
+      await expect(prisma.planWorkout.findMany({ where: { planId: p.planId } }))
+        .resolves.toEqual(before);
+    },
+  );
+
   it('requires the real card confirmation, commits the same draft, and replays the same receipt after a lost response', async () => {
     const p = await proposal();
     await expect(

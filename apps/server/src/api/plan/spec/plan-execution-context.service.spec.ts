@@ -335,6 +335,63 @@ describe('PlanExecutionContextService', () => {
     expect(ctx.factHash).toHaveLength(64);
   });
 
+  it.each([
+    {
+      anchorDate: '2026-06-21',
+      missingDay: false,
+      previousDaily: 40,
+      expected: 10,
+    },
+    {
+      anchorDate: '2026-06-21',
+      missingDay: true,
+      previousDaily: 40,
+      expected: undefined,
+    },
+    {
+      anchorDate: '2026-06-17',
+      missingDay: false,
+      previousDaily: 40,
+      expected: 10,
+    },
+    {
+      anchorDate: '2026-06-21',
+      missingDay: false,
+      previousDaily: 0,
+      expected: undefined,
+    },
+  ])(
+    'derives comparable weekly load change for $anchorDate with coverage $missingDay and baseline $previousDaily',
+    async ({ anchorDate, missingDay, previousDaily, expected }) => {
+      const daily = Array.from({ length: 14 }, (_, index) => ({
+        date: date(`2026-06-${String(8 + index).padStart(2, '0')}`),
+        // A workout recorded on the anchor day is outside both comparison windows.
+        dailyValue:
+          index === Number(anchorDate.slice(-2)) - 8
+            ? 800
+            : index < 7
+              ? previousDaily
+              : 44,
+      })).filter(({ date: day }) => !missingDay || day.getUTCDate() !== 13);
+      const prisma = createPrisma();
+      prisma.planWorkout.findMany.mockResolvedValue([]);
+      prisma.activity.findMany.mockResolvedValue([]);
+      prisma.coachEvent.findMany.mockResolvedValue([]);
+
+      const context = await createService(prisma, {
+        pmc: createPmc({ daily }),
+      }).buildContext({
+        userId: 'u1',
+        surface: 'HOME_TODAY',
+        anchorDate,
+        timezone: 'UTC',
+      });
+
+      expect(context.anchor.anchorDate).toBe(anchorDate);
+      expect(context.recentLoad.weekToDateLoadChangePercent).toBe(expected);
+    },
+  );
+
   it('resolves an activity anchor through its linked plan workout', async () => {
     const prisma = createPrisma();
     const linkedActivity = activity({

@@ -1,0 +1,35 @@
+---
+title: Diagnostiquer les problèmes d’activité, de charge et de récupération
+description: Partez du symptôme visible pour remonter à la donnée manquante ou à l’état de traitement avant de modifier vos seuils, sources de charge ou décisions.
+seoTitle: "Activité ou charge manquante ? Guide de dépannage complet"
+seoDescription: Diagnostiquez les activités manquantes, les erreurs de charge d’entraînement, de récupération ou de traitement en remontant jusqu’aux données sources.
+keywords: ["données d’activité manquantes", "charge d’entraînement manquante", "dépannage synchronisation activité", "données de récupération"]
+---
+
+# Diagnostiquer les problèmes d’activité, de charge et de récupération
+
+## Partir du symptôme
+
+| Symptôme | À vérifier en premier | Guide suivant probable |
+| --- | --- | --- |
+| Une activité est manquante | Connexion au fournisseur, plage de dates d’importation et statut du fichier | [Connecter des données](/fr/docs/guide/connect-data) |
+| Une activité apparaît en double | Multiples canaux d’importation et identifiants sources | [Intégrations](/fr/docs/guide/integrations) |
+| L’activité existe mais n’a pas de charge | État de traitement, durée, fréquence cardiaque, puissance, allure et seuils du profil | [Détail d’activité](/fr/docs/guide/activity-detail) |
+| Les graphiques ou tours ne s’affichent pas | Présence des enregistrements détaillés et des tours dans le fichier source | [Téléverser des fichiers d’activité](/fr/docs/guide/upload-activity-files) |
+| Le sommeil, la VFC ou la FC au repos est vide | Autorisations santé, couverture du fournisseur, date et fuseau horaire | [Compte, autorisations et utilisation](/fr/docs/guide/account-permissions-and-usage) |
+| Le PMC paraît anormalement bas ou élevé | Doublons, jours manquants, sport sélectionné, source de charge et changements de seuils | [Flux d’analyse d’entraînement](/fr/docs/guide/training-analysis-workflow) |
+
+## Diagnostiquer dans l’ordre
+
+1. Confirmez la source attendue et la période concernée.
+2. Vérifiez si la source a bien fourni le flux de capteur requis.
+3. Contrôlez l’état d’importation et de traitement.
+4. Vérifiez les seuils du profil et l’ordre de priorité des sources de charge.
+5. Comparez une activité touchée avec une activité de référence fonctionnant correctement.
+6. Ne modifiez la configuration ou ne contactez le support qu’après ces vérifications.
+
+## Rassembler des éléments de diagnostic sans exposer de secrets
+
+Indiquez la date de l’activité, le sport, la source, le statut visible, le résultat attendu par rapport au résultat obtenu, et si le problème est reproductible. Supprimez les adresses e-mail, les jetons OAuth, les clés API, les localisations exactes de votre domicile et les identifiants privés de fournisseur.
+
+Ne modifiez pas vos seuils dans le seul but d’obtenir une valeur de charge qui vous convient. Un changement de configuration influe sur l’interprétation ultérieure et peut modifier l’historique dérivé.

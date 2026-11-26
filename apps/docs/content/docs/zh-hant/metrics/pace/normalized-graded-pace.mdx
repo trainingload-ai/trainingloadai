@@ -1,82 +1,84 @@
 ---
-title: 正規化坡度配速（NGP）
-description: 將坡度調整後再正規化嘅配速，更貼近一次跑步嘅生理成本。
-keywords: ["NGP", "Normalized Graded Pace", "GAP", "Grade Adjusted Pace", "rTSS"]
+title: 標準化坡度配速（NGP）
+description: 標準化坡度配速（NGP）將配速與坡度起伏的跑步轉換為穩定的平地等效強度，用於計算 rTSS 與進階跑步分析。
+keywords: ["NGP", "標準化坡度配速", "Normalized Graded Pace", "GAP", "坡度調整配速", "rTSS", "跑步 TSS", "標準化配速"]
 ---
 
-# 正規化坡度配速（NGP）
+# 標準化坡度配速（NGP）
 
-**正規化坡度配速（NGP）**係跑步分析入面嘅核心強度指標。佢建立喺 **[GAP（坡度調整配速）](/zh-hant/docs/metrics/pace/grade-adjusted-pace)** 之上，而且邏輯同單車嘅 **[NP（正規化功率）](/zh-hant/docs/metrics/power/normalized-power)** 好相似。
+**標準化坡度配速（Normalized Graded Pace，簡稱 NGP）** 是一項專為跑步設計的強度指標。它建立在 **[GAP（坡度調整配速）](/zh-hant/docs/metrics/pace/grade-adjusted-pace)** 之上，整體演算法邏輯則與單車領域的 **[NP（標準化功率）](/zh-hant/docs/metrics/power/normalized-power)** 相似。
 
-用最白話講：
-
-- **GAP**：回答「呢段上落斜，以同等能量成本，平路等效配速係幾多？」（偏即時/分段等效）
-- **NGP**：回答「呢次跑步強度有起伏（坡度同速度都變），如果用一個穩定平路配速去代表同等生理成本，會係幾多？」（全程等效）
+用白話區分兩者：
+- **GAP** 回答：「這段上坡或下坡配速，相當於平地多快的配速？」（即時／分段等效）。
+- **NGP** 回答：「把這整趟配速與坡度都在變化的跑步攤平來看，相當於全程穩定跑多少平地配速的生理消耗？」（整趟活動等效）。
 
 ## 核心概念
 
-生理成本（肝醣消耗、乳酸累積、代謝壓力）對強度係 **非線性**。
+生理消耗（肝醣消耗、乳酸堆積與整體代謝壓力）與運動強度之間呈現**非線性**關係。
 
-> **例子**：  
-> 穩定 5:00/km 嘅跑步，通常遠比「一半時間 4:00/km + 一半時間 6:00/km」輕鬆。  
-> 雖然平均都係 5:00/km，但第二個跑法嘅 **NGP** 會明顯更快（例如 4:45/km），反映更高嘅生理成本。
+> **舉例**：
+> 全程穩定跑 5:00/km，生理壓力通常低於「一半時間跑 4:00/km、另一半時間跑 6:00/km」。
+> 即使兩者的平均配速都是 5:00/km，第二趟的 **NGP** 會明顯更快，藉此反映加速衝刺所帶來的額外生理負荷。
 
-## 計算
+## 計算方式
 
-NGP 嘅計算大概係：
+NGP 會先從坡度調整後的強度序列進行加權計算，最後再轉回配速格式顯示。
 
-### 正規化
+### 標準化步驟
 
-先將 GAP 時間序列做一個 NP 式正規化：
+由於配速是時間單位（數值越小代表越快），Trainingload.ai 會先將 GAP 轉換為速度／強度等效值再加權，接著套用類似 NP 的標準化流程：
 
-1. **平滑**：對 GAP 做 30 秒 rolling average
-2. **加權**：用 4 次方加權，令「更硬嘅段落」影響更大
-3. **平均 + 開方**：取平均再做 4 次方根
-
-```text
-NGP = 4th_root( (1/N) * sum_{i=1..N} (GAP_rolling(i))^4 )
-```
-
-## 常見用途
-
-### 1) 更準確反映越野/山跑努力
-
-喺上落起伏路線，平均配速可能好慢；NGP 可以揭示你嘅實際努力未必低。
-
-- **例**：山路越野平均 10:00/km
-- **NGP**：可能係 6:00/km，更貼近身體感受到嘅代謝壓力
-
-### 2) rTSS 嘅基礎
-
-Trainingload.ai 用 NGP 去計 **rTSS（Running Training Stress Score）**。結構同單車 TSS 類似：
+1. **轉換**：將 GAP 配速轉換為速度或強度值。
+2. **平滑**：計算 30 秒滑動平均（rolling average）。
+3. **加權**：對平滑後數值取四次方，提高高強度路段的權重。
+4. **平均並開根號**：計算平均值後再取四次方根。
+5. **回轉顯示**：將結果轉回配速格式，方便閱讀。
 
 ```text
-IF = NGP / FTPa
+NGP_intensity = 4th_root( (1/N) * sum_{i=1..N} (GAP_intensity_rolling(i))^4 )
 ```
+
+## 常見應用
+
+### 1. 為越野跑與山路課表補齊強度脈絡
+在丘陵或山徑地形上，平均配速常顯得非常慢，而 NGP 能協助看出你的真實生理付出其實並未下降。
+- **舉例**：一趟高爬升越野跑的平均配速為 10:00/km。
+- **NGP**：換算結果可能快上許多，更能如實反映身體承受的代謝壓力。
+
+### 2. rTSS 的計算基礎
+Trainingload.ai 以 NGP 計算 **rTSS（跑步訓練壓力分數，Running Training Stress Score）**，公式架構與單車 TSS 相同。
+
+當 NGP 與 FTPa 以 min/km 配速呈現時，必須先轉換為速度再計算：
 
 ```text
-rTSS = (t_sec * NGP * IF) / (FTPa * 3600) * 100
+IF = Speed_NGP / Speed_FTPa
 ```
 
-用 NGP 可以令唔同地形下嘅跑步負荷更可比。
+採用 NGP 能讓不同地形條件下的跑步訓練負荷具備更好的可比性。
 
 ## 指標比較
 
-| 指標 | 全名 | 意思 | 幾時用 |
+| 指標 | 全稱 | 含義 | 適用情境 |
 | :--- | :--- | :--- | :--- |
-| **Avg Pace** | 平均配速 | 實際平均配速 | 平路穩定跑、估 finish time |
-| **Avg GAP** | 平均 GAP | 平均坡度調整配速 | 起伏但冇太多衝刺嘅路線 |
-| **NGP** | 正規化坡度配速 | 正規化後嘅坡度調整配速 | **大部分情況**，尤其係越野、間歇、地形複雜 |
+| **Avg Pace** | 平均配速 | 實際跑出的平均配速 | 平路穩定配速跑、推估完賽時間 |
+| **Avg GAP** | 平均坡度調整配速 | 經坡度調整後的平均配速 | 起伏地形但節奏相對穩定的路線 |
+| **NGP** | 標準化坡度配速 | 經坡度調整與非線性加權的配速 | 越野跑、間歇訓練、複雜地形與 rTSS 計算 |
 
-## Trainingload.ai 建議
+## Trainingload.ai 如何運用 NGP
 
-- **作為主要強度參考**：大部分跑步分析，NGP 比平均配速更有訊息量，亦令平路同山路更可比。
-- **配合 VI**：可以計 **VI（變異指數）= NGP / Avg GAP**  
-  - VI 接近 1.0：努力較穩
-  - VI > 1.05：多數係間歇或地形/配速變化好大
+- **作為考量地形的強度參考**：在山路或配速起伏大的課表中，NGP 通常比平均配速更有參考價值。
+- **計算跑步訓練負荷**：NGP 是 rTSS 的關鍵輸入，能同時反映坡度與強度變異。
+- **搭配 VI（變異指數）觀察配速穩定度**：計算 **VI = NGP / Avg GAP**（以速度計算）。
+  - 若 VI 接近 1.0，代表出力相當穩定。
+  - 若 VI > 1.05，通常代表課表包含間歇加速或地形起伏劇烈。
 
-## 參考
+## 相關文件
+
+- [坡度調整配速（GAP）](/zh-hant/docs/metrics/pace/grade-adjusted-pace)
+- [配速區間](/zh-hant/docs/metrics/pace/zones)
+- [訓練壓力分數（TSS）](/zh-hant/docs/metrics/training-load/training-stress-score)
+
+## 參考資料
 
 - [TrainingPeaks: What is Normalized Graded Pace?](https://help.trainingpeaks.com/hc/en-us/articles/204071804-Normalized-Graded-Pace-NGP-)
-- *Normalized Graded Pace (NGP) is a registered trademark of Peaksware, LLC.*
-
+- *Normalized Graded Pace (NGP) 為 Peaksware, LLC 之註冊商標。*

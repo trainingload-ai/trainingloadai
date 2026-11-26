@@ -12,6 +12,15 @@ import { PLAN_SPORT_TYPES } from '../plan.constants';
 import { ParseWorkoutDefinitionDto } from '../../workout/dto/parse-workout-definition.dto';
 
 export class UpdatePlanWorkoutDto {
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  expectedRevision?: number;
+
+  @IsOptional()
+  @IsIn(['DRAFT'])
+  expectedPlanStatus?: 'DRAFT';
+
   @IsInt()
   @Min(1)
   @Max(520)

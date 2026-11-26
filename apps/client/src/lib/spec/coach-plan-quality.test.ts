@@ -12,18 +12,30 @@ describe("coach plan quality metadata and verified previews", () => {
         startDate: "2026-09-07",
         weekPhases: ["BUILD", "RECOVERY"],
         maxDailyMinutes: 60,
+        maxMinutesByIsoWeekday: { 1: 30, 6: 60 },
+      },
+      planAssessment: {
+        assessmentId: "ddf48599-cdcb-4d58-b44c-a3c6e37cdf35",
+        weekTargets: ["BUILD", "RECOVERY"].map((phase, index) => ({
+          weekIndex: index + 1, phase, focus: "Aerobic work",
+          trainingDays: { min: 1, max: 2 }, durationMinutes: { min: 20, max: 50 },
+        })),
       },
       workouts: [
-        { weekIndex: 1, dayIndex: 1, sportType: "RUN", text: "work 30m" },
+        { weekIndex: 1, dayIndex: 1, sportType: "RUN", text: "work 30m", plannedSessionRpe: 4 },
       ],
     });
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) throw new Error(parsed.error);
     const dto = draftToCreatePlanDto(parsed.data);
     expect(dto.sourceType).toBe("AI");
+    expect(dto.workouts[0].plannedSessionRpe).toBe(4);
+    expect(dto.generationMetadata).toMatchObject({ qualityContract: { maxMinutesByIsoWeekday: { 1: 30, 6: 60 } } });
     expect(dto.generationMetadata).toEqual({
       qualityContract: parsed.data.qualityContract,
+      planAssessment: parsed.data.planAssessment,
     });
+    expect(parsed.data.planAssessment?.weekTargets).toHaveLength(2);
   });
   it("rejects malformed contracts while accepting legacy drafts without one", () => {
     const draft = {

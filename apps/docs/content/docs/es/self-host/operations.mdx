@@ -1,0 +1,96 @@
+---
+title: Gestionar una instancia autohospedada
+description: Usa el punto de entrada de gestión oficial para comprobaciones de salud, registros, copias de seguridad, restauración, actualización, reversión y apagado.
+---
+
+# Gestionar una instancia autohospedada
+
+Opera la instancia a través de `./self-host <command> --json` en Linux, macOS y WSL2, o `.\self-host.ps1 <command> --json` en Windows PowerShell. El punto de entrada de gestión conserva las reglas de validación, bloqueo, auditoría y seguridad de datos de la versión.
+
+## Antes de empezar
+
+- Mantén privados el directorio de versión instalado y su archivo `.env.selfhost`.
+- Evalúa la automatización por los campos JSON `ok`, `exitCode`, `error.code` y `details`, no por los mensajes legibles para humanos.
+- Ejecuta el mismo comando con `--dry-run` antes de cada operación que modifique el estado.
+- No uses nunca `docker compose down -v`, no borres marcadores de ciclo de vida ni hagas downgrade manual de la base de datos.
+
+## Comprobar estado, salud y registros
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+`status` ofrece una instantánea acotada del estado en ejecución. `doctor` comprueba la configuración de confianza, los recursos del host, las rutas de datos, el estado de la base de datos, la disponibilidad y los proveedores habilitados. Los registros están acotados y anonimizados parcialmente, pero todavía pueden incluir datos de actividad; revísalos antes de compartirlos.
+
+## Arrancar y detener
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+
+./self-host stop --dry-run --json
+./self-host stop --json
+```
+
+Detener conserva los contenedores, la configuración y los datos persistentes. Para eliminar los recursos de ejecución conservando los datos, usa el flujo documentado de `uninstall`; no elimines volúmenes manualmente.
+
+## Crear una copia de seguridad verificada
+
+```bash
+./self-host backup --output weekly-<yyyy-mm-dd> --dry-run --json
+./self-host backup --output weekly-<yyyy-mm-dd> --json
+```
+
+Una copia de seguridad contiene un volcado lógico de PostgreSQL y los archivos subidos autoritativos. Excluye cachés, diagnósticos, tokens de arranque, estado privado TLS, datos locales de elevación y valores secretos. Guarda el paquete completo en almacenamiento cifrado fuera del host y pruébalo periódicamente en un destino limpio y aislado.
+
+## Restaurar con seguridad
+
+Restaura únicamente en un destino recién inicializado, de la misma versión exacta, cuya base de datos y carpeta de archivos subidos estén vacías:
+
+```bash
+./self-host restore /secure/path/to/backup --dry-run --json
+./self-host restore /secure/path/to/backup --json
+./self-host doctor --json
+```
+
+No sobrescribas la instancia actual. Una restauración fallida deja un marcador de bloqueo y un informe para evitar que un destino incompleto arranque como si estuviera sano.
+
+## Actualizar
+
+Una actualización requiere el directorio completo y firmado de la versión destino. Conserva la instancia actual, el paquete destino y una copia de seguridad verificada fuera del host. Ejecuta las simulaciones de compatibilidad de ambos controladores (actual y destino) antes de la actualización real controlada por el destino:
+
+```bash
+instance='/absolute/path/to/current-instance'
+target='/absolute/path/to/trainingload-selfhost-<target-version>'
+
+"$instance/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --json
+"$target/self-host" doctor --directory "$instance" --json
+```
+
+Las migraciones de base de datos son únicamente hacia delante. Una reversión de aplicación solo está disponible cuando el informe de actualización lo declara explícitamente y las imágenes antiguas siguen siendo verificables; nunca hace downgrade de la base de datos.
+
+## Rutina recomendada
+
+- A diario: revisa `status` y la capacidad del disco.
+- Cada semana: ejecuta `doctor` y crea una copia de seguridad verificada fuera del host.
+- Antes de cada actualización: lee las notas de la versión destino, verifica el paquete destino, prueba la copia de seguridad y revisa la declaración de reversión.
+- Periódicamente: restaura una copia de seguridad en un destino aislado y verifica el Owner, las actividades y los archivos subidos.
+
+## Verificación
+
+- Cada cambio de estado fue precedido por el mismo comando y parámetros con `--dry-run`.
+- `doctor` devuelve `"ok": true` después de arrancar, restaurar o actualizar.
+- Existe al menos una copia de seguridad reciente verificada fuera del host de la instancia.
+- Un simulacro de restauración ha confirmado que la copia es utilizable, no solo que existe.
+
+## Solución de problemas
+
+Si falla una operación, conserva su código de error estable y ejecuta `doctor`. Crea un paquete de diagnóstico solo cuando sea necesario, revísalo localmente y nunca publiques `.env.selfhost` en bruto, volcados de base de datos, archivos subidos, contraseñas, tokens ni claves de proveedor. No reintentes en paralelo una operación que cambia el estado mientras otra mantiene el bloqueo de la instancia.
+
+## Próximo paso
+
+Ten a mano [Solución de problemas](/es/docs/self-host/troubleshooting) junto a tu guía operativa. Revisa [Configuración](/es/docs/self-host/configuration) antes de modificar ajustes de red o de proveedor.

@@ -80,7 +80,7 @@ describe("AiCoachClientLoader", () => {
     deployment = "self-host";
     render(view());
 
-    expect(screen.getByText("AI 访问暂不可用")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "智能教练暂不可用" })).toBeVisible();
     expect(
       screen.getByText("请检查实例的 AI 配置或当前账户权限。"),
     ).toBeVisible();

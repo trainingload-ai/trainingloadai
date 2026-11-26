@@ -1,7 +1,7 @@
 "use client";
 
-import { isRollingPlan, isPlanDateNotGenerated, type PlanPlanning } from "@/lib/rolling-plan";
-import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
+import { Skeleton } from "@/components/ui/skeleton";
+import { isRollingPlan, type PlanPlanning } from "@/lib/rolling-plan";
 import {
   ArrowRight,
   CalendarRange,
@@ -94,7 +94,7 @@ const HomeWeeklyLoadChart = dynamic(
 );
 
 const FitnessStateMiniCards = dynamic(() => import("./FitnessStateMiniCards"), {
-  loading: () => <div className="h-52 animate-pulse rounded-md bg-muted/45" />,
+  loading: () => <Skeleton className="h-52 w-full" aria-hidden="true" />,
 });
 
 const MobileHealthOverviewSection = dynamic(
@@ -120,7 +120,7 @@ const HomeMetricsOverviewSection = dynamic(
     ),
   {
     loading: () => (
-      <div className="h-64 animate-pulse rounded-md bg-muted/45" />
+      <Skeleton className="h-64 w-full" aria-hidden="true" />
     ),
   },
 );
@@ -632,7 +632,7 @@ function SummaryPanel({
             <Link
               key={item.key}
               href={item.desktopHref}
-              className="group rounded-md bg-neutral-100 px-3 py-3 transition-colors hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted"
+              className="group rounded-surface bg-neutral-100 px-3 py-3 transition-colors hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-background text-muted-foreground transition-colors group-hover:text-foreground dark:bg-black/20">
@@ -693,7 +693,6 @@ function TodayExecutionPanel({
   const tActivities = useTranslations("activities");
   const tLoad = useTranslations("V2PlanDetailPage.mobile.loadChart");
   const tWorkoutDialog = useTranslations("ViewWorkoutDialog.mobile");
-  const rollingT = useTranslations("RollingPlan");
   const dayHref = `/day/${homeData.today.isoDate}`;
   const {
     pendingWorkoutId,
@@ -767,8 +766,8 @@ function TodayExecutionPanel({
 
   return (
     <>
-      <SoftPanel className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3">
+      <SoftPanel className="flex flex-col gap-3 pc:gap-1.5">
+        <div className="flex min-h-8 items-center justify-between gap-3 pc:min-h-7">
           <div className="flex items-baseline gap-1.5">
             <h2 className="text-sm font-semibold text-foreground">
               <span className="pc:hidden">
@@ -798,7 +797,7 @@ function TodayExecutionPanel({
           <Link
             href={dayHref}
             aria-label={t("todayExecution.enterToday")}
-            className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-mobile-caption font-medium leading-none text-muted-foreground transition-colors hover:bg-neutral-100 hover:text-foreground pc:h-4 pc:w-auto pc:gap-1 pc:rounded-none pc:hover:bg-transparent pc:text-xs dark:hover:bg-muted pc:dark:hover:bg-transparent"
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-mobile-caption font-medium leading-none text-muted-foreground transition-colors hover:bg-neutral-100 hover:text-foreground pc:h-7 pc:w-auto pc:gap-1 pc:rounded-none pc:hover:bg-transparent pc:text-xs dark:hover:bg-muted pc:dark:hover:bg-transparent"
           >
             <span className="hidden pc:inline">
               {t("todayExecution.enterToday")}
@@ -809,7 +808,7 @@ function TodayExecutionPanel({
         <div className="space-y-1.5">
           {homeData.today.plannedWorkouts.length === 0 ? (
             <div className="rounded-surface border border-dashed border-border/70 bg-neutral-100 px-4 py-6 text-sm text-muted-foreground dark:bg-muted/45">
-              {homeData.currentPlan.planning && isPlanDateNotGenerated(homeData.currentPlan.planning, homeData.today.isoDate) ? rollingT("notGenerated") : t("todayExecution.empty")}
+              {t("todayExecution.empty")}
             </div>
           ) : null}
           {homeData.today.plannedWorkouts.map((workout) => {
@@ -1151,15 +1150,13 @@ function HomeTwoColumnSection({
       <main className="contents md:flex md:min-h-0 md:min-w-0 md:flex-col md:gap-3 md:[grid-area:main] md:order-none">
         <div className="order-2 min-w-0 md:order-none">
           <DeferredMount
-            fallback={
-              <div className="h-64 animate-pulse rounded-md bg-muted/45" />
-            }
+            fallback={<Skeleton className="h-64 w-full" aria-hidden="true" />}
           >
-            {isRollingPlan(homeData.currentPlan.planning) ? <RollingPlanCoverage plan={homeData.currentPlan.planning!} /> : <LoadComparisonChart
+            <LoadComparisonChart
               homeData={homeData}
               plannedWorkouts={plannedWorkouts}
               t={t}
-            />}
+            />
           </DeferredMount>
         </div>
         <div className="order-1 min-w-0 md:order-none">
@@ -1177,7 +1174,7 @@ function HomeTwoColumnSection({
       <div className="order-3 min-w-0 md:[grid-area:state] md:order-none">
         <DeferredMount
           fallback={
-            <div className="h-52 animate-pulse rounded-md bg-muted/45" />
+            <Skeleton className="h-52 w-full" aria-hidden="true" />
           }
         >
           <CurrentStatePanel />
@@ -1186,7 +1183,7 @@ function HomeTwoColumnSection({
       <div className="order-5 min-w-0 md:[grid-area:recent] md:order-none">
         <DeferredMount
           fallback={
-            <div className="h-64 animate-pulse rounded-md bg-muted/45" />
+            <Skeleton className="h-64 w-full" aria-hidden="true" />
           }
         >
           <RecentActivityPanel
@@ -1607,7 +1604,7 @@ export default function V2HomePageClient({
             todayFocus:
               currentDayWorkouts[0]?.title?.trim() ||
               currentDayWorkouts[0]?.notes?.trim() ||
-              (activePlan && isPlanDateNotGenerated(activePlan, dateKey) ? rollingT("notGenerated") : baseHomeData.currentPlan.todayFocus),
+              baseHomeData.currentPlan.todayFocus,
             weekTargetLoad: currentWeekWorkouts.filter(
               (workout) => workout.status !== "MOVED",
             ).length,
@@ -1692,7 +1689,6 @@ export default function V2HomePageClient({
     t,
     tAiConsent,
   ]);
-  const hasActivePlan = Boolean(activePlan);
   const refreshHome = useCallback(
     () =>
       Promise.all([
@@ -1714,7 +1710,7 @@ export default function V2HomePageClient({
     [queryClient],
   );
 
-  if (!hasActivePlan) {
+  if (!activePlan) {
     return (
       <MobilePullToRefresh onRefresh={refreshHome}>
         <V2HomeDialogs />
@@ -1730,12 +1726,14 @@ export default function V2HomePageClient({
     );
   }
 
+  const rolling = isRollingPlan(activePlan);
+
   return (
     <MobilePullToRefresh onRefresh={refreshHome}>
       <V2HomeDialogs />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 pb-2 pc:gap-3">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 pb-2 pc:gap-2">
         <AiDataConsentReminder />
-        <header className="px-1 py-1">
+        <header className="px-1 py-1 pc:py-0">
           <div className="grid gap-2 pc:grid-cols-[3fr_2fr] pc:gap-2">
             <section className="relative">
               <HomeSuggestionCardStack
@@ -1753,7 +1751,7 @@ export default function V2HomePageClient({
               />
             </section>
 
-            <div className="hidden min-w-0 space-y-3 pc:block">
+            <div className="hidden min-w-0 flex-col gap-1.5 pc:flex">
               <div className="flex items-center gap-2 text-mobile-caption text-muted-foreground pc:min-h-8 pc:text-xs">
                 <CalendarRange className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 <span className="truncate">{homeData.currentPlan.title}</span>
@@ -1761,31 +1759,37 @@ export default function V2HomePageClient({
 
               <Link
                 href="/plan"
-                className="group flex min-h-[150px] min-w-0 flex-col rounded-surface bg-neutral-100 p-3 text-foreground transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-muted/45 dark:hover:bg-muted"
+                className="group flex min-h-[150px] min-w-0 flex-1 flex-col rounded-surface bg-neutral-100 px-4 pt-3 pb-2 text-foreground transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-surface-strong dark:hover:bg-muted"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <h1 className="min-w-0 truncate text-base font-semibold leading-6 tracking-normal">
+                <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+                  <h1 className="min-w-0 flex-[1_1_9rem] break-words text-base font-semibold leading-6 tracking-normal">
                     {displayedHomeData.currentPlan.cycle}
                   </h1>
-                  <div className="inline-flex shrink-0 rounded-md bg-white/92 px-2 py-1 text-mobile-caption text-muted-foreground dark:bg-black/30 pc:text-[11px]">
-                    {t("header.weekTarget")}
-                    <span className="ml-1 font-semibold text-foreground">
-                      {isRollingPlan(activePlan) ? "—" : displayedHomeData.currentPlan.weekTargetLoad}
+                  {rolling ? (
+                    <span className="ms-auto max-w-full break-words rounded-md bg-background px-2 py-1 text-mobile-caption text-muted-foreground pc:text-[11px]">
+                      {rollingT("shortTitle")}
                     </span>
-                  </div>
+                  ) : (
+                    <div className="ms-auto inline-flex shrink-0 rounded-md bg-background px-2 py-1 text-mobile-caption text-muted-foreground pc:text-[11px]">
+                      {t("header.weekTarget")}
+                      <span className="ml-1 font-semibold text-foreground">
+                        {displayedHomeData.currentPlan.weekTargetLoad}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="mt-3 flex min-w-0 items-start gap-2.5">
-                  <span className="shrink-0 whitespace-nowrap rounded-md bg-white/88 px-2 py-1 text-mobile-caption text-muted-foreground dark:bg-black/28 pc:text-[11px]">
-                    {isRollingPlan(activePlan) ? <RollingPlanCoverage plan={activePlan!} /> : displayedHomeData.currentPlan.weekLabel}
+                {!rolling ? (
+                  <span className="mt-2 w-fit rounded-md bg-background px-2 py-1 text-mobile-caption text-muted-foreground pc:text-[11px]">
+                    {displayedHomeData.currentPlan.weekLabel}
                   </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-mobile-caption text-muted-foreground pc:text-[11px]">
-                      {t("currentPlan.todayFocus")}
-                    </div>
-                    <div className="mt-0.5 truncate text-sm font-medium leading-5">
-                      {displayedHomeData.currentPlan.todayFocus}
-                    </div>
+                ) : null}
+                <div className="mt-2 min-w-0 pb-3">
+                  <div className="text-mobile-caption text-muted-foreground pc:text-[11px]">
+                    {t("currentPlan.todayFocus")}
+                  </div>
+                  <div className="mt-0.5 truncate text-sm font-medium leading-5">
+                    {displayedHomeData.currentPlan.todayFocus}
                   </div>
                 </div>
 

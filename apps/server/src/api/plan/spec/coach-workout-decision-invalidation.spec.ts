@@ -123,13 +123,16 @@ describe('workout writes retire obsolete coach proposals', () => {
                   in: [
                     'PLAN_WORKOUT_UPDATE',
                     'PLAN_WORKOUT_POSTPONE',
+                    'PLAN_WORKOUT_RESCHEDULE',
                     'PLAN_WORKOUT_STATUS',
                   ],
                 },
                 payload: { path: ['workoutId'], equals: 'w' },
               },
               {
-                decisionType: 'PLAN_WORKOUT_BATCH_UPDATE',
+                decisionType: {
+                  in: ['PLAN_WORKOUT_BATCH_UPDATE', 'PLAN_WORKOUT_SCHEDULE'],
+                },
                 payload: {
                   path: ['changes'],
                   array_contains: [{ workoutId: 'w' }],

@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { APP_VERSION } from "@/utils/version";
 import { useRuntimeEnvironment } from "@/hooks/use-runtime-environment";
@@ -8,21 +7,12 @@ import { useRuntimeEnvironment } from "@/hooks/use-runtime-environment";
 const SUPPORT_EMAIL = "support@trainingload.ai";
 const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=Trainingload.ai%20feedback`;
 
-/**
- * 主应用页脚（版本信息）
- * - AI 教练全屏对话路由不展示，避免干扰沉浸布局
- */
 export function MainAppFooter() {
   const t = useTranslations("SharedUI");
   const desktopT = useTranslations("desktopChrome");
   const { isDesktopSelfHost } = useRuntimeEnvironment();
-  const pathname = usePathname();
-  if (pathname === "/ai-coach" || pathname?.startsWith("/ai-coach/")) {
-    return null;
-  }
-
   return (
-    <div className="hidden w-full shrink-0 flex-wrap items-center justify-center gap-1 border-t border-border/70 bg-background p-2 text-center text-mobile-caption text-muted-foreground pc:flex pc:text-xs">
+    <footer className="hidden w-full shrink-0 flex-wrap items-center justify-center gap-1 border-t border-border/70 bg-background p-2 text-center text-mobile-caption text-muted-foreground pc:flex pc:text-xs">
       <span>
         {isDesktopSelfHost
           ? `${desktopT("appName")} · ${APP_VERSION}`
@@ -36,6 +26,6 @@ export function MainAppFooter() {
       >
         {SUPPORT_EMAIL}
       </a>
-    </div>
+    </footer>
   );
 }

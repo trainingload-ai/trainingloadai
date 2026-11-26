@@ -11,6 +11,240 @@ import {
   easyBlocks,
 } from "./fixtures/coach-visual-states";
 
+test("workspace sidebar keeps navigation, chat groups and account in a compact shell", async ({
+  page,
+}) => {
+  await openCoachFixture(page, undefined, {
+    sessions: [
+      { id: "coach-stream-fixture", title: "当月训练安排", updatedAt: visualTime, pinnedAt: null },
+      { id: "pinned", title: "重点训练回顾", updatedAt: visualTime, pinnedAt: visualTime },
+    ],
+  });
+
+  const sidebar = page.locator("#workspace-sidebar");
+  const footer = page.getByRole("contentinfo").getByRole("link", { name: "support@trainingload.ai" });
+  const viewportWidth = page.viewportSize()?.width ?? 0;
+  if (viewportWidth < 768) {
+    await expect(sidebar).toBeHidden();
+    await expect(page.getByRole("button", { name: "展开侧边栏" })).toBeHidden();
+    await expect(footer).toBeHidden();
+    return;
+  }
+
+  const compactByDefault = viewportWidth < 1024;
+  if (compactByDefault) {
+    await page.getByRole("button", { name: "展开侧边栏" }).click();
+  } else {
+    await expect(footer).toBeVisible();
+  }
+  await expect(sidebar.getByRole("link", { name: "日历", exact: true })).toBeVisible();
+  await expect(sidebar.getByRole("link", { name: "设置" })).toBeVisible();
+  const pinned = sidebar.getByRole("button", { name: "置顶", exact: true }).filter({ hasText: "置顶" });
+  await expect(pinned).toBeVisible();
+  await expect.poll(async () => (await sidebar.boundingBox())?.width).toBe(204);
+
+  const coachHeading = sidebar.getByRole("link", { name: "教练", exact: true });
+  await expect(coachHeading.locator("svg")).toHaveCount(0);
+  const notification = await sidebar.getByRole("button", { name: "通知", exact: true }).boundingBox();
+  const home = await sidebar.getByRole("link", { name: "首页", exact: true }).boundingBox();
+  expect(notification!.y).toBeLessThan(home!.y);
+  const settings = await sidebar.getByRole("link", { name: "设置" }).boundingBox();
+  const theme = await sidebar.getByRole("button", { name: "主题" }).boundingBox();
+  const language = await sidebar.getByRole("button", { name: "语言" }).boundingBox();
+  expect(settings!.y + settings!.height / 2).toBeCloseTo(theme!.y + theme!.height / 2, 0);
+  expect(theme!.y).toBeCloseTo(language!.y, 0);
+  const resize = await sidebar.getByRole("separator", { name: "调整侧边栏宽度" }).boundingBox();
+  expect(resize!.height).toBeLessThan((await sidebar.boundingBox())!.height - 40);
+
+  if (await page.evaluate(() => matchMedia("(hover: hover)").matches)) {
+    const activities = sidebar.getByRole("link", { name: "活动", exact: true });
+    await activities.hover();
+    await expect(activities).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    const hoverColor = await activities.evaluate(async (link) => {
+      await Promise.all(link.getAnimations().map((animation) => animation.finished));
+      return getComputedStyle(link).backgroundColor;
+    });
+    await pinned.hover();
+    await expect(pinned).toHaveCSS("background-color", hoverColor);
+  }
+  await pinned.click();
+  await expect(sidebar.getByRole("button", { name: "重点训练回顾" })).toBeHidden();
+  await pinned.click();
+  await expect(sidebar.getByRole("button", { name: "重点训练回顾" })).toBeVisible();
+
+  await sidebar.getByRole("button", { name: "聚焦置顶和当前对话" }).click();
+  await expect(sidebar.getByRole("button", { name: "聚焦置顶和当前对话" })).toHaveAttribute("aria-pressed", "true");
+  const searchTrigger = sidebar.getByRole("button", { name: "搜索对话", exact: true });
+  await searchTrigger.click();
+  const searchPanel = page.getByRole("dialog", { name: "搜索对话" });
+  await expect(searchPanel).toBeVisible();
+  await expect(searchPanel.getByRole("option", { name: "新对话" })).toBeVisible();
+  expect((await searchPanel.boundingBox())!.width).toBeGreaterThanOrEqual(600);
+  await page.keyboard.press("Escape");
+  await expect(searchTrigger).toBeFocused();
+  await searchTrigger.click();
+  const keyword = page.getByRole("combobox", { name: "搜索对话" });
+  const searchRequest = page.waitForRequest((request) => new URL(request.url()).searchParams.get("q") === "重点训练");
+  await keyword.fill("重点训练");
+  await searchRequest;
+  await expect(searchPanel.getByRole("option", { name: "重点训练回顾" })).toBeVisible();
+  await expect(searchPanel.getByRole("option", { name: "当月训练安排" })).toHaveCount(0);
+  await searchPanel.getByRole("option", { name: "重点训练回顾" }).click();
+  await expect(page).toHaveURL(/sid=pinned/);
+
+  const calendar = sidebar.getByRole("link", { name: "日历", exact: true });
+  const calendarIcon = calendar.locator("svg");
+  const iconX = (await calendarIcon.boundingBox())?.x;
+  await page.getByRole("button", { name: "收起侧边栏" }).click();
+  await expect.poll(async () => (await sidebar.boundingBox())?.width).toBe(48);
+  await expect(calendar).toBeVisible();
+  await expect(calendar.getByText("日历")).toHaveCSS("opacity", "0");
+  expect((await calendarIcon.boundingBox())?.x).toBe(iconX);
+  await expect(sidebar.getByRole("button", { name: "搜索对话" })).toHaveCount(0);
+  const collapsedSettings = await sidebar.getByRole("link", { name: "设置" }).boundingBox();
+  expect(collapsedSettings).toMatchObject({ width: 32, height: 32 });
+  const languageTrigger = sidebar.getByRole("button", { name: "语言" });
+  await languageTrigger.click();
+  const languageMenu = page.getByRole("menu");
+  await expect(languageMenu).toHaveAttribute("data-side", "right");
+  await expect(languageMenu).toHaveCSS("backdrop-filter", "blur(8px)");
+  await expect(languageMenu).toHaveCSS("background-color", /\/ 0\.5\)$/);
+  await page.keyboard.press("Escape");
+  await expect(languageTrigger).toBeFocused();
+  await page.getByRole("button", { name: "展开侧边栏" }).click();
+  await expect(sidebar.getByRole("button", { name: "搜索对话" })).toBeVisible();
+});
+
+test("workspace usage shows the share of subscription credits used and a compact summary", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop usage panel");
+  await page.clock.setFixedTime(new Date("2026-11-22T05:00:00Z"));
+  await openCoachFixture(page, undefined, {
+    membershipPeriodEnd: "2026-11-25T05:00:00Z",
+    subscriptionUsedCredits: 2700,
+  });
+
+  const usageTrigger = page.getByRole("button", { name: /AI 用量.*已使用 27%/ });
+  await expect(usageTrigger).toBeVisible();
+  await expect(usageTrigger).toHaveText("");
+  const progress = usageTrigger.locator("circle[stroke-dasharray]");
+  await expect(progress).toHaveAttribute("stroke-dasharray", "73 100");
+  await expect(progress).toHaveAttribute("stroke-dashoffset", "-27");
+  await expect(progress).toHaveCSS("stroke-width", "2.75px");
+  await expect(usageTrigger.locator("circle").first()).toHaveCSS("stroke-width", "1.8px");
+  const theme = page.getByRole("button", { name: "主题" });
+  expect((await usageTrigger.boundingBox())?.y).toBe((await theme.boundingBox())?.y);
+  await usageTrigger.click();
+  const panel = page.getByRole("dialog", { name: "AI 用量" });
+  await expect(panel.getByText("7,300", { exact: true })).toBeVisible();
+  await expect(panel.getByText("PLUS", { exact: true })).toBeVisible();
+  await expect(panel.getByText(/会员有效至/)).toHaveCount(0);
+  await expect(panel.getByRole("link", { name: "查看用量" })).toHaveAttribute("href", "/zh/usage");
+});
+
+test("workspace usage shows progress for valid grants without a subscription quota", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop usage ring");
+  await openCoachFixture(page, undefined, { useGrantedCredits: true, subscriptionUsedCredits: 8750 });
+
+  const usageTrigger = page.getByRole("button", { name: /AI 用量.*积分.*已使用 87.5%/ });
+  const progress = usageTrigger.locator("circle[stroke-dasharray]");
+  await expect(progress).toHaveAttribute("stroke-dasharray", "12.5 100");
+  await expect(progress).toHaveAttribute("stroke-dashoffset", "-87.5");
+});
+
+test("sidebar chat titles reveal their overflow and expose conversation actions", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop chat row");
+  const title = "分析我过去四周的跑量、强度分布和睡眠，再安排下一阶段的跑步训练计划";
+  const fittingTitle = "最近一次训练的配速怎么样";
+  await openCoachFixture(page, undefined, {
+    sessions: [
+      { id: "coach-stream-fixture", title, updatedAt: visualTime, pinnedAt: null },
+      { id: "recent-pace", title: fittingTitle, updatedAt: visualTime, pinnedAt: null },
+    ],
+  });
+
+  const button = page.getByRole("button", { name: title, exact: true });
+  const titleClip = button.locator("span").first();
+  const row = button.locator("..");
+  const pin = row.getByRole("button", { name: "置顶", exact: true });
+
+  await expect(pin).toBeHidden();
+  await expect(titleClip).toHaveCSS("mask-image", /linear-gradient/);
+  const fullTitleWidth = (await button.boundingBox())!.width;
+  expect(fullTitleWidth).toBe((await row.boundingBox())!.width);
+  await expect(page.getByRole("button", { name: fittingTitle, exact: true }).locator("span").first())
+    .toHaveCSS("mask-image", "none");
+
+  await button.hover();
+  await expect(pin).toBeVisible();
+  expect((await button.boundingBox())!.width).toBeLessThan(fullTitleWidth);
+  await expect(titleClip).toHaveCSS("mask-image", /linear-gradient/);
+  await expect(titleClip.locator("span")).not.toHaveCSS("translate", "none");
+  await page.getByRole("link", { name: "首页", exact: true }).hover();
+  await expect(pin).toBeHidden();
+  expect((await button.boundingBox())!.width).toBe(fullTitleWidth);
+
+  await button.hover();
+  await row.getByRole("button", { name: "删除", exact: true }).click();
+  const confirm = page.getByRole("alertdialog");
+  await expect(confirm).toBeVisible();
+  await confirm.getByRole("button", { name: "取消" }).click();
+
+  await button.click({ button: "right" });
+  const menu = page.getByRole("menu", { name: "更多操作" });
+  await expect(menu.getByRole("menuitem")).toHaveText(["重命名", "置顶", "删除"]);
+  await page.keyboard.press("Escape");
+  await button.press("Shift+F10");
+  await expect(menu).toBeVisible();
+  await menu.getByRole("menuitem", { name: "重命名" }).click();
+  await expect(page.getByRole("dialog").getByRole("textbox")).toHaveValue(title);
+});
+
+test("coach sidebar persists each group across reloads", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop recent sidebar");
+  const now = Date.parse(visualTime);
+  await page.clock.setFixedTime(new Date(now));
+  await openCoachFixture(page, undefined, {
+    navigate: false,
+    sessions: [
+      { id: "pinned", title: "训练重点", updatedAt: visualTime, pinnedAt: visualTime },
+      { id: "coach-stream-fixture", title: "今日对话", updatedAt: visualTime, pinnedAt: null },
+      {
+        id: "yesterday",
+        title: "昨日对话",
+        updatedAt: new Date(now - 86_400_000).toISOString(),
+        pinnedAt: null,
+      },
+      {
+        id: "past",
+        title: "过去对话",
+        updatedAt: new Date(now - 172_800_000).toISOString(),
+        pinnedAt: null,
+      },
+    ],
+  });
+  await page.goto("/zh/plan", { waitUntil: "domcontentloaded" });
+  const history = page.locator("[data-coach-recent-history]");
+  const group = (name: string) =>
+    history.getByRole("button", { name, exact: true }).filter({ hasText: name });
+
+  for (const name of ["置顶", "昨天"]) {
+    await expect(group(name)).toHaveAttribute("aria-expanded", "true");
+    await group(name).click();
+  }
+  await page.reload({ waitUntil: "domcontentloaded" });
+  for (const name of ["置顶", "昨天"]) {
+    await expect(group(name)).toHaveAttribute("aria-expanded", "false");
+  }
+  for (const name of ["今天", "过去"]) {
+    await expect(group(name)).toHaveAttribute("aria-expanded", "true");
+  }
+
+  await group("置顶").click();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(group("置顶")).toHaveAttribute("aria-expanded", "true");
+  await expect(group("昨天")).toHaveAttribute("aria-expanded", "false");
+});
+
 test("recent sidebar keeps row spacing after a conversation moves to today", async ({
   page,
 }, testInfo) => {
@@ -38,7 +272,7 @@ test("recent sidebar keeps row spacing after a conversation moves to today", asy
   await expect(history.getByText("昨天", { exact: true })).toBeVisible();
   const checkSpacing = async () => {
     const boxes = await history
-      .locator("button[title]")
+      .locator("[data-coach-history-title]")
       .evaluateAll((buttons) =>
         buttons.map((button) => {
           const rect = button.getBoundingClientRect();
@@ -47,9 +281,9 @@ test("recent sidebar keeps row spacing after a conversation moves to today", asy
       );
     expect(boxes).toHaveLength(15);
     boxes.forEach((box, index) => {
-      expect(box.height).toBeGreaterThanOrEqual(40);
+      expect(box.height).toBe(32);
       if (index > 0)
-        expect(box.top - boxes[index - 1].bottom).toBeGreaterThanOrEqual(4);
+        expect(box.top - boxes[index - 1].bottom).toBeGreaterThanOrEqual(2);
     });
   };
   await checkSpacing();
@@ -73,11 +307,22 @@ test("recent sidebar keeps row spacing after a conversation moves to today", asy
     window.coachStreamFixture.finish();
   });
   await expect(history.getByText("昨天", { exact: true })).toHaveCount(0);
-  await expect(history.locator("button[title]").first()).toHaveAttribute(
-    "title",
-    "你好啊，教练",
-  );
+  await expect(history.locator("[data-coach-history-title]").first()).toHaveText("你好啊，教练");
   await checkSpacing();
+  const originalViewport = page.viewportSize()!;
+  await page.setViewportSize({ ...originalViewport, height: 650 });
+  const historyViewport = history.locator("..");
+  await expect(historyViewport).not.toHaveCSS("mask-image", "none");
+  await historyViewport.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect(historyViewport).toHaveCSS("mask-image", "none");
+  await historyViewport.evaluate((element) => {
+    element.scrollTop = 0;
+  });
+  await expect(historyViewport).not.toHaveCSS("mask-image", "none");
+  await page.setViewportSize(originalViewport);
+
   await page.addStyleTag({
     content: ".tsqd-parent-container, nextjs-portal { display:none!important }",
   });

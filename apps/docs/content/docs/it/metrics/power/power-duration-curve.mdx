@@ -1,73 +1,73 @@
 ---
-title: Power Duration Curve (PDC)
-description: A power duration curve maps maximal mean power across durations and supports CP, W', FTP, and rider-profile analysis.
-keywords: ["Power Duration Curve", "PDC", "MMP", "Max Mean Power", "CP model", "Critical Power", "W Prime", "Rider Profile"]
+title: Curva potenza–durata (PDC)
+description: "La curva potenza–durata mappa la massima potenza media su diverse durate e supporta l'analisi di CP, W', FTP e profilo dell'atleta."
+keywords: ["Power Duration Curve", "Curva potenza-durata", "PDC", "MMP", "Max Mean Power", "modello CP", "Critical Power", "W Prime", "Profilo ciclista"]
 ---
 
-# Power Duration Curve (PDC)
+# Curva potenza–durata (PDC)
 
-The Power Duration Curve (PDC) maps your best average power, or maximal mean power (MMP), across different durations. It is a useful way to understand short-power ability, sustained threshold power, and the data behind CP and W' estimates.
+La **Curva potenza–durata (PDC, Power Duration Curve)** mette su grafico la tua migliore potenza media — detta *Maximal Mean Power* (MMP) — su durate differenti. È uno strumento prezioso per leggere la capacità esplosiva sui brevi sforzi, la potenza sostenuta alla soglia e i dati alla base delle stime di CP e W'.
 
-## What is a Power Duration Curve?
+## Cos'è una curva potenza–durata?
 
-In simple terms, it plots your best efforts on one curve:
-- **X-axis**: duration (from 1 second to hours).
-- **Y-axis**: average power (watts).
+In parole semplici, riunisce tutti i tuoi sforzi migliori in un'unica curva:
+- **Asse X**: durata (da 1 secondo a diverse ore).
+- **Asse Y**: potenza media (watt).
 
-Typically, the curve looks hyperbolic:
-- **Left side (short duration)**: very high power, representing neuromuscular explosiveness and anaerobic capacity.
-- **Right side (long duration)**: power declines and flattens, representing aerobic metabolic capability (often summarized by CP).
+Tipicamente la curva assume una forma iperbolica:
+- **Lato sinistro (durate brevi)**: potenza molto alta, espressione di esplosività neuromuscolare e capacità anaerobica.
+- **Lato destro (durate lunghe)**: la potenza scende e si appiattisce, rispecchiando la capacità metabolica aerobica (spesso sintetizzata dalla CP).
 
 <PDCChart />
 
-## Key Components of the Curve
+## Componenti chiave della curva
 
-In Trainingload.ai and common sport-science models, the PDC is often described using these key parameters:
+Su Trainingload.ai e nei principali modelli di scienza dello sport, la PDC viene descritta tramite questi parametri chiave:
 
-### 1. Maximal instantaneous power (Pmax)
-The far-left end (often ~1 second or less) represents the absolute maximum power your neuromuscular system can produce. It depends largely on strength and neural recruitment.
+### 1. Potenza massima istantanea (Pmax)
+L'estremità sinistra (intorno a ~1 secondo o meno) rappresenta la massima potenza assoluta che il tuo sistema neuromuscolare riesce a generare. Dipende soprattutto da forza e reclutamento neurale.
 
-### 2. Anaerobic work capacity / functional reserve capacity (W')
-W′ (“W prime”) represents the total amount of “extra work” you can do above Critical Power (CP).
-- When your power exceeds CP, W' begins to deplete.
-- When W' is depleted, you generally need to reduce power toward CP or below.
-- See: [W′](/docs/metrics/power/anaerobic-work-capacity)
+### 2. Capacità di lavoro anaerobico / riserva funzionale (W')
+W′ («W prime») indica la quantità totale di «lavoro extra» che puoi svolgere sopra la Critical Power (CP).
+- Quando la potenza supera la CP, W' inizia a consumarsi.
+- Una volta esaurito W', devi in genere riportare la potenza alla CP o al di sotto.
+- Vedi: [W′](/it/docs/metrics/power/anaerobic-work-capacity)
 
 ### 3. Critical Power (CP)
-CP is the model threshold that describes the high sustainable side of the curve. In practice, it is limited by fatigue mechanisms and often aligns with hard steady efforts shorter than or around an hour, depending on the athlete and model fit.
-- It is the asymptote on the right side of the PDC.
-- See: [CP](/docs/metrics/power/critical-power)
+La CP è la soglia del modello che descrive il lato sostenibile della curva. Nella pratica è limitata dai meccanismi di fatica e corrisponde spesso a sforzi intensi e regolari fino a circa un'ora, in base all'atleta e all'adattamento del modello.
+- Costituisce l'asintoto sul lato destro della PDC.
+- Vedi: [CP](/it/docs/metrics/power/critical-power)
 
-## How to interpret your PDC shape
+## Come interpretare la forma della tua PDC
 
-Different curve shapes reveal your “type”:
+Forme diverse della curva rivelano il tuo profilo di atleta:
 
-### 1. Sprinter-type
-- **Traits**: very high left side (huge Pmax), but the curve drops quickly.
-- **Strategy**: avoid long breakaways; conserve energy in the pack and launch in the final 200 meters.
+### 1. Profilo velocista (Sprinter)
+- **Tratti**: lato sinistro altissimo (Pmax enorme), ma la curva scende rapidamente.
+- **Strategia**: evita fughe lunghe; risparmia energie in gruppo e scatta negli ultimi 200 metri.
 
-### 2. Time trialist-type
-- **Traits**: unremarkable sprint end, but a flatter curve and slower decay on the right.
-- **Strategy**: strong sustained output. Try long breakaways, or use hard pulls to deplete opponents’ anaerobic reserves.
+### 2. Profilo passista / cronoman (Time trialist)
+- **Tratti**: picco di sprint nella norma, ma curva più piatta con decadimento lento sulla destra.
+- **Strategia**: grande tenuta sul passo sostenuto. Tenta azioni da lontano o imponi un ritmo elevato per svuotare le riserve anaerobiche degli avversari.
 
-### 3. All-rounder-type
-- **Traits**: smooth curve without clear strengths or weaknesses.
-- **Strategy**: adaptable tactically, but may lose out in extremes (pure flat sprint or very steep climbs) against specialists.
+### 3. Profilo completo (All-rounder)
+- **Tratti**: curva armonica senza picchi estremi né cali marcati.
+- **Strategia**: grande flessibilità tattica, anche se può cedere sugli estremi (volata pura in piano o salite molto ripide) rispetto agli specialisti.
 
-## How Trainingload.ai uses PDC
+## Come Trainingload.ai utilizza la PDC
 
-Trainingload.ai uses the PDC as the evidence layer for CP, W', FTP estimates, and athlete profile review. The curve helps separate different performance questions:
+Trainingload.ai usa la PDC come base empirica per stimare CP, W' e FTP e per analizzare il profilo dell'atleta. La curva aiuta a separare domande prestazionali diverse:
 
-1. **Short duration**: 5 seconds to 1 minute reflects sprint and anaerobic ability.
-2. **Middle duration**: 3–8 minutes often reflects VO2max-oriented power.
-3. **Long duration**: 20 minutes and beyond is more relevant to threshold and aerobic durability.
+1. **Durate brevi**: da 5 secondi a 1 minuto riflettono sprint e capacità anaerobica.
+2. **Durate medie**: 3–8 minuti riflettono spesso la potenza legata al VO₂max.
+3. **Durate lunghe**: dai 20 minuti in su contano soprattutto per soglia e durabilità aerobica.
 
-PDC quality depends on the data behind it. If you only have easy rides or one 20-minute test, some parts of the curve may be under-tested rather than truly weak.
+La qualità della PDC dipende dai dati che la alimentano. Se hai svolto solo uscite facili o un singolo test da 20 minuti, alcune zone della curva appariranno basse semplicemente perché non sono state testate, non perché siano davvero punti deboli.
 
-For a direct model fit, use the [fit Critical Power for training load modeling](/critical-power-calculator). For a file-based FTP estimate, use the [estimate FTP training load from an activity file](/ftp-calculator).
+Per adattare direttamente il modello, usa lo strumento per [calcolare la Critical Power per modellare il carico di allenamento](/it/critical-power-calculator). Per una stima dell'FTP da file, usa lo strumento per [stimare il carico di allenamento FTP da un file di attività](/it/ftp-calculator).
 
 ---
-*Related*:
-- [Critical Power (CP)](/docs/metrics/power/critical-power)
-- [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power)
-- [W' (Anaerobic Work Capacity)](/docs/metrics/power/anaerobic-work-capacity)
+*Correlati*:
+- [Critical Power (CP)](/it/docs/metrics/power/critical-power)
+- [Functional Threshold Power (FTP)](/it/docs/metrics/power/functional-threshold-power)
+- [W' (Capacità di lavoro anaerobico)](/it/docs/metrics/power/anaerobic-work-capacity)

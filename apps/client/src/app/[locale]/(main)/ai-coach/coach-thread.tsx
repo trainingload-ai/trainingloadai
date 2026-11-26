@@ -28,6 +28,13 @@ import {
   CoachQuestionFlowProvider,
 } from "./coach-question-flow";
 import { CoachThinkingEnabledContext } from "./coach-thinking-context";
+import { PlanCalendarMoveState } from "@shared/plan-proposal";
+import { readCoachTurnError } from "./coach-turn-error-model";
+import {
+  CoachCalendarMoveRecoveryCard,
+  isCalendarMoveRecoveryError,
+  useCoachCalendarMovePreview,
+} from "./coach-calendar-move-recovery-card";
 import {
   CoachTurnRetryContext,
   type CoachTurnRetryControls,
@@ -155,6 +162,7 @@ function CoachEmptyThread({
 }
 
 export function CoachThread({
+  sessionId,
   isLoading,
   turnError,
   thinkingEnabled,
@@ -162,6 +170,7 @@ export function CoachThread({
   onPrepareTurnRetry,
   variant = "page",
 }: {
+  sessionId?: string;
   isLoading: boolean;
   turnError: string | null;
   thinkingEnabled: boolean;
@@ -173,11 +182,20 @@ export function CoachThread({
   const turnRetryControls = useMemo<CoachTurnRetryControls | null>(
     () =>
       onPrepareTurnRetry
-        ? { thinkingEnabled, prepareRetry: onPrepareTurnRetry }
+        ? { sessionId, thinkingEnabled, prepareRetry: onPrepareTurnRetry }
         : null,
-    [onPrepareTurnRetry, thinkingEnabled],
+    [onPrepareTurnRetry, sessionId, thinkingEnabled],
   );
   const isEmpty = useCoachThread((state) => state.messages.length === 0);
+  const hasCalendarRecovery = useCoachThread((state) =>
+    isCalendarMoveRecoveryError(readCoachTurnError(state.messages.at(-1)?.content ?? [])),
+  );
+  const running = useCoachThread((state) => state.isRunning);
+  const { data: calendarMove } = useCoachCalendarMovePreview(sessionId);
+  const displayCalendarMove = sessionId?.startsWith("calendar-move:") &&
+    (hasCalendarRecovery || calendarMove?.state === PlanCalendarMoveState.Expired ||
+      calendarMove?.state === PlanCalendarMoveState.Invalidated ||
+      calendarMove?.requiresCoachConfirmation);
   const isMobile = useIsMobile();
   const embedded = variant === "embedded";
 
@@ -204,7 +222,7 @@ export function CoachThread({
                 <ConversationContent
                   scrollClassName={
                     !embedded && !isEmpty
-                      ? "desktop-coach-message-viewport"
+                      ? "desktop-coach-message-viewport tablet:[scrollbar-width:thin]"
                       : undefined
                   }
                   className={cn(
@@ -235,6 +253,14 @@ export function CoachThread({
                     />
                   )}
                   <CoachMessageList />
+                  {displayCalendarMove && sessionId ? (
+                    <CoachCalendarMoveRecoveryCard
+                      key={sessionId}
+                      sid={sessionId}
+                      current={calendarMove}
+                      disabled={running}
+                    />
+                  ) : null}
                   {turnError ? (
                     <div
                       role="alert"

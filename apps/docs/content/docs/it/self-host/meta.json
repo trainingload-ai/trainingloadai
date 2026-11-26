@@ -1,0 +1,12 @@
+{
+  "title": "Self-hosting",
+  "pages": [
+    "index",
+    "self-host-vs-cloud",
+    "installation",
+    "configuration",
+    "garmin-personal-api",
+    "operations",
+    "troubleshooting"
+  ]
+}

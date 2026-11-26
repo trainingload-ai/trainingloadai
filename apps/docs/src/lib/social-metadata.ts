@@ -1,4 +1,4 @@
-export const HOME_OPEN_GRAPH_IMAGE_PATH = "/og/home.jpg?v=20260912";
+export const HOME_OPEN_GRAPH_IMAGE_PATH = "/og/home.jpg?v=20261123";
 export const HOME_TWITTER_IMAGE_PATH = HOME_OPEN_GRAPH_IMAGE_PATH;
 
 export function homeOpenGraphImage(

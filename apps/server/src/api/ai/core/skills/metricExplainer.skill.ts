@@ -18,6 +18,7 @@ export const metricExplainerSkill: CoachSkillDef = {
     'metric.history',
     'metric.forecast',
     'training.aggregate',
+    'training.data_coverage',
     'present_training_visualization',
     'training.readiness',
     'pmc.range',

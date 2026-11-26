@@ -1,99 +1,124 @@
 ---
-title: Activity Detail
-description: Understand an activity detail page in Trainingload.ai, including processing status, summary metrics, charts, route data, load, pace, power, and heart-rate analysis.
-keywords: ["activity detail", "workout analysis", "training activity charts", "Trainingload.ai activity"]
+title: Détail de l’activité
+description: Analysez une séance terminée dans Trainingload.ai à partir de son résumé, de sa chronologie, de ses tours, de ses meilleurs efforts, de sa fréquence cardiaque, de sa puissance, de son tracé, de sa charge d’entraînement et du contexte du plan.
+seoTitle: "Guide d’analyse d’activité | Trainingload.ai"
+seoDescription: "Apprenez à analyser une séance, choisir un onglet, vérifier capteurs et charge d’entraînement, comparer au plan et interroger le Coach IA avec contexte."
+keywords: ["analyse d’activité", "bilan de séance", "détail de l’activité", "chronologie d’entraînement", "guide Trainingload.ai"]
 ---
 
-# Activity Detail
+# Détail de l’activité
 
-The activity detail page explains one completed workout. It is where you move from “I uploaded a file” to “I understand what this session did.”
+Utilisez le détail de l’activité pour comprendre une séance terminée. Cette page rassemble l’activité enregistrée, le tracé, les graphiques, les métriques propres au sport et l’avis du coach lorsqu’il est disponible. Commencez par la source et le résumé, examinez un effort précis, puis confrontez les données observées à l’objectif initial de la séance.
 
-Open it from:
+[Ouvrir la course de 10 km dans la Démo](https://demo.trainingload.ai/en/activities/17921623926005309429). Le lien ouvre une véritable activité dans un compte de démonstration en lecture seule. Vous pouvez inspecter ses onglets et ses graphiques ; l’enregistrement de modifications nécessite votre propre compte.
 
-- The activity feed.
-- Activity search.
-- Map.
-- Calendar or day view.
-- A linked workout inside a training plan.
+## Avant de commencer
 
-## Processing status
+- Importez ou enregistrez une activité, puis attendez la fin de son traitement.
+- Vérifiez le sport et la date de l’activité, ainsi que votre système d’unités et les seuils pertinents dans votre profil.
+- Choisissez une activité qui contient les données à examiner : une analyse de fréquence cardiaque requiert des échantillons de fréquence cardiaque, l’analyse de puissance exige des données de puissance, et le tracé suppose un enregistrement GPS.
+- Pour comparer le prévu et le réalisé, repérez la séance planifiée visée et son association avec l’activité.
 
-An activity may not be fully analyzed immediately after import. Processing can include file normalization, duplicate handling, time-series preparation, and metric computation.
+Une activité ne contenant que des valeurs récapitulatives reste consultable, mais propose moins de graphiques. Les onglets affichés dépendent du sport et des données enregistrées.
 
-Common states:
+## 1. Ouvrir l’activité et vérifier sa source
 
-- **Analyzing**: charts and derived metrics may still be incomplete.
-- **Ready**: the activity is available for normal review.
-- **Partial failed**: the activity exists, but some analysis may be missing.
-- **Failed**: the file could not be processed.
+Ouvrez **Activités**, sélectionnez une séance, puis vérifiez son titre, son sport, son heure de début, sa source, sa distance et sa durée. Vous pouvez également ouvrir une activité depuis la recherche, la carte, le calendrier ou la séance planifiée associée.
 
-If the activity is not ready yet, wait for processing to complete before judging missing charts or metrics.
+Si le traitement est encore en cours, patientez avant de conclure que des graphiques manquent. Une activité peut apparaître avant que toutes ses analyses ne soient prêtes.
 
-## Summary metrics
+| État de traitement | Action recommandée |
+| --- | --- |
+| En cours d’analyse | Attendez la fin du traitement de l’activité, puis actualisez la page. |
+| Prêt | Poursuivez l’examen des données disponibles. |
+| Échec partiel | Vérifiez quelle analyse manque et appuyez-vous sur les parties terminées. |
+| Échec | Vérifiez le fichier et les informations d’erreur avant de relancer le traitement ou d’importer de nouveau. |
 
-The top-level summary usually includes core workout fields such as:
+<DocsScreenshot
+  id="activity-detail-review"
+  title="Repérer les onglets d’analyse sous le résumé et la carte"
+  description="Vérifiez d’abord la source et le résumé. Les onglets sous le tracé donnent accès à Aperçu, Tours, Fréquence cardiaque, Puissance, Allure, Meilleurs efforts et Chronologie lorsque ces vues sont disponibles."
+  imageAlt="Résumé et tracé de la course de démonstration avec les onglets d’analyse affichés en dessous"
+  route="Activités → Détail de l’activité"
+  demoLabel="Ouvrir cette activité dans la Démo"
+/>
 
-- Sport type.
-- Start time and time zone.
-- Distance and duration.
-- Moving time and elapsed time.
-- Elevation gain.
-- Average and max heart rate.
-- Average and max power.
-- Pace or speed.
+## 2. Choisir la vue adaptée à votre question
 
-The exact fields depend on the sport and the data available in the file.
+Sur le Web bureau, les onglets d’analyse se trouvent sous le tracé. Commencez par **Aperçu**, puis ouvrez l’onglet qui répond à votre question. Sur mobile, utilisez les vues de détail et de graphiques disponibles pour ce sport. La Chronologie synchronisée décrite ci-dessous est un flux propre au Web bureau.
 
-## Charts and time series
+| Vue | Pour examiner | Données ou périmètre |
+| --- | --- | --- |
+| Aperçu | Résumé de la séance, graphiques disponibles, météo et contexte propre au sport | Les champs varient selon l’activité. |
+| Chronologie | Un point précis ou un segment sélectionné sur des graphiques synchronisés et sur le tracé | Course à pied ou cyclisme avec séries temporelles exploitables sur Web bureau. |
+| Tours | Comparer les tours enregistrés et leurs métriques récapitulatives | Disponible lorsque l’activité comporte des tours et que le sport prend cette vue en charge. |
+| Meilleurs efforts | Repérer les efforts soutenus par distance ou par durée et examiner leurs statistiques | La disponibilité dépend du sport et des flux enregistrés. |
+| Fréquence cardiaque | Réponse cardiovasculaire, zones et métriques dérivées prises en charge | Requiert des données de fréquence cardiaque pour l’analyse correspondante. |
+| Puissance | Puissance développée, zones et indicateurs liés à l’efficience | Requiert les données de puissance correspondantes. La puissance estimée est signalée comme telle. |
+| Allure | Gestion de l’allure et analyses associées | Affichée pour les activités de course à pied prises en charge. |
+| Dynamiques de course | Mesures techniques enregistrées | Course à pied équipée des capteurs correspondants. |
 
-Activity charts help explain how the workout unfolded over time. Depending on the data, you may see:
+La natation et d’autres sports disposent de leurs propres règles d’affichage. Un onglet absent peut simplement refléter le sport pratiqué ou l’absence de données, et non un échec de traitement.
 
-- Pace or speed.
-- Heart rate.
-- Power.
-- Cadence.
-- Elevation.
-- Grade or slope.
+## 3. Examiner un effort dans son contexte
 
-Use charts to find pacing drift, surges, climbs, stops, or unusual sensor behavior.
+Pour étudier une côte, une relance ou un intervalle, ouvrez **Chronologie**. Placez le curseur sur un point pour comparer les relevés, ou sélectionnez une plage pour consulter ses valeurs moyenne, minimale et maximale en regard du tronçon de parcours correspondant.
 
-## Load and intensity
+Suivez [Analyser une séance avec la chronologie](/fr/docs/guide/activity-timeline) pour le flux complet de sélection, de configuration des graphiques et d’édition des segments d’analyse.
 
-Trainingload.ai can compute session load from different data sources:
+Utilisez **Tours** pour comparer les tours enregistrés par votre appareil. Utilisez **Meilleurs efforts** lorsque vous cherchez les efforts soutenus les plus élevés. Dans Meilleurs efforts, basculez entre distance et temps lorsque le choix est proposé. **Modifier les colonnes** permet de définir les statistiques affichées et leur ordre. Cliquer sur la première colonne ou la valeur d’un effort localise son tronçon sur le tracé lorsque les données de localisation sont disponibles.
 
-- Power-based TSS when power and threshold are reliable.
-- Pace-based rTSS for running when pace, terrain, and threshold pace are available.
-- Heart-rate-based TRIMP / hrTSS when heart rate is the best available signal.
-- Fallback estimates when limited data is available.
+## 4. Lire l’intensité et la charge d’entraînement
 
-For the concepts behind this, read [Training Load](/docs/metrics/training-load).
+Interprétez les analyses d’allure, de fréquence cardiaque et de puissance disponibles en tenant compte du sport et de vos seuils. La source de calcul de la charge d’entraînement compte lorsque vous comparez plusieurs séances.
 
-## Route and terrain context
+- La charge basée sur la puissance utilise la puissance et le seuil applicable.
+- La charge basée sur l’allure en course à pied dépend de l’allure disponible, du terrain et du seuil configuré.
+- La charge basée sur la fréquence cardiaque utilise l’enregistrement cardiaque disponible et les réglages du profil.
+- D’autres méthodes de calcul peuvent s’appliquer lorsque ces signaux ne sont pas disponibles.
 
-If the activity has GPS and elevation data, terrain can change how you interpret pace and effort.
+Consultez [Charge d’entraînement](/fr/docs/metrics/training-load) pour les notions prises en charge. Vérifiez [Profil, seuils et zones](/fr/docs/guide/profile-thresholds-zones) si vos zones ou l’intensité semblent incohérentes.
 
-- Uphill pace may look slow while effort is high.
-- Downhill pace may look fast while mechanical stress is high.
-- GAP and NGP help compare hilly running with flatter efforts.
+Dans les analyses de fréquence cardiaque compatibles, le découplage aérobie compare l’évolution du rapport entre production d’effort et fréquence cardiaque au fil de la séance. Consultez [Découplage aérobie](/fr/docs/metrics/heart-rate/aerobic-decoupling) pour vérifier ses conditions de validité avant d’interpréter Pw:Hr ou Pa:Hr. Une séance irrégulière ou interrompue ne s’analyse pas dans le même contexte qu’un effort régulier.
 
-See [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace) and [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace).
+## 5. Ajouter le contexte du parcours et du plan
 
-## Plan linkage
+Appuyez-vous sur le tracé pour relier les variations d’effort au terrain. Les côtes, les arrêts et les conditions environnementales expliquent souvent des variations d’allure ou de fréquence cardiaque. Sans GPS, fiez-vous aux autres signaux enregistrés.
 
-If the activity belongs to a plan workout, link it to the planned session. This unlocks plan execution review:
+Si la séance correspond à une séance planifiée, vérifiez son association dans le calendrier ou dans le plan. Confirmez qu’il s’agit bien de la séance visée avant de comparer le contenu prévu, l’exécution et la charge d’entraînement. Corrigez toute association erronée avant de demander un bilan du plan. Suivez [Gérer un plan actif](/fr/docs/guide/manage-active-plan) pour le flux d’association.
 
-- Planned vs completed session.
-- Expected load vs actual load.
-- Completion status.
-- AI Coach follow-up with plan context.
+## 6. Lire l’avis du coach ou poser une question ciblée
 
-If the wrong activity is linked, unlink it and choose the correct workout manually.
+La section **Avis du coach** indique l’état de l’analyse IA disponible. Si la page vous demande de vérifier vos préférences de partage de données, faites ce choix avant d’utiliser l’IA avec vos propres données. Le traitement ou la demande d’analyse peut également être encore en attente. Utilisez l’action de nouvelle tentative affichée lorsqu’une requête échoue.
 
-## Ask AI Coach
+Lorsque vous poursuivez avec le Coach IA, précisez l’activité et votre question. Parmi les pistes utiles : vérifier si la séance a respecté l’intensité prévue, identifier ce qui a changé en fin de séance, ou situer cette activité dans l’entraînement récent. Vérifiez l’activité, la plage de dates et les éléments retenus dans la réponse avant d’appliquer une modification proposée au plan.
 
-Use AI Coach when you want interpretation rather than raw numbers. Helpful prompts:
+Consultez [Coach IA](/fr/docs/guide/ai-coach) pour le flux de relecture et de confirmation.
 
-- “Did this session match the planned intensity?”
-- “Why did my heart rate drift late in the run?”
-- “Was this too hard for an easy day?”
-- “What should I change before the next workout?”
+## Vérifier votre analyse
+
+Vous devez pouvoir identifier l’activité et sa source de données, expliquer l’effort examiné et nommer les signaux enregistrés qui fondent votre conclusion. Pour un entraînement planifié, vérifiez la séance associée. Notez toute donnée de capteur manquante ou toute interprétation incertaine avant de prendre votre prochaine décision d’entraînement.
+
+## Questions fréquentes
+
+### Pourquoi certains graphiques ou onglets sont-ils absents ?
+
+Vérifiez l’état de traitement, le sport et la couverture des capteurs. Les fichiers ne contenant qu’un résumé ne donnent pas accès aux mêmes analyses que les fichiers dotés d’échantillons enregistrés. Le Web bureau et l’application mobile native exposent également des flux de détail différents.
+
+### Pourquoi une valeur diffère-t-elle d’une vue à l’autre ?
+
+Vérifiez l’unité, la plage sélectionnée et le mode de calcul affiché. Dans la Chronologie, les statistiques de plage décrivent l’ensemble de la séance ou la sélection active, tandis que la lecture au curseur décrit un échantillon unique. Les résumés de tours enregistrés et les segments d’analyse recalculés peuvent également reposer sur des entrées différentes.
+
+### Pourquoi le tracé est-il absent ?
+
+Le fichier peut ne pas contenir de GPS, un réglage de confidentialité peut masquer les données de localisation, ou la requête de carte peut avoir échoué. Examinez séparément les graphiques disponibles et l’état d’erreur de la carte.
+
+### Puis-je modifier l’activité de démonstration ?
+
+La Démo publique permet d’explorer l’exemple. Les modifications d’activité, l’enregistrement de segments d’analyse et les changements de plan nécessitent un compte connecté disposant des droits appropriés.
+
+## Continuer
+
+- [Analyser une séance avec la chronologie](/fr/docs/guide/activity-timeline)
+- [Pages d’analyse de la performance](/fr/docs/guide/performance-analysis-pages)
+- [Bilan d’entraînement hebdomadaire](/fr/docs/workflow/weekly-review)

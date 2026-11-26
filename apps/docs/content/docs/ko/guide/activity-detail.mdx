@@ -1,99 +1,124 @@
 ---
-title: Activity Detail
-description: Understand an activity detail page in Trainingload.ai, including processing status, summary metrics, charts, route data, load, pace, power, and heart-rate analysis.
-keywords: ["activity detail", "workout analysis", "training activity charts", "Trainingload.ai activity"]
+title: 활동 상세 분석
+description: 요약, 타임라인, 랩, 구간 최고 기록, 심박수, 파워, 경로, 훈련 부하, 플랜 맥락을 통해 Trainingload.ai에서 완료된 워크아웃을 깊이 있게 리뷰합니다.
+seoTitle: "활동 상세 분석 가이드 | Trainingload.ai"
+seoDescription: "완료된 워크아웃을 리뷰하고 알맞은 분석 탭을 선택하며 센서·훈련 부하 데이터를 확인하고 플랜과 비교해 AI 코치에게 질문하는 방법을 안내합니다."
+keywords: ["활동 분석", "워크아웃 리뷰", "활동 상세", "훈련 타임라인", "Trainingload.ai 가이드"]
 ---
 
-# Activity Detail
+# 활동 상세 분석
 
-The activity detail page explains one completed workout. It is where you move from “I uploaded a file” to “I understand what this session did.”
+활동 상세 페이지는 완료된 워크아웃 하나를 깊이 있게 이해하는 화면입니다. 기록된 활동 데이터, 경로, 차트, 종목별 지표, 그리고 제공되는 AI 코치 리뷰를 한곳에 모아 보여 줍니다. 소스와 요약부터 확인하고 특정 구간을 살펴본 뒤, 기록된 근거를 원래 워크아웃 목적과 비교해 보세요.
 
-Open it from:
+[10km 레이스 데모 열기](https://demo.trainingload.ai/en/activities/17921623926005309429)에서 읽기 전용 데모 계정의 실제 활동을 바로 확인할 수 있습니다. 탭과 차트를 자유롭게 탐색해 볼 수 있으며, 변경 사항을 저장하려면 본인 계정이 필요합니다.
 
-- The activity feed.
-- Activity search.
-- Map.
-- Calendar or day view.
-- A linked workout inside a training plan.
+## 시작하기 전에
 
-## Processing status
+- 활동을 가져오거나 기록한 뒤 분석 처리가 완료될 때까지 기다립니다.
+- 활동의 종목과 날짜를 확인하고 프로필의 단위 체계와 관련 역치를 점검합니다.
+- 살펴보려는 센서 데이터가 실제로 포함된 활동인지 확인합니다. 심박수 분석에는 심박수 샘플이, 파워 분석에는 파워 데이터가, 경로 표시에는 GPS가 필요합니다.
+- 계획된 훈련과 실제 수행을 비교하려면 해당하는 예정 플랜 워크아웃과 활동 연결 상태를 먼저 확인합니다.
 
-An activity may not be fully analyzed immediately after import. Processing can include file normalization, duplicate handling, time-series preparation, and metric computation.
+요약 수치만 담긴 활동도 리뷰할 수 있지만 표시되는 차트 수는 줄어들 수 있습니다. 표시되는 탭은 종목과 기록된 데이터에 따라 달라집니다.
 
-Common states:
+## 1. 활동 열기 및 소스 확인
 
-- **Analyzing**: charts and derived metrics may still be incomplete.
-- **Ready**: the activity is available for normal review.
-- **Partial failed**: the activity exists, but some analysis may be missing.
-- **Failed**: the file could not be processed.
+**Activities(활동)**에서 워크아웃을 선택해 제목, 종목, 시작 시각, 소스, 거리, 운동 시간을 확인합니다. 검색, 지도, 캘린더 또는 연결된 플랜 워크아웃에서도 활동 상세로 바로 들어갈 수 있습니다.
 
-If the activity is not ready yet, wait for processing to complete before judging missing charts or metrics.
+분석 처리가 아직 진행 중이라면 누락된 차트를 판단하기 전에 잠시 기다려 주세요. 모든 분석이 끝나기 전에 활동 항목이 먼저 표시될 수 있습니다.
 
-## Summary metrics
+| 처리 상태 | 해야 할 일 |
+| --- | --- |
+| Analyzing(분석 중) | 활동 처리가 완료될 때까지 기다린 뒤 새로고침합니다. |
+| Ready(준비 완료) | 준비된 데이터를 이어서 리뷰합니다. |
+| Partial failed(부분 실패) | 어떤 분석이 누락되었는지 확인하고 완료된 부분을 활용합니다. |
+| Failed(실패) | 재시도하거나 다시 가져오기 전에 원본 파일과 오류 정보를 확인합니다. |
 
-The top-level summary usually includes core workout fields such as:
+<DocsScreenshot
+  id="activity-detail-review"
+  title="활동 요약과 지도 아래에서 분석 탭 찾기"
+  description="먼저 소스와 요약을 확인합니다. 경로 아래의 탭에서 지원하는 경우 Overview, Laps, Heart Rate, Power, Pace, Best efforts, Timeline으로 이동할 수 있습니다."
+  imageAlt="데모 레이스 요약과 경로, 그리고 그 아래에 배치된 활동 분석 탭"
+  route="Activities → Activity detail"
+  demoLabel="이 데모 활동 열기"
+/>
 
-- Sport type.
-- Start time and time zone.
-- Distance and duration.
-- Moving time and elapsed time.
-- Elevation gain.
-- Average and max heart rate.
-- Average and max power.
-- Pace or speed.
+## 2. 질문에 맞는 분석 뷰 선택하기
 
-The exact fields depend on the sport and the data available in the file.
+데스크톱 웹에서는 경로 아래에 분석 탭이 표시됩니다. **Overview(개요)**부터 살펴본 뒤 확인하려는 질문에 맞는 탭을 여세요. 모바일에서는 해당 종목에서 지원하는 상세 및 차트 뷰를 이용합니다. 아래에 설명하는 동기화 타임라인(Timeline)은 데스크톱 웹 워크플로입니다.
 
-## Charts and time series
+| 뷰 | 확인할 내용 | 데이터 또는 범위 |
+| --- | --- | --- |
+| Overview(개요) | 세션 요약, 주요 데이터 차트, 날씨, 종목별 맥락 | 활동에 포함된 필드에 따라 달라집니다. |
+| Timeline(타임라인) | 동기화된 차트와 경로 위의 특정 시점 또는 선택 구간 분석 | 데스크톱 웹에서 시계열 데이터가 있는 러닝 또는 사이클링 |
+| Laps(랩) | 기기에 기록된 랩과 랩별 요약 지표 비교 | 활동에 랩 데이터가 있고 해당 종목에서 지원할 때 표시 |
+| Best efforts(구간 최고 기록) | 거리별 또는 시간별 지속 최고 구간과 통계 탐색 | 종목과 기록된 스트림에 따라 지원 여부 결정 |
+| Heart Rate(심박수) | 심혈관 반응, 존 분포, 지원하는 파생 지표 | 해당 분석에 필요한 심박수 데이터 필요 |
+| Power(파워) | 파워 출력, 존 분포, 효율 관련 지표 | 해당 파워 데이터 필요(추정 파워는 별도 표시됨) |
+| Pace(페이스) | 페이싱 및 페이스 관련 분석 | 지원하는 러닝 활동에 표시 |
+| Running Dynamics(러닝 다이내믹스) | 기록된 주법·기술 관련 측정치 | 관련 센서 스트림이 있는 러닝 활동 |
 
-Activity charts help explain how the workout unfolded over time. Depending on the data, you may see:
+수영 및 기타 종목은 각 종목별 상세 표시 정책을 따릅니다. 특정 탭이 보이지 않는 것은 처리 실패가 아니라 종목 특성이나 센서 데이터 부재 때문일 수 있습니다.
 
-- Pace or speed.
-- Heart rate.
-- Power.
-- Cadence.
-- Elevation.
-- Grade or slope.
+## 3. 맥락 속에서 특정 구간 자세히 보기
 
-Use charts to find pacing drift, surges, climbs, stops, or unusual sensor behavior.
+오르막, 급가속 또는 인터벌 구간을 분석하려면 **Timeline(타임라인)**을 여세요. 특정 지점을 가리켜 수치를 비교하거나, 구간을 드래그해 평균·최솟값·최댓값을 해당 경로 구간과 나란히 살펴볼 수 있습니다.
 
-## Load and intensity
+구간 선택 워크플로, 차트 구성, 분석 구간 편집의 전체 절차는 [타임라인으로 워크아웃 분석하기](/ko/docs/guide/activity-timeline)를 따릅니다.
 
-Trainingload.ai can compute session load from different data sources:
+기기에 기록된 랩을 비교할 때는 **Laps**, 가장 강하게 지속한 구간을 찾을 때는 **Best efforts**를 활용하세요. Best efforts에서는 지원하는 경우 거리 기준과 시간 기준을 전환할 수 있으며, **Edit columns(열 편집)**로 표시할 통계 항목과 순서를 조정할 수 있습니다. 위치 데이터가 있다면 기록 행의 첫 번째 열이나 값을 선택해 해당 경로 구간을 지도에서 바로 찾을 수 있습니다.
 
-- Power-based TSS when power and threshold are reliable.
-- Pace-based rTSS for running when pace, terrain, and threshold pace are available.
-- Heart-rate-based TRIMP / hrTSS when heart rate is the best available signal.
-- Fallback estimates when limited data is available.
+## 4. 강도와 훈련 부하 해석하기
 
-For the concepts behind this, read [Training Load](/docs/metrics/training-load).
+활동의 종목과 프로필 역치를 염두에 두고 페이스, 심박수, 파워 분석을 확인하세요. 세션을 비교할 때는 부하가 어떤 소스에서 계산되었는지가 중요합니다.
 
-## Route and terrain context
+- 파워 기반 부하는 파워 데이터와 해당 역치(FTP 등)를 사용합니다.
+- 러닝 페이스 기반 부하는 기록된 페이스, 지형, 역치 맥락에 따라 계산됩니다.
+- 심박수 기반 부하는 심박수 기록과 프로필 설정을 사용합니다.
+- 위 신호가 없는 경우 다른 부하 산출 방식이 적용될 수 있습니다.
 
-If the activity has GPS and elevation data, terrain can change how you interpret pace and effort.
+지원하는 부하 개념은 [훈련 부하 지표](/ko/docs/metrics/training-load)를 참고하고, 존이나 강도가 비현실적으로 보인다면 [프로필, 역치 및 훈련 존](/ko/docs/guide/profile-thresholds-zones)을 점검하세요.
 
-- Uphill pace may look slow while effort is high.
-- Downhill pace may look fast while mechanical stress is high.
-- GAP and NGP help compare hilly running with flatter efforts.
+지원하는 심박수 분석에서는 유산소 디커플링(Aerobic Decoupling)을 통해 활동 전·후반의 출력 대비 심박수 관계를 비교합니다. Pw:Hr 또는 Pa:Hr를 해석하기 전에 [유산소 디커플링](/ko/docs/metrics/heart-rate/aerobic-decoupling)에서 적용 조건을 먼저 확인하세요. 강도 변화가 크거나 중단이 잦은 워크아웃은 일정 강도의 지속주와 다른 맥락으로 해석해야 합니다.
 
-See [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace) and [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace).
+## 5. 경로와 플랜 맥락 더하기
 
-## Plan linkage
+지도 경로를 보면서 강도 변화가 지형 때문인지 확인하세요. 언덕, 신호 대기, 날씨·환경 요인이 페이스나 심박수 변화를 설명해 주는 경우가 많습니다. GPS가 없는 실내 훈련이라면 남아 있는 센서 기록을 중심으로 판단합니다.
 
-If the activity belongs to a plan workout, link it to the planned session. This unlocks plan execution review:
+해당 세션이 예정된 플랜 워크아웃이라면 캘린더나 플랜 화면에서 연결 상태를 확인하세요. 계획 내용, 완료 여부, 부하를 비교하기 전에 의도한 세션과 올바르게 연결되어 있는지 검증하고, 잘못 연결되었다면 플랜 리뷰를 요청하기 전에 수정해야 합니다. 연결 절차는 [진행 중인 플랜 관리](/ko/docs/guide/manage-active-plan)를 참고하세요.
 
-- Planned vs completed session.
-- Expected load vs actual load.
-- Completion status.
-- AI Coach follow-up with plan context.
+## 6. 코치 리뷰 읽기 또는 구체적 질문하기
 
-If the wrong activity is linked, unlink it and choose the correct workout manually.
+**Coach review(코치 리뷰)** 섹션에서는 현재 활동에 대한 AI 리뷰 상태를 확인할 수 있습니다. 데이터 공유 동의 안내가 표시된다면 본인 데이터로 AI를 사용하기 전에 먼저 선택을 완료하세요. 분석 처리나 리뷰 요청이 아직 진행 중일 수도 있으며, 요청이 실패한 경우 화면에 표시된 재시도 버튼을 사용하세요.
 
-## Ask AI Coach
+AI 코치와 대화를 이어갈 때는 해당 활동과 궁금한 질문을 구체적으로 포함하세요. "예정된 강도에 맞게 수행했는가?", "후반부에 무엇이 달라졌는가?", "최근 훈련 흐름 속에서 이 활동이 어떤 의미가 있는가?" 같은 질문이 좋은 출발점입니다. 제안된 플랜 변경을 적용하기 전에는 답변이 참조한 활동, 기간, 근거를 반드시 검증하세요.
 
-Use AI Coach when you want interpretation rather than raw numbers. Helpful prompts:
+리뷰 및 확정 워크플로는 [AI 코치](/ko/docs/guide/ai-coach)에서 자세히 볼 수 있습니다.
 
-- “Did this session match the planned intensity?”
-- “Why did my heart rate drift late in the run?”
-- “Was this too hard for an easy day?”
-- “What should I change before the next workout?”
+## 리뷰 결과 확인
+
+리뷰를 마쳤을 때 해당 활동의 정체와 데이터 소스를 명확히 파악하고, 살펴본 구간의 특징을 설명할 수 있으며, 어떤 기록 신호가 그 결론을 뒷받침하는지 말할 수 있어야 합니다. 예정된 훈련이었다면 연결된 워크아웃을 확인하고, 다음 훈련 결정을 내리기 전에 누락된 센서 데이터나 불확실한 해석 여지를 함께 메모해 두세요.
+
+## 자주 묻는 질문
+
+### 일부 차트나 탭이 보이지 않는 이유는?
+
+처리 상태, 종목, 센서 포함 범위를 확인하세요. 요약 값만 있는 파일은 시계열 샘플이 포함된 파일과 동일한 분석을 제공하지 않습니다. 또한 데스크톱 웹과 네이티브 모바일 앱은 제공하는 상세 워크플로가 다를 수 있습니다.
+
+### 화면마다 수치가 다르게 보이는 이유는?
+
+단위, 선택된 범위, 계산 방식을 확인하세요. 타임라인의 구간 통계는 전체 또는 선택 범위를 요약하지만 커서 수치는 단일 시점의 샘플을 보여 줍니다. 또한 기기가 기록한 랩 요약과 시계열로 재계산된 분석 구간은 입력 데이터가 다를 수 있습니다.
+
+### 경로가 표시되지 않는 이유는?
+
+원본 파일에 GPS가 없거나, 개인정보 설정으로 위치 데이터가 제거되었거나, 지도 요청이 실패했을 수 있습니다. 표시되는 차트와 지도 오류 상태를 따로 확인하세요.
+
+### 데모 활동을 편집할 수 있나요?
+
+공개 데모는 예시를 조회하는 용도입니다. 활동 수정, 분석 구간 저장, 플랜 변경은 본인 계정으로 로그인해야 사용할 수 있습니다.
+
+## 이어서 보기
+
+- [타임라인으로 워크아웃 분석하기](/ko/docs/guide/activity-timeline)
+- [퍼포먼스 분석 페이지 안내](/ko/docs/guide/performance-analysis-pages)
+- [주간 훈련 리뷰](/ko/docs/workflow/weekly-review)

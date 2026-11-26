@@ -11,6 +11,7 @@ import type {
 
 type CoachTranscriptMetaRowProps = {
   item: CoachTranscriptItem;
+  title?: string;
   onRetry?: () => void;
   retryDisabled?: boolean;
   recoveryAction?: {
@@ -89,6 +90,7 @@ function transcriptReasonLabel(
 
 export function CoachTranscriptMetaRow({
   item,
+  title,
   onRetry,
   retryDisabled,
   recoveryAction,
@@ -96,7 +98,6 @@ export function CoachTranscriptMetaRow({
 }: CoachTranscriptMetaRowProps) {
   const t = useTranslations("AiCoachPage.transcript");
 
-  const title = transcriptMetaTitle(item, t);
   const reasonLabel =
     item.message?.trim() || transcriptReasonLabel(item.reason, t);
 
@@ -125,7 +126,9 @@ export function CoachTranscriptMetaRow({
             )}
           />
           <div className="min-w-0 flex-1 space-y-1">
-            <div className={cn("font-medium text-foreground")}>{title}</div>
+            <div className={cn("font-medium text-foreground")}>
+              {title ?? transcriptMetaTitle(item, t)}
+            </div>
             <div className={cn("text-sm leading-6 text-muted-foreground")}>
               {reasonLabel}
               {item.detail ? (

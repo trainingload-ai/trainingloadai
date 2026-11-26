@@ -1,6 +1,7 @@
 import type { Activity, ActivityLap } from "@/api/activities";
 import type { ChartValue } from "@/api/useActivityMetric";
 import type { TimelineTrackPoint } from "@shared/activity-timeline";
+import type { CoachActivityFocus } from "@shared/ai-coach-schema";
 import type { RouteCoordinate } from "@/components/MapBoxMap/activity-route-focus";
 
 export type TimelinePoint = { time: number; value: number | null };
@@ -140,6 +141,17 @@ export function timelineTimeAtDistance(
     ((distance - previous.value!) / (next.value! - previous.value!)) *
       (next.time - previous.time)
   );
+}
+
+export function recordedTimelineFocus(
+  focus: CoachActivityFocus,
+  model: { laps: { index: number; range: TimelineRange }[]; distance: TimelinePoint[]; distanceGap: number },
+): TimelineRange | null {
+  if ("lap" in focus) return model.laps.find(({ index }) => index === focus.lap)?.range ?? null;
+  const last = model.distance.at(-1);
+  if (last?.value == null) return null;
+  const start = timelineTimeAtDistance(model.distance, last.value - focus.lastMeters, model.distanceGap);
+  return start != null && start < last.time ? [start, last.time] : null;
 }
 
 export function timelineLaps(

@@ -4,14 +4,18 @@ import type {
   TodaySuggestionWorkout,
   TodaySuggestionFeedback,
 } from '@shared/ai-today-suggestion-contract';
-import type { TodayAdviceCoachState } from '../coach-state-context.service';
+import {
+  PREVIEW_BACKED_PLAN_DECISION_TYPES,
+  type TodayAdviceCoachDecision,
+  type TodayAdviceCoachState,
+} from '../coach-state-context.service';
 import type { ActivityEvidenceSnapshot } from '../core/training-data-coverage-query.service';
 import type {
   TodayWeatherImpact,
   WeatherAttribution,
 } from '@/weather/weather.types';
 
-export const TODAY_SUGGESTION_POLICY_VERSION = 'today-shared-facts-v8';
+export const TODAY_SUGGESTION_POLICY_VERSION = 'today-shared-facts-v10';
 
 export type TodaySuggestionConstraintCode =
   | 'NEVER_RECORDED_ACTIVITY'
@@ -112,6 +116,21 @@ export type TodaySuggestionDraft = {
     reason: string | null;
   }>;
 };
+
+export function isRelevantTodaySuggestionDecision(
+  decision: TodayAdviceCoachDecision,
+): boolean {
+  return (
+    !(
+      decision.stateRole === 'ACTIVE_PROPOSAL' &&
+      PREVIEW_BACKED_PLAN_DECISION_TYPES.includes(decision.decisionType)
+    ) &&
+    ['TODAY', 'TOMORROW', 'UNKNOWN'].includes(decision.relevance) &&
+    ['ACTIVE_PROPOSAL', 'REJECTED_HISTORY', 'APPLIED_HISTORY'].includes(
+      decision.stateRole,
+    )
+  );
+}
 
 export function todaySuggestionCoachAvailable(
   projection: Partial<

@@ -1,46 +1,88 @@
 ---
-title: Rapport de charge aiguë:chronique (ACWR)
-description: Découvrez comment Trainingload.ai calcule l’ACWR avec la Fatigue et la Condition physique du même jour, comme outil de vérification et non de prédiction des blessures.
-keywords: ["ACWR", "rapport A:C", "charge aiguë chronique", "ATL divisée par CTL", "ACWR couplé"]
+title: "Ratio charge aiguë/chronique (ACWR)"
+description: "Découvrez comment Trainingload.ai calcule l’ACWR à partir de la fatigue (ATL) et de la forme (CTL) du même jour, et pourquoi ce ratio sert à analyser la charge plutôt qu’à prédire une blessure."
+keywords: ["ACWR", "ratio charge aiguë chronique", "ratio A:C", "ATL divisé par CTL", "ACWR couplé", "variation de charge d'entraînement"]
 ---
 
-# Qu’est-ce que l’ACWR ?
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
 
-Le **rapport de charge aiguë:chronique (ACWR)** compare la charge récente modélisée à la charge à long terme. Dans Trainingload.ai, A:C correspond à la [Fatigue (ATL)](/fr/docs/metrics/pmc/acute-training-load) du jour divisée par la [Condition physique (CTL)](/fr/docs/metrics/pmc/chronic-training-load) du même jour.
+# Qu’est-ce que le ratio charge aiguë/chronique (ACWR) ?
 
-Ce rapport peut signaler un changement de contexte, mais ne prédit ni blessure ni état de préparation.
+L’**ACWR** compare la charge récente modélisée à la charge long terme modélisée. Dans Trainingload.ai, le ratio A:C correspond à la [fatigue (ATL)](/fr/docs/metrics/pmc/acute-training-load) du jour divisée par la [forme (CTL)](/fr/docs/metrics/pmc/chronic-training-load) du même jour.
+
+Ce ratio met en lumière une évolution du contexte de charge, mais l’ACWR ne prédit ni les blessures ni l’état de fraîcheur. Il ne mesure directement ni l’adaptation, ni la fatigue, ni la récupération, ni le risque médical.
 
 <div className="my-6 max-w-sm w-full mx-auto">
   <AcRatioStatPreviewCard
     value="1.12"
     metricLabel="A:C"
     valuePopoverTitle="Valeur A:C"
-    valuePopoverBody="ATL du jour divisée par la CTL du même jour."
-    rangePopoverTitle="Segments de l’interface"
-    rangePopoverBody="<0,8, 0,8–1,3, 1,3–1,5 et ≥1,5 sont des repères de revue, pas des limites de sécurité."
+    valuePopoverBody="Trainingload.ai divise la fatigue (ATL) du jour par la forme (CTL) du même jour."
+    rangePopoverTitle="Plages de l’interface"
+    rangePopoverBody="L’interface utilise <0,8, 0,8–1,3, 1,3–1,5 et ≥1,5 comme repères de lecture — pas comme limites de sécurité ni probabilités de blessure."
     helpTitle="Charge relative"
-    details="Examinez toujours l’ATL, la CTL et les activités à l’origine du résultat."
+    details="Examinez l’ATL, la CTL et les activités sources avant d’interpréter le ratio."
   />
 </div>
 
-## Formule et variante
+_Les valeurs d’exemple servent uniquement à l’aperçu de l’interface._
+
+## Formule et source de données
+
+L’ATL et la CTL reposent sur la même série de charge quotidienne :
 
 ```text
+decay_ATL = exp(-1 / 7)
+decay_CTL = exp(-1 / 42)
+ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
+CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
+
 ACWR_today = ATL_today / CTL_today
 ```
 
-Avec une ATL de 60 et une CTL de 50, l’ACWR vaut `1.20`. Si la CTL est nulle, le produit renvoie `0`.
+Si l’ATL du jour est de 60 et la CTL de 50, l’ACWR vaut `1,20`. Si la CTL vaut zéro, le produit renvoie `0` afin d’éviter une division par zéro.
 
-Trainingload.ai utilise un **rapport exponentiel couplé du PMC** : la charge du jour entre à la fois dans l’ATL, dont la constante de temps est de sept jours, et dans la CTL, dont la constante est de 42 jours. Ce n’est ni un simple rapport 7/28 jours, ni une variante découplée.
+Les activités, les seuils et les réglages de priorité des sources de charge peuvent modifier à la fois le numérateur et le dénominateur. L’ACWR est sans unité et gomme leur échelle absolue.
 
-Au-dessus de 1, l’ATL dépasse la CTL ; près de 1, les courbes sont proches ; sous 1, l’ATL est inférieure. Mais le rapport masque l’échelle : `12 / 10` et `120 / 100` donnent tous deux 1,20. Une CTL très faible peut également produire une valeur élevée après une seule séance.
+## De quel ACWR s’agit-il ?
 
-Les segments de l’interface `<0.8`, `0.8–<1.3`, `1.3–<1.5` et `≥1.5` sont des règles d’affichage, pas la preuve d’un état optimal, sûr ou dangereux.
+Il n’existe pas un algorithme unique d’ACWR. Trainingload.ai utilise un **ratio exponentiel PMC couplé** : la charge du jour entre à la fois dans l’ATL et dans la CTL, et les deux courbes utilisent des constantes de temps exponentielles.
+
+Il ne s’agit ni d’un simple calcul « 7 derniers jours ÷ moyenne hebdomadaire sur 28 jours », ni d’une variante découplée qui exclut la fenêtre récente de la fenêtre chronique. Les seuils issus d’un autre algorithme, d’un autre sport, d’une autre population ou d’une autre source de charge ne peuvent pas être transposés directement.
+
+## Lire le ratio
+
+- **Au-dessus de 1 :** l’ATL est supérieure à la CTL.
+- **Proche de 1 :** l’ATL et la CTL sont proches ; cela ne signifie pas que l’entraînement est optimal.
+- **En dessous de 1 :** l’ATL est inférieure à la CTL.
+
+Vérifiez toujours le numérateur et le dénominateur. `ATL 12 / CTL 10` et `ATL 120 / CTL 100` donnent tous deux 1,20, malgré des charges absolues très différentes. Un compte récent ou une CTL très basse peut aussi produire un ratio élevé après une seule séance.
+
+L’interface affiche actuellement quatre plages : `<0,8`, `0,8–<1,3`, `1,3–<1,5` et `≥1,5`. Ce sont des règles d’affichage pour examiner la charge relative — pas la preuve d’un état « optimal », « sûr », « dangereux », « sous-entraîné » ou « surentraîné ».
+
+## Revue pratique
+
+Vérifiez que l’ACWR, l’ATL et la CTL portent bien sur la même date. Examinez les valeurs absolues, remontez jusqu’aux activités qui expliquent la variation et contrôlez vos seuils ainsi que la priorité des sources de charge. Ajoutez ensuite la qualité des séances, le sommeil, les douleurs, les maladies, la fatigue ressentie et l’historique de blessures avant d’ajuster le plan d’entraînement.
+
+<DocsToolCtaCard
+  title="Analyser une variation A:C dans Trainingload.ai"
+  description="Remontez du ratio vers la fatigue (ATL), la forme (CTL) et les activités qui l’ont généré."
+  primary={{ href: "/fr/features", label: "Explorer l’analyse de la charge →" }}
+  secondary={{ href: "/fr/docs/metrics/pmc/chronic-training-load", label: "Comprendre la forme (CTL)" }}
+/>
 
 ## Références
 
-- [Intervals.icu : formules Fitness et Fatigue](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
-- [Windt et Gabbett (2019) : couplage mathématique](https://doi.org/10.1136/bjsports-2017-098925)
-- [Maupin et al. (2020) : revue systématique](https://doi.org/10.2147/OAJSM.S231405)
-- [Impellizzeri et al. (2020) : problèmes conceptuels](https://doi.org/10.1123/ijspp.2019-0864)
-- [Wang et al. (2020) : enseignements tirés de l’ACWR](https://doi.org/10.1007/s40279-020-01280-1)
+- [Intervals.icu developer explanation of the Fitness and Fatigue formulas](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [Gabbett (2016): The training—injury prevention paradox](https://doi.org/10.1136/bjsports-2015-095788)
+- [Windt and Gabbett (2019): Mathematical coupling in ACWR](https://doi.org/10.1136/bjsports-2017-098925)
+- [Maupin et al. (2020): Systematic review of ACWR and injury risk](https://doi.org/10.2147/OAJSM.S231405)
+- [Impellizzeri et al. (2020): Conceptual issues and fundamental pitfalls](https://doi.org/10.1123/ijspp.2019-0864)
+- [Wang et al. (2020): Lessons learned from ACWR](https://doi.org/10.1007/s40279-020-01280-1)
+
+## Pages associées
+
+- [Fatigue (ATL)](/fr/docs/metrics/pmc/acute-training-load)
+- [Forme (CTL)](/fr/docs/metrics/pmc/chronic-training-load)
+- [Fraîcheur (TSB)](/fr/docs/metrics/pmc/training-stress-balance)
+- [Charge d’entraînement](/fr/docs/metrics/training-load)

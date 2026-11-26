@@ -3,6 +3,7 @@ import { Injectable, Logger, Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { PlanSummaryService } from './plan-summary.service';
 import { CoachContextRepository } from '../persistence/coach-context.repository';
 import { PlanRepository } from '../persistence/plan.repository';
@@ -115,6 +116,11 @@ export class CoachContextService {
         this.appendEvent({ ...args, tx }),
       );
     }
+    if (args.tx) {
+      // Serialize sequence allocation per user inside any transaction so
+      // concurrent event writers cannot abort the outer transaction with 25P02.
+      await acquireHashtextAdvisoryXactLock(args.tx, args.userId);
+    }
     const context = await this.ensureContext({
       userId: args.userId,
       planId: args.planId,
@@ -162,36 +168,46 @@ export class CoachContextService {
         const change = args.payload as
           | {
               workoutId?: unknown;
+              workoutIds?: unknown;
               decisionId?: unknown;
             }
           | undefined;
-        if (
-          args.type === 'ADAPTATION_APPLIED' &&
-          typeof change?.workoutId === 'string' &&
-          change.workoutId
-        ) {
-          // The workout and its obsolete proposals share the writer's transaction.
-          // Do not claim these were applied: only the actual applying decision gets APPLIED.
-          await this.contexts.supersedeWorkoutDecisions(
-            {
-              contextId: context.id,
-              workoutId: change.workoutId,
-              eventSeq: seq,
-              appliedDecisionId:
-                args.decisionId ??
-                (typeof change.decisionId === 'string'
-                  ? change.decisionId
-                  : null),
-            },
-            args.tx,
-          );
+        const appliedDecisionId =
+          args.decisionId ??
+          (typeof change?.decisionId === 'string' ? change.decisionId : null);
+        if (args.type === 'ADAPTATION_APPLIED') {
+          const affectedWorkoutIds = [
+            ...new Set([
+              ...(typeof change?.workoutId === 'string' && change.workoutId
+                ? [change.workoutId]
+                : []),
+              ...(Array.isArray(change?.workoutIds)
+                ? change.workoutIds.filter(
+                    (id): id is string => typeof id === 'string' && id.length > 0,
+                  )
+                : []),
+            ]),
+          ];
+          for (const workoutId of affectedWorkoutIds) {
+            // The workout and its obsolete proposals share the writer's transaction.
+            // Do not claim these were applied: only the actual applying decision gets APPLIED.
+            await this.contexts.supersedeWorkoutDecisions(
+              {
+                contextId: context.id,
+                workoutId,
+                eventSeq: seq,
+                appliedDecisionId,
+              },
+              args.tx,
+            );
+          }
         }
         if (args.tx && args.type === 'ADAPTATION_APPLIED') {
           await this.contexts.supersedeStartDecisions(
             {
               userId: args.userId,
               planId: args.planId,
-              appliedDecisionId: args.decisionId,
+              appliedDecisionId,
             },
             args.tx,
           );
@@ -259,6 +275,18 @@ export class CoachContextService {
       },
       tx: args.tx,
     });
+    if (typeof this.contexts.retireContextOpenWork === 'function') {
+      await this.contexts.retireContextOpenWork(
+        {
+          userId: args.userId,
+          contextId: context.id,
+          planId: args.planId,
+          closedAt: occurredAt,
+          excludeDecisionId: args.decisionId ?? null,
+        },
+        args.tx,
+      );
+    }
     return context;
   }
 
@@ -384,13 +412,25 @@ export class CoachContextService {
       tx: args.tx,
     });
 
+    const closedAt = args.occurredAt ?? new Date();
     await this.ensureContext({
       userId: args.userId,
       planId: args.planId,
       tx: args.tx,
       status: 'FINALIZED',
-      closedAt: args.occurredAt ?? new Date(),
+      closedAt,
     });
+    if (typeof this.contexts.retireContextOpenWork === 'function') {
+      await this.contexts.retireContextOpenWork(
+        {
+          userId: args.userId,
+          contextId: context.id,
+          planId: args.planId,
+          closedAt,
+        },
+        args.tx,
+      );
+    }
 
     const afterCommit = () =>
       this.emitAfterFinalize({

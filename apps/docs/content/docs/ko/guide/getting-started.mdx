@@ -1,93 +1,102 @@
 ---
-title: Getting Started
-description: "Learn the core Trainingload.ai workflow: set up your profile, bring in training data, review load, manage plans, and ask the AI coach for context-aware guidance."
-keywords: ["Trainingload.ai guide", "getting started", "training load app", "AI coach", "training plan"]
+title: 첫 번째 활동 가져오기
+description: 훈련 플랫폼을 연동하거나 워크아웃 파일을 업로드한 뒤 가져온 활동을 열어 상세 분석을 살펴봅니다.
+seoTitle: "빠른 시작: 첫 번째 활동 가져오기 | Trainingload.ai"
+seoDescription: "훈련 플랫폼을 연동하거나 FIT, TCX, GPX 파일을 업로드해 첫 번째 활동을 가져오고 상세 분석과 훈련 부하를 확인해 보세요."
+keywords: ["Trainingload.ai 빠른 시작", "첫 번째 활동 가져오기", "워크아웃 가져오기", "FIT 파일 업로드"]
 ---
 
-# Getting Started
+# 첫 번째 활동 가져오기 [#get-started-with-your-first-activity]
 
-Trainingload.ai is built around a simple loop:
+워치, 사이클링 컴퓨터 또는 훈련 플랫폼의 기록을 가져오면 Trainingload.ai에서 활동 상세 정보, 차트, 훈련 부하를 바로 확인할 수 있습니다. 이 가이드는 웹 앱에서 플랫폼 동기화와 파일 업로드를 진행하는 방법을 안내합니다.
 
-1. Set up your athlete profile and thresholds.
-2. Import or sync completed workouts.
-3. Review training load, intensity, and recovery signals.
-4. Create or activate a training plan.
-5. Use AI Coach to review execution and adjust the plan when needed.
+## 시작하기 전에
 
-The product is most useful when plans and real workouts stay connected. A workout file on its own tells you what happened; a plan-linked workout tells you whether the training matched the intent.
+[Trainingload.ai 열기](https://app.trainingload.ai/en)에서 본인 계정으로 로그인합니다. 셀프 호스팅 환경이라면 직접 운영 중인 인스턴스를 열어 주세요. 먼저 화면을 둘러보고 싶다면 [데모 살펴보기](https://demo.trainingload.ai/en)를 이용할 수 있습니다.
 
-## 1. Set up your account
+## 1. 가져오기 방식 선택 [#2-choose-one-route-for-the-first-activity]
 
-After signing in, open **Settings** or **Me** and check:
+| 동기화 방식 | 안내 |
+| --- | --- |
+| 서드파티 훈련 플랫폼 동기화 (Strava, Garmin, Intervals.icu) | [플랫폼 연동하기](#connect-a-training-platform) |
+| 활동 파일 동기화 (FIT, TCX, GPX) | [워크아웃 파일 업로드하기](#upload-a-workout-file) |
+| 스마트폰에서 동기화 | [모바일 동기화 가이드 읽기](/ko/docs/guide/account-permissions-and-usage#2-review-mobile-permissions-and-data-sources) |
 
-- Time zone, because calendar days and reminders depend on it.
-- Unit preference, so distance, pace, power, and elevation display correctly.
-- Language and theme preferences.
-- Athlete profile values such as body weight and sport preferences.
+셀프 호스팅 환경에서 지원하는 연동 목록은 [환경 설정](/ko/docs/self-host/configuration)을 참고하세요. 아래의 파일 업로드 방식도 동일하게 사용할 수 있습니다.
 
-## 2. Add thresholds and zones
+## 2. 활동 기록 가져오기 [#3-import-and-wait-for-processing]
 
-Trainingload.ai uses threshold settings to calculate intensity and load. Add the values you know first; you can refine them later.
+### 방법 1: 훈련 플랫폼 연동 [#connect-a-training-platform]
 
-- Cycling: FTP, CP, and power zones.
-- Running: threshold pace, heart-rate zones, and pace zones.
-- Heart rate: max HR, resting HR, or LTHR when available.
+1. 사이드바 하단의 계정 메뉴를 열고 **Account(계정)**를 선택한 뒤 **Third Party Connections(서드파티 연동)** 항목으로 스크롤합니다.
+2. 활동 기록이 저장된 플랫폼을 선택하고 안내 대화상자에 따라 연동을 완료합니다.
+3. 필요에 따라 초기 가져오기(initial import) 또는 수동 동기화(manual sync) 옵션을 실행합니다.
+4. 사이드바에서 **Activities(활동)**를 열어 동기화된 기록을 확인합니다.
 
-For the full setup flow, see [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones).
+플랫폼마다 지원하는 과거 기록 가져오기 범위가 다릅니다. 자세한 연동 및 과거 기록 가져오기 단계는 [Strava, Garmin 및 기타 플랫폼 연동](/ko/docs/guide/connect-third-party-platforms)을 참고하세요.
 
-If you are unsure, start with the calculators and update the values after a recent test or race:
+<DocsScreenshot
+  id="integrations-connections"
+  title="훈련 플랫폼 선택"
+  description="계정(Account)에서 서드파티 연동(Third Party Connections)으로 스크롤해 기록이 저장된 플랫폼을 선택합니다."
+  route="사이드바 계정 메뉴 → Account → Third Party Connections"
+  demoLabel="데모에서 플랫폼 둘러보기"
+/>
 
-- [Estimate FTP training load from an activity file](/ftp-calculator)
-- [Fit Critical Power for training load planning](/critical-power-calculator)
-- [Calculate heart-rate training load zones](/heart-rate-zones-calculator)
-- [Calculate VDOT to calibrate running training load](/vdot-calculator)
+### 방법 2: 워크아웃 파일 업로드 [#upload-a-workout-file]
 
-## 3. Bring in completed workouts
+워치, 사이클링 컴퓨터 또는 훈련 플랫폼에서 FIT, TCX, GPX 파일을 내보낸 뒤 아래 순서를 따릅니다.
 
-You can import activity files or connect a supported platform. Trainingload.ai analyzes the activity, computes metrics, and makes the workout available in the activity feed, dashboard, calendar, and AI Coach context.
+1. 왼쪽 사이드바에서 **Activities(활동)**를 클릭해 활동 페이지를 엽니다.
+2. 맨 오른쪽의 **Upload activity files(활동 파일 업로드)** 카드에서 **Choose activity files(활동 파일 선택)**를 클릭합니다.
 
-Supported file-based workflow:
+<DocsScreenshot
+  id="activity-upload-location"
+  title="활동 페이지에서 업로드 버튼 찾기"
+  description="왼쪽 사이드바에서 Activities를 클릭한 뒤 맨 오른쪽 카드에서 Choose activity files를 클릭합니다."
+  route="왼쪽 사이드바: Activities → 오른쪽 카드: Choose activity files"
+  demoLabel="데모에서 활동 둘러보기"
+/>
 
-- Upload GPX / TCX / FIT files.
-- Review duplicate warnings when they appear.
-- Wait for the import batch to finish processing.
-- Open the activity detail page once analysis is ready.
+3. 가져올 파일을 대화상자로 드래그하거나 파일 선택 영역을 클릭해 지정합니다.
+4. 대화상자 오른쪽 하단의 **Upload(업로드)** 버튼을 클릭합니다.
 
-## 4. Review your training load
+<DocsScreenshot
+  id="activity-import-entry"
+  title="파일 선택 및 업로드"
+  description="대화상자로 파일을 드래그하거나 클릭해 선택한 뒤 오른쪽 하단의 Upload를 클릭합니다."
+  route="업로드 대화상자: 파일 선택 → Upload"
+  demoLabel="데모에서 활동 둘러보기"
+/>
 
-Use the dashboard and PMC pages to understand the training trend:
+업로드 후 가져오기 진행 상황 대화상자가 열립니다. 가져오기가 완료되면 **Activities(활동)**로 돌아가 기록을 확인합니다. 중복 경고가 표시되면 같은 워크아웃을 두 번 가져오지 말고 기존 기록을 유지할 수 있습니다. 자세한 내용은 [활동 파일 업로드](/ko/docs/guide/upload-activity-files)를 참고하세요.
 
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score) for session load.
-- [CTL](/docs/metrics/pmc/chronic-training-load) for longer-term load.
-- [ATL](/docs/metrics/pmc/acute-training-load) for recent fatigue.
-- [TSB](/docs/metrics/pmc/training-stress-balance) for freshness/form context.
+## 3. 가져온 활동 열기 [#4-verify-the-first-recorded-result]
 
-Treat these as evidence, not verdicts. The best decisions usually combine load, workout quality, sleep, soreness, and the goal of the current training block.
+**Activities(활동)**에서 날짜별로 워크아웃을 찾아 상세 화면을 엽니다. 기록에 포함된 시간, 거리, 훈련 부하와 차트 및 경로를 확인할 수 있습니다. 화면 구성 안내는 [활동 상세 분석](/ko/docs/guide/activity-detail)을 참고하세요.
 
-## 5. Create a plan
+방금 가져온 활동은 아직 처리 중일 수 있습니다. 전체 결과를 확인하기 전에 분석이 완료될 때까지 잠시 기다려 주세요. 심박수, 파워, 경로 차트는 해당 센서 데이터가 기록에 포함되어 있어야 표시되며, GPS 데이터가 없는 기록에는 경로가 표시되지 않습니다.
 
-Open **Plans** to create a plan manually or with AI. A useful plan should include:
+## 자주 묻는 질문
 
-- Goal and date range.
-- Sport type.
-- Weekly structure.
-- Individual workouts with clear intent.
-- Expected load when enough target information is available.
+### 플랫폼을 연동했는데 활동이 보이지 않습니다
 
-Once a plan is active, the **Plan** page becomes your daily training workspace.
+플랫폼 연동 상태를 확인하고 활동 페이지의 날짜 필터를 점검해 주세요. 과거 워크아웃은 별도의 기록 가져오기(history import) 실행이 필요할 수 있습니다. 해당 플랫폼의 옵션을 따르거나 원본 워크아웃 파일을 내보내 Trainingload.ai에 업로드해 보세요.
 
-## 6. Use AI Coach
+### 활동에 심박수나 경로가 표시되지 않습니다
 
-AI Coach can discuss your training with context from workouts, plans, and load trends. Good questions include:
+처리가 완료될 때까지 잠시 기다려 주세요. 원본 파일에 심박수, 파워 또는 GPS 데이터가 없다면 해당 차트는 표시되지 않습니다. 원본 플랫폼에서는 해당 측정값이 보인다면 원본 활동 파일을 다시 내보내 업로드해 보세요.
 
-- “How did this week compare with my plan?”
-- “Should I adjust tomorrow’s workout?”
-- “Why did my long run feel harder than expected?”
-- “Which session should I prioritize if I only have four days this week?”
+### 활동이 다른 날짜에 표시됩니다
 
-AI suggestions that change a plan should be reviewed before applying. Trainingload.ai is designed to keep the final decision visible to you.
+계정의 시간대(Time zone) 설정과 기록의 시작 시각을 확인하세요. 시간대 및 단위 설정 방법은 [프로필, 역치 및 존](/ko/docs/guide/profile-thresholds-zones)을 참고하세요.
 
-## Continue with product workflows
+### 데모에서는 왜 업로드할 수 없나요?
 
-- [Manage training load with CTL, ATL, and TSB in your plan](/training-load)
-- [Use AI coach review to adjust training load safely](/ai-training-plan)
+데모 계정은 샘플 데이터를 둘러보는 용도입니다. 본인 기록을 가져오려면 [메인 앱 열기](https://app.trainingload.ai/en)에서 본인 계정으로 로그인해 주세요.
+
+## 다음 단계 [#5-choose-the-next-task]
+
+- [훈련 부하 변화 살펴보기](/ko/docs/guide/pmc-forecast)
+- [훈련 플랜 만들기](/ko/docs/guide/create-training-plan)
+- [AI 코치에게 이 워크아웃에 대해 물어보기](/ko/docs/guide/ai-coach)

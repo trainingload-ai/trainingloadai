@@ -1,3 +1,4 @@
+import { isPlanClarification } from './coach-plan-question-review';
 import type {
   CoachActivity,
   CoachActivityEvent,
@@ -62,6 +63,7 @@ export function coachSnapshotChunks(
 
 /** One producer-owned projection feeds BOTH storage and the live stream. */
 export class CoachRunProjector {
+  planClarification = false;
   readonly message: CoachUiMessage;
   readonly run: CoachRunSnapshot;
   readonly activities = new Map<string, CoachActivity>();
@@ -269,6 +271,7 @@ export class CoachRunProjector {
           input: block.input,
         });
         if (block.name === 'AskUserQuestion') {
+          this.planClarification = isPlanClarification(block.input);
           this.pendingInteraction = {
             interactionId: `${this.run.attemptId}:question:${block.id}`,
             runId: this.run.runId,
@@ -340,6 +343,19 @@ export class CoachRunProjector {
       this.mutationStarted || this.unresolvedTools.size > 0;
     if (status === 'awaiting_input' && this.pendingInteraction)
       this.run.pendingInteractionId = this.pendingInteraction.interactionId;
+    if (status === 'cancelled' && this.pendingInteraction) {
+      this.pendingInteraction = {
+        ...this.pendingInteraction,
+        status: 'cancelled',
+        revision: this.pendingInteraction.revision + 1,
+      };
+      delete this.run.pendingInteractionId;
+      this.upsert(
+        'coach-interaction',
+        this.pendingInteraction.interactionId,
+        this.pendingInteraction,
+      );
+    }
     for (const item of this.activities.values()) {
       if (item.status !== 'running' && item.status !== 'queued') continue;
       this.activity(

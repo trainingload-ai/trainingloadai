@@ -1,0 +1,86 @@
+---
+title: Enregistrement mobile
+description: Préparez les autorisations, enregistrez une séance en toute sécurité, récupérez les sessions interrompues et vérifiez la synchronisation d’une activité mobile vers Trainingload.ai.
+keywords:
+  ["enregistrement séance mobile", "enregistrement Trainingload.ai", "application séance GPS"]
+---
+
+# Enregistrement mobile
+
+Ce tutoriel aboutit à une séance mobile sauvegardée qui apparaît dans votre historique d’activités Trainingload.ai.
+
+## Avant de commencer
+
+- Connectez-vous à l’application mobile avec le même compte que sur le Web.
+- Activez l’autorisation de localisation pour l’enregistrement GPS en extérieur.
+- Autorisez la localisation en arrière-plan lorsque votre système la propose et que vous prévoyez de verrouiller l’écran pendant la séance.
+- Désactivez les restrictions d’économie de batterie agressives pour Trainingload.ai si votre téléphone met en pause les applications en arrière-plan.
+- Assurez-vous que votre téléphone dispose de suffisamment de batterie et d’espace de stockage pour la durée prévue.
+
+## 1. Vérifier les autorisations
+
+Ouvrez **Moi → Menu → Autorisation des données** et vérifiez les autorisations de localisation ou de données de santé avant la séance. Une autorisation de plateforme tierce et l’autorisation GPS du téléphone sont différentes : connecter une plateforme n’accorde pas au téléphone le droit d’enregistrer votre position.
+
+## 2. Ouvrir l’enregistreur
+
+Dans **Aujourd’hui**, ouvrez la séance programmée, vérifiez son sport et sa structure, puis sélectionnez **Démarrer la séance du jour**. Vous pouvez aussi ouvrir la séance depuis votre plan actif. Vérifiez l’autorisation de localisation avant une sortie en extérieur.
+
+<DocsScreenshot
+  id="mobile-recording-ready"
+  title="Démarrer l’enregistrement depuis la séance du jour"
+  description="Vérifiez la structure de la séance du jour, puis appuyez sur Démarrer la séance du jour en bas de l’écran."
+  route="Aujourd’hui → Séance programmée → Démarrer la séance du jour"
+  platform="mobile"
+/>
+
+## 3. Démarrer et suivre la séance
+
+1. Sélectionnez **Démarrer la séance du jour** une seule fois, suivez les indications de préparation et attendez le compte à rebours.
+2. Vérifiez que le temps écoulé augmente.
+3. Pour une sortie en extérieur, assurez-vous que la distance ou le tracé commence à se mettre à jour.
+4. Ne verrouillez l’écran qu’une fois la séance clairement démarrée.
+
+Si l’application revient au premier plan après avoir été suspendue, attendez qu’elle restaure la session en cours. Ne lancez pas un second enregistrement pendant que la récupération s’exécute.
+
+## 4. Terminer et enregistrer
+
+Lorsque la séance est terminée :
+
+1. Arrêtez l’enregistrement.
+2. Vérifiez la durée, la distance et le sport.
+3. Enregistrez la séance.
+4. Gardez l’application connectée jusqu’à la fin du téléversement ou du transfert d’importation.
+
+L’application mobile conserve les données localement pendant la séance et dispose d’un mécanisme de récupération pour les enregistrements interrompus. Une sauvegarde locale réussie ne signifie pas que tous les graphiques serveur sont immédiatement prêts : l’analyse se poursuit après le téléversement.
+
+## Vérifier le résultat
+
+Ouvrez **Moi → Activités** ou le jour correspondant dans le calendrier. Vérifiez que :
+
+- Une seule activité existe pour la séance.
+- L’heure de début, le sport, la durée et la distance sont cohérents.
+- La carte apparaît pour une séance GPS.
+- Les graphiques issus des capteurs n’apparaissent que lorsque l’enregistrement contenait ces données.
+- L’activité peut être associée à la séance planifiée correspondante.
+
+## Dépannage
+
+### Le temps avance mais la distance reste à zéro
+
+Vérifiez l’autorisation de localisation, la réception GPS et le fait que le sport sélectionné attend bien une distance extérieure. Placez-vous dans un espace dégagé et attendez l’acquisition du signal.
+
+### L’enregistrement s’arrête lorsque l’écran se verrouille
+
+Activez la localisation en arrière-plan et désactivez l’optimisation de batterie pour l’application. Les réglages du système d’exploitation peuvent outrepasser l’état affiché dans l’application.
+
+### L’activité apparaît deux fois
+
+Ne téléversez pas de nouveau le fichier enregistré localement tant que la synchronisation est encore en attente. Comparez l’heure de début et la durée, puis ne supprimez que le doublon confirmé.
+
+### L’activité existe mais les graphiques manquent
+
+Attendez la fin de l’analyse puis actualisez. L’absence de fréquence cardiaque, de puissance ou de cadence peut aussi signifier que l’enregistrement ne contenait pas ces flux.
+
+## Étape suivante
+
+Ouvrez le [détail de l’activité](/fr/docs/guide/activity-detail), puis associez le résultat via [Gérer un plan actif](/fr/docs/guide/manage-active-plan) s’il s’agissait d’une séance planifiée.

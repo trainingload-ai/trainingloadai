@@ -4,16 +4,19 @@ import {
   requireSignedInUser,
   type AiToolDef,
 } from '../tool.types';
+import { COACH_ACTIVITY_SECTIONS, type CoachActivitySection } from '@shared/ai-coach-schema';
 
 type Input = {
   /** 日历日 YYYY-MM-DD */
   date: string;
   sportType?: string;
+  section?: CoachActivitySection;
 };
 
 export type ActivityDayViewToolOutput = {
   kind: 'activity_day_view';
   date: string;
+  section?: CoachActivitySection;
   items: Array<{
     hashId: string;
     sportType: string;
@@ -36,7 +39,7 @@ export const activityDayViewTool: AiToolDef<Input, ActivityDayViewToolOutput> =
     name: 'activity.day_view',
     aliases: ['activity_day_view', 'activities_on_day'],
     description:
-      'Completed **logged activities** on one calendar day (YYYY-MM-DD). Use for “what did I do last Tuesday” or “sessions on May 10”. Not plan prescriptions — use plan.day_view for scheduled workouts.',
+      'Completed logged activities on one athlete-local calendar date. Use to show or open an activity on a named date. Each matching activity is clickable. Specify section to open a requested analysis section. If multiple activities match, let the athlete choose.',
     cost: 'low',
     searchHint: 'activities on date day summary completed workouts',
     isEnabled: async (ctx) => hasSignedInUser(ctx),
@@ -54,6 +57,7 @@ export const activityDayViewTool: AiToolDef<Input, ActivityDayViewToolOutput> =
           type: 'string',
           description: 'Optional sport filter (e.g. RUN, CYCLING).',
         },
+        section: { type: 'string', enum: [...COACH_ACTIVITY_SECTIONS] },
       },
     },
     checkPermissions: async (ctx) => requireSignedInUser(ctx),
@@ -62,9 +66,8 @@ export const activityDayViewTool: AiToolDef<Input, ActivityDayViewToolOutput> =
       count: output.items.length,
       items: output.items.slice(0, 15),
     }),
-    execute: async (ctx, input) =>
-      ctx.coachTools.activitiesDayView(ctx, {
-        date: input.date,
-        sportType: input.sportType,
-      }),
+    execute: async (ctx, { date, sportType, section }) => ({
+      ...(await ctx.coachTools.activitiesDayView(ctx, { date, sportType })),
+      ...(section ? { section } : {}),
+    }),
   });

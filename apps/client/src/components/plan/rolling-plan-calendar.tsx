@@ -39,6 +39,7 @@ export function RollingPlanCalendar({
     <>
       <PlanDetailWeekBreakdown
         weeks={buildWeekGroups(t, calendarPlan)}
+        planStartDate={calendarPlan.startDate}
         t={t}
         onOpenWorkout={setWorkout}
       />

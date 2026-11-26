@@ -8,6 +8,8 @@
 
 普通聊天在无技能和已有 active skill 时都能看到目录；激活后使用精简任务描述，切换通过现有 `skill.activate` 更新下一步提示词与工具 scope。交接保留打开的具体计划、日期范围、已确认限制和必要证据。`plan.active` 可能不是用户打开的计划。
 
+创建可保存的新计划先进入 `plan-builder`，随后在该技能内完成适配评估和草案交付。`plan-cycle-review` 可做适配评估，需要生成新计划时交接给 `plan-builder`。两种计划工具在提供给模型和执行时都检查当前技能。服务发起的既有问题复核继续使用该问题的专用工具范围。
+
 `athlete-state`、`activity-review`、`period-review`、`plan-review-adjustment`、`rolling-plan` 和 `workout-generator` 由服务编排，不作为普通聊天的激活入口。服务按名称和旧别名查找仍可用。隐藏目录只是发现面设计，不承担授权：后台任务先按固定 candidate/allowed 工具集筛选，再排除写入和草案工具；换技能不能扩大这个集合。后台 prompt 不提供聊天切换目录，也不注入交互式 Workout operation 合同。
 
 持久化问题回复恢复其实际 owner；专属 fitness 操作保留原采用/追踪协议。仅存在一个未完成测评，不会把以“今天”“根据”或“apply”开头的新目标自动归入测评。具体旧协议短回复仍能继续原任务，宽泛自然语言由模型结合当前目标判断。

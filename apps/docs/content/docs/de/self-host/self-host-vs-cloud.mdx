@@ -1,0 +1,68 @@
+---
+title: Self-Hosting vs. Cloud
+description: Vergleiche Einrichtung, Datenspeicherung, Aktivitätsimporte, KI-Kosten und Wartungsaufwand, um die passende Variante für dich zu wählen.
+seoTitle: "Trainingload.ai Self-Hosting vs. Cloud: Was passt zu dir?"
+seoDescription: "Vergleiche Trainingload.ai Cloud und Self-Hosting nach Einrichtung, Speicherort, lokalen Dateien, eigener KI, Integrationen, Backups und Updates."
+keywords:
+  [
+    "Self-Hosting vs. Cloud",
+    "Trainingload.ai Betrieb",
+    "lokale Trainingsdaten",
+    "BYOK KI",
+  ]
+---
+
+# Self-Hosting vs. Cloud
+
+Wähle **Cloud**, wenn du Trainingload.ai sofort nutzen möchtest. Wähle **Self-Hosting**, wenn deine Trainingsdaten auf deinem eigenen Computer oder Server bleiben sollen und du die Anwendung selbst installieren und warten möchtest.
+
+## Kurzvergleich
+
+| Was dir wichtig ist | Cloud | Self-Hosting |
+| --- | --- | --- |
+| Einstieg | App öffnen und ein Konto erstellen | Release-Paket herunterladen und der Installationsanleitung auf deinem eigenen Gerät folgen |
+| Speicherort deiner Daten | Cloud-Dienst von Trainingload.ai | Dein eigenes Gerät – inklusive Aktivitäten, Trainingsplänen und hochgeladenen Dateien |
+| Training importieren | Unterstützte Trainingsplattform verbinden oder Aktivitätsdateien hochladen | Aktivitätsdateien hochladen oder Intervals.icu und Garmin Personal API mit eigenen Schlüsseln verbinden |
+| KI-Coach nutzen | Das in deinem Tarif enthaltene KI-Kontingent nutzen | Standardmäßig aus; eigenen KI-Dienst konfigurieren und direkt beim Anbieter bezahlen |
+| Konten | Dein Cloud-Konto | Genau eine Person pro selbst gehosteter Instanz |
+| Backups & Wiederherstellung | Trainingload.ai betreibt und sichert den Cloud-Dienst | Du erstellst Backups und stellst sie bei Bedarf selbst wieder her |
+| Software-Updates | Trainingload.ai aktualisiert den Dienst automatisch | Du installierst neue Releases gemäß Upgrade-Anleitung |
+
+## Welche Variante passt zu dir?
+
+**Wähle Cloud**, wenn du deine Zeit lieber mit Training und Auswertung verbringst, ohne selbst Software zu installieren, Updates einzuspielen oder Backups zu pflegen.
+
+**Wähle Self-Hosting**, wenn du deine Trainingsdaten selbst speichern willst, ein Gerät für den Betrieb bereitstellen kannst und dich um Updates und Backups kümmerst. Self-Hosting ist für den persönlichen Gebrauch gedacht; eine Instanz unterstützt nicht mehrere Nutzer.
+
+## Prüfe, wie du dein Training importierst
+
+Self-Hosting unterstützt derzeit:
+
+- das Hochladen von **FIT-, GPX- und TCX**-Aktivitätsdateien;
+- die Verbindung zu **Intervals.icu** über einen persönlichen API-Schlüssel;
+- die Verbindung zur **Garmin Personal API** über einen persönlichen API-Schlüssel.
+
+Wenn du auf eine bestimmte Trainingsplattform angewiesen bist, prüfe zuerst [Daten verbinden](/de/docs/guide/connect-data) und die [Verbindungseinstellungen beim Self-Hosting](/de/docs/self-host/configuration#connect-intervalsicu). Cloud und Self-Hosting bieten unterschiedliche Integrationswege. Kann eine andere Plattform eine unterstützte Aktivitätsdatei exportieren, kannst du diese Datei jederzeit manuell hochladen.
+
+**Trainingload.ai unterstützt derzeit keine Apple-Watch-App.**
+
+## Wie KI funktioniert und welche Kosten entstehen
+
+KI ist standardmäßig ausgeschaltet. Alle Funktionen ohne KI lassen sich ohne weitere Konfiguration nutzen. Um den KI-Coach zu verwenden, wähle in den Einstellungen einen Anbieter aus und trage deinen eigenen API-Schlüssel ein; siehe [KI im Client konfigurieren](/de/docs/self-host/configuration#configure-ai-in-the-client).
+
+Self-Hosting nutzt weder Trainingload.ai-Cloud-Mitgliedschaften noch Cloud-KI-Guthaben. Dein gewählter KI-Anbieter rechnet deine API-Nutzung direkt mit dir ab.
+
+Wenn du einen externen KI-Dienst einsetzt, werden die für die jeweilige Anfrage benötigten Trainingsdaten an diesen Anbieter gesendet. Eine lokale Installation der Anwendung führt einen externen KI-Dienst nicht lokal aus. Auch die Synchronisierung mit einer Trainingsplattform erfordert eine Internetverbindung.
+
+## Worum du dich selbst kümmerst
+
+- Sorge für ausreichend freien Speicherplatz auf dem Gerät und starte die Anwendung, wenn du sie brauchst.
+- Erstelle vor jedem Update ein Backup und bewahre eine Kopie getrennt vom laufenden Gerät auf.
+- Teste regelmäßig, ob sich deine Backups wiederherstellen lassen, damit du im Fehlerfall eine funktionierende Sicherung hast.
+- Folge der [Anleitung für Betrieb und Upgrades](/de/docs/self-host/operations), um neue Versionen einzuspielen.
+
+## Nächster Schritt
+
+Für die Cloud [öffne die App](https://app.trainingload.ai/en) und folge [Erste Schritte](/de/docs/guide/getting-started), um deine erste Aktivität zu importieren.
+
+Für Self-Hosting starte mit der [Installationsanleitung](/de/docs/self-host/installation). Installation, Backups und Upgrades sind jeweils in eigenen Anleitungen beschrieben.

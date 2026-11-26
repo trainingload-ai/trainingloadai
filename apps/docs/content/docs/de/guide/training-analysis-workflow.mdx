@@ -1,58 +1,118 @@
 ---
-title: Training Analysis Workflow
-description: A practical workflow for turning training analysis into daily decisions using plan vs actual, training load, and AI review.
-keywords: ["training analysis app", "endurance training analysis", "plan vs actual", "training load workflow"]
+title: Workflow für die Trainingsanalyse
+description: Verbinde Planumsetzung, Aktivitätsdaten, Trainingsbelastung, Leistungstrends und KI-Auswertung zu einer einzelnen, konservativen Trainingsentscheidung.
+keywords:
+  [
+    "Trainingsanalyse App",
+    "Ausdauer-Trainingsanalyse",
+    "Plan vs Ist",
+    "Trainingsbelastung Workflow",
+  ]
 ---
 
-# Training Analysis Workflow
+# Workflow für die Trainingsanalyse
 
-Training analysis is useful only when it changes a decision.
-Use this workflow to avoid collecting metrics without acting on them.
+Trainingsanalyse ist nur dann nützlich, wenn sie eine echte Entscheidung verbessert. Dieser Workflow verhindert, dass ein Dashboard voller Kennzahlen zu einer Sammlung zusammenhangloser Zahlen wird.
 
-## Step 1: Compare plan vs actual
+## Bevor du beginnst
 
-Before reading any score, answer:
+- Lege eine einzelne Entscheidung und einen Zeitraum fest – etwa, ob die morgige Schlüsseleinheit unverändert bleiben soll.
+- Warte, bis alle relevanten Aktivitäten den Status **Bereit** erreicht haben.
+- Prüfe Schwellenwerte, Zeitzone, Sportartfilter und Priorität der Belastungsquellen.
+- Verknüpfe absolvierte Aktivitäten mit geplanten Einheiten, sobald der Trainingsplan Teil der Frage ist.
+- Ergänze subjektiven Kontext wie Einheiten-RPE oder Angaben zu deinem aktuellen Zustand, sofern verfügbar.
 
-- What was planned?
-- What was completed?
-- Which key sessions drifted?
+## 1. Frage klar definieren
 
-If you skip this step, load metrics lose context.
+Starte mit einer Entscheidung, nicht mit einer Kennzahl:
 
-## Step 2: Read load and response together
+- Sollte die nächste Schlüsseleinheit wie geplant stattfinden?
+- Hat diese Woche den beabsichtigten Trainingsreiz gesetzt?
+- Liegt ein wiederkehrendes Umsetzungsproblem am Zeitplan, an der Belastung oder an der Einheitenstruktur?
 
-Use these signals as a set:
+Stelle die passende Sportart und den richtigen Zeitraum ein. Vermische eine Sieben-Tage-Entscheidung nicht mit einem Gesamtzeit-Diagramm.
 
-- [CTL](/docs/metrics/pmc/chronic-training-load): long-term load trend.
-- [ATL](/docs/metrics/pmc/acute-training-load): recent stress.
-- [TSB](/docs/metrics/pmc/training-stress-balance): freshness context.
-- effective VO2max trend: whether stress is translating into performance.
+## 2. Plan und Ist vergleichen
 
-Load tells you pressure. Response tells you adaptation.
+Beantworte vor jedem Blick auf abgeleitete Kennzahlen:
 
-## Step 3: Draft one conservative change
+- Was war geplant?
+- Was wurde absolviert, übersprungen, verschoben oder noch nicht verknüpft?
+- Welche Schlüsseleinheiten wichen bei Dauer, Intensität, Struktur oder Belastung ab?
+- War diese Abweichung beabsichtigt?
 
-Avoid changing everything at once.
-Choose one primary adjustment:
+Überspringst du diesen Schritt, verlieren Belastungskennzahlen ihren eigentlichen Trainingsbezug.
 
-- Reduce intensity but keep frequency.
-- Keep intensity but trim duration.
-- Move one key session by 24-48 hours.
+## 3. Datengrundlage prüfen
 
-Then observe the next key session before adjusting again.
+Öffne die Aktivitäten hinter den Gesamtwerten und kontrolliere:
 
-## Step 4: Confirm and log rationale
+- Verarbeitungsstatus und Quellanbieter.
+- Sensorverfügbarkeit und offensichtliche Messfehler.
+- Schwellenwert- und Zonenkontext.
+- Welche Belastungsquelle den Wert für die Aktivität berechnet hat.
+- Gelände, Wetter, Ausrüstung oder sonstige Umstände, die die Einordnung verändern.
 
-Record what changed and why:
+Ein offen ausgewiesenes fehlendes Signal ist immer besser als eine scheinbar präzise Schätzung, die eine Lücke kaschiert.
 
-- Trigger (e.g. ATL rising too fast).
-- Decision (e.g. threshold -> easy aerobic).
-- Expected outcome (e.g. protect quality in next long run).
+## 4. Belastung und Körperreaktion gemeinsam lesen
 
-This makes future reviews faster and more reliable.
+Nutze die PMC-Signale als Gesamtbild:
 
-## Recommended navigation
+- [CTL](/de/docs/metrics/pmc/chronic-training-load) beschreibt den längerfristigen Belastungstrend.
+- [ATL](/de/docs/metrics/pmc/acute-training-load) beschreibt den kurzfristigen Trainingsdruck.
+- [TSB](/de/docs/metrics/pmc/training-stress-balance) zeigt die Differenz zwischen langfristiger und kurzfristiger modellierter Belastung.
 
-- [Manage training load in your plan](/training-load)
-- [Use AI review for adjustment drafts](/ai-training-plan)
-- [Analyze pacing and execution details](/docs/guide/activity-detail)
+Vergleiche diese Kurven anschließend mit Ausführungsqualität, subjektiver Ermüdung und einem passenden Leistungstrend. Trainingsbelastung beschreibt die aufgebrachte Dosis – sie beweist für sich genommen noch keine Anpassung.
+
+<DocsScreenshot
+  id="training-analysis-decision"
+  title="Trainingsbelastung im Entscheidungskontext"
+  description="Nutze einen einheitlichen Zeitraum, um CTL, ATL und TSB direkt mit den Aktivitäten und dem aktiven Planzeitraum zu verknüpfen, die den Trend erzeugt haben."
+  route="Analyse → PMC"
+/>
+
+## 5. Eine konservative Änderung entwerfen
+
+Verändere zuerst genau eine zentrale Stellschraube:
+
+- Trainingshäufigkeit beibehalten und die Intensität einer Einheit reduzieren.
+- Trainingsziel erhalten und die Dauer verkürzen.
+- Eine Schlüsseleinheit um 24–48 Stunden verschieben.
+- Den Plan unverändert lassen und das Ergebnis der nächsten Schlüsseleinheit abwarten.
+
+Halte fest, was unverändert bleiben muss, damit eine Anpassung nicht stillschweigend den ganzen Trainingsblock umwirft.
+
+## 6. Bestätigen und Begründung festhalten
+
+Halte fünf Punkte fest, bevor du eine Planänderung anwendest:
+
+- **Auslöser:** Das Plan-, Umsetzungs- oder Belastungsmuster, das die Prüfung angestoßen hat.
+- **Entscheidung:** Die konkrete Einheit und das geänderte Detail.
+- **Geschütztes Ziel:** Was der Trainingsplan weiterhin erreichen soll.
+- **Erwartetes Ergebnis:** Was sich verbessern oder stabilisieren soll.
+- **Prüfpunkt:** Die nächste Aktivität oder das Datum, an dem die Entscheidung überprüft wird.
+
+Wenn der KI-Coach die Anpassung vorbereitet, prüfe die vorgeschlagene Einheit sorgfältig und bestätige erst, wenn alle fünf Punkte klar sind.
+
+## Entscheidung überprüfen
+
+- Jede Schlussfolgerung lässt sich auf einen Plan, eine Aktivität, eine Einstellung oder einen Trend in Trainingload.ai zurückführen.
+- Beobachtete Daten sind klar von Interpretation und Unsicherheit getrennt.
+- Nur die beabsichtigte zukünftige Einheit ändert sich.
+- Abgeschlossene und übersprungene Historie bleibt unverändert.
+- Ein konkreter nächster Prüfpunkt ist definiert.
+
+## Fehlerbehebung
+
+- **Die Kennzahlen widersprechen sich:** Vergleiche Zeitraum, Sportart, Schwellenwerte und Belastungsquellen, bevor du ein einzelnes Signal als „richtig“ auswählst.
+- **Das Diagramm hat sich nach einer Einstellungsänderung verschoben:** Identifiziere die geänderte Schwelle oder Quellenpriorität und bewerte die Historie konsistent neu.
+- **Plan und Ist lassen sich nicht vergleichen:** Verknüpfe die richtige Aktivität und prüfe, ob die geplante Einheit genügend Struktur für die erwartete Belastung enthält.
+- **Die KI schlägt einen großen Umbau vor:** Verlange eine einzelne konservative Änderung mit geschützten Rahmenbedingungen und ausdrücklicher Bestätigung.
+- **Die Datenlage reicht nicht aus:** Lass den Plan unverändert oder wähle die kleinste rückgängig machbare Anpassung und sammle zuerst die nächste relevante Einheit.
+
+## Nächste Schritte
+
+- [Aktiven Plan verwalten](/de/docs/guide/manage-active-plan)
+- [Aktivitätsdetails](/de/docs/guide/activity-detail)
+- [KI-Coach](/de/docs/guide/ai-coach)

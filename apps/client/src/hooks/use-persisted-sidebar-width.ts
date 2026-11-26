@@ -4,10 +4,12 @@ import { useCallback, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "sidebar:width:v2";
 
+export const SIDEBAR_COLLAPSED_WIDTH = 48;
+
 export const SIDEBAR_WIDTH_LIMITS = {
-  default: 224,
-  min: 208,
-  max: 384,
+  default: 204,
+  min: 184,
+  max: 280,
 };
 
 const listeners = new Set<() => void>();

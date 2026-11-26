@@ -1,77 +1,84 @@
 ---
-title: Functional Threshold Power (FTP)
-description: Functional Threshold Power (FTP) is a practical threshold benchmark used to set power zones, estimate training load, and guide cycling workouts.
-keywords: ["FTP", "Functional Threshold Power", "FTP test", "FTP calculator", "Lactate Threshold", "20-minute test", "CP60", "Power benchmark"]
+title: "Functional Threshold Power (FTP)"
+description: "O Functional Threshold Power (FTP) é uma referência prática de limiar usada para definir zonas de potência, estimar carga de treino e orientar treinos de ciclismo."
+keywords: ["FTP", "Functional Threshold Power", "teste de FTP", "calculadora de FTP", "Limiar de Lactato", "teste de 20 minutos", "CP60", "referência de potência"]
 ---
 
 # Functional Threshold Power (FTP)
 
-In endurance sports, **functional threshold** is a practical benchmark near the boundary between steady and increasingly fatiguing work. It is widely used to set training zones, estimate training load, and track whether threshold-level performance is improving.
+Nos esportes de endurance, o **limiar funcional** é uma referência prática próxima à fronteira entre um esforço sustentável e um trabalho de fadiga progressiva. Ele é amplamente usado para definir zonas de treino, estimar carga de treino e acompanhar se o desempenho no limiar está evoluindo.
 
-Two common terms are **FTP** for cycling and **rFTP** for running.
+Dois termos comuns são **FTP** para ciclismo e **rFTP** para corrida.
 
 ## Functional Threshold Power (FTP)
 
-**FTP** usually refers to cycling threshold power. It is commonly described as the **highest average power you can sustain for roughly 60 minutes**, though in practice it is an estimate that depends on testing method, pacing, fatigue, and recent training.
+**FTP** geralmente se refere à potência de limiar funcional no ciclismo. Costuma ser descrito como a **maior potência média que você consegue sustentar por cerca de 60 minutos**, embora na prática seja uma estimativa que depende do protocolo de teste, ritmo (*pacing*), fadiga e treino recente.
 
-### Why it matters
--   **Physiological anchor**: FTP roughly aligns with the threshold range around [Lactate Threshold (LT)](/docs/metrics/physiology/lactate-threshold). Below it, many athletes can work for much longer; above it, fatigue accumulates faster.
--   **Relative-intensity reference**: whether your FTP is 400 W or 150 W, percentages of FTP make workouts more comparable within an athlete’s own fitness context. Most power-based training plans use FTP percentages (for example, Zone 2 ≈ 55–75% FTP).
+### Por que isso importa
 
-### How to estimate FTP
-1.  **20-minute test (classic)**: ride all-out for 20 minutes, then take 95% of the average power.
-2.  **Ramp test**: increase load each minute to exhaustion, then use ~75% of the final minute’s power.
-3.  **CP model estimate**: Trainingload.ai can estimate from your Power Duration Curve (PDC), often using `FTP ≈ 0.95 * CP`.
+- **Âncora fisiológica**: o FTP se alinha aproximadamente à faixa em torno do [Limiar de Lactato (LT)](/pt-BR/docs/metrics/physiology/lactate-threshold). Abaixo dele, muitos atletas conseguem se exercitar por muito mais tempo; acima dele, a fadiga se acumula mais rápido.
+- **Referência de intensidade relativa**: seja seu FTP de 400 W ou de 150 W, os percentuais de FTP tornam os treinos comparáveis dentro do contexto de condicionamento de cada atleta. A maioria dos planos de treino baseados em potência usa percentuais de FTP (por exemplo, Zona 2 ≈ 55–75% do FTP).
 
-If you want a file-based estimate, use the [estimate FTP training load from an activity file](/ftp-calculator). If you already have maximal efforts across durations, use the [fit Critical Power and W' for training load planning](/critical-power-calculator) to fit CP and W'.
+### Como estimar o FTP
+
+1. **Teste de 20 minutos (clássico)**: pedale no máximo possível por 20 minutos e use 95% da potência média.
+2. **Teste de rampa (*ramp test*)**: aumente a carga a cada minuto até a exaustão e utilize ~75% da potência do último minuto completo.
+3. **Estimativa pelo modelo CP**: o Trainingload.ai pode estimar a partir da sua Curva Potência-Duração (PDC), geralmente usando `FTP ≈ 0.95 * CP`.
+
+Se quiser uma estimativa baseada em arquivo, use a ferramenta para [estimar a carga de treino de FTP a partir de um arquivo de atividade](/pt-BR/ftp-calculator). Se já tiver esforços máximos em várias durações, use a ferramenta para [ajustar Potência Crítica e W' para planejamento de carga de treino](/pt-BR/critical-power-calculator) e calcular CP e W'.
 
 ---
 
 ## Running Functional Threshold Power (rFTP)
 
-**Running Functional Threshold Power (rFTP)** became popular with the rise of running power meters (Stryd, Garmin, COROS, etc.).
+O **Running Functional Threshold Power (rFTP)** se popularizou com a expansão dos medidores de potência de corrida (Stryd, Garmin, COROS etc.).
 
-It is commonly defined as the **highest average running power you can sustain for roughly 60 minutes**.
+Costuma ser definido como a **maior potência média de corrida que você consegue sustentar por cerca de 60 minutos**.
 
 ### rFTP vs. FTP
-Even though the definitions are similar, the numbers are usually **not interchangeable**:
--   **Different magnitude**: many athletes have higher rFTP than cycling FTP. Running includes elastic energy storage/release (spring-like behavior), recruits more muscle groups, and typically yields higher heart rates.
--   **Test separately**: don’t use cycling FTP to guide running training, and vice versa.
 
-### rFTP vs. threshold pace
--   **rFTP (power)**: measured in watts. Less affected by hills and wind (depending on the device/model), and often closer to physiological output.
--   **Threshold pace**: measured in min/km. Strongly affected by terrain (pace slows uphill even when intensity is high).
-    -   *Note: on flat, calm terrain, the pace corresponding to rFTP approximates threshold pace. On rolling trails, rFTP can be more stable.*
+Embora as definições sejam parecidas, os valores normalmente **não são intercambiáveis**:
 
-### How to estimate rFTP
-Common running power tests (e.g. Stryd protocols):
--   **3/9 test**: 3 minutes all-out (then 30 minutes recovery) + 9 minutes all-out.
--   **CP model**: fit Critical Power from maximal efforts of different durations (e.g. 30s, 2min, 10min); CP is often used directly as rFTP.
+- **Magnitude diferente**: muitos atletas têm rFTP mais alto do que o FTP no ciclismo. A corrida envolve armazenamento e liberação de energia elástica (efeito mola), recruta mais grupos musculares e normalmente gera frequências cardíacas mais altas.
+- **Teste separadamente**: não use o FTP do ciclismo para orientar treinos de corrida, nem o contrário.
 
-## How Trainingload.ai uses FTP
+### rFTP vs. ritmo de limiar
 
-Trainingload.ai uses FTP as a threshold reference for power zones, Intensity Factor, and Training Stress Score. If FTP is too low, hard workouts can look more stressful than they really were; if FTP is too high, training load and zone targets can be understated.
+- **rFTP (potência)**: medido em watts. Menos afetado por subidas e vento (dependendo do dispositivo/modelo) e frequentemente mais próximo do esforço fisiológico real.
+- **Ritmo de limiar**: medido em min/km. Fortemente influenciado pelo terreno (o ritmo cai na subida mesmo quando a intensidade é alta).
+  - *Nota: em terreno plano e sem vento, o ritmo correspondente ao rFTP se aproxima do ritmo de limiar. Em trilhas e percursos ondulados, o rFTP tende a ser mais estável.*
 
-For plan review, FTP is most useful when it answers:
+### Como estimar o rFTP
 
--   Did the completed workout match the intended zone?
--   Are TSS and IF being calculated from a current threshold?
--   Has threshold fitness changed enough to update future workouts?
+Testes comuns de potência na corrida (por exemplo, protocolos Stryd):
 
-## Summary
+- **Teste 3/9**: 3 minutos no máximo (seguidos de 30 minutos de recuperação) + 9 minutos no máximo.
+- **Modelo CP**: ajuste a Potência Crítica a partir de esforços máximos de diferentes durações (por exemplo, 30 s, 2 min, 10 min); o CP costuma ser usado diretamente como rFTP.
 
-| Metric | Full Name | Sport | Unit | Meaning |
+## Como o Trainingload.ai usa o FTP
+
+O Trainingload.ai usa o FTP como referência de limiar para zonas de potência, Fator de Intensidade (IF) e Training Stress Score (TSS). Se o FTP estiver baixo demais, treinos fortes podem parecer mais estressantes do que realmente foram; se estiver alto demais, a carga de treino e os alvos de zona podem ficar subestimados.
+
+Na revisão do plano de treino, o FTP é mais útil quando responde:
+
+- O treino concluído correspondeu à zona planejada?
+- O TSS e o IF estão sendo calculados a partir de um limiar atualizado?
+- O condicionamento no limiar mudou o suficiente para atualizar os próximos treinos?
+
+## Resumo
+
+| Métrica | Nome completo | Modalidade | Unidade | Significado |
 | :--- | :--- | :--- | :--- | :--- |
-| **FTP** | Functional Threshold Power | Cycling | Watts | Highest ~1-hour cycling power |
-| **rFTP** | Running Functional Threshold Power | Running | Watts | Highest ~1-hour running power |
-{/* | **FTPa** | Functional Threshold Pace | Running | min/km | Highest ~1-hour running pace (typically flat) | */}
+| **FTP** | Functional Threshold Power | Ciclismo | Watts | Maior potência sustentável por ~1 hora no ciclismo |
+| **rFTP** | Running Functional Threshold Power | Corrida | Watts | Maior potência sustentável por ~1 hora na corrida |
+{/* | **FTPa** | Functional Threshold Pace | Corrida | min/km | Maior ritmo sustentável por ~1 hora na corrida (geralmente no plano) | */}
 
-> **Trainingload.ai advice**:
-> Update your threshold settings regularly (every 4–8 weeks) so TSS calculations and training zones stay useful.
+> **Recomendação do Trainingload.ai**:
+> Atualize suas configurações de limiar regularmente (a cada 4–8 semanas) para que os cálculos de TSS e as zonas de treino continuem úteis.
 
-## Related tools and docs
+## Ferramentas e documentos relacionados
 
--   [Estimate FTP training load from an activity file](/ftp-calculator)
--   [Calculate Critical Power and W' for training load planning](/critical-power-calculator)
--   [Power Zones](/docs/metrics/power/zones)
--   [Critical Power (CP)](/docs/metrics/power/critical-power)
+- [Estime a carga de treino de FTP a partir de um arquivo de atividade](/pt-BR/ftp-calculator)
+- [Calcule Potência Crítica e W' para planejamento de carga de treino](/pt-BR/critical-power-calculator)
+- [Zonas de potência](/pt-BR/docs/metrics/power/zones)
+- [Potência Crítica (CP)](/pt-BR/docs/metrics/power/critical-power)

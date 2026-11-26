@@ -135,7 +135,7 @@ export class ReviewCronService implements OnModuleInit, OnModuleDestroy {
         SELECT
           e.user_id,
           e.timezone,
-          date_trunc('day', (NOW() AT TIME ZONE e.timezone)) AT TIME ZONE e.timezone AS period_end
+          date_trunc('day', NOW() AT TIME ZONE e.timezone) AS local_end
         FROM expanded e
         WHERE e.enabled = TRUE
           AND split_part(e.send_at_local_time, ':', 1)::int = EXTRACT(HOUR FROM (NOW() AT TIME ZONE e.timezone))::int
@@ -145,11 +145,11 @@ export class ReviewCronService implements OnModuleInit, OnModuleDestroy {
         SELECT
           d.user_id,
           (CASE
-            WHEN '${type}' = 'DAILY' THEN d.period_end - INTERVAL '1 day'
-            WHEN '${type}' = 'WEEKLY' THEN d.period_end - INTERVAL '7 days'
-            ELSE d.period_end - INTERVAL '30 days'
-          END) AS period_start,
-          d.period_end AS period_end
+            WHEN '${type}' = 'DAILY' THEN d.local_end - INTERVAL '1 day'
+            WHEN '${type}' = 'WEEKLY' THEN d.local_end - INTERVAL '7 days'
+            ELSE d.local_end - INTERVAL '1 month'
+          END) AT TIME ZONE d.timezone AS period_start,
+          d.local_end AT TIME ZONE d.timezone AS period_end
         FROM due d
       )`;
   }

@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react";
 
 export type CoachTurnRetryControls = {
+  sessionId?: string;
   /** Current model mode (`true` = reasoning). */
   thinkingEnabled: boolean;
   /**

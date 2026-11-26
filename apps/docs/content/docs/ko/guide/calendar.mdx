@@ -1,130 +1,142 @@
 ---
-title: Calendar
-description: Use the Trainingload.ai calendar to review planned workouts, completed activities, daily load, weekly summaries, and plan progress in one date-based view.
-keywords: ["training calendar", "workout calendar", "planned workouts", "completed activities", "Trainingload.ai calendar"]
+title: 훈련 캘린더에서 계획과 실제 훈련 비교하기
+description: 날짜를 선택해 예정된 워크아웃과 완료된 활동을 확인하고, 올바른 기록을 연결하며 훈련 부하 요약의 기간과 범위를 검증합니다.
+seoTitle: "훈련 캘린더와 계획·실제 훈련 비교 가이드 | Trainingload.ai"
+seoDescription: "훈련 캘린더에서 예정된 훈련과 완료된 활동을 비교하고, 일간 상세를 열어 활동을 연결하며 날짜·상태·훈련 부하 요약을 검증하는 방법을 안내합니다."
+keywords: ["훈련 캘린더", "계획 대 실제 비교", "워크아웃 활동 연결", "일일 훈련 리뷰", "Trainingload.ai 가이드"]
 ---
 
-# Calendar
+# 훈련 캘린더에서 계획과 실제 훈련 비교하기
 
-The calendar brings planned workouts and completed activities into one date-based view. It is useful when you want to see how the training plan and real training line up across days and weeks.
+훈련 캘린더는 앞으로의 계획과 실제로 기록된 훈련을 하나의 날짜 축 위에 함께 보여 줍니다. 같은 날짜에 표시되더라도 예정된 워크아웃과 완료된 활동은 별개의 기록이므로, 상세 정보와 연결 상태를 통해 해당 기록이 실제로 그 예정 세션을 수행한 결과인지 확인해야 합니다.
 
-Use it to answer:
+[데모에서 캘린더 열기](https://demo.trainingload.ai/en/calendar)에서 화면을 미리 살펴볼 수 있습니다. 스크린샷은 실제 웹 앱의 샘플 플랜과 활동 데이터를 사용했습니다. 데모에서는 날짜 탐색과 조회만 가능하며, 활동 연결이나 일정 변경을 저장하려면 본인 계정이 필요합니다.
 
-- What is scheduled today?
-- What did I actually complete?
-- How much load landed on this day or week?
-- Did missed or moved workouts change the rhythm of the plan?
-- Which day should I open for more detail?
+## 시작하기 전에
 
-## Month and week views
+계정 시간대와 활동 시작 시각을 먼저 확인합니다. 예정된 훈련의 경우 진행 중인 플랜의 시작일과 워크아웃 일정을 점검하세요. 새로 가져온 활동은 분석 처리가 끝날 때까지 기다린 뒤 부하 누락 여부를 판단합니다.
 
-The calendar shows a month view on larger screens. On mobile, it can use a week-focused view so each day remains readable.
+웹과 macOS용 Trainingload.ai Personal에서는 사이드바에서 **Calendar(캘린더)**를 엽니다. 좁은 웹 화면에서는 달력 버튼으로 월 선택기를 열 수 있고, 모바일 앱에서는 **Calendar** 탭을 엽니다.
 
-Use navigation controls to:
+## 1. 날짜 찾기 및 선택
 
-- Move to the previous or next month.
-- Move to the previous or next week on mobile week view.
-- Jump back to today.
-- Pick another month.
+넓은 화면에서는 캘린더를 스크롤하거나 월 선택기와 화살표를 사용합니다. 날짜를 선택하면 해당 일간 패널이 열리며, **Today(오늘)** 버튼으로 현재 날짜로 바로 돌아올 수 있습니다.
 
-The selected date controls the detail panel on the side or bottom of the screen.
+선택한 날짜에 따라 일간 패널의 내용이 바뀝니다. 하루에는 플랜 소속 예정 세션, 독립 예정 워크아웃, 기록된 활동 또는 이들의 조합이 함께 있을 수 있으므로 항목 라벨을 확인한 뒤 여세요.
 
-## What each day can show
+<DocsScreenshot
+  id="calendar-plan-actual"
+  title="같은 날짜의 예정 세션과 실제 활동 확인"
+  description="샘플 웹 화면입니다. 캘린더에서 예정된 워크아웃과 기록된 활동, 일간 부하를 함께 보여 주며, 선택한 날짜 뷰에서 각각의 상세 정보를 확인할 수 있습니다."
+  imageAlt="예정된 워크아웃, 기록된 활동, 선택한 날짜의 훈련 맥락이 표시된 캘린더 예시"
+  route="Calendar → 날짜 선택"
+  demoLabel="데모 캘린더 열기"
+/>
 
-A calendar day can include:
+## 2. 일간 패널 읽기
 
-- Planned workouts from the active plan.
-- Completed activities.
-- Daily load.
-- Visual indicators for plan range.
-- Sport-specific styling for workouts or activities.
+**Training(훈련)** 탭에서 예정된 워크아웃을, **Activities(활동)** 탭에서 기록된 활동을 확인합니다. 선택한 날짜, 표시된 훈련 부하, 항목 개수를 검토하고, 전체 화면이 필요하면 **View day(하루 상세 보기)**를 선택합니다.
 
-Calendar markers are meant for scanning. Open the day panel or activity detail page when you need exact metrics.
+| 기록 유형 | 비교 전 확인할 항목 |
+| --- | --- |
+| 예정된 워크아웃 | 훈련 목적, 예정 날짜, 종목, 구성, 메모, 실행 상태 |
+| 완료된 활동 | 시작 시각, 소스, 종목, 기록된 시간/거리, 처리 상태, 센서 포함 범위 |
+| 연결(Association) | 올바른 활동이 실제로 의도한 워크아웃에 연결되어 있는지 여부 |
 
-## Selected day panel
+완료 라벨만으로는 어느 기록인지 알 수 없습니다. 실제 운동 강도와 내용을 살펴보려면 [활동 상세 분석](/ko/docs/guide/activity-detail)을 여세요.
 
-The selected day panel shows the details for one date.
+<DocsScreenshot
+  id="calendar-activity-details"
+  title="선택한 날짜의 기록된 활동으로 전환"
+  description="같은 샘플 날짜에서 Activities 탭을 선택한 화면입니다. 활동을 연결하기 전에 실제 운동 시간, 거리, 분석 결과를 열어 확인합니다."
+  imageAlt="선택한 캘린더 날짜의 Activities 탭에 기록된 워크아웃이 표시된 화면"
+  route="Calendar → 선택한 날짜 → Activities"
+  demoLabel="데모 캘린더 열기"
+/>
 
-It can include:
+## 3. 워크아웃에 올바른 활동 연결하기
 
-- Selected date.
-- Daily load.
-- Activity count.
-- Planned workout count.
-- Planned workout cards or charts.
-- Completed activity list.
-- Link to the full day page.
+본인 계정에서 예정된 워크아웃의 상세 화면을 열고 **Link activity(활동 연결)** 항목을 선택합니다.
 
-Open a planned workout to inspect the workout description and chart. Open a completed activity to review its activity detail page.
+1. 워크아웃에 예정 날짜가 설정되어 있고 종목이 맞는지 확인합니다.
+2. 활동 상세에서 기록의 시작 시각을 먼저 확인한 뒤, 해당 날짜의 후보 목록에서 제목과 운동 시간을 비교해 일치하는 기록을 찾습니다.
+3. 일치하는 기록을 선택하고 저장 성공 피드백이 뜰 때까지 기다립니다.
+4. 해당 활동이 이미 다른 예정 세션에 연결되어 있다면 **Replace link?(연결을 교체할까요?)** 확인 안내를 읽고 결정합니다.
+5. 워크아웃과 활동을 다시 열어 연결이 정상 반영되었는지 확인합니다.
 
-## Training and activity tabs
+후보 목록에 활동이 나타나지 않으면 동기화 상태, 활동의 현지 날짜, 워크아웃 일정, 종목 일치 여부를 점검하세요. 원인을 해결하지 않은 채 관련 없는 활동을 임의로 연결하지 마세요.
 
-The day panel separates planned training and completed activities.
+잘못 연결된 항목을 수정하려면 기존 연결의 **Remove link(연결 해제)**를 사용하거나 올바른 활동을 다시 선택합니다. 연결 해제와 활동 삭제는 서로 다른 작업입니다. 데모 계정에서는 이러한 쓰기 작업이 비활성화되어 있습니다.
 
-Use **Training** to review:
+## 4. 계획된 훈련과 실제 수행 비교하기
 
-- Planned workouts.
-- Workout structure.
-- Sport type.
-- Session details.
+먼저 훈련 목적과 구성을 비교한 뒤, 기록된 시간·거리·강도·훈련 부하를 살펴봅니다. 세션을 단축했거나 대체·건너뛰기한 이유를 기록해 두면 이후 리뷰에 큰 도움이 됩니다. 원래 플랜에 없던 추가 활동도 실제 훈련 부하에 기여하는 중요한 기록입니다.
 
-Use **Activity** to review:
+예상 부하나 실제 부하가 비어 있다면 0으로 간주하지 말고 역치, 종목, 처리 상태부터 확인하세요. 현재 워크아웃 상태에서 지원하는 완료, 건너뛰기, 연기 등 실행 제어는 [진행 중인 플랜 관리](/ko/docs/guide/manage-active-plan)를 참고합니다.
 
-- Completed workouts for the selected day.
-- Distance and duration.
-- Sport type.
-- Links to activity details.
+## 5. 요약 범위 확인하기
 
-This separation helps avoid confusing "what was planned" with "what happened."
+캘린더에서는 **Plan(플랜)** 요약과 **Month(월간)** 요약이 제공될 수 있습니다. 횟수, 거리, 시간, 훈련 부하를 비교하기 전에 현재 활성화된 범위와 날짜 경계를 먼저 확인하세요.
 
-## Summary scope
+플랜 진행 요약은 현재 활성 주기를 기준으로 하고, 월간 개요는 화면에 보이는 달력 월을 기준으로 합니다. 비교 기간이 서로 다르므로 모든 요약이 같은 기간을 뜻한다고 가정하지 말고 표시된 맥락을 기준으로 읽으세요.
 
-The calendar can summarize training by plan progress or by calendar month.
+주간 단위 리뷰는 [주간 리뷰](/ko/docs/workflow/weekly-review)를, 누적 부하와 조건부 전망은 [PMC 예측](/ko/docs/guide/pmc-forecast)을 활용합니다.
 
-When an active plan exists, the plan scope helps you review the current plan period. Without an active plan, the month scope still gives a useful overview.
+## 결과 확인
 
-Summary metrics can include:
+선택한 날짜, 일간 패널, 열어 본 각 기록의 날짜가 서로 일치해야 합니다. 예정 워크아웃과 활동이 의도대로 연결되어 있어야 하며, 부하 비교 시 대상 범위와 누락 데이터 여부를 함께 파악할 수 있어야 합니다.
 
-- Activity count.
-- Training load.
-- Distance.
-- Duration.
-- Comparison with the previous period.
+## 예정된 워크아웃 일정 조정하기 [#adjust-upcoming-workouts]
 
-Use these summaries to spot patterns, not to judge one day in isolation.
+1. 진행 중인 플랜이 있을 때 웹 또는 Personal에서 날짜를 우클릭하고 **Adjust schedule(일정 조정)**을 선택합니다.
+2. 예정된 워크아웃을 다른 날짜로 드래그하거나, 우클릭 후 **Move workout(워크아웃 이동)**으로 날짜를 지정합니다. 처방 내용을 바꾸려면 워크아웃 메뉴의 **Edit workout(워크아웃 편집)**을 사용하고, 날짜 메뉴로 새 워크아웃을 추가하거나 워크아웃 메뉴로 삭제할 수 있습니다. 편집기는 이 변경 사항을 하나의 초안(draft)으로 묶어 관리합니다.
+3. 짝을 이루는 색상과 **Before(변경 전)** / **After(변경 후)** 라벨을 확인한 뒤 **Review changes(변경 검토)** → **Confirm plan changes(플랜 변경 확정)**를 눌러 일괄 적용합니다. 나중에 마무리하려면 편집기를 닫을 때 **Save draft(초안 저장)**를 선택하고, 이후 **Adjust schedule**에서 대기 중인 조정안을 다시 열 수 있습니다.
+4. 캘린더를 다시 열어 바뀐 날짜와 워크아웃 내용을 확인합니다. 확정 전에 일정이 외부에서 변경되었다면 **Load latest schedule(최신 일정 불러오기)**을 눌러 적용 가능한 나머지 편집을 검토하세요.
 
-## Calendar vs current plan
+<DocsScreenshot
+  id="calendar-adjustment-entry"
+  title="날짜에서 일정 편집기 열기"
+  description="월간 캘린더에서 날짜를 우클릭하고 Adjust schedule을 선택합니다."
+  route="Calendar → 날짜 우클릭 → Adjust schedule"
+/>
 
-Use the calendar when you want date context across multiple days.
+<DocsScreenshot
+  id="calendar-adjustment-draft"
+  title="기존 훈련 날짜와 새 날짜 비교"
+  description="짝을 이루는 색상과 Before/After 라벨로 10월 30일에서 31일로 이동된 워크아웃을 보여 줍니다. 적용하기 전에 초안을 검토하세요."
+  route="Adjust schedule → Move workout → Review changes"
+/>
 
-Use the current plan page when you want to execute or adjust the plan:
+좁은 화면에서는 워크아웃 메뉴나 드래그 핸들을 사용해 월간 그리드 안에서 이동할 수 있습니다. 이미 지났거나 완료되었거나 활동이 연결된 세션은 일정 변경이 제한될 수 있습니다.
 
-- Mark workouts done or skipped.
-- Move unfinished workouts.
-- Compare expected and actual load in the plan workflow.
-- Ask AI Coach for plan follow-up.
+메인 캘린더에서 워크아웃 하나만 옮기려면 새 날짜로 드래그하거나 메뉴에서 **Move workout**을 선택하고, 미리보기 날짜를 확인한 뒤 **Confirm adjustment**를 누릅니다.
 
-The calendar is for orientation; the current plan page is for execution.
+AI 코치 대화에서 **View workout calendar(워크아웃 캘린더 보기)**가 제공되면 그 안에서 미리보기를 열어 지원하는 변경 사항을 검토·편집하고, 저장된 초안을 확인한 뒤 확정할 수 있습니다.
 
-## When the calendar looks wrong
+## 자주 묻는 질문
 
-If a workout or activity appears on an unexpected day:
+### 활동이 다른 날짜에 표시되는 이유는?
 
-- Check your profile time zone.
-- Check the activity start time and activity time zone.
-- Confirm the plan start date.
-- Confirm the activity has finished processing.
-- Check whether search or calendar data needs refreshing.
+활동의 시작 시각 및 시간대를 계정의 표시 시간대와 비교하고, 플랜 시작일과 예정 날짜를 함께 확인하세요. 날짜 원인을 파악하기 전에 워크아웃을 임의로 옮기지 마세요.
 
-If planned workouts are missing:
+### 플랜 워크아웃이 보이지 않는 이유는?
 
-- Confirm a plan is active.
-- Check whether the selected date is inside the active plan range.
-- Open the plan detail page to confirm the workout schedule.
+진행 중인 플랜 여부, 플랜 날짜 범위, 개별 워크아웃의 일정과 상태를 확인하세요. 이동했거나 건너뛴 세션은 원래 예상한 날짜에 표시되지 않을 수 있습니다.
 
-Related pages:
+### 한 번의 훈련에 기록이 두 개 표시되는 이유는?
 
-- [Manage an Active Plan](/docs/guide/manage-active-plan)
-- [Activity Detail](/docs/guide/activity-detail)
-- [Activities Feed and Search](/docs/guide/activity-feed-search)
-- [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones)
+예정된 세션과 실제 완료 활동은 별개의 기록입니다. 두 항목의 연결 상태를 확인하세요. 실제 활동 자체가 두 개 중복 생성된 경우라면 삭제하기 전에 중복 전달 경로나 중복 가져오기를 먼저 점검해야 합니다.
+
+### 데모에서는 왜 활동을 연결할 수 없나요?
+
+데모는 예시 데이터를 살펴보는 용도입니다. 활동 연결과 일정 변경은 본인 계정의 쓰기 권한이 필요합니다.
+
+### 변경이 거부되면 어떻게 하나요?
+
+오류 메시지를 읽고 최신 플랜이나 활동 상태를 새로고침한 뒤 다시 시도하세요. 재시도 후 의도한 연결이나 일정이 실제로 반영되었는지 확인합니다.
+
+## 이어서 보기
+
+- [오늘의 조언과 현재 상태](/ko/docs/guide/today-and-current-state)
+- [진행 중인 플랜 관리](/ko/docs/guide/manage-active-plan)
+- [활동 상세 분석](/ko/docs/guide/activity-detail)

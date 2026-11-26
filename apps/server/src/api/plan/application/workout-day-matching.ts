@@ -4,7 +4,10 @@ export type MatchingSession = {
   durationSeconds: number | null;
   distanceMeters: number | null;
 };
-export type MatchingActivity = MatchingSession & { id: number };
+export type MatchingActivity = MatchingSession & {
+  id: number;
+  linkedWorkoutId?: string;
+};
 export type MatchingWorkout = MatchingSession & { id: string };
 export type WorkoutMatchingReview = {
   activityId: number;
@@ -26,43 +29,68 @@ function sport(session: MatchingSession) {
     : null;
 }
 
+function matchEdge(activity: MatchingSession, workout: MatchingSession) {
+  const activitySport = sport(activity);
+  const workoutSport = sport(workout);
+  if (activitySport && workoutSport && activitySport !== workoutSport)
+    return null;
+  const errors: number[] = [];
+  for (const [key, limit] of [
+    ['durationSeconds', 0.5],
+    ['distanceMeters', 0.25],
+  ] as const) {
+    if (!positive(activity[key]) || !positive(workout[key])) continue;
+    const error = Math.abs(activity[key]! - workout[key]!) / workout[key]!;
+    if (error > limit + EPSILON) return null;
+    errors.push(error);
+  }
+  // Missing evidence is a possible competing relationship, never permission to link.
+  return {
+    cost: errors.length
+      ? errors.reduce((sum, value) => sum + value, 0) / errors.length
+      : 0,
+    supported: Boolean(activitySport && workoutSport) && errors.length > 0,
+  };
+}
+
 /** All sessions belong to the same athlete-local calendar day. Parent plans carry no preference. */
 export function matchWorkoutDay(
   activityInput: MatchingActivity[],
   workoutInput: MatchingWorkout[],
 ) {
-  const activities = [...activityInput].sort((a, b) => a.id - b.id);
-  const workouts = [...workoutInput].sort((a, b) => a.id.localeCompare(b.id));
+  const workoutsById = new Map(
+    workoutInput.map((workout) => [workout.id, workout]),
+  );
+  const retained = new Map<number, string>();
+  const occupied = new Set<string>();
+  // An existing link reserves both endpoints while its evidence remains compatible.
+  for (const activity of activityInput) {
+    const linked = activity.linkedWorkoutId
+      ? workoutsById.get(activity.linkedWorkoutId)
+      : undefined;
+    if (linked && !occupied.has(linked.id) && matchEdge(activity, linked)) {
+      retained.set(activity.id, linked.id);
+      occupied.add(linked.id);
+    }
+  }
+  const retainedMatches = [...retained].map(([activityId, workoutId]) => ({
+    activityId,
+    workoutId,
+  }));
+  const activities = activityInput
+    .filter(({ id }) => !retained.has(id))
+    .sort((a, b) => a.id - b.id);
+  const workouts = workoutInput
+    .filter(({ id }) => !occupied.has(id))
+    .sort((a, b) => a.id.localeCompare(b.id));
   const edges = activities.map((activity) =>
-    workouts.map((workout) => {
-      const activitySport = sport(activity);
-      const workoutSport = sport(workout);
-      if (activitySport && workoutSport && activitySport !== workoutSport)
-        return null;
-      const errors: number[] = [];
-      for (const [key, limit] of [
-        ['durationSeconds', 0.5],
-        ['distanceMeters', 0.25],
-      ] as const) {
-        if (!positive(activity[key]) || !positive(workout[key])) continue;
-        const error = Math.abs(activity[key]! - workout[key]!) / workout[key]!;
-        if (error > limit + EPSILON) return null;
-        errors.push(error);
-      }
-      // Missing evidence is a possible competing relationship, never permission to link.
-      return {
-        cost: errors.length
-          ? errors.reduce((sum, value) => sum + value, 0) / errors.length
-          : 0,
-        supported: Boolean(activitySport && workoutSport) && errors.length > 0,
-      };
-    }),
+    workouts.map((workout) => matchEdge(activity, workout)),
   );
   const candidates = (index: number) =>
     workouts.filter((_workout, j) => edges[index][j] != null);
   if (workouts.length > 12 || activities.length > 24) {
     return {
-      matches: [] as Array<{ activityId: number; workoutId: string }>,
+      matches: retainedMatches,
       reviews: activities.flatMap((activity, i) =>
         candidates(i).length
           ? [
@@ -164,5 +192,5 @@ export function matchWorkoutDay(
       },
     ];
   });
-  return { matches, reviews };
+  return { matches: [...retainedMatches, ...matches], reviews };
 }

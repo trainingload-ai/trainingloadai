@@ -93,7 +93,7 @@ export function SortableFitnessStatCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative overflow-visible select-none group cursor-move touch-none will-change-transform",
+        "relative grid overflow-visible select-none group cursor-move touch-none will-change-transform",
         getSpanClass(clampSpan(span, 4)),
         isDragging && "opacity-70",
       )}

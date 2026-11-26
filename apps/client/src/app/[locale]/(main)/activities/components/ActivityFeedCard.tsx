@@ -7,11 +7,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { removeActivityAnalysisCaches } from "@/lib/activity-analysis-cache";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Download, Eye, MoreHorizontal, Trash2, Upload } from "lucide-react";
-import type {
-  V2ActivityListItem,
-  V2ActivityThirdPartyMapping,
-} from "@/api/v2-activities";
+import { Download, Eye, MoreHorizontal, Trash2 } from "lucide-react";
+import type { V2ActivityListItem } from "@/api/v2-activities";
 import { dayjs } from "@/lib/dayjs-tz";
 import { monthDayClockFormat } from "@/lib/time-format";
 import { resolveActivityDisplayTimezone } from "@/lib/user-timezone";
@@ -43,22 +40,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ActivitySummaryCard } from "@/components/activities/activity-summary-card";
-import { ActivityPlanLinkControl } from "@/components/plan/activity-plan-link-control";
-import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { ActivityCardFooter } from "@/components/activities/activity-card-footer";
+import { Link } from "@/i18n/navigation";
 import { getSportDisplayName, type SportDefinition } from "@/api/sports";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
 import { activitySupportsDistance } from "@/lib/activity-presentation";
-import {
-  isThirdPartyProviderBrand,
-  ProviderFavicon,
-  thirdPartyProviderName,
-  type ThirdPartyProviderBrand,
-} from "@/components/third-party/provider-favicon";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
 import { ManagedActivityExportMenuItems } from "@deployment/managed-ui";
 
@@ -66,95 +52,6 @@ type ActivityCardTranslateFn = (
   key: string,
   values?: Record<string, string | number | Date>,
 ) => string;
-
-function ProviderBadge({
-  provider,
-  variant,
-  manualLabel,
-}: {
-  provider: ThirdPartyProviderBrand | "manual";
-  variant: "inbound" | "outbound";
-  manualLabel: string;
-}) {
-  const isManual = provider === "manual";
-  const label = isManual ? manualLabel : thirdPartyProviderName(provider);
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          tabIndex={0}
-          aria-label={label}
-          className={cn(
-            "inline-flex size-7 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            variant === "inbound"
-              ? "bg-neutral-200 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
-              : "border border-border bg-background/65 text-muted-foreground",
-          )}
-        >
-          <span className="inline-flex size-4 items-center justify-center overflow-hidden rounded-xs bg-white">
-            {isManual ? (
-              <Upload className="size-3 text-neutral-600" aria-hidden />
-            ) : (
-              <ProviderFavicon provider={provider} className="size-4" />
-            )}
-          </span>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent side="top">
-        <span translate={isManual ? undefined : "no"}>{label}</span>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-function ThirdPartyMappingBadges({
-  mappings,
-  side,
-  excludeProvider,
-  manualLabel,
-}: {
-  mappings: V2ActivityThirdPartyMapping[];
-  side: "inbound" | "outbound";
-  excludeProvider?: V2ActivityListItem["primaryProvider"];
-  manualLabel: string;
-}) {
-  const seen = new Set<string>();
-  const providers: ThirdPartyProviderBrand[] = [];
-
-  for (const mapping of mappings) {
-    const direction = mapping.syncDirection ?? "IMPORT";
-    const belongsOnSide =
-      side === "inbound"
-        ? direction === "IMPORT" || direction === "BIDIRECTIONAL"
-        : direction === "EXPORT" || direction === "BIDIRECTIONAL";
-    if (
-      !belongsOnSide ||
-      mapping.provider === excludeProvider ||
-      !isThirdPartyProviderBrand(mapping.provider) ||
-      seen.has(mapping.provider)
-    ) {
-      continue;
-    }
-    seen.add(mapping.provider);
-    providers.push(mapping.provider);
-  }
-
-  if (providers.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {providers.map((provider) => (
-        <ProviderBadge
-          key={`${side}:${provider}`}
-          provider={provider}
-          variant={side}
-          manualLabel={manualLabel}
-        />
-      ))}
-    </div>
-  );
-}
 
 function formatDateTime(
   tr: ActivityCardTranslateFn,
@@ -168,35 +65,9 @@ function formatDateTime(
   return d.format(monthDayClockFormat(timeFormat));
 }
 
-function formatDistance(meters: number | null) {
-  if (typeof meters !== "number" || meters <= 0) return null;
-  return `${(meters / 1000).toFixed(1)} km`;
-}
-
-function formatDuration(seconds: number | null) {
-  if (typeof seconds !== "number") return "--";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  return h > 0
-    ? `${h}:${`${m}`.padStart(2, "0")}:${`${s}`.padStart(2, "0")}`
-    : `${m}:${`${s}`.padStart(2, "0")}`;
-}
-
-function visibleStatusLabel(
-  t: ActivityCardTranslateFn,
-  status: V2ActivityListItem["status"],
-) {
-  if (status === "PROCESSING") return t("status.processing");
-  if (status === "PARTIAL_FAILED") return t("status.partialFailed");
-  if (status === "FAILED") return t("status.failed");
-  return null;
-}
-
 export function ActivityFeedCard({
   activity,
   t,
-  onOpen,
   onDeleted,
   onPlanLinkChange,
   sportCatalog,
@@ -204,7 +75,6 @@ export function ActivityFeedCard({
 }: {
   activity: V2ActivityListItem;
   t: ActivityCardTranslateFn;
-  onOpen: (hashId: string) => void;
   onDeleted?: (hashId: string) => void;
   onPlanLinkChange?: (
     hashId: string,
@@ -243,11 +113,10 @@ export function ActivityFeedCard({
       ),
     [activity.timezone, profile],
   );
-  const statusText = visibleStatusLabel(t, activity.status);
   const supportsDistance = activitySupportsDistance(sportCatalog, activity);
-  const distanceLabel = supportsDistance
-    ? formatDistance(activity.distance)
-    : null;
+  const href = !previewOnly && activity.hashId
+    ? `/activities/${encodeURIComponent(activity.hashId)}`
+    : undefined;
 
   const handleDelete = async () => {
     if (!activity.hashId || deleting) return;
@@ -302,17 +171,16 @@ export function ActivityFeedCard({
           displayTz,
           timeFormat,
         )}
-        distanceLabel={distanceLabel}
-        durationLabel={formatDuration(activity.duration)}
+        distanceMeters={supportsDistance ? activity.distance : null}
+        durationSeconds={activity.duration ?? null}
         load={activity.load == null ? null : Math.round(activity.load)}
         loadLabel={t("common.load")}
-        loadPlacement="meta"
         note={activity.note}
         mapThumbnailDarkUrl={
           supportsDistance ? activity.mapThumbnailDarkUrl : null
         }
         mapThumbnailUrl={supportsDistance ? activity.mapThumbnailUrl : null}
-        onOpen={previewOnly ? undefined : () => onOpen(activity.hashId)}
+        href={href}
         headerAction={
           previewOnly ? undefined : (
             <DropdownMenu>
@@ -325,17 +193,19 @@ export function ActivityFeedCard({
                 <span className="sr-only">{t("actions.openMenu")}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onSelect={(event) => {
-                    event.preventDefault();
-                    if (!activity.hashId) return;
-                    onOpen(activity.hashId);
-                  }}
-                  disabled={!activity.hashId}
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  {t("actions.view")}
-                </DropdownMenuItem>
+                {href ? (
+                  <DropdownMenuItem asChild>
+                    <Link href={href} prefetch={false}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      {t("actions.view")}
+                    </Link>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem disabled>
+                    <Eye className="mr-2 h-4 w-4" />
+                    {t("actions.view")}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={(event) => {
@@ -376,45 +246,12 @@ export function ActivityFeedCard({
           )
         }
         footer={
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              {statusText ? (
-                <span className="rounded-md bg-muted px-2 py-1 text-mobile-caption pc:text-xs text-muted-foreground">
-                  {statusText}
-                </span>
-              ) : null}
-              <ProviderBadge
-                provider={
-                  isThirdPartyProviderBrand(activity.primaryProvider)
-                    ? activity.primaryProvider
-                    : "manual"
-                }
-                variant="inbound"
-                manualLabel={t("provider.manual")}
-              />
-              <ThirdPartyMappingBadges
-                mappings={activity.thirdPartyMappings}
-                side="inbound"
-                excludeProvider={activity.primaryProvider}
-                manualLabel={t("provider.manual")}
-              />
-            </div>
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <ThirdPartyMappingBadges
-                mappings={activity.thirdPartyMappings}
-                side="outbound"
-                manualLabel={t("provider.manual")}
-              />
-              {activity.planLinkUiVisible ? (
-                <ActivityPlanLinkControl
-                  activity={activity}
-                  onLinkedPlanWorkoutChange={(linked) =>
-                    onPlanLinkChange?.(activity.hashId, linked)
-                  }
-                />
-              ) : null}
-            </div>
-          </div>
+          <ActivityCardFooter
+            activity={activity}
+            onLinkedPlanWorkoutChange={(linked) =>
+              onPlanLinkChange?.(activity.hashId, linked)
+            }
+          />
         }
       />
 

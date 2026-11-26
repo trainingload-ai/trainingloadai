@@ -1,0 +1,138 @@
+---
+title: Analyser une séance avec la chronologie
+description: Utilisez la chronologie d’activité sur Web bureau dans Trainingload.ai pour inspecter des graphiques synchronisés, sélectionner un segment de séance, comparer ses statistiques de plage et localiser l’effort sur le tracé.
+seoTitle: "Chronologie d’activité et analyse de segments | Trainingload.ai"
+seoDescription: "Suivez le flux de chronologie d’activité pour la course et le cyclisme : sélectionnez un effort, inspectez statistiques et parcours, et éditez vos segments."
+keywords: ["chronologie d’activité", "analyse de segment de séance", "analyse d’intervalles course", "graphiques cyclisme", "chronologie Trainingload.ai"]
+---
+
+# Analyser une séance avec la chronologie
+
+La chronologie aligne les flux enregistrés d’une activité sur un axe horizontal commun. Utilisez-la pour inspecter un instant précis ou comparer l’allure, la puissance, la fréquence cardiaque, la cadence et le parcours d’un effort sélectionné. Les statistiques de plage et la lecture au curseur répondent à deux questions différentes.
+
+Ce guide porte sur le **Web bureau** pour la course à pied et le cyclisme. Les graphiques disponibles dépendent des données enregistrées dans l’activité. Pour le flux complet de bilan de séance, commencez par [Détail de l’activité](/fr/docs/guide/activity-detail).
+
+## Ouvrir l’exemple
+
+[Ouvrir l’activité de démonstration de course 10 km](https://demo.trainingload.ai/en/activities/17921623926005309429), puis sélectionnez **Chronologie** sous le tracé. L’activité s’ouvre d’abord sur Aperçu. La Démo étant en lecture seule, l’édition des segments enregistrés y est désactivée.
+
+Pour votre propre activité, attendez la fin du traitement et vérifiez qu’elle contient des échantillons enregistrés. Les activités ne contenant qu’un résumé ne proposent pas de chronologie synchronisée. Les séances en intérieur peuvent disposer de graphiques exploitables sans GPS. Vérifiez le sport, vos seuils et vos unités avant d’interpréter les données.
+
+## 1. Lire l’ensemble de l’activité
+
+Après avoir sélectionné **Chronologie**, repérez les en-têtes de segments en haut, les commandes d’indicateurs et les statistiques de plage à gauche, ainsi que les graphiques alignés à droite. L’axe horizontal démarre en mode temps. Le tracé reste affiché au-dessus des onglets lorsque l’activité comporte des données de localisation.
+
+Les activités longues dépassent la largeur visible du graphique : faites défiler horizontalement pour explorer la suite. Les statistiques de plage continuent de décrire l’activité complète tant que vous ne sélectionnez pas de plage.
+
+Au départ, les valeurs **Moyenne**, **Min** et **Max** affichées à gauche décrivent l’ensemble de l’activité. Un indicateur dépourvu d’échantillons exploitables peut être absent, et les coupures au sein d’un flux apparaissent sous forme d’interruptions sur son graphique.
+
+<DocsScreenshot
+  id="activity-timeline-full"
+  title="Commencer par l’activité complète et les graphiques alignés"
+  description="La colonne de gauche résume la plage active. Chaque graphique partage la même position horizontale afin de comparer l’effort sur l’allure, la fréquence cardiaque et la cadence."
+  imageAlt="Chronologie complète de la course avec graphiques alignés et statistiques sur toute l’activité"
+  route="Détail de l’activité → Chronologie"
+  demoLabel="Ouvrir cet exemple de chronologie"
+/>
+
+## 2. Inspecter un instant précis
+
+Déplacez le pointeur sur un graphique et lisez la valeur flottante affichée dans chaque graphique à la même position horizontale. Lorsque le GPS est disponible, la carte indique la position correspondante.
+
+Cliquez pour conserver un point sélectionné. Sortir le pointeur des graphiques masque les lectures temporaires au survol. Les statistiques de plage à gauche restent rattachées à l’activité complète ou à la plage sélectionnée.
+
+Vous pouvez placer le focus sur la commande de positionnement de la chronologie et utiliser les flèches gauche et droite pour parcourir les échantillons, ou les touches **Début** et **Fin** pour atteindre ses extrémités. Les lectures au clavier se masquent lorsque la commande perd le focus.
+
+| Question | Où regarder |
+| --- | --- |
+| Qu’a-t-il été enregistré à cet instant ? | La valeur ponctuelle affichée dans chaque graphique. |
+| Quelle était la valeur représentative sur cet effort ? | La moyenne dans les statistiques de plage à gauche. |
+| Quels ont été les extrêmes valides enregistrés ? | Le minimum et le maximum sur cette même plage. |
+
+## 3. Sélectionner un effort et le comparer
+
+Vous pouvez sélectionner un tour enregistré ou tracer votre propre plage.
+
+1. Cliquez sur un en-tête de segment pour mettre ce segment en évidence et mettre à jour ses statistiques. Cliquez de nouveau dessus pour effacer la sélection.
+2. Pour examiner une autre plage, cliquez-glissez horizontalement sur un graphique puis relâchez. L’axe commun zoome sur votre sélection.
+3. Comparez la moyenne, le minimum et le maximum de la plage sélectionnée avec l’effort visible. Déplacez le pointeur pour examiner des échantillons individuels à l’intérieur.
+4. Observez le tronçon mis en surbrillance sur le tracé lorsque les données de localisation sont disponibles. Appuyez-vous sur la carte environnante pour situer où l’effort a eu lieu.
+
+<DocsScreenshot
+  id="activity-timeline-selection"
+  title="Comparer un effort sélectionné avec son parcours"
+  description="Sélectionner un segment met à jour les statistiques de plage et met en évidence l’intervalle correspondant sur les graphiques et le tracé. Les lectures au survol restent distinctes du résumé de plage."
+  imageAlt="Segment de course sélectionné avec statistiques de plage actualisées et tronçon de parcours mis en évidence"
+  route="Détail de l’activité → Chronologie → Sélectionner un segment"
+  demoLabel="Inspecter la même activité dans la Démo"
+/>
+
+Sur un effort long et régulier, vérifiez si l’allure ou la puissance restent stables tandis que la fréquence cardiaque évolue. Sur des intervalles répétés, comparez les phases d’effort et de récupération à l’objectif de la séance. Expliquez les écarts observés à l’aide de la durée, du terrain, des arrêts et des données de capteurs disponibles.
+
+## 4. Revenir à l’activité complète ou changer d’axe
+
+Ouvrez **Options de chronologie** à côté de **Segments** et choisissez **Afficher toute l’activité** pour effacer la plage et restaurer la vue complète. Un double-clic sur un graphique ou la touche **Échap** dans la chronologie réinitialise également la sélection et le zoom.
+
+Dans le même menu, basculez l’**Axe horizontal** entre **Temps** et **Distance**. Le mode Distance nécessite un enregistrement exploitable de distance cumulée. L’effort sélectionné conserve ses bornes temporelles d’origine lors du changement d’axe.
+
+## 5. Configurer les graphiques
+
+Cliquez sur le nom d’un indicateur, par exemple **Allure** ou **Fréquence cardiaque**, pour ouvrir ses réglages. Vous pouvez choisir l’indicateur disponible, la couleur de courbe, la hauteur du graphique et le lissage. Utilisez **Monter**, **Descendre** ou **Retirer le graphique** pour organiser les lignes visibles.
+
+Utilisez **Ajouter un graphique** en bas pour afficher un autre flux disponible. Vous pouvez ajouter plusieurs fois le même indicateur, par exemple pour comparer l’affichage brut et l’affichage lissé. **Agrandir** ouvre une vue élargie d’un graphique individuel.
+
+Le lissage modifie la courbe tracée, tandis que les lectures ponctuelles et les statistiques de plage conservent la signification des données enregistrées. La disposition des graphiques est enregistrée dans les préférences de ce navigateur et ne modifie pas l’activité source.
+
+## 6. Modifier les segments d’analyse dans votre compte
+
+Utilisez **Modifier les segments** lorsque vous souhaitez définir des plages d’analyse différentes des tours de l’appareil. Cela requiert un compte connecté disposant des droits d’édition sur l’activité.
+
+1. Ouvrez **Modifier les segments** et vérifiez le nom, le début et la fin de chaque segment.
+2. Renommez un segment ou ajustez ses bornes. L’éditeur propose également **Ajouter un segment dans un vide**, **Diviser en deux**, **Fusionner avec le suivant** et **Supprimer** lorsque ces actions s’appliquent.
+3. Maintenez les bornes dans les limites de l’activité, avec un début antérieur à la fin et sans chevauchement entre segments.
+4. Sélectionnez **Enregistrer les segments**, puis examinez les statistiques mises à jour. **Annuler** ferme le brouillon sans enregistrer.
+
+Les segments d’analyse enregistrés laissent intacts le fichier d’origine, les tours de l’appareil et la charge d’entraînement globale de l’activité. Des bornes modifiées recalculent les statistiques de cette plage à partir des flux enregistrés. **Restaurer les tours de l’appareil** rétablit dans l’éditeur les plages de tours d’origine, que vous pouvez ensuite enregistrer.
+
+Si une autre fenêtre a modifié les définitions, fermez puis rouvrez l’éditeur afin de charger la dernière version avant de reprendre l’édition. En cas d’échec d’enregistrement, le brouillon reste disponible pour réessayer. La Démo publique désactive ce flux d’édition.
+
+## Vérifier le résultat
+
+Après avoir sélectionné un effort, vérifiez que ses bornes, ses statistiques de plage et son tronçon de parcours renvoient bien à la même portion de l’activité. Restaurez la vue complète et confirmez que les statistiques reviennent à l’activité entière. Si vous avez enregistré des segments d’analyse dans votre compte, rouvrez l’activité et vérifiez que ces définitions restent bien présentes.
+
+## Questions fréquentes
+
+### Pourquoi les chiffres à gauche ne changent-ils pas quand je déplace le pointeur ?
+
+Ils résument l’activité complète ou la plage sélectionnée. Fiez-vous aux lectures flottantes à l’intérieur des graphiques pour connaître la valeur au point survolé.
+
+### Pourquoi y a-t-il des coupures ou des tirets ?
+
+Un flux manquant, une interruption d’échantillonnage ou une valeur invalide peuvent produire une coupure ou un tiret. Une vitesse, une cadence ou une puissance nulle enregistrée peut être valide. Un échantillon à l’arrêt n’a pas d’allure exploitable, et les échantillons manquants de fréquence cardiaque ne sont pas remplacés par zéro.
+
+### Pourquoi un tour diffère-t-il après modification de ses bornes ?
+
+Un tour d’appareil inchangé peut s’appuyer sur son résumé importé. Un segment d’analyse modifié ou personnalisé est recalculé à partir des échantillons valides enregistrés dans cette plage. La couverture des données et les bornes choisies influencent donc le résultat.
+
+### Pourquoi une valeur de puissance porte-t-elle la mention Estimée ?
+
+Ce flux repose sur une puissance estimée. Gardez cette source en tête lorsque vous la comparez à un capteur de puissance ou que vous interprétez l’intensité.
+
+### Pourquoi le tracé ne met-il pas en évidence la plage sélectionnée ?
+
+L’activité peut manquer de points GPS valides sur cet intervalle, ou la carte peut être indisponible. Poursuivez avec les graphiques enregistrés et vérifiez séparément l’état de la carte.
+
+### Pourquoi la Chronologie n’apparaît-elle pas sur mon téléphone ?
+
+Ce flux est proposé sur Web bureau. Utilisez le détail d’activité et les graphiques mobiles pris en charge par l’application pour votre sport, ou ouvrez l’activité sur ordinateur.
+
+### Que faire si un graphique échoue à charger ?
+
+Utilisez son action de nouvelle tentative lorsqu’elle est proposée. Les autres graphiques déjà chargés restent exploitables. Si une actualisation échoue, la page peut conserver le résultat précédent tout en affichant cet état. Distinguez l’absence de données d’une requête en échec.
+
+## Continuer
+
+- [Détail de l’activité](/fr/docs/guide/activity-detail)
+- [Découplage aérobie](/fr/docs/metrics/heart-rate/aerobic-decoupling)
+- [Profil, seuils et zones](/fr/docs/guide/profile-thresholds-zones)
+- [Bilan d’entraînement hebdomadaire](/fr/docs/workflow/weekly-review)

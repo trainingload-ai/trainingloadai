@@ -1,39 +1,126 @@
 ---
-title: Monotonia dell’allenamento
-description: Scopri come Trainingload.ai calcola Monotonia e Training Strain dai sette carichi giornalieri più recenti e come differiscono dalle metriche classiche di Foster.
-keywords: ["monotonia", "formula monotonia", "Training Strain", "variabilità del carico", "Carl Foster"]
+title: "Monotonia dell'allenamento: formula di Foster vs. punteggio limitato"
+description: "La monotonia dell'allenamento misura quanto sono simili i tuoi ultimi sette carichi giornalieri. Confronta la formula di Foster con il punteggio limitato di Trainingload.ai e il Training Strain."
+keywords:
+  [
+    "monotonia dell'allenamento",
+    "monotonia Foster",
+    "training strain",
+    "variabilità carico giornaliero",
+    "formula monotonia",
+  ]
 ---
 
-# Che cos’è la monotonia?
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
 
-La **monotonia dell’allenamento** descrive quanto si assomigliano i carichi giornalieri degli ultimi sette giorni di calendario. Giorni simili producono in genere un valore più alto; una chiara alternanza di giorni ad alto carico, a basso carico e di riposo produce in genere un valore più basso.
+# Monotonia dell'allenamento: formula di Foster vs. punteggio limitato
 
-Trainingload.ai mostra una versione normalizzata e limitata, non il valore classico di Foster. Non misura fatica, recupero, sovrallenamento o probabilità di infortunio.
+La **monotonia dell'allenamento** descrive quanto si assomigliano i carichi giornalieri negli ultimi sette giorni di calendario. Giornate molto simili generano un valore più alto; un'alternanza netta tra giorni ad alto carico, giorni leggeri e giorni a carico zero produce di solito un valore più basso.
+
+Trainingload.ai mostra una versione normalizzata e limitata, non il valore classico di Foster. Descrive la distribuzione numerica dei carichi; non misura direttamente fatica, recupero, sovrallenamento, probabilità di infortunio o qualità dell'allenamento.
 
 <div className="my-6 max-w-sm w-full mx-auto">
-  <MonotonyStatPreviewCard value="0.72" metricLabel="Monotonia"
+  <MonotonyStatPreviewCard
+    value="0.72"
+    metricLabel="Monotonia"
     valuePopoverTitle="Valore di monotonia"
-    valuePopoverBody="Calcolata dalla media e dalla deviazione standard della popolazione di sette carichi giornalieri; i giorni senza attività valgono zero."
-    rangePopoverTitle="Fasce dell’interfaccia"
-    rangePopoverBody="<0,6, 0,6–0,8 e >0,8 aiutano la revisione, ma non sono soglie di salute o infortunio."
+    valuePopoverBody="Calcolata da media e deviazione standard della popolazione degli ultimi sette giorni di calendario; i giorni senza attività valgono zero."
+    rangePopoverTitle="Fasce nell'interfaccia"
+    rangePopoverBody="L'interfaccia usa <0,6, 0,6–0,8 e >0,8 come spunti di verifica, non come soglie di salute o rischio infortunio."
     helpTitle="Variazione del carico"
-    details="Guarda insieme i sette valori e il carico totale." />
+    details="Esamina tutti e sette i carichi giornalieri insieme al carico totale per spiegare il valore."
+  />
 </div>
+
+_I valori di esempio servono solo come anteprima dell'interfaccia._
+
+## Dati e formula
+
+Trainingload.ai include oggi e i sei giorni di calendario precedenti. Più attività svolte nello stesso giorno vengono sommate; un giorno senza carico registrato contribuisce con zero.
 
 ```text
 mean_load = sum(loads) / 7
 sd_load = sqrt(sum((load − mean_load)²) / 7)
 monotony = mean_load / (sd_load + mean_load)
-training_strain = sum(loads) × monotony / 0.5
 ```
 
-Se tutti i valori sono zero, Monotonia e Strain valgono zero. La formula classica è `foster_monotony = mean_load / sd_load` e non ha limite superiore. Per questo `0.8` in Trainingload.ai non equivale a `2.0` secondo Foster.
+Se `sd_load + mean_load = 0`, tutti e sette i carichi sono zero e il prodotto restituisce `monotony = 0`.
 
-Sette giorni a zero danno 0; un solo giorno con carico dà circa 0,29; sette carichi positivi identici danno 1. Un valore basso non è sempre migliore: anche un grande picco seguito da sei giorni a zero produce bassa monotonia.
+Il Training Strain utilizza la stessa finestra:
+
+```text
+total_load = sum(loads)
+training_strain = total_load × monotony / 0.5
+```
+
+## Differenza rispetto alla metrica classica di Foster
+
+```text
+foster_monotony = mean_load / sd_load
+foster_strain = total_load × foster_monotony
+```
+
+Il valore classico non ha limite superiore e tende all'infinito quando tutti i carichi giornalieri sono identici. Trainingload.ai usa invece `mean_load / (sd_load + mean_load)`, mantenendo ogni settimana non nulla nell'intervallo tra 0 e 1.
+
+Quando media e deviazione standard sono entrambe positive:
+
+```text
+trainingload_monotony = foster_monotony / (1 + foster_monotony)
+```
+
+Di conseguenza, un valore `0.8` su Trainingload.ai non è confrontabile con un valore `2.0` nella scala classica di Foster, e differiscono anche le due formule di Training Strain.
+
+## Come leggere il valore
+
+- Sette giorni a carico zero restituiscono 0.
+- Un giorno di carico più sei giorni a zero produce circa 0,29.
+- Sette giorni con carico positivo identico producono 1.
+- Tra questi estremi, un valore più alto indica in genere carichi giornalieri più uniformi tra loro.
+
+Un valore basso non è automaticamente migliore: anche un enorme picco di carico isolato seguito da sei giorni di riposo produce bassa monotonia. Un valore alto non diagnostica infortuni o sovrallenamento: dice soltanto che i sette carichi giornalieri sono molto simili tra loro.
+
+Le fasce dell'interfaccia sono `<0.6`, `0.6–0.8` e `>0.8`. Sono regole di visualizzazione, non soglie cliniche di sicurezza. Lo zero speciale di una settimana di riposo totale non significa «struttura eccellente».
+
+## Verifica pratica
+
+Esamina tutti e sette i carichi giornalieri insieme al carico totale settimanale. Capisci se lo schema deriva dal piano di allenamento, da giorni di riposo reali, da un singolo picco, da attività mancanti o da una modifica di soglia/sorgente. Poi aggiungi disciplina, contenuto delle sessioni, prestazioni, sonno, dolori, malesseri e fatica soggettiva.
+
+<DocsToolCtaCard
+  title="Analizza la distribuzione giornaliera del carico"
+  description="Leggi insieme il carico totale sui sette giorni, la variazione giornaliera e le attività di origine."
+  primary={{ href: "/it/training-load", label: "Gestisci il carico di allenamento con CTL, ATL e TSB nel tuo piano" }}
+  secondary={{ href: "/it/docs/metrics/training-load/training-stress-score", label: "Scopri come il TSS diventa carico giornaliero" }}
+/>
 
 ## Riferimenti
 
-- [Foster (1998)](https://doi.org/10.1097/00005768-199807000-00023)
-- [Haddad et al. (2017): session-RPE](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
-- [Jones et al. (2017): revisione sistematica](https://doi.org/10.1007/s40279-016-0619-5)
-- [Fellrnr: Training Monotony](https://fellrnr.com/wiki/Training_Monotony)
+- [Foster (1998): Monitoring training with reference to overtraining syndrome](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad et al. (2017): Review of the session-RPE method](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones et al. (2017): Systematic review of training load, fatigue markers, injury, and illness](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr: Training Monotony and the bounded modification](https://fellrnr.com/wiki/Training_Monotony)
+
+## FAQ
+
+### Cos'è la monotonia dell'allenamento?
+
+La monotonia dell'allenamento è un indice di somiglianza sui sette giorni per il carico giornaliero. Giornate molto simili alzano il valore; un'alternanza di giorni intensi, facili e di riposo di solito lo abbassa. Descrive i numeri, non il rischio di infortunio.
+
+### In cosa differisce la formula di Foster?
+
+La monotonia classica di Foster è carico medio ÷ deviazione standard e non ha un limite superiore: giornate identiche la spingono verso infinito. Trainingload.ai usa `media / (ds + media)`, così una settimana con carico resta tra 0 e 1. Un `0.8` del prodotto non equivale a un `2.0` di Foster.
+
+### Cos'è il Training Strain?
+
+Il Training Strain moltiplica il carico totale su sette giorni per la monotonia (in questo prodotto diviso per 0,5). Un carico totale alto unito a giornate sempre uguali fa crescere lo strain. Leggilo insieme ai sette valori giornalieri, non come un allarme isolato.
+
+### Una monotonia bassa è sempre meglio?
+
+No. Anche un picco enorme seguito da sei giorni a zero produce bassa monotonia. Usa il punteggio per accorgerti di una settimana troppo piatta, poi controlla il piano, eventuali file mancanti e le sensazioni delle sessioni.
+
+## Pagine correlate
+
+- [Cos'è il carico di allenamento?](/it/docs/metrics/training-load)
+- [Chronic Training Load (CTL)](/it/docs/metrics/pmc/chronic-training-load)
+- [Fatica (ATL)](/it/docs/metrics/pmc/acute-training-load)
+- [ACWR](/it/docs/metrics/pmc/acute-to-chronic-workload-ratio)
+- [Usa la revisione del Coach AI per adattare il carico di allenamento in sicurezza](/it/ai-training-plan)

@@ -1,7 +1,13 @@
 "use client";
 
-import { isRollingPlan } from "@/lib/rolling-plan";
-import { RollingPlanExecution } from "@/components/plan/rolling-plan-execution";
+import {
+  generatedPlanThrough,
+  isPlanDateNotGenerated,
+  isRollingPlan,
+  naturalWeekStart,
+} from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
+import { calendarIsoWeekday } from "@shared/plan-calendar";
 import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import {
@@ -16,7 +22,6 @@ import {
   Sparkles,
   StopCircle,
   Target,
-  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -27,7 +32,7 @@ import { invalidateActivePlanAndPlanDetails } from "@/lib/query-invalidation";
 import { toast } from "sonner";
 import { Link } from "@/i18n/navigation";
 import { useActivePlan } from "@/api/usePlans";
-import { useDeletePlan, useCompletePlan } from "@/api/usePlanMutations";
+import { useCompletePlan } from "@/api/usePlanMutations";
 import {
   isWorkoutPlannedOrInProgress,
   type PlanWorkout,
@@ -77,14 +82,17 @@ import { MobilePlanDetailSheet } from "@/components/plan/mobile-plan-detail";
 import { WorkoutActionConfirm } from "@/components/plan/workout-action-confirm";
 import { summarizePlanCycleProgress } from "@/components/plan/plan-cycle-progress-model";
 import {
+  buildWeekGroups,
   buildWorkoutListNotes,
   buildWorkoutListTitle,
   canMutatePlanWorkoutSchedule,
   getPlanWorkoutDisplayKind,
   getPlanWorkoutMovedByLabel,
   getPlanWorkoutStatusLabel,
+  getRollingPlanCurrentDate,
   hasPrimaryActivityLink,
   type PlanWorkoutDisplayKind,
+  type WeekGroup,
 } from "@/components/plan/detail/plan-detail-utils";
 
 const PlanCreateLauncher = dynamic(
@@ -141,7 +149,6 @@ function getWeekdayLabelFromDate(t: TranslateFn, date: dayjs.Dayjs) {
   return t(`weekday.${keys[date.day()]}`);
 }
 
-type ManageAction = "complete" | "delete" | null;
 type PostponeAction =
   | { type: "today" }
   | { type: "single"; workout: DerivedWorkout }
@@ -170,6 +177,7 @@ function primaryActualLoadFromWorkout(workout: PlanWorkout): number {
 
 type WeekSummary = {
   week: number;
+  label?: string;
   workoutCount: number;
   completedCount: number;
   missedCount: number;
@@ -226,28 +234,9 @@ function Panel({
   );
 }
 
-function SectionTitle({
-  title,
-  action,
-  actionHref,
-}: {
-  title: string;
-  action?: string;
-  actionHref?: string;
-}) {
+function SectionTitle({ title }: { title: string }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-      {action && actionHref ? (
-        <Link
-          href={actionHref}
-          className="flex items-center gap-1 text-mobile-caption pc:text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {action}
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      ) : null}
-    </div>
+    <h2 className="text-sm font-semibold text-foreground">{title}</h2>
   );
 }
 
@@ -309,7 +298,10 @@ function getWorkoutDate(
   options: { weekOffset: 0 | 1; dayOffset: 0 | 1 },
 ) {
   if (workout.scheduledDate) {
-    return dayjs(workout.scheduledDate).startOf("day");
+    const date = isRollingPlan(plan)
+      ? workout.scheduledDate.slice(0, 10)
+      : workout.scheduledDate;
+    return dayjs(date).startOf("day");
   }
   if (!plan.startDate) {
     return null;
@@ -335,14 +327,15 @@ function toDerivedWorkout(
   plan: TrainingPlanDetail,
   workout: PlanWorkout,
   offsets: { weekOffset: 0 | 1; dayOffset: 0 | 1 },
+  todayKey: string,
 ): DerivedWorkout {
   const date = getWorkoutDate(plan, workout, offsets);
   const dateKey = date?.format("YYYY-MM-DD") ?? null;
-  const isToday = Boolean(date && date.isSame(dayjs(), "day"));
-  const displayKind = getPlanWorkoutDisplayKind({
-    status: workout.status,
-    scheduledDate: dateKey,
-  });
+  const isToday = dateKey === todayKey;
+  const displayKind = getPlanWorkoutDisplayKind(
+    { status: workout.status, scheduledDate: dateKey },
+    dayjs(todayKey),
+  );
   const isOverdue = displayKind === "incomplete";
   const { uiWeekIndex, uiDayIndex } = getUiWeekDay(workout, offsets);
   const dayLabel = date
@@ -370,41 +363,50 @@ function buildWeekSummaries(
   currentWeekIndex: number,
   currentDayIndex: number | null,
   offsets: { weekOffset: 0 | 1; dayOffset: 0 | 1 },
+  todayKey: string,
+  rollingWeeks: WeekGroup[] | null,
 ) {
-  const summaries: WeekSummary[] = [];
-  const todayKey = dayjs().format("YYYY-MM-DD");
+  const weeks = rollingWeeks
+    ? rollingWeeks.map(({ weekIndex, calendarRange, days }) => ({
+        week: weekIndex,
+        label: calendarRange
+          ? `${dayjs(calendarRange.from).format("M/D")} – ${dayjs(calendarRange.through).format("M/D")}`
+          : undefined,
+        workouts: days.flatMap(({ workouts, dateKey, dayIndex }) =>
+          workouts.map(({ status }) => ({ status, dateKey, dayIndex })),
+        ),
+      }))
+    : Array.from({ length: Math.max(1, plan.periodWeeks || 1) }, (_, index) => {
+        const week = index + 1;
+        return {
+          week,
+          label: undefined,
+          workouts: plan.workouts
+            .filter((item) => getUiWeekDay(item, offsets).uiWeekIndex === week)
+            .map((workout) => ({
+              status: workout.status,
+              dateKey: getWorkoutDate(plan, workout, offsets)?.format("YYYY-MM-DD") ?? null,
+              dayIndex: getUiWeekDay(workout, offsets).uiDayIndex,
+            })),
+        };
+      });
 
-  for (let week = 1; week <= Math.max(1, plan.periodWeeks || 1); week += 1) {
-    const workouts = plan.workouts.filter(
-      (item) => getUiWeekDay(item, offsets).uiWeekIndex === week,
-    );
+  return weeks.map(({ week, label, workouts }): WeekSummary => {
     const state =
       week < currentWeekIndex
         ? "done"
         : week === currentWeekIndex
           ? "current"
           : "next";
-    const counts = summarizePlanCycleProgress(
-      workouts.map((workout) => ({
-        status: workout.status,
-        dateKey:
-          getWorkoutDate(plan, workout, offsets)?.format("YYYY-MM-DD") ?? null,
-        dayIndex: getUiWeekDay(workout, offsets).uiDayIndex,
-      })),
-      {
-        phase:
-          state === "done"
-            ? "past"
-            : state === "current"
-              ? "current"
-              : "future",
-        todayKey,
-        currentDayIndex,
-      },
-    );
+    const counts = summarizePlanCycleProgress(workouts, {
+      phase: state === "done" ? "past" : state === "current" ? "current" : "future",
+      todayKey,
+      currentDayIndex,
+    });
 
-    summaries.push({
+    return {
       week,
+      label,
       workoutCount: workouts.length,
       completedCount: counts.completed,
       missedCount: counts.missed,
@@ -412,10 +414,8 @@ function buildWeekSummaries(
       movedCount: counts.moved,
       pendingCount: counts.pending,
       state,
-    });
-  }
-
-  return summaries;
+    };
+  });
 }
 
 function buildCurrentWeekDays(args: {
@@ -423,22 +423,30 @@ function buildCurrentWeekDays(args: {
   plan: TrainingPlanDetail;
   currentWeekIndex: number;
   offsets: { weekOffset: 0 | 1; dayOffset: 0 | 1 };
+  todayKey: string;
+  rollingWeek?: WeekGroup;
 }) {
-  const { t, plan, currentWeekIndex, offsets } = args;
-  const derived = plan.workouts
-    .filter(
-      (item) => getUiWeekDay(item, offsets).uiWeekIndex === currentWeekIndex,
-    )
-    .map((item) => toDerivedWorkout(t, plan, item, offsets));
+  const { t, plan, currentWeekIndex, offsets, todayKey, rollingWeek } = args;
+  const fixedWeekWorkouts = rollingWeek
+    ? []
+    : plan.workouts.filter(
+        (item) => getUiWeekDay(item, offsets).uiWeekIndex === currentWeekIndex,
+      );
 
   return Array.from({ length: 7 }, (_, index) => {
     const dayIndex = index + 1;
-    const workouts = derived
-      .filter((item) => item.uiDayIndex === dayIndex)
+    const rollingDay = rollingWeek?.days[index];
+    const workouts = (
+      rollingDay?.workouts ??
+      fixedWeekWorkouts.filter((item) => getUiWeekDay(item, offsets).uiDayIndex === dayIndex)
+    )
+      .map((item) => toDerivedWorkout(t, plan, item, offsets, todayKey))
       .sort((a, b) => (a.sessionIndex ?? 1) - (b.sessionIndex ?? 1));
 
     const fallbackDate =
-      plan.startDate == null
+      rollingDay?.dateKey
+        ? dayjs(rollingDay.dateKey)
+        : plan.startDate == null
         ? null
         : dayjs(plan.startDate)
             .startOf("day")
@@ -653,33 +661,24 @@ function WeekStrip({
   weeks,
   selectedWeek,
   onSelectWeek,
-  planHref,
   t,
 }: {
   weeks: WeekSummary[];
   selectedWeek: number;
   onSelectWeek: (week: number) => void;
-  planHref?: string;
   t: TranslateFn;
 }) {
-  const currentWeek =
-    weeks.find((week) => week.state === "current") ?? weeks[0];
+  const currentWeek = weeks.find((week) => week.state === "current");
   return (
     <Panel>
       <PlanCycleProgressChart
         ariaLabel={t("weekStrip.title")}
-        action={
-          planHref ? (
-            <Link
-              href={planHref}
-              className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {t("weekStrip.action")}
-              <ArrowRight className="size-3.5" />
-            </Link>
-          ) : undefined
+        currentKey={currentWeek ? String(currentWeek.week) : undefined}
+        currentPositionLabel={
+          currentWeek?.label
+            ? `${t("weekStrip.state.current")} · ${currentWeek.label}`
+            : undefined
         }
-        currentKey={String(currentWeek?.week ?? selectedWeek)}
         selectedKey={String(selectedWeek)}
         onPointSelect={(key) => onSelectWeek(Number(key))}
         labels={{
@@ -690,8 +689,8 @@ function WeekStrip({
           pending: t("workout.status.planned"),
         }}
         data={weeks.map((week) => ({
-          key: t("weekLoad.currentWeek", { week: week.week }),
-          label: t("weekLoad.currentWeek", { week: week.week }),
+          key: String(week.week),
+          label: week.label ?? t("weekLoad.currentWeek", { week: week.week }),
           selectionKey: String(week.week),
           completed: week.completedCount || undefined,
           missed: week.missedCount || undefined,
@@ -731,6 +730,7 @@ function WeekLoadMap({
 // 本周训练列表
 function WorkoutList({
   workouts,
+  emptyLabel,
   t,
   onOpenWorkout,
   onPostponeWorkout,
@@ -738,6 +738,7 @@ function WorkoutList({
   pendingWorkoutId,
 }: {
   workouts: DerivedWorkout[];
+  emptyLabel?: string;
   t: TranslateFn;
   onOpenWorkout: (workout: DerivedWorkout) => void;
   onPostponeWorkout: (workout: DerivedWorkout) => Promise<void>;
@@ -755,7 +756,7 @@ function WorkoutList({
       <div className="space-y-1.5">
         {workouts.length === 0 ? (
           <div className="rounded-surface border border-dashed border-border/70 bg-neutral-100 px-4 py-6 text-sm text-muted-foreground dark:bg-muted/45">
-            {t("workout.empty")}
+            {emptyLabel ?? t("workout.empty")}
           </div>
         ) : (
           workouts.map((workout) => {
@@ -872,24 +873,20 @@ function WorkoutList({
 // 侧边栏 今日训练模块
 function TodayWorkout({
   workout,
+  emptyLabel,
   plan,
-  planHref,
   onOpenWorkout,
   t,
 }: {
   workout?: DerivedWorkout;
+  emptyLabel?: string;
   plan: TrainingPlanDetail;
-  planHref?: string;
   onOpenWorkout: (workout: DerivedWorkout) => void;
   t: TranslateFn;
 }) {
   return (
     <Panel className="flex flex-col gap-3">
-      <SectionTitle
-        title={t("today.title")}
-        action={planHref ? t("today.viewTodayPlan") : undefined}
-        actionHref={planHref}
-      />
+      <SectionTitle title={t("today.title")} />
       {workout ? (
         <MobilePlanWorkoutRow
           plan={plan}
@@ -901,7 +898,7 @@ function TodayWorkout({
         />
       ) : (
         <div className="rounded-surface bg-neutral-100 px-4 py-6 text-sm text-muted-foreground dark:bg-muted/45">
-          {t("today.empty")}
+          {emptyLabel ?? t("today.empty")}
         </div>
       )}
     </Panel>
@@ -976,12 +973,19 @@ function CoachSuggestion({
   mobile?: boolean;
   t: TranslateFn;
 }) {
-  const fallbackSummary = t("coach.description", {
-    status: describePlanStatus(t, plan),
-    completed: completedSessions,
-    total: totalSessions,
-    remainingWeeks: Math.max(0, remainingWeeks),
-  });
+  const rollingT = useTranslations("RollingPlan");
+  const rolling = isRollingPlan(plan);
+  const through = generatedPlanThrough(plan)?.slice(0, 10);
+  const fallbackSummary = rolling
+    ? through
+      ? rollingT("generatedThrough", { date: through })
+      : rollingT("notGenerated")
+    : t("coach.description", {
+        status: describePlanStatus(t, plan),
+        completed: completedSessions,
+        total: totalSessions,
+        remainingWeeks: Math.max(0, remainingWeeks),
+      });
   const coachParams = new URLSearchParams({
     intent: "plan-followup",
     source: "plan",
@@ -1002,10 +1006,12 @@ function CoachSuggestion({
       mobilePlanPresentation={{
         planTitle: plan.title,
         metrics: [
-          {
-            label: t("header.currentCycle"),
-            value: `${plan.currentWeekIndex ?? 1}/${plan.periodWeeks}`,
-          },
+          rolling
+            ? { label: rollingT("title"), value: through ?? rollingT("notGenerated") }
+            : {
+                label: t("header.currentCycle"),
+                value: `${plan.currentWeekIndex ?? 1}/${plan.periodWeeks}`,
+              },
           {
             label: t("weekLoad.title"),
             value:
@@ -1024,12 +1030,14 @@ function CoachSuggestion({
 }
 
 function MobileTodayWorkout({
+  emptyLabel,
   onOpenPlan,
   onOpenWorkout,
   plan,
   t,
   workout,
 }: {
+  emptyLabel?: string;
   onOpenPlan: () => void;
   onOpenWorkout: (workout: PlanWorkout) => void;
   plan: TrainingPlanDetail;
@@ -1056,8 +1064,8 @@ function MobileTodayWorkout({
         plan={plan}
         workout={workout}
         showDateBlock={false}
-        emptyTitle={tMobile("restDay")}
-        emptyDetail={tMobile("noPlannedWorkout")}
+        emptyTitle={emptyLabel ?? tMobile("restDay")}
+        emptyDetail={emptyLabel ?? tMobile("noPlannedWorkout")}
         onClick={onOpenWorkout}
       />
     </section>
@@ -1066,14 +1074,14 @@ function MobileTodayWorkout({
 
 export default function V2PlanPage() {
   const t = useTranslations("V2PlanPage");
+  const rollingT = useTranslations("RollingPlan");
   const tWorkoutDialog = useTranslations("ViewWorkoutDialog.mobile");
   const locale = useLocale();
   useSetPageTitle(t("header.title"));
-  const [manageAction, setManageAction] = useState<ManageAction>(null);
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const { active, isLoading } = useActivePlan(true);
   const { mutateAsync: completeAsync, isPending: completing } =
     useCompletePlan();
-  const { mutateAsync: deleteAsync, isPending: deleting } = useDeletePlan();
   const queryClient = useQueryClient();
   const {
     pendingWorkoutId: postponingWorkoutId,
@@ -1089,6 +1097,25 @@ export default function V2PlanPage() {
   const [mobilePlanDetailOpen, setMobilePlanDetailOpen] = useState(false);
 
   const plan = active?.plan ?? null;
+  const rolling = isRollingPlan(plan);
+  const todayKey = rolling && plan
+    ? getRollingPlanCurrentDate(plan)
+    : dayjs().format("YYYY-MM-DD");
+  const rollingWeeks = useMemo(
+    () => rolling && plan ? buildWeekGroups(t, plan) : null,
+    [rolling, plan, t],
+  );
+  const currentRollingWeek = rollingWeeks?.find(
+    (week) => week.calendarRange?.from === naturalWeekStart(todayKey),
+  );
+  const selectedWorkoutWeek =
+    rolling && selectedWorkout?.scheduledDateKey
+      ? naturalWeekStart(selectedWorkout.scheduledDateKey)
+      : null;
+  const workoutDialogWeek = selectedWorkoutWeek
+    ? rollingWeeks?.find((week) => week.calendarRange?.from === selectedWorkoutWeek)
+        ?.weekIndex
+    : selectedWorkout?.uiWeekIndex;
   const offsets = useMemo(
     () =>
       plan
@@ -1097,10 +1124,12 @@ export default function V2PlanPage() {
     [plan],
   );
   const currentWeekIndex =
-    active?.currentWeekIndex ?? plan?.currentWeekIndex ?? 1;
+    currentRollingWeek?.weekIndex ?? active?.currentWeekIndex ?? 1;
   const currentDayIndex =
-    active?.currentDayIndex ?? plan?.currentDayIndex ?? null;
-  const [selectedWeek, setSelectedWeek] = useState<number>(1);
+    currentRollingWeek && plan?.currentDayIndex
+      ? calendarIsoWeekday(todayKey)
+      : active?.currentDayIndex ?? null;
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
 
   const weekSummaries = useMemo(
     () =>
@@ -1110,12 +1139,23 @@ export default function V2PlanPage() {
             currentWeekIndex || 1,
             currentDayIndex,
             offsets,
+            todayKey,
+            rollingWeeks,
           )
         : [],
-    [plan, currentWeekIndex, currentDayIndex, offsets],
+    [plan, currentWeekIndex, currentDayIndex, offsets, todayKey, rollingWeeks],
   );
 
-  const effectiveWeek = selectedWeek || currentWeekIndex || 1;
+  const effectiveWeek =
+    selectedWeek !== null && weekSummaries.some(({ week }) => week === selectedWeek)
+      ? selectedWeek
+      : currentWeekIndex;
+  const selectedRollingWeek = rollingWeeks?.find(
+    (week) => week.weekIndex === effectiveWeek,
+  );
+  const weekNotGenerated = selectedRollingWeek?.days.every(
+    (day) => day.notGenerated && day.workouts.length === 0,
+  );
   const currentWeekDays = useMemo(
     () =>
       plan
@@ -1124,30 +1164,30 @@ export default function V2PlanPage() {
             plan,
             currentWeekIndex: effectiveWeek,
             offsets,
+            todayKey,
+            rollingWeek: selectedRollingWeek,
           })
         : [],
-    [plan, effectiveWeek, offsets, t],
+    [plan, effectiveWeek, offsets, t, todayKey, selectedRollingWeek],
   );
 
   const currentWeekWorkouts = useMemo(
     () => currentWeekDays.flatMap((day) => day.workouts),
     [currentWeekDays],
   );
-  const totalSessions = currentWeekWorkouts.length;
-  const completedSessions = currentWeekWorkouts.filter(
-    (item) => item.status === "DONE",
-  ).length;
-  const todayWorkout = currentWeekWorkouts.find((item) => item.isToday);
+  const currentWeekSummary = weekSummaries.find(({ week }) => week === currentWeekIndex);
+  const completedSessions = currentWeekSummary?.completedCount ?? 0;
+  const totalSessions = currentWeekSummary?.workoutCount ?? 0;
   const focusedWorkout = useMemo(
-    () => (plan ? getPlanFocusWorkouts(plan).currentWorkout : null),
-    [plan],
+    () => (plan ? getPlanFocusWorkouts(plan, dayjs(todayKey).toDate()).currentWorkout : null),
+    [plan, todayKey],
   );
   const focusedDerivedWorkout = useMemo(
     () =>
       plan && focusedWorkout
-        ? toDerivedWorkout(t, plan, focusedWorkout, offsets)
+        ? toDerivedWorkout(t, plan, focusedWorkout, offsets, todayKey)
         : null,
-    [focusedWorkout, offsets, plan, t],
+    [focusedWorkout, offsets, plan, t, todayKey],
   );
   const activePlanSummary = useMemo(
     () =>
@@ -1165,23 +1205,34 @@ export default function V2PlanPage() {
   const remainingWeeks = plan
     ? Math.max(0, (plan.periodWeeks ?? 1) - (currentWeekIndex || 1))
     : 0;
+  const planStart = plan?.startDate?.slice(0, 10);
+  const planEnd = plan && planStart
+    ? rolling
+      ? generatedPlanThrough(plan)?.slice(0, 10)
+      : plan.endDate?.slice(0, 10) ?? dayjs(plan.startDate)
+          .add(Math.max(1, plan.periodWeeks ?? 1) * 7 - 1, "day")
+          .format("YYYY-MM-DD")
+    : undefined;
+  const todayEmptyLabel = plan && isPlanDateNotGenerated(plan, todayKey)
+    ? rollingT("notGenerated")
+    : undefined;
 
   const postponeTodayEligibleCount = useMemo(() => {
     if (!plan) return 0;
     return plan.workouts
-      .map((item) => toDerivedWorkout(t, plan, item, offsets))
+      .map((item) => toDerivedWorkout(t, plan, item, offsets, todayKey))
       .filter(
         (item) =>
           item.isToday &&
           isWorkoutPlannedOrInProgress(item.status) &&
           !hasPrimaryActivityLink(item),
       ).length;
-  }, [plan, offsets, t]);
+  }, [plan, offsets, t, todayKey]);
 
   const postponeToday = async () => {
     if (!plan) return;
     const todayWorkouts = plan.workouts
-      .map((item) => toDerivedWorkout(t, plan, item, offsets))
+      .map((item) => toDerivedWorkout(t, plan, item, offsets, todayKey))
       .filter(
         (item) =>
           item.isToday &&
@@ -1288,32 +1339,7 @@ export default function V2PlanPage() {
   // 初始化周选择跟随当前周；当当前周变化时自动同步。
   useEffect(() => {
     setSelectedWeek(currentWeekIndex);
-  }, [currentWeekIndex]);
-
-  const actionCopy =
-    manageAction === "complete"
-      ? {
-          title: t("manage.complete.title"),
-          description: t("manage.complete.description"),
-          confirm: t("manage.complete.confirm"),
-          pending: completing,
-          onConfirm: async () => {
-            if (!plan) return;
-            await completeAsync({ planId: plan.id });
-          },
-        }
-      : manageAction === "delete"
-        ? {
-            title: t("manage.delete.title"),
-            description: t("manage.delete.description"),
-            confirm: t("manage.delete.confirm"),
-            pending: deleting,
-            onConfirm: async () => {
-              if (!plan) return;
-              await deleteAsync({ planId: plan.id });
-            },
-          }
-        : null;
+  }, [currentWeekIndex, plan?.id]);
 
   if (isLoading) {
     return (
@@ -1323,8 +1349,6 @@ export default function V2PlanPage() {
       </>
     );
   }
-
-  if (plan && isRollingPlan(plan)) return <><MobilePlanNavigation /><RollingPlanExecution plan={plan} /></>;
 
   if (!plan) {
     return (
@@ -1345,23 +1369,27 @@ export default function V2PlanPage() {
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-mobile-caption pc:text-xs text-muted-foreground">
                 <CalendarDays className="h-3.5 w-3.5" />
-                <span>{t("header.currentCycle")}</span>
+                <span>{t(rolling ? "header.title" : "header.currentCycle")}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="inline-flex rounded-compact bg-white/92 px-2 py-1 text-mobile-caption pc:text-[11px] dark:bg-black/30">
-                  {t("header.remaining")}
-                  <span className="ml-1 font-semibold">
-                    {t("header.remainingWeeks", { weeks: remainingWeeks })}
-                  </span>
-                </div>
-                <PlanCreateLauncher
+                {!rolling ? (
+                  <div className="inline-flex rounded-compact bg-white/92 px-2 py-1 text-mobile-caption pc:text-[11px] dark:bg-black/30">
+                    {t("header.remaining")}
+                    <span className="ml-1 font-semibold">
+                      {t("header.remainingWeeks", { weeks: remainingWeeks })}
+                    </span>
+                  </div>
+                ) : null}
+                <Button
+                  asChild
                   variant="secondary"
                   size="sm"
-                  className="inline-flex max-w-[min(100%,11rem)] shrink-0 gap-1 truncate px-2 font-medium sm:max-w-none sm:px-2.5"
                 >
-                  <Plus className="h-3.5 w-3.5" />
-                  {t("header.createPlan")}
-                </PlanCreateLauncher>
+                  <Link href={`/plans/${plan.id}`}>
+                    {t("today.viewTodayPlan")}
+                    <ArrowRight aria-hidden />
+                  </Link>
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     unstyled
@@ -1379,18 +1407,10 @@ export default function V2PlanPage() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onSelect={() => setManageAction("complete")}
+                      onSelect={() => setCompleteDialogOpen(true)}
                     >
                       <StopCircle className="h-4 w-4" />
                       {t("manage.complete.menu")}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onSelect={() => setManageAction("delete")}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      {t("manage.delete.menu")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -1400,13 +1420,17 @@ export default function V2PlanPage() {
               {plan.title}
             </h1>
             <div className="mt-1 flex items-center gap-2 text-mobile-caption pc:text-xs text-muted-foreground">
-              <span className="rounded-xs bg-white/88 px-1.5 py-0.5 dark:bg-black/28">
-                {t("header.weekStatus", {
-                  current: currentWeekIndex,
-                  total: plan.periodWeeks ?? 1,
-                  status: describePlanStatus(t, plan),
-                })}
-              </span>
+              {rolling ? (
+                <RollingPlanCoverage plan={plan} />
+              ) : (
+                <span className="rounded-xs bg-white/88 px-1.5 py-0.5 dark:bg-black/28">
+                  {t("header.weekStatus", {
+                    current: currentWeekIndex,
+                    total: plan.periodWeeks ?? 1,
+                    status: describePlanStatus(t, plan),
+                  })}
+                </span>
+              )}
               <span className="truncate">
                 {t("header.totalSessions", { count: plan.workouts.length })}
               </span>
@@ -1431,23 +1455,18 @@ export default function V2PlanPage() {
               mobile
               t={t}
             />
-            {plan.startDate ? (
+            {planStart && planEnd ? (
               <CompetitionPlanImpactCard
-                anchorDate={dayjs().format("YYYY-MM-DD")}
-                startDate={dayjs(plan.startDate).format("YYYY-MM-DD")}
-                endDate={
-                  plan.endDate
-                    ? dayjs(plan.endDate).format("YYYY-MM-DD")
-                    : dayjs(plan.startDate)
-                        .add(Math.max(1, plan.periodWeeks ?? 1) * 7 - 1, "day")
-                        .format("YYYY-MM-DD")
-                }
+                anchorDate={todayKey}
+                startDate={planStart}
+                endDate={planEnd}
                 locale={locale}
               />
             ) : null}
             <MobileTodayWorkout
               plan={plan}
               workout={focusedWorkout}
+              emptyLabel={todayEmptyLabel}
               t={t}
               onOpenPlan={() => setMobilePlanDetailOpen(true)}
               onOpenWorkout={() => {
@@ -1462,9 +1481,11 @@ export default function V2PlanPage() {
             <div className="order-3 flex flex-col gap-3 pc:order-none">
               {/* 今日训练 */}
               <TodayWorkout
-                workout={todayWorkout}
+                workout={focusedDerivedWorkout?.isToday
+                  ? focusedDerivedWorkout
+                  : currentWeekWorkouts.find((workout) => workout.isToday)}
+                emptyLabel={todayEmptyLabel}
                 plan={plan}
-                planHref={`/plans/${plan.id}`}
                 onOpenWorkout={setSelectedWorkout}
                 t={t}
               />
@@ -1493,18 +1514,12 @@ export default function V2PlanPage() {
                 t={t}
               />
             </div>
-            {plan.startDate ? (
+            {planStart && planEnd ? (
               <div className="order-2 pc:order-none">
                 <CompetitionPlanImpactCard
-                  anchorDate={dayjs().format("YYYY-MM-DD")}
-                  startDate={dayjs(plan.startDate).format("YYYY-MM-DD")}
-                  endDate={
-                    plan.endDate
-                      ? dayjs(plan.endDate).format("YYYY-MM-DD")
-                      : dayjs(plan.startDate)
-                          .add(Math.max(1, plan.periodWeeks ?? 1) * 7 - 1, "day")
-                          .format("YYYY-MM-DD")
-                  }
+                  anchorDate={todayKey}
+                  startDate={planStart}
+                  endDate={planEnd}
                   locale={locale}
                 />
               </div>
@@ -1532,17 +1547,19 @@ export default function V2PlanPage() {
               weeks={weekSummaries}
               selectedWeek={effectiveWeek}
               onSelectWeek={setSelectedWeek}
-              planHref="/plans"
               t={t}
             />
             {/* 本周负荷 */}
-            <WeekLoadMap
-              currentWeekIndex={effectiveWeek}
-              days={currentWeekDays}
-            />
+            {weekNotGenerated ? null : (
+              <WeekLoadMap
+                currentWeekIndex={effectiveWeek}
+                days={currentWeekDays}
+              />
+            )}
             {/* 课表列表 */}
             <WorkoutList
               workouts={currentWeekWorkouts}
+              emptyLabel={weekNotGenerated ? rollingT("notGenerated") : undefined}
               t={t}
               onOpenWorkout={setSelectedWorkout}
               onPostponeWorkout={async (workout) => {
@@ -1557,30 +1574,28 @@ export default function V2PlanPage() {
         </div>
 
         <AlertDialog
-          open={Boolean(manageAction)}
-          onOpenChange={(open) => {
-            if (!open) setManageAction(null);
-          }}
+          open={completeDialogOpen}
+          onOpenChange={setCompleteDialogOpen}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{actionCopy?.title}</AlertDialogTitle>
+              <AlertDialogTitle>{t("manage.complete.title")}</AlertDialogTitle>
               <AlertDialogDescription>
-                {actionCopy?.description}
+                {t("manage.complete.description")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={actionCopy?.pending}>
+              <AlertDialogCancel disabled={completing}>
                 {t("manage.cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
-                disabled={actionCopy?.pending}
+                disabled={completing}
                 onClick={async () => {
-                  await actionCopy?.onConfirm();
-                  setManageAction(null);
+                  await completeAsync({ planId: plan.id });
+                  setCompleteDialogOpen(false);
                 }}
               >
-                {actionCopy?.confirm ?? t("manage.confirm")}
+                {t("manage.complete.confirm")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -1622,8 +1637,12 @@ export default function V2PlanPage() {
             }}
             planId={selectedWorkout.planId ?? undefined}
             workoutId={selectedWorkout.id}
-            weekIndex={Math.max(0, (selectedWorkout.uiWeekIndex ?? 1) - 1)}
-            dayIndex={Math.max(0, (selectedWorkout.uiDayIndex ?? 1) - 1)}
+            weekIndex={workoutDialogWeek ? workoutDialogWeek - 1 : undefined}
+            dayIndex={
+              rolling && selectedWorkout.scheduledDateKey
+                ? calendarIsoWeekday(selectedWorkout.scheduledDateKey) - 1
+                : selectedWorkout.uiDayIndex - 1
+            }
             notes={selectedWorkout.notes}
             text={selectedWorkout.text}
             sportType={selectedWorkout.sportType as SportType}

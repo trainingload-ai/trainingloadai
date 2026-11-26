@@ -16,62 +16,6 @@ jest.mock('@/api/ai/core/coach-upstream.adapter', () => ({
   getCoachUpstreamProvider: jest.fn(() => 'openrouter'),
 }));
 
-function interpolate(template: string, args?: Record<string, unknown>) {
-  if (!args) return template;
-  return Object.entries(args).reduce(
-    (text, [key, value]) => text.split(`{${key}}`).join(String(value)),
-    template,
-  );
-}
-
-function createService() {
-  const i18n = {
-    t: jest.fn(
-      (
-        key: string,
-        opts?: { lang?: string; args?: Record<string, unknown> },
-      ) => {
-        const templates: Record<string, string> = {
-          'common.notification.reviewDigest.fallbackOverviewDaily':
-            '## Daily overview',
-          'common.notification.reviewDigest.fallbackOverviewWeekly':
-            '## Weekly overview',
-          'common.notification.reviewDigest.fallbackOverviewMonthly':
-            '## Monthly overview',
-          'common.notification.reviewDigest.fallbackSessions':
-            '- Sessions: {count}',
-          'common.notification.reviewDigest.fallbackDurationHours':
-            '- Duration: {hours} h',
-          'common.notification.reviewDigest.fallbackDistanceKm':
-            '- Distance: {km} km',
-          'common.notification.reviewDigest.fallbackLoad':
-            '- Combined load: {load}',
-          'common.notification.reviewDigest.fallbackTss': '- TSS: {tss}',
-          'common.notification.reviewDigest.fallbackHighlightsHeading':
-            '## Highlights',
-          'common.notification.reviewDigest.fallbackHighlightDuration':
-            '{minutes}min',
-          'common.notification.reviewDigest.fallbackHighlightDistance':
-            '{km}km',
-          'common.notification.reviewDigest.fallbackHighlightTss': 'TSS {tss}',
-          'common.notification.reviewDigest.fallbackHighlightItem':
-            '- #{rank} {summary}',
-          'common.aiCoach.mutation.userFitnessMetric.sports.RUN': 'run',
-        };
-        return interpolate(templates[key] ?? key, opts?.args);
-      },
-    ),
-  };
-  const service = new ReviewDigestService(
-    {} as never,
-    i18n as never,
-    {} as never,
-    {} as never,
-    new ReviewModelCallGuard(),
-  );
-  return { service, i18n };
-}
-
 function createAiService(args?: {
   usageFailure?: Error;
   guard?: ReviewModelCallGuard;
@@ -82,8 +26,11 @@ function createAiService(args?: {
     : jest.fn(async () => undefined);
   const create =
     args?.create ??
-    jest.fn(async () => ({
-      result: { markdown: '## AI review' },
+    jest.fn(async (request: { validateResult: (raw: unknown) => unknown }) => ({
+      result: request.validateResult({
+        headline: 'Key workouts stayed consistent',
+        activityRefs: [],
+      }),
       usage: {
         inputTokens: 900,
         outputTokens: 100,
@@ -114,63 +61,6 @@ const totals = {
   totalLoad: 80,
 };
 
-describe('ReviewDigestService.buildMarkdownSummary', () => {
-  it('renders fallback copy through i18n instead of zh/en string branches', async () => {
-    const { service, i18n } = createService();
-    const markdown = await service.buildMarkdownSummary({
-      type: 'DAILY',
-      lang: 'ja',
-      totals,
-      highlights: [
-        {
-          rank: 1,
-          sportType: 'RUN',
-          durationSec: 1800,
-          distanceM: 5000,
-          tss: 32,
-          title: null,
-          startTime: null,
-        },
-      ],
-    });
-
-    expect(markdown).toBe(
-      [
-        '## Daily overview',
-        '- Sessions: 2',
-        '- Duration: 1 h',
-        '- Distance: 10 km',
-        '- Combined load: 80',
-        '',
-        '## Highlights',
-        '- #1 run · 30min · 5km · TSS 32',
-      ].join('\n'),
-    );
-    expect(i18n.t).toHaveBeenCalledWith(
-      'common.notification.reviewDigest.fallbackOverviewDaily',
-      expect.objectContaining({ lang: 'ja' }),
-    );
-    expect(i18n.t).toHaveBeenCalledWith(
-      'common.aiCoach.mutation.userFitnessMetric.sports.RUN',
-      { lang: 'ja' },
-    );
-  });
-
-  it('uses TSS when combined load is missing', async () => {
-    const { service } = createService();
-    const markdown = await service.buildMarkdownSummary({
-      type: 'WEEKLY',
-      lang: 'de',
-      totals: { ...totals, totalLoad: 0 },
-      highlights: [],
-    });
-
-    expect(markdown).toContain('## Weekly overview');
-    expect(markdown).toContain('- TSS: 48');
-    expect(markdown).not.toContain('Combined load');
-  });
-});
-
 describe('ReviewDigestService AI usage accounting', () => {
   const request = {
     userId: 'user-1',
@@ -194,8 +84,14 @@ describe('ReviewDigestService AI usage accounting', () => {
   it('records automatic digest generation as platform-paid usage', async () => {
     const { service, recordUsageEvent, create } = createAiService();
 
-    await expect(service.generateAiSummaryMarkdown(request)).resolves.toEqual(
-      expect.objectContaining({ markdown: '## AI review', model: 'model' }),
+    await expect(service.generateAiAnalysis(request)).resolves.toEqual(
+      expect.objectContaining({
+        analysis: {
+          headline: 'Key workouts stayed consistent',
+          activityRefs: [],
+        },
+        model: 'model',
+      }),
     );
     expect(recordUsageEvent).not.toHaveBeenCalled();
     expect(create).toHaveBeenCalledWith(
@@ -212,9 +108,7 @@ describe('ReviewDigestService AI usage accounting', () => {
         });
       }),
     });
-    await expect(
-      service.generateAiSummaryMarkdown(request),
-    ).resolves.toBeNull();
+    await expect(service.generateAiAnalysis(request)).resolves.toBeNull();
   });
 
   it('keeps a valid digest when internal usage persistence is unavailable', async () => {
@@ -222,15 +116,20 @@ describe('ReviewDigestService AI usage accounting', () => {
       usageFailure: new Error('database unavailable'),
     });
 
-    await expect(service.generateAiSummaryMarkdown(request)).resolves.toEqual(
-      expect.objectContaining({ markdown: '## AI review' }),
+    await expect(service.generateAiAnalysis(request)).resolves.toEqual(
+      expect.objectContaining({
+        analysis: {
+          headline: 'Key workouts stayed consistent',
+          activityRefs: [],
+        },
+      }),
     );
   });
 
   it('bounds the Agent task with a per-attempt timeout and an abort signal', async () => {
     const { service, create } = createAiService();
 
-    await service.generateAiSummaryMarkdown(request);
+    await service.generateAiAnalysis(request);
 
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -248,9 +147,19 @@ describe('ReviewDigestService AI usage accounting', () => {
       }),
     });
 
-    await expect(
-      service.generateAiSummaryMarkdown(request),
-    ).resolves.toBeNull();
+    await expect(service.generateAiAnalysis(request)).resolves.toBeNull();
+  });
+
+  it('falls back when the Agent submits the old unstructured result', async () => {
+    const { service } = createAiService({
+      create: jest.fn(
+        async (request: { validateResult: (raw: unknown) => unknown }) => ({
+          result: request.validateResult({ markdown: '# Training review' }),
+        }),
+      ),
+    });
+
+    await expect(service.generateAiAnalysis(request)).resolves.toBeNull();
   });
 
   it('defers instead of falling back once the review run is stopped', async () => {
@@ -265,18 +174,14 @@ describe('ReviewDigestService AI usage accounting', () => {
       error: jest.fn(),
     };
 
-    await expect(
-      service.generateAiSummaryMarkdown(request),
-    ).resolves.toBeNull();
-    await expect(
-      service.generateAiSummaryMarkdown(request),
-    ).resolves.toBeNull();
-    await expect(
-      service.generateAiSummaryMarkdown(request),
-    ).rejects.toBeInstanceOf(ReviewModelDeferredError);
-    await expect(
-      service.generateAiSummaryMarkdown(request),
-    ).rejects.toBeInstanceOf(ReviewModelDeferredError);
+    await expect(service.generateAiAnalysis(request)).resolves.toBeNull();
+    await expect(service.generateAiAnalysis(request)).resolves.toBeNull();
+    await expect(service.generateAiAnalysis(request)).rejects.toBeInstanceOf(
+      ReviewModelDeferredError,
+    );
+    await expect(service.generateAiAnalysis(request)).rejects.toBeInstanceOf(
+      ReviewModelDeferredError,
+    );
     expect(create).toHaveBeenCalledTimes(3);
   });
 });

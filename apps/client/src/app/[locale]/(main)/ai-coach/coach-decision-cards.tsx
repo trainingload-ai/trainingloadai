@@ -15,6 +15,7 @@ import {
 import {
   CoachDecisionAppliedCard,
   CoachDecisionDraftCard,
+  hasCoachPlanReview,
   type CoachDecisionApplyToolResult,
   type CoachDecisionDraftToolResult,
 } from "./cards/CoachDecisionCard";
@@ -126,16 +127,20 @@ function CoachDecisionDraftTabs({
             dense
             isApplied={appliedDecisionIds?.has(draft.decisionId)}
             confirmDisabled={confirmDisabled}
-            showConfirmControls={false}
+            showConfirmControls={hasCoachPlanReview(draft)}
             onConfirm={onConfirmDecision}
           />
         </TabsContent>
       ))}
-      <div className="mt-2 flex flex-col gap-2 rounded-md bg-neutral-100 p-3 dark:bg-muted/45 sm:flex-row sm:items-center sm:justify-between">
+      {!hasCoachPlanReview(activeDraft) ? <div className="mt-2 flex flex-col gap-2 rounded-md bg-neutral-100 p-3 dark:bg-muted/45 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
           {t("selectedDraft", { index: activeDraftIndex + 1 })}
         </p>
-        {onConfirmDecision && !activeDraftApplied ? (
+        {onConfirmDecision &&
+        !activeDraftApplied &&
+        !["APPLIED", "REJECTED", "SUPERSEDED", "APPROVED"].includes(
+          String(activeDraft.state ?? "").toUpperCase(),
+        ) ? (
           <Button
             type="button"
             size="sm"
@@ -145,7 +150,7 @@ function CoachDecisionDraftTabs({
             {t("confirmSelectedButton")}
           </Button>
         ) : null}
-      </div>
+      </div> : null}
     </Tabs>
   );
 }

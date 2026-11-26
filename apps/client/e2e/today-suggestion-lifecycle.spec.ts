@@ -128,9 +128,8 @@ for (const width of [1440, 390]) {
         path: `/private/tmp/today-advice-qa/home-${width}-${theme}.png`,
         fullPage: false,
       });
-      await page
-        .getByRole("button", { name: `${headline} · ${summary}` })
-        .click();
+      const advice = (await page.getByTestId("today-advice").boundingBox())!;
+      await page.mouse.click(advice.x + advice.width - 8, advice.y + 8);
       await expect(page.getByRole("dialog")).toBeVisible();
       await expect(page).toHaveURL(/\/en$/);
       await expect(

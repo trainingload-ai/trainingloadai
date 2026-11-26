@@ -1,0 +1,283 @@
+---
+title: 근력 워크아웃 DSL
+description: Trainingload.ai 규칙(Rules) 모드에서 운동 종목, 세트 그룹, 중량, RPE/RIR, 휴식 시간으로 완전한 근력 워크아웃을 작성하고 검증하는 방법을 안내합니다.
+keywords:
+  [
+    "Trainingload.ai 근력 DSL",
+    "근력 워크아웃 규칙",
+    "운동 세트 문법",
+  ]
+---
+
+# 근력 워크아웃 DSL
+
+근력 DSL(Strength DSL)은 근력 워크아웃 빌더의 텍스트 형식입니다. 코치에게 받은 세션을 복사하거나 여러 세트 그룹을 빠르게 편집하거나 Trainingload.ai에 저장될 정확한 구조를 검토할 때 유용합니다. 이 DSL은 하나의 정적 세션을 기술하며, 각 운동 종목에는 1개 이상의 웜업 또는 본 세트 그룹이 포함됩니다.
+
+## 시작하기 전에
+
+- 편집 가능한 워크아웃을 열고 종목으로 **근력 훈련(Strength Training)**을 선택합니다.
+- **규칙(Rules)** 탭을 선택합니다. **수동(Manual)** 탭에서도 동일한 워크아웃 구조를 시각적으로 편집할 수 있습니다.
+- 알고 있는 중량 정보가 무엇인지 정리합니다. 중량이나 1RM 백분율을 임의로 지어내지 말고 `open`을 사용하세요.
+- 코칭 설명은 워크아웃 메모에 작성합니다. DSL에는 자유 서술문이 아니라 처방 내용만 적습니다.
+
+## 가장 작은 유효 워크아웃으로 시작하기
+
+**규칙(Rules)** 탭에 아래 내용을 붙여넣습니다.
+
+```text
+exercise "Goblet Squat" equipment dumbbell {
+  work 3x8 open rir 3 rest 90s
+}
+```
+
+그다음 **입력 검증(Validate Input)**을 선택합니다. 이 예제의 의미는 다음과 같습니다.
+
+- 이름이 “Goblet Squat”인 운동 1개
+- 장비: 덤벨(`dumbbell`)
+- 8회 반복 본 세트 3세트
+- 고정 중량 없음(`open`)
+- 예비 반복 횟수(RIR) 3회
+- 각 세트 후 90초 휴식
+
+유효한 근력 워크아웃에는 최소 1개 이상의 운동이 필요하며, 모든 운동에는 비어 있지 않은 큰따옴표 이름과 최소 1개 이상의 `work` 줄이 포함되어야 합니다.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="플랜 일정에서 편집기 열기"
+  description="수동 플랜 빌더에서 날짜 선택 단계로 이동한 뒤 원하는 날짜의 + 세션(+ Session)을 선택합니다."
+  route="플랜 → 수동 플랜 빌더 → 날짜 선택 → + 세션"
+/>
+
+<DocsScreenshot
+  id="strength-dsl-rules-input"
+  title="규칙(Rules) 모드의 근력 DSL"
+  description="검증을 통과한 2개 운동 세션과 근력 미리보기에 표시된 저장 구조입니다."
+  route="플랜 → 수동 워크아웃 → 근력 훈련 → 규칙"
+/>
+
+## 문서 구조 이해하기
+
+완전한 세션은 세 계층으로 구성됩니다.
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+```
+
+1. `duration`과 `session rpe`는 전체 세션을 설명합니다. 둘 다 선택 사항이며 최대 한 번씩만 작성할 수 있습니다.
+2. `exercise "…" {`가 운동 블록을 시작하고 닫는 중괄호 `}`가 블록을 끝냅니다.
+3. `warmup`과 `work` 줄은 해당 운동 안의 세트 그룹을 정의합니다.
+
+빈 줄은 허용됩니다. 주석이나 일반 서술문은 문법에 포함되지 않습니다.
+
+## 세션 설정 추가하기
+
+첫 번째 운동 블록 앞에 다음 줄을 작성할 수 있습니다.
+
+```text
+duration 50m
+session rpe 6
+```
+
+`duration`은 `45s`, `50m`, `1.5h`처럼 초·분·시간 단위를 지원합니다. 한 세트가 아니라 전체 워크아웃의 예정 소요 시간을 의미합니다.
+
+`session rpe`는 1부터 10까지의 숫자를 받으며 세션 전체의 예정 난이도를 뜻합니다. 세트 그룹 줄에 쓰는 `rpe`(해당 세트들의 목표 자각 강도)와는 다른 개념입니다.
+
+## 운동 추가하기
+
+기본 형식은 다음과 같습니다.
+
+```text
+exercise "Romanian Deadlift" {
+  work 3x8 open rir 2 rest 2m
+}
+```
+
+운동 이름은 반드시 큰따옴표로 감싸야 하며 비어 있을 수 없습니다. 선수에게 익숙한 언어를 사용할 수 있습니다. 이름 안에 큰따옴표를 넣으려면 `\"`, 백슬래시 문자를 넣으려면 `\\`로 이스케이프합니다.
+
+장비(`equipment`)는 선택 사항입니다.
+
+```text
+exercise "Romanian Deadlift" equipment barbell {
+```
+
+장비 코드에는 영문 소문자·대문자, 숫자, 하이픈(`-`), 밑줄(`_`)을 사용할 수 있습니다. 저장된 DSL은 장비 코드를 소문자로 정규화합니다. `barbell`, `dumbbell`, `bodyweight`, `cable`, `machine`처럼 일관된 코드를 사용하는 것이 좋습니다.
+
+## 세트 그룹 작성하기
+
+읽기 쉽고 표준적인 DSL을 위해 다음 순서를 권장합니다.
+
+```text
+work PRESCRIPTION LOAD EFFORT rest DURATION
+```
+
+필수 요소는 `warmup` 또는 `work`와 처방(`PRESCRIPTION`)뿐입니다. 부하(`LOAD`)를 생략하면 기본값은 `open`이지만, 의도를 분명히 하려면 `open`을 직접 적는 것이 좋습니다. 강도(`EFFORT`)와 휴식(`rest`)은 선택 사항입니다.
+
+| 구성 요소 | 허용 형식 | 예시 |
+| --- | --- | --- |
+| 세트 유형 | `warmup` 또는 `work` | `work` |
+| 처방 | 고정 반복, 범위 반복, AMRAP 또는 시간 | `3x5`, `3x8-12`, `1x5+`, `3x45s` |
+| 부하(Load) | 오픈, 고정 중량, 1RM 백분율 또는 맨몸 | `open`, `weight 80kg`, `weight 75%1rm`, `bodyweight` |
+| 강도(Effort) | RPE 또는 RIR | `rpe 7`, `rir 2` |
+| 휴식(Rest) | `rest` 뒤의 시간 | `rest 90s`, `rest 3m` |
+
+하나의 운동에 여러 세트 그룹을 넣을 수 있습니다.
+
+```text
+exercise "Back Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+```
+
+웜업 그룹은 선택 사항입니다. 본 세트 그룹은 최소 1개 이상 필수이므로 `warmup` 줄만 있는 운동은 검증을 통과하지 못합니다.
+
+## 반복 횟수 또는 시간 처방 선택하기
+
+| 목표 | 문법 | 의미 |
+| --- | --- | --- |
+| 고정 반복 | `3x5` | 5회씩 3세트 |
+| 반복 범위 | `3x8-12` | 각 세트 8~12회씩 3세트 |
+| AMRAP | `1x5+` | 기본 5회 기준 AMRAP 플래그가 붙은 1세트 |
+| 시간 기반 세트 | `3x45s` | 45초씩 3세트 |
+| 분 단위 시간 세트 | `2x1.5m` | 90초씩 2세트 |
+
+세트 수와 반복 횟수는 모두 양수여야 하며, 범위 표기에서는 작은 값을 먼저 적습니다.
+
+## 부하(Load) 선택하기
+
+### 오픈 부하(Open load)
+
+```text
+work 3x10 open rir 3 rest 90s
+```
+
+선수가 당일 컨디션에 맞춰 중량을 선택해야 하거나 신뢰할 만한 중량 이력이 없을 때 `open`을 사용합니다.
+
+### 고정 중량(Fixed weight)
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x5 weight 175lb rpe 7 rest 3m
+```
+
+숫자와 `kg` 또는 `lb` 사이에 공백 없이 붙여 적습니다.
+
+### 1RM 백분율(Percentage of 1RM)
+
+```text
+work 4x4 weight 80%1rm rest 3m
+```
+
+해당 운동의 최신 1RM이 정확히 파악된 경우에만 사용합니다. 허용 범위는 0 초과 100 이하입니다.
+
+### 맨몸 및 맨몸 가감(Bodyweight & offset)
+
+```text
+work 3x8 bodyweight rir 2 rest 90s
+work 3x6 bodyweight +10kg rpe 8 rest 2m
+work 3x8 bodyweight -20kg rir 2 rest 2m
+```
+
+`+10kg`는 추가 중량을 뜻하며, `-20kg`는 보조를 통해 실제 맨몸 부하를 줄이는 것을 뜻합니다.
+
+## RPE 또는 RIR 선택하기
+
+한 세트 그룹 줄에는 하나의 강도 모델만 사용합니다.
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x8 open rir 2 rest 2m
+```
+
+- `rpe`는 1~10 범위를 허용합니다.
+- `rir`은 0~10 범위를 허용합니다.
+- 같은 줄에 두 지표를 함께 쓰지 마세요.
+
+RPE와 RIR은 수행 가이드일 뿐 자동 중량 계산 기능이 아닙니다. `rpe 7`을 입력했다고 해서 Trainingload.ai가 중량을 자동으로 생성하거나 조정하지는 않습니다.
+
+## 다국어 운동 이름을 포함한 전체 세션 작성하기
+
+운동 이름은 사용자 콘텐츠이므로 영어로 쓸 필요가 없습니다. 반면 DSL 키워드는 문법 요소이므로 영어 그대로 유지해야 합니다.
+
+```text
+duration 45m
+session rpe 6
+
+exercise "Barbell Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+
+exercise "Push-up" equipment bodyweight {
+  work 3x8-12 bodyweight rir 2 rest 90s
+}
+
+exercise "Plank" equipment bodyweight {
+  work 3x45s bodyweight rest 60s
+}
+```
+
+이 코드는 중량 반복 운동, 맨몸 반복 범위 운동, 시간 기반 맨몸 버티기 운동의 총 3개 운동을 생성합니다.
+
+## 검증, 비교 및 저장하기
+
+1. **입력 검증(Validate Input)**을 선택합니다.
+2. 다른 줄을 고치기 전에 가장 먼저 보고된 줄 오류부터 확인합니다.
+3. 근력 미리보기의 운동 수와 본 세트 수가 의도와 일치하는지 비교합니다.
+4. 파싱된 필드를 시각적으로 확인하고 싶다면 **수동(Manual)** 탭으로 전환합니다.
+5. 다시 **규칙(Rules)** 탭으로 돌아와 정규화된 DSL이 원래 의미와 동일한지 확인합니다.
+6. **초안 저장(Save Draft)**을 선택한 뒤 워크아웃을 다시 열어 한 번 더 검증합니다.
+
+정규화 과정에서 키워드·장비 코드·단위가 소문자로 바뀌거나 명시적인 `open`이 추가될 수 있습니다. 이런 변화는 워크아웃의 의미를 바꾸지 않습니다. 반면 운동 종목, 세트 수, 처방, 부하, 강도, 휴식 시간이 달라졌다면 의도와 다른 변경입니다.
+
+## DSL에서 지원하지 않는 기능
+
+근력 DSL은 정적 세션 처방 형식입니다. 다음 내용은 텍스트에 포함하지 마세요.
+
+- `if/else` 또는 실행 가능한 조건 로직
+- 주간 점진적 과부하(Progression) 또는 디로드(Deload) 규칙
+- 중첩된 운동 블록
+- 쉼표로 구분된 속성 나열
+- 실행 가능한 프로그레션 스크립트
+- 일반 메모 또는 코칭 문단
+
+사람에게 전달할 안내는 워크아웃 메모에 작성하세요. 지원되지 않는 외부 스크립트는 임의로 다른 처방으로 번역하기보다 원래 시스템에 그대로 유지하는 것이 안전합니다.
+
+## 워크아웃 검증하기
+
+- 종목이 지구력 종목이 아니라 **근력 훈련(Strength Training)**으로 설정되어 있습니다.
+- 모든 운동에 큰따옴표로 감싼 비어 있지 않은 이름이 있습니다.
+- 모든 운동에 최소 1개 이상의 `work` 그룹이 포함되어 있습니다.
+- 반복 범위가 낮은 값에서 높은 값 순서로 작성되었습니다.
+- 각 세트 그룹에 부하 모델과 강도 모델이 각각 최대 1개씩만 사용되었습니다.
+- 미리보기에 의도한 운동과 본 세트가 그대로 표시됩니다.
+- 저장된 워크아웃을 다시 열어도 동일한 의미가 유지됩니다.
+
+## 문제 해결
+
+| 오류 또는 증상 | 해결 방법 |
+| --- | --- |
+| Exercise name cannot be empty | `exercise "Back Squat" {`처럼 큰따옴표 안에 비어 있지 않은 이름을 입력합니다. |
+| Strength workout requires at least one exercise | 완전한 `exercise` 블록을 최소 1개 추가합니다. |
+| Exercise requires at least one work set | `work` 줄을 추가합니다. 웜업 그룹만으로는 유효한 운동이 되지 않습니다. |
+| Invalid set prescription | `3x5`, `3x8-12`, `1x5+` 또는 `3x45s` 같은 시간 형식을 사용합니다. |
+| Maximum reps must be greater than or equal to minimum reps | `3x12-8`을 `3x8-12`처럼 작은 값이 앞에 오도록 수정합니다. |
+| Use either RPE or RIR, not both | 세트 그룹 줄에서 RPE와 RIR 중 하나를 제거합니다. |
+| Invalid weight | `weight 80kg`, `weight 175lb`, `weight 80%1rm`처럼 값 내부에 공백을 넣지 말고 작성합니다. |
+| Unsupported set attribute | 세트 줄에서 서술문, 쉼표, 알 수 없는 키워드, 동적 로직을 제거합니다. |
+| Exercise is missing a closing brace | 해당 운동의 마지막 세트 그룹 뒤에 닫는 중괄호 `}`를 하나 추가합니다. |
+| 종목 전환 시 편집기가 초기화되거나 대체됨 | 지구력과 근력은 구조가 다르므로 종목을 바꾸기 전에 DSL을 복사하거나 저장해 두세요. |
+
+## 다음 단계
+
+- 시각적 빌더와 근력 프로그래밍 기준은 [근력 워크아웃](/ko/docs/planning/strength-workouts)을 참고하세요.
+- 규칙 모드와 수동 모드를 비교하려면 [수동 워크아웃 편집기 가이드](/ko/docs/planning/manual-workout-editor)를 읽어 보세요.
+- 작성한 워크아웃을 플랜에 추가하려면 [훈련 플랜 만들기](/ko/docs/guide/create-training-plan)로 이동하세요.

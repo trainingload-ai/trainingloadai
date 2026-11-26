@@ -1,48 +1,123 @@
 ---
-title: AI Marathon Plan Adjustments
-description: A conservative method for using AI-generated marathon workout adjustments with explicit confirmation.
-keywords: ["AI marathon training plan", "marathon workout adjustments", "adaptive marathon plan", "AI coach"]
+title: Ajustes de plan de maratón con IA
+description: Método conservador para usar ajustes de sesiones de maratón generados por IA con confirmación explícita.
+keywords:
+  [
+    "plan de entrenamiento de maratón con IA",
+    "ajustes de sesiones de maratón",
+    "plan de maratón adaptable",
+    "entrenador con IA",
+  ]
 ---
 
-# AI Marathon Plan Adjustments
+# Ajustes de plan de maratón con IA
 
-AI adjustments are strongest when they are conservative, explicit, and reviewable.
+El Entrenador con IA puede conectar el contexto del plan, las actividades y la carga de entrenamiento para redactar un borrador de ajuste. No debería reescribir un bloque de maratón en silencio. Úsalo para generar una única propuesta explícita y conservadora que revises antes de confirmar.
 
-## Trigger checklist
+## Antes de empezar
 
-Use AI adjustment drafts when one or more are true:
+- Abre el plan activo correcto y confirma sus fechas, objetivo y semana actual.
+- Espera a que las actividades recientes terminen de procesarse y vincúlalas a sus sesiones planificadas.
+- Revisa la ventana relevante del PMC y, cuando sea útil, la tendencia de VO2max efectivo/VDOT.
+- Añade restricciones reales: días disponibles, molestias o enfermedad, viajes, equipamiento y qué sesión clave es la más importante.
+- Elige una sola decisión. Por ejemplo: mantener o mover la sesión de ritmo de maratón de mañana, simplificar los próximos siete días o responder a una tirada larga omitida.
+- No pidas al Entrenador con IA el alta médica ni un diagnóstico de lesión.
 
-- Key sessions are repeatedly missed.
-- ATL is climbing faster than expected.
-- TSB remains strongly negative near quality days.
-- effective VO2max trend stalls across 10-14 days.
+## 1. Empieza con el contexto del plan
 
-## Adjustment order
+Abre el Entrenador con IA desde el plan activo o indica el plan exacto y la semana objetivo en una nueva conversación. Entrar desde el plan reduce el riesgo de analizar el calendario equivocado.
 
-Use this sequence:
+Usa una indicación en cuatro partes:
 
-1. Keep training frequency stable.
-2. Modify one major variable first (volume or intensity).
-3. Protect long run and marathon-pace quality.
-4. Re-evaluate after next key workout.
+1. **Decisión:** la única pregunta que necesitas responder.
+2. **Evidencia:** sesiones completadas y omitidas, patrón del PMC, tendencia de respuesta y estado subjetivo.
+3. **Restricciones:** fechas y sesiones que no deben cambiar.
+4. **Resultado:** un único borrador conservador y un punto de revisión.
 
-## Confirmation standard
+Ejemplo:
 
-Before applying AI changes, confirm:
+> Revisa la semana 7 de mi plan activo de maratón. La sesión de umbral del martes resultó más dura de lo previsto, el ATL subió tras el fin de semana y la tirada larga del sábado debe mantenerse. Propón como máximo un cambio para los próximos siete días. Conserva la frecuencia semanal y explica la evidencia, el cambio exacto de sesión y el próximo punto de revisión. No lo apliques todavía.
 
-- Why the change was proposed.
-- What exactly changes in the session.
-- Which risk is reduced.
-- What metric will validate the change.
+## 2. Revisa la evidencia utilizada
 
-## Common safe edits
+Antes de valorar un cambio, confirma que la respuesta hace referencia a:
 
-- Replace one threshold run with easy aerobic.
-- Shorten one quality session but keep structure.
-- Shift a key workout by 24-48 hours.
+- El plan, la semana y el deporte correctos.
+- Las sesiones completadas u omitidas correctas.
+- Un rango de fechas pertinente para CTL, ATL y TSB.
+- La siguiente sesión clave real.
+- Las restricciones que aportaste.
 
-## Related pages
+Si algún dato objetivo es incorrecto, detente y vuelve a precisarlo. No confirmes una recomendación que suene razonable si se apoya en el registro equivocado.
 
-- [AI marathon training plan](/marathon-training-plan)
-- [AI coach usage guide](/docs/guide/ai-coach)
-- [PMC-based marathon adjustment](/docs/guide/pmc-marathon-adjustment)
+## 3. Pide el cambio mínimo necesario
+
+Sigue este orden de ajuste:
+
+1. Mantener el plan sin cambios cuando la evidencia sea insuficiente.
+2. Mover una sesión sin cambiar su objetivo.
+3. Acortar una sesión conservando su estructura.
+4. Sustituir una sesión de calidad no esencial por trabajo aeróbico suave o descanso.
+5. Modificar el volumen o la intensidad semanal de forma más amplia solo cuando las opciones menores no resuelvan el problema.
+
+Evita cambiar a la vez frecuencia, volumen, intensidad y ubicación de las sesiones clave. Eso dificulta atribuir el resultado o revertirlo.
+
+<DocsScreenshot
+  id="ai-adjustment-confirmation"
+  title="Revisa un ajuste de sesión con IA"
+  description="La propuesta debe identificar su evidencia, mostrar un único cambio exacto en una sesión futura, respetar tus restricciones y permanecer sin confirmar hasta que la revises."
+  route="Entrenador → Ver calendario de entrenamiento"
+/>
+
+## 4. Revisa la propuesta antes de confirmar
+
+Selecciona **Ver calendario de entrenamiento** en la conversación con el entrenador. Compara las sesiones originales y las propuestas en la vista previa.
+
+| Comprobación  | Pregunta                                                                                 |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| Objetivo      | ¿Se trata de la sesión futura y la fecha previstas?                                      |
+| Alcance       | ¿Solo cambia una variable principal?                                                     |
+| Propósito     | ¿Sigue sirviendo la sesión al objetivo previsto del bloque de maratón?                   |
+| Restricciones | ¿Se mantienen intactos la tirada larga protegida, la carrera, el descanso y la agenda?   |
+| Evidencia     | ¿Distingue la explicación entre datos observados e interpretación?                       |
+| Revisión      | ¿Queda explícito el próximo punto de control?                                            |
+
+Rechaza o pide revisar el borrador si modifica historial completado, el plan equivocado, varias sesiones sin relación o una restricción protegida.
+
+## 5. Confirma y luego comprueba el plan
+
+Selecciona **Confirmar cambios del plan** tras revisar el calendario. A continuación:
+
+1. Vuelve a abrir el plan activo o el calendario.
+2. Verifica la fecha, deporte, duración y estructura de la sesión modificada.
+3. Confirma que las sesiones de alrededor no cambiaron de forma inesperada.
+4. Registra el motivo en el contexto del plan o de la revisión cuando esté disponible.
+5. Fija un punto de control tras la siguiente sesión clave comparable.
+
+Si aparece la opción Deshacer y el resultado aplicado no es correcto, úsala de inmediato. En caso contrario, edita directamente la sesión futura afectada después de comprobar la versión actual del plan.
+
+## Verifica el ajuste
+
+- El Entrenador con IA utilizó el plan, la semana, las actividades y el rango de fechas correctos.
+- La propuesta mostró el efecto exacto de antes y después antes de confirmar.
+- Solo cambió la sesión futura prevista.
+- El historial completado, omitido y vinculado permaneció intacto.
+- Se conservaron las restricciones protegidas y el objetivo del bloque de maratón.
+- El plan activo y el calendario muestran la misma sesión actualizada.
+- Queda registrado un próximo punto de revisión concreto.
+
+## Solución de problemas
+
+- **La respuesta es genérica:** empieza desde la página del plan, nombra la semana y la sesión exactas, y aporta la evidencia y restricciones pertinentes.
+- **Se cita la actividad o el plan equivocados:** no confirmes. Abre el registro correcto o inicia una conversación nueva con el contexto del plan.
+- **La propuesta reescribe demasiado:** pide un solo cambio, una única variable principal, restricciones protegidas y un alcance máximo de siete días.
+- **La acción falla por conflicto de versión:** recarga el plan activo, compara la última versión y vuelve a solicitar o aplicar el cambio mínimo.
+- **La sesión aplicada no es la esperada:** usa Deshacer de inmediato cuando esté disponible; si no, revisa el plan y corrige manualmente solo la sesión futura.
+- **La evidencia sigue procesándose o falta:** mantén el plan sin cambios, espera a que termine el procesamiento o vinculación de datos y vuelve cuando el contexto esté completo.
+- **La pregunta parte de dolor, enfermedad o síntomas inusuales:** acude a un profesional médico o entrenador cualificado; el Entrenador con IA no puede diagnosticar ni autorizar entrenamientos.
+
+## Próximos pasos
+
+- Conoce el modelo completo de interacción y deshacer del [Entrenador con IA](/es/docs/guide/ai-coach).
+- Evalúa la presión de carga con [PMC para ajustes de maratón](/es/docs/guide/pmc-marathon-adjustment).
+- Sigue ejecutando y comprobando los resultados en [Gestionar un plan activo](/es/docs/guide/manage-active-plan).

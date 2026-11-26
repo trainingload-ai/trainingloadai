@@ -1,0 +1,52 @@
+---
+title: TrainingLoad MCP
+description: Verbinde dein TrainingLoad-Konto sicher mit ChatGPT, Codex, Claude, Cursor, VS Code und opencode.
+---
+
+# TrainingLoad MCP
+
+Verbinde deine Trainingsdaten über TrainingLoad MCP mit ChatGPT, Codex, Claude oder einem anderen kompatiblen KI-Client. Stelle Fragen zu deiner aktuellen Trainingsbelastung, Planerfüllung, Leistungsentwicklung oder zu Synchronisierungsproblemen, ohne einzelne Aktivitäten manuell kopieren zu müssen. MCP liest ausschließlich Daten – es verändert deinen Trainingsplan nicht.
+
+**Server-URL:** `https://api.trainingload.ai/mcp`
+
+Es ist kein API-Schlüssel erforderlich. Der Client öffnet TrainingLoad OAuth, wo du den Client-Namen und den angeforderten Berechtigungsumfang (Scope) prüfst. Den Zugriff kannst du später jederzeit in deinem Konto widerrufen.
+
+## Trainingsinformationen, die du abfragen kannst
+
+| Frage | Zentrale Fähigkeiten |
+| --- | --- |
+| Wie ist mein aktueller Trainingszustand? | Trainings-Snapshot, Bereitschaftsindikatoren, Belastungsverläufe |
+| Was hat sich zwischen zwei Trainingsblöcken verändert? | Zeitraumvergleich, Sportartenaufschlüsselung, Aktivitätsstatistiken und Konstanz |
+| Verändert sich meine Lauf-, Rad- oder Schwimmfitness? | Fitnesstrends, Trainingszonen, persönliche Bestleistungen |
+| Wie genau halte ich mich an meinen Trainingsplan? | Planübersicht und -zusammenfassung, geplante Einheiten, Einheitsdetails, statusbasierte Planerfüllung |
+| Welches Training habe ich absolviert? | Aktivitätsliste, datenschutzreduzierte Details, Zeit in Zonen sowie Runden- und Split-Zusammenfassungen |
+| Welche Wettkämpfe stehen an? | Wettkampfliste und kontobezogene Veranstaltungsdetails |
+| Warum synchronisiert ein Anbieter nicht? | Verbindungs- und Synchronisierungsstatus |
+| Hat sich mein Wellness-Kontext verändert? | Separat autorisierte tägliche Gesundheitszusammenfassung |
+
+In der [Tool-Referenz](/de/docs/mcp/tools) findest du jedes Feld und jeden Berechtigungsumfang (Scope). Clients können außerdem drei integrierte [Ressourcen und Prompts](/de/docs/mcp/resources-and-prompts) für die Kennzahleninterpretation, Sicherheitsgrenzen und wiederverwendbare Analyse-Workflows abrufen.
+
+## Fragen zum Ausprobieren
+
+- „Vergleiche meinen Umfang und meine Trainingsbelastung dieser Woche mit der letzten Woche. Welche Aktivitäten erklären die wichtigsten Veränderungen?“
+- „Wie viel von meinem Trainingsplan dieser Woche habe ich absolviert, und welche Einheiten haben noch keine verknüpfte Aktivität?“
+- „Wie haben sich meine aktuellen Laufkennzahlen entwickelt? Für welche Tage fehlen vergleichbare Daten?“
+
+Prüfe bei jeder Antwort den verwendeten Datumsbereich, die herangezogenen Aktivitäten und fehlende Daten. Trends unterstützen eine Trainingsbesprechung, ersetzen aber keine medizinische Beurteilung.
+
+## Grenzen, die du vor dem Verbinden kennen solltest
+
+- **Schreibgeschützt:** Clients können keine Aktivitäten, Trainingspläne, Wettkämpfe, Profile, Verbindungen oder Kontodaten ändern.
+- **Nur deine eigenen Daten:** Clients können ausschließlich Datensätze abfragen, die zu deinem autorisierten Konto gehören.
+- **Trainingszusammenfassungen:** Die Tools liefern keine genauen GPS-Tracks, keine rohen Sensordatenströme, keine Zugangsdaten von Drittanbietern und keine vollständigen FIT-Dateien.
+- **Separate Gesundheitsfreigabe:** `health:read` ist standardmäßig nicht enthalten.
+- **Widerrufbarer Zugriff:** Entziehe einem Client in deinem Konto die Berechtigung, sobald du ihn nicht mehr nutzt.
+
+## Hier starten
+
+- [Sieh dir an, wie eine Anfrage abläuft](/de/docs/mcp/how-it-works)
+- [Kopiere praxisnahe Prompts](/de/docs/mcp/use-cases)
+- [Client auswählen und verbinden](/de/docs/mcp/connect)
+- [Alle Tools im Überblick](/de/docs/mcp/tools)
+- [Ressourcen und Prompts entdecken](/de/docs/mcp/resources-and-prompts)
+- [Sicherheits- und Datenschutzgrenzen lesen](/de/docs/mcp/security)

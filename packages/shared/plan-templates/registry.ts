@@ -1603,6 +1603,24 @@ export function getPlanTemplateVariant(
   return template.variants.find((variant) => variant.id === id) ?? null;
 }
 
+export function getPlanTemplateCopy(
+  template: PlanTemplateDefinition,
+  variant: PlanTemplateVariant,
+  locale: PlanTemplateLocale,
+): LocalizedTemplateText {
+  const copy = template.copy[locale];
+  if (template.key !== "RUN_5K_FIRST") return copy;
+
+  const weeks = variant.periodWeeks;
+  const description: Record<PlanTemplateLocale, string> = {
+    en: `Build up to your first 5K with three sessions per week for ${weeks} weeks. Start with relaxed run-walk intervals, progress toward continuous easy running, and ease off before your final 5K. Keep the effort around RPE 3–4, where you can speak in full sentences.`,
+    zh: `这份计划共 ${weeks} 周，每周训练 3 次，帮助零基础跑者完成第一个 5K。从轻松跑走交替开始，逐步过渡到连续轻松跑，最后减量并完成 5K。跑步保持在 RPE 3–4、能说完整句子的强度。`,
+    "zh-hant": `這份計畫共 ${weeks} 週，每週訓練 3 次，幫助零基礎跑者完成第一個 5K。從輕鬆跑走交替開始，逐步過渡到連續輕鬆跑，最後減量並完成 5K。跑步保持在 RPE 3–4、能說完整句子的強度。`,
+    ja: `週3回・${weeks}週間で初めての5K完走を目指します。ゆったりしたランとウォークから始め、連続イージーランへ進み、最後の5K前に負荷を落とします。会話ができるRPE 3〜4を目安にしてください。`,
+  };
+  return { ...copy, description: description[locale] };
+}
+
 export function chooseFirst5kVariant(
   continuousRunMinutes: number | null | undefined,
 ): string {
@@ -1732,7 +1750,7 @@ export function buildPlanTemplateDraft(args: {
   const dayIndexes = preferredWeekdays
     .map((weekday) => ((weekday - startIsoWeekday + 7) % 7) + 1)
     .sort((left, right) => left - right);
-  const copy = args.template.copy[locale];
+  const copy = getPlanTemplateCopy(args.template, args.variant, locale);
   const workoutDefinitions = resolvePlanTemplateWorkoutDefinitions(args);
   return {
     title: copy.title,

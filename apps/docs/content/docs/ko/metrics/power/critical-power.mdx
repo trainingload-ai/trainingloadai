@@ -1,126 +1,126 @@
 ---
-title: Critical Power (CP)
-description: Critical Power (CP) is a model-based threshold used with W' to describe power-duration performance and high-intensity fatigue.
-keywords: ["Critical Power", "CP", "critical power calculator", "W'", "W Prime", "Anaerobic Work Capacity", "MMP", "Monod-Scherrer", "FTP vs CP"]
+title: 임계 파워 (CP)
+description: 임계 파워(Critical Power)는 W'와 함께 파워-지속시간 경기력과 고강도 피로 특성을 설명하는 모델 기반 역치 지표입니다.
+keywords: ["임계 파워", "Critical Power", "CP", "임계 파워 계산기", "W'", "W Prime", "무산소 작업 용량", "MMP", "Monod-Scherrer", "FTP vs CP"]
 ---
 
-# Critical Power (CP)
+# 임계 파워 (CP)
 
-**Critical Power (CP)** is a model-based threshold used in endurance physiology to describe the boundary between heavy and severe intensity domains.
+**임계 파워(Critical Power, CP)**는 지구력 생리학에서 고강도(Heavy) 영역과 극한(Severe) 영역의 경계를 설명하는 모델 기반 역치입니다.
 
-In simple terms, CP estimates the highest power at which a physiological steady state may still be possible. Above CP, fatigue develops quickly and the finite work capacity above CP, called W', begins to matter.
+쉽게 말해 CP는 생리학적 정상 상태(steady state)가 가능할 수 있는 최고 파워의 추정치입니다. CP를 넘어서면 피로가 빠르게 진행되며, CP 이상에서 사용할 수 있는 유한한 작업 용량인 W'가 결정적인 역할을 하게 됩니다.
 
-In 1965, Monod and Scherrer proposed the Critical Power model. They described CP as the maximal rate of work that can be sustained without progressive fatigue, and introduced a finite “energy reserve” available above CP (later referred to as W').
+1965년 모노와 셰러(Monod & Scherrer)가 임계 파워 모델을 제안하면서, 점진적 피로 없이 유지할 수 있는 최대 작업률(CP)과 그 위에서 사용할 수 있는 유한한 “에너지 예비량”(이후 W'로 명명)의 개념을 정립했습니다.
 
-## Core Model: The Two-Parameter Model
+## 핵심 모델: 2-파라미터 모델
 
-The theoretical foundation of CP is often called the **two-parameter model**, describing your performance as the combination of two components:
+CP의 이론적 토대는 흔히 **2-파라미터 모델(two-parameter model)**로 불리며, 선수의 수행 능력을 두 가지 구성 요소의 조합으로 설명합니다.
 
-1.  **Critical Power (CP)**:
-    *   **Nature**: a model threshold for high sustainable power.
-    *   **Interpretation**: staying below CP usually allows much longer work than staying above CP, though duration is still limited by glycogen, heat, motivation, fueling, and other factors.
-    *   **Unit**: Watts (W).
+1. **임계 파워 (CP)**:
+   * **성격**: 높은 지속 가능 파워를 나타내는 모델 역치.
+   * **해석**: CP 아래에서는 CP 위에서보다 훨씬 오래 버틸 수 있습니다. 다만 실제 지속 시간은 글리코겐, 더위, 동기, 보급 등 다른 요인의 제한을 받습니다.
+   * **단위**: 와트 (W).
 
-2.  **[W' (W Prime)](/docs/metrics/power/anaerobic-work-capacity)**：
-    *   **Nature**: Anaerobic Work Capacity.
-    *   **Interpretation**: a finite amount of work available above CP. Once your power exceeds CP, this reserve is depleted.
-    *   **Unit**: Joules (J) or kilojoules (kJ).
+2. **[W' (W 프라임)](/ko/docs/metrics/power/anaerobic-work-capacity)**:
+   * **성격**: 무산소 작업 용량 (Anaerobic Work Capacity).
+   * **해석**: CP 이상에서 사용할 수 있는 유한한 작업량입니다. 출력이 CP를 초과하는 순간부터 이 예비량이 소모됩니다.
+   * **단위**: 줄(J) 또는 킬로줄(kJ).
 
-### Power–Duration relationship
+### 파워–지속시간 관계식
 
-These two parameters form the well-known hyperbolic relationship:
+두 파라미터는 잘 알려진 쌍곡선 관계를 이룹니다.
 
 ```text
 P = CP + W' / t
 ```
 
-Or, rearranged to predict time to exhaustion:
+탈진까지의 시간($t$)을 예측하도록 정리하면 다음과 같습니다.
 
 ```text
 t = W' / (P - CP)
 ```
 
-This means:
-*   **When P > CP**: the time you can hold it depends on how large your W' is and how far above CP you are. The higher above CP, the faster W' is depleted.
-*   **When P ≤ CP**: the simple model no longer predicts a finite exhaustion time, but real performance is still limited by other fatigue mechanisms.
+이 식은 다음을 의미합니다.
+* **P > CP일 때**: 버틸 수 있는 시간은 W'의 크기와 CP를 얼마나 초과했는지에 달려 있습니다. CP를 많이 초과할수록 W'가 훨씬 빠르게 소진됩니다.
+* **P ≤ CP일 때**: 단순 모델은 유한한 탈진 시간을 예측하지 않지만, 실제 경기력은 다른 피로 기전에 의해 여전히 제한됩니다.
 
-## Physiological Meaning: A Boundary Between Intensity Domains
+## 생리학적 의미: 강도 영역의 경계
 
-In exercise physiology, CP is often treated as the boundary between the **Heavy** and **Severe** intensity domains:
+운동 생리학에서 CP는 **고강도(Heavy)** 영역과 **극한(Severe)** 영역을 가르는 경계로 자주 다룹니다.
 
-*   **Below CP**:
-    *   You can reach a physiological steady state.
-    *   Blood lactate may rise but can stabilize.
-    *   VO2 can stabilize at a submaximal level.
+* **CP 이하**:
+  * 생리학적 정상 상태에 도달할 수 있습니다.
+  * 혈중 젖산이 상승하더라도 일정 수준에서 안정화될 수 있습니다.
+  * 산소섭취량(VO2)이 최대치 아래 수준에서 안정화될 수 있습니다.
 
-*   **Above CP**:
-    *   **No steady state**.
-    *   Blood lactate keeps rising until you stop.
-    *   VO2 often shows a slow component and rises toward VO2max.
-    *   Once W' is depleted, you generally need to reduce power toward CP or below.
+* **CP 이상**:
+  * **정상 상태에 도달할 수 없습니다.**
+  * 멈출 때까지 혈중 젖산이 계속 상승합니다.
+  * VO2가 느린 상승 성분(slow component)을 보이며 VO2max까지 치솟습니다.
+  * W'가 바닥나면 파워를 CP 이하로 낮출 수밖에 없습니다.
 
 ## CP vs. FTP
 
-Although CP and [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power) are often used interchangeably, they differ slightly in definition and typical value:
+CP와 [기능적 역치 파워(FTP)](/ko/docs/metrics/power/functional-threshold-power)는 종종 혼용되지만 정의와 일반적인 수치에서 약간의 차이가 있습니다.
 
-1.  **Different definitions**:
-    *   **FTP**: commonly defined as the maximum average power you can sustain for about 60 minutes; a performance-based, practical concept.
-    *   **CP**: a model parameter representing the fatigue threshold in the CP model.
+1. **정의의 차이**:
+   * **FTP**: 대략 60분 동안 유지할 수 있는 최고 평균 파워로 정의되는 실용적·수행 기반 개념입니다.
+   * **CP**: CP 모델에서 피로 역치를 나타내는 수학적 모델 파라미터입니다.
 
-2.  **Typical values**:
-    *   CP is often **slightly higher** than FTP.
-    *   In many athletes, riding at CP lasts less than an hour, often closer to ~30–40 minutes, but this varies with model fit and testing data.
-    *   In Trainingload.ai, we often treat `FTP ≈ 95%–96% of CP`.
+2. **일반적인 수치 차이**:
+   * CP는 보통 FTP보다 **약간 높게** 산출됩니다.
+   * 많은 선수에게 CP 강도는 1시간보다 짧은 약 30–40분 정도 유지 가능한 수준에 가깝습니다(모델 피팅과 테스트 데이터에 따라 차이 있음).
+   * Trainingload.ai에서는 보통 `FTP ≈ CP의 95%–96%`로 다룹니다.
 
-3.  **Use cases**:
-    *   **FTP** is commonly used as the basis for training zones (Zone 1–Zone 7).
-    *   The **CP + W'** model is useful for predicting time-to-exhaustion for short, high-intensity efforts (intervals, attacks, sprints).
+3. **활용 목적**:
+   * **FTP**는 훈련 존(Zone 1–Zone 7) 설정의 표준 기준으로 널리 쓰입니다.
+   * **CP + W'** 모델은 인터벌, 어택, 스프린트 같은 단시간 고강도 노력의 탈진 시간 예측에 매우 유용합니다.
 
-## W' Depletion and Recovery
+## W'의 소모와 회복
 
-W' is often modeled as a finite reserve that depletes above CP and recovers below CP:
+W'는 CP 위에서 소모되고 CP 아래에서 회복되는 유한한 예비량으로 모델링됩니다.
 
-*   **Depletion**: when P > CP, W' depletes at a rate proportional to (P - CP).
-*   **Recovery**: when P < CP, W' begins to recover. The recovery rate depends on how far below CP you are.
-    *   Full rest (0 W) recovers fastest.
-    *   Riding just below CP (e.g., 90% CP) recovers very slowly.
+* **소모**: `P > CP`일 때 `(P - CP)`에 비례하는 속도로 W'가 줄어듭니다.
+* **회복**: `P < CP`일 때 W'가 회복되기 시작하며, 회복 속도는 CP보다 얼마나 낮게 타는지에 따라 달라집니다.
+  * 완전 휴식(0 W)일 때 가장 빨리 회복됩니다.
+  * CP 바로 아래(예: 90% CP)에서는 매우 느리게 회복됩니다.
 
-This is why recovery intensity matters so much in interval workouts.
+인터벌 훈련에서 휴식 구간의 강도 조절이 매우 중요한 이유가 바로 여기에 있습니다.
 
-## How Trainingload.ai estimates CP
+## Trainingload.ai의 CP 추정 방식
 
-Trainingload.ai can estimate CP from historical **MMP (Max Mean Power)** data rather than requiring one fixed protocol.
+Trainingload.ai는 단일 고정 테스트만 요구하지 않고, 축적된 **MMP(최대 평균 파워, Max Mean Power)** 데이터에서 CP를 추정할 수 있습니다.
 
-1.  **Data selection**: best average power for key durations over the last ~90 days (e.g., 1 min, 3 min, 5 min, 10 min, 20 min…).
-2.  **Model fitting**: fit CP and W' from these time–power points.
-3.  **FTP estimate**: derive FTP from CP (default 0.95 × CP).
+1. **데이터 선별**: 최근 약 90일간 주요 지속시간(예: 1분, 3분, 5분, 10분, 20분 등)의 최고 평균 파워를 추출합니다.
+2. **모델 피팅**: 추출한 시간–파워 데이터 포인트로 CP와 W'를 피팅합니다.
+3. **FTP 추정**: CP에서 FTP를 산출합니다(기본값 `0.95 × CP`).
 
-If you have a test file, you can also upload it for a one-off estimate: see [estimate FTP and CP training load from an activity file](/ftp-calculator).
+단일 테스트 파일로 FTP를 추정하려면 [FTP 계산기](/ko/ftp-calculator)를 사용하세요.
 
-For manual model fitting, use the [fit Critical Power for training load planning](/critical-power-calculator).
+직접 수동으로 모델을 피팅하려면 [임계 파워(CP) 계산기](/ko/critical-power-calculator)를 이용할 수 있습니다.
 
-### Tips to improve estimate quality
+### 추정 정확도를 높이는 팁
 
-To make the estimated **CP** more useful, ensure your power–duration curve contains enough hard, representative efforts:
+추정 **CP**의 신뢰도를 높이려면 파워–지속시간 곡선에 충분한 대표 최대 노력 기록이 포함되어야 합니다.
 
-*   **Short durations**: include 3–5 minute maximal efforts (important for W').
-*   **Medium/long durations**: include 10–20 minute or longer maximal efforts (important for CP).
+* **단시간 구간**: 3–5분 최대 노력 기록 포함 (W' 추정에 중요).
+* **중·장시간 구간**: 10–20분 이상의 최대 노력 기록 포함 (CP 추정에 중요).
 
-If you only do low-intensity riding for a long time, the system may underestimate your CP and W'.
+오랫동안 저강도 라이딩만 수행하면 시스템이 CP와 W'를 실제보다 낮게 추정할 수 있습니다.
 
-## How Trainingload.ai uses CP
+## Trainingload.ai의 CP 활용 방식
 
-Trainingload.ai uses CP to understand the power-duration profile behind threshold and above-threshold work. CP helps estimate FTP, but it is also useful for reviewing whether intervals, climbs, or race-like surges are targeting the intended intensity.
+Trainingload.ai는 역치 및 역치 이상 훈련의 바탕이 되는 파워-지속시간 프로필을 이해하는 데 CP를 활용합니다. FTP 추정에도 도움이 될 뿐 아니라 인터벌, 업힐, 레이스형 급가속이 의도한 강도를 정확히 겨냥했는지 리뷰할 때도 유용합니다.
 
-CP is most useful when paired with W':
+CP는 W'와 함께 볼 때 가장 큰 의미를 가집니다.
 
--   CP describes the sustainable side of the model.
--   W' describes the finite work available above CP.
--   The power-duration curve shows whether your data has enough maximal efforts to support the estimate.
+- CP는 모델에서 지속 가능한 영역을 설명합니다.
+- W'는 CP 이상에서 사용할 수 있는 유한한 작업 용량을 설명합니다.
+- 파워-지속시간 곡선(PDC)은 추정치를 뒷받침할 최대 노력 데이터가 충분한지 보여 줍니다.
 
-## Related tools and docs
+## 관련 도구 및 문서
 
--   [Fit Critical Power for training load planning](/critical-power-calculator)
--   [Estimate FTP training load from an activity file](/ftp-calculator)
--   [W' (Anaerobic Work Capacity)](/docs/metrics/power/anaerobic-work-capacity)
--   [Power Duration Curve](/docs/metrics/power/power-duration-curve)
+- [훈련 부하 계획을 위한 임계 파워(CP) 피팅하기](/ko/critical-power-calculator)
+- [활동 파일로 FTP 훈련 부하 추정하기](/ko/ftp-calculator)
+- [W' (무산소 작업 용량)](/ko/docs/metrics/power/anaerobic-work-capacity)
+- [파워-지속시간 곡선 (PDC)](/ko/docs/metrics/power/power-duration-curve)

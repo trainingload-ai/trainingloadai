@@ -235,7 +235,6 @@ export class RollingPlanService {
   }
   async weekDependencies(
     planId: string,
-    policyId: string,
     weekStart: string,
     tx: PlanDb,
     from = weekStart,
@@ -251,7 +250,6 @@ export class RollingPlanService {
     const strategies = await tx.rollingMonthStrategy.findMany({
       where: {
         planId,
-        policyId,
         monthStart: { in: months.map((m) => date(`${m}-01`)) },
         appliedAt: { not: null },
         supersededAt: null,
@@ -279,7 +277,6 @@ export class RollingPlanService {
   ) {
     const currentIds = await this.weekDependencies(
       input.planId,
-      input.policyId,
       input.weekStart,
       tx,
       input.from,

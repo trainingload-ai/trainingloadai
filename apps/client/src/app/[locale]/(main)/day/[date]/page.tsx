@@ -245,7 +245,7 @@ function DayHeader({
       <div className="mb-2 flex items-center justify-between gap-3">
         <Link
           href="/"
-          className="inline-flex shrink-0 items-center gap-1 text-mobile-caption pc:text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex shrink-0 items-center gap-1 tablet:hidden text-mobile-caption pc:text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
           {t("header.backHome")}

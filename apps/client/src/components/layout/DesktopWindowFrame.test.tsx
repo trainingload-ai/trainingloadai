@@ -1,6 +1,6 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DesktopWindowFrame } from "./DesktopWindowFrame";
+import { DesktopWindowFrame, DesktopWorkspaceTitleBar } from "./DesktopWindowFrame";
 import type { DesktopNavigationState } from "@/lib/runtime-environment";
 
 const mocks = vi.hoisted(() => ({
@@ -51,18 +51,24 @@ beforeEach(() => {
 });
 
 describe("desktop window frame", () => {
-  it("only offers the secondary sidebar toggle in Coach", async () => {
+  it("connects the native toggle to the workspace sidebar across training pages", async () => {
     mocks.desktop = true;
     mocks.pathname = "/settings";
     render(
       <DesktopWindowFrame>
+        <div id="workspace-sidebar" />
+        <section aria-label="workspace content">
+          <DesktopWorkspaceTitleBar />
+        </section>
         <main>content</main>
       </DesktopWindowFrame>,
     );
     await act(async () => {});
-    expect(
-      screen.queryByRole("button", { name: "collapse" }),
-    ).not.toBeInTheDocument();
+    const navigation = screen.getByRole("navigation", { name: "navigation" });
+    expect(screen.getByRole("region", { name: "workspace content" })).toContainElement(navigation);
+    const toggle = within(navigation).getByRole("button", { name: "collapse" });
+    expect(within(navigation).getAllByRole("button")[0]).toBe(toggle);
+    expect(toggle).toHaveAttribute("aria-controls", "workspace-sidebar");
   });
   it("leaves browser shells unchanged and enables native chrome only for Electron self-host", async () => {
     const web = render(
@@ -81,6 +87,7 @@ describe("desktop window frame", () => {
     );
     await act(async () => {});
     expect(screen.getByRole("banner")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "collapse" })).toBeNull();
     expect(document.documentElement.dataset.desktopSelfHost).toBe("true");
     desktop.unmount();
     expect(mocks.unsubscribe).toHaveBeenCalledOnce();
@@ -90,6 +97,7 @@ describe("desktop window frame", () => {
     mocks.desktop = true;
     render(
       <DesktopWindowFrame>
+        <DesktopWorkspaceTitleBar />
         <main>content</main>
       </DesktopWindowFrame>,
     );
@@ -102,6 +110,24 @@ describe("desktop window frame", () => {
     expect(mocks.toggle).toHaveBeenCalledOnce();
     fireEvent.doubleClick(screen.getByRole("banner"));
     expect(mocks.zoom).toHaveBeenCalledOnce();
-    expect(screen.getByText("appName · coach")).toBeInTheDocument();
+    expect(screen.getByText("coach")).toBeInTheDocument();
+  });
+  it("updates the title using the same section as the sidebar", async () => {
+    mocks.desktop = true;
+    mocks.pathname = "/calendar";
+    const frame = () => (
+      <DesktopWindowFrame>
+        <main>content</main>
+      </DesktopWindowFrame>
+    );
+    const { rerender } = render(frame());
+    await act(async () => {});
+    expect(within(screen.getByRole("banner")).getByText("calendar")).toBeVisible();
+    mocks.pathname = "/plans/example";
+    rerender(frame());
+    expect(within(screen.getByRole("banner")).getByText("plan")).toBeVisible();
+    mocks.pathname = "/sign-in";
+    rerender(frame());
+    expect(within(screen.getByRole("banner")).getByText("appName")).toBeVisible();
   });
 });

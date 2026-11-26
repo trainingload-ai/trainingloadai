@@ -2,6 +2,8 @@ import { mkdirSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { openCoachFixture } from "./fixtures/coach-page";
 
+const matchingHeadline = "Training is recorded; check its workout association";
+
 async function openIndependentCourses(
   page: Page,
   matchingReason?: "AMBIGUOUS" | "INSUFFICIENT_EVIDENCE",
@@ -197,7 +199,33 @@ async function openIndependentCourses(
       });
     }
     if (path.endsWith("/ai/today-suggestion"))
-      return route.fulfill({ json: { data: null } });
+      return route.fulfill({
+        json: {
+          data: matchingReason && !linked && !suppressed ? {
+            version: 2,
+            suggestionId: "matching-advice",
+            headline: matchingHeadline,
+            summary: "This activity may correspond to Ordinary run or Second plan · Easy run.",
+            recommendation: { kind: "RECOVER" },
+            confidence: "LOW",
+            evidence: [],
+            primaryIntent: {
+              type: "OPEN_ACTIVITY_REVIEW",
+              label: "Review activity",
+              activityId: activity.hashId,
+            },
+            secondaryIntents: [],
+            validUntil: new Date(Date.now() + 3_600_000).toISOString(),
+            delivery: { state: "FACT_FALLBACK", reasonCode: "UPSTREAM_ERROR" },
+            source: "fallback",
+            tags: [],
+            shouldRefresh: false,
+            generatedAt: new Date().toISOString(),
+          } : null,
+        },
+      });
+    if (/\/ai\/today-suggestion\/[^/]+\/interactions$/.test(path))
+      return route.fulfill({ json: { data: {} } });
     if (
       path.endsWith("/coach/pending-decisions") ||
       path.endsWith("/coach/home-review-state")
@@ -332,24 +360,20 @@ for (const width of [1440, 390])
       );
       const mutations = await openIndependentCourses(page, "AMBIGUOUS");
       const reminder = page.getByRole("article").filter({
-        has: page.getByRole("heading", { name: "Check workout association" }),
+        has: page.getByRole("heading", { name: matchingHeadline }),
       });
       await expect(reminder).toBeVisible();
       await expect(reminder).toContainText("Second plan");
-      await expect(
-        reminder.getByRole("link", {
-          name: "Associate Completed easy run manually",
-        }),
-      ).toHaveAttribute("href", "/en/activities/completed-run");
-      await reminder.getByRole("link").focus();
-      await expect(reminder.getByRole("link")).toBeFocused();
+      const reviewActivity = reminder.getByRole("button", { name: "Review activity", exact: true });
+      await reviewActivity.focus();
+      await expect(reviewActivity).toBeFocused();
       expect(mutations).toEqual([]);
       mkdirSync("/private/tmp/unified-matching-qa", { recursive: true });
       await page.screenshot({
         path: `/private/tmp/unified-matching-qa/coach-${width}-${theme}.png`,
         animations: "disabled",
       });
-      await reminder.getByRole("link").click();
+      await reviewActivity.click();
       await expect(page).toHaveURL(/\/en\/activities\/completed-run$/);
       const associate = page.getByRole("button", {
         name: "Link workout",

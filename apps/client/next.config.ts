@@ -17,6 +17,7 @@ const isDev = process.env.NODE_ENV !== "production";
 loadEnvConfig(workspaceRoot, isDev, console, true);
 const isCoachE2e =
   process.env.NODE_ENV === "development" && process.env.COACH_E2E === "1";
+const isMarketingCapture = isCoachE2e && process.env.MARKETING_CAPTURE === "1";
 const isSelfHostBuild = Boolean(process.env.NEXT_PUBLIC_SELF_HOST_MODE?.trim());
 const isDesktopBuild = process.env.TRAININGLOAD_DESKTOP_BUILD === "1";
 if (isDesktopBuild && !isSelfHostBuild)
@@ -113,19 +114,22 @@ const nextConfig: NextConfig = {
       "../../packages/shared/**/*",
     ],
   },
-  // Separate ports do not isolate Next's files: the screenshot server must not
-  // overwrite the live dev server's manifests, chunks or generated route types.
-  distDir: isCoachE2e
-    ? ".next-coach-e2e"
-    : process.env.NODE_ENV === "development"
-      ? ".next-dev"
-      : ".next",
+  // Keep screenshot builds out of the development and Coach E2E caches.
+  distDir: isMarketingCapture
+    ? ".next-marketing-capture"
+    : isCoachE2e
+      ? ".next-coach-e2e"
+      : process.env.NODE_ENV === "development"
+        ? ".next-dev"
+        : ".next",
   typescript: {
-    tsconfigPath: isCoachE2e
-      ? "tsconfig.coach-e2e.json"
-      : isSelfHostBuild
-        ? "tsconfig.selfhost.json"
-        : "tsconfig.json",
+    tsconfigPath: isMarketingCapture
+      ? "tsconfig.marketing-capture.json"
+      : isCoachE2e
+        ? "tsconfig.coach-e2e.json"
+        : isSelfHostBuild
+          ? "tsconfig.selfhost.json"
+          : "tsconfig.json",
   },
   experimental: {
     externalDir: true,

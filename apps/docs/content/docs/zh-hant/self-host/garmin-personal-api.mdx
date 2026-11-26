@@ -1,0 +1,62 @@
+---
+title: Garmin Personal API
+description: 在自行託管實例中連接你自己的 Garmin 金鑰，匯入活動紀錄並讀取睡眠與恢復資料。
+seoTitle: "Garmin Personal API：自行託管活動與恢復資料匯入"
+seoDescription: 透過 Personal API 金鑰在自行託管實例連接 Garmin，匯入已完成活動、讀取恢復資料，並了解地區設定與唯讀限制。
+keywords: ["Garmin Personal API", "Garmin 自行託管", "Garmin 個人金鑰", "Garmin 活動匯入"]
+---
+
+# Garmin Personal API
+
+在自行託管實例中，你可以使用自己的 Garmin Personal API 金鑰，從你的裝置與帳號匯入已完成活動，以及可用的睡眠、HRV、靜止心率等資料。
+
+本頁僅適用於自行託管版本。若需了解雲端版授權與歷史紀錄匯入，請參閱[第三方平台連接指南](/zh-hant/docs/guide/connect-third-party-platforms#connect-garmin-for-new-data)。
+
+## 連接你自己的帳號
+
+1. 在 Garmin Connect 的 [Personal API 金鑰設定](https://connect.garmin.com/app/settings/personalApiToken)中建立金鑰。若使用中國區帳號，請切換至對應的 Garmin Connect 地區。
+2. 在 Trainingload.ai 中開啟**帳號 → 第三方連接 → Garmin → 連接設定**。
+3. 選擇帳號地區並確認時區，例如 `Asia/Shanghai`。
+4. 依需求勾選活動匯入、睡眠與恢復資料以及排程同步，貼上金鑰並完成連接。
+5. 點選**立即同步**。未填寫日期時預設同步最近 30 天，你也可以自訂歷史日期範圍。
+
+此方式不需要提供 Garmin 密碼或瀏覽器 Cookie。金鑰會加密儲存在你自己的實例中，切勿在聊天室、問題回報單或日誌中傳送。建立後請妥善保存，若遭撤銷或逾期請立即更換；請留意 Garmin 顯示的有效期限選項。
+
+## 同步後檢查項目
+
+| 資料項目 | 檢查結果 |
+| --- | --- |
+| 已完成活動 | 活動清單中出現對應紀錄；開啟後可檢查來源、時間與可用圖表 |
+| 睡眠、HRV、靜止心率、步數 | 對應日期顯示 Garmin 提供的資料；缺失數值不會補零 |
+| 體重、壓力、血氧飽和度、身體電量（Body Battery） | 完整保留 Garmin 原始含義；這些數值不會取代 ATL、CTL 或 TSB |
+| 其他進階指標 | 在**進階資料與操作**中依日期讀取，不會自動修改本機運動設定 |
+| 營養與經期資料 | 不納入排程同步；額外讀取需另行確認 |
+
+資料是否可用取決於裝置紀錄、地區與 Garmin 權限，並非每個帳號都具備上表的所有項目。完成連接後請檢查同步結果。無法辨識的資料會回報錯誤，空結果並不代表數值為零。
+
+此連接僅供讀取個人資料，不會在 Garmin 建立或推送未來課表。
+
+## 歷史同步與進度
+
+- 請依需求選擇日期；範圍依帳號時區計算。
+- **已排入佇列（Queued）**表示請求已儲存；活動須待下載與匯入完成後才會計入**已匯入（Imported）**。
+- 重新整理頁面不會清除執行中的任務。大量匯入時請耐心等待，切勿重複提交。
+- 單次歷史請求最多涵蓋十年，耗時視活動量與 Garmin 速率限制而定。
+- 再次同步會檢查並更新既有的 Garmin 紀錄，而不會每次建立重複複本。
+- 若有項目失敗，請檢視顯示的錯誤訊息；其他成功讀取的項目仍可完成匯入。
+
+如需排程同步，請在連接設定中啟用相關選項。「已發現紀錄數」不等於「成功匯入數」。
+
+## 金鑰逾期、中斷連接與備份
+
+當金鑰逾期或遭撤銷時，請使用**更換金鑰或重新授權**。輸入新金鑰前請先核對地區與帳號。
+
+中斷連接會停止日後同步，但不會清除你已保存的離線備份。請依照[備份與還原指南](/zh-hant/docs/self-host/operations)，隨資料庫備份一併妥善保管原始實例金鑰；還原後的連接需要這些金鑰才能解密。
+
+此連接僅供存取你自己的 Garmin 資料，切勿蒐集他人金鑰以單一個人實例提供多使用者服務。更多資訊請參閱 [Garmin Personal API 官方介紹](https://developer.garmin.com/gc-developer-program/personal/personal-api/)。
+
+## 下一步
+
+- [活動詳情](/zh-hant/docs/guide/activity-detail)：同步後檢視單次訓練內容。
+- [連接資料](/zh-hant/docs/guide/connect-data)：選擇主要資料來源並避免重複紀錄。
+- [自行託管疑難排解](/zh-hant/docs/self-host/troubleshooting)：排查連接或同步錯誤。

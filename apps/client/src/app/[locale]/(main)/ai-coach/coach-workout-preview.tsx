@@ -6,6 +6,8 @@ import { parseWorkoutDefinition } from "@/api/workout";
 import type { PlanSportType } from "@/api/plans";
 import { WorkoutRenderer } from "@/components/workout/WorkoutRenderer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoadErrorState } from "@/components/ui/load-error-state";
+import { classifyApiError } from "@/lib/api-error";
 import type { WorkoutStructureKind } from "@shared/workout-structure";
 
 /** Read-only canonical parser; identical previews share a request and cache. */
@@ -26,6 +28,7 @@ export function CoachWorkoutPreview({
     enabled: Boolean(text.trim()),
     staleTime: Infinity,
     retry: false,
+    meta: { errorSurface: "inline" },
   });
   if (!text.trim()) return null;
   return (
@@ -36,6 +39,9 @@ export function CoachWorkoutPreview({
           aria-label={t("rendering.rendering", { name: t("decision.workout") })}
           className="h-20 w-full rounded-md motion-reduce:animate-none"
         />
+      ) : definition.isError && classifyApiError(definition.error) !== "validation" ? (
+        <LoadErrorState compact retrying={definition.isFetching}
+          onRetry={() => void definition.refetch({ cancelRefetch: false })} />
       ) : definition.data ? (
         <WorkoutRenderer
           workout={{

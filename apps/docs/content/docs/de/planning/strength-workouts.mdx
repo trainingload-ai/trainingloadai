@@ -1,0 +1,139 @@
+---
+title: Krafteinheiten
+description: Erstelle strukturierte Krafteinheiten mit Übungen, Aufwärm- und Arbeitssätzen, Wiederholungen oder Zeit, Last, Anstrengung und Pause in Trainingload.ai.
+keywords: ["Krafteinheiten Builder", "Krafttrainingsplan"]
+---
+
+# Krafteinheiten
+
+Krafteinheiten erfordern Übungen, Sätze, Wiederholungen, Last, Anstrengung und Pausen statt zeit- oder distanzbasierter Ausdauerschritte. Trainingload.ai bietet dafür einen eigenen Kraft-Editor und kann die geplante Vorgabe direkt neben der absolvierten Kraftaktivität darstellen.
+
+## Bevor du startest
+
+- Öffne einen Planentwurf oder eine bearbeitbare künftige Einheit. Schreibe eine bereits absolvierte Aktivität nicht als neue Vorgabe um.
+- Wähle **Krafttraining** als Sportart, um den Kraft-Editor zu öffnen.
+- Entscheide, ob du den Modus **Manuell** oder **Regeln** nutzen möchtest. Beide erzeugen dieselbe Einheitenstruktur.
+- Lege Übungsnamen, Ausrüstung, belastbare Gewichte oder 1RM-Werte sowie gewünschte RPE/RIR-Werte bereit. Wähle **Offene Last**, wenn kein genaues Gewicht bekannt ist.
+
+## Struktur auf einen Blick
+
+<Mermaid
+  chart={`flowchart TD
+  Session[Krafteinheit] --> Exercise[Übung]
+  Exercise --> Warmup[Aufwärmsatzgruppe]
+  Exercise --> Work[Arbeitssatzgruppe]
+  Work --> Prescription[Wiederholungen oder Zeit]
+  Work --> Load[Offen, Gewicht, Prozent 1RM oder Körpergewicht]
+  Work --> Effort[RPE oder RIR]
+  Work --> Rest[Pausendauer]`}
+/>
+
+## 1. Krafttraining wählen
+
+Öffne den manuellen Einheiten-Editor und wähle **Krafttraining**. Der Editor wechselt automatisch von Ausdauerschritten zum Kraft-Builder.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Editor aus dem Planzeitplan öffnen"
+  description="Wechsle im Manuellen Plan-Builder zur Datumsauswahl und wähle am gewünschten Tag + Einheit."
+  route="Pläne → Manueller Plan-Builder → Datumsauswahl → + Einheit"
+/>
+
+<DocsScreenshot
+  id="strength-workout-builder"
+  title="Krafteinheiten-Builder"
+  description="Eine vollständige Übung enthält einen Namen und mindestens eine Arbeitssatzgruppe; Aufwärmsätze sind optional."
+  route="Pläne → Manuelle Einheit → Krafttraining"
+/>
+
+## 2. Rahmenangaben für die Einheit festlegen
+
+Ergänze geplante Dauer und Einheits-RPE nur dann, wenn sie für den Plan hilfreich sind. Der Einheits-RPE beschreibt die geplante Gesamtbeanspruchung der Einheit und nicht das Ziel für jeden einzelnen Satz.
+
+## 3. Eine Übung hinzufügen
+
+Jede Übung braucht einen nicht leeren Namen. Verwende konsistente, leicht erkennbare Bezeichnungen, damit sich Plan und absolvierte Einheit später sauber vergleichen lassen. Die Ausrüstung ist optional und beschreibt, was du für die Übung benötigst – nicht einfach eine Wiederholung des Übungsnamens.
+
+Beispiele:
+
+- Kniebeuge (Back Squat) — Langhantel
+- Rumänisches Kreuzheben — Langhantel
+- Klimmzug — Körpergewicht
+- Split Squat — Kurzhanteln
+
+## 4. Satzgruppen anlegen
+
+Eine Satzgruppe fasst mehrere Sätze mit identischer Vorgabe zusammen.
+
+- **Aufwärmen** — Vorbereitungssätze; optional.
+- **Arbeit** — die Sätze, die den eigentlichen Trainingsreiz setzen; für jede Übung erforderlich.
+
+Wähle Wiederholungen für klassische Sätze oder Zeit für isometrische bzw. zeitbasierte Sätze. Achte bei einem Wiederholungsbereich darauf, dass der Minimalwert kleiner oder gleich dem Maximalwert ist.
+
+## 5. Last wählen
+
+- **Offene Last** — keine numerische Gewichtsangabe. Ideal, wenn Ausrüstung oder aktuelles Kraftniveau noch nicht feststehen.
+- **Festes Gewicht** — ein konkreter Gewichtswert in einer unterstützten Einheit.
+- **Prozent des 1RM** — nur sinnvoll, wenn das entsprechende 1RM bekannt und aktuell ist.
+- **Körpergewicht** — dein eigenes Körpergewicht.
+- **Körpergewicht-Offset** — Körpergewicht zuzüglich Zusatzgewicht oder abzüglich Unterstützung, sofern unterstützt.
+
+KI-generierte Kraftpläne sollten keine Kilogramm-, Pfund- oder 1RM-Prozentwerte erfinden, wenn keine belegte Trainingshistorie und kein bekanntes 1RM vorliegen. Offene Last in Kombination mit RPE oder RIR ist dann die sicherere Standardwahl.
+
+## 6. Anstrengung und Pause festlegen
+
+Nutze RPE für das subjektive Belastungsempfinden oder RIR für die noch verbleibenden Wiederholungen in Reserve. Achte auf inhaltliche Stimmigkeit: Vermeide die Kombination aus sehr hoher Last und extrem niedrigem Anstrengungsziel, sofern dieser Kontrast nicht bewusst geplant ist.
+
+Die Satzpause wird pro Satzgruppe gespeichert. Wähle genügend Pausenzeit für die gewünschte Bewegungsqualität, statt für jede Übung pauschal denselben Wert einzutragen.
+
+## 7. Dieselbe Einheit mit Kraft-DSL schreiben
+
+Im Modus **Regeln** lässt sich eine Krafteinheit so notieren:
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+
+exercise "Pull Up" equipment bodyweight {
+  work 3x8 bodyweight rir 2 rest 90s
+}
+```
+
+Folge der [Kraft-Workout-DSL](/de/docs/planning/strength-workout-dsl) für die vollständige Grammatik, lokalisierte Übungsnamen, Lastformen, Validierung und Fehlerbehebung. Die Kraft-DSL ist eine statische Vorgabe: Sie führt weder `if/else`, wöchentliche Progression, Deload-Skripte noch verschachtelte Blöcke oder beliebige Skripte aus.
+
+## Einheit überprüfen
+
+Prüfe vor dem Speichern:
+
+- Es gibt mindestens eine Übung.
+- Jede Übung hat einen Namen.
+- Jede Übung hat mindestens eine Satzgruppe.
+- Jede Übung enthält mindestens eine Arbeitssatzgruppe.
+- Sätze, Wiederholungen, Sekunden, Anstrengung und Last liegen im unterstützten Bereich.
+- Die Vorschau spiegelt die geplante Einheit korrekt wider.
+
+Öffne die Einheit nach dem Speichern erneut und prüfe, ob im visuellen Builder bzw. in der normalisierten Kraft-DSL dieselbe Struktur erscheint. Die Vorschauzusammenfassung sollte die erwartete Anzahl an Übungen und Arbeitssätzen anzeigen.
+
+## Fehlerbehebung
+
+- **„Für jede Übung einen Namen eingeben“:** Füge in der DSL einen nicht leeren Namen in Anführungszeichen ein oder fülle das Feld „Übung“ im visuellen Builder aus.
+- **„Jede Übung braucht mindestens eine Satzgruppe“:** Lege vor dem Schließen der Übung eine Aufwärm- oder Arbeitsgruppe an.
+- **„Jede Übung braucht mindestens einen Arbeitssatz“:** Eine reine Aufwärmübung ist ungültig; füge mindestens eine `work`-Zeile hinzu.
+- **Ein Wiederholungsbereich schlägt fehl:** Schreibe den kleineren Wert zuerst, z. B. `3x8-12`.
+- **Last oder Anstrengung besteht die Validierung nicht:** Nutze eine unterstützte Lastform und wähle entweder RPE oder RIR – nicht beides gleichzeitig.
+- **Die schließende geschweifte Klammer wird abgelehnt:** Schließe jede Übung genau einmal und verschachtle keine Übungsblöcke.
+- **Wechsel von Kraft zu Ausdauer leert den Editor:** Beide Strukturen sind bewusst unterschiedlich. Speichere oder kopiere deinen Text vor dem Sportartwechsel.
+
+## Absolvierte Krafteinheiten
+
+Kraftaktivitäten können Übungen, absolvierte Sätze und den Abschluss der gesamten Einheit erfassen. Öffne nach dem Training die Details deiner Kraftaktivität und prüfe Übungsnamen, absolvierte Sätze, Lasten, Wiederholungen/Zeit sowie den Gesamtkontext, bevor du die Einheit auswertest.
+
+## Nächste Schritte
+
+- Folge der [Kraft-Workout-DSL](/de/docs/planning/strength-workout-dsl) für eine vollständige Einführung in den Textmodus.
+- Füge die Einheit zu einem Trainingsplan hinzu und fahre mit [Planstatus verwalten](/de/docs/planning/plan-lifecycle) oder [Aktiven Trainingsplan verwalten](/de/docs/guide/manage-active-plan) fort.

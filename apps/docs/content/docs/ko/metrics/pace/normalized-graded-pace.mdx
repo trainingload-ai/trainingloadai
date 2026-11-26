@@ -1,84 +1,84 @@
 ---
-title: Normalized Graded Pace (NGP)
-description: Normalized Graded Pace converts variable running pace and terrain into a steady flat-equivalent intensity used for rTSS and run analysis.
-keywords: ["NGP", "Normalized Graded Pace", "GAP", "Grade Adjusted Pace", "rTSS", "running TSS", "normalized pace"]
+title: 정규화 경사도 페이스 (NGP)
+description: 정규화 경사도 페이스(NGP)는 변동이 큰 러닝 페이스와 지형을 일정한 평지 등가 강도로 환산하여 rTSS 계산과 러닝 분석에 활용하는 지표입니다.
+keywords: ["NGP", "정규화 경사도 페이스", "Normalized Graded Pace", "GAP", "경사도 보정 페이스", "rTSS", "러닝 TSS", "정규화 페이스"]
 ---
 
-# Normalized Graded Pace (NGP)
+# 정규화 경사도 페이스 (NGP)
 
-**Normalized Graded Pace (NGP)** is an intensity metric for running. It builds on **[GAP (Grade Adjusted Pace)](/docs/metrics/pace/grade-adjusted-pace)**, and the logic is similar to cycling’s **[NP (Normalized Power)](/docs/metrics/power/normalized-power)**.
+**정규화 경사도 페이스(Normalized Graded Pace, NGP)**는 러닝용 강도 지표입니다. **[GAP(경사도 보정 페이스)](/ko/docs/metrics/pace/grade-adjusted-pace)**를 기반으로 하며, 계산 논리는 사이클링의 **[NP(정규화 파워)](/ko/docs/metrics/power/normalized-power)**와 유사합니다.
 
-In plain terms:
--   **GAP** answers: “What flat-ground pace is equivalent to this uphill/downhill pace?” (instant/segment-level equivalence).
--   **NGP** answers: “For this variable run (changes in grade and speed), what steady flat pace would have similar physiological cost?” (whole-run equivalence).
+쉽게 비교하면 다음과 같습니다.
+- **GAP**이 답하는 질문: “이 오르막·내리막 페이스는 평지에서 어느 정도 페이스와 같은가?” (순간/구간 단위 등가치)
+- **NGP**가 답하는 질문: “경사와 속도 변화가 섞인 이번 러닝 전체는, 평지에서 어느 정도 일정 페이스로 달린 것과 비슷한 생리학적 부담을 주는가?” (세션 전체 등가치)
 
-## Core idea
+## 핵심 개념
 
-Physiological cost (glycogen use, lactate accumulation, overall metabolic stress) is **non-linear** with intensity.
+생리학적 비용(글리코겐 소모, 젖산 축적, 전반적인 대사 스트레스)은 강도에 따라 **비선형적**으로 증가합니다.
 
-> **Example**:
-> A steady 5:00/km run is usually less stressful than “half the time at 4:00/km + half the time at 6:00/km”.
-> Even though both average to 5:00/km, the second run’s **NGP** may be meaningfully faster, reflecting the higher physiological cost of the surges.
+> **예시**:
+> 5:00/km로 일정하게 달리는 러닝보다, “절반은 4:00/km + 절반은 6:00/km”로 달리는 러닝이 신체에 훨씬 큰 부담을 줍니다.
+> 두 러닝의 평균 페이스는 똑같이 5:00/km이지만, 두 번째 러닝의 **NGP**는 의미 있게 더 빠르게 산출되어 급가속 구간이 만든 높은 생리학적 비용을 반영합니다.
 
-## Computation
+## 계산 과정
 
-NGP is computed from a grade-adjusted intensity stream, then displayed back as a pace.
+NGP는 경사도가 보정된 강도 스트림으로 계산한 뒤 다시 페이스 형태로 표시합니다.
 
-### Normalization
+### 정규화 단계
 
-Because pace is a time value (smaller means faster), Trainingload.ai converts GAP into a speed/intensity equivalent before weighting. Then it applies an NP-like normalization:
+페이스는 시간 값(숫자가 작을수록 빠름)이기 때문에 Trainingload.ai는 가중치를 적용하기 전에 먼저 GAP을 속도/강도 등가값으로 변환한 뒤 NP와 유사한 정규화를 적용합니다.
 
-1.  **Convert**: turn GAP pace into speed or intensity.
-2.  **Smooth**: compute a 30-second rolling average.
-3.  **Weight**: apply 4th-power weighting to emphasize harder segments.
-4.  **Average + root**: take the mean and then the 4th root.
-5.  **Display**: convert the result back to pace for readability.
+1. **변환**: GAP 페이스를 속도 또는 강도 값으로 변환합니다.
+2. **평활화**: 30초 이동 평균(rolling average)을 계산합니다.
+3. **가중치 적용**: 고강도 구간을 강조하기 위해 4제곱 가중치를 적용합니다.
+4. **평균 및 제곱근**: 평균을 구한 뒤 4제곱근을 취합니다.
+5. **표시**: 읽기 쉽도록 결과를 다시 페이스 단위로 변환합니다.
 
 ```text
 NGP_intensity = 4th_root( (1/N) * sum_{i=1..N} (GAP_intensity_rolling(i))^4 )
 ```
 
-## Typical applications
+## 주요 활용 사례
 
-### 1. Add context for trail and mountain effort
-On hilly terrain, average pace can look very slow. NGP helps reveal that your actual effort may not have dropped.
--   **Example**: a mountainous trail run averages 10:00/km.
--   **NGP**: could be much faster, better reflecting the metabolic stress your body felt.
+### 1. 트레일 및 산악 러닝의 실제 강도 파악
+고저차가 큰 지형에서는 평균 페이스가 매우 느리게 보일 수 있습니다. NGP는 실제 운동 강도가 결코 낮지 않았음을 보여 줍니다.
+- **예시**: 산악 트레일 러닝의 평균 페이스가 10:00/km입니다.
+- **NGP**: 실제 신체가 겪은 대사 스트레스를 반영해 훨씬 빠른 페이스로 표시될 수 있습니다.
 
-### 2. Basis for rTSS
-Trainingload.ai uses NGP to compute **rTSS (Running Training Stress Score)**. The formula structure is similar to cycling TSS:
+### 2. rTSS 계산의 토대
+Trainingload.ai는 **rTSS(러닝 훈련 스트레스 점수)**를 계산할 때 NGP를 사용합니다. 공식 구조는 사이클링 TSS와 유사합니다.
 
-When NGP and FTPa are displayed as min/km pace, convert them to speed first. In speed terms:
+NGP와 FTPa가 분/km 페이스로 표시되는 경우 먼저 속도로 변환해야 합니다. 속도 기준 공식은 다음과 같습니다.
 
 ```text
 IF = Speed_NGP / Speed_FTPa
 ```
 
-Using NGP helps keep running load comparable across different terrains.
+NGP를 사용하면 서로 다른 지형에서 수행한 러닝의 훈련 부하를 일관되게 비교할 수 있습니다.
 
-## Metric comparison
+## 지표 비교
 
-| Metric | Full name | Meaning | When to use |
+| 지표 | 정식 명칭 | 의미 | 적합한 활용 |
 | :--- | :--- | :--- | :--- |
-| **Avg Pace** | Average Pace | Actual average pace | Flat steady runs, finish-time estimation |
-| **Avg GAP** | Average GAP | Average grade-adjusted pace | Rolling routes without big surges |
-| **NGP** | Normalized Graded Pace | Normalized grade-adjusted pace | Trails, intervals, complex terrain, and rTSS |
+| **평균 페이스 (Avg Pace)** | Average Pace | 실제 평균 페이스 | 평지 지속주, 완주 시간 예측 |
+| **평균 GAP (Avg GAP)** | Average GAP | 경사도 보정 평균 페이스 | 큰 가감속 없는 완만한 기복 코스 |
+| **NGP** | Normalized Graded Pace | 정규화 경사도 페이스 | 트레일, 인터벌, 복합 지형, rTSS 계산 |
 
-## How Trainingload.ai uses NGP
+## Trainingload.ai의 NGP 활용 방식
 
--   **Use as a terrain-aware intensity reference**: NGP is often more informative than average pace on hilly or variable runs.
--   **Compute running load**: NGP is a key input for rTSS because it reflects terrain and intensity variation.
--   **Use with VI**: compute **VI (Variability Index) = NGP / Avg GAP**.
-    -   If VI is close to 1.0, the effort was steady.
-    -   If VI > 1.05, it likely reflects intervals or very complex terrain.
+- **지형을 반영한 강도 기준**: 언덕이 많거나 페이스 변동이 큰 러닝에서는 평균 페이스보다 NGP가 더 정확한 정보를 제공합니다.
+- **러닝 부하 산출**: 지형과 강도 변동을 모두 반영하므로 rTSS의 핵심 입력값으로 사용합니다.
+- **VI와 함께 활용**: **VI(변동성 지수) = NGP / Avg GAP**로 계산할 수 있습니다.
+  - VI가 1.0에 가까우면 일정한 페이스로 달렸다는 뜻입니다.
+  - VI > 1.05이면 인터벌 훈련이었거나 지형 변화가 매우 큰 코스였을 가능성이 높습니다.
 
-## Related docs
+## 관련 문서
 
-- [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace)
-- [Pace Zones](/docs/metrics/pace/zones)
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score)
+- [경사도 보정 페이스 (GAP)](/ko/docs/metrics/pace/grade-adjusted-pace)
+- [페이스 존](/ko/docs/metrics/pace/zones)
+- [훈련 스트레스 점수 (TSS)](/ko/docs/metrics/training-load/training-stress-score)
 
-## References
+## 참고 자료
 
--   [TrainingPeaks: What is Normalized Graded Pace?](https://help.trainingpeaks.com/hc/en-us/articles/204071804-Normalized-Graded-Pace-NGP-)
--   *Normalized Graded Pace (NGP) is a registered trademark of Peaksware, LLC.*
+- [TrainingPeaks: What is Normalized Graded Pace?](https://help.trainingpeaks.com/hc/en-us/articles/204071804-Normalized-Graded-Pace-NGP-)
+- *Normalized Graded Pace (NGP)는 Peaksware, LLC의 등록 상표입니다.*

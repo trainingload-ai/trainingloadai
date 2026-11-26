@@ -19,10 +19,14 @@ export const COACH_TURN_ERROR_PART_NAME = "coach-turn-error" as const;
  * the model tier and retrying.
  */
 export const COACH_MODEL_UNAVAILABLE_ERROR_CODE = "model_unavailable" as const;
+export const CALENDAR_MOVE_EXPIRED_ERROR_CODE = "calendar_move_expired" as const;
+export const COACH_QUESTION_STALE_ERROR_CODE = "question_stale" as const;
 
 /** Stable runtime-neutral terminal codes emitted by the coach runtime. */
 export const COACH_TURN_ERROR_CODES = [
   COACH_MODEL_UNAVAILABLE_ERROR_CODE,
+  CALENDAR_MOVE_EXPIRED_ERROR_CODE,
+  COACH_QUESTION_STALE_ERROR_CODE,
   "aborted",
   "business",
   "internal",
@@ -38,6 +42,7 @@ const COACH_TURN_ERROR_CODE_SET = new Set<string>(COACH_TURN_ERROR_CODES);
 /** Stable presentation categories shared by web and mobile. */
 export type CoachTurnErrorReason =
   | "modelUnavailable"
+  | "questionStale"
   | "aborted"
   | "business"
   | "internal"
@@ -48,6 +53,7 @@ export type CoachTurnErrorReason =
 
 const COACH_TURN_ERROR_REASONS: Record<string, CoachTurnErrorReason> = {
   model_unavailable: "modelUnavailable",
+  [COACH_QUESTION_STALE_ERROR_CODE]: "questionStale",
   aborted: "aborted",
   business: "business",
   internal: "internal",
@@ -109,6 +115,10 @@ export function canUseCoachTurnServerMessage(code: unknown): boolean {
  * a retry that is guaranteed to fail with the same state.
  */
 export function canRetryCoachTurnError(code: unknown): boolean {
+  if (
+    code === CALENDAR_MOVE_EXPIRED_ERROR_CODE ||
+    code === COACH_QUESTION_STALE_ERROR_CODE
+  ) return false;
   const operationReason = aiOperationErrorReason(code);
   return !["accessRequired", "purposeUnavailable"].includes(operationReason ?? "");
 }

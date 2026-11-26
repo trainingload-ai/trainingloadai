@@ -1,112 +1,103 @@
 ---
-title: Power
-description: What power is in endurance training, how cycling and running power are measured or estimated, and how Trainingload.ai uses power for zones, TSS, FTP, CP, NP, and VI.
+title: "Leistung (Power)"
+description: "Was Leistung im Ausdauertraining bedeutet, wie Rad- und Laufleistung gemessen oder geschätzt werden und wie Trainingload.ai sie für Zonen, TSS, FTP, CP, NP und VI nutzt."
 keywords:
-  - "power training"
-  - "cycling power"
-  - "running power"
-  - "estimated power"
-  - "power zones"
+  - "Leistungstraining"
+  - "Radleistung"
+  - "Laufleistung"
+  - "geschätzte Leistung"
+  - "Leistungszonen"
   - "FTP"
-  - "normalized power"
+  - "Normalized Power"
 ---
 
-# Power
+# Leistung (Power)
 
-Power is one of the most direct ways to describe exercise intensity. In physics, power is defined as the work done per unit of time.
+Leistung ist eine der direktesten Möglichkeiten, Trainingsintensität zu beschreiben. Physikalisch ist Leistung definiert als verrichtete Arbeit pro Zeiteinheit.
 
 $$
 P = W / t = (F * d) / t = F * v
 $$
 
-Where:
-- `P` is Power (Watts).
-- `W` is Work (Joules).
-- `t` is Time (Seconds).
-- `F` is Force (Newtons).
-- `v` is Velocity (m/s).
+Dabei gilt:
+- `P` ist Leistung (Watt).
+- `W` ist Arbeit (Joule).
+- `t` ist Zeit (Sekunden).
+- `F` ist Kraft (Newton).
+- `v` ist Geschwindigkeit (m/s).
 
-In cycling, this roughly means that power rises when you apply more force to the pedals and/or turn them faster.
+Beim Radfahren bedeutet das vereinfacht: Deine Leistung steigt, wenn du mehr Kraft auf die Pedale bringst und/oder schneller trittst.
 
-## Why power is useful
+## Warum Leistung so hilfreich ist
 
-Compared to heart rate or pace, power has several practical advantages:
+Im Vergleich zu Herzfrequenz oder Pace bietet Leistung mehrere praktische Vorteile:
 
-1.  **Fast response**: heart rate lags behind intensity changes, while power responds almost immediately.
-2.  **Clear external output**: heart rate is influenced by stress, caffeine, sleep, temperature, and dehydration; power describes the work rate being produced.
-3.  **Useful for load models**: power is a key input for FTP, CP, IF, TSS, NP, and VI.
-4.  **Helpful across terrain**: uphill or into a headwind, pace may slow, but power can help keep effort more consistent.
+1.  **Schnelle Reaktion**: Die Herzfrequenz hinkt Intensitätswechseln hinterher, während Leistung nahezu verzögerungsfrei reagiert.
+2.  **Klarer externer Output**: Die Herzfrequenz wird von Stress, Koffein, Schlaf, Temperatur und Flüssigkeitsmangel beeinflusst; Leistung beschreibt direkt die geleistete Arbeit.
+3.  **Grundlage für Belastungsmodelle**: Leistung ist eine zentrale Eingangsgröße für FTP, CP, IF, TSS, NP und VI.
+4.  **Geländeunabhängige Steuerung**: Bergauf oder bei Gegenwind sinkt die Pace, doch über die Leistung kannst du deinen Einsatz deutlich gleichmäßiger steuern.
 
-Power is still not the whole story. Sensor quality, calibration, drivetrain losses, wind, surface, running form, fatigue, and heat can all affect interpretation. Trainingload.ai reads power alongside heart rate, pace, RPE, and recent load.
+Trotzdem erzählt Leistung allein nicht die ganze Geschichte. Sensorqualität, Kalibrierung, Antriebsverluste, Wind, Untergrund, Lauftechnik, Ermüdung und Hitze beeinflussen die Einordnung. Trainingload.ai betrachtet Leistung daher immer zusammen mit Herzfrequenz, Pace, RPE und deiner jüngsten Trainingsbelastung.
 
-## Estimated Power
+## Geschätzte Leistung
 
-Not everyone owns an expensive power meter. Trainingload.ai supports estimating power using physical models.
+Nicht jede und jeder besitzt einen Leistungsmesser. Trainingload.ai kann Leistung über ein physikalisches Modell schätzen. Schätzwerte werden in einer separaten Datenreihe `calculatedPower` gespeichert und niemals als gemessene Geräte-`power` ausgegeben.
 
-### Estimation Principles
+Version 1 ist bewusst ein Flachstreckenmodell: Es verwendet Geschwindigkeit, Körpermasse sowie versionierte feste Parameter und ignoriert die Steigung. Enthalten mindestens 50 % der Messpunkte gültige gemessene Leistung, hat die gemessene Leistung immer Vorrang.
 
-#### Cycling power estimation
+### Schätzprinzipien
 
-When you ride outdoors, your power output is mainly used to overcome:
+#### Schätzung der Radleistung
+
+Beim Fahren im Freien dient deine Leistung vor allem dazu, folgende Widerstände zu überwinden:
 
 $$
-P_total = P_gravity + P_rolling + P_air + P_acceleration + P_loss
+P_{calculated} = (P_{rolling} + P_{air}) / (1 - drivetrainLoss)
 $$
 
-1.  **Gravity (P_gravity)**: overcoming gravity while climbing (often the largest term on climbs).
-    -   Depends on: total weight (rider + bike), grade, speed.
-2.  **Rolling resistance (P_rolling)**: friction between tires and the road.
-    -   Depends on: total weight, road roughness (Crr), speed.
-3.  **Air resistance (P_air)**: overcoming aerodynamic drag (often dominant on flats at high speed).
-    -   Depends on: drag coefficient (CdA), air density, cube of relative wind speed.
-4.  **Acceleration (P_acceleration)**: energy to change speed (change in kinetic energy).
-5.  **Drivetrain loss (P_loss)**: mechanical losses in chain, hubs, etc. (typically ~2–5%).
+Version 1 nutzt eine flache, stationäre Gribble-Struktur mit Rollwiderstand, Luftwiderstand und Antriebsverlusten. Radgewicht, Crr, CdA, Luftdichte und Verlustfaktor beruhen auf versionierten Standardwerten. Steigung, Beschleunigung und Echtzeit-Wind werden bewusst ausgeklammert.
 
-### Prerequisites for useful estimates
+### Voraussetzungen für brauchbare Schätzungen
 
-The usefulness of estimated power depends heavily on input data quality:
-- **Body and bike weight**: should be set as reliably as possible.
-- **GPS precision**: grade data has a huge impact, and GPS elevation is often noisy.
-- **Environmental factors**: models typically cannot observe wind direction (tailwind/headwind) or road surface conditions, so errors increase in windy conditions.
+Die Aussagekraft geschätzter Leistung hängt stark von der Qualität der Eingangsdaten ab:
+- **Körper- und Radgewicht**: sollten möglichst genau hinterlegt sein.
+- **GPS-Geschwindigkeitspräzision**: Geschwindigkeitsschwankungen wirken sich direkt auf die Schätzung aus.
+- **Umweltfaktoren**: Modelle erfassen in der Regel weder Windrichtung (Rücken-/Gegenwind) noch Straßenbelag; bei Wind steigen die Abweichungen.
 
-Despite limitations, estimated power can be a useful reference for trends, especially on long steady climbs.
+Geschätzte Leistung eignet sich vor allem für Trends innerhalb desselben Modells – nicht als Ersatz für einen echten Leistungsmesser.
 
-#### Running power estimation
+#### Schätzung der Laufleistung
 
-Running power estimation differs from cycling. There is no drivetrain-measured mechanical output; it’s closer to a modeled estimate of metabolic output required to sustain a given speed and grade.
+Die Schätzung der Laufleistung unterscheidet sich vom Radfahren. Es gibt keinen über einen Antrieb gemessenen mechanischen Output; stattdessen wird die metabolische Leistung modelliert, die zum Halten einer bestimmten Geschwindigkeit nötig ist.
 
-In Trainingload.ai, when a run is missing power data, we estimate and fill a power series based on **speed, grade, and body weight** (so power zones and related metrics can still be computed).
+Wenn einem Lauf verlässliche gemessene Leistungsdaten fehlen, erstellt Trainingload.ai eine separate Schätzung aus **Geschwindigkeit, Körpermasse und Körpergröße**. Version 1 verwendet die Flachstrecken-Energiekosten und liest keine Steigung ein.
 
-A common approach is to estimate an “energy cost per distance” at a given grade (`J/kg/m`), then multiply by speed and weight to get watts:
+Ein gängiger Ansatz schätzt die „Energiekosten pro Distanz“ bei gegebener Steigung (`J/kg/m`) und multipliziert diese mit Geschwindigkeit und Körpergewicht, um Watt zu erhalten:
 
 $$
 Power(W) = Cost(J/kg/m) * Speed(m/s) * Weight(kg)
 $$
 
-Where `Cost` is a function of grade `i` (as a decimal, e.g. 5% = 0.05). A commonly used form is:
+Version 1 nutzt Flachstrecken-Kosten von `3.6 J/kg/m` zuzüglich geschwindigkeitsabhängiger Effizienz- und Luftwiderstandskosten.
 
-$$
-Cost(i) = 155.4 i^5 - 30.4 i^4 - 43.3 i^3 + 46.3 i^2 + 19.5 i + 3.6
-$$
+**Voraussetzungen für brauchbare Schätzungen** (gelten auch fürs Laufen):
 
-**Prerequisites for useful estimates** (running also applies):
+- **Verlässliche Geschwindigkeit**: GPS-Sprünge verzerren die Schätzung unmittelbar.
+- **Genaues Körpergewicht**: Die Wattzahl skaliert linear mit dem Gewicht.
+- **Näherungscharakter**: Wind, Nachgiebigkeit des Untergrunds, Lauftechnik oder Beschleunigungswechsel lassen sich kaum vollständig abbilden. Nutze den Wert für Trends und Vergleiche, nicht als absoluten Messwert.
 
-- **Reliable speed and grade**: GPS speed jitter and elevation noise can amplify grade errors and distort the estimate.
-- **Accurate body weight**: watts scale linearly with weight.
-- **Approximation**: wind, surface compliance, running form, acceleration/variability, etc. are hard to fully capture. Use it for trends and comparisons, not as an absolute measurement.
+## Wie Trainingload.ai Leistung nutzt
 
-## How Trainingload.ai uses power
+- **Intensitätszonen festlegen**: Gemessene Leistung verankert FTP, CP und Leistungszonen.
+- **Belastung berechnen**: Offizielle leistungsbasierte Belastungs- und Bestwerte verwenden ausschließlich gemessene Leistung; Schätzwerte beeinflussen keine Leistungsfähigkeits-Metriken.
+- **Pacing auswerten**: VI und NP zeigen, ob eine Einheit gleichmäßig oder stark von Tempoverschärfungen geprägt war.
+- **Fehlenden Kontext ergänzen**: Im Leistungsdiagramm und in der Live-Aufzeichnung kann eine klar gekennzeichnete Schätzung angezeigt werden. Running GOVSS nutzt dieselbe Modellfamilie, führt aber eine eigene Schwellen- und Zeitfensterberechnung durch.
 
-- **Set intensity zones**: power anchors FTP, CP, and power zones.
-- **Calculate load**: NP, IF, and TSS use power to estimate training dose.
-- **Review pacing**: VI and NP help show whether an effort was steady or surge-heavy.
-- **Fill missing context**: estimated power can keep analysis available when direct power is missing, while still being treated as a model estimate.
+## Verwandte Tools und Seiten
 
-## Related tools and docs
-
-- [Estimate FTP training load from an activity file](/ftp-calculator)
-- [Fit Critical Power for training load planning](/critical-power-calculator)
-- [Calculate power training load zones](/power-zones-calculator)
-- [Functional Threshold Power](/docs/metrics/power/functional-threshold-power)
-- [Critical Power](/docs/metrics/power/critical-power)
-- [Normalized Power](/docs/metrics/power/normalized-power)
+- [FTP-Trainingsbelastung aus einer Aktivitätsdatei schätzen](/de/ftp-calculator)
+- [Critical Power für deine Trainingsbelastungsplanung bestimmen](/de/critical-power-calculator)
+- [Leistungszonen für die Trainingsbelastung berechnen](/de/power-zones-calculator)
+- [Functional Threshold Power](/de/docs/metrics/power/functional-threshold-power)
+- [Critical Power](/de/docs/metrics/power/critical-power)
+- [Normalized Power](/de/docs/metrics/power/normalized-power)

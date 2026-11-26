@@ -112,6 +112,18 @@ export class PlanProposalApplyService {
         data: {
           appliedAt: new Date(),
           appliedDecisionId: args.decisionId,
+          ...(proposal.mode === 'SCHEDULE' && preview.calendarAdjustmentId
+            ? {
+                calendarReceipt: {
+                  planId: args.contextPlanId,
+                  versionId: preview.id,
+                  readbackVerified: true,
+                  changedWorkoutCount: proposal.request.changes.length,
+                  addedWorkoutCount: proposal.request.additions.length,
+                  deletedWorkoutCount: proposal.request.deletions.length,
+                },
+              }
+            : {}),
           ...(receipt.createdPlanId
             ? { createdPlanId: receipt.createdPlanId }
             : {}),
@@ -205,8 +217,8 @@ export class PlanProposalApplyService {
         conflict(`Workout ${workout.id} changed after preview`);
       if (workout.links.length)
         conflict(`Workout ${workout.id} became linked after preview`);
-      const dynamicTarget = this.firstDynamicTarget(change.dto.blocks);
-      if (dynamicTarget) {
+      const dynamicTargets = this.allDynamicTargets(change.dto.blocks);
+      for (const [index, dynamicTarget] of dynamicTargets.entries()) {
         const fingerprint = await this.cachedCurrentZoneFingerprint(
           zoneFingerprints,
           `${workout.sportType}:${dynamicTarget.dimension}`,
@@ -220,7 +232,9 @@ export class PlanProposalApplyService {
         if (
           !fingerprint ||
           fingerprint !== dynamicTarget.fingerprint ||
-          fingerprint !== change.expectedZoneFingerprint
+          (index === 0 &&
+            change.expectedZoneFingerprint != null &&
+            fingerprint !== change.expectedZoneFingerprint)
         ) {
           conflict(`Training zones changed after preview for ${workout.id}`);
         }
@@ -500,44 +514,43 @@ export class PlanProposalApplyService {
     };
   }
 
-  private firstDynamicTarget(blocks: unknown): {
+  private allDynamicTargets(blocks: unknown): Array<{
     dimension: 'PACE' | 'HEART_RATE' | 'POWER';
     fingerprint: string;
-  } | null {
-    const visit = (
-      value: unknown,
-    ): ReturnType<PlanProposalApplyService['firstDynamicTarget']> => {
+  }> {
+    const found: Array<{
+      dimension: 'PACE' | 'HEART_RATE' | 'POWER';
+      fingerprint: string;
+    }> = [];
+    const seen = new Set<string>();
+    const visit = (value: unknown): void => {
       if (Array.isArray(value)) {
-        for (const item of value) {
-          const found = visit(item);
-          if (found) return found;
-        }
-        return null;
+        for (const item of value) visit(item);
+        return;
       }
       const row = record(value);
-      if (!row) return null;
+      if (!row) return;
       if (
         row.resolutionMode === 'DYNAMIC_ZONE' &&
         typeof row.zoneFingerprint === 'string'
       ) {
         const kind = String(row.kind ?? '');
-        return {
-          dimension:
-            kind === 'SPEED'
-              ? 'PACE'
-              : kind.startsWith('HEART_RATE')
-                ? 'HEART_RATE'
-                : 'POWER',
-          fingerprint: row.zoneFingerprint,
-        };
+        const dimension: 'PACE' | 'HEART_RATE' | 'POWER' =
+          kind === 'SPEED'
+            ? 'PACE'
+            : kind.startsWith('HEART_RATE')
+              ? 'HEART_RATE'
+              : 'POWER';
+        const key = `${dimension}:${row.zoneFingerprint}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          found.push({ dimension, fingerprint: row.zoneFingerprint });
+        }
       }
-      for (const child of Object.values(row)) {
-        const found = visit(child);
-        if (found) return found;
-      }
-      return null;
+      for (const child of Object.values(row)) visit(child);
     };
-    return visit(blocks);
+    visit(blocks);
+    return found;
   }
 
   private async currentZoneFingerprint(

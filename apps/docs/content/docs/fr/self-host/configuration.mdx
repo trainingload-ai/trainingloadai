@@ -1,0 +1,158 @@
+---
+title: Configurer une instance auto-hébergée
+description: Choisissez l’emplacement local des données, contrôlez l’exposition réseau et configurez un fournisseur IA compatible OpenAI géré par l’Owner.
+---
+
+# Configurer une instance auto-hébergée
+
+Choisissez l’emplacement des données et le port d’accès local avant l’installation. Après l’installation, vous pourrez sélectionner ou changer de fournisseur d’IA dans les paramètres de l’application.
+
+## Avant de commencer
+
+- N’utilisez que les paramètres déclarés dans le fichier `.env.example` et le schéma d’instance du paquet de version.
+- Exécutez la commande correspondante avec `--dry-run --json` avant chaque opération modifiant le cycle de vie.
+- Ne collez jamais `.env.selfhost`, vos mots de passe, clés API ou jetons dans un chat, un ticket ou un historique de terminal partagé.
+- Le répertoire de données existant contient vos enregistrements d’entraînement. Ne le remplacez pas et ne le videz pas manuellement.
+
+## Choisir l’emplacement des données locales [#choose-the-local-data-path]
+
+L’emplacement par défaut est `./data` dans le répertoire de la version. Il regroupe les données PostgreSQL, les fichiers téléversés, les journaux d’opérations, les sauvegardes et les caches. L’application monte le dossier d’envois de l’hôte vers `/data/uploads` ; aucun service de stockage objet séparé n’est nécessaire.
+
+Pour définir un autre chemin avant la première installation :
+
+1. Dans le répertoire de version vérifié et extrait, créez une configuration privée à partir du modèle fourni :
+
+   ```bash
+   umask 077
+   cp .env.example .env.selfhost
+   chmod 600 .env.selfhost
+   ```
+
+2. Générez localement trois valeurs distinctes de 32 octets avec `openssl rand -hex 32`, puis remplacez les trois valeurs de substitution de secrets dans `.env.selfhost`. L’installateur standard réalise cette opération automatiquement.
+3. Décommentez `SELF_HOST_DATA_ROOT` et indiquez un chemin dédié, par exemple :
+
+   ```dotenv
+   SELF_HOST_DATA_ROOT=/srv/trainingload-data
+   ```
+
+4. Lancez le `dry-run` habituel de l’installateur et ne poursuivez que s’il renvoie `"ok": true` :
+
+   ```bash
+   ./install.sh --dry-run --json
+   ./install.sh --json
+   ```
+
+Le répertoire cible peut ne pas encore exister ou être dédié à cette instance. La CLI de gestion refuse la racine du système de fichiers, les répertoires parents de la version, les sous-arborescences de la version signée, les liens symboliques non sûrs ainsi que les dossiers contenant des fichiers étrangers.
+
+Ne modifiez pas `SELF_HOST_DATA_ROOT` sur une instance en cours d’exécution comme raccourci de migration de fichiers. Déplacer une instance existante exige une sauvegarde vérifiée suivie d’une restauration dans une nouvelle cible initialisée.
+
+## Contrôler l’exposition réseau
+
+Seul le port HTTP du Client est publié, par défaut sur la boucle locale (`loopback`) :
+
+```dotenv
+SELF_HOST_SITE_ADDRESS=http://localhost:43210
+SELF_HOST_HTTP_BIND=127.0.0.1
+SELF_HOST_HTTP_PORT=43210
+```
+
+Pour utiliser un autre port disponible, modifiez à la fois l’adresse du site et le port HTTP. Gardez PostgreSQL et le Server sur le réseau privé Compose. Pour y accéder depuis un autre ordinateur, utilisez un tunnel SSH tout en conservant une origine locale dans le navigateur. Le paquet applicatif ne contient ni Caddy, ni port HTTPS, ni profil Docs.
+
+Validez les modifications hôtes en passant par le point d’entrée de gestion :
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+./self-host doctor --json
+```
+
+### Chemin des requêtes locales
+
+Accédez à l’application dans votre navigateur via son adresse locale configurée. La base de données et les services applicatifs internes n’ont pas besoin de ports publics. Ne les exposez pas sur Internet pour contourner un problème de connexion.
+
+## Votre compte personnel
+
+Saisissez un nom d’utilisateur lors de la première ouverture, puis suivez la configuration initiale. Une instance est prévue pour une seule personne ; elle ne prend pas en charge l’inscription publique ni la création de plusieurs comptes.
+
+L’auto-hébergement repose sur un compte local plutôt que sur le parcours d’inscription Cloud ou la connexion sociale. Une session locale expirée est restaurée automatiquement. Confirmer la suppression du compte efface les données de ce compte puis ramène l’instance à l’écran de choix du nom d’utilisateur. Gérez vos sauvegardes et la configuration de l’instance séparément : la suppression du compte ne supprime pas ces fichiers.
+
+## Connecter Intervals.icu [#connect-intervalsicu]
+
+L’auto-hébergement se connecte à Intervals.icu via la **clé API personnelle** de l’Owner. Aucun client OAuth Intervals.icu, aucune URI de redirection ni aucun webhook n’est requis ou pris en charge.
+
+L’auto-hébergement prend également en charge [Garmin Personal API](/fr/docs/self-host/garmin-personal-api). COROS MCP n’est pas activé. Aucun secret hôte supplémentaire n’est nécessaire pour ces deux connexions personnelles.
+
+Pour connecter Intervals.icu :
+
+1. Ouvrez les [paramètres Intervals.icu](https://intervals.icu/settings) et copiez votre clé API personnelle en bas de page. Le bouton **Obtenir une clé API** de la boîte de connexion du Client ouvre directement cette page.
+2. Choisissez **Intervals.icu** lors de l’étape d’importation d’activité de l’accueil initial, ou ouvrez plus tard **Compte → Connexions tierces → Intervals.icu**.
+3. Saisissez la clé API, sélectionnez les sens de synchronisation souhaités pour les activités, les séances planifiées, les données de bien-être et les réglages sportifs, puis enregistrez.
+4. Lancez une synchronisation manuelle et vérifiez l’heure de dernière synchronisation ainsi que les éléments importés.
+
+La [documentation Open API d’Intervals.icu](https://www.intervals.icu/features/open-api/) précise que chaque utilisateur peut appeler l’API REST avec sa clé API personnelle, notamment pour l’envoi/téléchargement d’activités, les données de bien-être et les séances planifiées. La clé n’est transmise qu’à votre Server local. Celui-ci la chiffre en AES-256-GCM à l’aide d’un secret d’intégration dédié généré lors de l’installation, stocke le texte chiffré dans PostgreSQL et ne renvoie jamais la clé en clair dans les réponses API ultérieures.
+
+Cette fonction n’est pas hors ligne. Une fois activée, votre Server local communique directement avec `intervals.icu` et lit ou envoie des données selon les directions choisies. La clé appartient à un utilisateur Intervals.icu précis : ne la placez pas dans des variables d’environnement partagées et ne la collez ni dans les journaux, ni dans un ticket, ni dans un chat.
+
+Les sauvegardes contiennent la version chiffrée de la clé API, mais les secrets de l’instance doivent être conservés séparément dans un lieu sûr. Restaurez les secrets d’authentification et d’intégration d’origine avec la base de données pour que les identifiants stockés restent déchiffrables. Les outils de gestion n’affichent ni n’exportent ces secrets. Consultez le fichier `BACKUP_RESTORE.md` du paquet de version pour la procédure complète.
+
+## Configurer l’IA dans le Client [#configure-ai-in-the-client]
+
+L’IA est désactivée par défaut. La dernière étape de l’accueil initial propose directement la configuration IA BYOK au lieu d’un écran de consentement Cloud Trainingload.ai ; vous pouvez aussi l’ignorer et configurer l’IA plus tard :
+
+1. Ouvrez le Client local.
+2. Ouvrez **Configurer votre service d’IA** pendant l’accueil initial, ou plus tard dans **Paramètres → IA auto-hébergée**.
+3. Sélectionnez OpenAI, DeepSeek, OpenRouter, DashScope ou **Personnalisé compatible OpenAI**.
+4. Saisissez la clé API du fournisseur lors de la configuration initiale ou d’un changement de fournisseur, puis renseignez le modèle standard et le modèle de raisonnement. L’URL de base peut rester vide pour les fournisseurs intégrés afin d’utiliser leur point de terminaison par défaut, mais elle est obligatoire pour un fournisseur personnalisé compatible OpenAI.
+5. Enregistrez, puis ouvrez une fonctionnalité IA pour vérifier qu’une requête aboutit.
+
+Utilisez des identifiants de modèles réellement pris en charge par votre fournisseur. Les URL de base distantes doivent utiliser HTTPS. Un point de terminaison local sur réseau LAN ne doit utiliser HTTP que si vous maîtrisez et contrôlez ce trajet réseau.
+
+Une clé API OpenAI est distincte d’un abonnement ChatGPT Plus ou Pro. Un abonnement ChatGPT ne peut pas servir de clé API et n’inclut pas la consommation API de cette instance.
+
+### Comment la clé est stockée
+
+- Le navigateur n’envoie la clé qu’à votre `server` local.
+- Le serveur dérive une clé de chiffrement à partir du secret d’authentification de l’instance et stocke la clé fournisseur dans PostgreSQL avec AES-256-GCM.
+- Les réponses API suivantes indiquent uniquement si une clé est configurée ; elles ne renvoient jamais la clé en clair.
+- Les réglages IA enregistrés dans l’application s’appliquent immédiatement et prévalent sur ceux des variables d’environnement.
+- Choisir **Aucun** supprime l’identifiant fournisseur enregistré et désactive l’IA.
+
+Restaurez le secret d’authentification d’origine de l’instance avec la base de données. Un autre secret ne peut pas déchiffrer les identifiants IA ni l’état d’authentification existants ; vérifiez la configuration d’origine avant de redémarrer.
+
+### Données quittant l’hôte
+
+Vous pouvez utiliser les activités, les plans et l’analyse tout en laissant l’IA désactivée. Lorsque vous activez un fournisseur d’IA externe, votre question et les données d’entraînement nécessaires à la réponse lui sont transmises. Consultez d’abord ses conditions de conservation, de confidentialité, de localisation et de facturation.
+
+L’auto-hébergement n’utilise ni les abonnements Cloud Trainingload.ai ni les crédits IA. La page **Utilisation de l’IA** explique comment fonctionne la facturation avec votre propre fournisseur. Vérifiez votre consommation API réelle, votre solde et vos factures dans le tableau de bord de ce fournisseur.
+
+## Diagnostics facultatifs pour les outils de fichiers publics
+
+Définissez `PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED=true` dans `.env.selfhost` pour conserver les fichiers d’origine lorsqu’un outil public de fichiers rencontre une erreur serveur. Ce paramètre est à `false` par défaut. Les captures peuvent contenir des traces GPS ou d’autres données personnelles. Elles restent dans `data/operations/public-upload-failures`, sont exclues des sauvegardes et sont purgées après 72 heures ou plus tôt si la limite de taille ou de nombre est atteinte.
+
+## Repli par variables d’environnement pour le provisionnement automatisé
+
+Le schéma de version accepte encore des groupes complets de fournisseur dans `.env.selfhost` pour le provisionnement sans intervention. Il s’agit d’un mode de repli, et non du parcours interactif recommandé. Le Client ne révèle jamais une clé définie par variable d’environnement, et l’Owner doit saisir une nouvelle clé lorsqu’il passe d’une configuration par environnement à une configuration gérée dans le Client.
+
+## Vérifier
+
+- `./self-host doctor --json` renvoie `"ok": true` après les modifications au niveau de l’hôte.
+- La racine de données contient le marqueur d’instance et les sous-répertoires attendus, sans fichiers étrangers.
+- La page de paramètres IA n’est visible que par l’Owner de l’instance.
+- Après l’enregistrement des paramètres IA, le champ est vidé et la page indique uniquement qu’une clé est configurée.
+- La page des connexions tierces en auto-hébergement affiche Intervals.icu et Garmin Personal API (flux par clé API, sans OAuth). COROS MCP n’apparaît pas comme disponible.
+- La page **Utilisation de l’IA** n’affiche ni paiement d’abonnement, ni solde de crédits, ni packs de crédits, et n’appelle aucun point de terminaison `/billing/*`.
+- Après l’enregistrement d’une clé Intervals.icu, le champ est vidé, seuls les quatre derniers caractères restent affichés et une synchronisation manuelle réussit.
+- Désactiver l’IA bloque tout nouvel appel au fournisseur sans perturber les fonctionnalités hors IA.
+
+## Dépannage
+
+- **La racine de données est refusée :** choisissez un chemin vide et dédié en dehors de l’arborescence de la version ; ne contournez pas les contrôles de marqueur ou de lien symbolique.
+- **La section des paramètres IA est absente :** vérifiez que l’instance est bien auto-hébergée et que vous êtes connecté en tant qu’Owner.
+- **Un nouveau fournisseur redemande une clé :** un changement de fournisseur exige volontairement un nouvel identifiant.
+- **L’IA ne fonctionne plus après une restauration :** restaurez le secret d’authentification d’origine de l’instance avant de redémarrer.
+- **Intervals.icu ne fonctionne plus après une restauration :** vérifiez que le secret d’intégration d’origine a bien été restauré avec la base de données.
+- **Le modèle est refusé en amont :** copiez l’identifiant exact du modèle depuis votre compte fournisseur et vérifiez que votre clé y a bien accès.
+
+## Étape suivante
+
+Lisez [Gérer votre instance](/fr/docs/self-host/operations) et planifiez une sauvegarde vérifiée. En cas d’erreur, poursuivez avec le [Dépannage](/fr/docs/self-host/troubleshooting).

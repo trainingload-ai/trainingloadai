@@ -2,7 +2,7 @@ import { Injectable, Logger, Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { $Enums } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
-import { AiService } from '@/api/ai/ai.service';
+import { TrainingCoachAgent } from '@/api/ai/agents/training-coach-agent.service';
 import { CoachBranchingService } from '@/api/ai/coach-branching.service';
 import { CoachContextService } from '@/api/plan/coach-context.service';
 import { PlanQueryService } from '@/api/plan/application/plan-query.service';
@@ -67,7 +67,7 @@ export class CoachPeriodReviewRuntimeService {
     private readonly planExecution: PlanExecutionContextService,
     private readonly coachContext: CoachContextService,
     private readonly branching: CoachBranchingService,
-    private readonly aiService: AiService,
+    private readonly coachAgent: TrainingCoachAgent,
     private readonly userService: UserService,
     private readonly i18n: I18nService,
     private readonly planQuery: PlanQueryService,
@@ -342,7 +342,7 @@ export class CoachPeriodReviewRuntimeService {
       const result = await this.modelGuard.run(
         `judgment:${args.scale}`,
         (signal) =>
-          this.aiService.generatePlanReviewJudgment({
+          this.coachAgent.generatePlanReviewJudgment({
             userId: args.userId,
             lang: args.lang,
             scale: args.scale,

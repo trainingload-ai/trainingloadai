@@ -22,6 +22,9 @@ import {
   shouldOfferCoachRetry,
 } from "./coach-turn-error-model";
 import { useCoachTurnRetry } from "./coach-turn-retry-context";
+import {
+  isCalendarMoveRecoveryError,
+} from "./coach-calendar-move-recovery-card";
 
 /**
  * Inline failure card for an assistant turn that produced no answer. It is
@@ -71,13 +74,13 @@ export function CoachTurnErrorCard({
         )?.id === messageId
       : isLastMessage,
   );
-  const canRetry =
+  const canRetryAttempt =
     isLatestAttempt &&
-    shouldOfferCoachRetry(turnError) &&
     retryControls != null &&
     (run?.type !== "data-coach-run" ||
       (["failed", "interrupted"].includes(run.data.status) &&
         !run.data.retryBlocked));
+  const canRetry = canRetryAttempt && shouldOfferCoachRetry(turnError);
   const retry = (options?: { thinkingEnabled?: boolean }) => {
     if (!retryControls || isThreadRunning) return;
     retryControls.prepareRetry(options);
@@ -96,12 +99,24 @@ export function CoachTurnErrorCard({
         }
       : undefined;
   const operationReason = aiOperationErrorReason(turnError.code);
-  const managedRecovery = useManagedAiAccessRecovery(operationReason);
+  const managedRecovery = useManagedAiAccessRecovery(operationReason, {
+    retry: canRetryAttempt ? () => retry() : undefined,
+    retryDisabled: isThreadRunning,
+  });
+
+  const sid = retryControls?.sessionId;
+  if (sid?.startsWith("calendar-move:") && isCalendarMoveRecoveryError(turnError)) {
+    return null;
+  }
 
   return (
     <>
       <CoachTranscriptMetaRow
-        item={{ ...item, retryable: canRetry }}
+        item={{
+          ...item,
+          message: managedRecovery.message ?? item.message,
+          retryable: canRetry,
+        }}
         onRetry={canRetry ? () => retry() : undefined}
         retryDisabled={isThreadRunning}
         recoveryAction={managedRecovery.recoveryAction}

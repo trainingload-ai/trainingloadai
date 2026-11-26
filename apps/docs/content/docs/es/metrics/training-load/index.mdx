@@ -1,44 +1,81 @@
 ---
-title: Training Load
-description: Understand training load, TSS, IF, and TRIMP, and how load trends support fatigue management and adaptive endurance training plans.
-keywords: ["Training Load", "training load management", "TSS", "IF", "TRIMP", "training stress", "adaptive training plan"]
+title: "¿Qué es la carga de entrenamiento? TSS, TRIMP e IF explicados"
+description: "La carga de entrenamiento cuantifica la dosis por sesión y semanal mediante TSS, TRIMP y Factor de intensidad. Descubre cómo comparan sesiones y apoyan la revisión del plan."
+keywords:
+  [
+    "qué es la carga de entrenamiento",
+    "carga de entrenamiento explicada",
+    "TSS vs TRIMP",
+    "métricas de carga de entrenamiento",
+    "cómo medir la carga de entrenamiento",
+  ]
 ---
 
-# Training Load
+# ¿Qué es la carga de entrenamiento? TSS, TRIMP e IF explicados
 
-**Training load** is a way to quantify how much stress a workout, week, or training block places on the body. It gives endurance athletes a shared language for comparing sessions, managing fatigue, and deciding whether an adaptive training plan should build, hold, recover, or adjust.
+La **carga de entrenamiento** es una dosis modelada para una sesión, una semana o un bloque. Esta guía central explica la familia de métricas —TSS, TRIMP y Factor de intensidad (IF)— para que puedas comparar una salida larga y suave con un día corto de series, y evaluar después si el plan debe construir carga, mantenerse, recuperar o ajustarse. Las decisiones de producto viven en la [gestión de la carga de entrenamiento](/es/training-load); las páginas siguientes detallan cada definición.
 
-Without a load metric, it is hard to compare “a 2-hour easy ride/run” with “a 30-minute interval session”. It is also harder to see whether recent load has risen faster than recovery can absorb.
+Sin una métrica de carga resulta difícil comparar «2 horas suaves en bici o corriendo» con «30 minutos de series». También cuesta más detectar si la carga reciente ha subido más rápido de lo que tu recuperación puede absorber.
 
-## Key Metrics
+## Métricas clave
 
 <Cards>
-  <Card title="TSS (Training Stress Score)" href="/docs/metrics/training-load/training-stress-score" />
-  <Card title="IF (Intensity Factor)" href="/docs/metrics/training-load/intensity-factor" />
-  <Card title="TRIMP (Training Impulse)" href="/docs/metrics/training-load/training-impulse" />
+  <Card
+    title="TSS (Training Stress Score)"
+    href="/es/docs/metrics/training-load/training-stress-score"
+  />
+  <Card
+    title="IF (Intensity Factor)"
+    href="/es/docs/metrics/training-load/intensity-factor"
+  />
+  <Card
+    title="TRIMP (Training Impulse)"
+    href="/es/docs/metrics/training-load/training-impulse"
+  />
 </Cards>
 
-## Why Quantify Training Load?
+## ¿Por qué cuantificar la carga de entrenamiento?
 
-1.  **Objective comparison**: evaluate different durations and session types with a single yardstick.
-2.  **Progress tracking**: ensure weekly load increases gradually and avoid injury risk from sudden spikes.
-3.  **Recovery management**: higher load requires more recovery; quantification helps you plan training and rest more rationally.
+1.  **Comparación objetiva**: evalúa duraciones y tipos de sesión distintos con una misma vara de medir.
+2.  **Seguimiento de tendencias**: detecta cambios graduales o bruscos en la carga semanal modelada.
+3.  **Contexto de recuperación**: combina el historial de carga con la calidad de las sesiones y tus sensaciones al planificar entrenamientos y descansos.
 
-## How Training Load Supports Adaptive Planning
+## Cómo apoya la carga de entrenamiento a la planificación adaptativa
 
-Training load is not the plan itself. It is the evidence layer behind better plan decisions:
+La carga de entrenamiento no es el plan en sí; es la capa de evidencia que respalda mejores decisiones sobre el plan:
 
--   **After completed workouts**: actual load can be compared with planned load instead of relying only on completion status.
--   **During review**: CTL, ATL, and TSB help separate long-term fitness trends from short-term fatigue.
--   **Before adjustment**: missed workouts, unusually high fatigue, or a fast load ramp can justify changing the next few sessions.
+- **Tras las sesiones completadas**: puedes comparar la carga real con la carga planificada en lugar de fijarte solo en si marcaste la sesión como hecha.
+- **Durante la revisión**: CTL, ATL y TSB comparan tendencias de carga modeladas más lentas y más rápidas; no miden directamente fitness real, fatiga ni preparación.
+- **Antes de ajustar**: las sesiones perdidas, una fatiga inusualmente alta o un repunte rápido de carga pueden justificar adaptar los próximos entrenamientos.
 
-Trainingload.ai uses this pattern throughout the product loop: plan → completed workouts → load trend → AI coach review → confirmed adjustment.
+Trainingload.ai aplica este ciclo en todo el producto: plan → sesiones completadas → tendencia de carga → revisión del Entrenador con IA → ajuste confirmado.
 
-## Related Concepts
+## Preguntas frecuentes
 
--   [Training Stress Score (TSS)](/docs/metrics/training-load/training-stress-score): single-session training stress.
--   [Intensity Factor (IF)](/docs/metrics/training-load/intensity-factor): workout intensity relative to threshold.
--   [Training Impulse (TRIMP)](/docs/metrics/training-load/training-impulse): heart-rate-based internal load.
--   [Chronic Training Load (CTL)](/docs/metrics/pmc/chronic-training-load): longer-term load trend.
--   [Acute Training Load (ATL)](/docs/metrics/pmc/acute-training-load): recent fatigue trend.
--   [Training Stress Balance (TSB)](/docs/metrics/pmc/training-stress-balance): freshness derived from CTL and ATL.
+### ¿Qué es la carga de entrenamiento?
+
+La carga de entrenamiento es una dosis modelada de esfuerzo. Puntuaciones por sesión como TSS o TRIMP estiman un entrenamiento concreto; CTL y ATL resumen esas puntuaciones a lo largo del tiempo para comparar semanas enteras y no solo «si terminaste o no».
+
+### TSS frente a TRIMP: ¿cuál mide la carga de entrenamiento?
+
+El TSS es la puntuación habitual de carga externa cuando dispones de potencia o ritmo fiable. El TRIMP mide carga interna a partir de la frecuencia cardíaca y la duración. Trainingload.ai puede usar cualquiera de los dos según el deporte y tu prioridad de fuentes de carga.
+
+### ¿Cómo mido la carga de entrenamiento en carrera y ciclismo?
+
+En ciclismo suele emplearse TSS de potencia a partir de NP, IF y FTP. En carrera a pie se usa a menudo rTSS a partir de NGP y ritmo umbral, o TRIMP cuando solo la frecuencia cardíaca es fiable. Compara primero las puntuaciones dentro del mismo deporte antes de comparar entre deportes.
+
+### ¿A dónde ir después de esta guía?
+
+Abre las páginas de definición de [TSS](/es/docs/metrics/training-load/training-stress-score), [TRIMP](/es/docs/metrics/training-load/training-impulse) y [Factor de intensidad (IF)](/es/docs/metrics/training-load/intensity-factor). Después, [gestiona la carga de entrenamiento con CTL, ATL y TSB en tu plan](/es/training-load).
+
+## Conceptos relacionados
+
+- [TSS (Training Stress Score)](/es/docs/metrics/training-load/training-stress-score): estrés de entrenamiento de una sola sesión.
+- [IF (Factor de intensidad)](/es/docs/metrics/training-load/intensity-factor): intensidad de la sesión en relación con el umbral.
+- [TRIMP (Training Impulse)](/es/docs/metrics/training-load/training-impulse): carga interna basada en frecuencia cardíaca.
+- [Calcula el TSS a partir de duración, NP y FTP](/es/tss-calculator)
+- [Proyecta CTL, ATL y TSB desde el TSS diario](/es/training-load-calculator)
+- [Carga crónica de entrenamiento (CTL)](/es/docs/metrics/pmc/chronic-training-load): tendencia de carga a más largo plazo.
+- [Fatiga (ATL)](/es/docs/metrics/pmc/acute-training-load): tendencia más rápida de carga reciente.
+- [Forma (TSB)](/es/docs/metrics/pmc/training-stress-balance): CTL actual menos ATL actual.
+- [Usa la revisión del Entrenador con IA para ajustar tu carga con seguridad](/es/ai-training-plan)

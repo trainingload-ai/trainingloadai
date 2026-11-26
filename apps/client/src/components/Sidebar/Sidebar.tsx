@@ -3,33 +3,22 @@
 import dynamic from "next/dynamic";
 import React from "react";
 import { Resizable } from "re-resizable";
-import { DesktopRailLink } from "./DesktopRailLink";
-import {
-  CalendarDays,
-  ChevronsLeft,
-  ChevronsRight,
-  Gauge,
-  House,
-  ListChecks,
-  NotebookText,
-  Settings as SettingsIcon,
-  Sparkles,
-} from "lucide-react";
+import { Settings as SettingsIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import ThemeLogo from "@/components/ui/ThemeLogo";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePersistedSidebarCollapsed } from "@/hooks/use-persisted-sidebar-collapsed";
-import { useCompactSidebarViewport } from "@/hooks/use-mobile";
 import { useRuntimeEnvironment } from "@/hooks/use-runtime-environment";
+import { useWorkspaceSidebarCollapsed } from "@/hooks/use-workspace-sidebar-collapsed";
 import { TopBar } from "@/components/TopBar";
+import { NotificationDrawer } from "@/components/notifications/NotificationDrawer";
 import {
   AccessOptionsDialog,
   useAccessNavigationGuard,
@@ -37,8 +26,6 @@ import {
 import {
   COACH_SPACE_HREF,
   clearLastCoachSession,
-  readLastProductRoute,
-  rememberLastProductRoute,
 } from "@/lib/app-space-memory";
 import { useCoachSid } from "@/app/[locale]/(main)/ai-coach/use-coach-sid";
 import {
@@ -46,6 +33,7 @@ import {
   resolveActiveCoachSid,
 } from "@/app/[locale]/(main)/ai-coach/coach-sid-model";
 import {
+  SIDEBAR_COLLAPSED_WIDTH,
   SIDEBAR_WIDTH_LIMITS,
   usePersistedSidebarWidth,
 } from "@/hooks/use-persisted-sidebar-width";
@@ -53,6 +41,7 @@ import {
   runtimeCapabilityAvailable,
   useRuntimeCapability,
 } from "@/api/runtime-capabilities";
+import { getTrainingSection, TRAINING_LINKS } from "./training-navigation";
 
 const CoachSidebarHistoryList = dynamic(
   () =>
@@ -65,17 +54,15 @@ const CoachSidebarHistoryList = dynamic(
   },
 );
 
-function firstRouteSegment(pathname: string) {
-  return pathname.split("/").filter(Boolean)[0] ?? "";
-}
+const COMPACT_LAYOUT_WIDTH = 128;
 
 function CoachHistoryListSkeleton() {
   return (
-    <div className="min-h-0 flex-1 space-y-2 px-3 py-3" aria-hidden="true">
-      <div className="h-9 animate-pulse rounded-md bg-muted/55" />
+    <div className="min-h-0 flex-1 space-y-1 px-2 py-2" aria-hidden="true">
+      <div className="h-7 animate-pulse rounded-md bg-muted/55" />
       <div className="h-3 w-14 animate-pulse rounded-xs bg-muted/55" />
-      {Array.from({ length: 7 }, (_, index) => (
-        <div key={index} className="h-9 animate-pulse rounded-md bg-muted/35" />
+      {Array.from({ length: 4 }, (_, index) => (
+        <div key={index} className="h-7 animate-pulse rounded-md bg-muted/35" />
       ))}
     </div>
   );
@@ -86,46 +73,37 @@ function DesktopSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { sid, applySid, clearCoachSidFromUrl, openNewCoachChat } =
-    useCoachSid();
-  const route = firstRouteSegment(pathname);
+  const { sid, applySid, openNewCoachChat } = useCoachSid();
+  const route = pathname.split("/")[1] ?? "";
+  const trainingSection = getTrainingSection(route);
   const isCoachSpace = route === "ai-coach";
-  const activeSid = resolveActiveCoachSid({
-    searchParamsSid: searchParams.get("sid") ?? "",
-    storeSid: sid,
-    locationSid: readSidFromLocationSearch(),
-  });
+  const activeSid = isCoachSpace
+    ? resolveActiveCoachSid({
+        searchParamsSid: searchParams.get("sid") ?? "",
+        storeSid: sid,
+        locationSid: readSidFromLocationSearch(),
+      })
+    : "";
   const t = useTranslations("sidebar");
-  const desktopT = useTranslations("desktopChrome");
-  const compactViewport = useCompactSidebarViewport();
-  const compactMode = compactViewport ?? true;
-  const { collapsed, toggleCollapsed } = usePersistedSidebarCollapsed({
-    mode: isDesktopSelfHost
-      ? "desktop-coach"
-      : compactMode
-        ? "compact"
-        : "wide",
-    defaultCollapsed: isDesktopSelfHost ? false : compactMode,
-  });
+  const { collapsed } = useWorkspaceSidebarCollapsed();
   const { setWidth: setSidebarWidth, width: sidebarWidth } =
     usePersistedSidebarWidth();
-  const productSidebarCollapsed =
-    !isDesktopSelfHost && !isCoachSpace && collapsed;
-  const desktopPaneHidden = isDesktopSelfHost && collapsed;
   const vipGate = useAccessNavigationGuard();
   const aiAvailable = runtimeCapabilityAvailable(useRuntimeCapability("ai"));
-  const [lastProductHref, setLastProductHref] = React.useState("/");
   const [isResizing, setIsResizing] = React.useState(false);
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const [compactLayout, setCompactLayout] = React.useState(collapsed);
 
   React.useEffect(() => {
-    if (isCoachSpace) {
-      setLastProductHref(readLastProductRoute());
-      return;
-    }
-
-    rememberLastProductRoute(pathname);
-    setLastProductHref(pathname);
-  }, [isCoachSpace, pathname]);
+    const content = contentRef.current;
+    if (!content || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => {
+      const width = entry.contentRect.width;
+      if (width > 0) setCompactLayout(width < COMPACT_LAYOUT_WIDTH);
+    });
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, []);
 
   React.useEffect(() => {
     if (!isResizing) return;
@@ -140,329 +118,204 @@ function DesktopSidebar() {
     };
   }, [isResizing]);
 
-  const active = (key: string) =>
-    key === "home"
-      ? route === ""
-      : key === "plan"
-        ? ["plan", "plans"].includes(route)
-        : key === "settings"
-          ? ["settings", "account"].includes(route)
-          : route === key;
-
-  const selectCoachSession = React.useCallback(
-    (nextSid: string) => {
-      applySid(nextSid);
-    },
-    [applySid],
-  );
-
-  const startNewCoachConversation = React.useCallback(() => {
+  const startNewCoachConversation = () => {
     clearLastCoachSession();
-    clearCoachSidFromUrl();
-  }, [clearCoachSidFromUrl]);
-
-  const openCoachSpace = React.useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
-      vipGate.guardNavigation(event, COACH_SPACE_HREF);
-      if (event.defaultPrevented) return;
-      const modifiedClick =
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey;
-      if (modifiedClick) return;
-      event.preventDefault();
-      clearLastCoachSession();
+    if (isCoachSpace) {
       openNewCoachChat();
-    },
-    [openNewCoachChat, vipGate.guardNavigation],
-  );
+    } else {
+      router.push(COACH_SPACE_HREF);
+    }
+  };
 
-  const openFullCoachHistory = React.useCallback(() => {
-    const next = new URLSearchParams();
-    next.set("view", "history");
-    if (activeSid) next.set("sid", activeSid);
-    router.replace(`/ai-coach?${next.toString()}`, { scroll: false });
-  }, [activeSid, router]);
-
-  const handleCoachSessionDeleted = React.useCallback(
-    (deletedSid: string) => {
-      if (deletedSid !== activeSid) return;
-      clearLastCoachSession();
-      clearCoachSidFromUrl();
-    },
-    [activeSid, clearCoachSidFromUrl],
+  const coachNav = (
+    <Link
+      href={COACH_SPACE_HREF}
+      aria-current={isCoachSpace ? "page" : undefined}
+      className={cn(
+        "flex h-7 min-w-0 items-center rounded-control px-2 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+        compactLayout && "justify-center px-0 text-xs",
+      )}
+      title={t("coach")}
+      onClick={(event) => {
+        vipGate.guardNavigation(event, COACH_SPACE_HREF);
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        )
+          return;
+        if (isCoachSpace) {
+          event.preventDefault();
+        } else {
+          clearLastCoachSession();
+        }
+      }}
+    >
+      <span className="truncate">{t("coach")}</span>
+    </Link>
   );
 
   return (
-    <div
-      data-coach-pane-open={
-        isDesktopSelfHost ? isCoachSpace && !collapsed : undefined
-      }
-      className={
-        isDesktopSelfHost
-          ? "desktop-navigation flex h-full shrink-0"
-          : "contents"
-      }
+    <Resizable
+      as="aside"
+      size={{
+        width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : sidebarWidth,
+        height: "100%",
+      }}
+      minWidth={isResizing ? SIDEBAR_WIDTH_LIMITS.min : SIDEBAR_COLLAPSED_WIDTH}
+      maxWidth={SIDEBAR_WIDTH_LIMITS.max}
+      enable={!collapsed && { right: true }}
+      handleClasses={{
+        right:
+          "group/resize touch-none outline-none focus-visible:outline-none",
+      }}
+      handleStyles={{
+        right: {
+          cursor: "col-resize",
+          right: -5,
+          top: 42,
+          height: "calc(100% - 82px)",
+          width: 10,
+          zIndex: 40,
+        },
+      }}
+      handleComponent={{
+        right: collapsed ? undefined : (
+          <SidebarResizeHandle
+            currentWidth={sidebarWidth}
+            isResizing={isResizing}
+            label={t("resize")}
+            maxWidth={SIDEBAR_WIDTH_LIMITS.max}
+            minWidth={SIDEBAR_WIDTH_LIMITS.min}
+            onCommit={setSidebarWidth}
+          />
+        ),
+      }}
+      onResizeStart={() => setIsResizing(true)}
+      onResizeStop={(_event, _direction, element) => {
+        setIsResizing(false);
+        const width = Number.parseFloat(element.style.width);
+        setSidebarWidth(
+          Number.isFinite(width)
+            ? width
+            : element.getBoundingClientRect().width,
+        );
+      }}
+      className={cn(
+        "relative hidden shrink-0 flex-col py-1.5 text-sidebar-foreground tablet:flex",
+        isResizing
+          ? "transition-none"
+          : "transition-[width] duration-350 ease-in-out motion-reduce:transition-none",
+      )}
     >
-      {isDesktopSelfHost ? (
+      <div
+        ref={contentRef}
+        data-sidebar-collapsed={collapsed}
+        className="group/workspace flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+      >
         <TooltipProvider delayDuration={180}>
+          <div className="flex h-9 shrink-0 items-center px-2 pb-0.5">
+            <div
+              aria-hidden={collapsed || undefined}
+              className={cn(
+                "min-w-0 flex-1 overflow-hidden transition-opacity duration-250 motion-reduce:transition-none",
+                collapsed ? "opacity-0" : "delay-75",
+              )}
+            >
+              <div className="ms-1.5 w-[106px]">
+                <ThemeLogo width={106} height={20} />
+              </div>
+            </div>
+            <NotificationDrawer />
+          </div>
           <nav
-            className="desktop-rail flex h-full w-[52px] shrink-0 flex-col items-stretch pt-2"
             aria-label={t("navigationLabel")}
+            className="grid shrink-0 gap-0.5 px-1.5 pb-3"
           >
-            <div className="space-y-2 px-2">
-              <DesktopRailLink
-                active={isCoachSpace}
-                href={COACH_SPACE_HREF}
-                icon={Sparkles}
-                label={t("coach")}
-                onClick={openCoachSpace}
+            {TRAINING_LINKS.map(({ key, href, Icon }) => (
+              <SidebarLink
+                key={key}
+                href={href}
+                label={t(key)}
+                icon={<Icon />}
+                active={key === trainingSection}
+                collapsed={collapsed}
               />
-              <DesktopRailLink
-                href="/"
-                label={t("home")}
-                icon={House}
-                active={active("home")}
-              />
-              <DesktopRailLink
-                href="/plan"
-                label={t("plan")}
-                icon={NotebookText}
-                active={active("plan")}
-              />
-              <DesktopRailLink
-                href="/calendar"
-                label={t("calendar")}
-                icon={CalendarDays}
-                active={active("calendar")}
-              />
-              <DesktopRailLink
-                href="/activities"
-                label={t("activities")}
-                icon={ListChecks}
-                active={active("activities")}
-              />
-              <DesktopRailLink
-                href="/dashboard"
-                label={t("dashboard")}
-                icon={Gauge}
-                active={active("dashboard")}
-              />
-            </div>
-            <div className="mt-auto space-y-1">
-              <div className="px-2">
-                <DesktopRailLink
-                  active={["settings", "account"].includes(route)}
-                  href="/settings"
-                  icon={SettingsIcon}
-                  label={t("settings")}
-                />
-              </div>
-              <TopBar placement="rail" collapsed />
-            </div>
+            ))}
           </nav>
-        </TooltipProvider>
-      ) : null}
-      {!isDesktopSelfHost || isCoachSpace ? (
-        <Resizable
-          as="aside"
-          size={{
-            width: productSidebarCollapsed ? 64 : sidebarWidth,
-            height: "100%",
-          }}
-          minWidth={productSidebarCollapsed ? 64 : SIDEBAR_WIDTH_LIMITS.min}
-          maxWidth={productSidebarCollapsed ? 64 : SIDEBAR_WIDTH_LIMITS.max}
-          enable={
-            productSidebarCollapsed
-              ? false
-              : {
-                  right: true,
-                }
-          }
-          handleClasses={{
-            right:
-              "group/resize touch-none outline-none focus-visible:outline-none",
-          }}
-          handleStyles={{
-            right: {
-              cursor: "col-resize",
-              right: -7,
-              width: 14,
-              zIndex: 40,
-            },
-          }}
-          handleComponent={{
-            right: productSidebarCollapsed ? (
-              <span />
-            ) : (
-              <SidebarResizeHandle
-                currentWidth={sidebarWidth}
-                isResizing={isResizing}
-                label={t("resize")}
-                maxWidth={SIDEBAR_WIDTH_LIMITS.max}
-                minWidth={SIDEBAR_WIDTH_LIMITS.min}
-                onCommit={setSidebarWidth}
-              />
-            ),
-          }}
-          onResizeStart={() => {
-            setIsResizing(true);
-          }}
-          onResizeStop={(_event, _direction, elementRef) => {
-            setIsResizing(false);
-            const inlineWidth = Number.parseFloat(elementRef.style.width);
-            setSidebarWidth(
-              Number.isFinite(inlineWidth)
-                ? inlineWidth
-                : elementRef.getBoundingClientRect().width,
-            );
-          }}
-          className={cn(
-            "relative hidden h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground tablet:flex",
-            isDesktopSelfHost && "desktop-context-pane",
-            isResizing
-              ? "transition-none"
-              : "transition-[width] duration-200 motion-reduce:transition-none",
-          )}
-          style={desktopPaneHidden ? { display: "none" } : undefined}
-        >
-          <TooltipProvider delayDuration={180}>
-            {isDesktopSelfHost ? (
-              <div className="flex h-12 shrink-0 items-center px-4 text-sm font-semibold">
-                {isDesktopSelfHost ? desktopT("appName") : "Trainingload.ai"}
-              </div>
-            ) : (
-              <SidebarSpaceSwitcher
-                coachHref={COACH_SPACE_HREF}
-                collapsed={productSidebarCollapsed}
-                isCoachSpace={isCoachSpace}
-                productHref={lastProductHref}
-                onCoachClick={openCoachSpace}
-                showCoach={aiAvailable}
-              />
-            )}
-
-            {isCoachSpace ? (
-              <div className="flex min-h-0 flex-1 flex-col">
-                <CoachSidebarHistoryList
-                  activeSid={activeSid}
-                  onNewChat={startNewCoachConversation}
-                  onSelectSession={selectCoachSession}
-                  onSessionDeleted={handleCoachSessionDeleted}
-                  onViewAll={openFullCoachHistory}
-                />
-                {!isDesktopSelfHost ? (
-                  <nav
-                    aria-label={t("secondaryNavigationLabel")}
-                    className="shrink-0 border-t border-border/70 p-3"
-                  >
-                    <SidebarLink
-                      href="/settings"
-                      label={t("settings")}
-                      icon={<SettingsIcon />}
-                      active={false}
-                      collapsed={false}
-                    />
-                  </nav>
-                ) : null}
-              </div>
-            ) : (
-              <>
+          {aiAvailable || isDesktopSelfHost ? (
+            <div className="flex min-h-0 flex-1 flex-col border-t border-border pt-1">
+              {compactLayout || !aiAvailable || !vipGate.canAccess ? (
+                <div className={cn("px-1.5", compactLayout && "w-12")}>{coachNav}</div>
+              ) : (
                 <div
-                  className={
-                    isDesktopSelfHost
-                      ? "px-4 pb-1 pt-2 text-xs font-medium text-muted-foreground"
-                      : "hidden"
-                  }
+                  inert={collapsed}
+                  className={cn(
+                    "flex min-h-0 flex-1 flex-col transition-opacity duration-200 motion-reduce:transition-none starting:opacity-0",
+                    collapsed && "opacity-0",
+                  )}
                 >
-                  {t("trainingSpace")}
+                  <CoachSidebarHistoryList
+                    activeSid={activeSid}
+                    heading={coachNav}
+                    onNewChat={startNewCoachConversation}
+                    onSelectSession={(nextSid) => {
+                      if (isCoachSpace) {
+                        applySid(nextSid);
+                      } else {
+                        router.push(
+                          `${COACH_SPACE_HREF}?${new URLSearchParams({ sid: nextSid })}`,
+                        );
+                      }
+                    }}
+                    onSessionDeleted={(deletedSid) => {
+                      if (deletedSid === activeSid) startNewCoachConversation();
+                    }}
+                    onViewAll={() => {
+                      const next = new URLSearchParams({ view: "history" });
+                      if (activeSid) next.set("sid", activeSid);
+                      router.push(`${COACH_SPACE_HREF}?${next}`, {
+                        scroll: false,
+                      });
+                    }}
+                  />
                 </div>
+              )}
+            </div>
+          ) : null}
+          <div className={cn(
+            "mt-auto shrink-0 border-t border-sidebar-border/60 px-1.5 pt-1",
+            compactLayout && "w-12",
+          )}>
+            <TopBar
+              placement="workspace"
+              collapsed={compactLayout}
+              settingsControl={
                 <nav
-                  aria-label={t("navigationLabel")}
-                  className="flex flex-col gap-1 px-3 py-2"
+                  aria-label={t("secondaryNavigationLabel")}
+                  className={compactLayout ? "w-8" : "min-w-0 flex-1"}
                 >
                   <SidebarLink
-                    href="/"
-                    label={t("home")}
-                    icon={<House />}
-                    active={active("home")}
-                    collapsed={productSidebarCollapsed}
-                  />
-                  <SidebarLink
-                    href="/plan"
-                    label={t("plan")}
-                    icon={<NotebookText />}
-                    active={active("plan")}
-                    collapsed={productSidebarCollapsed}
-                  />
-                  <SidebarLink
-                    href="/calendar"
-                    label={t("calendar")}
-                    icon={<CalendarDays />}
-                    active={active("calendar")}
-                    collapsed={productSidebarCollapsed}
-                  />
-                  <SidebarLink
-                    href="/activities"
-                    label={t("activities")}
-                    icon={<ListChecks />}
-                    active={active("activities")}
-                    collapsed={productSidebarCollapsed}
-                  />
-                  <SidebarLink
-                    href="/dashboard"
-                    label={t("dashboard")}
-                    icon={<Gauge />}
-                    active={active("dashboard")}
-                    collapsed={productSidebarCollapsed}
+                    href="/settings"
+                    label={t("settings")}
+                    icon={<SettingsIcon />}
+                    active={route === "settings" || route === "account"}
+                    collapsed={collapsed}
                   />
                 </nav>
-                {!isDesktopSelfHost ? (
-                  <>
-                    <nav
-                      aria-label={t("secondaryNavigationLabel")}
-                      className="mt-auto px-3 pb-1"
-                    >
-                      <SidebarLink
-                        href="/settings"
-                        label={t("settings")}
-                        icon={<SettingsIcon />}
-                        active={active("settings")}
-                        collapsed={productSidebarCollapsed}
-                      />
-                    </nav>
-                    <div className="p-3 pt-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-center text-muted-foreground"
-                        onClick={toggleCollapsed}
-                        aria-label={
-                          productSidebarCollapsed ? t("expand") : t("collapse")
-                        }
-                      >
-                        {productSidebarCollapsed ? (
-                          <ChevronsRight className="h-4 w-4" />
-                        ) : (
-                          <ChevronsLeft className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </>
-                ) : null}
-              </>
-            )}
-          </TooltipProvider>
-
-          <AccessOptionsDialog
-            open={vipGate.pricingOpen}
-            onOpenChange={vipGate.setPricingOpen}
-          />
-        </Resizable>
-      ) : null}
-    </div>
+              }
+            />
+          </div>
+        </TooltipProvider>
+      </div>
+      <AccessOptionsDialog
+        open={vipGate.pricingOpen}
+        onOpenChange={vipGate.setPricingOpen}
+      />
+    </Resizable>
   );
 }
 
@@ -511,124 +364,17 @@ function SidebarResizeHandle({
       aria-valuemin={minWidth}
       aria-valuenow={currentWidth}
       tabIndex={0}
-      className="relative flex h-full w-full cursor-col-resize items-center justify-center outline-none"
+      className="group/handle relative flex h-full w-full cursor-col-resize items-center justify-center outline-none"
       onKeyDown={resizeFromKeyboard}
     >
       <span
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute inset-y-0 left-1/2 w-2 -translate-x-1/2 rounded-sm bg-brand/0 transition-colors duration-150 group-hover/resize:bg-brand/15 group-focus-within/resize:bg-brand/15",
-          isResizing && "bg-brand/20",
-        )}
-      />
-      <span
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border transition-[background-color,width] duration-150 group-hover/resize:w-0.5 group-hover/resize:bg-brand group-focus-within/resize:w-0.5 group-focus-within/resize:bg-brand",
-          isResizing && "w-0.5 bg-brand",
+          "pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded-full bg-transparent group-hover/resize:bg-brand/75 group-focus-visible/handle:bg-brand/85",
+          isResizing && "bg-brand",
         )}
       />
     </div>
-  );
-}
-
-function SidebarSpaceSwitcher({
-  coachHref,
-  collapsed,
-  isCoachSpace,
-  productHref,
-  onCoachClick,
-  showCoach,
-}: {
-  coachHref: string;
-  collapsed: boolean;
-  isCoachSpace: boolean;
-  productHref: string;
-  onCoachClick: React.MouseEventHandler<HTMLAnchorElement>;
-  showCoach: boolean;
-}) {
-  const t = useTranslations("sidebar");
-
-  return (
-    <nav
-      aria-label={t("spaceSwitcherLabel")}
-      className={cn("shrink-0", collapsed ? "p-2" : "p-3 pb-1")}
-    >
-      <div
-        className={cn(
-          "grid gap-1 rounded-control bg-muted p-1",
-          collapsed || !showCoach ? "grid-cols-1" : "grid-cols-2",
-        )}
-      >
-        <SidebarSpaceLink
-          active={!isCoachSpace}
-          collapsed={collapsed}
-          href={productHref}
-          icon={<House />}
-          label={t("trainingSpace")}
-        />
-        {showCoach ? (
-          <SidebarSpaceLink
-            active={isCoachSpace}
-            collapsed={collapsed}
-            href={coachHref}
-            icon={<Sparkles />}
-            label={t("coach")}
-            onClick={onCoachClick}
-          />
-        ) : null}
-      </div>
-    </nav>
-  );
-}
-
-function SidebarSpaceLink({
-  active,
-  collapsed,
-  href,
-  icon,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  collapsed: boolean;
-  href: string;
-  icon: React.ReactElement<{
-    className?: string;
-    "aria-hidden"?: boolean;
-  }>;
-  label: string;
-  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
-}) {
-  const link = (
-    <Link
-      href={href}
-      aria-current={active ? "page" : undefined}
-      aria-label={collapsed ? label : undefined}
-      onClick={onClick}
-      className={cn(
-        "flex min-w-0 touch-manipulation items-center justify-center gap-1.5 rounded-compact text-mobile-caption font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pc:text-xs",
-        collapsed ? "min-h-9 px-0" : "min-h-8 px-2",
-        active
-          ? "bg-card text-foreground shadow-sm"
-          : "text-muted-foreground hover:bg-card/70 hover:text-foreground",
-      )}
-    >
-      {React.cloneElement(icon, {
-        className: "h-3.5 w-3.5 shrink-0",
-        "aria-hidden": true,
-      })}
-      {collapsed ? null : <span className="truncate">{label}</span>}
-    </Link>
-  );
-
-  if (!collapsed) return link;
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{link}</TooltipTrigger>
-      <TooltipContent side="right">{label}</TooltipContent>
-    </Tooltip>
   );
 }
 
@@ -654,30 +400,41 @@ function SidebarLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      aria-label={collapsed ? label : undefined}
+      aria-label={label}
       onClick={onClick}
       className={cn(
-        "flex h-9 touch-manipulation items-center gap-2 rounded-compact px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-        collapsed && "justify-center",
+        "flex h-8 min-w-0 touch-manipulation items-center overflow-hidden rounded-control text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
         active
-          ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-          : "text-muted-foreground hover:bg-muted hover:text-sidebar-foreground",
+          ? "bg-background font-semibold text-sidebar-foreground"
+          : "text-muted-foreground hover:bg-background/70 hover:text-sidebar-foreground",
       )}
     >
-      {React.cloneElement(icon, {
-        className: "size-[18px]",
-        "aria-hidden": true,
-      })}
-      {collapsed ? null : <span>{label}</span>}
+      <span className="grid w-9 max-w-full shrink-0 place-items-center">
+        {React.cloneElement(icon, {
+          className: "size-4 shrink-0",
+          "aria-hidden": true,
+        })}
+      </span>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "min-w-0 truncate pe-1 transition-opacity duration-250 motion-reduce:transition-none",
+          collapsed ? "opacity-0" : "delay-75",
+        )}
+      >
+        {label}
+      </span>
     </Link>
   );
-
-  if (!collapsed) return link;
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>{link}</TooltipTrigger>
-      <TooltipContent side="right">{label}</TooltipContent>
+      {collapsed && (
+        <TooltipContent side="right" sideOffset={8}>
+          {label}
+        </TooltipContent>
+      )}
     </Tooltip>
   );
 }

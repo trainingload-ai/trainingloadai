@@ -1,4 +1,6 @@
 import { AiService } from '../ai.service';
+import { TrainingCoachAgent } from '../agents/training-coach-agent.service';
+import type { CoachRunStore } from '../coach-run-store.service';
 import { AiUsageKind } from '@prisma/client';
 
 function installBackgroundPersistence(service: AiService) {
@@ -12,17 +14,21 @@ function installBackgroundPersistence(service: AiService) {
     finish: jest.fn(() => []),
   };
   const coachRuns = {
-    beginBackground: jest.fn(async () => ({
-      handle: {
-        projector,
-        revision: 0,
-        userId: 'user-1',
-        sessionId: 'background:task',
-        operationId: 'operation-1',
-        previousExecutionMs: 0,
-      },
-    })),
-    checkpoint: jest.fn(async () => undefined),
+    beginBackground: jest.fn(
+      async (_input: Parameters<CoachRunStore['beginBackground']>[0]) => ({
+        handle: {
+          projector,
+          revision: 0,
+          userId: 'user-1',
+          sessionId: 'background:task',
+          operationId: 'operation-1',
+          previousExecutionMs: 0,
+        },
+      }),
+    ),
+    checkpoint: jest.fn<Promise<void>, Parameters<CoachRunStore['checkpoint']>>(
+      async () => undefined,
+    ),
     heartbeat: jest.fn(async () => null),
   };
   const operations = {
@@ -43,6 +49,61 @@ function installBackgroundPersistence(service: AiService) {
   };
   Object.defineProperty(service, 'aiUsage', { value: aiUsage });
   return { coachRuns, operations, projector, aiUsage };
+}
+
+function installActivityReview(
+  service: AiService,
+  trigger: 'IMPORT' | 'MANUAL' = 'IMPORT',
+) {
+  const prepared = {
+    outcome: 'READY' as const,
+    review: {
+      id: 'review-1',
+      activityId: 42,
+      userId: 'user-1',
+      trigger,
+    },
+    lang: 'zh',
+    unifiedInput: {
+      sport_context: {
+        family: 'RUNNING',
+        sportCode: 'RUN',
+        allowedMetricDomains: [],
+        coachingFocus: [],
+        forbiddenInferences: [],
+      },
+      temporal_context: {
+        activity_local_date: '2026-07-29',
+        activity_timezone: 'Asia/Shanghai',
+        historical_load_as_of: '2026-07-29',
+        historical_load_window_days: 14,
+      },
+    },
+    evidenceSnapshot: {
+      version: 'evidence-v1',
+      unifiedInput: {},
+      lang: 'zh',
+    },
+    evidenceHash: 'evidence-hash',
+  };
+  const persistGeneratedReview = jest.fn(async () => ({
+    outcome: 'SUCCEEDED' as const,
+    activityId: 42,
+    weightedTokens: 321,
+  }));
+  Object.defineProperty(service, 'activityAiReviewService', {
+    value: {
+      prepareGeneration: jest.fn(async () => prepared),
+      persistGeneratedReview,
+    },
+  });
+  Object.defineProperty(service, 'logger', {
+    value: { log: jest.fn() },
+  });
+  Object.defineProperty(service, 'getCoachModel', {
+    value: () => 'fallback-model',
+  });
+  return { prepared, persistGeneratedReview };
 }
 
 describe('AiService background coach tasks', () => {
@@ -67,7 +128,7 @@ describe('AiService background coach tasks', () => {
       loadCoachContextFromDb: { value: history },
     });
     await expect(
-      service.coachStream({
+      service['runCoachTurn']({
         session: { user: { id: 'athlete' } } as never,
         sid: 'state-session',
         prompt: 'Refresh state.',
@@ -101,7 +162,7 @@ describe('AiService background coach tasks', () => {
         };
       })(),
     );
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
     const result = await service.runBackgroundCoachTask({
       userId: 'user-1',
       lang: 'en',
@@ -177,7 +238,7 @@ describe('AiService background coach tasks', () => {
         };
       })();
     });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     const run = await service.runBackgroundCoachTask({
       userId: 'user-1',
@@ -242,20 +303,22 @@ describe('AiService background coach tasks', () => {
     ).toBeLessThan(persistence.operations.complete.mock.invocationCallOrder[0]);
   });
 
-  it('keeps a completed run durable when delivery fails so a retry can replay it', async () => {
+  it('replays an activity review after its billing operation disappears during delivery', async () => {
     const service = Object.create(AiService.prototype) as AiService;
-    Object.defineProperty(service, 'getCoachModel', {
-      value: () => 'fallback-model',
-    });
+    const { prepared, persistGeneratedReview } = installActivityReview(
+      service,
+      'MANUAL',
+    );
     const persistence = installBackgroundPersistence(service);
     persistence.operations.markDelivered.mockRejectedValueOnce(
-      new Error('delivery unavailable'),
+      new Error('operation not found'),
     );
+    const review = { markdown: '### 结论\n训练稳定。' };
     const coachStream = jest.fn(async (input: Record<string, unknown>) => {
       const task = input.backgroundTask as {
         submitResult: (result: unknown) => Promise<void> | void;
       };
-      await task.submitResult({ summary: '已完成。' });
+      await task.submitResult(review);
       return (async function* () {
         yield {
           type: 'result' as const,
@@ -265,25 +328,55 @@ describe('AiService background coach tasks', () => {
         };
       })();
     });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     await expect(
-      service.runBackgroundCoachTask({
-        userId: 'user-1',
-        lang: 'zh',
-        taskType: 'ATHLETE_CHECK_IN',
-        activeSkillName: 'readiness-check',
-        instructions: 'Assess today.',
-        validateResult: (result) => result as { summary: string },
-      }),
-    ).rejects.toThrow('delivery unavailable');
+      service.processQueuedActivityAiReview(prepared.review.id),
+    ).rejects.toThrow('operation not found');
+    expect(persistGeneratedReview).not.toHaveBeenCalled();
 
     expect(persistence.coachRuns.checkpoint).toHaveBeenLastCalledWith(
       expect.any(Object),
       'completed',
       undefined,
-      expect.objectContaining({ resultType: 'ATHLETE_CHECK_IN' }),
+      expect.objectContaining({
+        resultType: 'ACTIVITY_REVIEW',
+        resultRef: expect.objectContaining({ result: review }),
+      }),
     );
+
+    const storedResult =
+      persistence.coachRuns.checkpoint.mock.lastCall?.[3]?.resultRef;
+    const [initialInput] = persistence.coachRuns.beginBackground.mock.calls[0];
+    const replay = jest.fn(async () => ({
+      replay: {
+        runId: 'run-1',
+        operationId: 'operation-1',
+        result: storedResult,
+      },
+    }));
+    Object.assign(persistence.coachRuns, { beginBackground: replay });
+
+    await expect(
+      service.processQueuedActivityAiReview(prepared.review.id),
+    ).resolves.toMatchObject({ outcome: 'SUCCEEDED', activityId: 42 });
+    expect(replay).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dedupeKey: initialInput.dedupeKey,
+        inputHash: initialInput.inputHash,
+        triggerRef: prepared.review.id,
+      }),
+    );
+    expect(persistGeneratedReview).toHaveBeenCalledTimes(1);
+    expect(persistGeneratedReview).toHaveBeenCalledWith(
+      expect.objectContaining({ prepared, markdown: review.markdown }),
+    );
+    expect(coachStream).toHaveBeenCalledTimes(1);
+    expect(persistence.operations.get).toHaveBeenCalledWith(
+      'user-1',
+      'operation-1',
+    );
+    expect(persistence.operations.markDelivered).toHaveBeenCalledTimes(1);
     expect(persistence.operations.fail).not.toHaveBeenCalled();
     expect(persistence.operations.complete).not.toHaveBeenCalled();
   });
@@ -315,7 +408,7 @@ describe('AiService background coach tasks', () => {
         };
       })();
     });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     const run = await service.runBackgroundCoachTask({
       userId: 'user-1',
@@ -388,7 +481,7 @@ describe('AiService background coach tasks', () => {
     };
     Object.defineProperty(service, 'coachRuns', { value: coachRuns });
     Object.defineProperty(service, 'operations', { value: operations });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     const replayed = await service.runBackgroundCoachTask({
       userId: 'user-1',
@@ -440,7 +533,7 @@ describe('AiService background coach tasks', () => {
     };
     Object.defineProperty(service, 'coachRuns', { value: coachRuns });
     Object.defineProperty(service, 'operations', { value: operations });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     await expect(
       service.runBackgroundCoachTask({
@@ -496,7 +589,7 @@ describe('AiService background coach tasks', () => {
     };
     Object.defineProperty(service, 'coachRuns', { value: coachRuns });
     Object.defineProperty(service, 'operations', { value: operations });
-    Object.defineProperty(service, 'coachStream', { value: jest.fn() });
+    Object.defineProperty(service, 'runCoachTurn', { value: jest.fn() });
 
     const replayed = await service.runBackgroundCoachTask({
       userId: 'user-1',
@@ -547,7 +640,7 @@ describe('AiService background coach tasks', () => {
         };
       })();
     });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     const result = await service.runAnonymousCoachTask({
       lang: 'zh',
@@ -625,54 +718,7 @@ describe('AiService background coach tasks', () => {
 
   it('runs a queued activity review through the durable activity-review skill', async () => {
     const service = Object.create(AiService.prototype) as AiService;
-    const prepared = {
-      outcome: 'READY' as const,
-      review: {
-        id: 'review-1',
-        activityId: 42,
-        userId: 'user-1',
-        trigger: 'IMPORT' as const,
-      },
-      lang: 'zh',
-      unifiedInput: {
-        sport_context: {
-          family: 'RUNNING',
-          sportCode: 'RUN',
-          allowedMetricDomains: [],
-          coachingFocus: [],
-          forbiddenInferences: [],
-        },
-        temporal_context: {
-          activity_local_date: '2026-07-29',
-          activity_timezone: 'Asia/Shanghai',
-          historical_load_as_of: '2026-07-29',
-          historical_load_window_days: 14,
-        },
-      },
-      evidenceSnapshot: {
-        version: 'evidence-v1',
-        unifiedInput: {},
-        lang: 'zh',
-      },
-      evidenceHash: 'evidence-hash',
-    };
-    const persistGeneratedReview = jest.fn(async () => ({
-      outcome: 'SUCCEEDED' as const,
-      activityId: 42,
-      weightedTokens: 321,
-    }));
-    Object.defineProperty(service, 'activityAiReviewService', {
-      value: {
-        prepareGeneration: jest.fn(async () => prepared),
-        persistGeneratedReview,
-      },
-    });
-    Object.defineProperty(service, 'logger', {
-      value: { log: jest.fn() },
-    });
-    Object.defineProperty(service, 'getCoachModel', {
-      value: () => 'fallback-model',
-    });
+    const { prepared, persistGeneratedReview } = installActivityReview(service);
     const runBackgroundCoachTask = jest.fn(
       async (input: { validateResult: (value: unknown) => unknown }) => ({
         result: input.validateResult({ markdown: '### 结论\n训练稳定。' }),
@@ -827,7 +873,7 @@ describe('AiService background coach tasks', () => {
         value: runBackgroundCoachTask,
       });
 
-      const result = await service.generatePlanReviewJudgment({
+      const result = await new TrainingCoachAgent(service).generatePlanReviewJudgment({
         userId: 'user-1',
         lang: 'zh',
         scale,

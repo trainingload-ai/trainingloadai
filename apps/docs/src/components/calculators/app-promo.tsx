@@ -1,5 +1,6 @@
 "use client";
 
+import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import Image from "next/image";
 import { useEffect } from "react";
 import { ArrowRight } from "lucide-react";
@@ -45,10 +46,11 @@ export function CalculatorPromo({
         : variant === "fitness"
           ? `/vo2-max-calculator/phone-vo2-${locale}.webp`
           : `/power-zones-calculator/phone-pmc-dark-${locale}.webp`;
-  const webSrc =
+  const webSrc = productScreenshotUrl(
     variant === "plan"
       ? `/css-calculator/web-plan-dark-${locale}.webp`
-      : "/ftp-calculator/web-pmc.webp";
+      : "/ftp-calculator/web-pmc.webp",
+  );
   const steps = t.raw("steps") as { title: string; body: string }[];
   useEffect(() => {
     if (toolId) trackToolEvent("tool_viewed", toolId, { lang });

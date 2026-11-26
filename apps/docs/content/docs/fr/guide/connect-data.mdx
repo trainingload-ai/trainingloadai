@@ -1,80 +1,119 @@
 ---
-title: Connect Data
-description: Connect training data to Trainingload.ai so completed workouts can feed activity analysis, training load, plans, calendar views, and AI Coach reviews.
-keywords:
-  [
-    "connect training data",
-    "Strava sync",
-    "activity import",
-    "Trainingload.ai data",
-  ]
+title: Connecter les données d’entraînement
+description: Choisissez une source, importez une séance connue, suivez le traitement, vérifiez les doublons et les capteurs, puis confirmez que l’enregistrement est prêt à être analysé.
+seoTitle: "Connecter et vérifier vos données d’entraînement | Trainingload.ai"
+seoDescription: "Choisissez la synchronisation de plateforme, l’importation de fichiers ou l’enregistrement mobile. Vérifiez le résultat, les doublons et les capteurs."
+keywords: ["connecter données entraînement", "importation activité", "téléversement FIT", "synchronisation séances", "guide Trainingload.ai"]
 ---
 
-# Connect Data
+# Connecter les données d’entraînement
 
-Trainingload.ai needs completed workouts before it can analyze execution, load, and readiness. You can bring data in through platform sync or by uploading files.
+Importez une séance terminée dans Trainingload.ai, puis vérifiez sa date, sa source et son détail. Choisissez une connexion de plateforme, un téléversement de fichier ou un enregistrement sur téléphone selon l’endroit où se trouve l’enregistrement d’origine.
 
-## What happens after data arrives
+[Parcourez les activités dans la Démo](https://demo.trainingload.ai/en/activities). Téléverser des fichiers ou autoriser une plateforme tierce nécessite votre propre compte. La capture d’écran du téléversement utilise un compte d’exemple dans l’application réelle.
 
-Imported workouts go through a processing pipeline:
+## 1. Choisir une source
 
-1. **Receive** the source activity or file.
-2. **Normalize** the data into a common activity format.
-3. **Check duplicates** so repeated uploads do not create confusing history.
-4. **Materialize** the activity in your account.
-5. **Build analysis data** for charts, maps, and metrics.
-6. **Compute training metrics** such as load, pace, power, heart rate, and PMC signals.
+| Méthode | Quand l’utiliser | À vérifier ensuite |
+| --- | --- | --- |
+| Connexion à une plateforme prise en charge | Une plateforme source héberge les activités que vous souhaitez importer ou synchroniser | Le sens de synchronisation proposé, la plage de dates, le résultat de la tâche, puis l’activité importée. |
+| Fichier original FIT, TCX ou GPX | Une séance précise, une archive ou une source sans connexion utilisable | L’inspection par fichier et le résultat du lot d’importation. |
+| Enregistrement mobile | Vous enregistrez une séance directement avec l’application Trainingload.ai | La synchronisation de l’enregistrement terminé et l’activité générée. |
 
-You may see an activity before every chart is ready. If analysis is still running, wait for the status to finish and refresh the page.
+Pour les capacités des plateformes et l’autorisation, consultez [Intégrations d’applications d’entraînement](/fr/docs/guide/integrations) et [Connecter Strava, Garmin et COROS](/fr/docs/guide/connect-third-party-platforms). Utilisez les opérations effectivement proposées par votre déploiement et votre compte. Une importation ponctuelle d’historique et une synchronisation continue sont deux fonctionnalités distinctes.
 
-## Platform sync
+## 2. Définir une source principale pour une séance connue
 
-If you connect a supported third-party provider, new activities can be brought into Trainingload.ai without manual file upload.
+Identifiez la date, le sport et la durée approximative d’une séance source. Si une même séance transite d’un appareil vers plusieurs services, choisissez la voie principale avant de lancer un rattrapage massif d’historique.
 
-Use platform sync when:
+Conservez l’enregistrement d’origine disponible. Un fichier converti ou limité au résumé peut contenir des champs différents de l’export FIT d’origine. L’importation d’activités exige un enregistrement d’activité ; un export de santé quotidienne sans séance relève d’une autre catégorie de données.
 
-- You record workouts on another service.
-- You want recent activities to appear automatically.
-- You want AI Coach and plans to use the latest completed training.
+## 3. Importer via la source choisie
 
-If a synced activity looks incomplete, check the original source first. Missing heart rate, power, GPS, or elevation data usually comes from the source file or device permissions.
+### Téléversement de fichier
 
-## File upload
+1. Ouvrez **Activités** et cliquez sur le point d’entrée de téléversement.
+2. Sélectionnez le fichier d’origine et attendez l’inspection du format.
+3. Vérifiez le format détecté et les éventuelles erreurs de validation. L’extension seule ne garantit pas le format réel du fichier.
+4. Poursuivez le téléversement et vérifiez tout avertissement de doublon.
+5. Suivez les résultats fichier par fichier dans la fenêtre de progression du lot. Rouvrez le lot récent si vous avez fermé la fenêtre.
 
-Use file upload when:
+<DocsScreenshot
+  id="activity-import-entry"
+  title="Choisir le fichier d’activité d’origine"
+  description="Compte Web synthétique. La fenêtre de téléversement accepte les fichiers d’activité et propose une action de confirmation séparée. Sélectionner un fichier et finaliser son importation sont deux étapes distinctes."
+  imageAlt="Fenêtre de téléversement d’activité avec la zone de sélection de fichiers et le bouton de téléversement"
+  route="Activités → Téléverser"
+  demoLabel="Parcourir les activités existantes dans la Démo"
+/>
 
-- You have a GPX / TCX / FIT file.
-- You want to import historical workouts.
-- You recorded a workout outside the connected platform.
-- You need to retry or test a specific activity.
+Consultez [Importer des fichiers d’activité](/fr/docs/guide/upload-activity-files) pour le parcours complet d’inspection, de gestion des doublons et de suivi de lot.
 
-See [Upload Activity Files](/docs/guide/upload-activity-files) for the step-by-step flow.
+### Synchronisation de plateforme
 
-## Data quality checklist
+Ouvrez les paramètres de connexion de la plateforme, lisez le sens des données proposé, terminez l’autorisation et lancez l’importation initiale ou la synchronisation lorsqu’elle est proposée. Attendez le résultat de cette tâche, puis retrouvez la séance connue dans Activités.
 
-For the best analysis, make sure your files contain:
+Les conditions de synchronisation et les plages de rattrapage varient selon les plateformes. Un compte indiqué comme connecté ne prouve pas que la séance historique attendue est déjà arrivée. Ne saisissez vos identifiants que dans le flux de connexion de la plateforme.
 
-- Accurate start time and time zone when available.
-- Distance and duration.
-- GPS track for outdoor routes.
-- Heart rate if you want HR zones, TRIMP, EF, or decoupling.
-- Power if you want FTP/CP/NP/VI and power-based TSS.
-- Elevation if you want GAP, NGP, route analysis, or climb context.
+### Enregistrement mobile
 
-## How connected data is used
+Terminez et sauvegardez l’enregistrement, puis laissez l’application le synchroniser. Vérifiez l’état de récupération ou les téléversements en attente avant de relancer un autre enregistrement de la même séance. Suivez [Enregistrement mobile](/fr/docs/guide/mobile-recording).
 
-Once processed, workouts can appear in:
+## 4. Distinguer la progression d’importation de l’analyse d’activité
 
-- **Activities**: feed, search, detail pages, charts, and map.
-- **Dashboard**: summary cards and trend views.
-- **PMC**: CTL, ATL, TSB, and related load metrics.
-- **Plans**: actual workouts can link back to planned sessions.
-- **AI Coach**: reviews can reference real completed training.
+| Ce que vous voyez | Ce qu’il faut vérifier |
+| --- | --- |
+| Un élément d’importation est en file d’attente ou en cours de traitement | Attendez son statut final dans le lot d’importation. |
+| Terminé ou lien vers l’activité | Ouvrez l’activité et vérifiez son propre état d’analyse. |
+| Ignoré en tant que doublon | Confirmez à quelle activité existante il correspond. |
+| Échec partiel | Identifiez quel fichier ou quelle analyse a échoué et utilisez les résultats disponibles. |
+| Échec | Lisez le message d’erreur de l’élément avant de réessayer avec le fichier d’origine ou l’action de la plateforme. |
 
-For day-to-day activity management, see [Activities Feed and Search](/docs/guide/activity-feed-search).
+Une activité peut apparaître avant que tous les graphiques ou indicateurs dérivés soient calculés. Des données de capteurs absentes, un échec de requête de traitement et un fichier source non pris en charge appellent des réponses différentes.
 
-## Connect Suunto
+## 5. Vérifier l’activité enregistrée
 
-Open **Account → Third Party Connections → Suunto**, then select **Connect with OAuth**. After you approve workout access on Suunto, Trainingload.ai queues an initial import of recent workouts. New workouts are imported through Suunto notifications with scheduled reconciliation as a fallback.
+Vérifiez la source, le sport, la date locale, la durée et la distance. Examinez ensuite uniquement les mesures que l’enregistrement contient réellement.
 
-You can return to the Suunto settings dialog to run a manual sync, disable automatic synchronization, reconnect an expired authorization, or disconnect the account. Disconnecting stops future imports but does not delete activities that were already imported.
+| Données sources | Ce qu’elles permettent |
+| --- | --- |
+| Échantillons GPS | Un tracé enregistré et un contexte géographique. |
+| Échantillons de fréquence cardiaque | Graphiques cardiaques et analyses dérivées prises en charge. |
+| Échantillons de puissance | Graphiques de puissance et analyses basées sur les seuils. La puissance estimée est indiquée séparément. |
+| Séries temporelles exploitables | Graphiques détaillés, inspection chronologique et statistiques sur plage lorsque c’est pris en charge. |
+
+Une connexion source ne peut pas fournir des mesures qui n’ont jamais été enregistrées ou partagées. Si un champ attendu manque, comparez la plateforme source et le fichier d’origine avant de relancer l’importation.
+
+## 6. Relier l’activité à votre suivi quotidien
+
+Ouvrez le [détail de l’activité](/fr/docs/guide/activity-detail) pour l’examiner. Utilisez le calendrier pour vérifier sa date locale et l’associer à la séance planifiée correspondante. Consultez ensuite le [PMC](/fr/docs/guide/pmc-forecast) avec le sport approprié et l’historique disponible.
+
+La synchronisation des activités ne signifie pas automatiquement que le sommeil, la VFC ou l’ensemble des mesures de santé quotidienne ont été importés. Vérifiez chaque catégorie de données séparément.
+
+## Vérifier le résultat
+
+La séance connue doit apparaître une seule fois via la source choisie, avec un résultat d’importation et d’analyse clair, la bonne source, la bonne date et une couverture de capteurs cohérente. Si elle correspond à une séance planifiée, confirmez le lien après avoir vérifié son identité.
+
+## Questions fréquentes
+
+### Une plateforme est connectée mais l’activité n’apparaît pas
+
+Vérifiez sa plage prise en charge, le compte source, le résultat de l’opération et les filtres de la liste d’activités. Lancez une seule fois la synchronisation manuelle proposée, puis attendez la fin de la tâche avant de démarrer une autre importation.
+
+### La même séance apparaît deux fois
+
+Comparez la source, l’heure de début, la durée et la couverture des capteurs. Vérifiez s’il existe un double transfert entre plateformes avant de supprimer un enregistrement, surtout si l’une des copies est liée à un plan.
+
+### Le graphique est vide après l’importation
+
+Vérifiez l’état de traitement de l’activité et assurez-vous que la source contient des échantillons exploitables. Des valeurs résumées seules ne suffisent pas pour afficher tous les graphiques. Utilisez le bouton de nouvelle tentative affiché en cas d’échec de requête réel.
+
+### La déconnexion supprime-t-elle mon historique importé ?
+
+La déconnexion d’une plateforme et la suppression d’activités sont deux opérations distinctes. Lisez l’effet indiqué dans la fenêtre de connexion avant de confirmer, puis vérifiez vos activités existantes séparément.
+
+## Continuer
+
+- [Importer des fichiers d’activité](/fr/docs/guide/upload-activity-files)
+- [Détail de l’activité](/fr/docs/guide/activity-detail)
+- [Calendrier](/fr/docs/guide/calendar)

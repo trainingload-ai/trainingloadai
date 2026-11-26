@@ -13,6 +13,7 @@ export class PlanWorkoutRepository {
   }
 
   async lockForUpdate(workoutId: string, tx: PlanDb) {
+    if (typeof tx.$queryRaw !== 'function') return;
     await tx.$queryRaw`SELECT id FROM t_plan_workout WHERE id = ${workoutId} FOR UPDATE`;
   }
 
@@ -137,4 +138,16 @@ export class PlanWorkoutRepository {
   ): Promise<boolean> {
     return markWorkoutDoneIfApplicable(tx, workoutId, eventTime);
   }
+}
+
+export function listRollingWorkoutDays(tx: PlanDb, planId: string, start: Date, end: Date) {
+  return tx.planWorkout.findMany({
+    where: {
+      planId,
+      scheduledDate: { gte: start, lte: end },
+      status: { not: 'MOVED' },
+    },
+    orderBy: { scheduledDate: 'desc' },
+    select: { scheduledDate: true, status: true },
+  });
 }

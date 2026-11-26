@@ -92,6 +92,7 @@ describe("PlanCycleProgressChart", () => {
     });
     expect(selectedWeek).not.toHaveAttribute("aria-current");
     expect(currentWeek).toHaveAttribute("aria-current", "step");
+    expect(currentWeek).not.toHaveTextContent("当前");
 
     rerender(chartUi({ selectedKey: "3" }));
 

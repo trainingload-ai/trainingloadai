@@ -85,7 +85,7 @@ function duplicates(pages, field) {
 let totalPages = 0;
 let priorityCount = 0;
 
-for (const locale of ["en", "zh"]) {
+for (const locale of ["en", "zh", "ja", "zh-hant"]) {
   const localeRoot = path.join(contentRoot, locale);
   const pages = walk(localeRoot).map((file) => ({
     file,

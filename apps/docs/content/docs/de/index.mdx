@@ -1,79 +1,93 @@
 ---
-title: Introduction
-description: Trainingload.ai brings your plan, completed workouts, training load, and AI coach review together so you can train smarter and keep improving.
+title: Trainingload.ai Dokumentation
+description: Erfahre, wie du Aktivitäten importierst, Trainingsanalysen nutzt, einen Trainingsplan erstellst und den KI-Coach einsetzt.
+seoTitle: "Trainingload.ai Doku: Trainingspläne, Belastung & KI-Coach"
+seoDescription: "Erfahre, wie du dein Profil einrichtest, Aktivitäten importierst, einen Trainingsplan erstellst, Trainingsanalysen und Belastung prüfst und den KI-Coach nutzt."
+keywords:
+  [
+    "Trainingload.ai Dokumentation",
+    "Trainingsplan App Anleitung",
+    "Trainingsbelastung Analyse",
+    "KI-Coach Training",
+  ]
 ---
 
-# Introduction
+# Trainingload.ai Dokumentation
 
-## What is Trainingload.ai?
+Starte damit, [deine erste Aktivität zu importieren](/de/docs/guide/getting-started), um Aktivitätsanalysen und deine Trainingsbelastung zu erkunden. Anschließend kannst du einen Trainingsplan erstellen oder den KI-Coach zu deinem Training befragen.
 
-**Trainingload.ai** is an AI coaching system built around the training plan. It brings your plan, completed workouts, training load, and AI coach review together so you can train smarter, recover better, and keep improving.
+## Funktionsanleitungen [#one-complete-training-loop]
 
-You can connect data from **other platforms**, or import **GPX / TCX / FIT** files directly. Trainingload.ai uses that activity feedback to explain plan execution, load changes, recovery signals, and possible workout adjustments.
+<DocsTaskGrid>
+  <DocsTaskCard
+    href="/de/docs/guide/getting-started"
+    preload
+    eyebrow="Einstieg"
+    title="Erste Aktivität importieren"
+    description="Verbinde eine Trainingsplattform oder lade eine Datei hoch und öffne die importierte Aktivität für die Detailanalyse."
+    action="Import-Schritten folgen"
+    screenshotId="getting-started-web-home"
+    imageAlt="Trainingload.ai Startseite im Web und Heute-Ansicht auf dem Smartphone"
+  />
+  <DocsTaskCard
+    href="/de/docs/guide/connect-data"
+    eyebrow="Trainingsdaten"
+    title="Datenimport einrichten"
+    description="Erfahre, wie Plattform-Synchronisierung, FIT-/TCX-/GPX-Uploads und die Aufzeichnung per Smartphone funktionieren."
+    action="Datenquelle wählen"
+    screenshotId="integrations-connections"
+    imageAlt="Plattformverbindungen von Trainingload.ai im Web und auf dem Smartphone"
+  />
+  <DocsTaskCard
+    href="/de/docs/guide/create-training-plan"
+    eyebrow="Planung"
+    title="Trainingsplan erstellen"
+    description="Nutze eine Vorlage, füge Einheiten selbst hinzu oder lass den KI-Coach einen Entwurf erstellen, und lege deine Trainingstermine fest."
+    action="Trainingsplan erstellen"
+    screenshotId="plan-active-summary"
+    imageAlt="Aktueller Trainingsplan in Trainingload.ai im Web und auf dem Smartphone"
+  />
+  <DocsTaskCard
+    href="/de/docs/guide/today-and-current-state"
+    eyebrow="Tägliches Training"
+    title="Heutiges Training ansehen"
+    description="Sieh dir auf der Startseite die heutige Einheit und Empfehlungen an. Im Trainingskalender findest du absolvierte Aktivitäten und kommende Einheiten."
+    action="Tägliches Training erkunden"
+    screenshotId="calendar-plan-actual"
+    imageAlt="Trainingskalender von Trainingload.ai im Web und auf dem Smartphone"
+  />
+  <DocsTaskCard
+    href="/de/docs/guide/activity-detail"
+    eyebrow="Aktivitätsanalyse"
+    title="Aktivitätsanalyse erkunden"
+    description="Öffne eine Aktivität, um Diagramme, Strecke, Runden und Trainingsbelastung im Detail zu prüfen."
+    action="Aktivitätsdetails ansehen"
+    screenshotId="activity-detail-review"
+    imageAlt="Aktivitätsdetails in Trainingload.ai im Web und auf dem Smartphone"
+  />
+  <DocsTaskCard
+    href="/de/docs/guide/ai-coach"
+    eyebrow="KI-Coach"
+    title="KI-Coach fragen"
+    description="Stell Fragen zu einer Aktivität, werte deinen Fortschritt aus oder besprich die nächste Einheit. Planänderungen bestätigst immer du."
+    action="KI-Coach kennenlernen"
+    screenshotId="ai-coach-contextual-review"
+    imageAlt="KI-Coach-Unterhaltung in Trainingload.ai im Web und auf dem Smartphone"
+  />
+</DocsTaskGrid>
 
----
+## Wenn etwas nicht wie erwartet läuft [#use-a-real-scenario]
 
-## Who is Trainingload.ai for?
+- [Eine importierte Aktivität oder Diagrammdaten fehlen](/de/docs/workflow/data-and-load-problems)
+- [Eine Einheit wurde ausgelassen, verkürzt oder zusätzlich absolviert](/de/docs/workflow/when-training-changes)
+- [So wertest du eine Trainingswoche strukturiert aus](/de/docs/workflow/weekly-review)
 
+## Weitere Hilfe [#reference-when-you-need-it]
 
-- **Runners / cyclists / swimmers**: want their plan, activities, and load signals in one consistent framework.
-- **Plan-driven athletes**: want to know whether today's training matches the plan, and whether tomorrow should change.
-- **Data-driven trainees**: care about heart rate, power, pace, and load, but want those metrics to support progress instead of becoming noise.
-- **Long-term builders**: prioritize sustainability, recovery, and load rhythm over short-term volume spikes.
+- [Aktivitäten, Trainingspläne und Einheiten verstehen](/de/docs/guide/product-terms-and-statuses)
+- [Trainingsbelastung, Herzfrequenz und Leistung verstehen](/de/docs/metrics)
+- [Ausdauer- und Krafteinheiten bearbeiten](/de/docs/planning)
+- [Auf eigenem Server selbst hosten](/de/docs/self-host)
+- [ChatGPT, Codex oder Claude verbinden](/de/docs/mcp)
 
----
-
-## Core Features Overview
-
-Trainingload.ai provides an end-to-end coaching flow:
-
-### 1. Training Plan as the Core Object
-Create, activate, review, and adjust structured training plans instead of treating plans as a side note next to activity charts.
-
-### 2. Real Activity Feedback
-Import or sync workouts, then connect real training back to the planned session so execution quality becomes visible.
-
-### 3. Scientific Load & Recovery (PMC)
-Quantify your training using the classic **PMC (Performance Management Chart)** model:
-- **Fitness (CTL)**: long-term accumulated training adaptation.
-- **Fatigue (ATL)**: short-term stress from recent training.
-- **Form (TSB)**: readiness derived from the balance between the two.
-Use this as evidence for progress: build when ready, recover when needed, and adjust before training stalls.
-
-### 4. AI Workout Review
-Ask the AI coach to review daily or weekly plan execution. It can compare planned workouts, actual activities, and readiness signals before recommending next steps.
-
-### 5. Confirmable Workout Adjustments
-AI can draft a before/after workout adjustment, but the saved plan changes only after you review and apply it.
-
-### 6. Metric Explanations & References
-Clear explanations for common training metrics so you can understand and apply them.
-
-### 7. Best Performance Tracking
-Track best performances (e.g., best results by distance) to observe capability ceilings and long-term improvement.
-
-### 8. Calendar & Planning Views
-Manage planned workouts and real activities together in calendar and daily views.
-
----
-
-## User Guide
-
-Use these guides when you want the product workflow rather than metric theory:
-
-- [Getting Started](/docs/guide/getting-started): set up the basic training loop.
-- [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones): calibrate profile values, thresholds, load sources, and zones.
-- [Connect Data](/docs/guide/connect-data): understand sync, upload, processing, and data quality.
-- [Activities Feed and Search](/docs/guide/activity-feed-search): review, filter, export, delete, and link completed workouts.
-- [Calendar](/docs/guide/calendar): see planned workouts and completed activities by date.
-- [Create a Training Plan](/docs/guide/create-training-plan): build a manual or AI-assisted plan.
-- [Manage an Active Plan](/docs/guide/manage-active-plan): execute, link activities, and compare planned vs actual load.
-- [AI Coach](/docs/guide/ai-coach): use chat, reviews, plan drafts, and follow-up.
-
----
-
-## Get Started
-
-Create or generate a plan, activate it, then bring real activity data back into the plan loop.
-
-[**Start Now**](https://app.trainingload.ai)
+Wenn du dir die Oberfläche zuerst ansehen möchtest, [öffne die Demo](https://demo.trainingload.ai/en) und stöbere durch Beispielaktivitäten und Trainingspläne.

@@ -62,14 +62,17 @@ function WeekWorkoutCard({
 
 export function PlanDetailWeekBreakdown({
   weeks,
+  planStartDate,
   t,
   onOpenWorkout,
 }: {
   weeks: WeekGroup[];
+  planStartDate?: string | null;
   t: TranslateFn;
   onOpenWorkout: (workout: DerivedWorkout) => void;
 }) {
   const rollingT = useTranslations("RollingPlan");
+  const firstPlanDay = planStartDate?.slice(0, 10);
   const hasWorkout = weeks.some((week) =>
     week.days.some((day) => day.workouts.length > 0),
   );
@@ -91,6 +94,9 @@ export function PlanDetailWeekBreakdown({
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1 [-webkit-overflow-scrolling:touch]">
           <div className="space-y-3">
             {weeks.map((week) => {
+              const days = week.calendarRange && firstPlanDay
+                ? week.days.filter((day) => !day.dateKey || day.dateKey >= firstPlanDay)
+                : week.days;
               const weekWorkoutCount = week.days.reduce(
                 (sum, day) => sum + day.workouts.length,
                 0,
@@ -116,7 +122,7 @@ export function PlanDetailWeekBreakdown({
                     <div>
                       <div className="text-sm font-semibold">
                         {week.calendarRange
-                          ? `${week.calendarRange.from} – ${week.calendarRange.through}`
+                          ? `${days[0]?.dateKey ?? week.calendarRange.from} – ${week.calendarRange.through}`
                           : t("weekBreakdown.weekLabel", {
                               week: week.weekIndex,
                             })}
@@ -140,7 +146,7 @@ export function PlanDetailWeekBreakdown({
                   </div>
 
                   <div className="mt-2 space-y-1.5">
-                    {week.days.map((day) => (
+                    {days.map((day) => (
                       <div
                         key={`${week.weekIndex}-${day.dayIndex}`}
                         className="rounded-md bg-background px-2 py-1.5 dark:bg-black/20"

@@ -114,11 +114,11 @@ export function McpTerminalDemo({
           right={
             <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-400 sm:text-[11px]">
               <span className="hidden text-neutral-600 md:inline">
-                demo {String(scenarioIndex + 1).padStart(2, "0")} / {""}
+                {copy.demoLabel} {String(scenarioIndex + 1).padStart(2, "0")} /{" "}
                 {String(copy.scenarios.length).padStart(2, "0")}
               </span>
               <CircleDot className="size-3" />
-              <span className="hidden sm:inline">connected</span>
+              <span className="hidden sm:inline">{copy.connectedLabel}</span>
             </span>
           }
         />

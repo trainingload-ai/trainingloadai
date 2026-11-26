@@ -10,7 +10,8 @@ import { useActivePlan } from "@/api/usePlans";
 import { usePMCData } from "@/api/usePMC";
 import { useMonthlyActivities } from "@/hooks/useActivities";
 import { queryKeys } from "@/lib/query-keys";
-import { generateCalendarWeeks } from "./utils";
+import { useCalendarWeekStartsOn } from "@/lib/calendar-week-start";
+import { generateCalendarWeeks, startOfCalendarWeek } from "./utils";
 import {
   getCompetitionEvents,
   type CompetitionEvent,
@@ -92,31 +93,18 @@ function buildRangeStats(args: {
   return result;
 }
 
-export function useCalendarViewModel(
+export function useCalendarSchedule(
   currentMonth: Dayjs,
   requestedRange?: { start: Dayjs; end: Dayjs } | null,
+  meta?: { errorSurface: "inline" },
+  enabled = true,
 ) {
   const locale = useLocale();
-  const t = useTranslations("CalendarExperience");
+  const weekStartsOn = useCalendarWeekStartsOn();
   const weeks = React.useMemo(
-    () => generateCalendarWeeks(currentMonth, locale),
-    [currentMonth, locale],
+    () => generateCalendarWeeks(currentMonth, locale, weekStartsOn),
+    [currentMonth, locale, weekStartsOn],
   );
-
-  const [selectedDate, setSelectedDate] = React.useState<Dayjs>(() => dayjs());
-
-  React.useEffect(() => {
-    const visible = weeks.flat();
-    const inVisibleRange = visible.some((date) =>
-      date.isSame(selectedDate, "day"),
-    );
-    if (inVisibleRange) return;
-
-    const fallback = currentMonth.isSame(dayjs(), "month")
-      ? dayjs()
-      : currentMonth.startOf("month");
-    setSelectedDate(fallback);
-  }, [currentMonth, selectedDate, weeks]);
 
   const visibleFetchStart = weeks[0]?.[0]?.subtract(7, "day");
   const visibleFetchEnd = weeks[weeks.length - 1]?.[6]?.add(7, "day");
@@ -137,46 +125,15 @@ export function useCalendarViewModel(
     workoutsByDate: activePlanWorkoutsByDate,
     range,
     active,
-  } = useActivePlan(true);
+  } = useActivePlan(enabled);
   const activePlanId = active?.plan?.id ?? null;
-  const { data: scheduledWorkouts } = useQuery({
+  const scheduleQuery = useQuery({
     queryKey: queryKeys.plans.scheduled(fetchStart, fetchEnd),
     queryFn: () => getScheduledWorkouts(fetchStart!, fetchEnd!),
-    enabled: Boolean(fetchStart && fetchEnd),
+    enabled: enabled && Boolean(fetchStart && fetchEnd),
+    meta,
   });
-  const { data: activeCompetitionEvents = [] } = useQuery({
-    queryKey: queryKeys.competitionEvents.range(fetchStart, fetchEnd),
-    queryFn: () => getCompetitionEvents(fetchStart!, fetchEnd!),
-    enabled: Boolean(fetchStart && fetchEnd),
-  });
-  const { data: cancelledCompetitionEvents = [] } = useQuery({
-    queryKey: queryKeys.competitionEvents.range(
-      fetchStart,
-      fetchEnd,
-      "CANCELLED",
-    ),
-    queryFn: () => getCompetitionEvents(fetchStart!, fetchEnd!, "CANCELLED"),
-    enabled: Boolean(fetchStart && fetchEnd),
-  });
-  const competitionEvents = React.useMemo(
-    () => [...activeCompetitionEvents, ...cancelledCompetitionEvents],
-    [activeCompetitionEvents, cancelledCompetitionEvents],
-  );
-  const competitionEventsByDate = React.useMemo(() => {
-    const map: Record<string, CompetitionEvent[]> = {};
-    for (const event of competitionEvents) {
-      const start = dayjs(event.startDate);
-      const end = event.endDate ? dayjs(event.endDate) : start;
-      const durationDays = Math.min(Math.max(end.diff(start, "day"), 0), 31);
-      for (let offset = 0; offset <= durationDays; offset += 1) {
-        const key = start.add(offset, "day").format("YYYY-MM-DD");
-        if (!map[key]) map[key] = [];
-        map[key].push(event);
-      }
-    }
-    return map;
-  }, [competitionEvents]);
-
+  const scheduledWorkouts = scheduleQuery.data;
   const { workoutsByDate, independentWorkoutsByDate } = React.useMemo(() => {
     const all: Record<string, CalendarWorkout[]> = {};
     const independent: Record<string, PlanWorkout[]> = {};
@@ -225,6 +182,87 @@ export function useCalendarViewModel(
       independentWorkoutsByDate: independent,
     };
   }, [activePlanWorkoutsByDate, scheduledWorkouts]);
+
+  return {
+    weeks,
+    weekStartsOn,
+    fetchStart,
+    fetchEnd,
+    scheduleQuery,
+    active,
+    activePlanId,
+    range,
+    workoutsByDate,
+    independentWorkoutsByDate,
+  };
+}
+
+export function useCalendarViewModel(
+  currentMonth: Dayjs,
+  requestedRange?: { start: Dayjs; end: Dayjs } | null,
+  summaryMonth = currentMonth,
+) {
+  const t = useTranslations("CalendarExperience");
+  const {
+    weeks,
+    weekStartsOn,
+    fetchStart,
+    fetchEnd,
+    active,
+    activePlanId,
+    range,
+    workoutsByDate,
+    independentWorkoutsByDate,
+  } = useCalendarSchedule(currentMonth, requestedRange);
+
+  const [selectedDate, setSelectedDate] = React.useState<Dayjs>(() => dayjs());
+
+  React.useEffect(() => {
+    const visible = weeks.flat();
+    const inVisibleRange = visible.some((date) =>
+      date.isSame(selectedDate, "day"),
+    );
+    if (inVisibleRange) return;
+
+    const fallback = currentMonth.isSame(dayjs(), "month")
+      ? dayjs()
+      : currentMonth.startOf("month");
+    setSelectedDate(fallback);
+  }, [currentMonth, selectedDate, weeks]);
+
+  const { data: activeCompetitionEvents = [] } = useQuery({
+    queryKey: queryKeys.competitionEvents.range(fetchStart, fetchEnd),
+    queryFn: () => getCompetitionEvents(fetchStart!, fetchEnd!),
+    enabled: Boolean(fetchStart && fetchEnd),
+  });
+  const { data: cancelledCompetitionEvents = [] } = useQuery({
+    queryKey: queryKeys.competitionEvents.range(
+      fetchStart,
+      fetchEnd,
+      "CANCELLED",
+    ),
+    queryFn: () => getCompetitionEvents(fetchStart!, fetchEnd!, "CANCELLED"),
+    enabled: Boolean(fetchStart && fetchEnd),
+  });
+  const competitionEvents = React.useMemo(
+    () => [...activeCompetitionEvents, ...cancelledCompetitionEvents],
+    [activeCompetitionEvents, cancelledCompetitionEvents],
+  );
+  const competitionEventsByDate = React.useMemo(() => {
+    const map: Record<string, CompetitionEvent[]> = {};
+    for (const event of competitionEvents) {
+      const start = dayjs(event.startDate);
+      const end = event.endDate ? dayjs(event.endDate) : start;
+      const durationDays = Math.min(Math.max(end.diff(start, "day"), 0), 31);
+      for (let offset = 0; offset <= durationDays; offset += 1) {
+        const key = start.add(offset, "day").format("YYYY-MM-DD");
+        if (!map[key]) map[key] = [];
+        map[key].push(event);
+      }
+    }
+    return map;
+  }, [competitionEvents]);
+
   const { data: pmcData = [] } = usePMCData({
     startDate: fetchStart!,
     endDate: fetchEnd!,
@@ -284,7 +322,7 @@ export function useCalendarViewModel(
     );
   }, [selectedDate, weeks]);
 
-  const selectedWeekStart = selectedWeek[0] || selectedDate.startOf("week");
+  const selectedWeekStart = selectedWeek[0] || startOfCalendarWeek(selectedDate, weekStartsOn);
   const selectedWeekStats = React.useMemo(
     () =>
       buildWeekStats({
@@ -350,18 +388,18 @@ export function useCalendarViewModel(
   }, [activitiesByDate, effectiveRange, hasPlanScope, t, tssByDate]);
 
   const monthSummaryScope = React.useMemo<SummaryScope>(() => {
-    const monthStart = currentMonth.startOf("month");
-    const monthEnd = currentMonth.endOf("month");
-    const previousMonthStart = currentMonth
+    const monthStart = summaryMonth.startOf("month");
+    const monthEnd = summaryMonth.endOf("month");
+    const previousMonthStart = summaryMonth
       .subtract(1, "month")
       .startOf("month");
-    const previousMonthEnd = currentMonth.subtract(1, "month").endOf("month");
+    const previousMonthEnd = summaryMonth.subtract(1, "month").endOf("month");
 
     return {
       key: "month",
       title: t("monthOverview"),
       description: t("monthOverviewDescription", {
-        month: currentMonth.format("YYYY/MM"),
+        month: summaryMonth.format("YYYY/MM"),
       }),
       comparisonLabel: t("comparisonLabelMonth"),
       stats: buildRangeStats({
@@ -377,7 +415,7 @@ export function useCalendarViewModel(
         tssByDate,
       }),
     };
-  }, [activitiesByDate, currentMonth, t, tssByDate]);
+  }, [activitiesByDate, summaryMonth, t, tssByDate]);
 
   return {
     currentMonth,

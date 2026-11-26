@@ -1,0 +1,86 @@
+---
+title: Registrazione mobile
+description: Prepara i permessi, registra un allenamento in sicurezza, recupera le sessioni interrotte e verifica che l'attività mobile si sia sincronizzata su Trainingload.ai.
+keywords:
+  ["registrazione allenamento mobile", "registrazione Trainingload.ai", "app allenamento GPS"]
+---
+
+# Registrazione mobile
+
+Questa guida ti porta fino a un allenamento registrato da mobile, salvato correttamente e visibile nello storico attività di Trainingload.ai.
+
+## Prima di iniziare
+
+- Accedi all'app mobile con lo stesso account che usi sul web.
+- Attiva il permesso di localizzazione per la registrazione GPS outdoor.
+- Consenti la posizione in background quando il sistema operativo la propone e prevedi di bloccare lo schermo durante l'allenamento.
+- Disattiva eventuali restrizioni batteria aggressive per Trainingload.ai se il dispositivo mette in pausa le app in background.
+- Assicurati che il telefono abbia batteria e spazio di archiviazione sufficienti per la durata prevista.
+
+## 1. Controlla i permessi
+
+Apri **Profilo → Menu → Autorizzazione dati** e verifica i permessi di posizione o dati salute prima di iniziare. Il permesso verso un provider e il permesso GPS del telefono sono due cose diverse: collegare un provider non autorizza il telefono a registrare la posizione.
+
+## 2. Apri il registratore
+
+In **Oggi**, apri l'allenamento programmato, controlla sport e struttura, poi seleziona **Inizia allenamento di oggi**. Puoi aprire la sessione anche dal tuo piano attivo. Controlla il permesso di posizione prima di una sessione outdoor.
+
+<DocsScreenshot
+  id="mobile-recording-ready"
+  title="Avvia la registrazione dall'allenamento di oggi"
+  description="Controlla la struttura della sessione di oggi, poi usa Inizia allenamento di oggi in fondo alla schermata."
+  route="Oggi → Allenamento programmato → Inizia allenamento di oggi"
+  platform="mobile"
+/>
+
+## 3. Avvia e monitora l'allenamento
+
+1. Seleziona una sola volta **Inizia allenamento di oggi**, segui gli avvisi di preparazione e attendi il conto alla rovescia.
+2. Verifica che il tempo trascorso inizi a scorrere.
+3. Per le sessioni outdoor, controlla che distanza o percorso inizino ad aggiornarsi.
+4. Blocca lo schermo solo dopo aver verificato che la sessione è chiaramente avviata.
+
+Se l'app torna in primo piano dopo una sospensione, attendi che ripristini la sessione attiva. Non avviare una seconda registrazione mentre il recupero è in corso.
+
+## 4. Termina e salva
+
+Quando hai finito la sessione:
+
+1. Ferma la registrazione.
+2. Controlla durata, distanza e sport.
+3. Salva l'allenamento.
+4. Mantieni l'app online finché il caricamento o il trasferimento dell'importazione non si conclude.
+
+L'app mobile conserva localmente i dati durante la sessione e dispone di un flusso di recupero per le registrazioni interrotte. Un salvataggio locale riuscito non significa che tutti i grafici lato server siano subito pronti: l'analisi prosegue dopo il caricamento.
+
+## Verifica il risultato
+
+Apri **Profilo → Attività** oppure il giorno corrispondente nel calendario. Verifica che:
+
+- Esista una sola attività per la sessione.
+- Orario di inizio, sport, durata e distanza siano coerenti.
+- Per un allenamento GPS compaia la mappa.
+- I grafici basati sui sensori compaiano solo se la registrazione conteneva quei dati.
+- L'attività possa essere collegata all'allenamento pianificato previsto.
+
+## Risoluzione dei problemi
+
+### Il tempo scorre ma la distanza resta a zero
+
+Controlla il permesso di posizione, il segnale GPS e verifica che lo sport selezionato preveda la distanza outdoor. Spostati in un'area aperta e attendi il aggancio del segnale.
+
+### La registrazione si interrompe quando blocco lo schermo
+
+Attiva la posizione in background e rimuovi l'ottimizzazione batteria per l'app. Le impostazioni del sistema operativo possono prevalere sullo stato del permesso nell'app.
+
+### L'attività compare due volte
+
+Non ricaricare manualmente il file registrato localmente mentre la sincronizzazione è ancora in corso. Confronta orario di inizio e durata, poi elimina solo il duplicato confermato.
+
+### L'attività c'è ma mancano i grafici
+
+Attendi la fine dell'elaborazione e aggiorna la pagina. L'assenza di frequenza cardiaca, potenza o cadenza può anche indicare che la registrazione non conteneva quei flussi.
+
+## Prossimo passo
+
+Apri [Dettaglio attività](/it/docs/guide/activity-detail), poi collega il risultato seguendo [Gestire un piano attivo](/it/docs/guide/manage-active-plan) se si trattava di una sessione pianificata.

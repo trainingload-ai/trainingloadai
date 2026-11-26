@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   Activity,
   Bike,
+  ChevronRight,
   CircleHelp,
   Dumbbell,
   Footprints,
@@ -14,6 +15,7 @@ import {
   StretchHorizontal,
   Waves,
 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { MapThumbnail } from "@/components/activities/map-thumbnail";
 import {
@@ -34,19 +36,34 @@ type ActivitySummaryCardProps = {
   subSportType?: string | null;
   sportLabel?: string | null;
   startLabel?: string | null;
-  distanceLabel?: string | null;
-  durationLabel?: string | null;
+  distanceMeters?: number | null;
+  durationSeconds?: number | null;
   load?: number | null;
-  loadPlacement?: "meta" | "aside";
   note?: string | null;
   mapThumbnailUrl?: string | null;
   mapThumbnailDarkUrl?: string | null;
   loadLabel?: string;
-  onOpen?: () => void;
   headerAction?: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
-};
+} & ({ href: string; onOpen?: never } | { href?: never; onOpen?: () => void });
+
+const openClassName =
+  "block w-full text-start after:absolute after:inset-0 after:rounded-surface focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring";
+
+const secondaryActionClassName =
+  "[&_:is(a,button,[tabindex])]:relative [&_:is(a,button,[tabindex])]:z-10";
+
+function formatDuration(seconds: number | null) {
+  if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "--";
+  const rounded = Math.round(seconds);
+  const hours = Math.floor(rounded / 3600);
+  const minutes = Math.floor((rounded % 3600) / 60);
+  const rest = String(rounded % 60).padStart(2, "0");
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}`
+    : `${minutes}:${rest}`;
+}
 
 function SportIcon({ visual }: { visual: ActivitySportVisual }) {
   const className = "h-5 w-5";
@@ -137,48 +154,53 @@ export function ActivitySummaryCard({
   subSportType,
   sportLabel,
   startLabel,
-  distanceLabel,
-  durationLabel,
+  distanceMeters,
+  durationSeconds,
   load,
-  loadPlacement = "aside",
   note,
   mapThumbnailDarkUrl,
   mapThumbnailUrl,
   loadLabel = "load",
+  href,
   onOpen,
   headerAction,
   footer,
   className,
 }: ActivitySummaryCardProps) {
+  const distanceLabel =
+    typeof distanceMeters === "number" && Number.isFinite(distanceMeters) && distanceMeters > 0
+      ? `${(distanceMeters / 1000).toFixed(1)} km`
+      : null;
   const meta = [
     sportLabel,
     startLabel,
     distanceLabel,
-    durationLabel,
-    loadPlacement === "meta" && typeof load === "number"
+    durationSeconds === undefined ? null : formatDuration(durationSeconds),
+    typeof load === "number" && Number.isFinite(load)
       ? `${loadLabel} ${load}`
       : null,
   ]
     .map((item) => String(item ?? "").trim())
     .filter(Boolean);
-  const clickable = Boolean(onOpen);
+  const clickable = Boolean(href || onOpen);
+  const showChevron = clickable && !headerAction;
+  const openContent = (
+    <>
+      <span className="block truncate">{title}</span>
+      {showChevron ? (
+        <ChevronRight
+          aria-hidden
+          className="absolute end-3 top-3 size-5 text-muted-foreground rtl:rotate-180"
+        />
+      ) : null}
+    </>
+  );
 
   return (
     <article
-      role={clickable ? "button" : undefined}
-      tabIndex={clickable ? 0 : undefined}
-      onClick={onOpen}
-      onKeyDown={(event) => {
-        if (!onOpen) return;
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onOpen();
-        }
-      }}
       className={cn(
-        "rounded-surface bg-muted/70 p-3 transition-colors",
-        clickable &&
-          "tap-feedback hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "relative rounded-surface bg-muted/70 p-3 transition-colors",
+        clickable && "tap-feedback hover:bg-muted",
         className,
       )}
     >
@@ -191,9 +213,20 @@ export function ActivitySummaryCard({
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="truncate text-sm font-semibold text-foreground">
-                {title}
+            <div className={cn("min-w-0 flex-1", showChevron && "pe-6")}>
+              <h2 className="text-sm font-semibold text-foreground">
+                {/* Keep tap feedback on the card so the hit area stays positioned relative to it. */}
+                {href ? (
+                  <Link href={href} prefetch={false} data-tap-feedback="false" className={openClassName}>
+                    {openContent}
+                  </Link>
+                ) : onOpen ? (
+                  <button type="button" data-tap-feedback="false" className={openClassName} onClick={onOpen}>
+                    {openContent}
+                  </button>
+                ) : (
+                  <span className="block truncate">{title}</span>
+                )}
               </h2>
               {meta.length > 0 ? (
                 <div className="mt-1 text-mobile-caption pc:text-xs text-muted-foreground">
@@ -201,33 +234,18 @@ export function ActivitySummaryCard({
                 </div>
               ) : null}
             </div>
-            <div className="shrink-0">
-              {loadPlacement === "aside" && typeof load === "number" ? (
-                <div className="mb-2 text-right">
-                  <div className="text-sm font-semibold text-foreground">
-                    {load}
-                  </div>
-                  <div className="text-mobile-unit pc:text-[10px] text-muted-foreground">
-                    {loadLabel}
-                  </div>
-                </div>
-              ) : null}
-              {headerAction ? (
-                <div
-                  className="flex items-center justify-end"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  {headerAction}
-                </div>
-              ) : null}
-            </div>
+            {headerAction ? (
+              <div className={cn("flex shrink-0 items-center justify-end", secondaryActionClassName)}>
+                {headerAction}
+              </div>
+            ) : null}
           </div>
           {note ? (
             <p className="mt-2 text-sm leading-5 text-muted-foreground">
               {note}
             </p>
           ) : null}
-          {footer ? <div className="mt-3">{footer}</div> : null}
+          {footer ? <footer className={cn("mt-3", clickable && secondaryActionClassName)}>{footer}</footer> : null}
         </div>
       </div>
     </article>

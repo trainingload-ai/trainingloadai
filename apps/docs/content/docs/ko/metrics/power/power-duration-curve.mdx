@@ -1,73 +1,73 @@
 ---
-title: Power Duration Curve (PDC)
-description: A power duration curve maps maximal mean power across durations and supports CP, W', FTP, and rider-profile analysis.
-keywords: ["Power Duration Curve", "PDC", "MMP", "Max Mean Power", "CP model", "Critical Power", "W Prime", "Rider Profile"]
+title: 파워-지속시간 곡선 (PDC)
+description: 파워-지속시간 곡선(PDC)은 지속시간별 최대 평균 파워(MMP)를 시각화하여 CP, W', FTP 및 선수 유형 분석의 근거를 제공합니다.
+keywords: ["파워-지속시간 곡선", "Power Duration Curve", "PDC", "MMP", "최대 평균 파워", "CP 모델", "임계 파워", "W 프라임", "선수 프로필"]
 ---
 
-# Power Duration Curve (PDC)
+# 파워-지속시간 곡선 (PDC)
 
-The Power Duration Curve (PDC) maps your best average power, or maximal mean power (MMP), across different durations. It is a useful way to understand short-power ability, sustained threshold power, and the data behind CP and W' estimates.
+**파워-지속시간 곡선(Power Duration Curve, PDC)**은 다양한 지속시간 구간에서 기록한 최고 평균 파워, 즉 **최대 평균 파워(MMP, Maximal Mean Power)**를 하나의 곡선으로 나타낸 것입니다. 단시간 폭발력, 지속 역치 파워, 그리고 CP·W' 추정의 근거 데이터를 한눈에 파악하는 데 매우 유용합니다.
 
-## What is a Power Duration Curve?
+## 파워-지속시간 곡선이란 무엇인가요?
 
-In simple terms, it plots your best efforts on one curve:
-- **X-axis**: duration (from 1 second to hours).
-- **Y-axis**: average power (watts).
+쉽게 말해 모든 시간대의 최고 기록을 하나의 그래프로 그린 것입니다.
+- **X축**: 지속시간 (1초부터 수 시간까지)
+- **Y축**: 평균 파워 (와트, W)
 
-Typically, the curve looks hyperbolic:
-- **Left side (short duration)**: very high power, representing neuromuscular explosiveness and anaerobic capacity.
-- **Right side (long duration)**: power declines and flattens, representing aerobic metabolic capability (often summarized by CP).
+일반적으로 곡선은 쌍곡선 형태를 띱니다.
+- **왼쪽 (단시간 구간)**: 매우 높은 파워로, 신경근 폭발력과 무산소 능력을 반영합니다.
+- **오른쪽 (장시간 구간)**: 파워가 점차 내려가며 완만해지고, 유산소 대사 능력(흔히 CP로 요약)을 반영합니다.
 
 <PDCChart />
 
-## Key Components of the Curve
+## 곡선의 핵심 구성 요소
 
-In Trainingload.ai and common sport-science models, the PDC is often described using these key parameters:
+Trainingload.ai와 주요 스포츠 과학 모델에서는 다음 세 가지 핵심 파라미터로 PDC를 설명합니다.
 
-### 1. Maximal instantaneous power (Pmax)
-The far-left end (often ~1 second or less) represents the absolute maximum power your neuromuscular system can produce. It depends largely on strength and neural recruitment.
+### 1. 최대 순간 파워 (Pmax)
+곡선의 맨 왼쪽 끝(보통 1초 이하)은 신경근 시스템이 만들어 낼 수 있는 절대 최대 파워를 나타냅니다. 주로 근력과 신경 동원 능력에 좌우됩니다.
 
-### 2. Anaerobic work capacity / functional reserve capacity (W')
-W′ (“W prime”) represents the total amount of “extra work” you can do above Critical Power (CP).
-- When your power exceeds CP, W' begins to deplete.
-- When W' is depleted, you generally need to reduce power toward CP or below.
-- See: [W′](/docs/metrics/power/anaerobic-work-capacity)
+### 2. 무산소 작업 용량 / 기능적 예비 용량 (W')
+W′(“W 프라임”)는 임계 파워(CP) 이상에서 수행할 수 있는 “추가 작업량”의 총합입니다.
+- 출력이 CP를 초과하면 W'가 소모되기 시작합니다.
+- W'가 바닥나면 파워를 CP 이하로 낮추어야 합니다.
+- 자세히 보기: [W′ (무산소 작업 용량)](/ko/docs/metrics/power/anaerobic-work-capacity)
 
-### 3. Critical Power (CP)
-CP is the model threshold that describes the high sustainable side of the curve. In practice, it is limited by fatigue mechanisms and often aligns with hard steady efforts shorter than or around an hour, depending on the athlete and model fit.
-- It is the asymptote on the right side of the PDC.
-- See: [CP](/docs/metrics/power/critical-power)
+### 3. 임계 파워 (CP)
+CP는 곡선의 높은 지속 가능 영역을 나타내는 모델 역치입니다. 실제 현장에서는 피로 기전의 제한을 받으며, 선수와 피팅 데이터에 따라 1시간 이하 또는 약 1시간 전후의 고강도 지속 주행과 맞물립니다.
+- PDC 오른쪽의 점근선(asymptote)에 해당합니다.
+- 자세히 보기: [임계 파워 (CP)](/ko/docs/metrics/power/critical-power)
 
-## How to interpret your PDC shape
+## PDC 형태로 보는 선수 유형
 
-Different curve shapes reveal your “type”:
+곡선의 기울기와 모양을 보면 자신의 경기 유형을 파악할 수 있습니다.
 
-### 1. Sprinter-type
-- **Traits**: very high left side (huge Pmax), but the curve drops quickly.
-- **Strategy**: avoid long breakaways; conserve energy in the pack and launch in the final 200 meters.
+### 1. 스프린터형 (Sprinter)
+- **특징**: 왼쪽 끝(Pmax)이 매우 높지만 오른쪽으로 갈수록 곡선이 빠르게 떨어집니다.
+- **전략**: 장거리 브레이크어웨이는 피하고, 펠로톤 안에서 에너지를 아낀 뒤 마지막 200미터에서 폭발적인 스퍼트를 노립니다.
 
-### 2. Time trialist-type
-- **Traits**: unremarkable sprint end, but a flatter curve and slower decay on the right.
-- **Strategy**: strong sustained output. Try long breakaways, or use hard pulls to deplete opponents’ anaerobic reserves.
+### 2. 타임트라이얼형 (Time trialist)
+- **특징**: 스프린트 출력은 평범하지만 곡선이 완만하고 오른쪽 구간에서 출력 저하가 매우 적습니다.
+- **전략**: 강한 지속 출력을 바탕으로 긴 브레이크어웨이를 시도하거나, 강한 선두 견인으로 경쟁자들의 무산소 예비량을 소진시킵니다.
 
-### 3. All-rounder-type
-- **Traits**: smooth curve without clear strengths or weaknesses.
-- **Strategy**: adaptable tactically, but may lose out in extremes (pure flat sprint or very steep climbs) against specialists.
+### 3. 올라운더형 (All-rounder)
+- **특징**: 뚜렷한 약점이나 극단적 강점 없이 매끄러운 곡선을 그립니다.
+- **전략**: 전술적 유연성이 높지만, 평지 순수 스프린트나 초고경사 업힐 같은 극단적 상황에서는 스페셜리스트에게 밀릴 수 있습니다.
 
-## How Trainingload.ai uses PDC
+## Trainingload.ai의 PDC 활용 방식
 
-Trainingload.ai uses the PDC as the evidence layer for CP, W', FTP estimates, and athlete profile review. The curve helps separate different performance questions:
+Trainingload.ai는 CP, W', FTP 추정과 선수 프로필 리뷰의 근거 계층으로 PDC를 활용합니다. 곡선을 구간별로 나누어 서로 다른 경기력 질문을 점검할 수 있습니다.
 
-1. **Short duration**: 5 seconds to 1 minute reflects sprint and anaerobic ability.
-2. **Middle duration**: 3–8 minutes often reflects VO2max-oriented power.
-3. **Long duration**: 20 minutes and beyond is more relevant to threshold and aerobic durability.
+1. **단시간 구간**: 5초~1분은 스프린트와 무산소 능력을 반영합니다.
+2. **중시간 구간**: 3–8분은 주로 VO2max 중심의 고강도 유산소 파워를 반영합니다.
+3. **장시간 구간**: 20분 이상은 역치 능력과 유산소 내구성과 밀접합니다.
 
-PDC quality depends on the data behind it. If you only have easy rides or one 20-minute test, some parts of the curve may be under-tested rather than truly weak.
+PDC의 품질은 바탕이 된 데이터에 달려 있습니다. 이지 라이딩만 하거나 20분 테스트 한 번만 기록했다면, 곡선의 다른 구간은 실제로 약한 것이 아니라 아직 충분히 테스트되지 않은 것일 수 있습니다.
 
-For a direct model fit, use the [fit Critical Power for training load modeling](/critical-power-calculator). For a file-based FTP estimate, use the [estimate FTP training load from an activity file](/ftp-calculator).
+직접 모델을 피팅하려면 [임계 파워 계산기](/ko/critical-power-calculator)를, 활동 파일로 FTP를 추정하려면 [FTP 계산기](/ko/ftp-calculator)를 이용해 보세요.
 
 ---
-*Related*:
-- [Critical Power (CP)](/docs/metrics/power/critical-power)
-- [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power)
-- [W' (Anaerobic Work Capacity)](/docs/metrics/power/anaerobic-work-capacity)
+*관련 문서*:
+- [임계 파워 (CP)](/ko/docs/metrics/power/critical-power)
+- [기능적 역치 파워 (FTP)](/ko/docs/metrics/power/functional-threshold-power)
+- [W' (무산소 작업 용량)](/ko/docs/metrics/power/anaerobic-work-capacity)

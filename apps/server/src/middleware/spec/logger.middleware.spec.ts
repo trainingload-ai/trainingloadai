@@ -214,4 +214,25 @@ describe('LoggerMiddleware response logging', () => {
     );
     expect(logger.debug).not.toHaveBeenCalled();
   });
+
+  it('does not log MCP plan inputs or save tokens', () => {
+    const middleware = new LoggerMiddleware();
+    const logger = { debug: jest.fn(), error: jest.fn(), log: jest.fn() };
+    (middleware as unknown as { logger: typeof logger }).logger = logger;
+    middleware.use(
+      {
+        body: { params: { arguments: { title: 'private plan', saveToken: 'draft token' } } },
+        connection: {},
+        get: () => '',
+        method: 'POST',
+        originalUrl: '/mcp',
+        path: '/mcp',
+        query: {},
+      } as never,
+      { get: () => undefined, on: jest.fn(), statusCode: 200 } as never,
+      jest.fn(),
+    );
+    expect(logger.log.mock.calls.flat().join(' ')).toContain('privacy=restricted');
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
 });

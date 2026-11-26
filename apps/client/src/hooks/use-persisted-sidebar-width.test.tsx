@@ -32,9 +32,9 @@ describe("usePersistedSidebarWidth", () => {
   it("persists width changes and clamps them to the shared bounds", () => {
     const { result } = renderHook(() => usePersistedSidebarWidth());
 
-    act(() => result.current.setWidth(288));
-    expect(result.current.width).toBe(288);
-    expect(window.localStorage.getItem("sidebar:width:v2")).toBe("288");
+    act(() => result.current.setWidth(260));
+    expect(result.current.width).toBe(260);
+    expect(window.localStorage.getItem("sidebar:width:v2")).toBe("260");
 
     act(() => result.current.setWidth(999));
     expect(result.current.width).toBe(SIDEBAR_WIDTH_LIMITS.max);

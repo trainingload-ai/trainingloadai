@@ -1,126 +1,126 @@
 ---
-title: Critical Power (CP)
-description: Critical Power (CP) is a model-based threshold used with W' to describe power-duration performance and high-intensity fatigue.
-keywords: ["Critical Power", "CP", "critical power calculator", "W'", "W Prime", "Anaerobic Work Capacity", "MMP", "Monod-Scherrer", "FTP vs CP"]
+title: "CP (Potencia crítica)"
+description: "La Potencia crítica (CP) es un umbral basado en modelo que se usa junto con W' para describir el rendimiento potencia-duración y la fatiga a alta intensidad."
+keywords: ["Potencia crítica", "Critical Power", "CP", "calculadora potencia crítica", "W'", "W Prime", "Capacidad de trabajo anaeróbico", "MMP", "Monod-Scherrer", "FTP vs CP"]
 ---
 
-# Critical Power (CP)
+# CP (Potencia crítica)
 
-**Critical Power (CP)** is a model-based threshold used in endurance physiology to describe the boundary between heavy and severe intensity domains.
+La **Potencia crítica (CP)** es un umbral basado en un modelo matemático muy utilizado en fisiología de la resistencia para delimitar la frontera entre los dominios de intensidad fuerte (heavy) y severo (severe).
 
-In simple terms, CP estimates the highest power at which a physiological steady state may still be possible. Above CP, fatigue develops quickly and the finite work capacity above CP, called W', begins to matter.
+En términos sencillos, la CP estima la potencia más alta a la que todavía es posible alcanzar un estado fisiológico estacionario. Por encima de la CP, la fatiga se dispara rápidamente y entra en juego la capacidad finita de trabajo por encima de la CP, conocida como W'.
 
-In 1965, Monod and Scherrer proposed the Critical Power model. They described CP as the maximal rate of work that can be sustained without progressive fatigue, and introduced a finite “energy reserve” available above CP (later referred to as W').
+En 1965, Monod y Scherrer propusieron el modelo de Potencia crítica. Describieron la CP como la tasa máxima de trabajo sostenible sin fatiga progresiva, e introdujeron una «reserva energética» finita disponible por encima de la CP (denominada más tarde W').
 
-## Core Model: The Two-Parameter Model
+## Modelo central: el modelo de dos parámetros
 
-The theoretical foundation of CP is often called the **two-parameter model**, describing your performance as the combination of two components:
+La base teórica de la CP se conoce habitualmente como el **modelo de dos parámetros**, que describe tu rendimiento mediante dos componentes:
 
-1.  **Critical Power (CP)**:
-    *   **Nature**: a model threshold for high sustainable power.
-    *   **Interpretation**: staying below CP usually allows much longer work than staying above CP, though duration is still limited by glycogen, heat, motivation, fueling, and other factors.
-    *   **Unit**: Watts (W).
+1.  **Potencia crítica (CP)**:
+    *   **Naturaleza**: un umbral modelado de potencia alta y sostenible.
+    *   **Interpretación**: mantenerse por debajo de la CP suele permitir trabajar durante mucho más tiempo que por encima, aunque la duración sigue limitada por el glucógeno, el calor, la motivación, la nutrición y otros factores.
+    *   **Unidad**: vatios (W).
 
-2.  **[W' (W Prime)](/docs/metrics/power/anaerobic-work-capacity)**：
-    *   **Nature**: Anaerobic Work Capacity.
-    *   **Interpretation**: a finite amount of work available above CP. Once your power exceeds CP, this reserve is depleted.
-    *   **Unit**: Joules (J) or kilojoules (kJ).
+2.  **[W' (W prima)](/es/docs/metrics/power/anaerobic-work-capacity)**:
+    *   **Naturaleza**: Capacidad de trabajo anaeróbico.
+    *   **Interpretación**: una cantidad finita de trabajo disponible por encima de la CP. En cuanto tu potencia supera la CP, esta reserva empieza a vaciarse.
+    *   **Unidad**: julios (J) o kilojulios (kJ).
 
-### Power–Duration relationship
+### Relación potencia–duración
 
-These two parameters form the well-known hyperbolic relationship:
+Estos dos parámetros forman la conocida relación hiperbólica:
 
 ```text
 P = CP + W' / t
 ```
 
-Or, rearranged to predict time to exhaustion:
+O, despejada para predecir el tiempo hasta el agotamiento:
 
 ```text
 t = W' / (P - CP)
 ```
 
-This means:
-*   **When P > CP**: the time you can hold it depends on how large your W' is and how far above CP you are. The higher above CP, the faster W' is depleted.
-*   **When P ≤ CP**: the simple model no longer predicts a finite exhaustion time, but real performance is still limited by other fatigue mechanisms.
+Esto significa:
+*   **Cuando P > CP**: el tiempo que puedes aguantar depende de cuán grande sea tu W' y de cuánto superes la CP. Cuanto más por encima de la CP estés, más rápido se agota W'.
+*   **Cuando P ≤ CP**: el modelo simple deja de predecir un tiempo finito de agotamiento, aunque el rendimiento real sigue limitado por otros mecanismos de fatiga.
 
-## Physiological Meaning: A Boundary Between Intensity Domains
+## Significado fisiológico: frontera entre dominios de intensidad
 
-In exercise physiology, CP is often treated as the boundary between the **Heavy** and **Severe** intensity domains:
+En fisiología del ejercicio, la CP se considera habitualmente el límite entre los dominios de intensidad **fuerte (Heavy)** y **severo (Severe)**:
 
-*   **Below CP**:
-    *   You can reach a physiological steady state.
-    *   Blood lactate may rise but can stabilize.
-    *   VO2 can stabilize at a submaximal level.
+*   **Por debajo de la CP**:
+    *   Puedes alcanzar un estado fisiológico estacionario.
+    *   El lactato en sangre puede subir, pero logra estabilizarse.
+    *   El VO₂ puede estabilizarse en un nivel submáximo.
 
-*   **Above CP**:
-    *   **No steady state**.
-    *   Blood lactate keeps rising until you stop.
-    *   VO2 often shows a slow component and rises toward VO2max.
-    *   Once W' is depleted, you generally need to reduce power toward CP or below.
+*   **Por encima de la CP**:
+    *   **No hay estado estacionario**.
+    *   El lactato en sangre sigue subiendo hasta que te detienes.
+    *   El VO₂ suele mostrar un componente lento y asciende hacia el VO₂max.
+    *   Una vez vaciado W', normalmente te ves obligado a bajar la potencia hacia la CP o por debajo.
 
-## CP vs. FTP
+## CP frente a FTP
 
-Although CP and [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power) are often used interchangeably, they differ slightly in definition and typical value:
+Aunque la CP y el [FTP (Functional Threshold Power)](/es/docs/metrics/power/functional-threshold-power) suelen usarse como sinónimos, presentan ligeras diferencias en definición y valor típico:
 
-1.  **Different definitions**:
-    *   **FTP**: commonly defined as the maximum average power you can sustain for about 60 minutes; a performance-based, practical concept.
-    *   **CP**: a model parameter representing the fatigue threshold in the CP model.
+1.  **Definiciones distintas**:
+    *   **FTP**: definido habitualmente como la potencia media máxima sostenible durante unos 60 minutos; un concepto práctico basado en rendimiento.
+    *   **CP**: parámetro de un modelo que representa el umbral de fatiga dentro del modelo de CP.
 
-2.  **Typical values**:
-    *   CP is often **slightly higher** than FTP.
-    *   In many athletes, riding at CP lasts less than an hour, often closer to ~30–40 minutes, but this varies with model fit and testing data.
-    *   In Trainingload.ai, we often treat `FTP ≈ 95%–96% of CP`.
+2.  **Valores típicos**:
+    *   La CP suele ser **ligeramente superior** al FTP.
+    *   En muchos deportistas, rodar a CP dura menos de una hora —a menudo en torno a ~30–40 minutos—, aunque varía según el ajuste del modelo y los datos de prueba.
+    *   En Trainingload.ai solemos considerar `FTP ≈ 95 %–96 % de la CP`.
 
-3.  **Use cases**:
-    *   **FTP** is commonly used as the basis for training zones (Zone 1–Zone 7).
-    *   The **CP + W'** model is useful for predicting time-to-exhaustion for short, high-intensity efforts (intervals, attacks, sprints).
+3.  **Casos de uso**:
+    *   El **FTP** se usa habitualmente como base para las zonas de entrenamiento (Zona 1–Zona 7).
+    *   El modelo **CP + W'** es especialmente útil para estimar el tiempo hasta el agotamiento en esfuerzos cortos y de alta intensidad (intervalos, ataques, esprints).
 
-## W' Depletion and Recovery
+## Vaciado y recuperación de W'
 
-W' is often modeled as a finite reserve that depletes above CP and recovers below CP:
+W' suele modelarse como una reserva finita que se vacía por encima de la CP y se recupera por debajo:
 
-*   **Depletion**: when P > CP, W' depletes at a rate proportional to (P - CP).
-*   **Recovery**: when P < CP, W' begins to recover. The recovery rate depends on how far below CP you are.
-    *   Full rest (0 W) recovers fastest.
-    *   Riding just below CP (e.g., 90% CP) recovers very slowly.
+*   **Vaciado**: cuando P > CP, W' se agota a una velocidad proporcional a (P - CP).
+*   **Recuperación**: cuando P < CP, W' empieza a recargarse. La tasa de recuperación depende de cuánto por debajo de la CP te encuentres.
+    *   El descanso completo (0 W) recupera más rápido.
+    *   Rodar justo por debajo de la CP (p. ej., al 90 % de la CP) recupera muy despacio.
 
-This is why recovery intensity matters so much in interval workouts.
+Por eso la intensidad de las recuperaciones importa tanto en las sesiones de series.
 
-## How Trainingload.ai estimates CP
+## Cómo estima Trainingload.ai la CP
 
-Trainingload.ai can estimate CP from historical **MMP (Max Mean Power)** data rather than requiring one fixed protocol.
+Trainingload.ai puede estimar la CP a partir de tus datos históricos de **MMP (Potencia media máxima)** sin obligarte a hacer un único protocolo fijo.
 
-1.  **Data selection**: best average power for key durations over the last ~90 days (e.g., 1 min, 3 min, 5 min, 10 min, 20 min…).
-2.  **Model fitting**: fit CP and W' from these time–power points.
-3.  **FTP estimate**: derive FTP from CP (default 0.95 × CP).
+1.  **Selección de datos**: mejor potencia media en duraciones clave durante los últimos ~90 días (p. ej., 1 min, 3 min, 5 min, 10 min, 20 min…).
+2.  **Ajuste del modelo**: ajusta CP y W' a partir de esos puntos tiempo–potencia.
+3.  **Estimación de FTP**: deriva el FTP desde la CP (por defecto, 0.95 × CP).
 
-If you have a test file, you can also upload it for a one-off estimate: see [estimate FTP and CP training load from an activity file](/ftp-calculator).
+Si tienes un archivo de test, usa la [calculadora de FTP](/es/ftp-calculator) para una estimación puntual de FTP.
 
-For manual model fitting, use the [fit Critical Power for training load planning](/critical-power-calculator).
+Para ajustar el modelo manualmente, usa [ajusta tu Potencia crítica para planificar tu carga](/es/critical-power-calculator).
 
-### Tips to improve estimate quality
+### Consejos para mejorar la calidad de la estimación
 
-To make the estimated **CP** more useful, ensure your power–duration curve contains enough hard, representative efforts:
+Para que tu **CP** estimada sea realmente útil, asegúrate de que tu curva de potencia–duración incluya suficientes esfuerzos máximos y representativos:
 
-*   **Short durations**: include 3–5 minute maximal efforts (important for W').
-*   **Medium/long durations**: include 10–20 minute or longer maximal efforts (important for CP).
+*   **Duraciones cortas**: incluye esfuerzos máximos de 3–5 minutos (clave para W').
+*   **Duraciones medias/largas**: incluye esfuerzos máximos de 10–20 minutos o más (clave para CP).
 
-If you only do low-intensity riding for a long time, the system may underestimate your CP and W'.
+Si llevas mucho tiempo rodando solo a baja intensidad, el sistema puede infravalorar tu CP y tu W'.
 
-## How Trainingload.ai uses CP
+## Cómo usa Trainingload.ai la CP
 
-Trainingload.ai uses CP to understand the power-duration profile behind threshold and above-threshold work. CP helps estimate FTP, but it is also useful for reviewing whether intervals, climbs, or race-like surges are targeting the intended intensity.
+Trainingload.ai utiliza la CP para comprender el perfil potencia-duración detrás del trabajo de umbral y por encima del umbral. La CP ayuda a estimar el FTP, pero también sirve para evaluar si tus series, subidas o demarrajes alcanzan realmente la intensidad prevista.
 
-CP is most useful when paired with W':
+La CP resulta mucho más útil cuando se combina con W':
 
--   CP describes the sustainable side of the model.
--   W' describes the finite work available above CP.
--   The power-duration curve shows whether your data has enough maximal efforts to support the estimate.
+-   La CP describe la vertiente sostenible del modelo.
+-   W' describe el trabajo finito disponible por encima de la CP.
+-   La curva de potencia-duración muestra si tus datos contienen suficientes esfuerzos máximos para respaldar la estimación.
 
-## Related tools and docs
+## Herramientas y documentación relacionada
 
--   [Fit Critical Power for training load planning](/critical-power-calculator)
--   [Estimate FTP training load from an activity file](/ftp-calculator)
--   [W' (Anaerobic Work Capacity)](/docs/metrics/power/anaerobic-work-capacity)
--   [Power Duration Curve](/docs/metrics/power/power-duration-curve)
+-   [Ajusta tu Potencia crítica para planificar tu carga](/es/critical-power-calculator)
+-   [Estima tu FTP y carga desde un archivo de actividad](/es/ftp-calculator)
+-   [W' (Capacidad de trabajo anaeróbico)](/es/docs/metrics/power/anaerobic-work-capacity)
+-   [PDC (Curva de potencia-duración)](/es/docs/metrics/power/power-duration-curve)

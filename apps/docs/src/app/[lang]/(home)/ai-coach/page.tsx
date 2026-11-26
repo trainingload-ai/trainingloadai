@@ -1,3 +1,4 @@
+import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
@@ -77,7 +78,9 @@ export default async function AiCoachCollectionPage({
   const appUrl = `https://app.trainingload.ai/${lang}/ai-coach?from=docs-ai-coach`;
   const pageUrl = `${siteUrl}${prefix}/ai-coach`;
   const screenshotLocale = ["zh", "zh-hant", "ja"].includes(lang) ? lang : "en";
-  const productScreenshot = `/5k-training-plan/web-coach-dark-v2-${screenshotLocale}.png`;
+  const productScreenshot = productScreenshotUrl(
+    `/5k-training-plan/web-coach-dark-v2-${screenshotLocale}.png`,
+  );
   const t = await getTranslations({ locale: lang, namespace: "aiCoachPages" });
   const copy = t.raw("collection") as AiCoachCollectionCopy;
   const labels = t.raw("labels") as AiCoachPageLabels;

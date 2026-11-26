@@ -1,0 +1,148 @@
+---
+title: MCP 리소스 및 프롬프트
+description: TrainingLoad MCP 기본 제공 레퍼런스 리소스와 재사용 가능한 훈련 분석 프롬프트입니다.
+---
+
+# MCP 리소스 및 프롬프트
+
+이 페이지는 서버 MCP 콘텐츠 카탈로그에서 자동 생성됩니다. 직접 편집하지 말고 `pnpm --dir apps/server mcp:reference`를 실행하세요.
+
+리소스는 추가 선수 데이터를 읽지 않고도 클라이언트에 안정적인 지표 정의, 안전 경계 및 승인된 기능 가이드를 제공합니다. 프롬프트는 구조화된 질문 템플릿을 생성하며, 실제 데이터 조회는 여전히 OAuth 권한 범위(스코프)가 적용된 도구를 통해 이루어집니다.
+
+## 리소스
+
+| URI | 이름 | 용도 |
+| --- | --- | --- |
+| `trainingload://guide/training-metrics` | TrainingLoad 지표 해석 가이드 | 훈련 부하, ATL, CTL, TSB, 준비도 구간, 데이터 커버리지 및 누락 데이터의 정의와 해석 경계를 안내합니다. |
+| `trainingload://guide/privacy-and-safety` | TrainingLoad 개인정보 보호 및 안전 가이드 | 읽기 전용 경계, 신뢰할 수 없는 텍스트 처리, 건강 데이터 제한 및 제외되는 데이터 유형을 안내합니다. |
+| `trainingload://catalog/capabilities` | 승인된 TrainingLoad 기능 카탈로그 | 현재 승인된 읽기 전용 도구 이름, 설명 및 OAuth 권한 범위(스코프)를 제공합니다. |
+
+## 프롬프트
+
+## `weekly-training-review`
+
+최근 훈련 부하, 일관성, 활동 및 예정된 워크아웃에 대한 근거 기반 리뷰를 구성합니다.
+
+<details>
+<summary>인자 JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "days": {
+      "default": "7",
+      "type": "string",
+      "enum": [
+        "7",
+        "14",
+        "28"
+      ]
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "days"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `compare-training-blocks`
+
+훈련 부하, 종목 구성, 활동 합계 및 일관성을 기준으로 두 개의 제한된 기간을 비교합니다.
+
+<details>
+<summary>인자 JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "periodAFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodATo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBTo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "periodAFrom",
+    "periodATo",
+    "periodBFrom",
+    "periodBTo"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `race-preparation-check`
+
+의학적 판단을 내리지 않으면서 대회 정보, 훈련 플랜 이행 현황, 최근 훈련 부하 및 예정된 워크아웃을 검토합니다.
+
+<details>
+<summary>인자 JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "horizonDays": {
+      "default": "28",
+      "type": "string",
+      "enum": [
+        "14",
+        "28",
+        "56"
+      ]
+    }
+  },
+  "required": [
+    "horizonDays"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>

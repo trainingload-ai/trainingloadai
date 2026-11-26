@@ -203,6 +203,10 @@
   --color-fd-accent-foreground: var(--foreground);
 }
 
+.docs-system-shell :is(#nd-sidebar, #nd-sidebar-mobile) :has(> [data-docs-sidebar-footer]) {
+  padding-block: var(--tl-space-two);
+}
+
 @layer components {
   .docs-system-shell {
     --fd-page-width: 1240px;

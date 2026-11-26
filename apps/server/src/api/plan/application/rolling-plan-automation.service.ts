@@ -1,3 +1,4 @@
+import { listRollingWorkoutDays } from '../persistence/plan-workout.repository';
 import { PlanRepository } from '../persistence/plan.repository';
 import { UserService } from '@/api/user/user.service';
 import {
@@ -10,7 +11,7 @@ import { Prisma, type RollingPlanJob } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { sha256Hex, stableJson } from '@/api/ai/core/ai-common.util';
-import { addCalendarDays, calendarIsoWeekday } from '@shared/plan-calendar';
+import { addCalendarDays } from '@shared/plan-calendar';
 import {
   calendarMonthEnd,
   isoWeekStart,
@@ -34,6 +35,25 @@ const fail = (code: string): never => {
 };
 const MAX_ATTEMPTS = 5;
 const LEASE_MS = 5 * 60_000;
+const WINDOW_NOT_DUE = 'ROLLING_WINDOW_NOT_DUE';
+
+function lastTrainingDayFinished(
+  workouts: { scheduledDate: Date | null; status: string }[],
+  from: string,
+  through: string,
+  today: string,
+) {
+  const lastDate = workouts.find(({ scheduledDate }) => {
+    const day = scheduledDate && ymd(scheduledDate);
+    return day && day >= from && day <= through;
+  })?.scheduledDate;
+  if (!lastDate) return today > through;
+  const lastDay = ymd(lastDate);
+  return today > lastDay ||
+    (today === lastDay && workouts.every(({ scheduledDate, status }) =>
+      !scheduledDate || ymd(scheduledDate) !== lastDay || status === 'DONE',
+    ));
+}
 
 /** Durable domain queue. Model calls never run inside these short transactions. */
 @Injectable()
@@ -64,9 +84,10 @@ export class RollingPlanAutomationService {
   }
 
   /** Scan the current/following ISO window, never backfill a past pause gap. */
-  async discover(now = new Date()) {
+  async discover(now = new Date(), planId?: string) {
     const policies = await this.prisma.planAutomationPolicy.findMany({
       where: {
+        ...(planId ? { planId } : {}),
         revokedAt: null,
         plan: { planningMode: 'ROLLING', status: 'ACTIVE' },
       },
@@ -82,10 +103,7 @@ export class RollingPlanAutomationService {
       if (!today || !plan.startDate) continue;
       const from = today > ymd(plan.startDate) ? today : ymd(plan.startDate);
       const week = isoWeekStart(from);
-      const through = addCalendarDays(
-        week,
-        calendarIsoWeekday(today) >= 5 ? 13 : 6,
-      );
+      const weekEnd = addCalendarDays(week, 6);
       try {
         enqueued += await this.prisma.$transaction(
           async (tx) => {
@@ -100,58 +118,83 @@ export class RollingPlanAutomationService {
             );
             if (current?.id !== policy.id || live?.status !== 'ACTIVE')
               return 0;
+            const monthStart = `${today.slice(0, 7)}-01`;
+            const monthEnd = calendarMonthEnd(today);
+            const workouts = await listRollingWorkoutDays(
+              tx,
+              plan.id,
+              date(monthStart < week ? monthStart : week),
+              date(monthEnd > weekEnd ? monthEnd : weekEnd),
+            );
+            const published = await tx.rollingWeekGeneration.findMany({
+              where: {
+                planId: plan.id,
+                supersededAt: null,
+                appliedAt: { not: null },
+                OR: [weekEnd, monthEnd].map((day) => ({
+                  generatedFrom: { lte: date(day) },
+                  generatedThrough: { gte: date(day) },
+                })),
+              },
+              select: { generatedFrom: true, generatedThrough: true },
+            });
+            const nextWeekDue =
+              from === today &&
+              published.some((generation) =>
+                ymd(generation.generatedFrom) <= from &&
+                ymd(generation.generatedThrough) >= weekEnd,
+              ) &&
+              lastTrainingDayFinished(workouts, week, weekEnd, today);
+            const through = nextWeekDue ? addCalendarDays(weekEnd, 7) : weekEnd;
+            const months = new Set([from.slice(0, 7)]);
+            const nextMonthStart = addCalendarDays(monthEnd, 1);
+            if (
+              lastTrainingDayFinished(workouts, monthStart, monthEnd, today) &&
+              (through >= nextMonthStart ||
+                published.some((generation) =>
+                  ymd(generation.generatedFrom) <= monthEnd &&
+                  ymd(generation.generatedThrough) >= monthEnd,
+                ))
+            ) {
+              months.add(nextMonthStart.slice(0, 7));
+            }
+            await tx.rollingPlanJob.updateMany({
+              where: {
+                planId: plan.id,
+                policyId: policy.id,
+                state: { in: ['PENDING', 'RETRY'] },
+                OR: [
+                  {
+                    kind: { in: ['WEEK', 'ADJUST'] },
+                    windowStart: { gt: date(through) },
+                  },
+                  {
+                    kind: 'MONTH',
+                    windowStart: {
+                      gt: date(monthStart),
+                      notIn: [...months].map((month) => date(`${month}-01`)),
+                    },
+                  },
+                ],
+              },
+              data: { state: 'CANCELLED', lastError: WINDOW_NOT_DUE },
+            });
             const evidence = await this.evidence(plan.id, from, through, tx);
-            const months = new Set([from.slice(0, 7), through.slice(0, 7)]);
-            if (today >= addCalendarDays(calendarMonthEnd(today), -7))
-              months.add(
-                addCalendarDays(calendarMonthEnd(today), 1).slice(0, 7),
-              );
+            const completedWindows: Prisma.RollingPlanJobWhereInput[] = [];
             let count = 0;
             for (const month of months) {
               const start = `${month}-01`;
               const currentMonth = await tx.rollingMonthStrategy.findFirst({
                 where: {
                   planId: plan.id,
-                  policyId: policy.id,
                   monthStart: date(start),
                   supersededAt: null,
                   appliedAt: { not: null },
                 },
               });
-              // A missing direction is required immediately. Existing directions re-evaluate only on external changes.
-              const last = await tx.rollingPlanJob.findFirst({
-                where: {
-                  planId: plan.id,
-                  policyId: policy.id,
-                  kind: 'MONTH',
-                  windowStart: date(start),
-                  state: 'APPLIED',
-                },
-                orderBy: { createdAt: 'desc' },
-              });
-              if (currentMonth && !last)
-                await tx.rollingPlanJob.createMany({
-                  data: {
-                    planId: plan.id,
-                    policyId: policy.id,
-                    kind: 'MONTH',
-                    windowStart: date(start),
-                    inputRevision: evidence.revision,
-                    state: 'APPLIED',
-                    receipt: json({
-                      baseline: true,
-                      semanticRevision: evidence.revision,
-                    }),
-                  },
-                  skipDuplicates: true,
-                });
-              if (
-                !currentMonth ||
-                (last &&
-                  ((last.receipt as { semanticRevision?: string })
-                    ?.semanticRevision ?? last.inputRevision) !==
-                    evidence.revision)
-              )
+              if (currentMonth) {
+                completedWindows.push({ kind: 'MONTH', windowStart: date(start) });
+              } else {
                 count += await this.enqueue(
                   tx,
                   {
@@ -173,6 +216,7 @@ export class RollingPlanAutomationService {
                     scanThrough: through,
                   },
                 );
+              }
             }
             for (
               let start = week;
@@ -189,15 +233,21 @@ export class RollingPlanAutomationService {
                   appliedAt: { not: null },
                 },
               });
-              const covered = generations.some(
+              const coverage = generations.find(
                 (g) =>
                   ymd(g.generatedFrom) <= first &&
                   ymd(g.generatedThrough) >= end,
               );
+              if (coverage) {
+                completedWindows.push({
+                  kind: { in: ['WEEK', 'ADJUST'] },
+                  windowStart: date(start),
+                });
+                continue;
+              }
               const deps = await tx.rollingMonthStrategy.findMany({
                 where: {
                   planId: plan.id,
-                  policyId: policy.id,
                   supersededAt: null,
                   appliedAt: { not: null },
                   monthStart: { lte: date(end) },
@@ -212,43 +262,12 @@ export class RollingPlanAutomationService {
                 months: deps.map((m) => m.id),
               });
               const inputRevision = hash({ semanticRevision, from: first });
-              const previous = await tx.rollingPlanJob.findFirst({
-                where: {
-                  planId: plan.id,
-                  policyId: policy.id,
-                  kind: { in: ['WEEK', 'ADJUST'] },
-                  windowStart: date(start),
-                  state: 'APPLIED',
-                },
-                orderBy: { createdAt: 'desc' },
-              });
-              if (covered && !previous && generations[0].policyId === policy.id)
-                await tx.rollingPlanJob.createMany({
-                  data: {
-                    planId: plan.id,
-                    policyId: policy.id,
-                    kind: 'ADJUST',
-                    windowStart: date(start),
-                    inputRevision,
-                    state: 'APPLIED',
-                    receipt: json({ baseline: true, semanticRevision }),
-                  },
-                  skipDuplicates: true,
-                });
-              if (
-                !covered ||
-                (previous &&
-                  ((previous.receipt as { semanticRevision?: string })
-                    ?.semanticRevision ?? previous.inputRevision) !==
-                    semanticRevision) ||
-                (covered && generations[0].policyId !== policy.id)
-              )
-                count += await this.enqueue(
+              count += await this.enqueue(
                   tx,
                   {
                     planId: plan.id,
                     policyId: policy.id,
-                    kind: covered ? 'ADJUST' : 'WEEK',
+                    kind: 'WEEK',
                     windowStart: date(start),
                     inputRevision,
                   },
@@ -261,8 +280,17 @@ export class RollingPlanAutomationService {
                     scanThrough: through,
                     monthStrategyIds: deps.map((m) => m.id),
                   },
-                );
+              );
             }
+            if (completedWindows.length) await tx.rollingPlanJob.updateMany({
+              where: {
+                planId: plan.id,
+                policyId: policy.id,
+                state: { in: ['PENDING', 'RETRY'] },
+                OR: completedWindows,
+              },
+              data: { state: 'CANCELLED', lastError: 'ROLLING_WINDOW_ALREADY_PUBLISHED' },
+            });
             return count;
           },
           { timeout: 60000 },
@@ -278,12 +306,19 @@ export class RollingPlanAutomationService {
     data: Prisma.RollingPlanJobUncheckedCreateInput,
     input: unknown,
   ) {
+    const window = {
+      planId: data.planId,
+      kind: data.kind,
+      policyId: data.policyId,
+      windowStart: data.windowStart,
+    };
+    if (await tx.rollingPlanJob.findFirst({
+      where: { ...window, state: 'RUNNING', leaseUntil: { gt: new Date() } },
+      select: { id: true },
+    })) return 0;
     await tx.rollingPlanJob.updateMany({
       where: {
-        planId: data.planId,
-        kind: data.kind,
-        policyId: data.policyId,
-        windowStart: data.windowStart,
+        ...window,
         inputRevision: { not: data.inputRevision },
         state: { in: ['PENDING', 'RUNNING', 'RETRY'] },
       },
@@ -294,17 +329,13 @@ export class RollingPlanAutomationService {
         lastError: 'ROLLING_INPUT_SUPERSEDED',
       },
     });
-    // Only a same-input pause can resume a frozen candidate. Discovery has already
-    // checked the active policy and current facts; prepare/apply revalidate them.
+    // Resume a frozen candidate only after the current scan confirms the same input is due.
     const resumed = await tx.rollingPlanJob.updateMany({
       where: {
-        planId: data.planId,
-        kind: data.kind,
-        policyId: data.policyId,
-        windowStart: data.windowStart,
+        ...window,
         inputRevision: data.inputRevision,
         state: 'CANCELLED',
-        lastError: 'PAUSED',
+        lastError: { in: ['PAUSED', WINDOW_NOT_DUE] },
       },
       data: {
         state: 'PENDING',
@@ -329,7 +360,11 @@ export class RollingPlanAutomationService {
       data: { state: 'RETRY', attempts: 0, lastError: null },
     });
     const result = await tx.rollingPlanJob.createMany({
-      data: { ...data, receipt: json({ input }) },
+      data: {
+        ...data,
+        availableAt: data.availableAt ?? new Date(),
+        receipt: json({ input }),
+      },
       skipDuplicates: true,
     });
     return result.count + resumed.count;
@@ -338,26 +373,43 @@ export class RollingPlanAutomationService {
   /** Atomic competing-worker claim, including process-crash recovery and a fresh fencing token. */
   async claim() {
     return this.prisma.$transaction(async (tx) => {
+      const claimAt = new Date();
       await tx.rollingPlanJob.updateMany({
         where: {
           state: 'RUNNING',
           attempts: { gte: MAX_ATTEMPTS },
-          leaseUntil: { lte: new Date() },
+          leaseUntil: { lte: claimAt },
         },
         data: {
           state: 'FAILED',
           claimToken: null,
           leaseUntil: null,
           lastError: 'ROLLING_RETRY_EXHAUSTED',
-          availableAt: new Date(Date.now() + 86400000),
+          availableAt: new Date(claimAt.getTime() + 86_400_000),
         },
       });
       const token = randomUUID();
-      const rows = await tx.$queryRawUnsafe<Array<{ id: string }>>(
-        `WITH picked AS (SELECT id FROM t_rolling_plan_job WHERE ((state IN ('PENDING','RETRY') AND available_at <= now()) OR (state='RUNNING' AND lease_until <= now())) AND attempts < $1 ORDER BY available_at, created_at FOR UPDATE SKIP LOCKED LIMIT 1) UPDATE t_rolling_plan_job j SET state='RUNNING',claim_token=$2,lease_until=now()+interval '5 minutes',attempts=j.attempts+1,updated_at=now() FROM picked WHERE j.id=picked.id RETURNING j.id`,
-        MAX_ATTEMPTS,
-        token,
-      );
+      // Queue dates are stored as UTC timestamps and compared by Prisma elsewhere.
+      const claimTimestamp = claimAt.toISOString().slice(0, -1);
+      const leaseTimestamp = new Date(claimAt.getTime() + LEASE_MS)
+        .toISOString()
+        .slice(0, -1);
+      const rows = await tx.$queryRaw<Array<{ id: string }>>`
+        WITH picked AS (
+          SELECT id FROM t_rolling_plan_job
+          WHERE (
+            (state IN ('PENDING', 'RETRY') AND available_at <= ${claimTimestamp}::timestamp)
+            OR (state = 'RUNNING' AND lease_until <= ${claimTimestamp}::timestamp)
+          ) AND attempts < ${MAX_ATTEMPTS}
+          ORDER BY available_at, created_at
+          FOR UPDATE SKIP LOCKED LIMIT 1
+        )
+        UPDATE t_rolling_plan_job j
+        SET state = 'RUNNING', claim_token = ${token},
+            lease_until = ${leaseTimestamp}::timestamp,
+            attempts = j.attempts + 1, updated_at = ${claimTimestamp}::timestamp
+        FROM picked WHERE j.id = picked.id RETURNING j.id
+      `;
       if (!rows.length) return null;
       return tx.rollingPlanJob.findUniqueOrThrow({ where: { id: rows[0].id } });
     });
@@ -442,7 +494,8 @@ export class RollingPlanAutomationService {
           where: {
             id: { in: input.monthStrategyIds ?? [] },
             supersededAt: null,
-            policyId: job.policyId,
+            planId: job.planId,
+            appliedAt: { not: null },
           },
         });
         if (months.length !== (input.monthStrategyIds ?? []).length)
@@ -503,7 +556,8 @@ export class RollingPlanAutomationService {
           where: {
             id: { in: receipt.input.monthStrategyIds ?? [] },
             supersededAt: null,
-            policyId: job.policyId,
+            planId: job.planId,
+            appliedAt: { not: null },
           },
         });
         if (count !== (receipt.input.monthStrategyIds ?? []).length)
@@ -584,18 +638,10 @@ export class RollingPlanAutomationService {
               appliedAt: { not: null },
             },
           });
-          if (
-            previous?.policyId === job.policyId &&
-            hash(previous.strategy) === hash(strategy)
-          )
+          if (previous) {
             monthId = previous.id;
-          else {
+          } else {
             changed = true;
-            if (previous)
-              await tx.rollingMonthStrategy.update({
-                where: { id: previous.id },
-                data: { supersededAt: new Date() },
-              });
             const latest = await tx.rollingMonthStrategy.aggregate({
               where: { planId: job.planId, monthStart: job.windowStart },
               _max: { revision: true },
@@ -614,25 +660,6 @@ export class RollingPlanAutomationService {
               },
             });
             monthId = month.id;
-            if (previous)
-              await tx.rollingPlanJob.updateMany({
-                where: {
-                  planId: job.planId,
-                  policyId: job.policyId,
-                  kind: { in: ['WEEK', 'ADJUST'] },
-                  state: { in: ['PENDING', 'RUNNING', 'RETRY'] },
-                  windowStart: {
-                    gte: date(isoWeekStart(strategy.monthStart)),
-                    lte: date(calendarMonthEnd(strategy.monthStart)),
-                  },
-                },
-                data: {
-                  state: 'CANCELLED',
-                  claimToken: null,
-                  leaseUntil: null,
-                  lastError: 'ROLLING_MONTH_DEPENDENCY_CHANGED',
-                },
-              });
           }
         }
         await this.authorized(jobId, token, tx);
@@ -675,17 +702,20 @@ export class RollingPlanAutomationService {
     const needsInput = reason === 'ROLLING_CANDIDATE_NEEDS_INPUT';
     const stale =
       /ROLLING_(FACTS|MONTH_DEPENDENCY|POLICY)_|changed|reassess/i.test(reason);
-    const state = needsInput
-      ? 'BLOCKED'
-      : stale
-        ? 'CANCELLED'
-        : job.attempts >= MAX_ATTEMPTS
-          ? 'FAILED'
-          : 'RETRY';
-    await this.prisma.rollingPlanJob.updateMany({
+    const state = resumeAt
+      ? 'RETRY'
+      : needsInput
+        ? 'BLOCKED'
+        : stale
+          ? 'CANCELLED'
+          : job.attempts >= MAX_ATTEMPTS
+            ? 'FAILED'
+            : 'RETRY';
+    const updated = await this.prisma.rollingPlanJob.updateMany({
       where: { id: job.id, state: 'RUNNING', claimToken: job.claimToken },
       data: {
         state,
+        ...(resumeAt ? { attempts: { decrement: 1 } } : {}),
         lastError: [reason, (error as { reason?: string })?.reason]
           .filter(Boolean)
           .join(': ')
@@ -701,6 +731,7 @@ export class RollingPlanAutomationService {
           ),
       },
     });
+    return updated.count ? state : null;
   }
   async configure(
     userId: string,
@@ -743,6 +774,12 @@ export class RollingPlanAutomationService {
         },
         '2000-01-01',
       );
+      if (
+        enabled === (latest.revokedAt === null) &&
+        (!enabled || hash(policySettings) === hash(latest.settings))
+      ) {
+        return { enabled, revision: latest.revision };
+      }
       await tx.rollingPlanJob.updateMany({
         where: { planId, state: { in: ['PENDING', 'RUNNING', 'RETRY'] } },
         data: {

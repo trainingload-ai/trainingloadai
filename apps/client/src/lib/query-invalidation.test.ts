@@ -75,6 +75,8 @@ it("refreshes every execution-advice variant after a committed plan mutation", a
     ["ai-plan-execution-advice", { planId: "a", surface: "HOME_TODAY" }],
     ["ai-plan-execution-advice", { planId: "a", surface: "PLAN_SIDEBAR" }],
     ["ai-plan-execution-advice", { planId: "b" }],
+    ["activities", "cards", ["activity-a", "activity-b"]],
+    ["activity-plan-link", "activity-a"],
     ["account-intervals-icu"],
     ["personal-connection", "garmin"],
     ["account-external-provider", "garmin", "training"],

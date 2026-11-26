@@ -47,6 +47,11 @@ describe('OAuthMetadataController', () => {
         'plan:read',
         'health:read',
         'competition:read',
+        'plan:draft',
+        'plan:update',
+        'plan:delete',
+        'plan:link',
+        'activity:import',
       ],
       bearer_methods_supported: ['header'],
     });

@@ -75,26 +75,26 @@ function UploadSkeleton() {
 
 export default function V2ActivitiesLoading() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 pb-3">
-      <div className="flex flex-col gap-3 md:grid md:grid-cols-[minmax(0,1fr)_320px] md:items-start md:[grid-template-areas:'main_aside']">
-        <aside className="order-1 flex min-w-0 flex-col gap-3 md:order-none md:[grid-area:aside]">
+    <div className="mx-auto flex w-full max-w-6xl flex-col pb-3 pc:min-h-0 pc:flex-1 pc:pb-0">
+      <div className="flex flex-col gap-3 pc:grid pc:min-h-0 pc:flex-1 pc:grid-cols-[minmax(0,1fr)_320px] pc:grid-rows-[minmax(0,1fr)] pc:[grid-template-areas:'main_aside']">
+        <aside className="order-1 flex min-w-0 flex-col gap-3 pc:order-none pc:overflow-clip pc:[grid-area:aside]">
           <MiniMapSkeleton />
           <StatsPreviewSkeleton />
           <UploadSkeleton />
         </aside>
 
-        <main className="order-3 flex min-w-0 flex-col gap-4 md:order-none md:min-h-0 md:[grid-area:main]">
-          <section className="flex items-center gap-2 rounded-md bg-neutral-100 px-3 py-2.5 dark:bg-muted/45">
+        <main className="order-3 flex min-w-0 flex-col gap-4 pc:order-none pc:min-h-0 pc:[grid-area:main]">
+          <section className="flex shrink-0 items-center gap-2 rounded-md bg-neutral-100 px-3 py-2.5 dark:bg-muted/45">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Skeleton className="h-4 w-36 bg-background/80 dark:bg-black/20" />
           </section>
 
-          <section>
-            <div className="flex items-center justify-between gap-3 pb-2">
+          <section className="pc:flex pc:min-h-0 pc:flex-1 pc:flex-col">
+            <div className="flex shrink-0 items-center justify-between gap-3 pb-2">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-4 w-16" />
             </div>
-            <div className="space-y-2 md:h-[640px] md:overflow-hidden md:pr-1">
+            <div className="space-y-2 pc:flex-1 pc:overflow-clip">
               {Array.from({ length: 5 }).map((_, index) => (
                 <ActivityCardSkeleton key={index} />
               ))}

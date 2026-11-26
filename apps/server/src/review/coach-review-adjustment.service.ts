@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { $Enums } from '@prisma/client';
-import { AiService } from '@/api/ai/ai.service';
+import { TrainingCoachAgent } from '@/api/ai/agents/training-coach-agent.service';
 import type {
   CoachReviewAction,
   CoachReviewJudgment,
@@ -42,7 +42,7 @@ export class CoachReviewAdjustmentService {
   private readonly logger = new Logger(CoachReviewAdjustmentService.name);
 
   constructor(
-    private readonly ai: AiService,
+    private readonly coachAgent: TrainingCoachAgent,
     private readonly codecs: WorkoutCodecRegistry,
     private readonly loadEstimator: PlanLoadEstimatorService,
     private readonly modelGuard: ReviewModelCallGuard,
@@ -116,7 +116,7 @@ export class CoachReviewAdjustmentService {
       const generated = await this.modelGuard.run(
         `adjustment:${args.context.meta.scale}`,
         (signal) =>
-          this.ai.generatePlanReviewAdjustment({
+          this.coachAgent.generatePlanReviewAdjustment({
             userId: args.userId,
             lang: args.lang,
             scale: args.context.meta.scale,

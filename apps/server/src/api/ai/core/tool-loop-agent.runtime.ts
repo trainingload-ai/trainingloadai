@@ -15,9 +15,12 @@ import {
 } from 'ai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import type { ActiveCoachSkill } from './skill.types';
-import type {
-  CoachPlanDraftData,
-  PlanWorkoutAdjustmentDraftData,
+import {
+  isCoachHealthVisualization,
+  readCoachActivityView,
+  readCoachEntityView,
+  type CoachPlanDraftData,
+  type PlanWorkoutAdjustmentDraftData,
 } from '@shared/ai-coach-schema';
 import {
   buildContextWindowSnapshot,
@@ -32,8 +35,13 @@ import {
   getCoachUpstreamProvider,
   type CoachClientOptions,
 } from './coach-upstream.adapter';
-import { resolveAthleteClock } from './athlete-relative-day';
+import {
+  resolveAthleteClock,
+  type CoachPromptClock,
+} from './athlete-relative-day';
 import { buildCoachSystemPrompt } from './coach.prompt';
+import { coachPlanCalendarBlock } from './coach-plan-calendar';
+import { planPhaseProgress } from './tools/plan-draft-phase-progress';
 import {
   scopeToolsByActiveSkill,
   sortToolsBySkillPreference,
@@ -47,6 +55,9 @@ import {
 } from './tool.types';
 import {
   createAiSdkCoachTools,
+  isAuditedPlanTool,
+  previewToolInputForLog,
+  recordPlanToolValidationRejection,
   stringifyAiSdkToolResultForModel,
 } from './ai-sdk-tool-adapter';
 import {
@@ -58,10 +69,11 @@ import { coachPublicSummaryFromText } from './coach-public-summary';
 import {
   coachStepBudgetReached,
   COACH_DELIVERY_SUMMARY_INSTRUCTION,
+  describeDeliveredFixedPlan,
   isCoachDraftDelivery,
   needsCoachDeliverySummary,
 } from './coach-delivery';
-import { unknownErrorFields } from './ai-common.util';
+import { asRecord, unknownErrorFields } from './ai-common.util';
 import { previewTextForLog, safeJsonPreview } from './safe-json-preview';
 import type {
   CoachAssistantContentBlock,
@@ -97,6 +109,7 @@ const COACH_UI_CARD_TOOL_DISPLAY_NAMES: Record<string, string> = {
   'activity.day_view': 'ActivityDayView',
   'pmc.range': 'PmcRange',
   present_training_visualization: 'TrainingVisualization',
+  present_coach_health: 'CoachHealthVisualization',
   'profile.zones': 'ProfileZones',
   'profile.zone_ranges': 'ProfileZoneRanges',
   'competition.events.list': 'CompetitionEvents',
@@ -104,6 +117,7 @@ const COACH_UI_CARD_TOOL_DISPLAY_NAMES: Record<string, string> = {
   'training.plan_context': 'TrainingPlanContext',
   'workout.intensity_strategy': 'WorkoutIntensityStrategy',
   coach_decision_draft: 'CoachDecisionDraft',
+  present_independent_workout_draft: 'PresentIndependentWorkoutDraft',
   coach_decision_apply: 'CoachDecisionApplied',
 };
 
@@ -127,6 +141,15 @@ class CoachStreamIdleTimeoutError extends Error {
     );
     this.name = 'CoachStreamIdleTimeoutError';
   }
+}
+
+export function isCoachModelTimeoutError(
+  error: unknown,
+): error is CoachStepTimeoutError | CoachStreamIdleTimeoutError {
+  return (
+    error instanceof CoachStepTimeoutError ||
+    error instanceof CoachStreamIdleTimeoutError
+  );
 }
 
 type CoachModelTimeoutKind = 'stream_idle' | 'step';
@@ -270,6 +293,8 @@ const SELF_CONTAINED_UI_SURFACE_TOOLS = new Set([
   'AskUserQuestion',
   'present_coach_plan_draft',
   'PresentCoachPlanDraft',
+  'present_independent_workout_draft',
+  'PresentIndependentWorkoutDraft',
   'present_plan_workout_adjustment_draft',
   'PresentPlanWorkoutAdjustmentDraft',
   'coach_decision_draft',
@@ -490,16 +515,48 @@ export function buildCoachUiCardToolUseBlocks(args: {
   calls: ProviderToolCall[];
   results: ProviderToolResult[];
 }): CoachAssistantContentBlock[] {
-  return args.calls.map((call, index) => {
-    const result = args.results[index];
+  const resultsById = new Map(args.results.map((result) => [result.id, result]));
+  return args.calls.flatMap<CoachAssistantContentBlock>((call) => {
+    const result = resultsById.get(call.id);
     const resolvedTool = resolveCanonicalTool({
       tools: args.tools,
       providerToolName: call.name,
     });
     const canonical = resolvedTool?.name ?? call.name;
+    const original: CoachAssistantContentBlock = {
+      type: 'tool_use', id: call.id, name: call.name,
+      input: isAuditedPlanTool(call.name) && result?.ok !== true ? {} : call.input,
+    };
+    if (result?.ok === true && result.output && typeof result.output === 'object') {
+      const views: CoachAssistantContentBlock[] = [];
+      if (canonical === 'plan.by_id' || canonical === 'plan.active') {
+        const { plan } = result.output as { plan?: { id?: string; title?: string } };
+        const detail = call.input.showDetail === true && readCoachEntityView({
+          kind: 'plan_detail', planId: plan?.id, title: plan?.title,
+        });
+        const calendar = call.input.showCalendar === true &&
+          coachPlanCalendarBlock(call.id, call.input, result.output);
+        if (detail) views.push({ type: 'tool_use', id: `${call.id}:detail`, name: 'CoachDetailView', input: detail });
+        if (calendar) views.push(calendar);
+      }
+      if (canonical === 'profile.current' && call.input.showOverview === true) {
+        views.push({
+          type: 'tool_use', id: `${call.id}:detail`, name: 'CoachDetailView', input: { kind: 'athlete_overview' },
+        });
+      }
+      if (canonical === 'activity.byHashId') {
+        const detail = readCoachActivityView({
+          kind: 'activity_detail', hashId: call.input.hashId, section: call.input.section,
+          focus: call.input.focus,
+        });
+        if (detail) views.push({ type: 'tool_use', id: `${call.id}:detail`, name: 'CoachDetailView', input: detail });
+      }
+      if (views.length) return [original, ...views];
+    }
     const uiName = COACH_UI_CARD_TOOL_DISPLAY_NAMES[canonical];
-    const publicOutput =
-      canonical === 'competition.events.list'
+    const publicOutput = canonical === 'present_coach_health'
+      ? (isCoachHealthVisualization(result?.output) ? result.output : null)
+      : canonical === 'competition.events.list'
         ? projectCoachCompetitionEvents(call.input, result?.output)
         : canonical === 'training.baseline'
           ? projectCoachTrainingBaseline(result?.output)
@@ -529,12 +586,7 @@ export function buildCoachUiCardToolUseBlocks(args: {
         input: result.output,
       };
     }
-    return {
-      type: 'tool_use',
-      id: call.id,
-      name: call.name,
-      input: call.input,
-    };
+    return original;
   });
 }
 
@@ -560,7 +612,17 @@ export function uiSurfaceAssistantForToolResult(
   result: ProviderToolResult,
 ): CoachQueryYield | null {
   if (!result.ok) return null;
-  const output = result.output as { kind?: unknown } | undefined;
+  const output = result.output as { kind?: unknown; draftId?: unknown } | undefined;
+  if (result.name === 'present_independent_workout_draft' && typeof output?.draftId === 'string') {
+    return {
+      type: 'assistant',
+      message: {
+        content: [{
+          type: 'tool_use', id: result.id, name: 'PresentIndependentWorkoutDraft', input: { draftId: output.draftId },
+        }],
+      },
+    };
+  }
   if (output?.kind === 'fitness_tracking_offer')
     return {
       type: 'assistant',
@@ -643,6 +705,10 @@ export function uiSurfaceAssistantForToolResult(
               ...(draft.qualityContract
                 ? { qualityContract: draft.qualityContract }
                 : {}),
+              ...(draft.planAssessment ? { planAssessment: draft.planAssessment } : {}),
+              ...(draft.scheduleConstraints
+                ? { scheduleConstraints: draft.scheduleConstraints }
+                : {}),
               ...(draft.qualityReport
                 ? { qualityReport: draft.qualityReport }
                 : {}),
@@ -721,6 +787,8 @@ export function stopAfterUiSurfaceTool({
       const output = result.output as { kind?: unknown } | undefined;
       return (
         isDisplayableFitnessAssessmentResult(output) ||
+        (result.toolName === 'present_independent_workout_draft' &&
+          typeof (result.output as { draftId?: unknown } | undefined)?.draftId === 'string') ||
         (['ask_user_question', 'mutation_apply_fitness_calculation'].includes(
           result.toolName ?? '',
         ) &&
@@ -744,6 +812,29 @@ export function stopAfterCoachTaskResult({
   );
 }
 
+function stopAfterRepeatedTodaySuggestionRejection({
+  steps,
+}: {
+  steps: ToolLoopStep[];
+}): boolean {
+  const submissions = steps
+    .flatMap((step) => step.toolResults ?? [])
+    .filter((result) => result.toolName === 'coach_task_submit_result');
+  const last = asRecord(submissions.at(-1)?.output);
+  if (
+    last?.stage !== 'execute' ||
+    typeof last.code !== 'string' ||
+    typeof last.error !== 'string'
+  ) {
+    return false;
+  }
+  const matchingRejections = submissions.filter((result) => {
+    const output = asRecord(result.output);
+    return output?.code === last.code && output?.error === last.error;
+  });
+  return matchingRejections.length >= 3;
+}
+
 function toolResultOk(output: unknown): boolean {
   const obj = output as { error?: unknown } | undefined;
   return !(obj && typeof obj === 'object' && typeof obj.error === 'string');
@@ -759,19 +850,13 @@ function shouldLogPlanDraftDebug(): boolean {
 function resolveStepScopedTools(args: {
   allTools: AiToolDef[];
   activeSkill: ActiveCoachSkill | null;
+  ctx: AiToolContext;
 }) {
+  const progress = planPhaseProgress(args.ctx);
+  const excluded = progress?.next ? 'present_coach_plan_draft' : 'plan.stage_phase';
   return sortToolsBySkillPreference(
-    scopeToolsByActiveSkill(args.allTools, args.activeSkill),
+    scopeToolsByActiveSkill(args.allTools, args.activeSkill).filter((tool) => tool.name !== excluded),
     args.activeSkill,
-  );
-}
-
-function providerToolNamesForStep(args: {
-  allTools: AiToolDef[];
-  activeSkill: ActiveCoachSkill | null;
-}): string[] {
-  return resolveStepScopedTools(args).map((tool) =>
-    toProviderToolName(tool.name),
   );
 }
 
@@ -784,9 +869,11 @@ type UiSurfacePayloadError = {
 
 const UI_SURFACE_PAYLOAD_TOOLS = new Set([
   'ask_user_question',
+  'plan_stage_phase',
   'present_coach_plan_draft',
   'present_plan_workout_adjustment_draft',
   'present_training_visualization',
+  'present_coach_health',
 ]);
 
 const UI_SURFACE_VALIDATION_LOG_PREVIEW_CHARS = 8_000;
@@ -819,12 +906,16 @@ function isSuccessfulUiSurfaceToolOutput(
   switch (toolName) {
     case 'ask_user_question':
       return obj.kind === 'ask_user_question';
+    case 'plan_stage_phase':
+      return obj.kind === 'plan_phase_staged';
     case 'present_coach_plan_draft':
       return obj.kind === 'coach_plan_draft';
     case 'present_plan_workout_adjustment_draft':
       return obj.kind === 'plan_workout_adjustment_draft';
     case 'present_training_visualization':
       return obj.kind === 'training_visualization';
+    case 'present_coach_health':
+      return isCoachHealthVisualization(output);
     default:
       return false;
   }
@@ -878,8 +969,14 @@ export function detectUiSurfacePayloadError(args: {
   const questionCount = Array.isArray(args.input.questions)
     ? args.input.questions.length
     : undefined;
+  const argsPreview = previewToolInputForLog(
+    args.result.name,
+    args.input,
+    UI_SURFACE_VALIDATION_LOG_PREVIEW_CHARS,
+  );
+  const logError = isAuditedPlanTool(args.result.name) ? '[omitted]' : error ?? 'unknown';
   logger.warn(
-    `[AI][教练][ui_surface][validate_failed] tool=${args.result.name} attempt=${args.attempt}/${maxAttempts} allow_retry=${args.attempt < maxAttempts ? 'yes' : 'no'} stage=${stage ?? 'none'} code=${code ?? 'none'} error=${error ?? 'unknown'} keys=${Object.keys(args.input).join(',') || '(empty)'}${questionCount !== undefined ? ` questionCount=${questionCount}` : ''} argsPreview=${safeJsonPreview(args.input, UI_SURFACE_VALIDATION_LOG_PREVIEW_CHARS)}`,
+    `[AI][coach][ui_surface][validate_failed] tool=${args.result.name} attempt=${args.attempt}/${maxAttempts} allow_retry=${args.attempt < maxAttempts ? 'yes' : 'no'} stage=${stage ?? 'none'} code=${code ?? 'none'} error=${logError} keys=${Object.keys(args.input).join(',') || '(empty)'}${questionCount !== undefined ? ` questionCount=${questionCount}` : ''} argsPreview=${argsPreview}`,
   );
 
   if (
@@ -888,7 +985,7 @@ export function detectUiSurfacePayloadError(args: {
   ) {
     const isEmptyArgs = Object.keys(args.input).length === 0;
     logger.warn(
-      `[AI][教练][plan_draft][debug] payload_failed attempt=${args.attempt}/${maxAttempts} allow_retry=${args.attempt < maxAttempts ? 'yes' : 'no'} emptyArgs=${isEmptyArgs ? 'yes' : 'no'} stage=${stage ?? 'none'} code=${code ?? 'none'} error=${error ?? 'unknown'} argsPreview=${safeJsonPreview(args.input, 1200)}`,
+      `Plan draft validation failed attempt=${args.attempt}/${maxAttempts} emptyArgs=${isEmptyArgs ? 'yes' : 'no'} stage=${stage ?? 'none'} code=${code ?? 'none'}`,
     );
   }
 
@@ -973,6 +1070,7 @@ export async function emitToolStepMessages(args: {
   ctx: AiToolContext;
 }): Promise<CoachQueryYield[]> {
   if (args.calls.length === 0) return [];
+  const resultsById = new Map(args.results.map((result) => [result.id, result]));
   const assistant: CoachQueryYield = {
     type: 'assistant',
     message: {
@@ -987,18 +1085,20 @@ export async function emitToolStepMessages(args: {
     type: 'user',
     message: {
       content: await Promise.all(
-        args.calls.map(async (call, index) => {
-          const result = args.results[index];
+        args.calls.map(async (call) => {
+          const result = resultsById.get(call.id);
           const tool = resolveCanonicalTool({
             tools: args.tools,
             providerToolName: call.name,
           });
-          const content = await stringifyAiSdkToolResultForModel({
-            tool,
-            ctx: args.ctx,
-            input: call.input,
-            output: result?.output,
-          });
+          const content = isAuditedPlanTool(call.name) && result?.ok !== true
+            ? JSON.stringify({ error: 'Plan candidate rejected', code: asRecord(result?.output)?.code })
+            : await stringifyAiSdkToolResultForModel({
+                tool,
+                ctx: args.ctx,
+                input: call.input,
+                output: result?.output,
+              });
           return {
             type: 'tool_result' as const,
             tool_use_id: call.id,
@@ -1024,6 +1124,10 @@ export async function* streamCoachAnswer(args: {
   coachFacts?: Awaited<ReturnType<CoachFactContextService['build']>>;
   /** Optional server-owned task model override (for example REVIEW_AI_MODEL). */
   model?: string;
+  /** Application-owned upper bound for a single delegated task. */
+  maxSteps?: number;
+  /** A specialist can use its own instructions while sharing tools and metering. */
+  systemPrompt?: (clock: CoachPromptClock) => string;
 }): AsyncGenerator<CoachQueryYield, void, undefined> {
   const { tools: allTools, ctx } = args;
   const t0 = Date.now();
@@ -1032,10 +1136,16 @@ export async function* streamCoachAnswer(args: {
     userService: ctx.userService,
     userId: ctx.session?.user?.id,
   });
-  const serverOwnedTask = Boolean(ctx.backgroundTask || ctx.athleteState);
-  const systemPromptFor = (publicReasoningSummary: boolean) =>
+  const serverOwnedTask = Boolean(
+    ctx.backgroundTask || ctx.athleteState || ctx.calendarScheduleOnly,
+  );
+  const systemPromptFor = (
+    activeSkill: ActiveCoachSkill | null,
+    publicReasoningSummary: boolean,
+  ) =>
+    args.systemPrompt?.(clock) ??
     appendAmbientMemory(
-      buildCoachSystemPrompt(ctx.lang, args.activeSkill ?? null, clock, {
+      buildCoachSystemPrompt(ctx.lang, activeSkill, clock, {
         publicReasoningSummary,
         serverOwnedTask,
       }),
@@ -1049,9 +1159,14 @@ export async function* streamCoachAnswer(args: {
     : getModelCandidates({ thinking });
   const stepTimeoutMs = resolveStepTimeoutMs(provider, args.activeSkill?.name);
   const streamIdleTimeoutMs = resolveStreamIdleTimeoutMs(provider);
-  const maxSteps = Math.max(
+  const configuredMaxSteps = Math.max(
     1,
     Number(process.env.AI_COACH_MAX_AGENT_STEPS ?? 16),
+  );
+  const maxSteps = Math.min(
+    configuredMaxSteps,
+    args.maxSteps ?? configuredMaxSteps,
+    ctx.planQuestionReview ? 6 : configuredMaxSteps,
   );
 
   const runtimeState: CoachToolLoopRuntimeState = {
@@ -1063,6 +1178,7 @@ export async function* streamCoachAnswer(args: {
   };
   const initialOrderedTools = resolveStepScopedTools({
     allTools,
+    ctx,
     activeSkill: runtimeState.currentActiveSkill,
   });
   const initialContextCompaction = compactMessagesForBudget({
@@ -1070,7 +1186,7 @@ export async function* streamCoachAnswer(args: {
     messages: [
       {
         role: 'system',
-        content: systemPromptFor(thinking),
+        content: systemPromptFor(runtimeState.currentActiveSkill, thinking),
       },
       ...args.messages,
     ],
@@ -1140,24 +1256,26 @@ export async function* streamCoachAnswer(args: {
   let committedWrite = false;
   let uiDelivered = false;
   let modelAttempt = 0;
-  let deliveryOnly = false;
-  const allAiSdkTools = createAiSdkCoachTools({
-    tools: allTools,
-    canExecute: () => !deliveryOnly,
-    ctx: {
+
+  let openErr: unknown = null;
+  for (const model of models) {
+    modelAttempt += 1;
+    let deliveryOnly = false;
+    const attemptAbort = new AbortController();
+    const sdkContext: AiToolContext = {
       ...ctx,
+      signal: mergeCoachAbortSignals(ctx.signal, attemptAbort.signal) ?? attemptAbort.signal,
       onActivity: async (activity) => {
         if (activity.mutation && activity.status === 'running')
           mutationStarted = true;
         await ctx.onActivity?.(activity);
       },
-    },
-  });
-
-  let openErr: unknown = null;
-  for (const model of models) {
-    modelAttempt += 1;
-    deliveryOnly = false;
+    };
+    const allAiSdkTools = createAiSdkCoachTools({
+      tools: allTools,
+      canExecute: () => !deliveryOnly,
+      ctx: sdkContext,
+    });
     let activeModelStep = '';
     let timedOut: { kind: CoachModelTimeoutKind; step: number } | null = null;
     const attemptUsageEvents: unknown[] = [];
@@ -1165,17 +1283,27 @@ export async function* streamCoachAnswer(args: {
       const agent = new ToolLoopAgent({
         id: 'trainingload-ai-coach',
         model: createCoachLanguageModel({ thinking }, model),
-        instructions: systemPromptFor(thinking),
+        instructions: systemPromptFor(args.activeSkill ?? null, thinking),
         allowSystemInMessages: true,
         tools: allAiSdkTools,
         toolChoice: ctx.backgroundTask ? 'required' : 'auto',
         temperature: 0.35,
         stopWhen: [
-          ({ steps }) => coachStepBudgetReached(steps, maxSteps),
+          ({ steps }) => {
+            const extraSteps = args.maxSteps == null && process.env.AI_COACH_MAX_AGENT_STEPS == null
+              ? planPhaseProgress(ctx)?.completedWindows ?? 0 : 0;
+            return coachStepBudgetReached(steps, maxSteps + extraSteps);
+          },
+          ({ steps }) => Boolean(
+            ctx.planQuestionReview && !ctx.planQuestionReview.decisions && steps.length >= 2,
+          ),
           ({ steps }) =>
             steps.length > 1 && needsCoachDeliverySummary(steps.slice(0, -1)),
           stopAfterUiSurfaceTool,
           stopAfterCoachTaskResult,
+          ...(ctx.backgroundTask?.taskType === 'TODAY_SUGGESTION'
+            ? [stopAfterRepeatedTodaySuggestionRejection]
+            : []),
           stopAfterUiSurfaceValidationExhausted(runtimeState),
         ],
         providerOptions: buildCoachStreamProviderOptions({
@@ -1184,35 +1312,28 @@ export async function* streamCoachAnswer(args: {
         }),
         prepareStep: ({ stepNumber, steps }) => {
           deliveryOnly = needsCoachDeliverySummary(steps);
-          ctx.activeSkillName = runtimeState.currentActiveSkill?.name;
-          if (ctx.activeSkillName === 'fitness-assessment')
+          const activeSkillName = runtimeState.currentActiveSkill?.name;
+          ctx.activeSkillName = activeSkillName;
+          sdkContext.activeSkillName = activeSkillName;
+          if (activeSkillName === 'fitness-assessment') {
             ctx.fitnessAssessmentActive = true;
+            sdkContext.fitnessAssessmentActive = true;
+          }
           const orderedTools = resolveStepScopedTools({
             allTools,
+            ctx,
             activeSkill: runtimeState.currentActiveSkill,
           });
-          const activeTools = providerToolNamesForStep({
-            allTools,
-            activeSkill: runtimeState.currentActiveSkill,
-          });
+          const activeTools = orderedTools.map((tool) => toProviderToolName(tool.name));
 
           const contextWindow = buildContextWindowSnapshot({
             model,
             messages: [
               {
                 role: 'system',
-                content: appendAmbientMemory(
-                  buildCoachSystemPrompt(
-                    ctx.lang,
-                    runtimeState.currentActiveSkill,
-                    clock,
-                    {
-                      publicReasoningSummary: thinking,
-                      serverOwnedTask,
-                    },
-                  ),
-                  args.ambientMemory,
-                  args.coachFacts,
+                content: systemPromptFor(
+                  runtimeState.currentActiveSkill,
+                  thinking,
                 ),
               },
               ...args.messages,
@@ -1227,31 +1348,57 @@ export async function* streamCoachAnswer(args: {
             compactedMessages: 0,
           };
 
-          const systemPrompt = appendAmbientMemory(
-            buildCoachSystemPrompt(
-              ctx.lang,
-              runtimeState.currentActiveSkill,
-              clock,
-              {
-                publicReasoningSummary: thinking && !deliveryOnly,
-                serverOwnedTask,
-              },
-            ),
-            args.ambientMemory,
-            args.coachFacts,
+          const systemPrompt = systemPromptFor(
+            runtimeState.currentActiveSkill,
+            thinking && !deliveryOnly,
           );
+          const review = ctx.planQuestionReview;
+          const requireQuestionReview = review && !review.decisions && !deliveryOnly;
+          const progress = deliveryOnly ? undefined : planPhaseProgress(ctx);
+          const nextTool = requireQuestionReview ? 'plan_suitability_assess'
+            : progress ? (progress.next ? 'plan_stage_phase' : 'present_coach_plan_draft') : undefined;
+          const rejectedCurrentPhase = Boolean(
+            progress?.next &&
+            ctx.planSuitability?.rejectedPhase &&
+            ctx.planSuitability.rejectedPhase.assessmentId === progress.assessmentId &&
+            ctx.planSuitability.rejectedPhase.startWeek === progress.next.startWeek &&
+            ctx.planSuitability.rejectedPhase.endWeek === progress.next.endWeek,
+          );
+          const allowReassessEscape = Boolean(
+            !requireQuestionReview &&
+            progress &&
+            (rejectedCurrentPhase || (!progress.next && runtimeState.uiSurfacePayloadError)) &&
+            activeTools.includes('plan_suitability_assess'),
+          );
+          const constrainedTools = nextTool
+            ? (allowReassessEscape
+                ? [nextTool, 'plan_suitability_assess']
+                : [nextTool]) as Array<keyof typeof allAiSdkTools>
+            : undefined;
           return {
             system: deliveryOnly
               ? systemPrompt + COACH_DELIVERY_SUMMARY_INSTRUCTION
-              : systemPrompt,
+              : requireQuestionReview
+                ? systemPrompt + `\nBefore replying, call plan_suitability_assess and complete its questionReview. Use these exact question IDs: ${review.questions.map(({ id }) => id).join(', ')}.`
+                : progress?.next
+                  ? systemPrompt + `\nWork on weeks ${progress.next.startWeek}–${progress.next.endWeek}. For a new window submit its schedule. For a rejected window use the latest feedback to change the prescriptions that failed${allowReassessEscape ? ' (or reassess with plan_suitability_assess only if validation found a blueprint phase/target error)' : ''}.`
+                  : progress
+                    ? systemPrompt + '\nAll phases are accepted. Call present_coach_plan_draft with assessmentId, title and description to deliver the assembled draft.'
+                    : systemPrompt,
             activeTools: deliveryOnly
               ? []
-              : (activeTools as Array<keyof typeof allAiSdkTools>),
-            toolChoice: ctx.backgroundTask
-              ? 'required'
-              : deliveryOnly
-                ? 'none'
-                : 'auto',
+              : constrainedTools ?? (activeTools as Array<keyof typeof allAiSdkTools>),
+            toolChoice: nextTool
+              ? thinking
+                ? 'auto'
+                : constrainedTools && constrainedTools.length > 1
+                  ? 'required'
+                  : { type: 'tool', toolName: nextTool }
+              : ctx.backgroundTask
+                ? 'required'
+                : deliveryOnly
+                  ? 'none'
+                  : 'auto',
             providerOptions: buildCoachStreamProviderOptions({
               thinking,
               provider,
@@ -1298,20 +1445,54 @@ export async function* streamCoachAnswer(args: {
         `[AI][教练][agent-sdk] 打开流 服务商=${provider ?? 'none'} baseURL=${getCoachBaseUrlForLog(provider)} 模型=${model}`,
       );
 
-      const attemptAbort = new AbortController();
       const stream = await agent.stream({
         messages: toAiSdkModelMessages(compactedMessages),
-        abortSignal: mergeCoachAbortSignals(ctx.signal, attemptAbort.signal),
+        abortSignal: sdkContext.signal,
       });
 
       let visibleTextBuf = '';
       let summaryRequired = false;
+      let planSummaryFallback = '';
       let pausedForUi = false;
       let stepTextBuf = '';
       let reasoningBuf = '';
       let currentStep = 0;
       let stepCalls: ProviderToolCall[] = [];
       let stepResults: ProviderToolResult[] = [];
+      let planDraftDelivered = false;
+      const awaitingPlanDraft = () => !planDraftDelivered && Boolean(planPhaseProgress(ctx));
+      const finalizeUiDelivery = () => {
+        if (awaitingPlanDraft()) {
+          runtimeState.uiSurfacePayloadError ??= { toolName: 'present_coach_plan_draft' };
+        }
+        if (runtimeState.uiSurfacePayloadError) runtimeState.emitUiSurfaceFallback = true;
+      };
+      const resolveVisibleStep = () => {
+        if (!stepCalls.length && awaitingPlanDraft()) return { text: '', violation: null };
+        const input = {
+          text: stepTextBuf,
+          hasToolCalls: stepCalls.length > 0,
+          lang: ctx.lang,
+          committedWrite,
+          currentUserPrompt: ctx.currentUserPrompt,
+        };
+        const step = resolveCoachVisibleStepText(input);
+        const rules = step.violation?.ruleIds;
+        if (
+          summaryRequired &&
+          !pausedForUi &&
+          planSummaryFallback &&
+          !input.hasToolCalls &&
+          rules?.length === 1 &&
+          rules[0] === 'internal_tool_identifier'
+        ) {
+          logger.warn(
+            `Coach plan summary replaced after output policy rejection step=${currentStep} rule=${rules[0]}`,
+          );
+          return resolveCoachVisibleStepText({ ...input, text: planSummaryFallback });
+        }
+        return step;
+      };
       const invalidInputCallIds = new Set<string>();
       const deliveredUiSurfaceCallIds = new Set<string>();
       const deliveredUiCardCallIds = new Set<string>();
@@ -1352,6 +1533,7 @@ export async function* streamCoachAnswer(args: {
           stepDeadlineAt = Date.now() + stepTimeoutMs;
           orderedToolsForStep = resolveStepScopedTools({
             allTools,
+            ctx,
             activeSkill: runtimeState.currentActiveSkill,
           });
 
@@ -1485,13 +1667,23 @@ export async function* streamCoachAnswer(args: {
           };
 
           const uiAssistant = uiSurfaceAssistantForToolResult(result);
+          if (uiAssistant && result.name === 'present_coach_plan_draft' &&
+            planDraftDelivered && planPhaseProgress(ctx)) {
+            deliveredUiSurfaceCallIds.add(result.id);
+            continue;
+          }
           if (
             isCoachDraftDelivery({
               toolName: result.name,
               output: result.output,
             })
-          )
+          ) {
             summaryRequired = true;
+            planSummaryFallback =
+              uiAssistant && result.name === 'present_coach_plan_draft'
+                ? describeDeliveredFixedPlan(ctx, result.output as CoachPlanDraftData)
+                : '';
+          }
           if (
             stopAfterUiSurfaceTool({
               steps: [
@@ -1505,6 +1697,7 @@ export async function* streamCoachAnswer(args: {
           )
             pausedForUi = true;
           if (uiAssistant) {
+            if (result.name === 'present_coach_plan_draft') planDraftDelivered = true;
             uiDelivered = true;
             deliveredUiSurfaceCallIds.add(result.id);
             yield uiAssistant;
@@ -1535,6 +1728,18 @@ export async function* streamCoachAnswer(args: {
           // SDK schema rejections never call execute(), but must still be
           // persisted and participate in the existing bounded repair budget.
           if (invalidInput) {
+            await recordPlanToolValidationRejection({
+              ctx,
+              toolCallId: part.toolCallId,
+              toolName: part.toolName,
+              candidate: part.input ?? null,
+              stage: 'validate_input',
+              validation: {
+                ok: false,
+                code: 'INVALID_INPUT',
+                message: part.error instanceof Error ? part.error.message : String(part.error),
+              },
+            });
             const canonical = resolveCanonicalTool({
               tools: allTools,
               providerToolName: part.toolName,
@@ -1577,13 +1782,7 @@ export async function* streamCoachAnswer(args: {
           if (part.usage !== undefined) {
             attemptUsageEvents.push(part.usage);
           }
-          const visibleStep = resolveCoachVisibleStepText({
-            text: stepTextBuf,
-            hasToolCalls: stepCalls.length > 0,
-            lang: ctx.lang,
-            committedWrite,
-            currentUserPrompt: ctx.currentUserPrompt,
-          });
+          const visibleStep = resolveVisibleStep();
           if (visibleStep.violation) {
             for (const usage of attemptUsageEvents) {
               yield {
@@ -1682,9 +1881,7 @@ export async function* streamCoachAnswer(args: {
           // unresolved validation error at this point means the model stopped
           // without repairing the UI payload, so decide the fallback here
           // synchronously instead of depending on callback ordering.
-          if (runtimeState.uiSurfacePayloadError) {
-            runtimeState.emitUiSurfaceFallback = true;
-          }
+          finalizeUiDelivery();
           if (activeModelStep)
             yield {
               type: 'activity',
@@ -1704,13 +1901,7 @@ export async function* streamCoachAnswer(args: {
           }
           // AI SDK normally emits finish-step first. Keep this fallback for
           // providers that terminate directly after their final text delta.
-          const visibleStep = resolveCoachVisibleStepText({
-            text: stepTextBuf,
-            hasToolCalls: stepCalls.length > 0,
-            lang: ctx.lang,
-            committedWrite,
-            currentUserPrompt: ctx.currentUserPrompt,
-          });
+          const visibleStep = resolveVisibleStep();
           if (visibleStep.violation) {
             for (const usage of attemptUsageEvents) {
               yield {
@@ -1755,7 +1946,7 @@ export async function* streamCoachAnswer(args: {
               toolName: runtimeState.uiSurfacePayloadError.toolName,
             });
             logger.warn(
-              `[AI][教练][工具兜底] tool=${runtimeState.uiSurfacePayloadError.toolName} stage=${runtimeState.uiSurfacePayloadError.stage ?? 'unknown'} code=${runtimeState.uiSurfacePayloadError.code ?? 'unknown'} error=${runtimeState.uiSurfacePayloadError.error ?? 'unknown'}`,
+              `Coach UI fallback tool=${runtimeState.uiSurfacePayloadError.toolName} stage=${runtimeState.uiSurfacePayloadError.stage ?? 'unknown'} code=${runtimeState.uiSurfacePayloadError.code ?? 'unknown'}`,
             );
             for (const usage of attemptUsageEvents) {
               yield {
@@ -1807,6 +1998,7 @@ export async function* streamCoachAnswer(args: {
         }
       }
 
+      finalizeUiDelivery();
       if (
         runtimeState.emitUiSurfaceFallback &&
         runtimeState.uiSurfacePayloadError
@@ -1835,13 +2027,7 @@ export async function* streamCoachAnswer(args: {
         return;
       }
 
-      const visibleStep = resolveCoachVisibleStepText({
-        text: stepTextBuf,
-        hasToolCalls: stepCalls.length > 0,
-        lang: ctx.lang,
-        committedWrite,
-        currentUserPrompt: ctx.currentUserPrompt,
-      });
+      const visibleStep = resolveVisibleStep();
       if (visibleStep.violation) {
         for (const usage of attemptUsageEvents) {
           yield {
@@ -1897,6 +2083,7 @@ export async function* streamCoachAnswer(args: {
       };
       return;
     } catch (err) {
+      attemptAbort.abort();
       if (activeModelStep)
         yield {
           type: 'activity',
@@ -1920,11 +2107,9 @@ export async function* streamCoachAnswer(args: {
             : new CoachStepTimeoutError(timedOut.step, stepTimeoutMs)
         : err;
       openErr = effectiveError;
-      const errorCode =
-        effectiveError instanceof CoachStreamIdleTimeoutError ||
-        effectiveError instanceof CoachStepTimeoutError
-          ? effectiveError.code
-          : 'unknown';
+      const errorCode = isCoachModelTimeoutError(effectiveError)
+        ? effectiveError.code
+        : 'unknown';
       logger.error(
         `[AI][教练][agent-sdk] 模型失败 服务商=${provider ?? 'none'} 模型=${model} code=${errorCode} message="${previewTextForLog(effectiveError instanceof Error ? effectiveError.message : String(effectiveError))}" 耗时毫秒=${Date.now() - t0}`,
       );
@@ -1935,8 +2120,7 @@ export async function* streamCoachAnswer(args: {
         !ctx.signal.aborted &&
         canTryNextModel &&
         (isRateLimitError(effectiveError) ||
-          effectiveError instanceof CoachStreamIdleTimeoutError ||
-          effectiveError instanceof CoachStepTimeoutError);
+          isCoachModelTimeoutError(effectiveError));
       for (const usage of attemptUsageEvents) {
         yield {
           type: 'model_usage',
@@ -1946,7 +2130,16 @@ export async function* streamCoachAnswer(args: {
           status: shouldRetry ? 'RETRY' : 'FAILED',
         };
       }
-      if (shouldRetry) continue;
+      if (shouldRetry) {
+        if (planPhaseProgress(ctx)) {
+          // The fallback starts with the original messages. Reassess before locking it to an unseen window.
+          ctx.planSuitability = {};
+          runtimeState.uiSurfaceValidationFailureCount = 0;
+          runtimeState.uiSurfacePayloadError = null;
+          runtimeState.emitUiSurfaceFallback = false;
+        }
+        continue;
+      }
       throw effectiveError;
     }
   }

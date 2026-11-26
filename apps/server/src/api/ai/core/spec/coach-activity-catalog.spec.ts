@@ -12,11 +12,16 @@ describe('Coach public activity catalog', () => {
         .map((skill) => skill.name)
         .sort(),
     ).toEqual(Object.keys(COACH_SKILL_LABELS).sort());
-    // Retired activity.recent events still exist in persisted histories.
+    // Retired activity.recent and direct mutation_plan_* events still exist in persisted histories.
     expect(
       [
         ...COACH_TOOL_DEFINITIONS.map((tool) => tool.name),
         'activity.recent',
+        'mutation_plan_lifecycle',
+        'mutation_plan_workout_add',
+        'mutation_plan_workout_postpone',
+        'mutation_plan_workout_status',
+        'mutation_plan_workout_update',
       ].sort(),
     ).toEqual(Object.keys(COACH_TOOL_LABELS).sort());
   });

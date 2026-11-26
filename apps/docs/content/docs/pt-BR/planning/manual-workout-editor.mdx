@@ -1,0 +1,146 @@
+---
+title: "Guia do Editor Manual de Treinos: Editar Treinos no Trainingload"
+description: "Documentação do produto para editar treinos planejados no Trainingload. Saiba como editar manualmente sessões de resistência e força no editor integrado — não é um construtor avulso."
+keywords:
+  [
+    "editor manual de treinos",
+    "como editar treinos",
+    "como editar treinos manualmente",
+    "guia editor de treinos Trainingload",
+    "editar treino estruturado",
+    "editor de treinos no app",
+  ]
+---
+
+# Como Editar Treinos Manualmente no Trainingload
+
+Este é o **guia do produto para o editor manual de treinos dentro do Trainingload.ai**. Ele explica como editar um treino planejado depois de abrir um plano — escolher a modalidade, adicionar etapas de resistência ou séries de força, pré-visualizar a sessão e salvar um rascunho válido.
+
+Ele não é um **editor de treinos** ou **construtor de treinos** avulso. Se você procura uma ferramenta gratuita no navegador para montar etapas e copiar a DSL do treino, use o [Editor e Construtor de Treinos](/pt-BR/workout-editor). Volte aqui quando precisar salvar no aplicativo, usar o construtor de força e trabalhar no fluxo de dias do plano.
+
+## Antes de começar
+
+- Abra um plano manual ou um treino editável de um plano.
+- Confirme os limiares do atleta usados por qualquer meta de zona ou percentual.
+- Decida se a sessão é de resistência ou de força.
+- Se quiser montar um rascunho público primeiro, [crie a sessão no editor de treinos](/pt-BR/workout-editor) e depois cole ou recrie aqui.
+
+## 1. Escolha a modalidade
+
+O editor manual oferece intencionalmente uma lista focada para planejamento:
+
+- Corrida: Corrida, Corrida em Trilha, Esteira.
+- Ciclismo: Ciclismo, Mountain Bike, Ciclismo Indoor.
+- Natação: Natação em Piscina, Natação em Águas Abertas.
+- Outros: Treino de Força.
+
+A modalidade selecionada altera as unidades de meta disponíveis e pode mudar o tipo de estrutura do treino. Alternar entre resistência e força reinicia estruturas incompatíveis do rascunho, portanto escolha a modalidade antes de preencher etapas detalhadas.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Abra o editor pelo cronograma do plano"
+  description="No Criador de Plano Manual, avance para Seleção de Datas e clique em + Sessão no dia desejado."
+  route="Planos → Criador de Plano Manual → Seleção de Datas → + Sessão"
+/>
+
+<DocsScreenshot
+  id="manual-workout-editor"
+  title="Editor manual de treinos"
+  description="Escolha a modalidade, monte o trabalho estruturado, adicione notas de treino e compare a prévia antes de salvar."
+  route="Planos → Plano manual → Adicionar treino"
+/>
+
+## 2. Adicione nome e notas
+
+Use o nome para identificar a sessão de forma curta, como “Intervalados aeróbios” ou “Força de membros inferiores”. Use as notas para orientações humanas que não devem virar estrutura de máquina:
+
+- Dicas de técnica.
+- Lembretes de equipamento.
+- Orientações de nutrição e hidratação.
+- Observações de percurso ou terreno.
+- Critérios para interromper ou reduzir a sessão.
+
+Não coloque texto corrido em um campo de DSL. As etapas do treino pertencem ao modo Manual ou Regras; o contexto de orientação pertence às notas.
+
+## 3. Monte um treino de resistência
+
+No modo Manual, adicione uma etapa ou um bloco de repetição. Para cada etapa:
+
+1. Escolha o tipo de etapa, como aquecimento, trabalho ou recuperação.
+2. Defina a duração ou a distância.
+3. Adicione uma meta apenas quando o atleta tiver um valor de referência confiável.
+4. Para intervalados, use um bloco de repetição em vez de copiar várias vezes as mesmas etapas de trabalho e recuperação.
+5. Confira o gráfico à medida que a estrutura muda.
+
+Uma estrutura de resistência válida precisa de pelo menos uma etapa significativa. Uma meta em faixa deve ter o valor inicial menor ou igual ao valor final.
+
+## 4. Monte um treino de força
+
+Escolha **Treino de Força** para abrir o construtor de força. Adicione exercícios e séries de trabalho conforme descrito em [Treinos de Força](/pt-BR/docs/planning/strength-workouts). Para edição em texto, siga [DSL de Treinos de Força](/pt-BR/docs/planning/strength-workout-dsl).
+
+## 5. Use o modo Regras quando fizer sentido
+
+O modo Regras aceita a DSL de treino suportada. Ele é útil para escrita compacta e texto reutilizável, mas não é um campo livre para notas de treinador.
+
+Antes de salvar no modo Regras:
+
+- Mantenha uma instrução por expressão DSL suportada.
+- Coloque explicações em linguagem natural nas notas.
+- Valide o resultado e inspecione a estrutura renderizada.
+- Consulte [DSL de Treinos de Resistência](/pt-BR/docs/planning/workout-dsl) ou [DSL de Treinos de Força](/pt-BR/docs/planning/strength-workout-dsl) para a sintaxe correspondente.
+- Você pode [rascunhar a mesma DSL no editor público de treinos](/pt-BR/workout-editor) primeiro e depois colar aqui.
+
+## 6. Salve
+
+Selecione **Salvar Rascunho**. O Trainingload.ai valida o treino antes de adicioná-lo ao rascunho do plano.
+
+## Verifique o treino salvo
+
+Confirme que:
+
+- O rótulo da modalidade está correto.
+- A prévia corresponde à sequência de trabalho/recuperação ou às séries de força desejadas.
+- As notas permanecem separadas da estrutura.
+- O treino salvo aparece na semana, no dia e na ordem de sessão corretos.
+- A carga esperada aparece apenas quando há informação suficiente.
+
+## Solução de problemas
+
+- **A lista de modalidades mostra um item inesperado:** verifique se você está no editor manual de treinos do plano. A lista de criação se limita às nove modalidades documentadas acima; as telas de classificação de atividades têm um catálogo maior.
+- **Trocar a modalidade apaga o rascunho:** estruturas de resistência e de força são incompatíveis. Escolha a modalidade primeiro e copie quaisquer notas ou regras reutilizáveis antes de trocar.
+- **A prévia de resistência está vazia:** adicione uma etapa significativa e confirme se a duração/distância e os valores de meta são válidos.
+- **Uma faixa de meta é rejeitada:** coloque o menor valor antes do maior e verifique a unidade da modalidade selecionada.
+- **“Informe um nome para cada exercício”:** preencha o nome de todos os exercícios de força; o texto de exemplo (placeholder) não é salvo como conteúdo.
+- **Um exercício de força não salva:** adicione pelo menos um grupo de séries e pelo menos uma série de trabalho para cada exercício.
+- **Um erro do modo Regras ainda aparece em inglês:** não copie a mensagem bruta do servidor para as notas. Registre o alerta localizado, a modalidade selecionada e a linha de DSL com falha para o suporte.
+- **O treino salvo aparece no dia errado:** confira a data de início do plano, o deslocamento de semana/dia, a ordem da sessão e o fuso horário da conta.
+
+## Perguntas frequentes
+
+### O que é o editor manual de treinos?
+
+É a tela interna do aplicativo para editar um treino planejado no Trainingload. Você escolhe a modalidade, adiciona etapas de resistência ou exercícios de força, inclui notas de treino, pré-visualiza a sessão e salva em uma semana e dia específicos. O [editor e construtor de treinos](/pt-BR/workout-editor) público é uma ferramenta separada para rascunhos.
+
+### Como editar um treino manualmente no Trainingload?
+
+Abra um treino editável do plano, escolha a modalidade primeiro e adicione etapas ou um bloco de repetição. Defina duração ou distância, inclua uma meta apenas quando o limiar for confiável e use um bloco de repetição para intervalados em vez de duplicar várias vezes o mesmo par de etapas.
+
+### O editor interno permite criar sessões de força?
+
+Sim. Escolha **Treino de Força** para abrir o construtor de força. Adicione exercícios nomeados e pelo menos uma série de trabalho por exercício. Para edição em texto, use a [DSL de Treinos de Força](/pt-BR/docs/planning/strength-workout-dsl).
+
+### Modo Manual ou modo Regras?
+
+Use o modo Manual quando preferir montar as etapas clicando na interface. Use o modo Regras quando quiser uma DSL compacta e fácil de reaproveitar. Não coloque comentários de treino em texto corrido no campo de DSL — isso pertence às notas. Veja [DSL de Treinos de Resistência](/pt-BR/docs/planning/workout-dsl).
+
+### Por que trocar a modalidade limpou o rascunho?
+
+Estruturas de resistência e força são incompatíveis. Escolha a modalidade antes de detalhar as etapas e copie notas ou regras reutilizáveis antes de mudar.
+
+## Próximos passos
+
+- [Rascunhe um treino estruturado no editor de treinos](/pt-BR/workout-editor) se preferir usar o construtor público primeiro.
+- Continue em [Gerenciar Status do Plano](/pt-BR/docs/planning/plan-lifecycle) e ative o plano quando o cronograma completo estiver pronto.
+- Use a [DSL de Treinos de Resistência](/pt-BR/docs/planning/workout-dsl) para criação em texto/regras.
+- Use [Treinos de Força](/pt-BR/docs/planning/strength-workouts) para o construtor visual.
+- [Use a revisão do Treinador de IA para ajustar a carga de treino com segurança](/pt-BR/ai-training-plan) após concluir a sessão.

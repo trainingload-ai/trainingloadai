@@ -1,0 +1,57 @@
+.imprint {
+  display: none;
+}
+
+@supports (mask-image: url("")) or (-webkit-mask-image: url("")) {
+  .imprint {
+    /* The same vector source as the Native authentication mark. */
+    --imprint-mask: url("/logo/trainingload-mark.svg") center / 9.5rem no-repeat;
+    --imprint-shadow-opacity: 0.12;
+    --imprint-highlight-opacity: 0.95;
+
+    display: grid;
+    isolation: isolate;
+    inline-size: min(8rem, 100%);
+    block-size: 6.5rem;
+    margin: 0 auto 1.25rem;
+  }
+
+  .compact {
+    --imprint-mask: url("/logo/trainingload-mark.svg") center / 6rem no-repeat;
+    block-size: 4.25rem;
+    inline-size: min(5rem, 100%);
+    margin-bottom: 0.75rem;
+  }
+
+  :global(.dark) .imprint {
+    --imprint-shadow-opacity: 0.42;
+    --imprint-highlight-opacity: 0.1;
+  }
+
+  .imprint::before,
+  .imprint::after,
+  .imprintFace {
+    grid-area: 1 / 1;
+    -webkit-mask: var(--imprint-mask);
+    mask: var(--imprint-mask);
+  }
+
+  .imprint::before {
+    content: "";
+    background-color: hsl(var(--black));
+    opacity: var(--imprint-shadow-opacity);
+    transform: translate(-2px, -2px);
+  }
+
+  .imprint::after {
+    content: "";
+    background-color: hsl(var(--white));
+    opacity: var(--imprint-highlight-opacity);
+    transform: translate(2px, 2px);
+  }
+
+  .imprintFace {
+    z-index: 1;
+    background-color: var(--background);
+  }
+}

@@ -1,0 +1,56 @@
+---
+title: "Atividades sombra: por que apenas um resumo está disponível?"
+description: Entenda o que são atividades sombra vindas do Intervals.icu e do Strava e decida quando conectar uma origem, tentar sincronizar novamente ou enviar o arquivo original.
+keywords:
+  [
+    "atividades sombra",
+    "fluxos ausentes no Strava",
+    "importação de atividade Intervals.icu",
+    "tentar sincronização de atividade novamente",
+  ]
+---
+
+# Atividades sombra: por que apenas um resumo está disponível?
+
+**Uma atividade sombra é uma atividade que identificamos, mas cujos registros completos ainda não estão disponíveis.** O Trainingload.ai preserva o título e o horário de início para você ver que ela não passou despercebida, junto com a próxima ação disponível.
+
+Uma atividade sombra não é uma atividade importada por completo. Nós não inventamos gráficos nem carga de treino a partir do resumo. Uma importação bem-sucedida substitui a atividade sombra pela atividade completa. Uma gravação completa já existente nunca é apagada só porque uma sincronização posterior não conseguiu recuperar dados.
+
+Atualmente existem duas situações principais.
+
+## Caso 1: O Intervals.icu tem informações da atividade, mas não pode fornecer o arquivo original
+
+O Intervals.icu pode exibir o resumo de uma atividade recebida do Strava, mas sua API restringe explicitamente o acesso ao arquivo original da atividade. Ver a atividade lá não significa que o Trainingload.ai consiga obter os registros completos por meio daquela API.
+
+O Trainingload.ai então tenta buscar diretamente no Strava. Siga a orientação do cartão para conectar o Strava, renovar a autorização ou ativar a importação de atividades e aguarde o término da sincronização.
+
+Se o Strava também não puder fornecer os dados necessários, a atividade sombra permanece. Sincronizar o Intervals.icu repetidamente não contorna essa restrição sobre o arquivo original.
+
+## Caso 2: O Strava tem detalhes da atividade, mas não consegue fornecer os fluxos de dados
+
+O nome da atividade, a distância total e a duração ficam separados das amostras ponto a ponto de GPS, frequência cardíaca, potência ou distância. **Ter a página de detalhes da atividade não garante que existam fluxos adequados para importação.**
+
+- **As amostras nunca existiram:** por exemplo, uma atividade lançada manualmente no Strava com distância e duração, mas sem gravação de dispositivo. Ela pode ter página de detalhes, mas novas tentativas não conseguem gerar amostras inexistentes.
+- **Os registros estão temporariamente indisponíveis:** o provedor ainda pode estar processando a sessão ou o endpoint de dados detalhados pode estar instável. Uma resposta “não encontrado” isolada não comprova exclusão nem ausência permanente dos fluxos.
+
+O Trainingload.ai repete falhas incertas de disponibilidade um número limitado de vezes. Se os registros continuarem indisponíveis, ele mantém a atividade sombra e oferece a opção de tentar novamente. A falta isolada de frequência cardíaca, potência ou GPS não cria necessariamente uma atividade sombra: uma atividade com série temporal utilizável ainda pode ser importada, apenas com menos análises disponíveis.
+
+## O que devo fazer?
+
+| O que você sabe | Ação sugerida |
+| --- | --- |
+| O cartão pede para conectar, renovar autorização ou ativar importação | Conclua a configuração indicada e aguarde a sincronização ou tente novamente. |
+| A atividade acabou de ser enviada ou ainda está processando | Aguarde o processamento terminar e tente novamente uma vez. |
+| Um problema temporário do provedor já foi resolvido | Tente novamente uma vez para solicitar os registros completos. |
+| A atividade foi lançada manualmente e nunca teve amostras | Novas tentativas repetidas não vão ajudar. Procure a gravação original no dispositivo. |
+| Várias tentativas ainda mantêm a atividade sombra | Verifique se a plataforma original permite exportar um arquivo de atividade; acione o suporte se precisar. |
+
+Tentar novamente solicita os dados outra vez, mas não garante que o provedor já consiga entregá-los. Você não precisa excluir a atividade sombra nem uma atividade completa existente antes. Desconectar e reconectar repetidamente também não gera amostras ausentes.
+
+## Eu tenho o arquivo original
+
+Se o seu dispositivo ou a plataforma que gravou o treino originalmente permite exportar um arquivo FIT, TCX ou GPX com os registros da atividade, use [Enviar arquivos de atividade](/pt-BR/docs/guide/upload-activity-files). Confira eventuais avisos de duplicidade e compare data e conteúdo caso já exista uma atividade completa.
+
+## Como pedir ajuda
+
+Informe a data da atividade, o provedor de origem, a mensagem exibida e se a plataforma original permite exportar um arquivo. Não envie tokens de acesso nem senhas. Veja [Solução de problemas](/pt-BR/docs/guide/troubleshooting) para mais orientações.

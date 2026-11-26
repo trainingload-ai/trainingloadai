@@ -1,0 +1,27 @@
+---
+title: Codex verbinden
+description: Verbinde TrainingLoad MCP über die Codex-CLI oder über config.toml.
+---
+
+# Codex verbinden
+
+Führe folgende Befehle aus:
+
+```bash
+codex mcp add trainingload --url https://api.trainingload.ai/mcp
+codex mcp login trainingload
+codex mcp list
+```
+
+Oder trage den Server direkt in `~/.codex/config.toml` ein:
+
+```toml
+[mcp_servers.trainingload]
+url = "https://api.trainingload.ai/mcp"
+```
+
+`codex mcp login` öffnet OAuth in deinem Browser. Frage nach der Autorisierung: „Nutze TrainingLoad, um die letzten 7 Tage mit den 7 Tagen davor zu vergleichen, und nenne die zurückgegebenen Felder.“
+
+Wenn `codex mcp list` den Server anzeigt, ein Tool-Aufruf aber nicht autorisiert ist, starte die Anmeldung in Codex erneut. Hinterlege kein Zugriffstoken in der TOML-Datei.
+
+[Offizielle Codex-MCP-Anleitung](https://developers.openai.com/codex/mcp/)

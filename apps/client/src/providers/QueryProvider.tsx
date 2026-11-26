@@ -7,13 +7,14 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { shouldRetryTransientQuery } from "@shared/runtime-reliability";
 import {
   reportApiError,
   type ApiErrorNoticeContext,
 } from "@/lib/api-error-notifier";
+import { subscribePlanMutationBroadcast } from "@/lib/query-invalidation";
 
 type ErrorPresentationMeta = {
   errorSurface?: "toast" | "inline" | "silent";
@@ -89,6 +90,11 @@ export default function QueryProvider({
   children: React.ReactNode;
 }) {
   const [queryClient] = useState(createAppQueryClient);
+
+  useEffect(
+    () => subscribePlanMutationBroadcast(queryClient),
+    [queryClient],
+  );
 
   return (
     <QueryClientProvider client={queryClient}>

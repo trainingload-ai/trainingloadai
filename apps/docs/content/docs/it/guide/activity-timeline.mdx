@@ -1,0 +1,138 @@
+---
+title: Analizzare un allenamento con la Timeline
+description: Usa la timeline attività su desktop di Trainingload.ai per esaminare grafici sincronizzati, selezionare un segmento di allenamento, confrontare statistiche di intervallo e localizzare lo sforzo sul percorso.
+seoTitle: "Timeline attività e analisi dei segmenti | Trainingload.ai"
+seoDescription: "Segui il flusso della timeline attività per corsa e ciclismo. Seleziona un tratto, esamina statistiche e percorso, configura i grafici e salva i segmenti di analisi."
+keywords: ["timeline attività", "analisi segmenti allenamento", "analisi ripetute corsa", "grafici ciclismo", "timeline Trainingload.ai"]
+---
+
+# Analizzare un allenamento con la Timeline
+
+La Timeline allinea i flussi registrati di un'attività su un asse orizzontale condiviso. Usala per esaminare un singolo istante o confrontare passo, potenza, frequenza cardiaca, cadenza e percorso di uno sforzo selezionato. Le statistiche di intervallo e la lettura puntuale rispondono a domande diverse.
+
+Questa guida riguarda il **web desktop** per corsa e ciclismo. I grafici disponibili dipendono dai dati registrati nell'attività. Per il flusso di revisione completo inizia da [Dettaglio attività](/it/docs/guide/activity-detail).
+
+## Apri l'esempio
+
+[Apri l'attività demo della gara da 10 km](https://demo.trainingload.ai/en/activities/17921623926005309429), poi seleziona **Timeline** sotto il percorso. L'attività si apre prima su Panoramica. La demo è in sola lettura, quindi la modifica dei segmenti salvati è disabilitata.
+
+Per una tua attività attendi la fine dell'elaborazione e verifica che contenga campioni registrati: le attività solo riepilogative non hanno una timeline sincronizzata. Le sessioni indoor possono comunque avere grafici completi senza GPS. Controlla sport, soglie e unità prima di interpretare i dati.
+
+## 1. Leggi l'attività completa
+
+Dopo aver selezionato **Timeline**, individua le intestazioni dei segmenti in alto, i controlli delle metriche e le statistiche di intervallo a sinistra e i grafici allineati a destra. L'asse orizzontale parte in modalità tempo. Il percorso resta sopra le schede quando l'attività contiene dati di posizione.
+
+Le attività lunghe superano la larghezza visibile del grafico: scorri orizzontalmente per vedere le fasi successive. Finché non selezioni un intervallo, le statistiche a sinistra continuano a descrivere l'intera attività.
+
+All'inizio **Media**, **Min** e **Max** sul lato sinistro si riferiscono all'intera attività. Una metrica priva di campioni validi può non comparire e le lacune in un flusso appaiono come interruzioni nel grafico.
+
+<DocsScreenshot
+  id="activity-timeline-full"
+  title="Parti dall'attività completa e dai grafici allineati"
+  description="La colonna sinistra riassume l'intervallo corrente. Ogni grafico condivide la stessa posizione orizzontale, così puoi confrontare lo sforzo tra passo, frequenza cardiaca e cadenza."
+  imageAlt="Timeline completa della gara con grafici allineati e statistiche dell'intera attività"
+  route="Dettaglio attività → Timeline"
+  demoLabel="Apri questo esempio di timeline"
+/>
+
+## 2. Ispeziona un singolo istante
+
+Muovi il puntatore lungo un grafico. Leggi il valore mobile all'interno di ciascun grafico nella stessa posizione orizzontale. Quando il GPS è disponibile, la mappa mostra il punto corrispondente.
+
+Fai clic per mantenere selezionato un punto. Spostare il puntatore fuori dai grafici nasconde le letture temporanee al passaggio del mouse. Le statistiche di intervallo a sinistra restano invece legate all'intera attività o all'intervallo selezionato.
+
+Puoi portare il focus sul controllo di posizionamento della timeline e usare i tasti freccia sinistra e destra per scorrere i campioni, oppure **Home** ed **End** per raggiungere gli estremi. Le letture da tastiera si nascondono quando il controllo perde il focus.
+
+| Domanda | Dove guardare |
+| --- | --- |
+| Cosa è stato registrato in questo istante? | La lettura puntuale dentro ciascun grafico. |
+| Qual era il valore tipico in questo sforzo? | La media nelle statistiche di intervallo a sinistra. |
+| Quali sono stati gli estremi validi registrati? | Minimo e massimo dello stesso intervallo. |
+
+## 3. Seleziona uno sforzo e confrontalo
+
+Puoi selezionare un giro registrato oppure tracciare un intervallo personalizzato.
+
+1. Seleziona l'intestazione di un segmento per evidenziarlo e aggiornarne le statistiche. Selezionalo di nuovo per annullare la selezione.
+2. Per esaminare un intervallo diverso, trascina orizzontalmente su un grafico e rilascia: tutti i grafici eseguono lo zoom sulla selezione.
+3. Confronta media, minimo e massimo dell'intervallo selezionato con l'andamento visibile. Muovi il puntatore per controllare i singoli campioni al suo interno.
+4. Controlla il tratto evidenziato sul percorso se i dati di posizione sono presenti. Usa la mappa circostante per capire dove è avvenuto lo sforzo.
+
+<DocsScreenshot
+  id="activity-timeline-selection"
+  title="Confronta uno sforzo selezionato con il suo percorso"
+  description="Selezionare un segmento aggiorna le statistiche di intervallo ed evidenzia il tratto corrispondente sui grafici e sul percorso. Le letture al passaggio del mouse restano separate dal riepilogo di intervallo."
+  imageAlt="Segmento di gara selezionato con statistiche aggiornate e tratto evidenziato sul percorso"
+  route="Dettaglio attività → Timeline → Seleziona un segmento"
+  demoLabel="Esplora la stessa attività demo"
+/>
+
+In uno sforzo lungo e costante, verifica se passo o potenza restano stabili mentre la frequenza cardiaca sale. Nelle ripetute, confronta le frazioni di lavoro e i recuperi con l'obiettivo della sessione. Interpreta sempre il quadro alla luce di durata, terreno, soste e dati disponibili dei sensori.
+
+## 4. Torna all'attività completa o cambia asse
+
+Apri **Opzioni timeline** accanto a **Segmenti** e scegli **Mostra attività completa** per azzerare l'intervallo e ripristinare la vista intera. Anche un doppio clic su un grafico o il tasto **Esc** nella timeline ripristinano selezione e zoom.
+
+Nello stesso menu puoi commutare **Asse orizzontale** tra **Tempo** e **Distanza**. La modalità Distanza richiede una traccia valida di distanza cumulativa. Quando cambi asse, lo sforzo selezionato mantiene i propri estremi temporali originali.
+
+## 5. Configura i grafici
+
+Seleziona il nome di una metrica, come **Passo** o **Frequenza cardiaca**, per aprirne le impostazioni. Puoi scegliere metrica, colore della linea, altezza del grafico e livellamento (smoothing). Usa **Sposta su**, **Sposta giù** o **Rimuovi grafico** per organizzare le righe visibili.
+
+Usa **Aggiungi grafico** in fondo per aggiungere un altro flusso disponibile. Puoi inserire la stessa metrica più di una volta, ad esempio per confrontare la traccia grezza con quella livellata. **Espandi** apre una vista più ampia del singolo grafico.
+
+Il livellamento modifica la curva disegnata, ma le letture puntuali e le statistiche di intervallo conservano il significato dei dati registrati. Il layout dei grafici viene salvato nelle preferenze di questo browser e non modifica l'attività originale.
+
+## 6. Modifica i segmenti di analisi nel tuo account
+
+Usa **Modifica segmenti** quando vuoi intervalli di analisi diversi dai giri registrati dal dispositivo. Questa funzione richiede un account autenticato con permesso di modifica sull'attività.
+
+1. Apri **Modifica segmenti** e controlla nome, inizio e fine di ciascun segmento.
+2. Rinomina un segmento o modificane i confini. L'editor offre anche **Aggiungi segmento in uno spazio vuoto**, **Dividi a metà**, **Unisci al successivo** e **Rimuovi** dove applicabile.
+3. Mantieni i confini all'interno dell'attività, con ogni inizio precedente alla fine e senza sovrapposizioni.
+4. Seleziona **Salva segmenti**, poi esamina le statistiche aggiornate. **Annulla** chiude la bozza senza salvare.
+
+I segmenti di analisi salvati lasciano intatti il file originale, i giri del dispositivo e il carico dell'intera attività. I confini modificati ricalcolano le statistiche di quell'intervallo a partire dai flussi registrati. **Ripristina giri del dispositivo** riporta l'editor agli intervalli originali dei lap, che potrai poi salvare.
+
+Se un'altra finestra ha modificato le definizioni, chiudi e riapri l'editor per caricare l'ultima versione prima di continuare. Un salvataggio non riuscito conserva la bozza per riprovare. La demo pubblica disabilita questo flusso di modifica.
+
+## Verifica il risultato
+
+Dopo aver selezionato uno sforzo, controlla che estremi, statistiche di intervallo e tratto del percorso si riferiscano alla stessa parte dell'attività. Ripristina la vista completa e verifica che le statistiche tornino a descrivere l'intera sessione. Se hai salvato segmenti di analisi nel tuo account, riapri l'attività e controlla che restino disponibili.
+
+## Domande frequenti
+
+### Perché i numeri a sinistra non cambiano quando sposto il puntatore?
+
+Riassumono l'intera attività o l'intervallo selezionato. Guarda le letture mobili dentro i grafici per il valore nel punto esatto sotto il puntatore.
+
+### Perché compaiono interruzioni o trattini?
+
+Un flusso mancante, un buco di campionamento o un valore non valido producono un'interruzione o un trattino. Velocità, cadenza o potenza registrate pari a zero possono essere valide; un campione da fermo non ha un passo utilizzabile e i campioni cardio mancanti non vengono sostituiti con zero.
+
+### Perché un giro cambia dopo che ho modificato i suoi estremi?
+
+Un giro invariato del dispositivo può usare il riepilogo importato. Un segmento modificato o personalizzato viene invece ricalcolato dai campioni validi registrati in quell'intervallo: copertura dei dati ed estremi scelti incidono sul risultato.
+
+### Perché un valore di potenza porta l'etichetta Stimata?
+
+Quel flusso usa potenza stimata. Tienine conto quando lo confronti con una registrazione da misuratore di potenza o quando valuti l'intensità.
+
+### Perché il percorso non evidenzia l'intervallo selezionato?
+
+L'attività potrebbe non avere dati GPS validi in quegli istanti oppure la mappa potrebbe non essere disponibile. Prosegui con i grafici registrati e verifica separatamente lo stato della mappa.
+
+### Perché non vedo la Timeline sul telefono?
+
+Questo flusso è disponibile sul web desktop. Su mobile usa il dettaglio attività e i grafici supportati per quell'app e quello sport, oppure apri l'attività su desktop.
+
+### Cosa faccio se un grafico non si carica?
+
+Usa l'azione di nuovo tentativo quando offerta. Gli altri grafici caricati restano utilizzabili. Se un aggiornamento fallisce, la pagina può mantenere il risultato precedente segnalando lo stato: distingui sempre i dati mancanti da una richiesta fallita.
+
+## Continua
+
+- [Dettaglio attività](/it/docs/guide/activity-detail)
+- [Disaccoppiamento aerobico](/it/docs/metrics/heart-rate/aerobic-decoupling)
+- [Profilo, soglie e zone](/it/docs/guide/profile-thresholds-zones)
+- [Revisione settimanale dell'allenamento](/it/docs/workflow/weekly-review)

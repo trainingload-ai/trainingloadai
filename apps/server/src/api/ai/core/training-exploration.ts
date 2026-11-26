@@ -26,6 +26,7 @@ const finite = (v: unknown): number | null =>
 export async function queryTrainingExploration(
   ctx: AiToolContext,
   input: ExplorationQuery & { title?: string; subtitle?: string },
+  resolvedTimezone?: string,
 ): Promise<TrainingVisualizationV2> {
   // Only query fields enter provenance; never accept caller-supplied series/values.
   const keys: (keyof ExplorationQuery)[] = [
@@ -59,8 +60,9 @@ export async function queryTrainingExploration(
   assertExplorationQuery(query);
   const userId = ctx.session.user.id;
   const tz =
-    (await ctx.userService.getPreferredTimezone(userId)) ||
+    resolvedTimezone ||
     ctx.currentTurnCalendar?.timezone ||
+    (await ctx.userService.getPreferredTimezone(userId)) ||
     'UTC';
   const notes: ExplorationNote[] = [];
   let panels: ExplorationPanel[] = [],
@@ -68,7 +70,47 @@ export async function queryTrainingExploration(
     matchedCount = 0,
     missingCount = 0;
   let coverage: Record<string, number> | undefined;
-  if (
+  if (query.source === 'POWER_DURATION') {
+    const axes = {
+      view: 'LINE' as const,
+      x: { kind: 'NUMBER' as const, unit: 's' as const },
+      y: { kind: 'NUMBER' as const, unit: 'W' as const, measure: 'POWER' as const },
+    };
+    const activityId = query.activityHashIds?.[0];
+    if (activityId) {
+      const result = await ctx.activityService.getActivityPowerDurationCurveByHashId(activityId, userId);
+      const points = (result?.points ?? [])
+        .map(({ duration, power }) => ({ x: duration, y: power }));
+      matchedCount = points.length;
+      panels = [{ ...axes, id: 'power-duration', series: [{ id: activityId, activityHashId: activityId, points }] }];
+    } else {
+      if (!ctx.power) throw new Error('Power duration service is unavailable');
+      const ranges = [{ from: query.from!, to: query.to! }, ...(query.compareFrom
+        ? [{ from: query.compareFrom, to: query.compareTo! }] : [])];
+      const boundaries = ranges.map(({ from, to }) => ({
+        start: dayjs.tz(from, tz).startOf('day').toISOString(),
+        end: dayjs.tz(to, tz).endOf('day').toISOString(),
+      }));
+      for (const sport of query.sportTypes!) {
+        const sets = await ctx.power.getPowerDurationCurvePoints(boundaries, userId, sport as SportType);
+        const series = sets.map((set, index) => ({
+          id: `${sport}:${index}`,
+          label: `${ranges[index].from} – ${ranges[index].to}`,
+          points: set.points.map((point) => {
+            const best = point.activities[0];
+            if (best) matchedCount++;
+            else missingCount++;
+            return {
+              x: point.durationSec, y: best?.value ?? null,
+              label: best?.activityName ?? undefined,
+              activityHashId: best?.hashId,
+            };
+          }),
+        }));
+        panels.push({ ...axes, id: sport, label: sport, series });
+      }
+    }
+  } else if (
     query.source === 'ACTIVITY_SERIES' ||
     (query.source === 'RELATIONSHIP' && query.relationshipBasis === 'SAMPLE')
   ) {

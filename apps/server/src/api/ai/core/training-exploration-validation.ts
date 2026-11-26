@@ -10,7 +10,9 @@ export function assertExplorationQuery(q: ExplorationQuery) {
     throw new Error('Unsupported exploration source');
   const common = ['source', 'measures'];
   const allowedFields =
-    q.source === 'ACTIVITY_SERIES' ||
+    q.source === 'POWER_DURATION'
+      ? ['source', 'from', 'to', 'sportTypes', 'activityHashIds', 'compareFrom', 'compareTo']
+      : q.source === 'ACTIVITY_SERIES' ||
     (q.source === 'RELATIONSHIP' && q.relationshipBasis === 'SAMPLE')
       ? [
           ...common,
@@ -62,6 +64,25 @@ export function assertExplorationQuery(q: ExplorationQuery) {
     )
       throw new Error('Use an inclusive date range of 1–365 days');
   };
+  if (q.source === 'POWER_DURATION') {
+    if (q.activityHashIds !== undefined) {
+      if (!Array.isArray(q.activityHashIds) || q.activityHashIds.length !== 1 ||
+        typeof q.activityHashIds[0] !== 'string' ||
+        !/^[a-zA-Z0-9_-]{1,128}$/.test(q.activityHashIds[0]) ||
+        q.from || q.to || q.sportTypes || q.compareFrom || q.compareTo) {
+        throw new Error('Choose one activity for the power duration curve');
+      }
+    } else {
+      range(q.from, q.to);
+      if (!Array.isArray(q.sportTypes) || !q.sportTypes.length ||
+          !q.sportTypes.every((sport) => sport === 'CYCLING' || sport === 'RUN') ||
+          new Set(q.sportTypes).size !== q.sportTypes.length) {
+        throw new Error('Choose running, cycling or both for the power duration curve');
+      }
+      if (q.compareFrom || q.compareTo) range(q.compareFrom, q.compareTo);
+    }
+    return;
+  }
   const signals =
     q.source === 'ACTIVITY_SERIES' ||
     (q.source === 'RELATIONSHIP' && q.relationshipBasis === 'SAMPLE');

@@ -1,0 +1,112 @@
+---
+title: Gestionar el estado y las importaciones del plan
+description: Activa, pausa, completa o cancela un plan de entrenamiento y gestiona tu historial de entrenamiento.
+keywords:
+  [
+    "estado del plan de entrenamiento",
+    "activar plan de entrenamiento",
+    "importar plan de entrenamiento",
+    "plan de entrenamiento VDOT",
+  ]
+---
+
+# Gestionar el estado y las importaciones del plan
+
+El estado del plan distingue entre un borrador que estás editando, el plan que sigues actualmente, un calendario pausado y un bloque de entrenamiento finalizado. Comprueba el estado y las fechas antes de importar o activar un plan.
+
+## Antes de cambiar el estado del plan
+
+- Abre el plan deseado y confirma su nombre, objetivo, fechas y estado actual.
+- Guarda o descarta cualquier edición de sesión que siga abierta en otro dispositivo.
+- Revisa las sesiones completadas, omitidas y vinculadas antes de finalizar o eliminar un plan.
+- Prefiere cambiar el estado del plan antes que eliminarlo cuando contenga historial valioso.
+
+<DocsScreenshot
+  id="plan-active-summary"
+  title="Resumen del plan activo"
+  description="El estado, la estructura semanal, el cumplimiento de sesiones y la carga esperada frente a la real aparecen juntos en la página de detalle del plan."
+  route="Plan → Plan actual"
+/>
+
+## Borrador (`Draft`)
+
+Usa un borrador mientras construyes, importas o revisas el plan. Las sesiones en borrador pueden editarse sin que el plan aparezca como tu calendario actual.
+
+Antes de activarlo, verifica:
+
+- Objetivo y rango de fechas.
+- Fecha de inicio y alineación de semanas.
+- Ritmo semanal y espaciado de recuperación.
+- Deporte y estructura de cada sesión.
+- Objetivos dependientes de umbrales.
+- Si la primera semana resulta realista para tu nivel de fitness actual.
+
+## Activar [#activate]
+
+Activar un plan coloca sus sesiones en fechas concretas del calendario y en las vistas diarias. A partir de ahí puedes vincular actividades completadas, comparar la carga y pedir al Entrenador con IA que revise tu progreso.
+
+1. Abre la página de detalle del plan.
+2. Selecciona **Start** (Iniciar) y elige la fecha de inicio prevista.
+3. Selecciona **Review with coach** (Revisar con el entrenador).
+4. Comprueba en la vista previa del calendario las fechas, las sesiones y el espaciado de recuperación.
+5. Confirma el calendario propuesto para iniciar el plan.
+
+**Verificación:** el estado del plan es Activo (`Active`) y sus sesiones aparecen en los días esperados del calendario.
+
+## Pausar y reanudar
+
+Pausa el plan cuando deba dejar temporalmente de guiar la ejecución diaria pero quieras conservarlo disponible. Motivos habituales: enfermedad, viaje, evaluación de una lesión o un descanso deliberado.
+
+Pausar no borra actividades completadas ni vínculos de sesiones. Antes de reanudar, revisa si las fechas restantes y el volumen siguen teniendo sentido; ajusta el plan en lugar de intentar recuperar cada sesión perdida a la intensidad original.
+
+## Completar
+
+Marca un plan como completado cuando haya terminado el bloque previsto. Revisa el porcentaje de cumplimiento, la carga real frente a la esperada, los vínculos de las actividades clave y qué aprendizajes conviene trasladar al siguiente bloque.
+
+Completar es distinto de cancelar: completar indica que el plan llegó a un final intencionado, aunque algunas sesiones se hayan omitido.
+
+## Cancelar
+
+Cancela un plan cuando ya no deba ejecutarse ni representarse como completado. Añade contexto en el plan o en el registro del entrenador si el motivo es relevante para decisiones futuras.
+
+## Enlaces existentes de planes VDOT
+
+El generador público de planes VDOT ya no está disponible. Si ya conservas un enlace de importación, previsualiza sus fechas, objetivos de ritmo y calendario antes de guardar un borrador. Si el enlace antiguo ha caducado, usa [Crear un plan de entrenamiento](/es/docs/guide/create-training-plan) para elegir uno de los métodos de creación disponibles actualmente.
+
+## Eliminar
+
+Eliminar es más destructivo que cambiar el estado del plan. Prefiere Completar o Cancelar cuando el plan forme parte de tu historial real de entrenamiento. Elimina solo cuando sea un borrador accidental o prescindible y la confirmación identifique claramente el registro correcto.
+
+## Estados de ejecución de las sesiones
+
+Cada sesión planificada puede marcarse como completada, omitida o actualizada según el flujo del plan activo. El vínculo con una actividad completada es una evidencia independiente: el estado registra la decisión del plan; el vínculo registra qué actividad real cumplió la sesión.
+
+## Ediciones simultáneas
+
+Los registros del plan utilizan actualizaciones con control de versión. Si otro dispositivo o una acción de la IA modificó el plan después de que cargaras la página, actualiza y revisa la nueva versión antes de reintentar. Así se evita que una edición antigua sobrescriba en silencio una decisión más reciente.
+
+## Verifica el cambio de estado
+
+- El detalle del plan muestra el nuevo estado previsto.
+- Las pantallas de Plan activo, Hoy y Calendario reflejan el mismo estado de ejecución.
+- Las sesiones completadas y los vínculos de actividades existentes siguen intactos.
+- Pausar o cancelar detiene la guía diaria sin reescribir el historial.
+- Completar conserva el plan como un bloque terminado de forma intencionada.
+- Un plan recién activado asigna su primera semana a las fechas esperadas del calendario.
+- Un plan VDOT importado aparece como un Borrador independiente antes de activarse.
+
+## Solución de problemas
+
+- **Iniciar no está disponible:** completa los campos obligatorios del plan, comprueba el rango de fechas y confirma que no haya otra regla de estado impidiendo la activación.
+- **Las sesiones aparecen en fechas inesperadas:** compara la fecha de inicio de activación, los desplazamientos relativos por día del plan, la zona horaria de la cuenta y la fecha del calendario.
+- **Aparece como actual un plan equivocado:** vuelve a la lista de planes, compara los estados y activa solo el registro correcto.
+- **Pausar o reanudar no se refleja en otro dispositivo:** actualiza Hoy, Calendario y el detalle del plan en el otro dispositivo.
+- **Una actualización informa de un conflicto de versión:** recarga el plan y vuelve a aplicar la decisión sobre la versión más reciente.
+- **Falla un enlace de importación VDOT:** comprueba que hayas copiado el enlace completo. Si ha caducado, crea un borrador nuevo con una plantilla oficial, el editor manual o el Entrenador con IA.
+- **Eliminar está bloqueado o resulta arriesgado:** usa Cancelar o Completar si debes conservar el historial. Elimina únicamente el borrador prescindible identificado en la confirmación.
+
+## Próximos pasos
+
+- Continúa con [Gestionar un plan activo](/es/docs/guide/manage-active-plan) para vincular actividades y comparar carga esperada frente a carga real.
+- Usa el [Calendario](/es/docs/guide/calendar) para verificar las fechas programadas.
+- Lee [Entrenador con IA](/es/docs/guide/ai-coach) antes de aplicar ajustes sobre el plan.

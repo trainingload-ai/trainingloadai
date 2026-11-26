@@ -1,92 +1,136 @@
 ---
-title: Create a training plan with the workout DSL
-description: Plain-language guide to writing the workout DSL in Trainingload.ai—what each line means, repeats, pace, power, all in everyday words.
+title: Ausdauer-Workout-DSL
+description: Schreibe und validiere Schritte, Zielvorgaben, Wiederholungen und sportartspezifische Zonen für Ausdauereinheiten im Text-/Regelmodus von Trainingload.ai.
 ---
 
-# Create a training plan with the workout DSL
+# Ausdauer-Workout-DSL
 
-When you edit a day in **text / rules** mode, this is the deal: **one line = one chunk** of the session. Read top to bottom, that’s the order you’ll do it. If something’s wrong, the app complains—fix it until it saves.
+Nutze diese DSL, um eine strukturierte Ausdauereinheit im Modus **Regeln** zu beschreiben. Ein Trainingsplan kann viele Einheiten enthalten; jede Einheit wird einzeln geparst und validiert. **Eine Zeile entspricht einem Schritt**, und die Schritte laufen von oben nach unten ab.
 
----
+Diese Seite behandelt Ausdauerschritte für Laufen, Radfahren und Schwimmen. Für Übungen und Sätze nutze stattdessen die Struktur für [Krafteinheiten](/de/docs/planning/strength-workouts).
 
-## What goes on each line (left to right)
+## Bevor du startest
 
-Don’t jumble tokens. Three chunks, separated by spaces:
-
-| Bit | In plain English | Examples |
-| --- | --- | --- |
-| ① What this chunk is | Warmup, main work, easy spin, rest, cooldown… | `warmup`, `work`, `recovery`, `rest`, `cooldown` |
-| ② How long / how it ends | **Only one** “number + unit” first: time, distance, kJ, or HR rule | `5m`, `3km`, `500kj`, `hr<150bpm` |
-| ③ What to aim for (optional) | Pace, power, HR, cadence… | `pace …`, `pwr …`, `hr …` |
-
-You can stack several things in ③—they all apply to **the same** chunk of time or distance.
-`work: 20m` and `work 20m` are the same; the colon is optional.
+- Wähle vor dem Schreiben die genaue Sportart; sie bestimmt, wie Zonen und Einheiten interpretiert werden.
+- Konfiguriere deine Pace-, Leistungs- oder Herzfrequenzzonen im Profil, bevor du `z1`, `z2` oder ähnliche Zonenreferenzen nutzt.
+- Entscheide für jeden Schritt, ob er nach Zeit, Distanz, Energie oder einer Sensorbedingung endet.
+- Nutze den visuellen Builder, wenn du keine textbasierte Bearbeitung benötigst.
 
 ---
 
-## ① Words at the start of the line
+## Jede Zeile von links nach rechts schreiben
 
-Stick these **first** (case usually doesn’t matter):
+Jede Zeile enthält bis zu drei durch Leerzeichen getrennte Teile in dieser Reihenfolge:
 
-| Word | Basically |
-| --- | --- |
-| `warmup` / `wu` | Ease in at the start |
-| `work` | The hard / main bit |
-| `recovery` / `rec` | Easy jog or spin between reps |
-| `rest` | Lighter than recovery—more “stop” |
-| `cooldown` / `cd` | Wind down at the end |
-| `other` | Rare, special label |
+| Teil                           | Zweck                                                                  | Beispiele                                        |
+| ------------------------------ | ---------------------------------------------------------------------- | ------------------------------------------------ |
+| ① Art des Abschnitts           | Aufwärmen, Hauptarbeit, lockere Erholung, Pause, Auslaufen…            | `warmup`, `work`, `recovery`, `rest`, `cooldown` |
+| ② Dauer / Endbedingung         | **Genau eine** Angabe zuerst: Zeit, Distanz, kJ oder HF-/Leistungsregel| `5m`, `3km`, `500kj`, `hr<150bpm`                |
+| ③ Zielvorgabe (optional)       | Pace, Leistung, Herzfrequenz, Tritt-/Schrittfrequenz…                  | `pace …`, `power …`, `hr …`                      |
 
-`recovery` vs `rest` is fuzzy—**use whichever matches how you coach it**.
+Nutze in ③ **höchstens ein Ziel**. Ein Schritt kann Pace, Leistung, Herzfrequenz, Kadenz oder Steigung als Ziel nutzen, aber nicht mehrere gleichzeitig. Teile mehrere Ziele auf getrennte Schritte auf oder schreibe sekundäre Hinweise in die Einheiten-Notizen. `work: 20m` und `work 20m` sind gleichwertig; der Doppelpunkt ist optional.
 
 ---
 
-## ② The first number after that word
+## ① Schritttyp wählen
 
-That’s **how this chunk ends**—by time, distance, energy, or HR. **Only one primary measure per line.** Anything like `pwr` or `hr` after it is **intensity**, not a second “length”.
+Schreibe eines dieser Schlüsselwörter an den Zeilenanfang. Groß- und Kleinschreibung spielen keine Rolle:
 
-| Form | Basically |
-| --- | --- |
-| `30s`, `5m`, `1h` | Clock time |
-| `5km`, `400m` | Distance (`3km` is three km, not three seconds) |
-| `500kj` | Kilojoules on the bike |
-| `hr<150bpm`, etc. | End this part when HR hits a rule |
+| Schlüsselwort      | Bedeutung                                            |
+| ------------------ | ---------------------------------------------------- |
+| `warmup` / `wu`    | Einleitendes Aufwärmen                               |
+| `work`             | Hauptbelastung                                       |
+| `recovery` / `rec` | Aktive Erholung zwischen Belastungsabschnitten       |
+| `rest`             | Ruhepause                                            |
+| `cooldown` / `cd`  | Abschließendes Auslaufen bzw. Ausfahren              |
+| `other`            | Schritt, der nicht in die Standardkategorien passt   |
 
----
-
-## ③ Targets after that
-
-All after the first measure, space-separated:
-
-| Keyword | For |
-| --- | --- |
-| `pace` | Run pace |
-| `speed` | Speed (app shows pace or km/h) |
-| `pwr` / `power` | Power: prefer **watts** (`250W`); a bare number like `250` is parsed as **watts**; legacy `%FTP` (`85%`) still works |
-| `cad`, `cadence`, `rpm` | Cadence |
-| `hr` | Heart rate: **bpm only** (`150bpm`, `150-160bpm`, or a bare number like `150`) |
-| `grade` | Slope |
-
-`pwr` + `cad` on one line means you’re trying to hold **both** during that chunk.
+Nutze `recovery` für einen lockeren aktiven Abschnitt und `rest`, wenn wirklich pausiert werden soll. Der gespeicherte Schritttyp bewahrt diesen Unterschied für Anzeige und Export.
 
 ---
 
-## `repeat`: same mini-block, many times
+## ② Endbedingung hinzufügen
+
+Sie legt fest, **wann der Schritt endet** – nach Zeit, Distanz, Energie oder einer Sensorbedingung. Pro Zeile ist nur eine primäre Endbedingung erlaubt. Ein später stehender `power`- oder `hr`-Wert ist ein Intensitätsziel, keine zweite Dauer.
+
+| Form                            | Bedeutung                                         |
+| ------------------------------- | ------------------------------------------------- |
+| `30s`, `5m`, `25min`, `1h`      | Zeitdauer                                         |
+| `5km`, `400m`                   | Distanz (`3km` sind drei Kilometer, nicht drei s) |
+| `500kj`                         | Kilojoule auf dem Rad                             |
+| `hr<150bpm`, `power>250W`, usw. | Beendet den Abschnitt bei Erreichen der Bedingung |
+
+---
+
+## ③ Optionales Ziel hinzufügen
+
+Alle Zielangaben stehen nach der ersten Maßangabe, getrennt durch Leerzeichen:
+
+| Schlüsselwort | Wofür                                                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `pace`        | Laufpace                                                                                                                    |
+| `speed`       | Geschwindigkeit (die App zeigt Pace oder km/h)                                                                              |
+| `power`       | Leistung: bevorzugt **Watt** (`250W`); eine bloße Zahl wie `250` wird als **Watt** interpretiert; älteres `%FTP` (`85%`) funktioniert weiter |
+| `cadence`     | Tritt- oder Schrittfrequenz                                                                                                 |
+| `hr`          | Herzfrequenz: **bpm** (`150bpm`, `150-160bpm`, `<150bpm` oder eine bloße Zahl wie `150`) oder Zonenreferenz wie `hr z2`     |
+| `grade`       | Steigung                                                                                                                    |
+
+Ältere Aliase wie `pwr`, `cad` und `rpm` werden weiterhin erkannt, neu erzeugte DSL nutzt jedoch die ausgeschriebenen Begriffe.
+
+Schlüsselwörter, Einheiten und Zonenkürzel unterscheiden nicht zwischen Groß- und Kleinschreibung: `WORK 25M HR Z2` wird genauso geparst wie `work 25m hr z2`. Gespeicherter oder neu generierter Text wird auf kleingeschriebene Schlüsselwörter normalisiert.
+
+Wenn du dich auf deine aktuellen Profilzonen beziehen willst, statt feste Werte einzufrieren, schreibe:
+
+```text
+work 25m hr z2
+work 10m power z4
+work 20m pace z2
+```
+
+Das bedeutet: „In der aktuellen Zone 2 bzw. Zone 4 ausführen.“ Ändern sich später deine Zonen, kann das System die Einheit mit den aktualisierten Bereichen auswerten. Nutze explizite Werte wie `hr 140-150bpm`, `power 220-250W` oder `pace 4:30-4:45`, wenn das Ziel fixiert bleiben soll.
+
+Halte die erste Dauer-Regel sauber von Zielvorgaben getrennt:
+
+```text
+work hr<150bpm
+work 25m hr <150bpm
+```
+
+Die erste Zeile endet, sobald die Herzfrequenz die Bedingung erfüllt, und kann kein weiteres Ziel tragen. Die zweite Zeile dauert 25 Minuten und setzt 150 bpm als Herzfrequenz-Obergrenze.
+
+---
+
+## `repeat`: denselben Block mehrfach wiederholen
 
 ```text
 repeat 4 {
-  work 4m pwr 270W
+  work 4m power 270W
   recovery 2m
 }
 ```
 
-- `repeat 4` = run the stuff inside **four times**.
-- Inside the braces: line 1, then line 2 = **one round**. Here it’s four rounds of “4 min hard @ ~90% power + 2 min easy”.
-Some builds also let you close with `end` / `endrepeat` instead of `}`—whatever your UI accepts.
+- `repeat 4` führt die eingeschlossenen Schritte **viermal** aus.
+- Die beiden Zeilen in den geschweiften Klammern bilden einen Durchgang. Dieses Beispiel erzeugt vier Durchgänge mit je 4 Minuten bei 270 W gefolgt von 2 Minuten Erholung. Manche Versionen erlauben statt `}` auch `end` / `endrepeat` – verwende die im aktuellen Editor akzeptierte Form.
+
+Du kannst außerdem wiederholen, bis eine Bedingung erreicht ist:
+
+```text
+repeat until 30m {
+  work 4m power 270W
+  recovery 2m
+}
+
+repeat until cadence<80rpm {
+  work 30s power 300W
+  recovery 30s
+}
+```
+
+`repeat until` akzeptiert Bedingungen für Zeit, Distanz, Kalorien, Herzfrequenz, Leistung und Kadenz. Verschachtelte Wiederholungen werden bewusst abgelehnt. Kann eine Integration eine Bedingung nicht abbilden, muss sie dies als nicht unterstützt oder eingeschränkt melden, statt die Einheit stillschweigend umzubauen.
 
 ---
 
-## Example 1: run
+## Beispiel 1: Laufen
 
 ```text
 warmup 5m
@@ -96,52 +140,86 @@ work 3km
 cooldown 5m
 ```
 
-- `warmup 5m`: five easy minutes.
-- `work 20m pace …`: twenty minutes main work, ~7:20–8:20 / km.
-- `recovery 90s`: ninety seconds easy.
-- `work 3km`: three **km** of work, not another 20 minutes.
-- `cooldown 5m`: five minutes easy to finish.
+- `warmup 5m`: fünf lockere Minuten zum Aufwärmen.
+- `work 20m pace …`: zwanzig Minuten Hauptteil bei ca. 7:20–8:20 / km.
+- `recovery 90s`: neunzig Sekunden locker.
+- `work 3km`: drei **Kilometer** Belastung, keine weiteren 20 Minuten.
+- `cooldown 5m`: fünf Minuten locker auslaufen.
 
-Top to bottom = session order.
+Von oben nach unten = Reihenfolge in der Einheit.
 
 ---
 
-## Example 2: bike
+## Beispiel 2: Radfahren
 
 ```text
-work 8m pwr 220-250W cad 85rpm
+work 8m power 220-250W
 recovery 2m
-work 5m pwr 250W hr 150-160bpm
+work 5m hr 150-160bpm
 ```
 
-- Line 1: eight minutes, 220–250 W, ~85 rpm.
-- Line 2: two minutes easy, nothing else.
-- Line 3: five minutes, 250 W, HR 150–160.
+- Zeile 1: acht Minuten bei 220–250 W.
+- Zeile 2: zwei Minuten locker, ohne weitere Vorgabe.
+- Zeile 3: fünf Minuten mit Herzfrequenz 150–160 bpm.
 
 ---
 
-## Example 3: four intervals
+## Beispiel 3: vier Intervalle
 
 ```text
 repeat 4 {
-  work 4m pwr 270W
+  work 4m power 270W
   recovery 2m
 }
 ```
 
-Four times: hard 4 min @ ~270 W, then easy 2 min. Without `repeat` you’d paste those two lines four times.
+Viermal: 4 Minuten intensiv bei ~270 W, danach 2 Minuten locker. Ohne `repeat` müsstest du diese beiden Zeilen viermal untereinander kopieren.
 
 ---
 
-## Saves keep failing?
+## Validieren und speichern
 
-Usually order: **keyword → one measure → then targets**.
-Whether `m` is meters or minutes depends on **position**—the **first** number+unit right after the keyword is the chunk’s main measure.
+1. Wähle im Einheiten-Editor **Regeln**.
+2. Gib die DSL ein oder füge sie ein.
+3. Nutze vor dem Speichern die Parse-/Vorschau-Funktion, sofern verfügbar.
+4. Vergleiche normalisierten Text und visuelle Vorschau mit der gewünschten Schrittfolge.
+5. Speichere die Einheit, öffne sie erneut und prüfe Sportart, Dauer, Wiederholungszahl und Ziel.
+
+Gespeicherter Text kann auf kleingeschriebene Schlüsselwörter und kanonische Einheiten normalisiert werden. Eine solche Normalisierung ist normal; eine inhaltliche Veränderung der Einheit hingegen nicht.
 
 ---
 
-## Three rules
+## Sportarten und DSL-Fähigkeiten
 
-1. One line = one piece; read down.
-2. What kind → how it ends → how hard (optional).
-3. Use `repeat` instead of copy-paste.
+Geplante Einheiten behalten ihre genaue Sportart, z. B. Straßenlauf, Trailrunning, Laufband, Rennrad/Radfahren, Mountainbike, Indoor Cycling, Beckenschwimmen oder Freiwasserschwimmen. Verwandte Sportarten teilen sich dennoch Lauf-, Rad- oder Schwimmzonen sowie die Belastungsanalyse, während Exporte zu Suunto, Intervals.icu und COROS die exakte Sportartzuordnung bevorzugen.
+
+In der API bezeichnet `sportType` die übergeordnete Sportartfamilie wie Laufen, Radfahren oder Schwimmen, während `subSportType` den kanonischen Untertyp wie `TRAIL_RUNNING` oder `INDOOR_CYCLING` angibt.
+
+Ist eine Sportart in der Auswahl deaktiviert, kann der strukturierte Editor sie noch nicht verlustfrei abbilden. Als Aktivitätstyp lässt sie sich dennoch verwenden, und die App wandelt eine nicht unterstützte Struktur nicht stillschweigend in eine andere Einheit um.
+
+---
+
+## Einheit überprüfen
+
+- Jeder Schritt erscheint in der Vorschau in der eingegebenen Reihenfolge.
+- Jede Zeile hat genau eine primäre Endbedingung und höchstens ein Ziel.
+- Zonenreferenzen beziehen sich auf die richtige Sportart und dein Athletenprofil.
+- Wiederholungsblöcke enthalten die erwarteten Schritte sowie die richtige Anzahl bzw. Endbedingung.
+- Nach dem erneuten Öffnen bleiben Struktur und Sportart-Untertyp unverändert.
+
+## Fehlerbehebung
+
+- **Eine Zeile meldet ein unbekanntes Schlüsselwort:** Verwende einen unterstützten Schritttyp oder Zielnamen und entferne Satzzeichen, die nicht Teil der Grammatik sind.
+- **Dauer oder Distanz stimmen nicht:** Prüfe Einheit und Position. Die erste Maßangabe nach dem Schritttyp ist immer die Endbedingung.
+- **Der Parser lehnt mehrere Ziele ab:** Belasse ein Ziel pro Zeile und lagere zusätzliche Hinweise in die Notizen oder einen eigenen Schritt aus.
+- **Eine Zeile mit Schwellen-Endbedingung lehnt ein Ziel ab:** `work hr<150bpm` nutzt die Herzfrequenz bereits als Endbedingung; schreibe `work 25m hr <150bpm` für einen Schritt mit fester Dauer und Herzfrequenz-Obergrenze.
+- **Ein `repeat`-Block schlägt fehl:** Schließe die geschweiften Klammern, vermeide verschachtelte Wiederholungen und prüfe die `repeat until`-Bedingung.
+- **Die Vorschau ändert sich nach einem Sportartwechsel:** Zonen und Einheiten hängen von der Sportart ab. Wähle wieder die richtige Sportart und prüfe jedes Ziel.
+- **Der Export meldet Einschränkungen oder nicht unterstützte Strukturen:** Vereinfache die Einheit erst, nachdem du die Anbieterwarnung gelesen hast; nicht jedes Gerät unterstützt bedingte Wiederholungen.
+
+## Nächste Schritte
+
+- [Entwirf eine strukturierte Einheit im Workout-Editor](/de/workout-editor) und füge die DSL anschließend hier ein.
+- Nutze die [Anleitung zum manuellen Einheiten-Editor](/de/docs/planning/manual-workout-editor) für visuelle und textbasierte Workflows in der App.
+- Erstelle übungsbasierte Einheiten unter [Krafteinheiten](/de/docs/planning/strength-workouts).
+- Füge die gespeicherte Einheit über [Trainingsplan erstellen](/de/docs/guide/create-training-plan) zu einem Plan hinzu.

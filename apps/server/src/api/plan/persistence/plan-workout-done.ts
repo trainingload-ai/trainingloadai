@@ -23,7 +23,11 @@ export async function markWorkoutDoneIfApplicable(
   }
   await tx.planWorkout.update({
     where: { id: workoutId },
-    data: { status: 'DONE', completedAt: eventTime ?? new Date() },
+    data: {
+      status: 'DONE',
+      completedAt: eventTime ?? new Date(),
+      revision: { increment: 1 },
+    },
   });
   return true;
 }

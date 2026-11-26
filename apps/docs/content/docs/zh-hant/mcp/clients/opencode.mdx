@@ -1,0 +1,34 @@
+---
+title: 連線 opencode
+description: 透過 opencode 設定檔與 OAuth 指令連線至 TrainingLoad MCP。
+---
+
+# 連線 opencode
+
+在 `opencode.json` 中新增遠端伺服器：
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "trainingload": {
+      "type": "remote",
+      "url": "https://api.trainingload.ai/mcp",
+      "enabled": true
+    }
+  }
+}
+```
+
+接著執行：
+
+```bash
+opencode mcp auth trainingload
+opencode mcp list
+```
+
+完成 OAuth 授權後，可提問：「檢查我的第三方訓練平台連線狀態，並說明目前可用的同步方向。」這應會呼叫 `get_integration_status`。
+
+若身分驗證畫面未自動開啟，請重新執行 `opencode mcp auth trainingload`。切勿在設定檔中填入權杖。
+
+[opencode 官方 MCP 指南](https://opencode.ai/docs/mcp-servers/)

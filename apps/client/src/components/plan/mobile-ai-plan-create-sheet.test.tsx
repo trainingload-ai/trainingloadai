@@ -62,4 +62,27 @@ describe("MobileAiPlanCreateSheet", () => {
     expect(params.has("raceD")).toBe(false);
     expect(params.has("raceDist")).toBe(false);
   });
+
+  it("hands a continuous brief to the coach without a fixed duration", async () => {
+    const onGenerate = vi.fn();
+    render(
+      <MobileAiPlanCreateSheet
+        open
+        rolling
+        onOpenChange={vi.fn()}
+        onBackToMode={vi.fn()}
+        onGenerate={onGenerate}
+      />,
+    );
+
+    expect(await screen.findByRole("heading", { name: "title" })).toBeVisible();
+    expect(screen.queryByText("cycleConstraints.cycleLength")).toBeNull();
+    fireEvent.click(screen.getByTestId("mobile-ai-plan-generate"));
+
+    const params = onGenerate.mock.calls[0][0] as URLSearchParams;
+    expect(params.get("planMode")).toBe("rolling");
+    expect(params.get("planIntent")).toBe("fitnessBuild");
+    expect(params.get("days")).toBe("5");
+    expect(params.has("weeks")).toBe(false);
+  });
 });

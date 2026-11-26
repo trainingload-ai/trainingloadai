@@ -131,8 +131,13 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
     return ctx.coachBranching.canUseDecisionTools({ userId, branchId });
   },
   checkPermissions: async (ctx) => requireSignedInUser(ctx),
-  validateInput: (_ctx, input) => {
+  validateInput: (ctx, input) => {
     const decisionType = String(input?.decisionType ?? '').trim();
+    if (ctx.calendarScheduleOnly && decisionType !== 'PLAN_SCHEDULE')
+      return aiToolError(
+        'Calendar moves require a PLAN_SCHEDULE decision',
+        'INVALID_INPUT',
+      );
     if (!SUPPORTED_DECISION_TYPES.has(decisionType)) {
       return aiToolError('Unsupported decisionType', 'INVALID_INPUT');
     }
@@ -199,12 +204,25 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
       const planId = String(input.payload.planId ?? '').trim();
       if (!planId)
         throw new Error('planId is required to open an adjustment branch');
-      const opened = await ctx.coachBranching.openBranch({
-        userId,
-        planId,
-        openReason: 'conversation_adjustment',
-      });
-      branchId = opened.branch.id;
+      if (
+        ctx.sid &&
+        typeof ctx.coachBranching.ensureConversationBranch === 'function'
+      ) {
+        branchId = await ctx.coachBranching.ensureConversationBranch({
+          userId,
+          sid: ctx.sid,
+          userMessageId: ctx.currentUserMessageId,
+          planId,
+          openReason: 'conversation_adjustment',
+        });
+      } else {
+        const opened = await ctx.coachBranching.openBranch({
+          userId,
+          planId,
+          openReason: 'conversation_adjustment',
+        });
+        branchId = opened.branch.id;
+      }
     }
 
     const { decision, options } = await ctx.coachBranching.squashBranch({

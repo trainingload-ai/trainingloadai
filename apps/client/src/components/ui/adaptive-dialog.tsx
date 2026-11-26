@@ -156,19 +156,14 @@ export const AdaptiveDialogContent = React.forwardRef<
       variant === "drawer" ? mobileClassName : desktopClassName,
     );
 
-    const DrawerBody = DrawerContent as React.ComponentType<{
-      ref?: React.Ref<HTMLDivElement>;
-      className?: string;
-      children?: React.ReactNode;
-    }>;
-
     return variant === "drawer" ? (
-      <DrawerBody
-        ref={ref as React.Ref<HTMLDivElement>}
+      <DrawerContent
+        ref={ref}
         className={mergedClassName}
+        {...mobileProps}
       >
         {children}
-      </DrawerBody>
+      </DrawerContent>
     ) : (
       <DialogContent
         ref={ref as React.Ref<HTMLDivElement>}

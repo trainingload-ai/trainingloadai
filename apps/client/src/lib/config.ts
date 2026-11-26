@@ -18,7 +18,7 @@ function getSelfHostPublicOrigin(): string | null {
   return process.env.CLIENT_PUBLIC_URL?.trim().replace(/\/+$/, "") || null;
 }
 
-/** 官网（定价页、计划分享预览等）；本地可看 docs：`NEXT_PUBLIC_MARKETING_BASE_URL=http://localhost:3000` */
+/** 官网（定价页等）；本地可看 docs：`NEXT_PUBLIC_MARKETING_BASE_URL=http://localhost:3000` */
 export function getMarketingSiteOrigin(): string {
   const selfHostOrigin = getSelfHostPublicOrigin();
   if (selfHostOrigin) return selfHostOrigin;
@@ -33,10 +33,6 @@ export function getMarketingSiteOrigin(): string {
     return "http://localhost:3000";
   }
   return DEFAULT_SITE_URL;
-}
-
-export function getPlanSharePublicUrl(publicId: string): string {
-  return `${getMarketingSiteOrigin()}/share/plans/${encodeURIComponent(publicId)}`;
 }
 
 const AUTH_UI_ENABLED = true;

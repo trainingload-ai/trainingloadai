@@ -1,0 +1,96 @@
+---
+title: Self-Hosting-Instanz verwalten
+description: Nutze den unterstützten Management-Einstiegspunkt für Systemprüfungen, Logs, Backup, Wiederherstellung, Upgrade, Rollback und Herunterfahren.
+---
+
+# Self-Hosting-Instanz verwalten
+
+Steuere deine Instanz über `./self-host <command> --json` unter Linux, macOS und WSL2 oder über `.\self-host.ps1 <command> --json` in Windows PowerShell. Der Management-Einstiegspunkt stellt sicher, dass alle Prüf-, Sperr-, Audit- und Datensicherheitsregeln des Releases eingehalten werden.
+
+## Bevor du startest
+
+- Halte das installierte Release-Verzeichnis und dessen `.env.selfhost` streng privat.
+- Bewerte Automatisierungen anhand der JSON-Felder `ok`, `exitCode`, `error.code` und `details` – nicht anhand lesbarer Textmeldungen.
+- Führe vor jeder zustandsändernden Aktion denselben Befehl zuerst mit `--dry-run` aus.
+- Verwende niemals `docker compose down -v`, lösche keine Lifecycle-Marker und führe niemals manuelle Datenbank-Downgrades durch.
+
+## Status, Zustand und Logs prüfen
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+`status` liefert einen begrenzten Laufzeit-Schnappschuss. `doctor` prüft vertrauenswürdige Konfiguration, Host-Ressourcen, Datenpfade, Datenbankzustand, Readiness und aktivierte Anbieter. Logs sind automatisch geschwärzt und in der Länge begrenzt, können aber dennoch Nutzdaten enthalten – prüfe sie daher vor jeder Weitergabe.
+
+## Starten und stoppen
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+
+./self-host stop --dry-run --json
+./self-host stop --json
+```
+
+Beim Stoppen bleiben Container, Konfiguration und persistente Daten erhalten. Um Laufzeitressourcen zu entfernen und Daten dennoch zu bewahren, nutze den dokumentierten `uninstall`-Ablauf; entferne Volumes niemals manuell.
+
+## Verifiziertes Backup erstellen
+
+```bash
+./self-host backup --output weekly-<yyyy-mm-dd> --dry-run --json
+./self-host backup --output weekly-<yyyy-mm-dd> --json
+```
+
+Ein Backup enthält einen logischen PostgreSQL-Dump sowie alle maßgeblichen Uploads. Ausgeschlossen sind Caches, Diagnosedaten, Bootstrap-Tokens, private TLS-Zustände, lokale Berechtigungsdaten und Secret-Werte. Bewahre das fertige Backup-Paket verschlüsselt außerhalb des Hosts auf und teste es regelmäßig gegen ein sauberes, isoliertes Ziel.
+
+## Sicher wiederherstellen
+
+Stelle Backups ausschließlich in eine frisch initialisierte Zielinstanz mit exakt gleicher Version wieder her, deren Datenbank und Uploads leer sind:
+
+```bash
+./self-host restore /secure/path/to/backup --dry-run --json
+./self-host restore /secure/path/to/backup --json
+./self-host doctor --json
+```
+
+Überschreibe niemals die laufende Instanz. Eine fehlgeschlagene Wiederherstellung hinterlässt einen blockierenden Marker und einen Bericht, damit ein unvollständiges Ziel nicht versehentlich als intakt gestartet werden kann.
+
+## Upgrade durchführen
+
+Für ein Upgrade benötigst du das vollständige, signierte Ziel-Release-Verzeichnis. Halte die aktuelle Instanz, das Ziel-Bundle und ein verifiziertes externes Backup bereit. Führe vor dem eigentlichen Upgrade durch den Ziel-Controller die Kompatibilitäts-Dry-Runs sowohl mit dem aktuellen als auch mit dem Ziel-Controller aus:
+
+```bash
+instance='/absolute/path/to/current-instance'
+target='/absolute/path/to/trainingload-selfhost-<target-version>'
+
+"$instance/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --json
+"$target/self-host" doctor --directory "$instance" --json
+```
+
+Datenbankmigrationen laufen ausschließlich vorwärts. Ein Anwendungs-Rollback steht nur zur Verfügung, wenn der Upgrade-Bericht ihn ausdrücklich deklariert und die alten Images weiterhin verifizierbar sind; die Datenbank wird dabei niemals zurückgestuft.
+
+## Empfohlene Routine
+
+- Täglich: `status` und freien Festplattenplatz prüfen.
+- Wöchentlich: `doctor` ausführen und ein verifiziertes externes Backup erstellen.
+- Vor jedem Upgrade: Release Notes der Zielversion lesen, Ziel-Bundle verifizieren, Backup prüfen und Rollback-Angaben kontrollieren.
+- In regelmäßigen Abständen: ein Backup in eine isolierte Testinstanz wiederherstellen und Owner, Aktivitäten sowie Uploads verifizieren.
+
+## Überprüfung
+
+- Jeder zustandsändernden Aktion ging derselbe Befehl mit identischen Parametern und `--dry-run` voraus.
+- `doctor` liefert nach Start, Wiederherstellung oder Upgrade `"ok": true`.
+- Mindestens ein aktuelles, verifiziertes Backup liegt außerhalb des Instanz-Hosts.
+- Ein Wiederherstellungstest hat bestätigt, dass das Backup wirklich nutzbar ist und nicht nur existiert.
+
+## Fehlerbehebung
+
+Schlägt eine Operation fehl, bewahre ihren stabilen Fehlercode auf und führe `doctor` aus. Erstelle Diagnosedaten nur bei Bedarf, prüfe sie lokal und veröffentliche niemals die rohe `.env.selfhost`, einen Datenbank-Dump, Uploads, Passwörter, Tokens oder Anbieter-Schlüssel. Starte keine zweite zustandsändernde Aktion parallel, solange eine laufende Operation die Instanzsperre hält.
+
+## Nächster Schritt
+
+Halte [Fehlerbehebung](/de/docs/self-host/troubleshooting) griffbereit für deinen Betriebsalltag. Prüfe [Konfiguration](/de/docs/self-host/configuration), bevor du Netzwerk- oder Anbietereinstellungen änderst.

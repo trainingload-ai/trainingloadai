@@ -8,6 +8,8 @@ export const MCP_SCOPE = {
 } as const;
 
 export const MCP_READ_SCOPES = Object.values(MCP_SCOPE);
+export const MCP_ACTIVITY_IMPORT_SCOPE = 'activity:import';
+export const MCP_PLAN_WRITE_SCOPES = ['plan:draft', 'plan:update', 'plan:delete', 'plan:link'] as const;
 export const MCP_DEFAULT_SCOPES = MCP_READ_SCOPES.filter(
   (scope) => scope !== MCP_SCOPE.HEALTH_READ,
 );
@@ -21,7 +23,8 @@ export const OAUTH_SCOPES = [
   'activity:write',
   'plan:write',
   'review:write',
-  'plan:draft',
+  ...MCP_PLAN_WRITE_SCOPES,
+  MCP_ACTIVITY_IMPORT_SCOPE,
 ] as const;
 
 export const OAUTH_DEFAULT_CLIENT_SCOPES = [

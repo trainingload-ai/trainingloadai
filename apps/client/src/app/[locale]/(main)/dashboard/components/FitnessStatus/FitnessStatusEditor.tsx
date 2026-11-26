@@ -27,7 +27,6 @@ import {
   type FitnessStatCard,
 } from "./components/SortableFitnessStatCard";
 import { FITNESS_STATUS_METRIC_KEYS } from "./fitness-status-model";
-import { clampSpan, getSpanClass } from "./fitness-status-layout";
 
 export function FitnessStatusEditor({
   statsByKey,
@@ -126,14 +125,11 @@ export function FitnessStatusEditor({
       </SortableContext>
       <DragOverlay adjustScale={false}>
         {activeDragItem && activeDragStat ? (
-          <div
-            className={getSpanClass(clampSpan(activeDragItem.span, 4))}
-          >
-            <FitnessStatusStatCard
-              stat={activeDragStat}
-              subContent={renderSubContent(activeDragStat)}
-            />
-          </div>
+          <FitnessStatusStatCard
+            className="h-full"
+            stat={activeDragStat}
+            subContent={renderSubContent(activeDragStat)}
+          />
         ) : null}
       </DragOverlay>
     </DndContext>

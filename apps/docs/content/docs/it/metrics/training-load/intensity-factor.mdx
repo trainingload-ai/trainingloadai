@@ -1,98 +1,131 @@
 ---
-title: Intensity Factor (IF)
-description: Intensity Factor (IF) compares workout intensity with threshold and helps interpret how hard a session was relative to current fitness.
-keywords: ["IF", "Intensity Factor", "intensity factor", "NP", "FTP", "TSS", "Tempo", "Sweet Spot", "training intensity"]
+title: "Cos'è l'Intensity Factor (IF) nel ciclismo e nella corsa"
+description: "L'Intensity Factor (IF) è il rapporto tra Normalized Power e FTP. Usa l'IF per leggere quanto è stata dura un'uscita o una corsa, verificare le zone e capire come guida il Training Stress Score."
+keywords:
+  [
+    "Intensity Factor",
+    "IF ciclismo",
+    "NP/FTP",
+    "intensity factor corsa",
+    "zone di allenamento IF",
+  ]
 ---
 
-# Intensity Factor (IF)
+# Cos'è l'Intensity Factor (IF) nel ciclismo e nella corsa
 
-**Intensity Factor (IF)** measures the **relative intensity** of a workout compared with your current **[FTP (Functional Threshold Power)](/docs/metrics/power/functional-threshold-power)** or a sport-specific threshold.
+L'**Intensity Factor (IF)** esprime l'intensità di un allenamento rispetto alla tua soglia: [Normalized Power](/it/docs/metrics/power/normalized-power) ÷ [FTP](/it/docs/metrics/power/functional-threshold-power). Risponde alla domanda «quanto è stata dura questa sessione?», chiarendo perché un'uscita a 150 W può essere facile per un atleta e massimale per un altro.
 
-It answers “How hard was this session?”—and makes training intensity comparable across athletes with different ability levels.
+Permette di confrontare in modo equo l'intensità relativa tra atleti con livelli di prestazione completamente diversi.
 
-## Calculation Formula
+## Formula di calcolo
 
-IF is the ratio of [Normalized Power (NP)](/docs/metrics/power/normalized-power) to [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power):
+L'IF è il rapporto tra la [Normalized Power (NP)](/it/docs/metrics/power/normalized-power) e la [Functional Threshold Power (FTP)](/it/docs/metrics/power/functional-threshold-power):
 
 $$
 IF = \frac{NP}{FTP}
 $$
 
-**Example**:
--   Suppose your FTP is 200 W.
--   You complete a ride with NP = 150 W.
--   Then $IF = 150 / 200 = 0.75$.
+**Esempio**:
+-   Supponiamo che la tua FTP sia 200 W.
+-   Completi un'uscita con NP = 150 W.
+-   Allora $IF = 150 / 200 = 0.75$.
 
-> **Note**: the same logic applies to running (using rFTP and NGP). Heart rate is generally less precise than power due to **lag and drift**.
+> **Nota**: la stessa logica si applica alla corsa (usando rFTP e NGP). La frequenza cardiaca è di solito meno precisa della potenza a causa di **ritardo e deriva cardiaca**.
 
-### IF calculation in running
+### Calcolo dell'IF nella corsa
 
-For running, we usually use **rFTP (running threshold power)** or **CP (Critical Power)** as the baseline:
+Nella corsa si utilizza di solito la **rFTP (potenza di soglia nella corsa)** o la **CP (Critical Power)** come riferimento:
 
 $$
 IF_{run} = \frac{RunPower}{CP}
 $$
 
-Or, if using pace:
+Oppure, lavorando sul passo:
 
 $$
 IF_{pace} = \frac{NGP}{ThresholdPace}
 $$
 
-*Note: [NGP (Normalized Graded Pace)](/docs/metrics/pace/normalized-graded-pace) is a grade-adjusted normalized pace.*
+*Nota: il [NGP (Normalized Graded Pace)](/it/docs/metrics/pace/normalized-graded-pace) è un passo normalizzato e corretto per la pendenza.*
 
-## Why focus on IF?
+## Perché prestare attenzione all'IF?
 
-### 1. Cross-athlete comparison
-- **Absolute power**: a pro can ride 200 W easily; a beginner may ride 200 W all-out. Watts alone don’t reflect effort.
-- **Relative intensity (IF)**: if both athletes have IF = 0.75, they’re doing the same relative aerobic endurance work.
+### 1. Confronto tra atleti diversi
+- **Potenza assoluta**: un professionista può pedalare a 200 W in pieno recupero; un principiante può trovarsi al limite. I watt da soli non descrivono lo sforzo relativo.
+- **Intensità relativa (IF)**: se entrambi gli atleti registrano IF = 0,75, stanno svolgendo lo stesso tipo di lavoro aerobico di resistenza rispetto alle proprie capacità.
 
-### 2. Identify training zones
-IF is the fastest way to see which intensity domain a session sits in:
+### 2. Identificare subito le zone di allenamento
+L'IF è il modo più rapido per capire in quale dominio di intensità ricade una sessione:
 
-| IF range | Training zone | Typical description |
+| Intervallo IF | Zona di allenamento | Descrizione tipica |
 | :--- | :--- | :--- |
-| **< 0.75** | **Z1 / Z2** | **Recovery / aerobic endurance**. Easy to moderate work, often used for base or recovery sessions. |
-| **0.75 - 0.85** | **Z3 / Sweet Spot** | **Tempo / sweet spot**. Moderately hard and sustainable for many athletes, depending on duration and sport. |
-| **0.85 - 0.95** | **Z4** | **Threshold**. Very hard, near FTP; common in intervals or time trials. |
-| **0.95 - 1.05** | **Z5** | **VO2max**. Very high-intensity work, usually performed in shorter intervals. |
-| **> 1.05** | **Z6 / Z7** | **Anaerobic / sprint**. Short bursts; usually only in short races or tests. |
+| **< 0.75** | **Z1 / Z2** | **Recupero / resistenza aerobica**. Lavoro facile o moderato, tipico di base e scarico. |
+| **0.75 - 0.85** | **Z3 / Sweet Spot** | **Tempo / sweet spot**. Moderatamente impegnativo e sostenibile per molti atleti, in base a durata e sport. |
+| **0.85 - 0.95** | **Z4** | **Soglia**. Molto impegnativo, vicino all'FTP; tipico di ripetute lunghe o prove a cronometro. |
+| **0.95 - 1.05** | **Z5** | **VO₂max**. Intensità molto elevata, generalmente svolta in intervalli più brevi. |
+| **> 1.05** | **Z6 / Z7** | **Anaerobico / sprint**. Brevi sforzi esplosivi; si osserva solo in gare brevi o test specifici. |
 
-## Typical application scenarios
+## Scenari tipici di utilizzo
 
-### 1. Validate FTP settings
-If you hold **IF ≈ 1.1** for a full **solo 1-hour time trial (TT)** (i.e., NP is 1.1× FTP), your **FTP may be set too low**.
-- **Why**: FTP is commonly treated as the highest power you can sustain near steady state for about an hour. If IF stays well above 1.0 for a full hour, your threshold estimate likely needs review.
+### 1. Verificare l'impostazione dell'FTP
+Se riesci a tenere **IF ≈ 1,1** in una **cronometro solitaria di un'ora intera** (ovvero NP pari a 1,1× FTP), la tua **FTP è probabilmente impostata troppo bassa**.
+- **Perché**: l'FTP rappresenta convenzionalmente la potenza massima sostenibile quasi a regime per circa un'ora. Se l'IF resta ben sopra 1,0 per un'ora intera, la stima della tua soglia va quasi certamente rivista.
 
-### 2. Race pacing strategy
-In long endurance events, controlling IF helps protect late-race pacing and nutrition:
+### 2. Strategia di passo in gara
+Nelle prove di lunga distanza, tenere sotto controllo l'IF aiuta a proteggere la tenuta nel finale e la strategia nutrizionale:
 
-| Race type | Target IF range | Risk note |
+| Tipo di gara | Intervallo IF obiettivo | Nota sul rischio |
 | :--- | :--- | :--- |
-| **Ironman** | **0.65 - 0.75** | Higher bike intensity can increase run and nutrition risk. |
-| **Half Ironman (70.3)** | **0.75 - 0.85** | The upper end is aggressive and depends heavily on run durability. |
-| **Olympic-distance** | **0.85 - 0.95** | Near-threshold bike; leave margin for the run. |
+| **Ironman** | **0.65 - 0.75** | Un'intensità ciclistica superiore può compromettere corsa finale e alimentazione. |
+| **Mezzo Ironman (70.3)** | **0.75 - 0.85** | La fascia alta è aggressiva e dipende molto dalla tua tenuta nella corsa. |
+| **Triathlon olimpico** | **0.85 - 0.95** | Frazione bici vicina alla soglia; conserva margine per la corsa. |
 
-### 3. A core building block of Training Stress Score (TSS)
-IF is a multiplier in **[TSS](./training-stress-score)**—it sets how fast TSS accumulates:
+### 3. Elemento chiave del Training Stress Score (TSS)
+L'IF funge da moltiplicatore nel **[TSS](/it/docs/metrics/training-load/training-stress-score)** e determina la velocità con cui il carico si accumula:
 
 $$
 TSS = \frac{t \times NP \times IF}{FTP \times 3600} \times 100
 $$
 
-- A small increase in IF raises TSS a lot (the formula effectively involves an $IF^2$ relationship).
+- Un piccolo incremento di IF fa crescere molto il TSS (la formula implica di fatto una relazione quadratica con $IF^2$).
 
-## Trainingload.ai recommendations
+## Raccomandazioni di Trainingload.ai
 
-Trainingload.ai uses IF to interpret the character of a workout, not just its total load:
+Trainingload.ai usa l'IF per leggere il carattere dell'allenamento, non solo il suo carico totale:
 
-1.  **Match IF to the session goal**: aerobic base sessions should usually stay controlled; threshold or VO2max sessions are intentionally higher.
-2.  **Be cautious with very short sessions**: for workouts shorter than roughly 20 minutes, IF can look unusually high and should not be interpreted the same way as a long steady session.
-3.  **Review threshold settings**: if easy sessions frequently show IF above 0.8, either the workout is not as easy as intended or your threshold estimate may need recalibration.
+1.  **Allinea l'IF all'obiettivo della sessione**: le uscite di base aerobica dovrebbero restare controllate; le sedute di soglia o VO₂max puntano intenzionalmente più in alto.
+2.  **Cautela con le sessioni molto brevi**: per allenamenti sotto i ~20 minuti, l'IF può apparire insolitamente alto e non va interpretato come in un lungo costante.
+3.  **Controlla i valori di soglia**: se le uscite facili superano spesso IF 0,8, o la sessione non era davvero facile oppure la tua soglia necessita di una ricalibrazione.
 
-## Limitations
+## Limiti
 
--   **Bias in short, intense sessions**: for very short workouts (e.g., ~10 minutes), NP behavior can make IF look unusually high.
--   **Depends on a reliable FTP**: if FTP is outdated or wrong, IF loses meaning.
+-   **Distorsione nelle sessioni brevi e intense**: in allenamenti molto brevi (es. ~10 minuti), il comportamento della NP può rendere l'IF artificialmente alto.
+-   **Dipende da un'FTP affidabile**: se l'FTP è superata o errata, l'IF perde significato.
 
-> Normalized Power (NP), Intensity Factor (IF), and Training Stress Score (TSS) are registered trademarks of [Peaksware, LLC](https://trainingpeaks.com/).
+## FAQ
+
+### Cos'è l'Intensity Factor?
+
+L'Intensity Factor è NP ÷ FTP (oppure NGP ÷ passo di soglia nella corsa). Un IF di 0,75 corrisponde per la maggior parte degli atleti a una sessione aerobica controllata; un IF vicino a 1,0 equivale a circa un'ora alla soglia.
+
+### Come si usa l'IF nell'allenamento ciclistico?
+
+Usalo per verificare che l'uscita sia rimasta nella zona prevista, per dosare lo sforzo nelle gare lunghe e per scoprire un'FTP sottostimata: tenere IF ≈ 1,1 per un'ora intera indica quasi sempre una soglia troppo bassa.
+
+### L'IF funziona anche nella corsa?
+
+Sì, con la potenza di soglia/CP nella corsa oppure confrontando NGP e passo di soglia. Un IF ricavato dalla frequenza cardiaca è meno preciso perché la FC presenta ritardo e deriva.
+
+### In che modo l'IF modifica il TSS?
+
+Il TSS cresce in proporzione a IF². Un piccolo aumento di IF aggiunge molto più carico rispetto allo stesso aumento percentuale di durata, motivo per cui un'FTP errata distorce sia IF sia TSS.
+
+## Passi successivi
+
+- [Scopri come calcolare il Training Stress Score](/it/docs/metrics/training-load/training-stress-score)
+- [Calcola il TSS da durata, NP e FTP](/it/tss-calculator)
+- [Stima l'FTP da un file di attività](/it/ftp-calculator)
+- [Calcola le zone di carico basate sulla potenza](/it/power-zones-calculator)
+- [Gestisci il carico di allenamento con CTL, ATL e TSB nel tuo piano](/it/training-load)
+
+> Normalized Power (NP), Intensity Factor (IF) e Training Stress Score (TSS) sono marchi registrati di [Peaksware, LLC](https://trainingpeaks.com/).

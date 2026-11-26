@@ -7,6 +7,7 @@ import {
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
+import { HOME_OPEN_GRAPH_IMAGE_PATH } from "@/lib/social-metadata";
 import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { JsonLd } from "@/components/JsonLd";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
@@ -47,7 +48,7 @@ export async function generateMetadata(props: {
   const publishedTime = page.data.date
     ? new Date(page.data.date).toISOString()
     : undefined;
-  const ogImageRaw = page.data.image || "/og/home.jpg?v=20260912";
+  const ogImageRaw = page.data.image || HOME_OPEN_GRAPH_IMAGE_PATH;
   const ogImage = resolveAbsoluteUrl(siteUrl, ogImageRaw);
 
   return {

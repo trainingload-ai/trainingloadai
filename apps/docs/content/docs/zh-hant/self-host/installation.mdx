@@ -1,0 +1,158 @@
+---
+title: 自行託管快速入門
+description: 驗證經簽章的 Trainingload.ai 發行版本、安裝本機實例、認領擁有者帳號，並建立第一份已驗證的備份。
+seoTitle: "以簽章發行版本安裝 Trainingload.ai 自行託管實例"
+seoDescription: "依循 Linux、macOS 與 Windows 的 Trainingload.ai 自行託管快速入門：驗證發行版本、安全安裝、認領擁有者並建立首份備份。"
+keywords:
+  [
+    "安裝 Trainingload.ai",
+    "自行託管快速入門",
+    "簽章發行套件",
+    "Docker Compose 自行託管",
+  ]
+---
+
+# 自行託管快速入門
+
+## 完成結果
+
+完成後你將擁有一個運作中的本機 Trainingload.ai 實例、一個已認領的擁有者（Owner）帳號、通過健康檢查的系統，以及第一份經過驗證的備份。
+
+## 開始之前
+
+請準備以下任一受支援的主機環境：
+
+- 執行於 `amd64` 或 `arm64` 架構的 Ubuntu 24.04；
+- 搭載 Apple Silicon 並安裝 Docker Desktop 的 macOS；
+- 執行於 `amd64` 架構、安裝 Docker Desktop 並使用 WSL2 與 Linux 容器的 Windows 11。
+
+主機同時需要：
+
+- Node.js 22 或更新版本；
+- Docker Engine 與 Docker Compose v2；
+- 支援 `verify-blob --bundle` 的 Cosign；
+- Core Local 至少需 2 顆 CPU、2 GiB 記憶體與 5 GiB 可用磁碟空間。
+
+請從官方 [GitHub Releases](https://github.com/trainingload-ai/trainingloadai/releases) 頁面下載精確版本的發行壓縮檔、校驗碼檔案與校驗碼簽章套件。切勿使用原始碼檢出或無版本號的壓縮檔作為正式發行版本。
+
+預設資料目錄位於解壓縮後發行目錄內的 `./data`。若需改用專用磁碟或其他路徑，請先閱讀[選擇本機資料路徑](/zh-hant/docs/self-host/configuration#choose-the-local-data-path)，再執行安裝程式。
+
+## 在 Linux、macOS 或 WSL2 上安裝
+
+### 1. 驗證下載的壓縮檔
+
+在存放三個下載檔案的目錄中執行以下命令：
+
+```bash
+version='<exact-version>'
+archive="trainingload-selfhost-$version.tar.gz"
+identity="https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$version"
+
+cosign verify-blob \
+  --bundle "$archive.sha256.bundle.json" \
+  --certificate-identity "$identity" \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  "$archive.sha256"
+```
+
+接著依主機作業系統執行對應命令以驗證壓縮檔校驗碼：
+
+```bash
+# Linux 或 WSL2
+sha256sum -c "$archive.sha256"
+
+# macOS
+shasum -a 256 -c "$archive.sha256"
+```
+
+務必確認簽章與校驗碼兩項驗證均成功後再繼續。
+
+### 2. 解壓縮並檢視安裝計畫
+
+```bash
+tar -xzf "$archive"
+cd "trainingload-selfhost-$version"
+./install.sh --dry-run --json
+```
+
+預演（dry run）會驗證內部套件簽章、主機前置條件、精確發行版本、設定值、資料路徑與生命週期計畫。僅在 JSON 結果包含 `"ok": true` 時才繼續下一步。
+
+### 3. 安裝實例
+
+```bash
+./install.sh --json
+```
+
+安裝程式會產生受保護的本機機密金鑰、建立宣告的資料目錄、啟動以摘要鎖定的映像檔、執行資料庫遷移，並等待必要服務就緒。
+
+## 在 Windows 11 上安裝
+
+於存放下載檔案的目錄中開啟 PowerShell 並執行：
+
+```powershell
+$Version = '<exact-version>'
+$Archive = "trainingload-selfhost-$Version.tar.gz"
+$Identity = "https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$Version"
+
+cosign verify-blob `
+  --bundle "$Archive.sha256.bundle.json" `
+  --certificate-identity $Identity `
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' `
+  "$Archive.sha256"
+
+$Expected = ((Get-Content "$Archive.sha256" -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+$Actual = (Get-FileHash $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($Actual -ne $Expected) { throw 'Release archive checksum mismatch' }
+
+tar.exe -xzf $Archive
+Set-Location "trainingload-selfhost-$Version"
+.\install.ps1 --dry-run --json
+.\install.ps1 --json
+```
+
+同樣僅在預演結果包含 `"ok": true` 時才繼續正式安裝。
+
+## 建立本機帳號
+
+預設安裝僅監聽於 `127.0.0.1`。服務就緒後，在同一台電腦上開啟 `http://localhost:43210`。首次啟動頁面只需輸入使用者名稱，無須填寫電子郵件地址或密碼。送出後系統會建立唯一的擁有者帳號、建立本機工作階段，並直接進入新手引導。若該工作階段日後逾期，重新開啟應用程式即可為同一位擁有者恢復工作階段。
+
+只有在網站來源（origin）、客戶端綁定位址與受信任客戶端位址全為本機迴路（loopback），且請求來自同源瀏覽器時，才會啟用免密碼存取。資料庫中不會儲存任何空白密碼。
+
+若需從其他電腦存取，請維持實例僅綁定於本機迴路，並透過 SSH 連接埠轉發至 `localhost:43210`。公開應用程式僅提供使用者名稱設定與本機工作階段恢復，不提供雲端版的電子郵件、密碼、註冊或 OAuth 頁面。切勿將免密碼實例直接發佈到網際網路。
+
+## 接下來會發生什麼
+
+預設網站位於 `http://localhost:43210`。PostgreSQL 資料、上傳檔案、快取、備份與操作紀錄均保留在宣告的資料根目錄中。客戶端為唯一對外發佈的服務；文件站點獨立部署。初次使用不需要任何 AI 或運動平台金鑰。唯一的擁有者可於稍後依需求設定 BYOK AI、Intervals.icu 個人 API 金鑰與 Garmin Personal API。
+
+## 驗證安裝
+
+執行唯讀檢查，接著建立第一份經驗證的備份：
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host backup --output first-verified-backup --dry-run --json
+./self-host backup --output first-verified-backup --json
+```
+
+滿足以下條件即表示安裝就緒：
+
+- `status` 與 `doctor` 均回傳 `"ok": true`；
+- 可以透過設定的網站位址進入實例；
+- 備份包含成功的 `backup-result.json` 並通過驗證步驟。
+
+請將已驗證的備份移至獨立故障網域中的加密儲存空間。只留在同一顆磁碟上的備份不足以提供還原保護。
+
+## 疑難排解
+
+- **安裝程式拒絕此主機：** 切勿繞過平台檢查，請使用受支援的主機環境組合。
+- **簽章或校驗碼驗證失敗：** 請立即停止，並從同一個精確版本重新下載所有發行檔案。
+- **無法使用 Docker：** 確認 Docker 正在運作，且已啟用 Compose v2 與 Linux 容器後端。
+- **連接埠已被佔用：** 啟動實例前，請先設定其他受支援的綁定位址與連接埠。
+- **就緒檢查失敗：** 請執行 `./self-host doctor --json`，切勿以手動撰寫的 `docker compose` 命令取代生命週期管理命令。
+
+如需穩定的錯誤代碼與安全復原步驟，請參閱[自行託管疑難排解](/zh-hant/docs/self-host/troubleshooting)。
+
+## 下一步
+
+繼續閱讀[設定實例](/zh-hant/docs/self-host/configuration)，以設定網路暴露範圍並視需要啟用 BYOK AI 服務商。在匯入重要資料之前，也請先詳閱[管理你的實例](/zh-hant/docs/self-host/operations)。

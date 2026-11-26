@@ -61,7 +61,7 @@ function toPreviewText(markdown: string) {
     .trim();
 }
 
-const AIAnalysis = () => {
+const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
   const t = useTranslations("AIAnalysis");
   const queryClient = useQueryClient();
   const activityId = useActivityId();
@@ -116,6 +116,7 @@ const AIAnalysis = () => {
     review?.found === true && ["DEAD", "SKIPPED"].includes(review.status ?? "");
   useEffect(() => {
     if (
+      !readOnly &&
       streamEligible &&
       !hasStoredMarkdown &&
       !workerPending &&
@@ -128,6 +129,7 @@ const AIAnalysis = () => {
       );
     }
   }, [
+    readOnly,
     streamEligible,
     hasStoredMarkdown,
     workerPending,
@@ -136,6 +138,7 @@ const AIAnalysis = () => {
   ]);
   // Once started, keep this request alive while canonical status changes to RUNNING.
   const streamEnabled =
+    !readOnly &&
     Boolean(activityId) &&
     hasReviewAccess &&
     hasAiDataConsent &&
@@ -195,7 +198,7 @@ const AIAnalysis = () => {
     !loadingCombined &&
     (reviewQuery.isError || Boolean(error) || workerFailed);
   const showFreeUpsell =
-    !accessLoading && !hasReviewAccess && !hasContent && !loadingCombined;
+    !readOnly && !accessLoading && !hasReviewAccess && !hasContent && !loadingCombined;
 
   const handleCardClick = () => {
     if (loadingCombined && !markdownBody) {
@@ -216,11 +219,15 @@ const AIAnalysis = () => {
   return (
     <div className="min-h-0 min-w-0">
       {!accessLoading && !hasAiDataConsent ? (
-        <AiDataConsentPrompt
-          className="mx-auto w-full max-w-md"
-          source="ACCOUNT_SETTINGS"
-          variant="compact"
-        />
+        readOnly ? (
+          <p className="text-mobile-caption text-muted-foreground pc:text-xs">{t("emptyHint")}</p>
+        ) : (
+          <AiDataConsentPrompt
+            className="mx-auto w-full max-w-md"
+            source="ACCOUNT_SETTINGS"
+            variant="compact"
+          />
+        )
       ) : (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col md:min-h-0">
           {showFreeUpsell ? (
@@ -230,7 +237,7 @@ const AIAnalysis = () => {
               <p className="text-mobile-caption pc:text-xs text-muted-foreground">
                 {error instanceof Error ? error.message : t("analysisFailed")}
               </p>
-              <Button
+              {!readOnly ? <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
@@ -243,15 +250,15 @@ const AIAnalysis = () => {
                 }}
               >
                 {t("regenerate")}
-              </Button>
+              </Button> : null}
             </div>
           ) : hasContent ? (
             <button
               type="button"
               onClick={handleCardClick}
-              onMouseEnter={preloadActivityCoachConversation}
-              onFocus={preloadActivityCoachConversation}
-              className="group flex min-h-[96px] w-full min-w-0 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onMouseEnter={readOnly ? undefined : preloadActivityCoachConversation}
+              onFocus={readOnly ? undefined : preloadActivityCoachConversation}
+              className="group flex min-h-12 w-full min-w-0 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[42rem]/activity-detail:min-h-[96px]"
             >
               <div className="relative max-h-[72px] min-h-0 flex-1 overflow-hidden">
                 <div className="prose prose-sm max-w-none text-foreground dark:prose-invert prose-p:my-1.5 prose-p:leading-6 prose-headings:my-1.5 prose-headings:text-sm prose-headings:font-semibold prose-ul:my-1.5 prose-li:my-0.5 prose-strong:text-foreground dark:prose-strong:text-foreground">
@@ -265,6 +272,10 @@ const AIAnalysis = () => {
                 <span>{t("expand")} ›</span>
               </div>
             </button>
+          ) : readOnly && !loadingCombined ? (
+            <p className="text-mobile-caption text-muted-foreground pc:text-xs">
+              {t("emptyHint")}
+            </p>
           ) : (
             analyzingPulse
           )}
@@ -289,7 +300,11 @@ const AIAnalysis = () => {
                 </DialogDescription>
               </DialogHeader>
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                {open && activityId && markdownBody ? (
+                {readOnly ? (
+                  <div className="prose prose-sm max-w-none overflow-y-auto px-4 py-3 dark:prose-invert pc:px-5">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdownBody}</ReactMarkdown>
+                  </div>
+                ) : open && activityId && markdownBody ? (
                   <ActivityCoachDialogBody
                     activityId={activityId}
                     markdown={markdownBody}

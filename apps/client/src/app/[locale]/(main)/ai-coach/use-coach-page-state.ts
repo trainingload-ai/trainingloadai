@@ -41,8 +41,8 @@ export function useCoachPageState(enabled: boolean) {
     queryKey: aiCoachMessagesQueryKey(sid || "__no_sid__"),
     queryFn: () => fetchCoachSessionMessages(sid),
     enabled: Boolean(enabled && session?.user?.id && sid),
-    staleTime: 30_000,
-    refetchOnWindowFocus: false,
+    staleTime: 5_000,
+    refetchOnWindowFocus: true,
   });
 
   const initialMessages = useMemo(() => {

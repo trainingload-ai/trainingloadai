@@ -848,12 +848,13 @@ export class HealthDataQueryService {
       }
 
       // 某些 provider 只提供每日候选，此时保留为单个点，不伪造日内曲线。
-      return this.selectedCandidatePoints({
+      const daily = await this.selectedCandidatePoints({
         userId,
         date,
         metricType: selected.metricType,
         provider: selected.selectedProvider,
       });
+      return daily.map((point) => ({ ...point, summaryOnly: true }));
     };
 
     const [current, previous] = await Promise.all([

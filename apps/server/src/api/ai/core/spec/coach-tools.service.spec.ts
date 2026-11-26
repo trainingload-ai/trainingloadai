@@ -11,6 +11,31 @@ jest.mock('@/api/pace/pace.service', () => ({
 import { CoachToolsService } from '../coach-tools.service';
 
 describe('CoachToolsService activity summaries', () => {
+  it('reads an athlete-local day even when the clock falls back', async () => {
+    const searchActivitiesForAi = jest.fn(async () => []);
+    const service = new CoachToolsService(
+      { getMapThumbnailUrlsForAi: jest.fn(async () => new Map()) } as never,
+      { searchActivitiesForAi } as never,
+      {} as never, {} as never, {} as never, {} as never, {} as never,
+    );
+    const ctx = {
+      session: { user: { id: 'athlete-1' } },
+      currentTurnCalendar: { timezone: 'America/Los_Angeles' },
+      userService: { getComposedUserProfile: jest.fn(async () => ({})) },
+      i18n: { t: (key: string) => key },
+    } as never;
+
+    await expect(service.activitiesDayView(ctx, { date: '2026-11-01', sportType: 'RUN' }))
+      .resolves.toEqual({ kind: 'activity_day_view', date: '2026-11-01', items: [] });
+    expect(searchActivitiesForAi).toHaveBeenCalledWith(expect.objectContaining({
+      userId: 'athlete-1',
+      sportType: 'RUN',
+      from: new Date('2026-11-01T07:00:00.000Z'),
+      to: new Date('2026-11-02T07:59:59.999Z'),
+    }));
+    await expect(service.activitiesDayView(ctx, { date: '2026-02-30' })).rejects.toThrow();
+  });
+
   it('exposes the authoritative feed load alongside legacy metrics', async () => {
     const getRecentActivitiesForAi = jest.fn(async () => [
       {

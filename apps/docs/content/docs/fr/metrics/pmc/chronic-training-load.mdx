@@ -1,12 +1,19 @@
 ---
-title: Condition physique (CTL)
-description: Trainingload.ai affiche le CTL avec une barre de progression bleue et une ligne bleue dans le graphique PMC.
-keywords: ["charge chronique d'entraînement", "condition physique", "CTL", "formule CTL", "tendance de charge", "interpréter le CTL"]
+title: "Charge chronique (CTL) : comment la forme est modélisée"
+description: "La charge chronique (CTL) est la courbe lente de forme du PMC issue de la charge quotidienne. Découvrez la formule sur 42 jours, la lecture d’une CTL en hausse ou en baisse et ses limites."
+keywords:
+  [
+    "Chronic Training Load",
+    "CTL",
+    "forme CTL",
+    "formule charge chronique",
+    "forme PMC",
+  ]
 ---
 
-# Qu'est-ce que la condition physique (CTL) ?
+# Charge chronique (CTL) : comment la forme est modélisée
 
-La **condition physique (CTL)**, ou charge chronique d'entraînement, combine la durée et la charge d'entraînement (TSS) afin de résumer l'historique d'entraînement d'un utilisateur. Trainingload.ai utilise par défaut une constante de temps de 42 jours et affiche le pourcentage actuel par rapport au CTL maximal historique de l'utilisateur. Le CTL résume un historique de charge modélisé ; il ne mesure pas directement la condition physique, l'adaptation, la santé ou la performance en compétition.
+La **charge chronique (CTL — Chronic Training Load)** est la courbe lente de forme sur un PMC. Il s’agit d’une moyenne exponentielle de la charge quotidienne — généralement le TSS — avec une constante de temps par défaut de 42 jours. Trainingload.ai affiche également la CTL du jour en pourcentage de votre maximum historique. La CTL résume votre historique de charge modélisée ; elle ne mesure directement ni votre forme réelle, ni votre adaptation, ni votre santé, ni votre niveau en course.
 
 <div className="my-6 max-w-sm w-full mx-auto">
   <CtlStatPreviewCard
@@ -14,71 +21,94 @@ La **condition physique (CTL)**, ou charge chronique d'entraînement, combine la
     percent={58}
     metricLabel="CTL"
     valuePopoverTitle="Valeur CTL"
-    valuePopoverBody="Une moyenne exponentielle lente de la charge quotidienne choisie selon vos sources de charge."
+    valuePopoverBody="Moyenne exponentielle lente de la charge quotidienne sélectionnée par vos réglages de sources de charge."
     percentPopoverTitle="Pourcentage CTL"
-    percentPopoverBody="Le CTL actuel exprimé par rapport à votre CTL maximal historique."
+    percentPopoverBody="La CTL actuelle exprimée par rapport à votre CTL maximale historique."
     helpTitle="Charge à long terme"
-    details="Utilisez le CTL pour examiner la direction et la régularité de la charge modélisée sur plusieurs semaines."
+    details="Utilisez la CTL pour évaluer la direction et la régularité de la charge modélisée sur plusieurs semaines."
   />
 </div>
 
-_Les valeurs d'exemple servent uniquement à prévisualiser l'interface._
+_Les valeurs d’exemple servent uniquement à l’aperçu de l’interface._
 
-## Origine de la valeur de condition physique (CTL)
+## D’où vient la valeur de forme (CTL)
 
-Trainingload.ai détermine d'abord la charge de chaque activité selon les mesures disponibles et la priorité des sources configurée. Selon l'activité et les réglages, la source peut être la puissance, la fréquence cardiaque, l'allure ou le RPE de séance.
+Trainingload.ai détermine d’abord la charge de chaque activité en fonction des métriques disponibles et de l’ordre de priorité des sources de charge configuré. Selon l’activité et vos paramètres, la source peut être la puissance, la fréquence cardiaque, l’allure ou le RPE de séance.
 
-Cela signifie que :
+Cela implique que :
 
-- Des données d'activité manquantes ou modifiées peuvent changer la condition physique (CTL).
-- Modifier les seuils ou la priorité des sources peut changer la charge dérivée et les valeurs PMC suivantes.
-- Trainingload.ai choisit une charge disponible par activité selon la priorité configurée ; mélanger des sources aux échelles incohérentes réduit la comparabilité entre périodes.
-- Lors d'une journée sans charge d'activité enregistrée, l'entrée quotidienne vaut zéro et le CTL précédent diminue progressivement.
+- Des données d’activité manquantes ou modifiées peuvent faire varier la forme (CTL).
+- La modification des seuils ou de la priorité des sources de charge peut changer la charge calculée des activités et les valeurs PMC ultérieures.
+- Trainingload.ai choisit une seule charge disponible par activité selon la priorité configurée ; mélanger des sources aux échelles incohérentes réduit la comparabilité entre périodes.
+- Un jour sans charge d’activité enregistrée, l’entrée quotidienne vaut zéro et la CTL précédente décroît progressivement.
 
 ## Formule
 
-Trainingload.ai utilise une décroissance exponentielle avec une constante de temps CTL par défaut de 42 jours :
+Trainingload.ai applique une décroissance exponentielle à constante de temps, avec une constante par défaut de 42 jours pour la CTL :
 
 ```text
 decay_CTL = exp(-1 / 42)
 CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
 ```
 
-`exp` est la fonction exponentielle naturelle. Avec la constante par défaut, `decay_CTL ≈ 0.976472` ; la charge du jour reçoit donc un poids d'environ `0.023528`.
+Ici, `exp` désigne la fonction exponentielle naturelle. Avec la constante de temps par défaut, `decay_CTL ≈ 0.976472`, ce qui donne à la charge du jour un poids d’environ `0.023528`.
 
-## Comprendre la tendance de condition physique (CTL)
+## Comment interpréter la tendance de forme (CTL)
 
-- **CTL en hausse** : la charge quotidienne récente est généralement supérieure au niveau CTL actuel.
+- **CTL en hausse** : la charge quotidienne récente est globalement supérieure au niveau de CTL actuel.
 - **CTL stable** : la charge récente maintient approximativement le niveau modélisé.
-- **CTL en baisse** : la charge récente est généralement inférieure, notamment pendant une réduction ou un taper.
+- **CTL en baisse** : la charge récente est globalement inférieure, y compris lors d’un allègement ou d’un affûtage.
 
 ## Questions utiles
 
-Le CTL peut aider à répondre :
+La CTL aide à répondre aux questions suivantes :
 
-- La condition physique (CTL) actuelle augmente-t-elle, se maintient-elle ou diminue-t-elle ?
-- Des séances manquées ou une période de récupération ont-elles changé la tendance à long terme ?
-- Le plan actuel produit-il la direction de charge prévue ?
-- Une modification de seuil ou de source a-t-elle réduit la comparabilité ?
+- La forme (CTL) actuelle est-elle en hausse, stable ou en baisse ?
+- Des séances manquées ou une période de récupération ont-elles infléchi la tendance à long terme ?
+- Le plan d’entraînement actuel produit-il l’orientation de charge souhaitée ?
+- Un changement de seuil ou de source a-t-il réduit la comparabilité historique ?
 
-Le CTL ne peut pas répondre seul :
+À elle seule, la CTL ne peut pas répondre à ces questions :
 
-- L'utilisateur s'est-il correctement adapté ?
-- La séance intense de demain est-elle sûre ?
-- L'utilisateur est-il récupéré, en bonne santé ou prêt à courir ?
-- Un utilisateur est-il plus en forme qu'un autre ?
+- L’athlète s’est-il correctement adapté ?
+- La séance intense de demain est-elle sans risque ?
+- L’athlète est-il récupéré, en bonne santé ou prêt pour la course ?
+- Un athlète est-il plus en forme qu’un autre ?
 
-Avant toute décision, considérez aussi les tendances de performance, la qualité d'exécution, l'état subjectif, la [fatigue (ATL)](/docs/metrics/pmc/acute-training-load) et la [forme (TSB)](/docs/metrics/pmc/training-stress-balance).
+Avant de prendre une décision, examinez aussi les tendances de performance, la qualité d’exécution des séances, l’état subjectif, la [fatigue (ATL)](/fr/docs/metrics/pmc/acute-training-load) et la [fraîcheur (TSB)](/fr/docs/metrics/pmc/training-stress-balance).
 
 ## Références
 
-- [Intervals.icu : formules de condition physique, fatigue et forme](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
-- [Glossaire RUNALYZE : Chronic Training Load (CTL)](https://runalyze.com/glossary/ctl)
-- [Calvert et al. (1976) : A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Intervals.icu developer explanation of the Fitness, Fatigue, and Form formulas](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE glossary: Chronic Training Load (CTL)](https://runalyze.com/glossary/ctl)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+
+## FAQ
+
+### Qu’est-ce que la charge chronique (CTL) ?
+
+La charge chronique (CTL) est la tendance lente de forme du PMC : une moyenne exponentielle de la charge quotidienne avec une constante de temps par défaut de 42 jours. Elle monte lorsque les jours récents dépassent la CTL actuelle et baisse lorsqu’ils se situent en dessous.
+
+### Comment la CTL est-elle calculée ?
+
+`CTL_today = CTL_yesterday × e^(−1/42) + daily_load × (1 − e^(−1/42))`. Avec la constante par défaut, la journée en cours pèse environ 2,35 % et la CTL de la veille environ 97,65 %. Les jours de repos font malgré tout décroître la courbe.
+
+### Une CTL plus élevée signifie-t-elle que je suis plus en forme ?
+
+Pas à elle seule. Une CTL en hausse indique que la charge modélisée a suffi à faire monter la moyenne longue. Elle ne prouve ni l’adaptation, ni la santé, ni l’état de forme en course. Interprétez-la avec la performance, le ressenti des séances, l’[ATL](/fr/docs/metrics/pmc/acute-training-load) et le [TSB](/fr/docs/metrics/pmc/training-stress-balance).
+
+### Pourquoi ma CTL a-t-elle bondi après avoir modifié ma FTP ?
+
+La CTL est construite à partir de la charge quotidienne. Modifier la FTP, les zones ou la priorité des sources de charge recalcule les valeurs passées de TSS/TRIMP, si bien que la courbe de forme peut bouger sans aucun nouvel entraînement.
 
 ## Pages associées
 
-- [Fatigue (ATL)](/docs/metrics/pmc/acute-training-load)
-- [Forme (TSB)](/docs/metrics/pmc/training-stress-balance)
-- [Processus d'analyse de l'entraînement](/docs/guide/training-analysis-workflow)
-- [Utiliser le PMC pour ajuster un entraînement marathon](/docs/guide/pmc-marathon-adjustment)
+- [Qu’est-ce que la charge d’entraînement ?](/fr/docs/metrics/training-load)
+- [Fatigue (ATL)](/fr/docs/metrics/pmc/acute-training-load)
+- [Fraîcheur (TSB)](/fr/docs/metrics/pmc/training-stress-balance)
+- [Projeter CTL, ATL et TSB à partir du TSS quotidien](/fr/training-load-calculator)
+- [Calculer le TSS à partir de la durée, de la NP et de la FTP](/fr/tss-calculator)
+- [Piloter votre charge d’entraînement avec CTL, ATL et TSB dans votre plan](/fr/training-load)
+- [Utiliser la revue du Coach IA pour ajuster la charge d’entraînement en toute sécurité](/fr/ai-training-plan)
+- [Workflow d’analyse de l’entraînement](/fr/docs/guide/training-analysis-workflow)
+- [Utiliser le PMC pour ajuster un plan marathon](/fr/docs/guide/pmc-marathon-adjustment)

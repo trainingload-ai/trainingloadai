@@ -4,7 +4,7 @@ import dayjs = require('dayjs');
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
-import { planStartFixture } from './plan-start.fixture';
+import { planStartFixture, raceWithUncommittedPlanWrite } from './plan-start.fixture';
 import type {
   PlanSchedulePreviewRequest,
   PlanStartPreviewRequest,
@@ -1033,6 +1033,35 @@ describe('continuous training / PostgreSQL', () => {
       ]);
     });
   });
+
+  (process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN ? it : it.skip)(
+    'rejects a pending automatic publication when a concurrent manual calendar write commits first',
+    async () => {
+      await withAuthorizedWeek(async ({ job, request, planId }) => {
+        const preview = await f.starts.createAutomationPreview(job.id, job.claimToken!, request);
+        const publication = await raceWithUncommittedPlanWrite(
+          prisma,
+          (tx) => f.write.addWorkout('user', planId, {
+            ...request.additions[0].workout,
+            name: 'Manual run',
+          }, { source: 'manual' }, { tx }),
+          () => f.starts.applyAutomation(job.id, job.claimToken!),
+        );
+        expect(publication).toMatchObject({
+          status: 'rejected',
+          reason: { message: 'Automation candidate is invalid or expired' },
+        });
+        const snapshot = await f.query.windowSnapshot('user', planId, '2099-11-23', '2099-11-29');
+        expect(snapshot.workouts).toEqual([
+          expect.objectContaining({ name: 'Manual run', scheduledDate: '2099-11-23' }),
+        ]);
+        await expect(prisma.rollingPlanJob.findUniqueOrThrow({ where: { id: job.id } }))
+          .resolves.toMatchObject({ state: 'RUNNING' });
+        await expect(prisma.planProposalPreview.findUniqueOrThrow({ where: { id: preview.previewId } }))
+          .resolves.toMatchObject({ appliedAt: null });
+      });
+    },
+  );
 
   it.each([
     'source edit',

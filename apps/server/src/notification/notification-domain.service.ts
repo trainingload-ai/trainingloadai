@@ -155,6 +155,40 @@ export class NotificationDomainService {
     });
   }
 
+  private visibleNotifications(userId: string): Prisma.NotificationWhereInput {
+    return {
+      userId,
+      visibleAt: { lte: new Date() },
+      cancelledAt: null,
+      AND: [
+        {
+          OR: [
+            { dedupeKey: null },
+            {
+              NOT: {
+                kind: 'REVIEW_DIGEST',
+                dedupeKey: { startsWith: 'rolling:', endsWith: ':blocked' },
+              },
+            },
+          ],
+        },
+        {
+          NOT: {
+            kind: 'REVIEW_DIGEST',
+            digest: {
+              is: {
+                OR: [
+                  { job: { is: { status: { not: 'DONE' } } } },
+                  { aiSummaryMarkdown: null },
+                ],
+              },
+            },
+          },
+        },
+      ],
+    };
+  }
+
   async list(args: {
     userId: string;
     offset?: number;
@@ -163,11 +197,9 @@ export class NotificationDomainService {
   }) {
     const offset = Math.max(0, Math.floor(args.offset ?? 0));
     const limit = Math.max(1, Math.min(100, Math.floor(args.limit ?? 20)));
-    const now = new Date();
+    const visible = this.visibleNotifications(args.userId);
     const where = {
-      userId: args.userId,
-      visibleAt: { lte: now },
-      cancelledAt: null,
+      ...visible,
       ...(args.unread ? { readAt: null } : {}),
     };
     const [items, total, unreadCount] = await this.notifications.transaction([
@@ -179,6 +211,7 @@ export class NotificationDomainService {
         select: {
           id: true,
           kind: true,
+          dedupeKey: true,
           title: true,
           bodyMarkdown: true,
           data: true,
@@ -190,24 +223,30 @@ export class NotificationDomainService {
       this.notifications.count({ where }),
       this.notifications.count({
         where: {
-          userId: args.userId,
+          ...visible,
           readAt: null,
-          visibleAt: { lte: now },
-          cancelledAt: null,
         },
       }),
     ]);
-    return { items, total, unreadCount, offset, limit };
+    return {
+      items: items.map(({ dedupeKey, ...item }) =>
+        item.kind === 'REVIEW_DIGEST' && dedupeKey?.startsWith('rolling:')
+          ? { ...item, kind: 'ROLLING_PLAN_UPDATE' as const }
+          : item,
+      ),
+      total,
+      unreadCount,
+      offset,
+      limit,
+    };
   }
 
   async markRead(args: { userId: string; id: string }) {
     const row = await this.notifications.updateMany({
       where: {
+        ...this.visibleNotifications(args.userId),
         id: args.id,
-        userId: args.userId,
         readAt: null,
-        visibleAt: { lte: new Date() },
-        cancelledAt: null,
       },
       data: { readAt: new Date() },
     });
@@ -217,10 +256,8 @@ export class NotificationDomainService {
   async markAllRead(args: { userId: string }) {
     const row = await this.notifications.updateMany({
       where: {
-        userId: args.userId,
+        ...this.visibleNotifications(args.userId),
         readAt: null,
-        visibleAt: { lte: new Date() },
-        cancelledAt: null,
       },
       data: { readAt: new Date() },
     });

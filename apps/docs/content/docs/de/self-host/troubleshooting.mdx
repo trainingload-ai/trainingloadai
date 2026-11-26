@@ -1,0 +1,68 @@
+---
+title: Self-Hosting Fehlerbehebung
+description: Installations-, Readiness-, Speicher-, KI-, Wiederherstellungs- und Upgrade-Probleme beheben, ohne Lifecycle- oder Datensicherheitskontrollen zu umgehen.
+---
+
+# Self-Hosting Fehlerbehebung
+
+Beginne immer mit den unterstützten schreibgeschützten Prüfungen. Notiere dir den ersten stabilen Fehlercode – er hilft deutlich weiter, als am Host so lange Änderungen vorzunehmen, bis ein Symptom verschwindet.
+
+## Erste Reaktion
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+Selbst wenn Docker nicht verfügbar ist, meldet `doctor` alle Prüfungen, die noch möglich sind. Ist eine Wiederherstellung oder ein Upgrade fehlgeschlagen, bewahre den Bericht und den Unvollständig-Marker auf. Entferne den Marker niemals, um einen normalen Start zu erzwingen.
+
+## Häufige Probleme
+
+| Symptom                             | Prüfen                                                                                      | Sicherer nächster Schritt                                                                         |
+| ----------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Installer lehnt das Release ab      | Äußere Prüfsumme, Cosign-Identität, exakte Version und Vollständigkeit der Dateien          | Alle Dateien derselben offiziellen Release-Version erneut herunterladen                           |
+| Seite öffnet sich nicht             | `status`, Client-Logs, Bind-Adresse, Portkonflikt und Origin                                | Deklarierte Einstellung korrigieren, dann `start --dry-run` vor `start` ausführen                 |
+| Datenbank ist nicht erreichbar      | Datenbankdienst-Status, Speicherplatz, Dateirechte und Migrationsergebnis in `doctor`       | Host-Kapazität oder Rechte wiederherstellen; PostgreSQL nicht direkt freigeben oder bearbeiten    |
+| Upload schlägt fehl                 | Freier Speicher im Datenpfad, Inode-Kapazität, Dateibesitzer und Upload-Verzeichnis         | Dediziertes Datenvolume erweitern und `doctor` erneut ausführen                                   |
+| KI-Einstellungen sind ausgeblendet  | Betriebsmodus, Readiness der Instanz, angemeldete Owner-Identität                           | Als eingerichteter Owner anmelden; andere Nutzer können Anbietereinstellungen nicht sehen/ändern  |
+| KI-Anfrage schlägt fehl             | Anbieterstatus, exakte Base URL, Modell-IDs, Schlüsselrechte und ausgehendes DNS/TLS        | Vom Owner verwaltete Konfiguration korrigieren oder KI deaktivieren, solange der Anbieter ausfällt |
+| KI schlägt nach Restore fehl        | Ob das Ziel ein anderes Instanz-Auth-Secret verwendet                                       | Neuen Anbieter-Schlüssel eingeben; nicht versuchen, den alten Klartext-Schlüssel auszulesen       |
+| Wiederherstellung ist blockiert     | Zielversion, Zielzustand, Backup-Manifest, Prüfsumme und Bericht                            | Sauberes Ziel mit exakter Version verwenden und fehlgeschlagenes Ziel zur Diagnose behalten       |
+| Upgrade ist blockiert               | Unterstützte Quellversionen, Migrationsstand, Backup, Speicherplatz und Rollback-Angabe     | Dem Upgrade-Bericht folgen; Image-Tags oder Migrationseinträge niemals manuell ändern             |
+
+## Diagnosedaten sammeln
+
+Wenn `doctor` nicht ausreicht:
+
+```bash
+./self-host diagnostics --output support-<yyyy-mm-dd> --tail 500 --service server --service client --json
+```
+
+Die Diagnose schwärzt sensible Daten automatisch, doch das ist kein Freifahrtschein zum öffentlichen Teilen. Öffne das Paket lokal und prüfe es auf Hostnamen, Nutzerdaten, Aktivitätsdetails und Anwendungslogs, bevor du es über einen von den Maintainern freigegebenen privaten Kanal weitergibst.
+
+Teile niemals:
+
+- `.env.selfhost`;
+- Owner-Passwörter oder das Bootstrap-Token;
+- Anbieter-API-Schlüssel, Cookies oder private Schlüssel;
+- Datenbank-Dumps oder hochgeladene Aktivitätsdateien;
+- ungeprüfte Diagnose-Bundles.
+
+## Aktionen, die du vermeiden solltest
+
+- Führe niemals `docker compose down -v` aus.
+- Lösche niemals PostgreSQL-Daten, Uploads, den Datenpfad-Marker, Betriebssperren oder Marker unvollständiger Lifecycle-Vorgänge.
+- Bearbeite niemals `_prisma_migrations`, Release-Manifeste, Prüfsummen oder Upgrade-Berichte.
+- Verwende weder `--skip-verify` noch veränderliche Image-Tags.
+- Wiederhole zustandsändernde Befehle niemals parallel.
+
+Solche Eingriffe können aus einem gut diagnostizierbaren Fehler einen unumkehrbaren oder unklaren Datenverlust machen.
+
+## Probleme mit hilfreichen Angaben melden
+
+Teile zunächst nur die exakte Release-Version, Betriebssystem und Architektur des Hosts, den stabilen `error.code`, den fehlgeschlagenen Befehl sowie die SHA-256-Prüfsumme eines lokal geprüften Diagnose-Pakets. Behalte das vollständige Paket privat, bis ein Maintainer einen freigegebenen Übertragungsweg nennt.
+
+## Nächster Schritt
+
+Kehre nach dem Beheben der Störung zu [Instanz verwalten](/de/docs/self-host/operations) zurück. Falls eine Wiederherstellung nötig ist, spiele ein verifiziertes Backup in ein sauberes Ziel ein, statt die fehlerhafte Instanz zu überschreiben.

@@ -7,6 +7,7 @@ import { DatePickerWithRange } from "./date-range-picker";
 
 vi.mock("@/hooks/use-mobile", () => ({
   useIsMobile: () => false,
+  useMobileViewport: () => false,
 }));
 
 function mount(

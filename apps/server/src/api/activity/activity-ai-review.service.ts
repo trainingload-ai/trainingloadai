@@ -254,6 +254,36 @@ export class ActivityAiReviewService {
     });
   }
 
+  async findReviewExcerpts(
+    userId: string,
+    activityIds: number[],
+    lang: string,
+  ) {
+    if (!activityIds.length) return new Map<number, string>();
+    const reviews = await this.prisma.activityAiReview.findMany({
+      where: {
+        userId,
+        activityId: { in: activityIds },
+        language: resolveSupportedLocale(lang),
+        status: $Enums.ActivityAiReviewStatus.SUCCEEDED,
+        promptVersion: ACTIVITY_AI_REVIEW_PROMPT_VERSION,
+        evidenceVersion: ACTIVITY_COACH_EVIDENCE_VERSION,
+      },
+      orderBy: [{ activityId: 'asc' }, { updatedAt: 'desc' }, { id: 'asc' }],
+      distinct: ['activityId'],
+      select: { activityId: true, summary: true, verdict: true },
+    });
+    const excerpts = new Map<number, string>();
+    for (const row of reviews) {
+      const excerpt = (row.summary?.trim() || row.verdict?.trim())?.slice(
+        0,
+        480,
+      );
+      if (excerpt) excerpts.set(row.activityId, excerpt);
+    }
+    return excerpts;
+  }
+
   async enqueueForActivity(args: {
     activityId: number;
     userId: string;

@@ -413,6 +413,7 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
       data: {
         status: PlanWorkoutStatus.DONE,
         completedAt: activityStart,
+        revision: { increment: 1 },
       },
     });
     expect(tx.planWorkoutActivityLink.create).toHaveBeenCalledWith({

@@ -1,29 +1,29 @@
-import dayjs, { Dayjs } from "dayjs";
+import type { Dayjs } from "dayjs";
 import "dayjs/locale/zh-cn";
 
-// 生成当前月份的周视图（左侧汇总 + 周日到周六 或 周一到周日，取决于语言）
+export function calendarScrollFetchRange(month: Dayjs) {
+  return {
+    start: month.startOf("month").subtract(9, "week"),
+    end: month.endOf("month").add(9, "week"),
+  };
+}
+
+export function startOfCalendarWeek(date: Dayjs, weekStartsOn: 0 | 1) {
+  return date.startOf("day").subtract((date.day() - weekStartsOn + 7) % 7, "day");
+}
+
 export function generateCalendarWeeks(
   month: Dayjs,
-  locale: string = "en"
+  locale = "en",
+  weekStartsOn: 0 | 1 = 1,
 ): Dayjs[][] {
-  // 设置 locale
   const dayjsLocale = locale.startsWith("zh") ? "zh-cn" : "en";
-  dayjs.locale(dayjsLocale);
-
-  const firstOfMonth = month.locale(dayjsLocale).startOf("month");
-  const calendarStart = firstOfMonth.startOf("week"); // 根据 locale 决定起始
-  const lastOfMonth = month.locale(dayjsLocale).endOf("month");
-  const calendarEnd = lastOfMonth.endOf("week"); // 根据 locale 决定结束
-
-  const days: Dayjs[] = [];
-  let cursor = calendarStart;
-  while (cursor.isBefore(calendarEnd) || cursor.isSame(calendarEnd, "day")) {
-    days.push(cursor);
-    cursor = cursor.add(1, "day");
-  }
+  const localized = month.locale(dayjsLocale);
+  const first = startOfCalendarWeek(localized.startOf("month"), weekStartsOn);
+  const last = startOfCalendarWeek(localized.endOf("month"), weekStartsOn);
   const weeks: Dayjs[][] = [];
-  for (let i = 0; i < days.length; i += 7) {
-    weeks.push(days.slice(i, i + 7));
+  for (let week = first; !week.isAfter(last); week = week.add(1, "week")) {
+    weeks.push(Array.from({ length: 7 }, (_, index) => week.add(index, "day")));
   }
   return weeks;
 }

@@ -1,0 +1,86 @@
+---
+title: Autohospedaje
+description: Usa Trainingload.ai en tu propio ordenador o servidor, guarda tus datos de entrenamiento, importa actividades y configura opcionalmente el Entrenador con IA.
+seoTitle: "Autohospedaje de Trainingload.ai: Instala y opera en local"
+seoDescription: "Instala una versión firmada de Trainingload.ai para autohospedaje, guarda archivos en tu almacenamiento, configura un proveedor de IA BYOK y gestiona copias y actualizaciones."
+keywords:
+  [
+    "autohospedaje de Trainingload.ai",
+    "app de entrenamiento autohospedada",
+    "datos de entrenamiento locales",
+    "despliegue con Docker Compose",
+  ]
+---
+
+# Autohospedaje
+
+El autohospedaje te permite usar Trainingload.ai en tu propio ordenador o servidor. Tus actividades, planes de entrenamiento y archivos subidos permanecen en tu equipo, y revisas y gestionas tu entrenamiento desde el navegador.
+
+Cada instancia autohospedada es para una sola persona. Tú te encargas del equipo, las actualizaciones de software y las copias de seguridad. Si prefieres abrir la app y empezar directamente, lee primero [Autohospedado vs. Cloud](/es/docs/self-host/self-host-vs-cloud).
+
+## Qué puedes hacer
+
+- Importar actividades y revisar su detalle, línea temporal y carga de entrenamiento.
+- Organizar tus entrenamientos en el calendario y comparar las sesiones planificadas con las completadas.
+- Subir archivos FIT, GPX o TCX, o conectar Intervals.icu y Garmin Personal API con tus claves personales.
+- Configurar tu propio servicio de IA para usar el Entrenador con IA, o dejar la IA desactivada.
+
+## Elige por dónde empezar
+
+<Cards>
+  <Card
+    title="Autohospedado vs. Cloud"
+    href="/es/docs/self-host/self-host-vs-cloud"
+    description="Compara instalación, almacenamiento de datos, importación de actividades y costes de IA."
+  />
+  <Card
+    title="Inicio rápido"
+    href="/es/docs/self-host/installation"
+    description="Descarga la versión, instala la app, crea tu cuenta local y guarda tu primera copia de seguridad."
+  />
+  <Card
+    title="Configuración"
+    href="/es/docs/self-host/configuration"
+    description="Elige la ruta local de datos y configura OpenAI, DeepSeek u otro proveedor de IA compatible."
+  />
+  <Card
+    title="Gestionar tu instancia"
+    href="/es/docs/self-host/operations"
+    description="Comprueba el estado, revisa registros, haz copias de seguridad, restaura, actualiza y detén la instancia con seguridad."
+  />
+  <Card
+    title="Solución de problemas"
+    href="/es/docs/self-host/troubleshooting"
+    description="Resuelve problemas habituales de arranque, conexión y sincronización."
+  />
+</Cards>
+
+## Conectar Garmin
+
+Si dispones de una clave de Garmin Personal API, puedes conectar Garmin para importar actividades completadas y leer los datos de recuperación disponibles. La guía siguiente detalla los pasos y los datos admitidos.
+
+<Cards>
+  <Card
+    title="Garmin Personal API"
+    href="/es/docs/self-host/garmin-personal-api"
+    description="Conecta tu clave de Garmin Personal API, sincroniza actividades y lee los datos de recuperación disponibles."
+  />
+</Cards>
+
+## Qué preparar antes de instalar
+
+- Un equipo que cumpla los [requisitos de instalación](/es/docs/self-host/installation), con Docker Compose instalado.
+- Espacio en disco suficiente para tus datos de entrenamiento y los archivos subidos.
+- Una ubicación independiente para guardar copias de seguridad y poder recuperarte si falla el equipo.
+
+Utiliza un paquete de versión oficial, versionado y firmado, y sigue la guía para verificarlo antes de instalar. No necesitas compilar el código fuente ni montar contenedores por tu cuenta. Docker Compose es el método de instalación admitido actualmente.
+
+## Dónde van tus datos
+
+Las actividades, los planes y los archivos subidos se guardan en tu dispositivo. Al conectar una plataforma de entrenamiento se envían o reciben datos según las opciones de sincronización que elijas. Si usas un servicio de IA externo, la información de entrenamiento necesaria para esa consulta se envía al proveedor que hayas elegido.
+
+La IA está desactivada de forma predeterminada. Para habilitarla, sigue la [guía de configuración](/es/docs/self-host/configuration) e introduce la clave API de tu proveedor. Ese proveedor facturará el uso de la API.
+
+## Próximo paso
+
+¿Listo para instalar? Sigue la [guía de instalación](/es/docs/self-host/installation). Si todavía estás decidiendo cómo usar Trainingload.ai, empieza por [Autohospedado vs. Cloud](/es/docs/self-host/self-host-vs-cloud).

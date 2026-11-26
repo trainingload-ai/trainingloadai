@@ -1,58 +1,128 @@
 ---
-title: Using PMC for Marathon Adjustments
-description: How to use CTL, ATL, and TSB in a practical marathon workflow without overreacting to daily noise.
-keywords: ["PMC", "marathon training load", "CTL ATL TSB", "marathon adjustment"]
+title: PMC für Marathon-Anpassungen nutzen
+description: So nutzt du CTL, ATL und TSB in einem praxisnahen Marathon-Workflow, ohne auf tägliche Schwankungen überzureagieren.
+keywords:
+  ["PMC", "Marathon Trainingsbelastung", "CTL ATL TSB", "Marathon-Anpassung"]
 ---
 
-# Using PMC for Marathon Adjustments
+# PMC für Marathon-Anpassungen nutzen
 
-PMC metrics are decision aids, not automatic commands.
-For marathon blocks, use them to protect consistency and key-session quality.
+PMC-Kennzahlen beschreiben angesammelte Trainingsbelastung. Sie entscheiden weder darüber, ob eine Einheit sicher ist, noch beweisen sie eine Anpassung oder diagnostizieren Ermüdung. Nutze sie in einem Marathonblock gezielt, um Kontinuität und das Trainingsziel deiner Schlüsseleinheiten zu schützen.
 
-## What each signal is good for
+## Bevor du beginnst
 
-- [CTL](/docs/metrics/pmc/chronic-training-load): direction of fitness load.
-- [ATL](/docs/metrics/pmc/acute-training-load): short-term stress pressure.
-- [TSB](/docs/metrics/pmc/training-stress-balance): readiness context before key sessions.
+- Lass alle relevanten Aktivitäten fertig verarbeiten, damit ihre Trainingsbelastung im PMC ankommt.
+- Prüfe deine Lauf-Schwellenwerte und die Priorität der Belastungsquellen im Profil.
+- Verknüpfe absolvierte Aktivitäten mit den zugehörigen geplanten Einheiten.
+- Lege ein klares Betrachtungsfenster fest – meist die letzten 2–6 Wochen plus die nächsten 7 Tage.
+- Benenne die nächste Schlüsseleinheit: langer Lauf, Marathontempo-Einheit, Schwellentraining oder Wettkampf.
+- Halte Kontext außerhalb der Diagramme fest, etwa Schlaf, Krankheit, Schmerzen, Reisen, Hitze und Einheiten-RPE – das PMC enthält diese Fakten nicht.
 
-## Practical adjustment rules
+## 1. Das richtige PMC-Zeitfenster öffnen
 
-### ATL rises fast, CTL flattens
+Öffne **Analyse → PMC / Fitness-Management** und wähle **Laufen**. Nutze den aufgezeichneten Verlauf, um Belastungsaufbau und jüngste Veränderungen zu erkennen, und prüfe dann die relevanten zukünftigen Tage. Details zur Kennzahlenauswahl, Tagesprüfung und den Prognoseannahmen findest du unter [PMC-Verlauf und Prognosen lesen](/de/docs/guide/pmc-forecast). Für ein engeres Fenster öffne im Dashboard eine Karte für Fitness, Ermüdung oder Form und wähle dort den passenden Verlaufs-Tab.
 
-Typical action:
+Lies die drei Signale immer gemeinsam:
 
-- Keep run frequency.
-- Downgrade one quality session to easy aerobic.
-- Recheck after 48 hours.
+- [CTL](/de/docs/metrics/pmc/chronic-training-load) beschreibt den längerfristigen Belastungstrend.
+- [ATL](/de/docs/metrics/pmc/acute-training-load) reagiert schneller auf die jüngste Trainingsbelastung.
+- [TSB](/de/docs/metrics/pmc/training-stress-balance) zeigt das Verhältnis zwischen langfristiger und kurzfristiger Belastung – als Kontext, nicht als Garantie für Einsatzbereitschaft.
 
-### TSB stays deeply negative before marathon-pace work
+<DocsScreenshot
+  id="pmc-marathon-window"
+  title="Lauf-Belastungsfenster richtig lesen"
+  description="Synthetisches Laufbeispiel. Lies aktuelle CTL-, ATL- und TSB-Werte gemeinsam und prüfe dann den aufgezeichneten Verlauf sowie den bedingten Zukunftsausblick."
+  imageSrc="/docs/analysis/en/pmc-forecast-overview.webp"
+  imageAlt="Lauf-PMC-Beispiel mit aktuellen Werten, aufgezeichnetem Verlauf, Zukunftsausblick und täglicher Trainingsbelastung"
+  route="Analyse → PMC"
+/>
 
-Typical action:
+## 2. Das Ereignis hinter der Kurve finden
 
-- Move marathon-pace session later.
-- Protect long run quality.
-- Trim non-key intensity first.
+Suche das Datum, an dem ATL stark angezogen, CTL die Richtung gewechselt oder TSB sich deutlich bewegt hat. Öffne anschließend die Aktivitäten und geplanten Einheiten rund um dieses Datum.
 
-### CTL rises, but execution quality falls
+Prüfe, ob die Bewegung zurückgeht auf:
 
-Typical action:
+- Eine geplante Belastungswoche.
+- Einen Wettkampf, langen Lauf oder eine ungewöhnlich harte Qualitätseinheit.
+- Eine ungeplante zusätzliche Aktivität.
+- Eine Änderung an Schwellenwerten oder Belastungsquellen.
+- Doppelte, falsch klassifizierte oder unvollständige Aktivitätsdaten.
 
-- Hold volume.
-- Simplify intensity distribution for one week.
-- Confirm adaptation using next key workout.
+Passe den Trainingsplan erst an, wenn sich die Kurvenbewegung durch echtes Training oder eine bekannte Einstellungsänderung erklären lässt.
 
-## Use with execution evidence
+## 3. Belastung mit der Umsetzung vergleichen
 
-Never read PMC alone. Combine with:
+Nutze Kalender oder aktiven Plan für diese Fragen:
 
-- Plan completion.
-- Long-run quality.
-- Perceived fatigue.
-- effective VO2max trend.
+- Haben die Schlüsseleinheiten ihr eigentliches Trainingsziel erfüllt?
+- Fühlen sich lockere Läufe noch wirklich locker an, oder lässt die Ausführungsqualität nach?
+- Wurden Einheiten aus Zeitgründen, wegen Ermüdung, Schmerzen oder wegen unpassender Einheitenplanung ausgelassen?
+- Passt die nächste Schlüsseleinheit nach dem tatsächlichen Verlauf dieser Woche noch ins Bild?
 
-## Related workflows
+Das PMC zeigt dir, wie viel Belastung sich aufgebaut hat. Der Plan-Ist-Vergleich zeigt dir, ob diese Belastung auch die beabsichtigte Trainingswirkung erzeugt hat.
 
-- [PMC fitness chart page](/pmc-fitness-chart)
-- [AI marathon plan adjustments](/docs/guide/ai-marathon-plan-adjustments)
-- [Training analysis workflow](/docs/guide/training-analysis-workflow)
-- [AI training plan page](/marathon-training-plan)
+## 4. Die kleinste sinnvolle Anpassung wählen
+
+Nutze das Muster als Auslöser für eine bewusste Prüfung – nicht als starre Schwellenregel.
+
+### Jüngste Belastung ist gestiegen und die Qualität der Schlüsseleinheiten sinkt
+
+- Behalte nach Möglichkeit deinen gewohnten Wochenrhythmus bei.
+- Ersetze eine nicht zwingende Qualitätseinheit durch lockeres aerobes Training oder einen Ruhetag.
+- Schütze entweder den langen Lauf oder die Marathontempo-Einheit, statt krampfhaft beide retten zu wollen.
+- Prüfe die Lage nach 24–48 Stunden oder nach der nächsten absolvierten Einheit erneut.
+
+### TSB liegt vor einer Schlüsseleinheit niedriger als gewohnt
+
+- Vergleiche den Wert mit deinem persönlich bewährten Bereich und deinem aktuellen Körpergefühl.
+- Verschiebe die Einheit um 24–48 Stunden, wenn dein Zeitplan es zulässt.
+- Kürze die Einheit unter Wahrung ihres Trainingsziels, wenn ein Verschieben die restliche Woche durcheinanderbringen würde.
+- Leite aus dem TSB niemals eine Verletzung oder Krankheit ab; orientiere dich an echten Symptomen und hole bei Bedarf fachlichen Rat ein.
+
+### CTL steigt, während die Ausführungsqualität abnimmt
+
+- Steigere die Trainingsbelastung vorerst nicht weiter.
+- Prüfe, ob Schwellenwerte, Belastungsquellen-Priorität oder doppelte Aktivitäten die Kurve künstlich aufblähen.
+- Vereinfache eine Woche, bevor du weiteren Umfang oder zusätzliche Intensität ergänzt.
+- Nutze die nächste vergleichbare Schlüsseleinheit als Prüfpunkt.
+
+### Die Kurven sind stabil und die Umsetzung passt
+
+Lass den Plan unverändert. Ein Diagramm verlangt keinen Eingriff, nur weil es da ist.
+
+## 5. Entscheidung festhalten
+
+Notiere fünf Punkte, bevor du deinen Plan änderst:
+
+1. **Beobachtetes Muster:** Was hat sich im PMC über welchen Zeitraum verändert?
+2. **Umsetzungsbelege:** Welche Aktivitäten oder verpassten Einheiten stützen die Einschätzung?
+3. **Anpassung:** Welche konkrete zukünftige Einheit und welches Detail wird geändert?
+4. **Geschütztes Ziel:** Was soll diese Woche weiterhin erreichen?
+5. **Prüfpunkt:** Welches Datum oder welche nächste Einheit überprüft die Entscheidung?
+
+Mit dieser Zusammenfassung kannst du direkt zum [KI-Coach](/de/docs/guide/ai-coach) gehen und einen konservativen, planbezogenen Entwurf anfordern.
+
+## Anpassung verifizieren
+
+- Gewählte Sportart und Zeitraum passen zur konkreten Marathon-Frage.
+- Die Kurvenbewegung lässt sich auf reale Aktivitäten oder eine bekannte Einstellungsänderung zurückführen.
+- Subjektives Befinden und Qualität der Schlüsseleinheiten wurden neben dem PMC berücksichtigt.
+- Nur die gewünschte zukünftige Einheit wurde geändert; die abgeschlossene Historie blieb unberührt.
+- Ein konkreter Prüfpunkt ist festgelegt.
+- Die Anpassung lässt sich rückgängig machen oder korrigieren, falls die nächsten Daten etwas anderes zeigen.
+
+## Fehlerbehebung
+
+- **Das PMC ist leer:** Prüfe, ob Aktivitäten den Status **Bereit** haben, kontrolliere den Sportartfilter und ob die Aktivitäten nutzbare Trainingsbelastung enthalten. Nutze **Erneut versuchen**, falls die Seite einen Ladefehler meldet.
+- **Werte haben sich nach Einstellungsänderungen verschoben:** Identifiziere die geänderte Schwelle oder Belastungsquelle und bewerte den gesamten Vergleichszeitraum konsistent neu.
+- **Eine einzelne Aktivität erzeugt einen extremen Ausschlag:** Öffne sie und prüfe Dauer, Sensordaten, Sportartzuordnung, Duplikate und gewählte Belastungsquelle.
+- **Plan und Diagramm zeigen unterschiedliche Daten:** Kontrolliere Konto-Zeitzone und Startzeit der Aktivität.
+- **Kennzahlen und Körpergefühl widersprechen sich:** Betrachte den Widerspruch als Hinweis zum genaueren Hinsehen – nicht als Grund, eine Seite zu ignorieren. Halte die nächste Änderung konservativ.
+- **Schmerzen, Krankheit oder ungewöhnliche Symptome treten auf:** Nutze weder PMC noch KI-Coach als medizinische Freigabe; unterbrich oder reduziere das Training und hole bei Bedarf qualifizierten Rat ein.
+
+## Nächste Schritte
+
+- Nutze [Effektive VO2max im Ausdauertraining verstehen](/de/docs/guide/effective-vo2max-for-endurance), um den Trend deiner Leistungsreaktion zu ergänzen.
+- Folge [KI-gestützte Marathonplan-Anpassungen](/de/docs/guide/ai-marathon-plan-adjustments), um eine Änderung zu entwerfen und sauber zu bestätigen.
+- Kehre zurück zum vollständigen [Workflow für die Trainingsanalyse](/de/docs/guide/training-analysis-workflow).

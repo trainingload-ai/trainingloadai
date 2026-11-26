@@ -1,0 +1,68 @@
+---
+title: Risoluzione dei problemi self-host
+description: Diagnostica errori di installazione, disponibilità, archiviazione, AI, ripristino e aggiornamento senza aggirare i controlli del ciclo di vita o di sicurezza dei dati.
+---
+
+# Risoluzione dei problemi self-host
+
+Inizia sempre dai controlli in sola lettura supportati. Conserva il primo codice di errore stabile: è molto più utile che continuare a modificare l'host fino a far sparire il sintomo.
+
+## Prima verifica
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+Se Docker non è disponibile, `doctor` riporta comunque i controlli che riesce a completare. Se un ripristino o un aggiornamento è fallito, conserva il relativo report e il marcatore di stato incompleto. Non rimuovere il marcatore per forzare un avvio normale.
+
+## Problemi comuni
+
+| Sintomo | Cosa controllare | Azione sicura successiva |
+| --- | --- | --- |
+| L'installer rifiuta la release | Checksum esterno, identità Cosign, versione esatta e completezza dei file scaricati | Scarica di nuovo tutti gli artefatti dalla stessa release ufficiale |
+| Il sito non si apre | `status`, log del Client, indirizzo di bind, conflitto di porta e origine HTTPS | Correggi l'impostazione dichiarata, poi esegui `start --dry-run` prima di `start` |
+| Il database non è disponibile | Stato del servizio database, disco, permessi e risultato delle migrazioni in `doctor` | Ripristina spazio o permessi sull'host; non esporre né modificare direttamente PostgreSQL |
+| Il caricamento fallisce | Spazio nella directory dati, inode disponibili, proprietà e directory uploads | Espandi il volume dati dedicato e riesegui `doctor` |
+| Le impostazioni AI sono nascoste | Modalità di distribuzione, disponibilità dell'istanza, identità dell'Owner autenticato | Accedi come Owner configurato; utenti non Owner non possono leggere o cambiare le impostazioni del provider |
+| La richiesta AI fallisce | Stato del provider, Base URL esatta, ID modelli, accesso della chiave e DNS/TLS in uscita | Correggi la configurazione gestita dall'Owner o disattiva l'AI mentre il provider non è raggiungibile |
+| L'AI non funziona dopo il ripristino | Se la destinazione usa un secret di autenticazione diverso | Inserisci una nuova chiave provider; non tentare di estrarre la vecchia chiave in chiaro |
+| Il ripristino è bloccato | Versione di destinazione, stato autorevole della destinazione, manifest del backup, checksum e report | Usa una destinazione pulita della stessa versione esatta e conserva quella fallita per la diagnosi |
+| L'aggiornamento è bloccato | Versioni sorgente supportate, inventario migrazioni, backup, disco e dichiarazione di rollback | Segui il report di aggiornamento; non modificare manualmente tag immagine o record delle migrazioni |
+
+## Raccogliere la diagnostica
+
+Quando `doctor` non è sufficiente:
+
+```bash
+./self-host diagnostics --output support-<yyyy-mm-dd> --tail 500 --service server --service client --json
+```
+
+La diagnostica applica un oscuramento automatico, ma ciò non equivale all'autorizzazione a pubblicare il pacchetto. Aprilo in locale e controlla hostname, dati utente, dettagli delle attività e log operativi prima di condividerlo tramite un canale privato approvato dai maintainer.
+
+Non condividere mai:
+
+- `.env.selfhost`;
+- password dell'Owner o bootstrap token;
+- chiavi API dei provider, cookie o chiavi private;
+- un dump del database o file attività caricati;
+- un pacchetto di diagnostica non revisionato.
+
+## Azioni da evitare
+
+- Non usare `docker compose down -v`.
+- Non eliminare dati PostgreSQL, file caricati, marcatore della directory dati, lock operativi o marcatori di ciclo di vita incompleto.
+- Non modificare `_prisma_migrations`, manifest di release, checksum o report di aggiornamento.
+- Non usare `--skip-verify` o tag immagine mutabili.
+- Non rilanciare in parallelo comandi che modificano lo stato.
+
+Queste azioni possono trasformare un errore diagnosticabile in una perdita di dati irreversibile o ambigua.
+
+## Segnalare il problema con evidenze utili
+
+Condividi solo la versione esatta della release, il sistema operativo e l'architettura dell'host, lo stabile `error.code`, il comando che ha fallito e lo SHA-256 di un pacchetto diagnostico revisionato in locale. Mantieni privato il pacchetto completo salvo diversa indicazione su un canale di trasferimento approvato da un maintainer.
+
+## Prossimo passo
+
+Torna a [Gestione dell'istanza](/it/docs/self-host/operations) dopo aver risolto la condizione bloccante. Se il recupero richiede la sostituzione dei dati, ripristina un backup verificato su una destinazione pulita anziché sovrascrivere l'istanza guasta.

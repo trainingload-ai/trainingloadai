@@ -1,0 +1,68 @@
+---
+title: Garmin Personal API
+description: Conecta tu propia clave de Garmin a una instancia autohospedada, importa actividades y lee datos de sueño y recuperación.
+seoTitle: "Garmin Personal API: Importación en autohospedaje"
+seoDescription: "Conecta Garmin en autohospedaje con una clave de Garmin Personal API. Importa actividades, lee datos de recuperación y conoce sus regiones y límites de solo lectura."
+keywords:
+  [
+    "Garmin Personal API",
+    "Garmin autohospedado",
+    "clave personal Garmin",
+    "importación de actividades Garmin",
+  ]
+---
+
+# Garmin Personal API
+
+En una instancia autohospedada, usa tu propia clave de Garmin Personal API para importar actividades completadas y los datos disponibles de sueño, HRV, frecuencia cardíaca en reposo y otras métricas de tu dispositivo y cuenta.
+
+Esta página cubre únicamente el autohospedaje. Para la autorización e importación de historial en Cloud, usa la [guía de conexión de plataformas](/es/docs/guide/connect-third-party-platforms#connect-garmin-for-new-data).
+
+## Conecta tu propia cuenta
+
+1. Crea una clave en los [ajustes de clave API personal de Garmin Connect](https://connect.garmin.com/app/settings/personalApiToken). Usa la región correspondiente de Garmin Connect si tienes una cuenta de China.
+2. En Trainingload.ai, abre **Cuenta → Conexiones de terceros → Garmin → Ajustes de conexión**.
+3. Elige la región de la cuenta y confirma su zona horaria, por ejemplo `Asia/Shanghai` o `Europe/Madrid`.
+4. Selecciona la importación de actividades, los datos de sueño y recuperación y la sincronización programada según necesites. Pega la clave y conecta.
+5. Selecciona **Sync now** (Sincronizar ahora). Si dejas las fechas vacías, se importan por defecto los últimos 30 días; también puedes elegir un rango histórico.
+
+No necesitas facilitar tu contraseña de Garmin ni cookies del navegador. La clave se guarda cifrada en tu propia instancia. No la envíes en chats, incidencias ni registros. Guárdala en un lugar seguro tras crearla y sustitúyela si se revoca o caduca; usa las opciones de caducidad que muestra Garmin.
+
+## Qué comprobar después de sincronizar
+
+| Datos | Resultado a comprobar |
+| --- | --- |
+| Actividades completadas | Aparece el registro correspondiente en Actividades; ábrelo para revisar la fuente, la hora y las gráficas disponibles |
+| Sueño, HRV, frecuencia cardíaca en reposo, pasos | La fecha correspondiente muestra los datos aportados por Garmin; los valores ausentes no se rellenan con cero |
+| Peso, estrés, saturación de oxígeno, Body Battery | Se conserva el significado original de Garmin; estos valores no sustituyen a ATL, CTL ni TSB |
+| Métricas adicionales | Se consultan por fecha en **Datos y operaciones avanzadas**, sin cambiar automáticamente los ajustes deportivos locales |
+| Nutrición y datos menstruales | Excluidos de la sincronización programada; las lecturas adicionales requieren confirmación aparte |
+
+La disponibilidad depende de los registros del dispositivo, la región y los permisos de Garmin. No todas las cuentas disponen de todos los elementos de esta tabla. Comprueba el resultado de la sincronización tras conectar. Los datos no reconocidos producen un error; un resultado vacío no significa cero.
+
+Esta conexión es de solo lectura de datos personales. No crea ni envía sesiones futuras a Garmin.
+
+## Historial y progreso
+
+- Elige las fechas pertinentes; los rangos usan la zona horaria de la cuenta.
+- **En cola (`Queued`)** significa que la solicitud quedó guardada. Una actividad cuenta como **Importada (`Imported`)** solo cuando terminan la descarga y la importación.
+- Recargar la página no borra una tarea en curso. Espera a que termine una importación grande en lugar de enviarla repetidamente.
+- Una solicitud histórica puede abarcar hasta diez años. La duración depende del volumen de actividades y de los límites de Garmin.
+- Volver a sincronizar comprueba y actualiza los registros existentes de Garmin en lugar de crear una copia nueva cada vez.
+- Lee el error mostrado si falla algún elemento. El resto de elementos leídos correctamente puede completar su importación.
+
+Activa las opciones pertinentes en los ajustes de conexión para habilitar la sincronización programada. El recuento de registros descubiertos no equivale al recuento de importaciones completadas.
+
+## Claves caducadas, desconexión y copias de seguridad
+
+Usa **Replace key or reauthorize** (Sustituir clave o volver a autorizar) cuando una clave caduque o sea revocada. Comprueba la región y la cuenta antes de introducir la clave sustituta.
+
+Desconectar detiene futuras sincronizaciones, pero no borra las copias de seguridad offline que ya hayas guardado. Sigue la [guía de copias de seguridad y recuperación](/es/docs/self-host/operations) para conservar seguras las claves originales de la instancia junto con tu copia de seguridad de base de datos. Las conexiones restauradas necesitan esas claves.
+
+Esta conexión es para tus propios datos de Garmin. No recopiles claves de otras personas para ofrecer un servicio multiusuario desde una instancia personal. Consulta la [introducción oficial de Garmin Personal API](https://developer.garmin.com/gc-developer-program/personal/personal-api/) para más información.
+
+## Próximos pasos
+
+- [Detalle de actividad](/es/docs/guide/activity-detail): revisa un entrenamiento tras sincronizar.
+- [Conectar datos](/es/docs/guide/connect-data): elige una fuente principal y evita duplicados.
+- [Solución de problemas de autohospedaje](/es/docs/self-host/troubleshooting): investiga errores de conexión o sincronización.

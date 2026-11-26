@@ -1,0 +1,209 @@
+---
+title: Conta, permissões, exportações e uso de IA
+description: Verifique a segurança da conta, gerencie permissões e conexões, exporte dados da conta, revise assinatura e uso de IA e exclua uma conta com segurança.
+keywords:
+  [
+    "conta Trainingload.ai",
+    "permissões no celular",
+    "uso de IA",
+    "alterar senha",
+    "atualização automática de limiares",
+    "exportar dados Trainingload",
+    "excluir conta Trainingload",
+  ]
+---
+
+# Conta, permissões, exportações e uso de IA
+
+As configurações de conta controlam identidade e acesso; permissões controlam quais dados do dispositivo e de plataformas podem entrar no Trainingload.ai; Uso explica assinatura e consumo de IA. Revise os três juntos ao configurar um novo dispositivo ou investigar algum recurso ausente.
+
+Esta página trata de contas na nuvem (Cloud). A hospedagem própria usa uma conta pessoal local; consulte a [configuração de hospedagem própria](/pt-BR/docs/self-host/configuration) para esses ajustes.
+
+## Antes de começar
+
+- Entre na mesma conta Trainingload.ai na web e no celular.
+- Mantenha acesso ao e-mail da conta para receber códigos de verificação.
+- No celular, verifique se o sistema operacional já negou acesso a Saúde ou Localização.
+- Decida quais limiares podem ser atualizados automaticamente antes de ativar qualquer chave.
+- Não compartilhe códigos de verificação, senhas, credenciais de conexão nem capturas de tela com identificadores privados da conta.
+
+## 1. Verifique identidade e status de senha
+
+Na web, abra **Conta**. No celular, abra **Eu → Menu → Conta**.
+
+Você pode consultar:
+
+- Nome de exibição.
+- E-mail da conta e status de verificação.
+- Se há uma senha definida.
+
+O campo do e-mail atual é somente leitura. Se a conta não estiver verificada, solicite um código de verificação de seis dígitos e insira-o antes que expire. Na web, um código enviado vale por cinco minutos e não pode ser reenviado enquanto a contagem regressiva estiver ativa.
+
+Use **Definir senha** quando a conta não tiver senha ou **Alterar senha** quando já existir uma. Uma conta criada via OAuth ainda pode indicar que nenhuma senha foi definida; use a ação de senha exibida em vez de presumir que há problema na conta.
+
+### Recuperar acesso e concluir o login
+
+Na página de login, use **Esqueci minha senha** para solicitar um e-mail de redefinição. Abra apenas o link de redefinição mais recente, confirme se ele leva à tela de redefinição do Trainingload.ai e defina uma nova senha lá. Um token expirado, inválido ou já usado precisa ser substituído por uma nova solicitação.
+
+O login por OAuth pode passar por uma tela de conclusão ou de erro antes de voltar ao aplicativo. Se a conclusão não redirecionar, volte para Login e tente novamente uma vez; se aparecer uma página de erro, anote o texto visível sem compartilhar tokens nem a URL completa de retorno.
+
+Quando outro aplicativo solicita acesso ao Trainingload.ai, a página de consentimento OAuth exibe o aplicativo solicitante, a conta conectada, os escopos pedidos e o destino de retorno. Aprove apenas quando todos os quatro corresponderem ao que você pretende. Recusar o consentimento devolve o controle sem conceder o acesso solicitado.
+
+<DocsScreenshot
+  id="account-security-status"
+  title="Identidade da conta e status de segurança"
+  description="Confirme o e-mail da conta, o selo de verificação e o status da senha antes de alterar conexões ou configurações de assinatura."
+  route="Conta → Identidade e segurança"
+/>
+
+## 2. Revise permissões e fontes de dados no celular [#2-review-mobile-permissions-and-data-sources]
+
+Abra **Eu → Menu → Autorização de dados** ou a página **Permissões** no celular. As fontes são separadas em fontes locais do dispositivo e serviços de terceiros.
+
+Fontes locais incluem:
+
+- **Saúde**: autorize leituras compatíveis de saúde e treinos, confira status concedido ou parcial, solicite sincronização histórica, gerencie dispositivos conectados ou abra as configurações de Saúde do sistema.
+- **Localização**: permita a gravação de trajetos ou abra as configurações do sistema caso a permissão tenha sido negada.
+
+Serviços de terceiros podem incluir Strava, Polar, COROS, Suunto, Wahoo e Intervals.icu. A linha da fonte exibe seu estado atual. Abra uma fonte para conectá-la, revisar configurações específicas ou avançar para a página de conexões.
+
+<DocsScreenshot
+  id="mobile-permission-sources"
+  title="Permissões e fontes de conexão no celular"
+  description="Permissões do dispositivo e conexões de plataformas são gerenciadas separadamente. Este exemplo mostra Localização e plataformas de treino; abra uma fonte para ver as ações disponíveis."
+  route="Eu → Menu → Autorização de dados"
+  platform="mobile"
+/>
+
+Permissão do dispositivo e conexão no servidor são estados distintos. Saúde pode estar autorizada no sistema operacional enquanto a conexão do dispositivo no Trainingload.ai ainda precisa ser reconectada. Reabra os detalhes da fonte ao retornar das configurações do sistema para o aplicativo atualizar os dois estados.
+
+## 3. Controle atualizações automáticas de métricas
+
+Abra **Conta → Atualização automática** na web ou no celular. Cada chave autoriza atualizações para uma métrica:
+
+| Grupo | Métricas |
+| --- | --- |
+| Potência | FTP, CP, W′, Pmax |
+| Ritmo | TP, CS |
+| Frequência cardíaca | LTHR, FC máx. |
+
+Ative apenas as métricas que você quer que o Trainingload.ai atualize a partir de evidências válidas. Ativar uma chave não garante que um novo valor aparecerá imediatamente; o sistema ainda precisa de dados de atividade compatíveis em quantidade suficiente.
+
+Atualizações automáticas podem alterar limiares usados por zonas, gráficos, treinos estruturados e interpretação de carga. Após uma atualização, confira o histórico da métrica e revise uma atividade recente antes de comparar períodos antigos e novos.
+
+## 4. Revise assinatura e uso de IA
+
+O cartão de assinatura em Conta exibe:
+
+- Plano atual e estado ativo.
+- Período ou validade da assinatura.
+- Origem da cobrança.
+- Se há cancelamento agendado para o fim do período.
+
+Apenas uma assinatura ativa na origem de cobrança compatível exibe a ação de gerenciamento de assinatura dentro do aplicativo. Outras origens de acesso podem mostrar o status da assinatura sem os mesmos controles de gerenciamento.
+
+Abra **Uso** a partir do cartão de assinatura ou da área de conta no celular. A página mostra:
+
+- Plano atual.
+- Créditos disponíveis, incluindo saldo negativo caso a última operação concluída tenha excedido o saldo anterior.
+- Créditos mensais da assinatura usados, restantes e validade.
+- Saldo disponível ou bloqueado por assinatura de pacotes de créditos e validade mais próxima.
+- Débito pendente, tendências de consumo, contagem de operações e lançamentos individuais do extrato.
+
+Escolha 1 dia, 7 dias, 30 dias, mês atual ou mês anterior. Os lançamentos do extrato identificam operações Padrão (1×), Profundo (3×) e mistas, concessões de assinatura, pacotes de créditos, presentes, reembolsos e compensações de débito. Um crédito representa 1.000 tokens equivalentes após aplicação dos multiplicadores de entrada em cache, entrada sem cache, saída, modo e multiplicadores globais; não equivale a um número fixo de mensagens.
+
+<DocsScreenshot
+  id="ai-usage-ledger"
+  title="Resumo e extrato de uso de IA"
+  description="Compare plano, concessões restantes, consumo do período, tendências do intervalo selecionado e extrato detalhado de eventos."
+  route="Conta → Uso"
+/>
+
+## 5. Defina preferências do aplicativo
+
+Abra **Configurações** na web para escolher:
+
+- tema claro, escuro ou do sistema;
+- unidades métricas ou imperiais;
+- comportamento do eixo X dos gráficos;
+- exibição de horário em 12 horas ou 24 horas;
+- idioma preferido da interface.
+
+Esses controles mantêm um valor temporário até você clicar em **Salvar**. Alterar o idioma também move a rota atual para o idioma selecionado e salva a preferência para visitas futuras. Unidades e formato de hora afetam apenas a exibição; não reescrevem o registro original da atividade.
+
+## 6. Exporte os dados da sua conta
+
+Na web, abra **Conta → Exportação de dados**. Escolha a exportação adequada à próxima tarefa:
+
+- **Análise por IA** cria um pacote compacto voltado para análise e não inclui os arquivos originais enviados.
+- **Backup completo** cria um arquivo mais amplo e pode incluir os arquivos originais quando os dados exatos de localização são mantidos.
+
+Escolha como os locais dos trajetos serão tratados antes de solicitar a exportação:
+
+- ocultar locais visitados com frequência;
+- remover dados de GPS;
+- manter localizações exatas.
+
+Incluir os arquivos originais força a manutenção das localizações exatas porque esses arquivos podem conter seus próprios dados de localização. Trate uma exportação com localização exata como dado sensível e não a envie a um serviço de IA nem compartilhe com terceiros sem saber exatamente o que o pacote contém.
+
+A criação da exportação é assíncrona. Mantenha a página aberta ou volte depois, atualize a tarefa mais recente e baixe o arquivo somente quando o status estiver **Pronto**. A página informa o tamanho do arquivo e o prazo de expiração. Uma tarefa pronta, com falha ou expirada pode ser removida da lista.
+
+## 7. Exclua uma conta com segurança
+
+A exclusão da conta é permanente e assíncrona. Antes de iniciá-la no celular:
+
+1. Exporte tudo o que precisa manter.
+2. Revise a assinatura exibida e o provedor de cobrança.
+3. Cancele a renovação quando o fluxo exigir.
+4. Leia e marque todas as confirmações finais.
+5. Envie a solicitação de exclusão e aguarde a tela de aceitação antes de sair do fluxo.
+
+A solicitação desconecta a conta e remove o acesso ativo enquanto a exclusão continua em segundo plano. A conclusão normalmente ocorre em até 24 horas e pode levar até 7 dias. A tela de aceitação retorna para Login; isso não significa que a conta antiga possa ser restaurada.
+
+O tratamento da assinatura depende da origem ativa de cobrança. Renovações cobradas na web podem precisar ser canceladas antes que a exclusão prossiga. A renovação pela Apple é gerenciada pela Apple e pode continuar após a exclusão da conta no Trainingload.ai, a menos que você a cancele separadamente. A exclusão por si só não garante reembolso, e uma nova assinatura posterior não restaura os dados excluídos.
+
+## 8. Verifique configurações entre dispositivos
+
+Após alterar configurações de conta, conexão, permissão ou atualização automática:
+
+1. Salve ou conclua a ação no dispositivo atual.
+2. Volte à lista de fontes e confirme o estado exibido.
+3. Atualize o outro dispositivo.
+4. Confirme o mesmo e-mail de conta e a configuração armazenada no servidor.
+5. Para permissões locais, verifique o status no sistema operacional do dispositivo onde a permissão foi concedida; permissões locais não são transferidas para outro telefone.
+
+## Verifique a configuração
+
+- As sessões web e celular exibem o mesmo e-mail da conta.
+- A verificação de e-mail e o status da senha correspondem ao método de login desejado.
+- Saúde e Localização mostram o estado esperado no nível do dispositivo.
+- Plataformas de terceiros exibem o estado esperado de conexão no servidor.
+- Apenas as chaves desejadas de atualização automática de métricas estão ativadas.
+- O status da assinatura e o extrato de Uso batem com concessões ou ações recentes de IA.
+- Uma exportação solicitada chega a Pronto, faz download antes de expirar e reflete a opção escolhida de privacidade de localização.
+- Tema, unidades, gráficos, formato de hora e idioma continuam salvos ao reabrir Configurações.
+
+## Solução de problemas
+
+- **O código de verificação não funciona:** digite os seis dígitos, confirme o e-mail, confira a validade e peça um novo código somente quando o botão de reenvio ficar disponível.
+- **Não consigo editar o e-mail:** a troca de e-mail não está disponível na interface atual de Conta; o campo é intencionalmente somente leitura.
+- **Saúde está autorizada, mas não conectada:** reabra Saúde, confira o estado da conexão entre aplicativo/servidor/dispositivo e use reconectar quando disponível.
+- **Localização continua negada:** abra as configurações do aplicativo no sistema operacional; uma permissão já negada pode não exibir novo alerta do sistema.
+- **Uma plataforma aparece desconectada após OAuth:** atualize o status da fonte, confirme a mesma conta Trainingload.ai e revise as configurações específicas da plataforma.
+- **Uma métrica automática não mudou:** confirme se a chave está ativada e se atividades qualificadas recentes têm dados compatíveis suficientes.
+- **Uso aparece vazio:** selecione um intervalo maior e verifique se a conta possui concessões ou eventos de consumo de IA.
+- **Não consigo gerenciar a assinatura no aplicativo:** o gerenciamento só aparece para origens ativas de assinatura compatíveis; confira a origem de cobrança exibida.
+- **A solicitação de exportação não inicia:** aguarde a conclusão da tarefa atual de exportação, atualize a página e tente novamente.
+- **Uma exportação expirou:** remova a tarefa expirada e solicite um novo arquivo com as opções de privacidade desejadas.
+- **A exclusão da conta está bloqueada por uma assinatura:** siga a etapa de renovação específica do provedor exibida no fluxo de exclusão e atualize o status. Em cobranças via Apple, cancele a renovação separadamente pela Apple.
+- **Um link de redefinição foi rejeitado:** solicite um novo e-mail e use o link mais recente; não reutilize tokens usados ou expirados.
+- **O consentimento OAuth parece estranho:** recuse a solicitação e verifique aplicativo solicitante, escopos, conta e destino de retorno antes de tentar novamente.
+- **Uma preferência parece não ter mudado:** clique em Salvar e reabra Configurações; preferências locais de exibição e idioma salvo no servidor podem atualizar em momentos diferentes.
+
+## Próximos passos
+
+- [Conectar dados de treino](/pt-BR/docs/guide/connect-data)
+- [Integrações](/pt-BR/docs/guide/integrations)
+- [Perfil, limiares e zonas](/pt-BR/docs/guide/profile-thresholds-zones)
+- [Gravação no celular](/pt-BR/docs/guide/mobile-recording)
+- [Notificações e revisões automáticas](/pt-BR/docs/guide/notifications-and-reviews)

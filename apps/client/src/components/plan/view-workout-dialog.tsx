@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -16,14 +14,15 @@ import type { ParsedPlan } from "@/api/workout";
 import { WorkoutPlanChart } from "@/components/workout/WorkoutPlanChart";
 import { WorkoutRenderer } from "@/components/workout/WorkoutRenderer";
 import type { SportType } from "@/api/activities";
+import { useQueryClient } from "@tanstack/react-query";
+import { updateIndependentWorkout, updatePlanWorkout } from "@/api/plans";
+import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
+import { WorkoutEditorSheet } from "./WorkoutEditorSheet";
 import { usePlanWorkoutDetail } from "@/api/usePlans";
 import type { WorkoutExpressionSportType } from "@/components/plan/workout-expression-codec";
 import { WorkoutLoadBadge } from "@/components/plan/workout-load-badge";
 import { useTranslations } from "next-intl";
-import { usePlanWorkoutActions } from "@/hooks/usePlanWorkoutActions";
-import { deleteIndependentWorkout, updatePlan } from "@/api/plans";
-import { queryKeys } from "@/lib/query-keys";
-import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
+import type { PlanWorkout } from "@/api/plans";
 import { resolveWorkoutSportLabelKind } from "@/lib/workout-sport-label";
 import { useMobileViewport } from "@/hooks/use-mobile";
 import {
@@ -31,6 +30,7 @@ import {
   MobileViewWorkoutDialog,
 } from "@/components/plan/mobile-view-workout-dialog";
 import { WorkoutDetailActions } from "./workout-detail-actions";
+import { useWorkoutDetailCommands } from "./use-workout-detail-commands";
 import { PlanWorkoutActivityLinkControl } from "./plan-workout-activity-link-control";
 import { ManagedWorkoutExternalActions } from "@deployment/managed-ui";
 
@@ -45,7 +45,8 @@ interface ViewWorkoutDialogProps {
   text?: string | null;
   sportType?: SportType;
   plan?: ParsedPlan | null;
-  workout?: import("@/api/plans").PlanWorkout;
+  workout?: PlanWorkout;
+  onMoveWorkout?: (workout: PlanWorkout) => void;
   mobile?: boolean;
   mobileEmbedded?: boolean;
 }
@@ -64,17 +65,16 @@ export const ViewWorkoutDialog: React.FC<ViewWorkoutDialogProps> = ({
   sportType = "RUN",
   plan,
   workout,
+  onMoveWorkout,
   mobile,
   mobileEmbedded = false,
 }) => {
   const t = useTranslations("ViewWorkoutDialog");
   const tSports = useTranslations("SportCatalog");
+  const titleId = React.useId();
   const queryClient = useQueryClient();
-  const {
-    pendingWorkoutId,
-    postponeWorkout: runPostponeWorkout,
-    skipWorkout: runSkipWorkout,
-  } = usePlanWorkoutActions();
+  const tEditor = useTranslations("WorkoutEditor");
+  const [editWorkout, setEditWorkout] = React.useState<PlanWorkout | null>(null);
   const { data: detail, isLoading } = usePlanWorkoutDetail(
     planId,
     workoutId,
@@ -132,108 +132,64 @@ export const ViewWorkoutDialog: React.FC<ViewWorkoutDialogProps> = ({
               ? t("sport.run")
               : tSports("families.UNKNOWN");
 
-  const isIndependent = !planId;
-  const isLinked = Boolean(detail?.links?.some((link) => !link.unlinkedAt));
-  const isDoneOrSkipped =
-    detail?.status === "DONE" || detail?.status === "SKIPPED";
-  const isPending = pendingWorkoutId === workoutId;
-  const [deleting, setDeleting] = React.useState(false);
-  const capabilities = {
-    delete:
-      Boolean(workoutId) &&
-      (isIndependent
-        ? Boolean(detail) && !isLinked && detail?.status === "PLANNED"
-        : detail?.capabilities?.delete === true),
-    postpone: Boolean(planId) && detail?.capabilities?.postpone === true,
-    skip: Boolean(planId) && detail?.capabilities?.skip === true,
-  };
+  const commands = useWorkoutDetailCommands(detail, () => onOpenChange(false));
+  const openingMove = React.useRef(false);
   const detectedMobile = useMobileViewport() === true;
   const isMobile = mobile ?? detectedMobile;
 
-  const handleDelete = async () => {
-    if (!workoutId || !capabilities.delete) return false;
-    setDeleting(true);
-    try {
-      if (planId) await updatePlan(planId, { deletedWorkoutIds: [workoutId] });
-      else await deleteIndependentWorkout(workoutId);
-      await invalidateAfterPlanMutation(queryClient, { planId });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["scheduled-workouts"] }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.plans.active() }),
-      ]);
-      toast.success(t("deleteSuccess"));
-      onOpenChange(false);
-    } catch {
-      toast.error(t("deleteFailed"));
-      return false;
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const handlePostpone = async () => {
-    if (!planId || !workoutId || !detail || !capabilities.postpone)
-      return false;
-    if (isDoneOrSkipped) return;
-    if (isLinked) {
-      toast.message(t("linkedBlockedTip"));
-      return;
-    }
-    const sourceDayOffset =
-      typeof detail.dayOffset === "number"
-        ? detail.dayOffset
-        : typeof weekIndex === "number" && typeof dayIndex === "number"
-          ? weekIndex * 7 + dayIndex
-          : 0;
-    try {
-      await runPostponeWorkout({
-        planId,
-        workoutId,
-        status: detail.status,
-        sourceDayOffset,
-        text: detail.text,
-        notes: detail.notes ?? null,
-        name: detail.name ?? null,
-        sportType: detail.sportType,
-      });
-      await invalidateAfterPlanMutation(queryClient, { planId });
-      toast.success(t("postponeSuccess"));
-    } catch {
-      toast.error(t("postponeFailed"));
-      return false;
-    }
-  };
-
-  const handleSkip = async () => {
-    if (!planId || !workoutId || !detail || !capabilities.skip) return false;
-    if (isDoneOrSkipped) return;
-    if (isLinked) {
-      toast.message(t("linkedBlockedTip"));
-      return;
-    }
-    try {
-      await runSkipWorkout({
-        planId,
-        workoutId,
-        status: detail.status,
-      });
-      await invalidateAfterPlanMutation(queryClient, { planId });
-      toast.success(t("skipSuccess"));
-    } catch {
-      toast.error(t("skipFailed"));
-      return false;
-    }
-  };
-
   const actions = (
     <WorkoutDetailActions
-      capabilities={capabilities}
-      pending={deleting || isPending || isLoading}
-      onPostpone={handlePostpone}
-      onSkip={handleSkip}
-      onDelete={handleDelete}
+      {...commands}
+      pending={commands.pending || isLoading}
+      onEdit={detail?.capabilities?.edit ? () => setEditWorkout(detail) : undefined}
+      onMove={
+        onMoveWorkout &&
+        detail?.status === "PLANNED" &&
+        commands.capabilities.postpone
+          ? () => {
+              openingMove.current = true;
+              onMoveWorkout(detail);
+              onOpenChange(false);
+            }
+          : undefined
+      }
     />
   );
+
+  if (editWorkout) {
+    return (
+      <WorkoutEditorSheet
+        open={open}
+        onOpenChange={(next) => { if (!next) setEditWorkout(null); }}
+        title={tEditor("title.edit")}
+        saveLabel={t("saveWorkout")}
+        showNameField
+        mobilePlanLayout={isMobile}
+        resetKey={`${editWorkout.id}:${editWorkout.revision}`}
+        initialValue={{
+          ...editWorkout,
+          notes: editWorkout.notes ?? undefined,
+          blocks: editWorkout.structure.kind === "ENDURANCE" ? editWorkout.structure.blocks as ParsedPlan : null,
+        }}
+        onSave={async (payload) => {
+          const fields = {
+            sportType: payload.sportType, sportDefinitionCode: payload.sportDefinitionCode,
+            definition: payload.definition, name: payload.name, notes: payload.notes,
+          };
+          const saved = planId
+            ? await updatePlanWorkout(planId, editWorkout.id, {
+                ...fields, expectedRevision: editWorkout.revision,
+                weekIndex: editWorkout.weekIndex, dayIndex: editWorkout.dayIndex, sessionIndex: editWorkout.sessionIndex,
+              })
+            : editWorkout.scheduledDate && editWorkout.revision && await updateIndependentWorkout(editWorkout.id, {
+                ...fields, expectedRevision: editWorkout.revision, scheduledDate: editWorkout.scheduledDate,
+              });
+          if (!saved) throw new Error(tEditor("errors.saveFailed"));
+          await invalidateAfterPlanMutation(queryClient, { planId });
+        }}
+      />
+    );
+  }
 
   if (isMobile) {
     if (mobileEmbedded) {
@@ -241,13 +197,13 @@ export const ViewWorkoutDialog: React.FC<ViewWorkoutDialogProps> = ({
         <MobileViewWorkoutContent
           workout={detail ?? workout ?? null}
           loading={isLoading}
-          pending={isPending || isLoading}
+          pending={commands.pending || isLoading}
           actions={actions}
           onPostpone={async () => {
-            await handlePostpone();
+            await commands.onPostpone();
           }}
           onSkip={async () => {
-            await handleSkip();
+            await commands.onSkip();
           }}
         />
       );
@@ -258,13 +214,13 @@ export const ViewWorkoutDialog: React.FC<ViewWorkoutDialogProps> = ({
         onOpenChange={onOpenChange}
         workout={detail ?? workout ?? null}
         loading={isLoading}
-        pending={isPending || isLoading}
+        pending={commands.pending || isLoading}
         actions={actions}
         onPostpone={async () => {
-          await handlePostpone();
+          await commands.onPostpone();
         }}
         onSkip={async () => {
-          await handleSkip();
+          await commands.onSkip();
         }}
       />
     );
@@ -272,9 +228,16 @@ export const ViewWorkoutDialog: React.FC<ViewWorkoutDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[96dvh] w-full max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none pc:max-h-[85vh] pc:w-[50vw] pc:gap-4 pc:p-6">
+      <DialogContent
+        aria-labelledby={titleId}
+        className="flex max-h-[96dvh] w-full max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none pc:max-h-[85vh] pc:w-[50vw] pc:gap-4 pc:p-6"
+        onCloseAutoFocus={(event) => {
+          if (openingMove.current) event.preventDefault();
+          openingMove.current = false;
+        }}
+      >
         <DialogHeader className="shrink-0 border-b border-border/60 px-4 pb-4 pt-4 pr-14 text-left pc:border-0 pc:p-0">
-          <DialogTitle>
+          <DialogTitle id={titleId}>
             {weekIndex !== undefined && dayIndex !== undefined
               ? t("titleWithWeek", {
                   week: weekIndex + 1,

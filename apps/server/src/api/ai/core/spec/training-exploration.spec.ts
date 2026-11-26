@@ -22,6 +22,31 @@ import type { AiToolContext } from '../tool.types';
 
 const range = { from: '2026-09-01', to: '2026-09-26' };
 describe('Training exploration', () => {
+  it('uses athlete-local bounds and preserves actual zero and missing power duration points', async () => {
+    const getPowerDurationCurvePoints = jest.fn(async () => [{
+      points: [
+        { durationSec: 5, activities: [{ value: 0 }] },
+        { durationSec: 300, activities: [{ value: 220, activityName: 'Ride', hashId: 'ride-1' }] },
+        { durationSec: 1200, activities: [] },
+      ],
+    }]);
+    const chart = await queryTrainingExploration({
+      session: { user: { id: 'athlete-1' } },
+      currentTurnCalendar: { timezone: 'Asia/Shanghai' },
+      lang: 'en',
+      power: { getPowerDurationCurvePoints },
+    } as unknown as AiToolContext, {
+      source: 'POWER_DURATION', from: '2026-09-01', to: '2026-09-02', sportTypes: ['CYCLING'],
+    });
+    expect(getPowerDurationCurvePoints).toHaveBeenCalledWith([{
+      start: '2026-08-31T16:00:00.000Z', end: '2026-09-02T15:59:59.999Z',
+    }], 'athlete-1', 'CYCLING');
+    expect(chart.panels[0].series[0].points.map(({ x, y }) => [x, y]))
+      .toEqual([[5, 0], [300, 220], [1200, null]]);
+    expect(chart.panels[0].series[0].points[1]).toMatchObject({ activityHashId: 'ride-1' });
+    expect(chart.provenance.missingCount).toBe(1);
+  });
+
   it('keeps independent heart-rate and pace scales on a shared X axis and can split them back', () => {
     const left: ExplorationPanel = {
       id: 'hr',

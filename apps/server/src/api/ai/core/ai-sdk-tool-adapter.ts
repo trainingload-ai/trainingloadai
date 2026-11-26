@@ -6,11 +6,13 @@ import {
 } from 'ai';
 import { Logger } from '@nestjs/common';
 import {
+  checkAiToolActiveSkill,
   checkAiToolPermissions,
   isAiToolConcurrencySafe,
   toProviderToolName,
   validateAiToolInput,
   type AiToolContext,
+  type AiToolCheckError,
   type AiToolDef,
   type AiToolModelSummaryArgs,
   asRecordTool,
@@ -18,6 +20,7 @@ import {
 import { safeJsonPreview } from './safe-json-preview';
 import { getCoachSkillByName } from './skill.registry';
 import { toolSchemaValidator } from './tool-input-validation';
+import { planPhaseProgress } from './tools/plan-draft-phase-progress';
 
 // Resolve only catalog identities. Model-provided reasons/prompts stay private.
 function skillIdentity(toolName: string, input: Record<string, unknown>) {
@@ -32,12 +35,45 @@ const logger = new Logger('CoachAiSdkTools');
 /** UI 卡片类工具：校验失败时需要完整上下文便于排查模型输出。 */
 const UI_SURFACE_TOOL_NAMES = new Set([
   'ask_user_question',
+  'plan_stage_phase',
   'present_coach_plan_draft',
   'present_plan_workout_adjustment_draft',
   'present_training_visualization',
 ]);
 
 const UI_SURFACE_VALIDATION_LOG_PREVIEW_CHARS = 8_000;
+const AUDITED_PLAN_TOOLS = new Set([
+  'plan_suitability_assess',
+  'plan_stage_phase',
+  'present_coach_plan_draft',
+  'present_plan_workout_adjustment_draft',
+  'present_independent_workout_draft',
+]);
+
+export function isAuditedPlanTool(toolName: string): boolean {
+  return AUDITED_PLAN_TOOLS.has(toolName);
+}
+
+export async function recordPlanToolValidationRejection(args: {
+  ctx: AiToolContext;
+  toolCallId: string;
+  toolName: string;
+  candidate: unknown;
+  validation: AiToolCheckError;
+  stage: 'parse_arguments' | 'validate_input';
+}) {
+  const { ctx, toolCallId, toolName, candidate, validation, stage } = args;
+  if (!isAuditedPlanTool(toolName)) return;
+  const code = validation.code ?? 'INVALID_INPUT';
+  await ctx.onPlanValidationRejected?.({
+    toolCallId, toolName, stage, candidate, code,
+    message: validation.message,
+    ...(validation.modelRepair && { modelRepair: validation.modelRepair }),
+    feedback: validation.feedback,
+    diagnostics: validation.diagnostics ?? validation.issues,
+  });
+  logger.warn(`Plan candidate rejected tool=${toolName} toolCall=${toolCallId} stage=${stage} code=${code}`);
+}
 
 function shouldLogToolOutputs(): boolean {
   const raw = String(process.env.AI_LOG_TOOL_OUTPUTS ?? '')
@@ -67,13 +103,24 @@ function asRecord(value: unknown): Record<string, unknown> {
   return {};
 }
 
+export function previewToolInputForLog(
+  providerToolName: string,
+  input: Record<string, unknown>,
+  maxChars: number,
+): string {
+  return providerToolName === 'ask_user_question' || isAuditedPlanTool(providerToolName)
+    ? '[omitted]'
+    : safeJsonPreview(input, maxChars);
+}
+
 function logUiSurfaceValidationFailure(args: {
   providerToolName: string;
   validation: { message: string; code?: string };
   input: Record<string, unknown>;
 }) {
   const { providerToolName, validation, input } = args;
-  const argsPreview = safeJsonPreview(
+  const argsPreview = previewToolInputForLog(
+    providerToolName,
     input,
     UI_SURFACE_VALIDATION_LOG_PREVIEW_CHARS,
   );
@@ -81,7 +128,7 @@ function logUiSurfaceValidationFailure(args: {
     ? input.questions.length
     : undefined;
   logger.warn(
-    `[AI][教练][工具] 参数不合法 name=${providerToolName} ${validation.message} code=${validation.code ?? 'none'} keys=${Object.keys(input).join(',') || '(empty)'}${questionCount !== undefined ? ` questionCount=${questionCount}` : ''} argsPreview=${argsPreview}`,
+    `[AI][coach][tool] Invalid input name=${providerToolName} ${validation.message} code=${validation.code ?? 'none'} keys=${Object.keys(input).join(',') || '(empty)'}${questionCount !== undefined ? ` questionCount=${questionCount}` : ''} argsPreview=${argsPreview}`,
   );
 }
 
@@ -150,14 +197,24 @@ async function executeCoachTool(args: {
   tool: AiToolDef;
   ctx: AiToolContext;
   input: Record<string, unknown>;
+  rawInput: unknown;
   toolCallId: string;
   providerToolName: string;
 }): Promise<unknown> {
-  const { tool, ctx, input, toolCallId, providerToolName } = args;
+  const { tool, ctx, input, rawInput, toolCallId, providerToolName } = args;
+
+  const skill = checkAiToolActiveSkill(tool, ctx);
+  if (skill.ok === false) {
+    return {
+      error: skill.message,
+      code: skill.code,
+      stage: 'check_permissions',
+    };
+  }
 
   if (shouldLogToolDebug()) {
     logger.warn(
-      `[AI][教练][tool-debug] start name=${providerToolName} keys=${Object.keys(input).join(',') || '(empty)'} argsPreview=${safeJsonPreview(input, 1600)}`,
+      `[AI][coach][tool-debug] start name=${providerToolName} keys=${Object.keys(input).join(',') || '(empty)'} argsPreview=${previewToolInputForLog(providerToolName, input, 1600)}`,
     );
   }
 
@@ -166,7 +223,7 @@ async function executeCoachTool(args: {
     shouldLogPlanDraftDebug()
   ) {
     logger.warn(
-      `[AI][教练][plan_draft][debug] before_validate keys=${Object.keys(input).join(',') || '(empty)'} argsPreview=${safeJsonPreview(input, 1200)}`,
+      `Validating plan draft keys=${Object.keys(input).join(',') || '(empty)'}`,
     );
   }
 
@@ -174,23 +231,28 @@ async function executeCoachTool(args: {
     providerToolName === 'present_coach_plan_draft' &&
     Object.keys(input).length === 0
   ) {
+    const invalidShape = rawInput === null || Array.isArray(rawInput) || typeof rawInput !== 'object';
+    const stage = invalidShape ? 'validate_input' : 'parse_arguments';
+    const code = invalidShape ? 'INVALID_INPUT' : 'EMPTY_TOOL_ARGUMENTS';
+    const message = 'Provide a complete plan draft JSON object with title, periodWeeks and workouts.';
+    await recordPlanToolValidationRejection({ ctx, toolCallId, toolName: providerToolName, candidate: rawInput ?? null,
+      stage, validation: { ok: false, code, message } });
     logger.warn(
       '[AI][教练][工具] 参数为空 name=present_coach_plan_draft expected=title,periodWeeks,workouts',
     );
-    return {
-      error:
-        'present_coach_plan_draft arguments were empty; retry with a complete JSON object containing title, periodWeeks, and workouts.',
-      code: 'EMPTY_TOOL_ARGUMENTS',
-      stage: 'parse_arguments',
-    };
+    return { error: message, code, stage };
   }
 
   const recordTool = asRecordTool(tool);
   const validation = await validateAiToolInput(recordTool, ctx, input);
   if (validation.ok === false) {
-    if (shouldLogToolDebug()) {
+    await recordPlanToolValidationRejection({
+      ctx, toolCallId, toolName: providerToolName, candidate: rawInput,
+      validation, stage: 'validate_input',
+    });
+    if (shouldLogToolDebug() && !isAuditedPlanTool(providerToolName)) {
       logger.warn(
-        `[AI][教练][tool-debug] validate_failed name=${providerToolName} code=${validation.code ?? 'none'} message=${validation.message} argsPreview=${safeJsonPreview(input, 1600)}`,
+        `[AI][coach][tool-debug] validate_failed name=${providerToolName} code=${validation.code ?? 'none'} message=${validation.message} argsPreview=${previewToolInputForLog(providerToolName, input, 1600)}`,
       );
     }
     if (
@@ -198,25 +260,26 @@ async function executeCoachTool(args: {
       shouldLogPlanDraftDebug()
     ) {
       logger.warn(
-        `[AI][教练][plan_draft][debug] validate_failed message=${validation.message} code=${validation.code ?? 'none'} argsPreview=${safeJsonPreview(input, 1200)}`,
+        `Plan draft validation failed code=${validation.code ?? 'none'}`,
       );
     }
-    if (UI_SURFACE_TOOL_NAMES.has(providerToolName)) {
+    if (!isAuditedPlanTool(providerToolName) && UI_SURFACE_TOOL_NAMES.has(providerToolName)) {
       logUiSurfaceValidationFailure({
         providerToolName,
         validation,
         input,
       });
-    } else {
+    } else if (!isAuditedPlanTool(providerToolName)) {
       logger.warn(
         `[AI][教练][工具] 参数不合法 name=${providerToolName} ${validation.message}`,
       );
     }
     return {
-      error: validation.message,
+      error: validation.modelRepair ?? validation.message,
       code: validation.code,
       stage: 'validate_input',
       ...(validation.issues ? { issues: validation.issues } : {}),
+      ...(validation.feedback && !validation.modelRepair ? { feedback: validation.feedback } : {}),
     };
   }
 
@@ -332,16 +395,17 @@ export function createAiSdkCoachTools(args: {
           value: value as Record<string, unknown>,
         })
       : toolSchemaValidator<Record<string, unknown>>(toolDef.parameters);
+    // UI tools return actionable validation errors through the normal tool loop.
+    const inputSchema = jsonSchema(toolDef.parameters, { validate: validateProviderInput });
+    const assembledSchema = providerToolName === 'present_coach_plan_draft' ? jsonSchema({
+      type: 'object', additionalProperties: false, required: ['assessmentId', 'title'],
+      properties: { assessmentId: { type: 'string' }, title: { type: 'string', minLength: 1 }, description: { type: 'string' } },
+    }, { validate: validateProviderInput }) : undefined;
     const sdkTool: Tool<Record<string, unknown>, unknown> = {
       description: toolDef.description,
-      inputSchema: jsonSchema(toolDef.parameters, {
-        // Keep the exact JSON Schema visible to the provider. For UI surface
-        // tools only, defer local parsing failure to executeCoachTool so the
-        // strict validator below can return an ordinary tool result to the
-        // model. Otherwise AI SDK rejects the call before the existing bounded
-        // repair loop can see the error and retry it.
-        validate: validateProviderInput,
-      }),
+      get inputSchema() {
+        return assembledSchema && planPhaseProgress(ctx)?.next === null ? assembledSchema : inputSchema;
+      },
       metadata: {
         canonicalName: toolDef.name,
         kind:
@@ -375,6 +439,7 @@ export function createAiSdkCoachTools(args: {
             tool: toolDef,
             ctx,
             input: inputRecord,
+            rawInput: input,
             toolCallId: options.toolCallId,
             providerToolName,
           });

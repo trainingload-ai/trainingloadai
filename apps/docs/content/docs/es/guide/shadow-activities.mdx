@@ -1,0 +1,56 @@
+---
+title: "Actividades sombra: ¿por qué solo aparece un resumen?"
+description: Entiende qué son las actividades sombra de Intervals.icu y Strava, y decide cuándo conectar una fuente, reintentar la sincronización o subir un archivo original.
+keywords:
+  [
+    "actividades sombra",
+    "series faltantes de Strava",
+    "importar actividades de Intervals.icu",
+    "reintentar sincronización de actividad",
+  ]
+---
+
+# Actividades sombra: ¿por qué solo aparece un resumen?
+
+**Una actividad sombra es una actividad que hemos detectado pero cuyos registros completos todavía no están disponibles.** Trainingload.ai conserva su título y su hora de inicio para que veas que no se ha pasado por alto, junto con la siguiente acción disponible.
+
+Una actividad sombra no es una actividad importada por completo. No inventamos gráficas ni carga de entrenamiento a partir de un simple resumen. Una importación correcta sustituye la actividad sombra por la actividad completa. Además, una grabación completa existente nunca se borra porque una sincronización posterior no consiga recuperar datos.
+
+Actualmente existen dos situaciones principales.
+
+## Caso 1: Intervals.icu tiene información de la actividad pero no puede entregar el archivo original
+
+Intervals.icu puede mostrar el resumen de una actividad recibida desde Strava, pero su API restringe explícitamente el acceso al archivo original de la actividad. Ver la actividad allí no significa que Trainingload.ai pueda descargar los registros completos a través de esa API.
+
+En ese caso, Trainingload.ai intenta obtenerla directamente desde Strava. Sigue la indicación de la tarjeta para conectar Strava, renovar la autorización o activar la importación de actividades, y espera a que termine la sincronización.
+
+Si Strava tampoco puede suministrar los datos necesarios, la actividad sombra permanece. Sincronizar Intervals.icu una y otra vez no puede sortear su restricción sobre el archivo original.
+
+## Caso 2: Strava tiene los detalles de la actividad pero no puede entregar las series
+
+El nombre de la actividad, la distancia total y la duración son independientes de las muestras de GPS, frecuencia cardíaca, potencia o distancia en cada instante. **Disponer de los detalles de la actividad no garantiza que haya series utilizables para importar.**
+
+- **Las muestras nunca existieron:** por ejemplo, una actividad introducida manualmente en Strava con distancia y duración, pero sin grabación de dispositivo. Puede tener una página de detalles, pero los reintentos no pueden generar las muestras ausentes.
+- **Los registros no están disponibles temporalmente:** el proveedor puede seguir procesando la sesión o el endpoint de datos detallados puede no estar disponible. Una respuesta de «no encontrado» no demuestra que la actividad se haya borrado ni que falten las series de forma permanente.
+
+Trainingload.ai reintenta un número limitado de veces los fallos de disponibilidad incierta. Si los registros siguen sin estar disponibles, mantiene la actividad sombra y ofrece un botón de reintento. La ausencia aislada de frecuencia cardíaca, potencia o GPS no crea necesariamente una actividad sombra: una actividad con una serie temporal utilizable puede importarse igualmente aunque falten algunos análisis.
+
+## ¿Qué debo hacer?
+
+| Qué sabes                                                                | Acción recomendada                                                                              |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| La tarjeta pide conectar, renovar autorización o activar la importación  | Completa la configuración indicada y espera a la sincronización o reintenta.                    |
+| La actividad se acaba de subir o sigue procesándose                      | Espera a que termine el procesamiento y reintenta una vez.                                      |
+| Se ha resuelto un problema temporal del proveedor                        | Reintenta una vez para solicitar de nuevo los registros completos.                              |
+| La actividad se registró a mano y nunca tuvo muestras                    | Reintentar repetidamente no servirá. Busca una grabación original de un dispositivo.            |
+| Tras varios intentos sigue siendo una actividad sombra                   | Comprueba si la plataforma original permite exportar un archivo de actividad; contacta soporte si hace falta. |
+
+Reintentar vuelve a solicitar los datos, pero no garantiza que el proveedor pueda suministrarlos ahora. No hace falta borrar primero la actividad sombra ni una actividad completa existente. Desconectar y reconectar repetidamente no generará muestras inexistentes.
+
+## Tengo el archivo original
+
+Si tu dispositivo o la plataforma que grabó primero la sesión pueden exportar un archivo FIT, TCX o GPX con registros de actividad, usa [Subir archivos de actividad](/es/docs/guide/upload-activity-files). Revisa los avisos de duplicado y compara la fecha y el contenido si ya existe una actividad completa.
+
+## Obtener ayuda
+
+Incluye la fecha de la actividad, la plataforma de origen, el mensaje mostrado y si la plataforma original permite exportar un archivo. No envíes tokens de acceso ni contraseñas. Consulta [Solución de problemas](/es/docs/guide/troubleshooting) para ver más pasos.

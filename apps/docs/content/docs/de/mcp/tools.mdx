@@ -1,0 +1,4790 @@
+---
+title: MCP-Tool-Referenz
+description: Schreibgeschützte TrainingLoad-MCP-Tools, OAuth-Scopes sowie Eingabe- und Ausgabeverträge.
+---
+
+# MCP-Tool-Referenz
+
+Diese Seite wird aus dem Fähigkeitskatalog des Servers erzeugt. Bearbeite sie nicht direkt; führe `pnpm --dir apps/server mcp:reference` aus. Jedes Tool liest ausschließlich Daten des per OAuth autorisierten Athleten.
+
+> `health:read` gehört nicht zur Standardfreigabe. Clients sollten vor dem ersten Aufruf von `get_health_summary` eine inkrementelle Autorisierung anfordern.
+
+| Tool | Zweck | OAuth-Scopes |
+| --- | --- | --- |
+| `get_training_snapshot` | Fasst aktuelle Trainingsbelastung, Fitness, Ermüdung, Form, die Veränderung gegenüber der Vorwoche sowie die letzten Aktivitäten für den autorisierten Athleten zusammen. Bevorzuge dieses Tool vor mehreren enger gefassten Tool-Aufrufen. | `training:read` `plan:read` `activity:read` |
+| `get_athlete_profile` | Liest die bevorzugten Sportarten und Trainingsschwellen des autorisierten Athleten. Gibt keinen Namen, keine E-Mail-Adresse, kein Geburtsdatum und keine interne Benutzer-ID zurück. | `profile:read` |
+| `list_activities` | Durchsucht die Aktivitätszusammenfassungen des autorisierten Athleten in einem begrenzten Zeitraum. Gibt weder rohe Sensordatenströme noch genaue GPS-Tracks zurück. | `activity:read` |
+| `get_activity` | Liest eine autorisierte Aktivität anhand ihrer opaken Hash-ID. Gibt ausschließlich zusammenfassende Kennzahlen zurück; genaue Routen und rohe Sensormesswerte sind ausgeschlossen. | `activity:read` |
+| `get_activity_zones` | Liest gespeicherte Herzfrequenz-, Leistungs- und Pace-Zonenverteilungen für eine autorisierte Aktivität. Gibt nur aggregierte Dauer und Prozentanteile zurück, niemals Sensormesswerte. | `activity:read` |
+| `get_activity_splits` | Liest begrenzte Runden- oder Split-Zusammenfassungen für eine autorisierte Aktivität mit opaker Paginierung. Genaue Koordinaten und rohe Sensormesswerte sind ausgeschlossen. | `activity:read` |
+| `get_activity_statistics` | Aggregiert Aktivitätsanzahl, aktive Tage, Dauer, Distanz und kanonische Trainingsbelastung nach Sportart über einen begrenzten Zeitraum, einschließlich Kennzahlenabdeckung und Kürzungsstatus. | `training:read` `activity:read` |
+| `get_training_load` | Liest die Zeitreihen für Trainingsbelastung, Fitness, Ermüdung und Form des autorisierten Athleten für einen Zeitraum von höchstens 180 Tagen. | `training:read` |
+| `compare_training_periods` | Vergleicht Trainingsbelastung, Tagesdurchschnitt und aktive Tage über zwei abgegrenzte Trainingszeiträume. Das Ergebnis ist rein deskriptiv und belegt keine Veränderung von Fitness oder Erholung. | `training:read` |
+| `get_training_breakdown` | Schlüsselt die Trainingsbelastung des autorisierten Athleten nach Laufen, Radfahren, Schwimmen und sonstiger Belastung für einen Zeitraum von höchstens 180 Tagen auf. | `training:read` |
+| `get_training_consistency` | Fasst die Abdeckung gespeicherter Tage, Serien aktiver Tage, Schwankungen der täglichen Trainingsbelastung und die Wochenbelastung für 14 bis 180 Tage zusammen. Fehlende Tage bleiben fehlend und werden nicht als Null gewertet. | `training:read` |
+| `get_training_readiness` | Gibt aktuelle Trainingsbelastung, Form, Frische und Bereiche der jüngsten Belastung als beobachtbare Trainingsindikatoren zurück. Dies ist weder eine medizinische Bewertung noch eine Trainingsanweisung. | `training:read` `plan:read` `activity:read` |
+| `get_fitness_trends` | Liest einen begrenzten Verlauf für eine Fitnesskennzahl des Athleten und einen expliziten Quellenverlauf. Geschätzte Werte dienen der Orientierung; AUTO- oder MANUAL-Werte sind Profileinträge. | `profile:read` |
+| `get_training_zones` | Liest die aktuell aufgelösten Herzfrequenz-, Pace- und Leistungszonen des Athleten einschließlich der Angabe, ob jede Einstellung benutzerdefiniert, abgeleitet oder nicht verfügbar ist. | `profile:read` |
+| `get_personal_bests` | Liest aufbereitete Bestleistungen für Standard- oder benutzerdefinierte Distanz- und Zeitziele innerhalb eines begrenzten Datumsbereichs. Es werden keine Routen oder rohen Sensordaten zurückgegeben. | `activity:read` |
+| `list_training_plans` | Findet autorisierte Trainingspläne, die sich mit einem begrenzten Datumsbereich überschneiden. Fortlaufende Pläne haben null für periodWeeks und endDate. generatedThrough bezeichnet das zuletzt veröffentlichte Datum, nicht das Planende und keine Garantie für lückenlose Abdeckung. | `plan:read` |
+| `get_plan_summary` | Liest die Zusammenfassung eines eigenen Trainingsplans mit Erfüllung, geplanter gegenüber tatsächlicher Trainingsbelastung, Wochenfortschritt und Sportartenaufschlüsselung. Summen fortlaufender Pläne decken nur workoutWindow ab (mit periodWeeks gleich null) und sind keine Gesamtsummen über die gesamte Laufzeit. Der Trainingsplan wird niemals verändert. | `plan:read` `activity:read` |
+| `list_planned_workouts` | Listet autorisierte geplante Einheiten in einem begrenzten Datumsbereich mit opaker Paginierung auf. | `plan:read` |
+| `get_planned_workout` | Liest eine autorisierte geplante Einheit einschließlich ihrer strukturierten Schritte. Dieses Tool ändert den Trainingsplan niemals. | `plan:read` |
+| `get_plan_adherence` | Fasst die statusbasierte Planerfüllung für einen begrenzten Datumsbereich zusammen. DONE gilt als absolviert, SKIPPED als übersprungen, und PLANNED oder IN_PROGRESS bleibt ausstehend. | `plan:read` |
+| `list_competitions` | Listet die Wettkämpfe des autorisierten Athleten in einem begrenzten Datumsbereich mit opaker Paginierung auf. | `competition:read` |
+| `get_competition` | Liest einen autorisierten Wettkampf anhand seiner opaken Event-ID einschließlich Zeitplan, Ziel, Ort und Notizen. Dieses Tool ändert den Wettkampf niemals. | `competition:read` |
+| `get_health_summary` | Liest ausgewählte tägliche Zusammenfassungen zu Erholung, Schlaf, Herzfrequenz, Stress und Aktivität. Dies dient als Wellness-Kontext und stellt keine Diagnose oder medizinische Empfehlung dar. | `health:read` |
+| `get_integration_status` | Liest den Verbindungs- und Synchronisierungsstatus für unterstützte Trainingsanbieter, ohne externe Kontokennungen, Zugangsdaten oder rohe Fehlermeldungen zurückzugeben. | `profile:read` |
+
+## `get_training_snapshot`
+
+Fasst aktuelle Trainingsbelastung, Fitness, Ermüdung, Form, die Veränderung gegenüber der Vorwoche sowie die letzten Aktivitäten für den autorisierten Athleten zusammen. Bevorzuge dieses Tool vor mehreren enger gefassten Tool-Aufrufen.
+
+- **Erforderliche Scopes:** `training:read`, `plan:read`, `activity:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "sportType": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "latestAvailableDate": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "current": {
+      "type": "object",
+      "properties": {
+        "atl": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ctl": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "tsb": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "acuteChronicRatio": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "atl",
+        "ctl",
+        "tsb",
+        "acuteChronicRatio"
+      ],
+      "additionalProperties": false
+    },
+    "windows": {
+      "type": "object",
+      "properties": {
+        "last7": {
+          "type": "object",
+          "properties": {
+            "totalLoad": {
+              "type": "number"
+            },
+            "averageDailyLoad": {
+              "type": "number"
+            },
+            "activeDays": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "totalLoad",
+            "averageDailyLoad",
+            "activeDays"
+          ],
+          "additionalProperties": false
+        },
+        "last14": {
+          "type": "object",
+          "properties": {
+            "totalLoad": {
+              "type": "number"
+            },
+            "averageDailyLoad": {
+              "type": "number"
+            },
+            "activeDays": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "totalLoad",
+            "averageDailyLoad",
+            "activeDays"
+          ],
+          "additionalProperties": false
+        },
+        "last28": {
+          "type": "object",
+          "properties": {
+            "totalLoad": {
+              "type": "number"
+            },
+            "averageDailyLoad": {
+              "type": "number"
+            },
+            "activeDays": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "totalLoad",
+            "averageDailyLoad",
+            "activeDays"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "last7",
+        "last14",
+        "last28"
+      ],
+      "additionalProperties": false
+    },
+    "week": {
+      "type": "object",
+      "properties": {
+        "currentLoad": {
+          "type": "number"
+        },
+        "previousLoad": {
+          "type": "number"
+        },
+        "delta": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "currentLoad",
+        "previousLoad",
+        "delta"
+      ],
+      "additionalProperties": false
+    },
+    "recentActivities": {
+      "maxItems": 3,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hashId": {
+            "type": "string"
+          },
+          "sportType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startTime": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "durationMinutes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "distanceKm": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "trainingLoad": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "hashId",
+          "sportType",
+          "startTime",
+          "durationMinutes",
+          "distanceKm",
+          "trainingLoad"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "plannedWorkouts": {
+      "maxItems": 3,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "scheduledDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sportType": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "plannedDurationMinutes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "estimatedLoad": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "scheduledDate",
+          "sportType",
+          "name",
+          "status",
+          "plannedDurationMinutes",
+          "estimatedLoad"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "asOf",
+    "timezone",
+    "sportType",
+    "latestAvailableDate",
+    "current",
+    "windows",
+    "week",
+    "recentActivities",
+    "plannedWorkouts"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_athlete_profile`
+
+Liest die bevorzugten Sportarten und Trainingsschwellen des autorisierten Athleten. Gibt keinen Namen, keine E-Mail-Adresse, kein Geburtsdatum und keine interne Benutzer-ID zurück.
+
+- **Erforderliche Scopes:** `profile:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "sportType": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "preferredSports": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "timezone": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "body": {
+              "type": "object",
+              "properties": {
+                "weightKg": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "heightCm": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "weightKg",
+                "heightCm"
+              ],
+              "additionalProperties": false
+            },
+            "heartRate": {
+              "type": "object",
+              "properties": {
+                "maximum": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "resting": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "threshold": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "maximum",
+                "resting",
+                "threshold"
+              ],
+              "additionalProperties": false
+            },
+            "performance": {
+              "type": "object",
+              "properties": {
+                "ftpWatts": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "criticalPowerWatts": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "criticalSpeedMetersPerSecond": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "thresholdPaceMetersPerSecond": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "vo2max": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "ftpWatts",
+                "criticalPowerWatts",
+                "criticalSpeedMetersPerSecond",
+                "thresholdPaceMetersPerSecond",
+                "vo2max"
+              ],
+              "additionalProperties": false
+            },
+            "loadSources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "sportType",
+            "preferredSports",
+            "timezone",
+            "body",
+            "heartRate",
+            "performance",
+            "loadSources"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "profile"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `list_activities`
+
+Durchsucht die Aktivitätszusammenfassungen des autorisierten Athleten in einem begrenzten Zeitraum. Gibt weder rohe Sensordatenströme noch genaue GPS-Tracks zurück.
+
+- **Erforderliche Scopes:** `activity:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "limit": {
+      "default": 10,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 1024
+    },
+    "sportType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "search": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "from": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    },
+    "sortBy": {
+      "default": "startTime",
+      "type": "string",
+      "enum": [
+        "startTime",
+        "distance",
+        "duration",
+        "load"
+      ]
+    },
+    "order": {
+      "default": "desc",
+      "type": "string",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    }
+  },
+  "required": [
+    "limit",
+    "sortBy",
+    "order"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "items": {
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hashId": {
+            "type": "string"
+          },
+          "activityName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sportType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startTime": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "durationMinutes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "distanceKm": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "averageHeartRate": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "averagePowerWatts": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "trainingLoad": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "hashId",
+          "activityName",
+          "sportType",
+          "startTime",
+          "durationMinutes",
+          "distanceKm",
+          "averageHeartRate",
+          "averagePowerWatts",
+          "trainingLoad"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "nextCursor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "items",
+    "nextCursor"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_activity`
+
+Liest eine autorisierte Aktivität anhand ihrer opaken Hash-ID. Gibt ausschließlich zusammenfassende Kennzahlen zurück; genaue Routen und rohe Sensormesswerte sind ausgeschlossen.
+
+- **Erforderliche Scopes:** `activity:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "hashId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "hashId"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "activity": {
+      "type": "object",
+      "properties": {
+        "hashId": {
+          "type": "string"
+        },
+        "activityName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sportType": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startTime": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "durationMinutes": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "distanceKm": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "averageHeartRate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "averagePowerWatts": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "trainingLoad": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "elapsedMinutes": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "maximumHeartRate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "normalizedPowerWatts": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "elevationGainMeters": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "calories": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "processingStatus": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "hashId",
+        "activityName",
+        "sportType",
+        "startTime",
+        "durationMinutes",
+        "distanceKm",
+        "averageHeartRate",
+        "averagePowerWatts",
+        "trainingLoad",
+        "description",
+        "elapsedMinutes",
+        "maximumHeartRate",
+        "normalizedPowerWatts",
+        "elevationGainMeters",
+        "calories",
+        "processingStatus"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "activity"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_activity_zones`
+
+Liest gespeicherte Herzfrequenz-, Leistungs- und Pace-Zonenverteilungen für eine autorisierte Aktivität. Gibt nur aggregierte Dauer und Prozentanteile zurück, niemals Sensormesswerte.
+
+- **Erforderliche Scopes:** `activity:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "hashId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "hashId"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "hashId": {
+      "type": "string"
+    },
+    "zones": {
+      "maxItems": 30,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "zoneType": {
+            "type": "string",
+            "enum": [
+              "HEART_RATE",
+              "POWER",
+              "PACE"
+            ]
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "durationMinutes": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "zoneType",
+          "order",
+          "name",
+          "durationMinutes",
+          "percent"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truncated": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "hashId",
+    "zones",
+    "truncated"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_activity_splits`
+
+Liest begrenzte Runden- oder Split-Zusammenfassungen für eine autorisierte Aktivität mit opaker Paginierung. Genaue Koordinaten und rohe Sensormesswerte sind ausgeschlossen.
+
+- **Erforderliche Scopes:** `activity:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "hashId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "limit": {
+      "default": 20,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 1024
+    }
+  },
+  "required": [
+    "hashId",
+    "limit"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "hashId": {
+      "type": "string"
+    },
+    "items": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "durationMinutes": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "elapsedMinutes": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "distanceKm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "elevationGainMeters": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "averageSpeedMetersPerSecond": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "averageHeartRate": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "maximumHeartRate": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "averagePowerWatts": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "normalizedPowerWatts": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "averageCadence": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "index",
+          "startTime",
+          "durationMinutes",
+          "elapsedMinutes",
+          "distanceKm",
+          "elevationGainMeters",
+          "averageSpeedMetersPerSecond",
+          "averageHeartRate",
+          "maximumHeartRate",
+          "averagePowerWatts",
+          "normalizedPowerWatts",
+          "averageCadence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "nextCursor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "hashId",
+    "items",
+    "nextCursor"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_activity_statistics`
+
+Aggregiert Aktivitätsanzahl, aktive Tage, Dauer, Distanz und kanonische Trainingsbelastung nach Sportart über einen begrenzten Zeitraum, einschließlich Kennzahlenabdeckung und Kürzungsstatus.
+
+- **Erforderliche Scopes:** `training:read`, `activity:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "from",
+    "to"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "sportType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "RUN",
+            "CYCLING",
+            "SWIM"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "totals": {
+      "type": "object",
+      "properties": {
+        "activityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "activeDays": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "durationMinutes": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "distanceKm": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "trainingLoad": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "coverage": {
+          "type": "object",
+          "properties": {
+            "durationPercent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "distancePercent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "trainingLoadPercent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "durationPercent",
+            "distancePercent",
+            "trainingLoadPercent"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "activityCount",
+        "activeDays",
+        "durationMinutes",
+        "distanceKm",
+        "trainingLoad",
+        "coverage"
+      ],
+      "additionalProperties": false
+    },
+    "bySport": {
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "activityCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "activeDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 366
+          },
+          "durationMinutes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "distanceKm": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "trainingLoad": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "coverage": {
+            "type": "object",
+            "properties": {
+              "durationPercent": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "distancePercent": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "trainingLoadPercent": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "durationPercent",
+              "distancePercent",
+              "trainingLoadPercent"
+            ],
+            "additionalProperties": false
+          },
+          "sportType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "activityCount",
+          "activeDays",
+          "durationMinutes",
+          "distanceKm",
+          "trainingLoad",
+          "coverage",
+          "sportType"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "countingRule": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "range",
+    "timezone",
+    "sportType",
+    "totals",
+    "bySport",
+    "truncated",
+    "countingRule"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_training_load`
+
+Liest die Zeitreihen für Trainingsbelastung, Fitness, Ermüdung und Form des autorisierten Athleten für einen Zeitraum von höchstens 180 Tagen.
+
+- **Erforderliche Scopes:** `training:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    }
+  },
+  "required": [
+    "from",
+    "to"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "sportType": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "totalLoad": {
+      "type": "number"
+    },
+    "series": {
+      "maxItems": 180,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "load": {
+            "type": "number"
+          },
+          "atl": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "ctl": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "tsb": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "load",
+          "atl",
+          "ctl",
+          "tsb"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "range",
+    "timezone",
+    "sportType",
+    "totalLoad",
+    "series"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `compare_training_periods`
+
+Vergleicht Trainingsbelastung, Tagesdurchschnitt und aktive Tage über zwei abgegrenzte Trainingszeiträume. Das Ergebnis ist rein deskriptiv und belegt keine Veränderung von Fitness oder Erholung.
+
+- **Erforderliche Scopes:** `training:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "periodA": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "periodB": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "periodA",
+    "periodB"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "timezone": {
+      "type": "string"
+    },
+    "sportType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "RUN",
+            "CYCLING",
+            "SWIM"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "periodA": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "days": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 180
+        },
+        "totalLoad": {
+          "type": "number"
+        },
+        "averageDailyLoad": {
+          "type": "number"
+        },
+        "activeDays": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 180
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "days",
+        "totalLoad",
+        "averageDailyLoad",
+        "activeDays"
+      ],
+      "additionalProperties": false
+    },
+    "periodB": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "days": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 180
+        },
+        "totalLoad": {
+          "type": "number"
+        },
+        "averageDailyLoad": {
+          "type": "number"
+        },
+        "activeDays": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 180
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "days",
+        "totalLoad",
+        "averageDailyLoad",
+        "activeDays"
+      ],
+      "additionalProperties": false
+    },
+    "delta": {
+      "type": "object",
+      "properties": {
+        "totalLoad": {
+          "type": "number"
+        },
+        "averageDailyLoad": {
+          "type": "number"
+        },
+        "activeDays": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "totalLoadPercent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "totalLoad",
+        "averageDailyLoad",
+        "activeDays",
+        "totalLoadPercent"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "timezone",
+    "sportType",
+    "periodA",
+    "periodB",
+    "delta"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_training_breakdown`
+
+Schlüsselt die Trainingsbelastung des autorisierten Athleten nach Laufen, Radfahren, Schwimmen und sonstiger Belastung für einen Zeitraum von höchstens 180 Tagen auf.
+
+- **Erforderliche Scopes:** `training:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    }
+  },
+  "required": [
+    "from",
+    "to"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "totalLoad": {
+      "type": "number",
+      "minimum": 0
+    },
+    "activeDays": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 180
+    },
+    "items": {
+      "minItems": 3,
+      "maxItems": 3,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sportType": {
+            "type": "string",
+            "enum": [
+              "RUN",
+              "CYCLING",
+              "SWIM"
+            ]
+          },
+          "load": {
+            "type": "number",
+            "minimum": 0
+          },
+          "sharePercent": {
+            "type": "number",
+            "minimum": 0
+          },
+          "activeDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 180
+          }
+        },
+        "required": [
+          "sportType",
+          "load",
+          "sharePercent",
+          "activeDays"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "other": {
+      "type": "object",
+      "properties": {
+        "load": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sharePercent": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "load",
+        "sharePercent"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "range",
+    "timezone",
+    "totalLoad",
+    "activeDays",
+    "items",
+    "other"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_training_consistency`
+
+Fasst die Abdeckung gespeicherter Tage, Serien aktiver Tage, Schwankungen der täglichen Trainingsbelastung und die Wochenbelastung für 14 bis 180 Tage zusammen. Fehlende Tage bleiben fehlend und werden nicht als Null gewertet.
+
+- **Erforderliche Scopes:** `training:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "days": {
+      "default": 56,
+      "type": "integer",
+      "minimum": 14,
+      "maximum": 180
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "days"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "days": {
+          "type": "integer",
+          "minimum": 14,
+          "maximum": 180
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "days"
+      ],
+      "additionalProperties": false
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "sportType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "RUN",
+            "CYCLING",
+            "SWIM"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "storedDays": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 180
+    },
+    "coveragePercent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "activeDays": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 180
+    },
+    "longestActiveDayStreak": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 180
+    },
+    "currentActiveDayStreak": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 180
+    },
+    "dailyLoadMean": {
+      "type": "number",
+      "minimum": 0
+    },
+    "dailyLoadStandardDeviation": {
+      "type": "number",
+      "minimum": 0
+    },
+    "loadVariabilityCoefficient": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "weekly": {
+      "maxItems": 27,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "weekStart": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "load": {
+            "type": "number",
+            "minimum": 0
+          },
+          "activeDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "storedDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
+          }
+        },
+        "required": [
+          "weekStart",
+          "load",
+          "activeDays",
+          "storedDays"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "countingRule": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "range",
+    "timezone",
+    "sportType",
+    "storedDays",
+    "coveragePercent",
+    "activeDays",
+    "longestActiveDayStreak",
+    "currentActiveDayStreak",
+    "dailyLoadMean",
+    "dailyLoadStandardDeviation",
+    "loadVariabilityCoefficient",
+    "weekly",
+    "countingRule"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_training_readiness`
+
+Gibt aktuelle Trainingsbelastung, Form, Frische und Bereiche der jüngsten Belastung als beobachtbare Trainingsindikatoren zurück. Dies ist weder eine medizinische Bewertung noch eine Trainingsanweisung.
+
+- **Erforderliche Scopes:** `training:read`, `plan:read`, `activity:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "sportType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "RUN",
+            "CYCLING",
+            "SWIM"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "latestAvailableDate": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "dataStatus": {
+      "type": "string",
+      "enum": [
+        "NO_DATA",
+        "CURRENT",
+        "STALE"
+      ]
+    },
+    "freshnessDays": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "signals": {
+      "type": "object",
+      "properties": {
+        "atl": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ctl": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "tsb": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "acuteChronicRatio": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ratioBand": {
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "LOW",
+            "BALANCED",
+            "HIGH"
+          ]
+        },
+        "formBand": {
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "VERY_NEGATIVE",
+            "NEGATIVE",
+            "NEUTRAL",
+            "POSITIVE"
+          ]
+        },
+        "last7Load": {
+          "type": "number"
+        },
+        "previous7Load": {
+          "type": "number"
+        },
+        "activeDaysLast7": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        }
+      },
+      "required": [
+        "atl",
+        "ctl",
+        "tsb",
+        "acuteChronicRatio",
+        "ratioBand",
+        "formBand",
+        "last7Load",
+        "previous7Load",
+        "activeDaysLast7"
+      ],
+      "additionalProperties": false
+    },
+    "advisory": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "asOf",
+    "timezone",
+    "sportType",
+    "latestAvailableDate",
+    "dataStatus",
+    "freshnessDays",
+    "signals",
+    "advisory"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_fitness_trends`
+
+Liest einen begrenzten Verlauf für eine Fitnesskennzahl des Athleten und einen expliziten Quellenverlauf. Geschätzte Werte dienen der Orientierung; AUTO- oder MANUAL-Werte sind Profileinträge.
+
+- **Erforderliche Scopes:** `profile:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "metric": {
+      "type": "string",
+      "enum": [
+        "CP",
+        "W_PRIME",
+        "FTP",
+        "MAX_HR",
+        "RESTING_HR",
+        "LTHR",
+        "AET_HR",
+        "CS",
+        "TP",
+        "AET_PACE",
+        "VO2_MAX",
+        "P_MAX"
+      ]
+    },
+    "sportType": {
+      "default": "RUN",
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    },
+    "source": {
+      "default": "ESTIMATED",
+      "type": "string",
+      "enum": [
+        "ESTIMATED",
+        "AUTO",
+        "MANUAL"
+      ]
+    },
+    "limit": {
+      "default": 180,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 366
+    }
+  },
+  "required": [
+    "from",
+    "to",
+    "metric",
+    "sportType",
+    "source",
+    "limit"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "metric": {
+      "type": "string",
+      "enum": [
+        "CP",
+        "W_PRIME",
+        "FTP",
+        "MAX_HR",
+        "RESTING_HR",
+        "LTHR",
+        "AET_HR",
+        "CS",
+        "TP",
+        "AET_PACE",
+        "VO2_MAX",
+        "P_MAX"
+      ]
+    },
+    "sportType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "RUN",
+            "CYCLING",
+            "SWIM"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "ESTIMATED",
+        "AUTO",
+        "MANUAL"
+      ]
+    },
+    "unit": {
+      "type": "string"
+    },
+    "points": {
+      "maxItems": 366,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "value": {
+            "type": "number"
+          },
+          "secondaryValue": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "recordedAt",
+          "value",
+          "secondaryValue"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truncated": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "range",
+    "metric",
+    "sportType",
+    "source",
+    "unit",
+    "points",
+    "truncated"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_training_zones`
+
+Liest die aktuell aufgelösten Herzfrequenz-, Pace- und Leistungszonen des Athleten einschließlich der Angabe, ob jede Einstellung benutzerdefiniert, abgeleitet oder nicht verfügbar ist.
+
+- **Erforderliche Scopes:** `profile:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "sportType": {
+      "default": "RUN",
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "sportType"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    },
+    "settings": {
+      "minItems": 3,
+      "maxItems": 3,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "HEART_RATE",
+              "PACE",
+              "POWER"
+            ]
+          },
+          "unit": {
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "custom",
+              "derived",
+              "none"
+            ]
+          },
+          "model": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "benchmark": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "zones": {
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "order": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "name": {
+                  "type": "string"
+                },
+                "minimum": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "maximum": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "order",
+                "name",
+                "minimum",
+                "maximum"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "type",
+          "unit",
+          "configured",
+          "source",
+          "model",
+          "benchmark",
+          "zones"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "sportType",
+    "settings"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_personal_bests`
+
+Liest aufbereitete Bestleistungen für Standard- oder benutzerdefinierte Distanz- und Zeitziele innerhalb eines begrenzten Datumsbereichs. Es werden keine Routen oder rohen Sensordaten zurückgegeben.
+
+- **Erforderliche Scopes:** `activity:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "default": "RUN",
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    },
+    "mode": {
+      "default": "distance",
+      "type": "string",
+      "enum": [
+        "distance",
+        "time"
+      ]
+    },
+    "targets": {
+      "minItems": 1,
+      "maxItems": 12,
+      "type": "array",
+      "items": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "maximum": 500000
+      }
+    },
+    "limitPerTarget": {
+      "default": 1,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3
+    }
+  },
+  "required": [
+    "from",
+    "to",
+    "sportType",
+    "mode",
+    "limitPerTarget"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "distance",
+        "time"
+      ]
+    },
+    "targets": {
+      "maxItems": 12,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "results": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "paceSeconds": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "timeSeconds": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "paceBaseMeters": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "activityHashId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "activityTime": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "paceSeconds",
+                "timeSeconds",
+                "paceBaseMeters",
+                "activityHashId",
+                "activityTime"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "key",
+          "results"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "range",
+    "sportType",
+    "mode",
+    "targets"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `list_training_plans`
+
+Findet autorisierte Trainingspläne, die sich mit einem begrenzten Datumsbereich überschneiden. Fortlaufende Pläne haben null für periodWeeks und endDate. generatedThrough bezeichnet das zuletzt veröffentlichte Datum, nicht das Planende und keine Garantie für lückenlose Abdeckung.
+
+- **Erforderliche Scopes:** `plan:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "statuses": {
+      "minItems": 1,
+      "maxItems": 7,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "DRAFT",
+          "SCHEDULED",
+          "ACTIVE",
+          "PAUSED",
+          "COMPLETED",
+          "CANCELLED",
+          "SUPERSEDED"
+        ]
+      }
+    },
+    "limit": {
+      "default": 10,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 1024
+    }
+  },
+  "required": [
+    "limit"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "items": {
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "goal": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SCHEDULED",
+              "ACTIVE",
+              "PAUSED",
+              "COMPLETED",
+              "CANCELLED",
+              "SUPERSEDED"
+            ]
+          },
+          "planningMode": {
+            "type": "string",
+            "enum": [
+              "FIXED",
+              "ROLLING"
+            ]
+          },
+          "periodWeeks": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "endDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "generatedThrough": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "goal",
+          "status",
+          "planningMode",
+          "periodWeeks",
+          "startDate",
+          "endDate",
+          "generatedThrough",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "nextCursor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "range",
+    "items",
+    "nextCursor"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_plan_summary`
+
+Liest die Zusammenfassung eines eigenen Trainingsplans mit Erfüllung, geplanter gegenüber tatsächlicher Trainingsbelastung, Wochenfortschritt und Sportartenaufschlüsselung. Summen fortlaufender Pläne decken nur workoutWindow ab (mit periodWeeks gleich null) und sind keine Gesamtsummen über die gesamte Laufzeit. Der Trainingsplan wird niemals verändert.
+
+- **Erforderliche Scopes:** `plan:read`, `activity:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "planId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "planId"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "planId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "SCHEDULED",
+        "ACTIVE",
+        "PAUSED",
+        "COMPLETED",
+        "CANCELLED",
+        "SUPERSEDED"
+      ]
+    },
+    "planningMode": {
+      "type": "string",
+      "enum": [
+        "FIXED",
+        "ROLLING"
+      ]
+    },
+    "workoutWindow": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "through": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "through"
+      ],
+      "additionalProperties": false
+    },
+    "periodWeeks": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "totals": {
+      "type": "object",
+      "properties": {
+        "workoutCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "doneCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "plannedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inProgressCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "skippedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "movedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "estimatedLoad": {
+          "type": "number",
+          "minimum": 0
+        },
+        "actualLoad": {
+          "type": "number",
+          "minimum": 0
+        },
+        "completionRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "complianceRate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "workoutCount",
+        "doneCount",
+        "plannedCount",
+        "inProgressCount",
+        "skippedCount",
+        "movedCount",
+        "estimatedLoad",
+        "actualLoad",
+        "completionRate",
+        "complianceRate"
+      ],
+      "additionalProperties": false
+    },
+    "weeks": {
+      "maxItems": 104,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "weekIndex": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "workoutCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "doneCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "plannedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "inProgressCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "skippedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "movedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "estimatedLoad": {
+            "type": "number",
+            "minimum": 0
+          },
+          "actualLoad": {
+            "type": "number",
+            "minimum": 0
+          },
+          "complianceRate": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "weekIndex",
+          "workoutCount",
+          "doneCount",
+          "plannedCount",
+          "inProgressCount",
+          "skippedCount",
+          "movedCount",
+          "estimatedLoad",
+          "actualLoad",
+          "complianceRate"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "bySport": {
+      "maxItems": 4,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sport": {
+            "type": "string",
+            "enum": [
+              "RUN",
+              "CYCLING",
+              "SWIM",
+              "OTHER"
+            ]
+          },
+          "workoutCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "doneCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "estimatedLoad": {
+            "type": "number",
+            "minimum": 0
+          },
+          "actualLoad": {
+            "type": "number",
+            "minimum": 0
+          },
+          "complianceRate": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "sport",
+          "workoutCount",
+          "doneCount",
+          "estimatedLoad",
+          "actualLoad",
+          "complianceRate"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truncated": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "planId",
+    "status",
+    "periodWeeks",
+    "totals",
+    "weeks",
+    "bySport",
+    "truncated"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `list_planned_workouts`
+
+Listet autorisierte geplante Einheiten in einem begrenzten Datumsbereich mit opaker Paginierung auf.
+
+- **Erforderliche Scopes:** `plan:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "limit": {
+      "default": 10,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 1024
+    }
+  },
+  "required": [
+    "from",
+    "to",
+    "limit"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "items": {
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "scheduledDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sportType": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "structureKind": {
+            "type": "string"
+          },
+          "plannedDurationMinutes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "plannedSessionRpe": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "estimatedLoad": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "scheduledDate",
+          "sportType",
+          "name",
+          "status",
+          "structureKind",
+          "plannedDurationMinutes",
+          "plannedSessionRpe",
+          "estimatedLoad"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "nextCursor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "items",
+    "nextCursor"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_planned_workout`
+
+Liest eine autorisierte geplante Einheit einschließlich ihrer strukturierten Schritte. Dieses Tool ändert den Trainingsplan niemals.
+
+- **Erforderliche Scopes:** `plan:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "workoutId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "workoutId"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "workout": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "scheduledDate": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sportType": {
+          "type": "string"
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string"
+        },
+        "structureKind": {
+          "type": "string"
+        },
+        "plannedDurationMinutes": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "plannedSessionRpe": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "estimatedLoad": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "parentId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "orderIndex": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "stepType": {
+                "type": "string"
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "intensity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "durationType": {
+                "type": "string"
+              },
+              "durationValue": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "durationUnit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "targetType": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "targetValueLow": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "targetValueHigh": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "targetUnit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "targetZoneIndex": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "targetZoneLabel": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "parentId",
+              "orderIndex",
+              "stepType",
+              "name",
+              "notes",
+              "intensity",
+              "durationType",
+              "durationValue",
+              "durationUnit",
+              "targetType",
+              "targetValueLow",
+              "targetValueHigh",
+              "targetUnit",
+              "targetZoneIndex",
+              "targetZoneLabel"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "id",
+        "scheduledDate",
+        "sportType",
+        "name",
+        "status",
+        "structureKind",
+        "plannedDurationMinutes",
+        "plannedSessionRpe",
+        "estimatedLoad",
+        "text",
+        "notes",
+        "steps"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "workout"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_plan_adherence`
+
+Fasst die statusbasierte Planerfüllung für einen begrenzten Datumsbereich zusammen. DONE gilt als absolviert, SKIPPED als übersprungen, und PLANNED oder IN_PROGRESS bleibt ausstehend.
+
+- **Erforderliche Scopes:** `plan:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportTypes": {
+      "minItems": 1,
+      "maxItems": 5,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "RUN",
+          "CYCLING",
+          "SWIM",
+          "STRETCHING",
+          "UNKNOWN"
+        ]
+      }
+    }
+  },
+  "required": [
+    "from",
+    "to"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "to": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "workoutCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+    },
+    "statuses": {
+      "type": "object",
+      "properties": {
+        "planned": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inProgress": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "done": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "planned",
+        "inProgress",
+        "done",
+        "skipped"
+      ],
+      "additionalProperties": false
+    },
+    "completionRatePercent": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "decisionRatePercent": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "plannedTotals": {
+      "type": "object",
+      "properties": {
+        "durationMinutes": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "estimatedLoad": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "durationCoveragePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "loadCoveragePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "durationMinutes",
+        "estimatedLoad",
+        "durationCoveragePercent",
+        "loadCoveragePercent"
+      ],
+      "additionalProperties": false
+    },
+    "bySport": {
+      "maxItems": 5,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sportType": {
+            "type": "string"
+          },
+          "workoutCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "statuses": {
+            "type": "object",
+            "properties": {
+              "planned": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "inProgress": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "done": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "skipped": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "planned",
+              "inProgress",
+              "done",
+              "skipped"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "sportType",
+          "workoutCount",
+          "statuses"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "countingRule": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "range",
+    "workoutCount",
+    "statuses",
+    "completionRatePercent",
+    "decisionRatePercent",
+    "plannedTotals",
+    "bySport",
+    "truncated",
+    "countingRule"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `list_competitions`
+
+Listet die Wettkämpfe des autorisierten Athleten in einem begrenzten Datumsbereich mit opaker Paginierung auf.
+
+- **Erforderliche Scopes:** `competition:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "to": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "limit": {
+      "default": 10,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 1024
+    }
+  },
+  "required": [
+    "from",
+    "to",
+    "limit"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "items": {
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "sportType": {
+            "type": "string"
+          },
+          "distanceKm": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "endDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startTimeMinute": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timezone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "importance": {
+            "type": "string"
+          },
+          "goalType": {
+            "type": "string"
+          },
+          "targetTimeSeconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "sportType",
+          "distanceKm",
+          "startDate",
+          "endDate",
+          "startTimeMinute",
+          "timezone",
+          "importance",
+          "goalType",
+          "targetTimeSeconds",
+          "location",
+          "notes",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "nextCursor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "items",
+    "nextCursor"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_competition`
+
+Liest einen autorisierten Wettkampf anhand seiner opaken Event-ID einschließlich Zeitplan, Ziel, Ort und Notizen. Dieses Tool ändert den Wettkampf niemals.
+
+- **Erforderliche Scopes:** `competition:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "eventId"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "competition": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "sportType": {
+          "type": "string"
+        },
+        "distanceKm": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "endDate": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "startTimeMinute": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timezone": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "importance": {
+          "type": "string"
+        },
+        "goalType": {
+          "type": "string"
+        },
+        "targetTimeSeconds": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "sportType",
+        "distanceKm",
+        "startDate",
+        "endDate",
+        "startTimeMinute",
+        "timezone",
+        "importance",
+        "goalType",
+        "targetTimeSeconds",
+        "location",
+        "notes",
+        "status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "competition"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_health_summary`
+
+Liest ausgewählte tägliche Zusammenfassungen zu Erholung, Schlaf, Herzfrequenz, Stress und Aktivität. Dies dient als Wellness-Kontext und stellt keine Diagnose oder medizinische Empfehlung dar.
+
+- **Erforderliche Scopes:** `health:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 98304 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "days": {
+      "default": 30,
+      "type": "integer",
+      "minimum": 7,
+      "maximum": 90
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    }
+  },
+  "required": [
+    "days"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "startDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "days": {
+      "maxItems": 90,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "timezone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "provider": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "value",
+                "unit",
+                "provider"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "date",
+          "timezone",
+          "metrics"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "startDate",
+    "endDate",
+    "days"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_integration_status`
+
+Liest den Verbindungs- und Synchronisierungsstatus für unterstützte Trainingsanbieter, ohne externe Kontokennungen, Zugangsdaten oder rohe Fehlermeldungen zurückzugeben.
+
+- **Erforderliche Scopes:** `profile:read`
+- **Annotationen:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Ausgabebudget:** 131072 Bytes
+
+<details>
+<summary>Eingabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "enum": [
+        "strava",
+        "polar",
+        "coros",
+        "intervals_icu",
+        "suunto",
+        "wahoo",
+        "liftosaur",
+        "garmin"
+      ]
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Ausgabe-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    },
+    "directionSemantics": {
+      "type": "object",
+      "properties": {
+        "import": {
+          "type": "string",
+          "const": "third_party_to_trainingload"
+        },
+        "export": {
+          "type": "string",
+          "const": "trainingload_to_third_party"
+        }
+      },
+      "required": [
+        "import",
+        "export"
+      ],
+      "additionalProperties": false
+    },
+    "items": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "strava",
+              "polar",
+              "coros",
+              "intervals_icu",
+              "suunto",
+              "wahoo",
+              "liftosaur",
+              "garmin"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "connectionState": {
+            "type": "string",
+            "enum": [
+              "NOT_CONNECTED",
+              "ACTIVE",
+              "INVALID",
+              "REVOKED"
+            ]
+          },
+          "operations": {
+            "type": "object",
+            "properties": {
+              "completedActivitiesImport": {
+                "type": "string",
+                "enum": [
+                  "UNSUPPORTED",
+                  "INTEGRATION_DISABLED",
+                  "NOT_CONNECTED",
+                  "MISSING_PERMISSION",
+                  "MANUAL_AVAILABLE",
+                  "MANUAL_REQUIRES_CONNECTION",
+                  "AUTOMATIC_DISABLED",
+                  "AUTOMATIC_ENABLED"
+                ]
+              },
+              "completedActivitiesExport": {
+                "type": "string",
+                "enum": [
+                  "UNSUPPORTED",
+                  "INTEGRATION_DISABLED",
+                  "NOT_CONNECTED",
+                  "MISSING_PERMISSION",
+                  "MANUAL_AVAILABLE",
+                  "MANUAL_REQUIRES_CONNECTION",
+                  "AUTOMATIC_DISABLED",
+                  "AUTOMATIC_ENABLED"
+                ]
+              },
+              "plannedWorkoutsImport": {
+                "type": "string",
+                "enum": [
+                  "UNSUPPORTED",
+                  "INTEGRATION_DISABLED",
+                  "NOT_CONNECTED",
+                  "MISSING_PERMISSION",
+                  "MANUAL_AVAILABLE",
+                  "MANUAL_REQUIRES_CONNECTION",
+                  "AUTOMATIC_DISABLED",
+                  "AUTOMATIC_ENABLED"
+                ]
+              },
+              "plannedWorkoutsExport": {
+                "type": "string",
+                "enum": [
+                  "UNSUPPORTED",
+                  "INTEGRATION_DISABLED",
+                  "NOT_CONNECTED",
+                  "MISSING_PERMISSION",
+                  "MANUAL_AVAILABLE",
+                  "MANUAL_REQUIRES_CONNECTION",
+                  "AUTOMATIC_DISABLED",
+                  "AUTOMATIC_ENABLED"
+                ]
+              },
+              "wellnessImport": {
+                "type": "string",
+                "enum": [
+                  "UNSUPPORTED",
+                  "INTEGRATION_DISABLED",
+                  "NOT_CONNECTED",
+                  "MISSING_PERMISSION",
+                  "MANUAL_AVAILABLE",
+                  "MANUAL_REQUIRES_CONNECTION",
+                  "AUTOMATIC_DISABLED",
+                  "AUTOMATIC_ENABLED"
+                ]
+              },
+              "athleteProfileImport": {
+                "type": "string",
+                "enum": [
+                  "UNSUPPORTED",
+                  "INTEGRATION_DISABLED",
+                  "NOT_CONNECTED",
+                  "MISSING_PERMISSION",
+                  "MANUAL_AVAILABLE",
+                  "MANUAL_REQUIRES_CONNECTION",
+                  "AUTOMATIC_DISABLED",
+                  "AUTOMATIC_ENABLED"
+                ]
+              }
+            },
+            "required": [
+              "completedActivitiesImport",
+              "completedActivitiesExport",
+              "plannedWorkoutsImport",
+              "plannedWorkoutsExport",
+              "wellnessImport",
+              "athleteProfileImport"
+            ],
+            "additionalProperties": false
+          },
+          "sync": {
+            "type": "object",
+            "properties": {
+              "startedAt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "completedAt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "latestActivityAt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hasError": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "startedAt",
+              "completedAt",
+              "latestActivityAt",
+              "hasError"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "provider",
+          "enabled",
+          "connected",
+          "connectionState",
+          "operations",
+          "sync"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "asOf",
+    "directionSemantics",
+    "items"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## Siehe auch
+
+- [MCP verbinden](/de/docs/mcp/connect)
+- [Sicherheit und Datenschutz](/de/docs/mcp/security)
+- [Fehlerbehebung](/de/docs/mcp/troubleshooting)

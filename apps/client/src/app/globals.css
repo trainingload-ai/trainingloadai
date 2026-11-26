@@ -15,6 +15,24 @@
 */
 @custom-variant dark (&:is(.dark *));
 
+@utility translucent-overlay {
+  background-color: var(--overlay-surface-color, var(--popover));
+
+  @supports (backdrop-filter: blur(1px)) {
+    background-color: color-mix(
+      in oklab,
+      var(--overlay-surface-color, var(--popover)) 50%,
+      transparent
+    );
+    backdrop-filter: blur(8px);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--overlay-surface-color, var(--popover));
+    backdrop-filter: none;
+  }
+}
+
 /* Desktop chrome shares one neutral palette across the title bar, navigation,
    and portalled menus. Web Cloud and browser self-host keep their own tokens. */
 :root[data-desktop-self-host="true"] {
@@ -28,6 +46,24 @@
 }
 [data-desktop-self-host="true"] .desktop-workspace-row {
   background: var(--desktop-chrome);
+}
+.desktop-frame .desktop-workspace-sidebar {
+  position: relative;
+  /* Keep the rail clear of macOS traffic lights, which start 13px from the top. */
+  padding-block-start: 28px;
+}
+.desktop-frame .desktop-workspace-sidebar::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 28px;
+  content: "";
+  -webkit-app-region: drag;
+}
+.desktop-frame[data-full-screen="true"] .desktop-workspace-sidebar {
+  padding-block-start: 0;
+}
+.desktop-frame[data-full-screen="true"] .desktop-workspace-sidebar::before {
+  display: none;
 }
 [data-desktop-self-host="true"] .desktop-content {
   background: var(--background);

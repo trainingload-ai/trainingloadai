@@ -5,6 +5,7 @@ import type {
 /** Numeric axes and independently sampled series for evidence-based Coach charts. */
 export const EXPLORATION_SOURCES = [
   "ACTIVITY_SERIES",
+  "POWER_DURATION",
   "ZONE_DISTRIBUTION",
   "PLAN_EXECUTION",
   "RELATIONSHIP",
@@ -94,6 +95,7 @@ export type ExplorationPoint = {
   x: number;
   y: number | null;
   label?: string;
+  activityHashId?: string;
   /** Bounds of a time-weighted bucket, in the X axis unit. */
   from?: number;
   to?: number;
@@ -165,6 +167,9 @@ export type TrainingVisualizationV2 = {
   schemaVersion: 2;
   title: string;
   subtitle?: string;
+  detail?: true;
+  observedAt?: string;
+  highlights?: Array<{ label: string; value: number; unit?: ExplorationUnit }>;
   panels: ExplorationPanel[];
   notes: ExplorationNote[];
   provenance: {
@@ -219,6 +224,12 @@ export function isTrainingVisualizationV2(
     v.kind === "training_visualization" &&
     v.schemaVersion === 2 &&
     typeof v.title === "string" &&
+    (v.detail === undefined || v.detail === true) &&
+    (v.highlights === undefined ||
+      (Array.isArray(v.highlights) && v.highlights.length <= 24 && v.highlights.every(
+        (item) => item && typeof item.label === "string" && Number.isFinite(item.value) &&
+          (item.unit === undefined || typeof item.unit === "string"),
+      ))) &&
     Array.isArray(v.panels) &&
     v.panels.length <= 24 &&
     v.panels.every(
@@ -250,6 +261,7 @@ export function isTrainingVisualizationV2(
                 point &&
                 Number.isFinite(point.x) &&
                 (point.y === null || Number.isFinite(point.y)) &&
+                (point.activityHashId === undefined || typeof point.activityHashId === "string") &&
                 [point.from, point.to, point.min, point.max].every(
                   (v) => v === undefined || Number.isFinite(v),
                 ) &&

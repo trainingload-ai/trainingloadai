@@ -1,0 +1,209 @@
+---
+title: Compte, autorisations, exports et consommation IA
+description: Vérifiez la sécurité de votre compte, gérez les autorisations et connexions, exportez vos données, consultez votre abonnement et votre consommation IA, et supprimez un compte en toute sécurité.
+keywords:
+  [
+    "compte Trainingload.ai",
+    "autorisations mobiles",
+    "consommation IA",
+    "changer mot de passe",
+    "mise à jour automatique des seuils",
+    "exporter données Trainingload",
+    "supprimer compte Trainingload",
+  ]
+---
+
+# Compte, autorisations, exports et consommation IA
+
+Les paramètres du compte régissent l’identité et l’accès ; les autorisations contrôlent quelles données d’appareils et de plateformes peuvent entrer dans Trainingload.ai ; la consommation présente votre abonnement et votre utilisation de l’IA. Passez-les en revue ensemble lorsque vous configurez un nouvel appareil ou recherchez une fonctionnalité manquante.
+
+Cette page concerne les comptes Cloud. L’auto-hébergement utilise un compte personnel local ; consultez [Configuration auto-hébergement](/fr/docs/self-host/configuration) pour ses réglages.
+
+## Avant de commencer
+
+- Connectez-vous au même compte Trainingload.ai sur le Web et sur mobile.
+- Conservez l’accès à l’adresse e-mail du compte pour les codes de vérification.
+- Sur mobile, vérifiez si le système d’exploitation a déjà refusé l’accès à Santé ou à la Localisation.
+- Décidez quels seuils peuvent être mis à jour automatiquement avant d’activer un interrupteur.
+- Ne partagez jamais de codes de vérification, mots de passe, identifiants de connexion ou captures d’écran contenant des identifiants privés de compte.
+
+## 1. Vérifier l’identité et l’état du mot de passe
+
+Sur le Web, ouvrez **Compte**. Sur mobile, ouvrez **Moi → Menu → Compte**.
+
+Vous pouvez y consulter :
+
+- Le nom affiché.
+- L’adresse e-mail du compte et son état de vérification.
+- Si un mot de passe a été défini.
+
+Le champ e-mail actuel est en lecture seule. Si le compte n’est pas vérifié, demandez un code de vérification à six chiffres et saisissez-le avant expiration. Sur le Web, un code envoyé reste valide cinq minutes et ne peut pas être renvoyé pendant le compte à rebours.
+
+Utilisez **Définir un mot de passe** lorsque le compte n’en possède pas encore, ou **Changer de mot de passe** lorsqu’un mot de passe existe déjà. Un compte créé via OAuth peut tout à fait indiquer qu’aucun mot de passe n’est défini : utilisez l’action affichée sans supposer que le compte est défectueux.
+
+### Récupérer l’accès et finaliser la connexion
+
+Depuis la page de connexion, utilisez **Mot de passe oublié** pour demander un e-mail de réinitialisation. Ouvrez uniquement le lien le plus récent, vérifiez qu’il renvoie bien vers l’écran de réinitialisation Trainingload.ai et définissez-y votre nouveau mot de passe. Un jeton expiré, invalide ou déjà utilisé doit être remplacé par une nouvelle demande.
+
+La connexion OAuth peut passer par un écran de finalisation ou d’erreur avant de revenir dans l’application. Si la redirection n’aboutit pas, revenez à la connexion et réessayez une fois ; si une page d’erreur apparaît, relevez le texte visible sans partager de jetons ni l’URL complète de rappel.
+
+Lorsqu’une autre application demande l’accès à Trainingload.ai, la page de consentement OAuth indique l’application demandeuse, le compte connecté, les portées demandées et la destination de retour. N’approuvez que si ces quatre éléments correspondent exactement à votre intention. Refuser le consentement redonne la main sans accorder l’accès demandé.
+
+<DocsScreenshot
+  id="account-security-status"
+  title="Identité et état de sécurité du compte"
+  description="Vérifiez l’e-mail du compte, le badge de vérification et l’état du mot de passe avant de modifier vos connexions ou paramètres d’abonnement."
+  route="Compte → Identité et sécurité"
+/>
+
+## 2. Vérifier les autorisations mobiles et les sources de données [#2-review-mobile-permissions-and-data-sources]
+
+Ouvrez **Moi → Menu → Autorisation des données** ou la page mobile **Autorisations**. Les sources sont séparées entre sources locales de l’appareil et services tiers.
+
+Les sources locales comprennent :
+
+- **Santé** : autoriser les lectures de données de santé et de séances prises en charge, consulter l’état accordé ou partiel, demander une synchronisation historique, gérer les appareils connectés ou ouvrir les réglages Santé du système.
+- **Localisation** : autoriser l’enregistrement du tracé ou ouvrir les réglages système si l’autorisation a déjà été refusée.
+
+Les sources tierces peuvent inclure Strava, Polar, COROS, Suunto, Wahoo et Intervals.icu. Chaque ligne indique son état actuel. Ouvrez une source pour la connecter, vérifier les paramètres propres à la plateforme ou accéder à la page des connexions.
+
+<DocsScreenshot
+  id="mobile-permission-sources"
+  title="Autorisations mobiles et sources de connexion"
+  description="Les autorisations de l’appareil et les connexions aux plateformes sont gérées séparément. Cet exemple montre la Localisation et les plateformes d’entraînement ; ouvrez une source pour ses actions disponibles."
+  route="Moi → Menu → Autorisation des données"
+  platform="mobile"
+/>
+
+L’autorisation de l’appareil et la connexion côté serveur sont deux états distincts. Santé peut être autorisé dans le système d’exploitation alors que la connexion de l’appareil dans Trainingload.ai doit encore être reconnectée. Rouvrez le détail de la source après être revenu des réglages système afin que l’application actualise les deux états.
+
+## 3. Contrôler les mises à jour automatiques des indicateurs
+
+Ouvrez **Compte → Mise à jour automatique** sur le Web ou sur mobile. Chaque interrupteur autorise la mise à jour d’un indicateur précis :
+
+| Groupe | Indicateurs |
+| --- | --- |
+| Puissance | FTP, CP, W′, Pmax |
+| Allure | TP, CS |
+| Fréquence cardiaque | LTHR, FC max |
+
+N’activez que les indicateurs que vous souhaitez voir Trainingload.ai mettre à jour à partir de données probantes. Un interrupteur activé ne garantit pas qu’une nouvelle valeur apparaîtra immédiatement : le système a toujours besoin de données d’activité suffisantes et prises en charge.
+
+Les mises à jour automatiques peuvent modifier les seuils utilisés pour les zones, les graphiques, les séances structurées et l’interprétation de la charge. Après une mise à jour, consultez l’historique de l’indicateur et vérifiez une activité récente avant de comparer d’anciennes et de nouvelles périodes.
+
+## 4. Consulter l’abonnement et la consommation IA
+
+La carte d’abonnement dans Compte affiche :
+
+- L’offre actuelle et son statut actif.
+- La période d’abonnement ou la date d’expiration.
+- La source de facturation.
+- Si une résiliation est programmée en fin de période.
+
+Seul un abonnement actif provenant de la source de facturation prise en charge affiche l’action de gestion d’abonnement intégrée. D’autres sources d’accès peuvent afficher le statut d’abonnement sans proposer les mêmes contrôles.
+
+Ouvrez **Consommation** depuis la carte d’abonnement ou la section Compte sur mobile. La page présente :
+
+- L’offre actuelle.
+- Les crédits disponibles, y compris un solde négatif lorsque la dernière opération terminée a dépassé le solde précédent.
+- Les crédits mensuels d’abonnement utilisés, restants et leur date d’expiration.
+- Le solde des packs de crédits disponibles ou verrouillés par l’abonnement, ainsi que leur expiration la plus proche.
+- Le solde dû, les tendances de consommation, le nombre d’opérations et chaque écriture individuelle du relevé.
+
+Choisissez 1 jour, 7 jours, 30 jours, le mois en cours ou le mois dernier. Les lignes du relevé distinguent les modes Standard (1×), Approfondi (3×), les opérations mixtes, les allocations d’abonnement, les packs de crédits, les bonus, les remboursements et les compensations de solde dû. Un crédit représente 1 000 jetons équivalents après application des multiplicateurs d’entrée mise en cache, d’entrée non mise en cache, de sortie, de mode et globaux ; ce n’est pas un nombre fixe de messages.
+
+<DocsScreenshot
+  id="ai-usage-ledger"
+  title="Résumé et relevé de consommation IA"
+  description="Comparez votre offre, vos allocations restantes, votre consommation sur la période, les tendances sur la plage choisie et le relevé détaillé des opérations."
+  route="Compte → Consommation"
+/>
+
+## 5. Définir les préférences de l’application
+
+Ouvrez **Paramètres** sur le Web pour choisir :
+
+- le thème clair, sombre ou système ;
+- les unités métriques ou impériales ;
+- le comportement de l’axe horizontal des graphiques ;
+- l’affichage horaire 12 heures ou 24 heures ;
+- la langue préférée de l’interface.
+
+Ces réglages restent temporaires tant que vous n’avez pas cliqué sur **Enregistrer**. Changer de langue redirige également la route courante vers la langue choisie et mémorise cette préférence pour vos prochaines visites. Les unités et le format horaire modifient la présentation sans altérer l’enregistrement d’activité sous-jacent.
+
+## 6. Exporter les données de votre compte
+
+Sur le Web, ouvrez **Compte → Export de données**. Choisissez le format correspondant à votre usage :
+
+- **Analyse IA** crée un paquet compact orienté analyse et n’inclut pas les fichiers originaux téléversés.
+- **Sauvegarde complète** crée une archive plus large et peut inclure les fichiers originaux lorsque les emplacements exacts sont conservés.
+
+Choisissez le traitement des positions GPS avant de lancer l’export :
+
+- masquer les lieux fréquemment visités ;
+- supprimer les données GPS ;
+- conserver les positions exactes.
+
+Inclure les fichiers originaux impose la conservation des positions exactes, car ces fichiers peuvent contenir leurs propres données de localisation. Considérez un export à positions exactes comme sensible et ne le téléversez pas vers un service IA ni ne le partagez sans savoir précisément ce que contient l’archive.
+
+La création de l’export est asynchrone. Gardez la page ouverte ou revenez plus tard, actualisez la dernière tâche et téléchargez l’archive uniquement lorsque son statut passe à **Prêt**. La page indique la taille de l’archive et sa date d’expiration. Une tâche prête, en échec ou expirée peut être retirée de la liste.
+
+## 7. Supprimer un compte en toute sécurité
+
+La suppression de compte est définitive et asynchrone. Avant de la lancer sur mobile :
+
+1. Exportez tout ce que vous souhaitez conserver.
+2. Vérifiez l’abonnement affiché et le fournisseur de facturation.
+3. Annulez le renouvellement si la procédure l’exige.
+4. Lisez et cochez chaque confirmation finale.
+5. Soumettez la demande de suppression et attendez l’écran d’acceptation avant de quitter.
+
+La demande vous déconnecte et retire immédiatement l’accès actif pendant que la suppression se poursuit en arrière-plan. L’exécution complète prend habituellement moins de 24 heures et jusqu’à 7 jours maximum. L’écran d’acceptation ramène à la connexion ; il ne signifie pas que l’ancien compte peut être restauré.
+
+La gestion de l’abonnement dépend de la source de facturation active. Un renouvellement facturé sur le Web peut devoir être résilié avant de poursuivre la suppression. Un renouvellement Apple est géré via Apple et peut continuer après la suppression du compte Trainingload.ai si vous ne l’annulez pas séparément. La suppression ne donne pas droit automatiquement à un remboursement, et souscrire un nouvel abonnement ultérieurement ne restaure pas les données supprimées.
+
+## 8. Vérifier les paramètres sur plusieurs appareils
+
+Après avoir modifié un paramètre de compte, de connexion, d’autorisation ou de mise à jour automatique :
+
+1. Enregistrez ou finalisez l’action sur l’appareil en cours.
+2. Revenez à la liste des sources et confirmez l’état affiché.
+3. Actualisez l’autre appareil.
+4. Vérifiez qu’il s’agit du même e-mail de compte et que le réglage côté serveur est identique.
+5. Pour les autorisations locales, vérifiez le statut système sur l’appareil où l’autorisation a été accordée ; les autorisations locales ne se transfèrent pas d’un téléphone à un autre.
+
+## Vérifier la configuration
+
+- Les sessions Web et mobile affichent la même adresse e-mail de compte.
+- La vérification de l’e-mail et l’état du mot de passe correspondent à votre méthode de connexion voulue.
+- Santé et Localisation affichent l’état attendu au niveau de l’appareil.
+- Les plateformes tierces affichent l’état de connexion serveur attendu.
+- Seuls les interrupteurs de mise à jour automatique souhaités sont activés.
+- Le statut d’abonnement et le relevé de consommation concordent avec les allocations ou actions IA récentes.
+- Un export demandé atteint l’état Prêt, se télécharge avant expiration et respecte l’option de confidentialité GPS choisie.
+- Les paramètres de thème, d’unités, de graphiques, de format horaire et de langue persistent à la réouverture de Paramètres.
+
+## Dépannage
+
+- **Le code de vérification ne fonctionne pas :** saisissez les six chiffres, vérifiez l’adresse e-mail, contrôlez l’expiration et ne demandez un nouveau code qu’une fois le bouton de renvoi disponible.
+- **L’e-mail ne peut pas être modifié :** la modification d’adresse e-mail n’est pas exposée dans l’interface Compte actuelle ; le champ est volontairement en lecture seule.
+- **Santé est autorisé mais non connecté :** rouvrez Santé, vérifiez l’état de connexion application/serveur/appareil et utilisez la reconnexion si elle est proposée.
+- **La localisation reste refusée :** ouvrez les réglages système de l’application ; une autorisation déjà refusée ne déclenche plus de nouvelle boîte de dialogue système.
+- **Une plateforme apparaît déconnectée après OAuth :** actualisez l’état des sources, vérifiez qu’il s’agit du même compte Trainingload.ai et consultez les paramètres de la plateforme.
+- **Un indicateur automatique n’a pas évolué :** vérifiez que l’interrupteur est activé et que vos activités éligibles récentes contiennent suffisamment de données prises en charge.
+- **La consommation semble vide :** sélectionnez une plage de dates plus large et vérifiez que le compte possède des allocations ou des événements de consommation IA.
+- **L’abonnement ne peut pas être géré dans l’application :** la gestion intégrée n’apparaît que pour les sources d’abonnement actives prises en charge ; vérifiez la source de facturation affichée.
+- **Impossible de lancer une demande d’export :** attendez la fin de la tâche d’export en cours, puis actualisez la page et réessayez.
+- **Un export a expiré :** retirez la tâche expirée et demandez une nouvelle archive avec les options de confidentialité souhaitées.
+- **La suppression du compte est bloquée par un abonnement :** suivez l’étape de résiliation propre au fournisseur affichée dans le flux, puis actualisez son statut. Pour une facturation Apple, résiliez séparément via Apple.
+- **Un lien de réinitialisation est rejeté :** demandez un nouvel e-mail et utilisez uniquement son lien le plus récent ; ne réutilisez pas un jeton expiré ou déjà consommé.
+- **Un écran de consentement OAuth semble inhabituel :** refusez la demande et vérifiez l’application demandeuse, les portées, le compte et la destination de retour avant de recommencer.
+- **Une préférence semble inchangée :** cliquez sur Enregistrer, puis rouvrez Paramètres ; les préférences d’affichage locales et la langue côté serveur peuvent s’actualiser à des moments différents.
+
+## Étapes suivantes
+
+- [Connecter les données d’entraînement](/fr/docs/guide/connect-data)
+- [Intégrations d’applications](/fr/docs/guide/integrations)
+- [Profil, seuils et zones](/fr/docs/guide/profile-thresholds-zones)
+- [Enregistrement mobile](/fr/docs/guide/mobile-recording)
+- [Notifications et bilans automatisés](/fr/docs/guide/notifications-and-reviews)

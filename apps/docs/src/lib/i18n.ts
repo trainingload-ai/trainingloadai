@@ -8,13 +8,11 @@ import { defineI18n } from "fumadocs-core/i18n";
 // partial translations indexed at scale dilute crawl budget across locales and
 // read as low-quality duplicates of the English pages.
 //
-// - en / zh: full native coverage (31 guide + 31 metrics each).
-// - ja / zh-hant: reviewed metrics translations; guide pages are not translated
-//   yet, so only the pages that exist natively enter the sitemap (see
-//   `isReviewedDocsSitemapEntry`).
-// - ko: excluded until its guide pages are translated — they currently hold
-//   English text under a Korean path, which contradicts the hreflang signal.
-// - de / fr / es / it / pt-BR: excluded pending native content review.
+// - en / zh / ja / zh-hant: full reviewed coverage (105 docs pages each) and
+//   active search-index targets.
+// - ko / de / fr / es / it / pt-BR: full localized docs for users, kept
+//   reachable and noindex (excluded from sitemap and hreflang per product
+//   policy).
 // Product policy (confirmed): only en / zh / ja / zh-hant are index targets.
 // Secondary locales stay reachable and noindex. Do not add them to sitemap or
 // hreflang as alternate index targets, including one-off landing pages.

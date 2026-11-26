@@ -2,6 +2,10 @@
 
 import type * as PageTree from "fumadocs-core/page-tree";
 import {
+  LanguageToggle,
+  LanguageToggleText,
+} from "fumadocs-ui/components/layout/language-toggle";
+import {
   SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
@@ -9,10 +13,12 @@ import {
   SidebarItem,
   type SidebarComponents,
 } from "fumadocs-ui/components/layout/sidebar";
-import { ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, Languages } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore, type ReactNode } from "react";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 const inactiveItemClass = [
   "relative flex min-h-9 flex-row items-center gap-2 rounded-control px-3 py-2",
@@ -145,3 +151,18 @@ export const docsSidebarComponents: Partial<SidebarComponents> = {
   Item: DocsSidebarItem,
   Folder: DocsSidebarFolder,
 };
+
+export function DocsSidebarFooter() {
+  const t = useTranslations("header");
+
+  return (
+    <div data-docs-sidebar-footer className="flex items-center gap-1.5">
+      <LanguageToggle className="h-9 min-w-0 gap-2 rounded-control! px-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-secondary data-[state=open]:text-foreground">
+        <Languages aria-hidden="true" className="size-4 shrink-0" />
+        <LanguageToggleText className="truncate text-xs font-medium" />
+        <ChevronDown aria-hidden="true" className="size-3.5 shrink-0" />
+      </LanguageToggle>
+      <ThemeSwitcher groupLabel={t("theme")} />
+    </div>
+  );
+}

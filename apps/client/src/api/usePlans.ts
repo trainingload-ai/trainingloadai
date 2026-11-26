@@ -119,11 +119,12 @@ export function useActivePlan(enabled = true) {
   };
 }
 
-export function usePlanDetail(planId?: string, enabled = true) {
-  return useQuery<TrainingPlanDetail | undefined>({
+export function usePlanDetail(planId?: string, enabled = true, meta?: { errorSurface: "inline" }) {
+  return useQuery<TrainingPlanDetail | null>({
     queryKey: queryKeys.plans.detail(planId),
-    queryFn: () => getPlanDetail(planId as string),
+    queryFn: async () => (await getPlanDetail(planId as string)) ?? null,
     enabled: enabled && !!planId,
+    meta,
   });
 }
 

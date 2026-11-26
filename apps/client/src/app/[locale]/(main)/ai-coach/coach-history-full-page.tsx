@@ -221,7 +221,7 @@ export function CoachHistoryFullPage({
               type="button"
               variant="ghost"
               size="icon"
-              className="shrink-0"
+              className="shrink-0 tablet:hidden"
               onClick={onBack}
               aria-label={t("backToCoach")}
             >

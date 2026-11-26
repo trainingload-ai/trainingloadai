@@ -54,11 +54,12 @@ export function splitActivityDateRange(
 }
 
 // Single activity detail query Hook
-export function useGetActivity(id: string) {
+export function useGetActivity(id: string, meta?: { errorSurface: "inline" }) {
   const client = useQueryClient();
   return useQuery({
     gcTime: ACTIVITY_ANALYSIS_CACHE.gcTime,
     queryKey: queryKeys.activity.detail(id),
+    meta,
     queryFn: async () => {
       const previous = client.getQueryData<Activity>(
         queryKeys.activity.detail(id),

@@ -25,9 +25,15 @@ import {
   type TimeFormat,
 } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import {
+  saveCalendarWeekStart,
+  useCalendarWeekStartPreference,
+  type CalendarWeekStart,
+} from "@/lib/calendar-week-start";
 import { persistLocalePreference } from "@/lib/locale-preference";
 import {
   ArrowRight,
+  CalendarDays,
   ChartNoAxesColumn,
   Clock3,
   Gauge,
@@ -141,6 +147,8 @@ export function SettingsInner() {
   const [tempPowerUnit, setTempPowerUnit] = useState<PowerUnit>(powerUnit);
   const [tempChartXaxis, setTempChartXaxis] = useState<ChartXaxis>(chartXaxis);
   const [tempTimeFormat, setTempTimeFormat] = useState<TimeFormat>(timeFormat);
+  const calendarWeekStart = useCalendarWeekStartPreference();
+  const [tempWeekStart, setTempWeekStart] = useState(calendarWeekStart);
   const [tempTheme, setTempTheme] = useState<Theme>(theme);
   const [tempLocale, setTempLocale] = useState<Locale>(locale);
   const [isSaving, setIsSaving] = useState(false);
@@ -166,6 +174,10 @@ export function SettingsInner() {
   }, [timeFormat]);
 
   useEffect(() => {
+    setTempWeekStart(calendarWeekStart);
+  }, [calendarWeekStart]);
+
+  useEffect(() => {
     setTempTheme(theme);
   }, [theme]);
 
@@ -178,6 +190,7 @@ export function SettingsInner() {
     tempPowerUnit !== powerUnit ||
     tempChartXaxis !== chartXaxis ||
     tempTimeFormat !== timeFormat ||
+    tempWeekStart !== calendarWeekStart ||
     tempTheme !== theme ||
     tempLocale !== locale;
 
@@ -203,6 +216,7 @@ export function SettingsInner() {
         settingUpdates.push(updateSetting("theme", tempTheme));
       }
       await Promise.all(settingUpdates);
+      if (tempWeekStart !== calendarWeekStart) saveCalendarWeekStart(tempWeekStart);
       if (tempTheme !== theme) applyTheme(tempTheme);
 
       if (tempLocale && tempLocale !== locale) {
@@ -370,6 +384,31 @@ export function SettingsInner() {
                 <SelectContent>
                   <SelectItem value="24h">{t("timeFormat24h")}</SelectItem>
                   <SelectItem value="12h">{t("timeFormat12h")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </SettingRow>
+
+            <SettingRow
+              icon={CalendarDays}
+              label={t("calendarWeekStart")}
+              description={t("calendarWeekStartDescription")}
+              value={t(`calendarWeekStartOptions.${tempWeekStart}`)}
+            >
+              <Select
+                disabled={publicDemo.active}
+                value={tempWeekStart}
+                onValueChange={(value: CalendarWeekStart) => setTempWeekStart(value)}
+              >
+                <SelectTrigger
+                  aria-label={t("calendarWeekStart")}
+                  size="default"
+                  className="w-full bg-background shadow-none dark:bg-black/20"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monday">{t("calendarWeekStartOptions.monday")}</SelectItem>
+                  <SelectItem value="sunday">{t("calendarWeekStartOptions.sunday")}</SelectItem>
                 </SelectContent>
               </Select>
             </SettingRow>

@@ -85,6 +85,7 @@ vi.mock("@deployment/managed-ui", () => ({
   useGuestAccessText: () => (key: string) => key,
   ManagedAccountMenuItem: () => null,
   DeploymentAccountBadge: () => null,
+  DeploymentAccountUsage: () => null,
   DeploymentUnauthenticatedAccountAction: () => null,
 }));
 
