@@ -9,7 +9,11 @@ import { FtpCalculatorClient } from "./client";
 import { FtpTableHighlight } from "./highlight";
 import { FtpAppPromo, FtpFooterCta } from "./promo";
 import styles from "./ftp-calculator.module.css";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { TrackedLink } from "@/components/TrackedLink";
 import { ALLEN_COGGAN_FTP_CATEGORIES } from "@/lib/ftp-field";
 import {
@@ -172,6 +176,7 @@ export async function generateMetadata({
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/ftp-calculator"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, "/ftp-calculator"),

@@ -1,11 +1,11 @@
-import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
+import { isSeoIndexedLanguage, SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 import { getNativeBlogLanguages } from "@/lib/blog-source";
 import {
   llmFreeToolPages,
   llmGuidePages,
   llmProductPages,
 } from "@/lib/llms-catalog";
-import { localePrefix } from "@/lib/locale-url";
+import { localePrefix, seoIndexedLanguagesForPath } from "@/lib/locale-url";
 
 function getSiteUrl() {
   const raw = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.trainingload.ai";
@@ -36,7 +36,7 @@ export async function GET() {
     "Plans can begin from a reviewed official template, a manual build, or an AI-assisted draft. AI Coach can explain evidence and propose structured changes, but plan and workout mutations remain reviewable before they are applied.",
     "The web and mobile apps share plans, activities, thresholds, AI Coach sessions, notifications, membership, and usage. Mobile adds daily execution and local workout recording; web provides the broadest planning, analysis, and connection-management surfaces.",
     "Primary topics: training load management, plan-versus-actual analysis, official and adaptive endurance training plans, AI endurance coaching, PMC / CTL-ATL-TSB, effective VO2max, thresholds, zones, provider synchronization, and free endurance tools.",
-    `Languages: ${SEO_INDEXED_LANGUAGES.join(", ")}`,
+    `Homepage and tools: ${seoIndexedLanguagesForPath("/").join(", ")}. Documentation: ${SEO_INDEXED_LANGUAGES.join(", ")}.`,
     "",
     "## Essential Resources",
     "",
@@ -90,7 +90,7 @@ export async function GET() {
     "",
     "## Localized Entry Points",
     "",
-    ...SEO_INDEXED_LANGUAGES.flatMap((lang) => {
+    ...seoIndexedLanguagesForPath("/").flatMap((lang) => {
       const prefix = localePrefix(lang);
       const items = [
         markdownFileLink(`${lang} homepage`, `${siteUrl}${prefix || "/"}`),
@@ -101,9 +101,11 @@ export async function GET() {
           markdownFileLink(`${lang} blog`, `${siteUrl}${prefix}/blog`),
         );
       }
-      items.push(
-        markdownFileLink(`${lang} documentation`, `${siteUrl}${prefix}/docs`),
-      );
+      if (isSeoIndexedLanguage(lang)) {
+        items.push(
+          markdownFileLink(`${lang} documentation`, `${siteUrl}${prefix}/docs`),
+        );
+      }
       return items;
     }),
     "",

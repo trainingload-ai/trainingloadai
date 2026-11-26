@@ -1,3 +1,5 @@
+import messages from "@trainingloadai/messages/docs-copy/home-plan-demo.json";
+import { formatDemoMessage } from "../home-demo/shared/format-demo-message";
 import type { PlanDemoCopy, PlanDemoPayload } from "./types";
 
 function buildPayload(locale: "en" | "zh"): PlanDemoPayload {
@@ -358,13 +360,18 @@ const jaCopy: PlanDemoCopy = {
 
 type LocalizedPlanSpec = {
   weekStrip: PlanDemoCopy["weekStrip"];
-  weekLoad: PlanDemoCopy["weekLoad"];
-  workout: PlanDemoCopy["workout"];
+  weekLoad: Omit<PlanDemoCopy["weekLoad"], "currentWeek"> & {
+    currentWeek: string;
+  };
+  workout: Omit<PlanDemoCopy["workout"], "linked" | "session"> & {
+    linked: string;
+    session: string;
+  };
   actions: PlanDemoCopy["actions"];
   today: PlanDemoCopy["today"];
-  goal: PlanDemoCopy["goal"];
+  goal: Omit<PlanDemoCopy["goal"], "dayNumber"> & { dayNumber: string };
   header: PlanDemoPayload["header"];
-  weekdayLabels: [string, string, string, string, string, string, string];
+  weekdayLabels: string[];
   workouts: {
     w1: {
       dayLabel: string;
@@ -403,11 +410,22 @@ function buildLocalizedPlanCopy(spec: LocalizedPlanSpec): PlanDemoCopy {
 
   return {
     weekStrip: spec.weekStrip,
-    weekLoad: spec.weekLoad,
-    workout: spec.workout,
+    weekLoad: {
+      ...spec.weekLoad,
+      currentWeek: (week) =>
+        formatDemoMessage(spec.weekLoad.currentWeek, { week }),
+    },
+    workout: {
+      ...spec.workout,
+      linked: (activity) => formatDemoMessage(spec.workout.linked, { activity }),
+      session: (index) => formatDemoMessage(spec.workout.session, { index }),
+    },
     actions: spec.actions,
     today: spec.today,
-    goal: spec.goal,
+    goal: {
+      ...spec.goal,
+      dayNumber: (day) => formatDemoMessage(spec.goal.dayNumber, { day }),
+    },
     payload: {
       ...basePayload,
       header: spec.header,
@@ -422,449 +440,17 @@ function buildLocalizedPlanCopy(spec: LocalizedPlanSpec): PlanDemoCopy {
   };
 }
 
-const koCopy = buildLocalizedPlanCopy({
-  weekStrip: {
-    title: "주기 진행도",
-    stateCurrent: "이번 주",
-  },
-  weekLoad: {
-    title: "이번 주 훈련 부하",
-    currentWeek: (week) => `${week}주차`,
-    plannedSessions: "예정 세션",
-  },
-  workout: {
-    title: "이번 주 훈련",
-    loadBadge: "계획 부하",
-    linked: (activity) => `연결됨 · ${activity}`,
-    notLinked: "연결된 활동 없음",
-    session: (index) => `세션 ${index}`,
-  },
-  actions: {
-    postpone: "연기",
-    skip: "건너뛰기",
-    delete: "삭제",
-    deleteDisabledTip: "삭제할 수 없습니다",
-  },
-  today: {
-    title: "오늘의 훈련",
-    viewTodayPlan: "오늘 계획 보기",
-    postponeToday: "오늘 훈련 연기",
-  },
-  goal: {
-    title: "주간 목표",
-    weekSessions: "세션 수",
-    completed: "완료",
-    progressTo: "진행률",
-    dayNumber: (day) => `${day}일차`,
-  },
-  header: {
-    cycleLabel: "현재 주기",
-    title: "마라톤 기초 블록",
-    weekStatus: "5 / 12주차 · ACTIVE",
-    totalSessions: "36개 세션",
-    remainingLabel: "남은 기간",
-    remainingWeeks: "7주",
-    createPlan: "계획 만들기",
-  },
-  weekdayLabels: ["월", "화", "수", "목", "금", "토", "일"],
-  workouts: {
-    w1: {
-      dayLabel: "월",
-      title: "이지 런 45 min",
-      detail: "RUN · Z2 45 min",
-      statusLabel: "완료",
-      linkedActivity: "일요일 이지 런",
-    },
-    w2: {
-      dayLabel: "수",
-      title: "스테디 런 35 min",
-      detail: "RUN · 유산소 지속주",
-      statusLabel: "오늘",
-    },
-    w3: {
-      dayLabel: "토",
-      title: "장거리 주 90 min",
-      detail: "RUN · 장거리 지구력",
-      statusLabel: "예정",
-    },
-  },
-  coach: {
-    title: "코치 노트",
-    summary: "목요일 포인트 훈련은 유지하고, 주말 장거리 주는 컨디션에 따라 조정하세요.",
-  },
-});
-
-const deCopy = buildLocalizedPlanCopy({
-  weekStrip: {
-    title: "Zyklusfortschritt",
-    stateCurrent: "Aktuell",
-  },
-  weekLoad: {
-    title: "Wochenbelastung",
-    currentWeek: (week) => `W${week}`,
-    plannedSessions: "Geplante Einheiten",
-  },
-  workout: {
-    title: "Einheiten der Woche",
-    loadBadge: "Geplante Last",
-    linked: (activity) => `Verknüpft · ${activity}`,
-    notLinked: "Keine verknüpfte Aktivität",
-    session: (index) => `Einheit ${index}`,
-  },
-  actions: {
-    postpone: "Verschieben",
-    skip: "Überspringen",
-    delete: "Löschen",
-    deleteDisabledTip: "Löschen ist nicht verfügbar",
-  },
-  today: {
-    title: "Heute",
-    viewTodayPlan: "Heute öffnen",
-    postponeToday: "Heute verschieben",
-  },
-  goal: {
-    title: "Wochenziel",
-    weekSessions: "Einheiten",
-    completed: "Erledigt",
-    progressTo: "Fortschritt",
-    dayNumber: (day) => `T${day}`,
-  },
-  header: {
-    cycleLabel: "Aktueller Zyklus",
-    title: "Marathon-Grundlagenblock",
-    weekStatus: "Woche 5 / 12 · ACTIVE",
-    totalSessions: "36 Einheiten",
-    remainingLabel: "Verbleibend",
-    remainingWeeks: "7 Wochen",
-    createPlan: "Plan erstellen",
-  },
-  weekdayLabels: ["M", "D", "M", "D", "F", "S", "S"],
-  workouts: {
-    w1: {
-      dayLabel: "Mo",
-      title: "Lockerer Lauf 45 min",
-      detail: "RUN · Z2 45 min",
-      statusLabel: "Erledigt",
-      linkedActivity: "Lockerer Lauf So",
-    },
-    w2: {
-      dayLabel: "Mi",
-      title: "Dauerlauf 35 min",
-      detail: "RUN · ruhiges Grundlagentempo",
-      statusLabel: "Heute",
-    },
-    w3: {
-      dayLabel: "Sa",
-      title: "Langer Lauf 90 min",
-      detail: "RUN · lange Ausdauer",
-      statusLabel: "Geplant",
-    },
-  },
-  coach: {
-    title: "Coach-Hinweis",
-    summary: "Donnerstags-Qualität beibehalten. Den langen Lauf nach Tagesform anpassen.",
-  },
-});
-
-const frCopy = buildLocalizedPlanCopy({
-  weekStrip: {
-    title: "Avancement du cycle",
-    stateCurrent: "En cours",
-  },
-  weekLoad: {
-    title: "Charge de la semaine",
-    currentWeek: (week) => `S${week}`,
-    plannedSessions: "Séances prévues",
-  },
-  workout: {
-    title: "Séances de la semaine",
-    loadBadge: "Charge prévue",
-    linked: (activity) => `Associée · ${activity}`,
-    notLinked: "Aucune activité associée",
-    session: (index) => `Séance ${index}`,
-  },
-  actions: {
-    postpone: "Reporter",
-    skip: "Ignorer",
-    delete: "Supprimer",
-    deleteDisabledTip: "Suppression indisponible",
-  },
-  today: {
-    title: "Aujourd'hui",
-    viewTodayPlan: "Ouvrir aujourd'hui",
-    postponeToday: "Reporter la séance",
-  },
-  goal: {
-    title: "Objectif hebdo",
-    weekSessions: "Séances",
-    completed: "Terminées",
-    progressTo: "Progression",
-    dayNumber: (day) => `J${day}`,
-  },
-  header: {
-    cycleLabel: "Cycle actuel",
-    title: "Bloc foncier marathon",
-    weekStatus: "Semaine 5 / 12 · ACTIVE",
-    totalSessions: "36 séances",
-    remainingLabel: "Restant",
-    remainingWeeks: "7 semaines",
-    createPlan: "Créer un plan",
-  },
-  weekdayLabels: ["L", "M", "M", "J", "V", "S", "D"],
-  workouts: {
-    w1: {
-      dayLabel: "Lun",
-      title: "Footing facile 45 min",
-      detail: "RUN · Z2 45 min",
-      statusLabel: "Terminée",
-      linkedActivity: "Footing facile dim.",
-    },
-    w2: {
-      dayLabel: "Mer",
-      title: "Allure soutenue 35 min",
-      detail: "RUN · aérobie régulier",
-      statusLabel: "Aujourd'hui",
-    },
-    w3: {
-      dayLabel: "Sam",
-      title: "Sortie longue 90 min",
-      detail: "RUN · endurance longue",
-      statusLabel: "Prévue",
-    },
-  },
-  coach: {
-    title: "Note du coach",
-    summary: "Maintenez la séance clé de jeudi. Ajustez la sortie longue selon votre fraîcheur.",
-  },
-});
-
-const esCopy = buildLocalizedPlanCopy({
-  weekStrip: {
-    title: "Progreso del ciclo",
-    stateCurrent: "Actual",
-  },
-  weekLoad: {
-    title: "Carga de esta semana",
-    currentWeek: (week) => `S${week}`,
-    plannedSessions: "Sesiones previstas",
-  },
-  workout: {
-    title: "Sesiones de la semana",
-    loadBadge: "Carga prevista",
-    linked: (activity) => `Vinculada · ${activity}`,
-    notLinked: "Sin actividad vinculada",
-    session: (index) => `Sesión ${index}`,
-  },
-  actions: {
-    postpone: "Posponer",
-    skip: "Omitir",
-    delete: "Eliminar",
-    deleteDisabledTip: "Eliminar no está disponible",
-  },
-  today: {
-    title: "Hoy",
-    viewTodayPlan: "Abrir hoy",
-    postponeToday: "Posponer hoy",
-  },
-  goal: {
-    title: "Objetivo semanal",
-    weekSessions: "Sesiones",
-    completed: "Completadas",
-    progressTo: "Progreso",
-    dayNumber: (day) => `D${day}`,
-  },
-  header: {
-    cycleLabel: "Ciclo actual",
-    title: "Bloque base de maratón",
-    weekStatus: "Semana 5 / 12 · ACTIVE",
-    totalSessions: "36 sesiones",
-    remainingLabel: "Restante",
-    remainingWeeks: "7 semanas",
-    createPlan: "Crear plan",
-  },
-  weekdayLabels: ["L", "M", "X", "J", "V", "S", "D"],
-  workouts: {
-    w1: {
-      dayLabel: "Lun",
-      title: "Rodaje suave 45 min",
-      detail: "RUN · Z2 45 min",
-      statusLabel: "Hecho",
-      linkedActivity: "Rodaje suave dom.",
-    },
-    w2: {
-      dayLabel: "Mié",
-      title: "Rodaje constante 35 min",
-      detail: "RUN · aeróbico sostenido",
-      statusLabel: "Hoy",
-    },
-    w3: {
-      dayLabel: "Sáb",
-      title: "Tirada larga 90 min",
-      detail: "RUN · resistencia larga",
-      statusLabel: "Previsto",
-    },
-  },
-  coach: {
-    title: "Nota del entrenador",
-    summary: "Mantén la calidad del jueves. Ajusta la tirada larga según tus sensaciones.",
-  },
-});
-
-const itCopy = buildLocalizedPlanCopy({
-  weekStrip: {
-    title: "Avanzamento ciclo",
-    stateCurrent: "Attuale",
-  },
-  weekLoad: {
-    title: "Carico settimanale",
-    currentWeek: (week) => `S${week}`,
-    plannedSessions: "Sedute pianificate",
-  },
-  workout: {
-    title: "Sedute della settimana",
-    loadBadge: "Carico previsto",
-    linked: (activity) => `Collegata · ${activity}`,
-    notLinked: "Nessuna attività collegata",
-    session: (index) => `Seduta ${index}`,
-  },
-  actions: {
-    postpone: "Posticipa",
-    skip: "Salta",
-    delete: "Elimina",
-    deleteDisabledTip: "Eliminazione non disponibile",
-  },
-  today: {
-    title: "Oggi",
-    viewTodayPlan: "Apri oggi",
-    postponeToday: "Posticipa oggi",
-  },
-  goal: {
-    title: "Obiettivo settimanale",
-    weekSessions: "Sedute",
-    completed: "Completate",
-    progressTo: "Avanzamento",
-    dayNumber: (day) => `G${day}`,
-  },
-  header: {
-    cycleLabel: "Ciclo attuale",
-    title: "Blocco base maratona",
-    weekStatus: "Settimana 5 / 12 · ACTIVE",
-    totalSessions: "36 sedute",
-    remainingLabel: "Rimanenti",
-    remainingWeeks: "7 settimane",
-    createPlan: "Crea piano",
-  },
-  weekdayLabels: ["L", "M", "M", "G", "V", "S", "D"],
-  workouts: {
-    w1: {
-      dayLabel: "Lun",
-      title: "Corsa facile 45 min",
-      detail: "RUN · Z2 45 min",
-      statusLabel: "Completata",
-      linkedActivity: "Corsa facile dom.",
-    },
-    w2: {
-      dayLabel: "Mer",
-      title: "Corsa media 35 min",
-      detail: "RUN · aerobico costante",
-      statusLabel: "Oggi",
-    },
-    w3: {
-      dayLabel: "Sab",
-      title: "Lungo 90 min",
-      detail: "RUN · resistenza lunga",
-      statusLabel: "Pianificata",
-    },
-  },
-  coach: {
-    title: "Nota del coach",
-    summary: "Mantieni la qualità di giovedì. Adatta il lungo del weekend alla tua prontezza.",
-  },
-});
-
-const ptBrCopy = buildLocalizedPlanCopy({
-  weekStrip: {
-    title: "Progresso do ciclo",
-    stateCurrent: "Atual",
-  },
-  weekLoad: {
-    title: "Carga da semana",
-    currentWeek: (week) => `S${week}`,
-    plannedSessions: "Sessões planejadas",
-  },
-  workout: {
-    title: "Sessões da semana",
-    loadBadge: "Carga planejada",
-    linked: (activity) => `Vinculada · ${activity}`,
-    notLinked: "Nenhuma atividade vinculada",
-    session: (index) => `Sessão ${index}`,
-  },
-  actions: {
-    postpone: "Adiar",
-    skip: "Pular",
-    delete: "Excluir",
-    deleteDisabledTip: "Exclusão indisponível",
-  },
-  today: {
-    title: "Hoje",
-    viewTodayPlan: "Abrir hoje",
-    postponeToday: "Adiar treino de hoje",
-  },
-  goal: {
-    title: "Meta semanal",
-    weekSessions: "Sessões",
-    completed: "Concluídas",
-    progressTo: "Progresso",
-    dayNumber: (day) => `D${day}`,
-  },
-  header: {
-    cycleLabel: "Ciclo atual",
-    title: "Bloco de base para maratona",
-    weekStatus: "Semana 5 / 12 · ACTIVE",
-    totalSessions: "36 sessões",
-    remainingLabel: "Restante",
-    remainingWeeks: "7 semanas",
-    createPlan: "Criar plano",
-  },
-  weekdayLabels: ["S", "T", "Q", "Q", "S", "S", "D"],
-  workouts: {
-    w1: {
-      dayLabel: "Seg",
-      title: "Corrida leve 45 min",
-      detail: "RUN · Z2 45 min",
-      statusLabel: "Concluído",
-      linkedActivity: "Corrida leve dom.",
-    },
-    w2: {
-      dayLabel: "Qua",
-      title: "Corrida contínua 35 min",
-      detail: "RUN · aeróbico contínuo",
-      statusLabel: "Hoje",
-    },
-    w3: {
-      dayLabel: "Sáb",
-      title: "Longão 90 min",
-      detail: "RUN · resistência longa",
-      statusLabel: "Planejado",
-    },
-  },
-  coach: {
-    title: "Nota do treinador",
-    summary: "Mantenha a qualidade de quinta. Ajuste o longão conforme a sua prontidão.",
-  },
-});
-
 export const planDemoCopy = {
   en: enCopy,
   zh: zhCopy,
   "zh-hant": zhHantCopy,
   ja: jaCopy,
-  ko: koCopy,
-  de: deCopy,
-  fr: frCopy,
-  es: esCopy,
-  it: itCopy,
-  "pt-BR": ptBrCopy,
+  ko: buildLocalizedPlanCopy(messages.ko),
+  de: buildLocalizedPlanCopy(messages.de),
+  fr: buildLocalizedPlanCopy(messages.fr),
+  es: buildLocalizedPlanCopy(messages.es),
+  it: buildLocalizedPlanCopy(messages.it),
+  "pt-BR": buildLocalizedPlanCopy(messages["pt-BR"]),
 } satisfies Record<string, PlanDemoCopy>;
 
 export type PlanDemoLang = keyof typeof planDemoCopy;

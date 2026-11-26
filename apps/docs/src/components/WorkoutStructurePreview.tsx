@@ -1,3 +1,4 @@
+import messages from "@trainingloadai/messages/docs-copy/workout-structure-preview.json";
 import type {
   EndurancePlanBlock,
   EnduranceWorkRestStep,
@@ -18,101 +19,9 @@ type PreviewLocale =
   | "pt-BR";
 type PreviewStepKind = NonNullable<EnduranceWorkRestStep["stepKind"]>;
 
-const CHART_ARIA_LABEL: Record<PreviewLocale, string> = {
-  en: "Workout structure chart",
-  zh: "训练结构图",
-  "zh-hant": "訓練結構圖",
-  ja: "ワークアウト構成図",
-  ko: "훈련 구조 차트",
-  de: "Trainingsstruktur-Diagramm",
-  fr: "Graphique de structure de séance",
-  es: "Gráfico de estructura del entrenamiento",
-  it: "Grafico della struttura dell'allenamento",
-  "pt-BR": "Gráfico de estrutura do treino",
-};
+const CHART_ARIA_LABEL: Record<PreviewLocale, string> = messages.chartAriaLabel;
 
-const STEP_COPY: Record<PreviewLocale, Record<PreviewStepKind, string>> = {
-  en: {
-    WARMUP: "Warm-up",
-    WORK: "Work",
-    RECOVERY: "Recovery",
-    REST: "Rest",
-    COOLDOWN: "Cool-down",
-    OTHER: "Step",
-  },
-  zh: {
-    WARMUP: "热身",
-    WORK: "主训练",
-    RECOVERY: "恢复",
-    REST: "休息",
-    COOLDOWN: "放松",
-    OTHER: "训练",
-  },
-  "zh-hant": {
-    WARMUP: "熱身",
-    WORK: "主訓練",
-    RECOVERY: "恢復",
-    REST: "休息",
-    COOLDOWN: "放鬆",
-    OTHER: "訓練",
-  },
-  ja: {
-    WARMUP: "ウォームアップ",
-    WORK: "メイン",
-    RECOVERY: "リカバリー",
-    REST: "休息",
-    COOLDOWN: "クールダウン",
-    OTHER: "ステップ",
-  },
-  ko: {
-    WARMUP: "워밍업",
-    WORK: "메인",
-    RECOVERY: "회복",
-    REST: "휴식",
-    COOLDOWN: "쿨다운",
-    OTHER: "구간",
-  },
-  de: {
-    WARMUP: "Aufwärmen",
-    WORK: "Belastung",
-    RECOVERY: "Erholung",
-    REST: "Pause",
-    COOLDOWN: "Auslaufen",
-    OTHER: "Abschnitt",
-  },
-  fr: {
-    WARMUP: "Échauffement",
-    WORK: "Travail",
-    RECOVERY: "Récupération",
-    REST: "Repos",
-    COOLDOWN: "Retour au calme",
-    OTHER: "Étape",
-  },
-  es: {
-    WARMUP: "Calentamiento",
-    WORK: "Trabajo",
-    RECOVERY: "Recuperación",
-    REST: "Descanso",
-    COOLDOWN: "Enfriamiento",
-    OTHER: "Bloque",
-  },
-  it: {
-    WARMUP: "Riscaldamento",
-    WORK: "Lavoro",
-    RECOVERY: "Recupero",
-    REST: "Riposo",
-    COOLDOWN: "Defaticamento",
-    OTHER: "Fase",
-  },
-  "pt-BR": {
-    WARMUP: "Aquecimento",
-    WORK: "Trabalho",
-    RECOVERY: "Recuperação",
-    REST: "Descanso",
-    COOLDOWN: "Desaquecimento",
-    OTHER: "Etapa",
-  },
-};
+const STEP_COPY: Record<PreviewLocale, Record<PreviewStepKind, string>> = messages.stepLabels;
 
 const STEP_TONE: Record<PreviewStepKind, { chip: string; color: string }> = {
   WARMUP: {

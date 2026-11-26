@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import { FitCourseConverterClient } from "./client.tsx";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import {
   breadcrumbSchema,
   faqPageSchema,
@@ -50,6 +54,7 @@ export async function generateMetadata({
       url: pageUrl,
       images: [{ url: ogImageUrl }],
     },
+    robots: robotsForPublicPath(lang, "/fit-course-converter"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, "/fit-course-converter"),

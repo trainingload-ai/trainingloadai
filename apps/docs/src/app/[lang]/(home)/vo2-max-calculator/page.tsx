@@ -8,7 +8,11 @@ import { ArrowRight } from "lucide-react";
 import { applyVo2Search } from "@/lib/vo2-field";
 import { Vo2ResultPromo, Vo2FooterCta } from "./promo";
 import { getTranslations } from "next-intl/server";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import {
   breadcrumbSchema,
   faqPageSchema,
@@ -212,6 +216,7 @@ export async function generateMetadata({
       url: pageUrl,
       images: [{ url: ogImageUrl }],
     },
+    robots: robotsForPublicPath(lang, "/vo2-max-calculator"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, path),

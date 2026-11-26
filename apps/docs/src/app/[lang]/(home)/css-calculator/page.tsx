@@ -9,7 +9,11 @@ import { CSS_ZONES } from "@/lib/css";
 import { CssCalculatorClient } from "./client";
 import { CssAppPromo, CssFooterCta } from "./promo";
 import styles from "./css-calculator.module.css";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { TrackedLink } from "@/components/TrackedLink";
 import {
   breadcrumbSchema,
@@ -159,6 +163,7 @@ export async function generateMetadata({
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/css-calculator"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, "/css-calculator"),

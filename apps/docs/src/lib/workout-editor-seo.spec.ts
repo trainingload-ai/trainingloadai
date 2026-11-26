@@ -1,18 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
+import { seoIndexedLanguagesForPath } from "@/lib/locale-url";
 import { llmFreeToolPages } from "@/lib/llms-catalog";
 import messages from "../../../../packages/messages/docs/en.json";
 
 describe("workout editor SEO ownership", () => {
-  it("registers the tool for indexed sitemap locales only", async () => {
-    const source = await readFile(
-      new URL("../app/sitemap.ts", import.meta.url),
-      "utf8",
-    );
-    expect(source).toContain('"/workout-editor"');
-    expect(source).toContain("for (const lang of SEO_INDEXED_LANGUAGES)");
-    expect(SEO_INDEXED_LANGUAGES).toEqual(["en", "zh", "ja", "zh-hant"]);
+  it("indexes the public editor in every supported locale", () => {
+    expect(seoIndexedLanguagesForPath("/workout-editor")).toHaveLength(10);
   });
 
   it("lists the public builder in the LLM tools catalog", () => {

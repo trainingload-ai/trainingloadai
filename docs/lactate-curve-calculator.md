@@ -67,10 +67,10 @@ dialog was requested, not that a PDF was saved.
 Print uses fixed-view-box SVGs for the full measured intensity range rather than
 depending on responsive chart measurements during the browser's print layout.
 
-English, Simplified Chinese, Traditional Chinese and Japanese have complete
-route copy, canonical/hreflang, metadata and structured data. Secondary locales
-use the site's existing English fallback/noindex policy. The route is included
-in sitemap, tools catalog and LLM catalog; physiology docs and the estimation
+All ten supported locales have localized route copy, canonical/hreflang,
+metadata, and structured data. Each locale is eligible for indexing and listed
+in the sitemap. The route appears in the tools catalog and LLM catalog;
+physiology docs and the estimation
 tool link to it. The OG illustration is labeled as illustrative.
 
 The methods section identifies each criterion's research background, links to

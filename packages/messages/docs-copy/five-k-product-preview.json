@@ -1,0 +1,62 @@
+{
+  "en": {
+    "webAlt": "TrainingLoad.ai Web training plan detail",
+    "mobileAlt": "TrainingLoad.ai iOS plan screen with today's workout",
+    "webCalendarAlt": "TrainingLoad.ai Web training calendar with completed and planned workouts",
+    "mobileCalendarAlt": "TrainingLoad.ai iOS training calendar with workout data"
+  },
+  "zh": {
+    "webAlt": "TrainingLoad.ai Web 端训练计划详情页",
+    "mobileAlt": "TrainingLoad.ai iOS 端今日训练页",
+    "webCalendarAlt": "TrainingLoad.ai Web 端含已完成与计划训练的训练日历",
+    "mobileCalendarAlt": "TrainingLoad.ai iOS 端含训练数据的日历页面"
+  },
+  "zh-hant": {
+    "webAlt": "TrainingLoad.ai Web 端訓練計畫詳情頁",
+    "mobileAlt": "TrainingLoad.ai iOS 端今日訓練頁",
+    "webCalendarAlt": "TrainingLoad.ai Web 端含已完成與計畫訓練的訓練日曆",
+    "mobileCalendarAlt": "TrainingLoad.ai iOS 端含訓練資料的日曆頁面"
+  },
+  "ja": {
+    "webAlt": "TrainingLoad.ai Web版のトレーニングプラン詳細画面",
+    "mobileAlt": "TrainingLoad.ai iOS版の今日のトレーニング画面",
+    "webCalendarAlt": "完了済みと予定のワークアウトが入ったTrainingLoad.ai Web版カレンダー",
+    "mobileCalendarAlt": "トレーニングデータが入ったTrainingLoad.ai iOS版カレンダー"
+  },
+  "ko": {
+    "webAlt": "TrainingLoad.ai 웹 훈련 계획 상세 화면",
+    "mobileAlt": "오늘의 훈련이 표시된 TrainingLoad.ai iOS 계획 화면",
+    "webCalendarAlt": "완료된 훈련과 예정된 훈련이 표시된 TrainingLoad.ai 웹 훈련 캘린더",
+    "mobileCalendarAlt": "훈련 데이터가 표시된 TrainingLoad.ai iOS 훈련 캘린더"
+  },
+  "de": {
+    "webAlt": "TrainingLoad.ai Web-Trainingsplandetail",
+    "mobileAlt": "TrainingLoad.ai iOS-Planansicht mit dem heutigen Training",
+    "webCalendarAlt": "TrainingLoad.ai Web-Trainingskalender mit absolvierten und geplanten Einheiten",
+    "mobileCalendarAlt": "TrainingLoad.ai iOS-Trainingskalender mit Trainingsdaten"
+  },
+  "fr": {
+    "webAlt": "Détail du plan d'entraînement TrainingLoad.ai sur le Web",
+    "mobileAlt": "Écran de plan TrainingLoad.ai iOS avec la séance du jour",
+    "webCalendarAlt": "Calendrier d'entraînement TrainingLoad.ai Web avec séances réalisées et planifiées",
+    "mobileCalendarAlt": "Calendrier d'entraînement TrainingLoad.ai iOS avec données de séance"
+  },
+  "es": {
+    "webAlt": "Detalle del plan de entrenamiento de TrainingLoad.ai en Web",
+    "mobileAlt": "Pantalla de plan en TrainingLoad.ai iOS con el entrenamiento de hoy",
+    "webCalendarAlt": "Calendario de entrenamiento de TrainingLoad.ai en Web con sesiones completadas y planificadas",
+    "mobileCalendarAlt": "Calendario de entrenamiento de TrainingLoad.ai en iOS con datos de entrenamiento"
+  },
+  "it": {
+    "webAlt": "Dettaglio del piano di allenamento TrainingLoad.ai Web",
+    "mobileAlt": "Schermata del piano TrainingLoad.ai iOS con l'allenamento di oggi",
+    "webCalendarAlt": "Calendario di allenamento TrainingLoad.ai Web con sessioni completate e pianificate",
+    "mobileCalendarAlt": "Calendario di allenamento TrainingLoad.ai iOS con dati di allenamento"
+  },
+  "pt-BR": {
+    "webAlt": "Detalhes do plano de treino do TrainingLoad.ai na Web",
+    "mobileAlt": "Tela do plano no TrainingLoad.ai iOS com o treino de hoje",
+    "webCalendarAlt": "Calendário de treino do TrainingLoad.ai na Web com treinos concluídos e planejados",
+    "mobileCalendarAlt": "Calendário de treino do TrainingLoad.ai no iOS com dados de treino"
+  }
+}

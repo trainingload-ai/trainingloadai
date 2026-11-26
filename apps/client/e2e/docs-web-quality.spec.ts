@@ -622,3 +622,55 @@ for (const route of [
     expect(unusedSpace.every((space) => space < 2)).toBe(true);
   });
 }
+
+test("indexes the homepage and tools in every supported locale", async ({
+  page,
+  request,
+}) => {
+  const sitemap = await request.get("/sitemap.xml");
+  expect(sitemap.ok()).toBe(true);
+  const xml = await sitemap.text();
+  const alternateLocales = [
+    "en",
+    "de",
+    "fr",
+    "es",
+    "pt-BR",
+    "it",
+    "ko",
+    "ja",
+    "zh-Hans",
+    "zh-Hant",
+    "x-default",
+  ].sort();
+
+  const toolPaths = ["/fr", "/fr/tools", "/fr/ftp-calculator", "/fr/fit-to-gpx"];
+  for (const path of toolPaths) {
+    await page.goto(path);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /^index, follow$/,
+    );
+    await expect(page.locator('meta[name="googlebot"]')).toHaveAttribute(
+      "content",
+      /^index, follow/,
+    );
+    const alternates = page.locator('link[rel="alternate"][hreflang]');
+    await expect(alternates).toHaveCount(alternateLocales.length);
+    const hreflangs = await alternates.evaluateAll((links) =>
+      links.map((link) => link.getAttribute("hreflang")),
+    );
+    expect(hreflangs.sort()).toEqual(alternateLocales);
+    expect(xml).toContain(`<loc>https://www.trainingload.ai${path}</loc>`);
+  }
+
+  for (const path of ["/fr/docs", "/fr/pricing"]) {
+    await page.goto(path);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /^noindex, follow$/,
+    );
+    expect(xml).not.toContain(`<loc>https://www.trainingload.ai${path}</loc>`);
+  }
+  expect(xml).toContain("<loc>https://www.trainingload.ai/ja/docs</loc>");
+});

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { isSeoIndexedLanguage } from "@/lib/i18n";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import {
   breadcrumbSchema,
   faqPageSchema,
@@ -35,12 +38,12 @@ export async function generateMetadata({
     namespace: "freeAiWorkoutReview",
   });
   const url = `${siteUrl()}${localePrefix(lang)}/free-ai-workout-review`;
-  const index = isSeoIndexedLanguage(lang);
   const keywords = t.raw("metadata.keywords");
   return {
     title: t("metadata.title"),
     description: t("metadata.description"),
     keywords: Array.isArray(keywords) ? keywords : undefined,
+    robots: robotsForPublicPath(lang, "/free-ai-workout-review"),
     alternates: {
       canonical: url,
       languages: absoluteAlternatesForPath(
@@ -61,7 +64,6 @@ export async function generateMetadata({
       title: t("metadata.title"),
       description: t("metadata.description"),
     },
-    robots: { index, follow: true },
   };
 }
 

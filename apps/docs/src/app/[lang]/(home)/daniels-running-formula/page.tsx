@@ -16,8 +16,11 @@ import {
   schemaId,
   schemaLanguage,
 } from "@/lib/seo-schema";
-import { isSeoIndexedLanguage } from "@/lib/i18n";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { getDanielsGuideCopy } from "@/lib/vdot-plan-content";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 
@@ -51,9 +54,7 @@ export async function generateMetadata({
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(base, GUIDE_PATH),
     },
-    robots: isSeoIndexedLanguage(lang)
-      ? { index: true, follow: true }
-      : { index: false, follow: true },
+    robots: robotsForPublicPath(lang, GUIDE_PATH),
     openGraph: {
       type: "article",
       title: seo.title,

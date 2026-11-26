@@ -6,6 +6,7 @@
   "exports": {
     "./client-core/*.json": "./client-core/*.json",
     "./docs/*.json": "./docs/*.json",
+    "./docs-copy/*.json": "./docs-copy/*.json",
     "./running-plan-intents/*.json": "./running-plan-intents/*.json",
     "./catalog": {
       "types": "./catalog.d.mts",

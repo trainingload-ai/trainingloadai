@@ -10,6 +10,7 @@ import {
   absoluteAlternatesForPath,
   absoluteLocalizedUrl,
   withLocalePath,
+  robotsForPublicPath,
 } from "@/lib/locale-url";
 import { getLactateCopy } from "@/lib/lactate-curve-copy";
 import { lactateExample } from "@/lib/lactate-recording";
@@ -69,6 +70,7 @@ export async function generateMetadata({
   return {
     title,
     description: c.description,
+    robots: robotsForPublicPath(lang, "/lactate-curve-calculator"),
     alternates: {
       canonical: url,
       languages: absoluteAlternatesForPath(siteUrl(), PATH),

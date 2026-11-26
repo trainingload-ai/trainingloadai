@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { i18n, isSeoIndexedLanguage, SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
+import { isSeoIndexedLanguage, SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 import { source } from "@/lib/source";
 import {
   blogAlternatesForSlug,
@@ -10,8 +10,11 @@ import {
   getNativeBlogPages,
 } from "@/lib/blog-source";
 import {
+  ALL_LOCALE_INDEXED_PATHS,
   absoluteAlternatesForLocales,
+  absoluteAlternatesForPath,
   localePrefix,
+  seoIndexedLanguagesForPath,
   withLocalePath,
 } from "@/lib/locale-url";
 import { isIndexableSitemapUrl } from "@/lib/public-html-url";
@@ -27,56 +30,22 @@ function getSiteUrl() {
   return raw.replace(/\/+$/, "");
 }
 
-function ensureLeadingSlash(pathname: string) {
-  return pathname.startsWith("/") ? pathname : `/${pathname}`;
-}
-
-function toBasePathFromPublicPath(publicPathname: string) {
-  const normalized = ensureLeadingSlash(publicPathname);
-  for (const lang of i18n.languages) {
-    const prefix = localePrefix(lang);
-    if (!prefix) continue;
-    if (normalized === prefix) return "/";
-    if (normalized.startsWith(`${prefix}/`)) {
-      return `/${normalized.slice(prefix.length + 1)}`;
-    }
-  }
-  return normalized;
-}
-
-function alternatesForPublicPath(siteUrl: string, publicPathname: string) {
-  const base = toBasePathFromPublicPath(publicPathname);
-  return {
-    languages: absoluteAlternatesForLocales(
-      siteUrl,
-      base,
-      SEO_INDEXED_LANGUAGES,
-    ),
-  };
-}
-
 const REVIEWED_DOC_LOCALES = new Set<string>(SEO_INDEXED_LANGUAGES);
-
-function docsSlugFromBasePath(basePathname: string) {
-  const parts = basePathname.split("/").filter(Boolean);
-  if (parts[0] !== "docs") return null;
-  return parts.slice(1);
-}
 
 function hasNativeDocsPage(lang: string, slug: string[]) {
   return source.getPage(slug, lang)?.path.startsWith(`${lang}/`) ?? false;
 }
 
-function reviewedDocsAlternates(siteUrl: string, publicPathname: string) {
-  const base = toBasePathFromPublicPath(publicPathname);
-  const slug = docsSlugFromBasePath(base);
-  if (!slug) return alternatesForPublicPath(siteUrl, publicPathname);
+function reviewedDocsAlternates(
+  siteUrl: string,
+  pathname: string,
+  slug: string[],
+) {
   const reviewedLocales = [...REVIEWED_DOC_LOCALES].filter((locale) =>
     hasNativeDocsPage(locale, slug),
   );
-
   return {
-    languages: absoluteAlternatesForLocales(siteUrl, base, reviewedLocales),
+    languages: absoluteAlternatesForLocales(siteUrl, pathname, reviewedLocales),
   };
 }
 
@@ -275,18 +244,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
 
   const now = new Date();
-  entries.push(
-    // Root path serves default-locale homepage; keep it discoverable.
-    {
-      url: `${siteUrl}/`,
-      lastModified: new Date(`${STATIC_LAST_MODIFIED["/"]}T00:00:00.000Z`),
-      alternates: alternatesForPublicPath(siteUrl, "/"),
-      ...getChangeFreqAndPriority("/"),
-    },
-  );
-
   const staticPaths = [
-    "",
     "/features",
     "/training-load",
     "/ai-training-plan",
@@ -316,7 +274,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/cycling-training-plan",
     "/ironman-70-3-training-plan",
     "/olympic-triathlon-training-plan",
-    "/brick-workout",
     "/swim-training-plan",
     "/features/pmc-fitness-chart",
     "/features/power-curve",
@@ -327,58 +284,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/features/best-efforts",
     "/features/mcp",
     "/features/fitness-fatigue-form",
-    "/tools",
-    "/free-ai-workout-review",
     "/pricing",
     "/download",
     "/releases",
-    "/ftp-calculator",
-    "/critical-power-calculator",
-    "/lactate-threshold-calculator",
-    "/lactate-curve-calculator",
-    "/converter",
-    "/fit-to-gpx",
-    "/gpx-to-fit",
-    "/tcx-to-gpx",
-    "/gpx-to-tcx",
-    "/fit-to-tcx",
-    "/tcx-to-fit",
-    "/fit-course-converter",
-    "/fit-file-viewer",
-    "/max-heart-rate-calculator",
-    "/heart-rate-zones-calculator",
-    "/zone-2-heart-rate-calculator",
-    "/css-calculator",
-    "/vo2-max-calculator",
-    "/vdot-calculator",
-    "/daniels-running-formula",
-    "/running-pace-calculator",
-    "/race-time-predictor",
-    "/power-zones-calculator",
-    "/tss-calculator",
-    "/training-load-calculator",
-    "/workout-editor",
     "/contact",
     "/privacy",
     "/terms-and-conditions",
+    ...ALL_LOCALE_INDEXED_PATHS,
   ];
 
-  for (const lang of SEO_INDEXED_LANGUAGES) {
-    for (const path of staticPaths) {
-      // as-needed locale prefix:
-      // - default locale (en): "/tools"
-      // - other locales (zh): "/zh/tools"
-      const urlPath = withLocalePath(lang, path || "/");
-      const pathname =
-        path === "" ? "/" : path.startsWith("/") ? path : `/${path}`;
-
-      const lastModified = STATIC_LAST_MODIFIED[pathname]
-        ? new Date(`${STATIC_LAST_MODIFIED[pathname]}T00:00:00.000Z`)
-        : undefined;
+  for (const pathname of staticPaths) {
+    const lastModified = STATIC_LAST_MODIFIED[pathname]
+      ? new Date(`${STATIC_LAST_MODIFIED[pathname]}T00:00:00.000Z`)
+      : undefined;
+    const languages = absoluteAlternatesForPath(siteUrl, pathname);
+    for (const lang of seoIndexedLanguagesForPath(pathname)) {
       entries.push({
-        url: `${siteUrl}${urlPath}`,
+        url: `${siteUrl}${withLocalePath(lang, pathname)}`,
         ...(lastModified ? { lastModified } : {}),
-        alternates: alternatesForPublicPath(siteUrl, urlPath),
+        alternates: { languages },
         ...getChangeFreqAndPriority(pathname),
       });
     }
@@ -443,7 +367,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entries.push({
       url: `${siteUrl}${urlPath}`,
       lastModified,
-      alternates: reviewedDocsAlternates(siteUrl, urlPath),
+      alternates: reviewedDocsAlternates(siteUrl, pathname, slug),
       ...getChangeFreqAndPriority(pathname),
     });
   }

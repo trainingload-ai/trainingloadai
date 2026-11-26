@@ -32,6 +32,7 @@ import {
   absoluteAlternatesForPath,
   localePrefix,
   withLocalePath,
+  robotsForPublicPath,
 } from "@/lib/locale-url";
 import {
   breadcrumbSchema,
@@ -87,6 +88,7 @@ export async function generateMetadata({
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/tools"),
     alternates: {
       canonical: `${siteUrl}${prefix}/tools`,
       languages: absoluteAlternatesForPath(siteUrl, "/tools"),

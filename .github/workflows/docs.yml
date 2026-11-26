@@ -8,6 +8,7 @@ on:
       - "apps/docs/**"
       - "packages/design-tokens/**"
       - "packages/messages/docs/**"
+      - "packages/messages/docs-copy/**"
       - "packages/shared/**"
       - "scripts/docs/**"
       - ".npmrc"
