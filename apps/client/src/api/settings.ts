@@ -135,6 +135,7 @@ export interface UserProfile {
   dPrime?: number;
   // 阈值速度
   tp?: number;
+  vo2max?: number;
   // 有氧运动阈值pace
   aerobicThresholdPaceSec?: number;
   // 装备重量
