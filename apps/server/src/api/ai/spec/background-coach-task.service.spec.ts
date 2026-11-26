@@ -720,20 +720,28 @@ describe('AiService background coach tasks', () => {
     const service = Object.create(AiService.prototype) as AiService;
     const { prepared, persistGeneratedReview } = installActivityReview(service);
     const runBackgroundCoachTask = jest.fn(
-      async (input: { validateResult: (value: unknown) => unknown }) => ({
-        result: input.validateResult({ markdown: '### 结论\n训练稳定。' }),
-        usage: {
-          inputTokens: 100,
-          outputTokens: 20,
-          cachedInputTokens: 0,
-          reported: true,
-        },
-        provider: 'test-provider',
-        model: 'test-model',
-        runId: 'run-1',
-        operationId: 'operation-1',
-        replayed: false,
-      }),
+      async (input: { validateResult: (value: unknown) => unknown }) => {
+        expect(() => input.validateResult({
+          markdown: 'The recorded activity was completed at a consistent pace.',
+        })).toThrow(expect.objectContaining({
+          code: 'ACTIVITY_REVIEW_LANGUAGE_MISMATCH',
+          correction: expect.stringContaining('Simplified Chinese'),
+        }));
+        return {
+          result: input.validateResult({ markdown: '### 结论\n训练稳定。' }),
+          usage: {
+            inputTokens: 100,
+            outputTokens: 20,
+            cachedInputTokens: 0,
+            reported: true,
+          },
+          provider: 'test-provider',
+          model: 'test-model',
+          runId: 'run-1',
+          operationId: 'operation-1',
+          replayed: false,
+        };
+      },
     );
     Object.defineProperty(service, 'runBackgroundCoachTask', {
       value: runBackgroundCoachTask,
@@ -778,6 +786,23 @@ describe('AiService background coach tasks', () => {
         operationId: 'operation-1',
       }),
     );
+  });
+
+  it('uses platform funding to repair a previously delivered activity review language', async () => {
+    const service = Object.create(AiService.prototype) as AiService;
+    const { prepared } = installActivityReview(service, 'MANUAL');
+    const runBackgroundCoachTask = jest.fn(async () => ({
+      result: { markdown: '### 结论\n训练稳定。' }, usage: {}, operationId: 'platform-run',
+    }));
+    Object.defineProperty(service, 'runBackgroundCoachTask', { value: runBackgroundCoachTask });
+
+    await service.processQueuedActivityAiReview(prepared.review.id, {
+      platformLanguageRepair: true,
+    });
+    expect(runBackgroundCoachTask).toHaveBeenCalledWith(expect.objectContaining({
+      funding: 'PLATFORM',
+      callerManagedOperationId: undefined,
+    }));
   });
 
   it('keeps coverage tools in the readiness Agent loop', async () => {

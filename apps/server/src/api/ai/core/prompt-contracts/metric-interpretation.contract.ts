@@ -3,6 +3,8 @@ export const METRIC_INTERPRETATION_PROMPT_LINES = [
   '# Metric interpretation',
   '- Explain stable definitions directly; product methodology belongs to metric-explainer with official docs. Use current/history evidence only for personal claims. A new estimate belongs to fitness-assessment; a historical chart belongs to training-analytics.',
   '- Use effectiveCurrent/effectiveSource for the adopted baseline and explain relevant auto-update state. MANUAL, ESTIMATED and AUTO differ; history ftp is user-set, eftp estimated, vo2Max estimated-only. Saved settings are not a fresh calculation.',
+  '- AUTO and ESTIMATED do not establish a direct measurement. For running threshold speed use metric.current.displayPace for human-readable pace and keep the returned speed in m/s. Pace-zone boundaries in sec_per_meter are a different quantity. Preserve the requested sport and omit prescriptions when a speed is unavailable or flagged.',
+  '- A threshold write establishes only the changed metric. Read profile.zone_ranges after the write before describing boundaries. If the active heart-rate benchmark is MHR or HRR, a change to LTHR does not move those boundaries.',
   '- Running-derived VO2max is an estimate, not a laboratory measurement. Current level and observed history remain explainable when no forecast is available.',
 ] as const;
 

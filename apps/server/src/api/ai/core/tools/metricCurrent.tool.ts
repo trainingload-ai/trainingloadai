@@ -30,6 +30,8 @@ type Output = {
     estimated?: number | null;
     automatic?: number | null;
     effectiveCurrent?: number | null;
+    displayPace?: string;
+    dataIssue?: 'SPEED_OUT_OF_RANGE';
     effectiveSource?: 'MANUAL' | 'AUTO' | 'ESTIMATED' | null;
     effectiveRecordedAt?: string | null;
     autoUpdateSupported?: boolean;
@@ -41,7 +43,7 @@ type Output = {
 export const metricCurrentTool: AiToolDef<Input, Output> = buildAiTool({
   name: 'metric.current',
   description:
-    'Fetch the authoritative current metric snapshot, including manual, estimated, AUTO-applied, effective value/source/date, auto-update state, and selection policy. Use effectiveCurrent—not manual—for the baseline used by zones and calculations.',
+    'Fetch the authoritative current metric snapshot, including manual, estimated, AUTO-applied, effective value/source/date, auto-update state, and selection policy. Use the stated sport, effectiveCurrent, unit and displayPace for explanations. SPEED_OUT_OF_RANGE means the speed is unavailable for prescriptions.',
   cost: 'low',
   searchHint: 'current metrics snapshot ftp eftp vo2max weight',
   isEnabled: async (ctx) => hasSignedInUser(ctx),

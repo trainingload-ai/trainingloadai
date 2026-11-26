@@ -17,6 +17,7 @@ import {
 } from './coach-message.util';
 import { sanitizeStoredCoachMessageForClient } from './coach-history-messages';
 import { COACH_RUN_PART_TYPES } from '@shared/ai-coach-run-contract';
+import { coachTurnErrorRecoveryReason } from '@shared/coach-turn-error';
 import { sanitizeCoachPublicSummary } from './coach-public-summary';
 import {
   buildCoachFailureReceipt,
@@ -316,6 +317,7 @@ export class CoachRunProjector {
       this.upsert('coach-context-window', 'coach-context-window-current', data);
     }
     if (event.type === 'result' && event.is_error) {
+      const recoveryReason = coachTurnErrorRecoveryReason(event.error_code, event.data);
       this.terminalFailure = {
         code: event.error_code,
         message: event.result,
@@ -323,6 +325,7 @@ export class CoachRunProjector {
       this.upsert('coach-turn-error', 'coach-turn-error', {
         code: event.error_code ?? 'internal',
         message: event.result,
+        ...(recoveryReason && { recoveryReason }),
       });
     }
     // Internal tool-result payloads and raw reasoning never enter the public projection.

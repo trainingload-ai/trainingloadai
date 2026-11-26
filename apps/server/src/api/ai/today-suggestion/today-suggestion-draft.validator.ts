@@ -31,6 +31,11 @@ const INTENSITIES = new Set<TodaySuggestionIntensity>([
   'HARD',
 ]);
 
+const LOW_RECORDED_LOAD =
+  /\b(?:low|light|minimal)\b.{0,28}\bload\b|\bload\s+(?:is|was|remains)\s+(?:low|light|minimal)\b|\b(?:niedrige|geringe)\w*\s+(?:Trainings)?(?:last|belastung)\b|(?:负荷|負荷).{0,6}(?:低|不高|不大|较少|較少)|(?:低|很少).{0,4}(?:负荷|負荷)/iu;
+const CONDITIONAL_READINESS =
+  /\bif you feel (?:well|recovered|fresh|rested)\b|\bwenn du dich .{0,24}(?:erholt|fit) fühlst\b|(?:如果|若|假如).{0,28}(?:感觉|感覺|体感|體感|自觉|自覺).{0,16}(?:良好|不错|不錯|恢复|恢復|轻松|輕鬆)/iu;
+
 const TRAINING_BASIS_CORRECTIONS = {
   TRAINING_BASIS_REQUIRED:
     'Provide trainingBasis for the scheduled workout or optional additional training, or reassess whether TRAIN is supported.',
@@ -38,6 +43,8 @@ const TRAINING_BASIS_CORRECTIONS = {
     'Select a PLANNED or IN_PROGRESS workout for the projected date, or revise the recommendation using the current schedule.',
   TRAINING_BASIS_REASON_NOT_IN_SUMMARY:
     'Include the reason for optional additional training in summary and use the same wording in trainingBasis.reason.',
+  TRAINING_BASIS_SPARSE_LOAD:
+    'Sparse activity history cannot establish readiness for extra training. In summary state the coverage limitation; make any easy extra session optional and conditional on how the athlete feels, or choose a non-training recommendation.',
   TRAINING_BASIS_CREATE_WORKOUT_REQUIRED:
     'Use CREATE_TODAY_WORKOUT as preferredIntent for ADDITIONAL training.',
   TRAINING_BASIS_OPEN_WORKOUT_CONFLICT:
@@ -81,6 +88,13 @@ function record(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+function fieldTooLongCode(field: string) {
+  return `${field
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_|_$/g, '')
+    .toUpperCase()}_TOO_LONG`;
+}
+
 function requiredText(
   value: unknown,
   max: number,
@@ -95,10 +109,16 @@ function requiredText(
       'Remove URLs from athlete-facing text.',
     );
   }
-  return text.slice(0, max);
+  if (text.length > max) {
+    rejectDraftField(
+      fieldTooLongCode(field),
+      `Shorten ${field} to at most ${max} characters using complete sentences without dropping key limitations or next steps (received ${text.length}).`,
+    );
+  }
+  return text;
 }
 
-function optionalText(value: unknown, max: number) {
+function optionalText(value: unknown, max: number, field: string) {
   const text = String(value ?? '').trim();
   if (/\b(?:https?:\/\/|www\.)/i.test(text)) {
     rejectDraftField(
@@ -106,26 +126,46 @@ function optionalText(value: unknown, max: number) {
       'Remove URLs from athlete-facing text.',
     );
   }
-  return text ? text.slice(0, max) : undefined;
+  if (!text) return undefined;
+  if (text.length > max) {
+    rejectDraftField(
+      fieldTooLongCode(field),
+      `Shorten ${field} to at most ${max} characters using complete sentences without dropping key limitations (received ${text.length}).`,
+    );
+  }
+  return text;
 }
 
-function stringList(value: unknown, maxItems: number, maxLength: number) {
-  const result = Array.isArray(value)
+function stringList(
+  value: unknown,
+  maxItems: number,
+  maxLength: number,
+  rejectOverlongField?: string,
+) {
+  const items = Array.isArray(value)
     ? [
         ...new Set(
           value.map((item) => String(item ?? '').trim()).filter(Boolean),
         ),
-      ]
-        .slice(0, maxItems)
-        .map((item) => item.slice(0, maxLength))
+      ].slice(0, maxItems)
     : [];
-  if (result.some((item) => /\b(?:https?:\/\/|www\.)/i.test(item))) {
+  if (items.some((item) => /\b(?:https?:\/\/|www\.)/i.test(item))) {
     rejectDraftField(
       'URL_NOT_ALLOWED',
       'Remove URLs from athlete-facing text.',
     );
   }
-  return result;
+  if (rejectOverlongField) {
+    const tooLong = items.find((item) => item.length > maxLength);
+    if (tooLong) {
+      rejectDraftField(
+        fieldTooLongCode(rejectOverlongField),
+        `Shorten each entry in ${rejectOverlongField} to at most ${maxLength} characters using complete sentences (received ${tooLong.length}).`,
+      );
+    }
+    return items;
+  }
+  return items.map((item) => item.slice(0, maxLength));
 }
 
 function trainingBasis(value: unknown): TodaySuggestionDraft['trainingBasis'] {
@@ -206,6 +246,13 @@ export function validateTodaySuggestionDraft(
     isTodaySuggestionIntentType,
   );
   const basis = trainingBasis(row.trainingBasis);
+  const details = stringList(
+    recommendation.details,
+    4,
+    160,
+    'recommendation.details',
+  );
+  const uncertainty = optionalText(row.uncertainty, 240, 'uncertainty');
   return {
     headline: requiredText(row.headline, 120, 'HEADLINE_REQUIRED', 'headline'),
     summary: requiredText(row.summary, 700, 'SUMMARY_REQUIRED', 'summary'),
@@ -213,9 +260,7 @@ export function validateTodaySuggestionDraft(
       kind: kind as TodaySuggestionRecommendationKind,
       ...(durationMinutes ? { durationMinutes } : {}),
       ...(intensity ? { intensity } : {}),
-      ...(stringList(recommendation.details, 4, 160).length
-        ? { details: stringList(recommendation.details, 4, 160) }
-        : {}),
+      ...(details.length ? { details } : {}),
     },
     confidence: ['HIGH', 'MEDIUM', 'LOW'].includes(
       String(row.confidence ?? '').toUpperCase(),
@@ -224,9 +269,7 @@ export function validateTodaySuggestionDraft(
           row.confidence,
         ).toUpperCase() as TodaySuggestionDraft['confidence'])
       : 'LOW',
-    ...(optionalText(row.uncertainty, 240)
-      ? { uncertainty: optionalText(row.uncertainty, 240) }
-      : {}),
+    ...(uncertainty ? { uncertainty } : {}),
     evidenceCodes: stringList(row.evidenceCodes, 6, 64),
     preferredIntent: isTodaySuggestionIntentType(preferredIntent)
       ? preferredIntent
@@ -245,7 +288,12 @@ export function validateTodaySuggestionDraft(
               ).toUpperCase() as NonNullable<
                 TodaySuggestionDraft['coachDecisionHandling']
               >[number]['handling'],
-              reason: optionalText(handling?.reason, 320) ?? null,
+              reason:
+                optionalText(
+                  handling?.reason,
+                  320,
+                  'coachDecisionHandling.reason',
+                ) ?? null,
             };
           }),
         }
@@ -274,6 +322,17 @@ export function validateTodaySuggestionDraftForProjection(
       rejectTrainingBasis('TRAINING_BASIS_WORKOUT_UNAVAILABLE');
     }
     if (basis?.kind === 'ADDITIONAL') {
+      const readyCount = record(
+        projection.lightContext?.activityCoverage,
+      )?.readyCount;
+      if (
+        typeof readyCount === 'number' &&
+        readyCount <= 3 &&
+        LOW_RECORDED_LOAD.test(basis.reason) &&
+        !CONDITIONAL_READINESS.test(draft.summary)
+      ) {
+        rejectTrainingBasis('TRAINING_BASIS_SPARSE_LOAD');
+      }
       if (!draft.summary.includes(basis.reason)) {
         rejectTrainingBasis('TRAINING_BASIS_REASON_NOT_IN_SUMMARY');
       }

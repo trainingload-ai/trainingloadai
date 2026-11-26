@@ -19,6 +19,19 @@ export class ImportSourceDataUnavailableError extends Error {
   }
 }
 
+/** A provider request failed before the source's availability could be established. */
+export class ImportSourceFetchError extends Error {
+  constructor(
+    readonly code: string,
+    readonly stage: string,
+    readonly retryable: boolean,
+    readonly status?: number,
+  ) {
+    super(`${code}: ${stage}${status ? ` (HTTP ${status})` : ''}`);
+    this.name = 'ImportSourceFetchError';
+  }
+}
+
 export type ImportItemExtensionJob = {
   id: string;
   batchJobId: string;

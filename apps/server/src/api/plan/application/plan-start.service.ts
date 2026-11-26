@@ -2609,10 +2609,30 @@ export class PlanStartService {
                 });
           const draftMetadata = source.generationMetadata as Record<string, unknown> | null;
           const fixedDays = this.constraints(draftMetadata?.scheduleConstraints);
-          const shouldAlign =
+          const datedAiDraft =
             request.mode === 'START' &&
             source.planningMode === 'FIXED' &&
-            source.sourceType === 'AI' &&
+            source.sourceType === 'AI';
+          const draftQuality = datedAiDraft
+            ? parsePlanQualityContract(draftMetadata?.qualityContract)
+            : null;
+          const assessedStartDate = draftQuality?.startDate;
+          if (
+            assessedStartDate &&
+            !fixedDays &&
+            !draftQuality.allowedDays?.length &&
+            !draftQuality.maxMinutesByIsoWeekday &&
+            !request.scheduleConstraints &&
+            calendarIsoWeekday(assessedStartDate) !== calendarIsoWeekday(startDate)
+          ) {
+            throw new UnprocessableEntityException({
+              code: 'PLAN_START_WEEKDAY_REVIEW_REQUIRED',
+              message: 'The selected start changes the weekdays of this draft. Confirm the intended weekdays in the schedule or select a start on the assessed weekday.',
+              data: { assessedStartDate, requestedStartDate: startDate },
+            });
+          }
+          const shouldAlign =
+            datedAiDraft &&
             fixedDays &&
             fixedDays.fixedRestWeekdays.length > 0 &&
             fixedDays.effectiveFrom <= startDate &&
@@ -2625,9 +2645,7 @@ export class PlanStartService {
             !request.changes.length &&
             !request.additions.length &&
             !request.deletions.length;
-          const draftAnchor = shouldAlign
-            ? parsePlanQualityContract(draftMetadata?.qualityContract)?.startDate
-            : undefined;
+          const draftAnchor = shouldAlign ? assessedStartDate : undefined;
           // Keep each prescription on its original weekday, including weekday-specific time limits.
           const dayShift = draftAnchor
             ? calendarIsoWeekday(draftAnchor) - calendarIsoWeekday(startDate)

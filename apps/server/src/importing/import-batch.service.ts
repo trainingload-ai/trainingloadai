@@ -1526,38 +1526,32 @@ export class ImportBatchService {
     return {
       batchId: batchJobId,
       totalCount: items.length,
-      items: items.map((item) => ({
-        id: item.id,
-        position: item.position,
-        status: item.status,
-        sourceKind: item.sourceKind,
-        sourceUid: item.sourceUid,
-        dedupeKey: item.dedupeKey,
-        attempts: item.attempts,
-        // lastError is an operator diagnostic and can contain Prisma queries,
-        // filesystem paths and upstream response bodies. Never cross the API boundary.
-        lastErrorCode:
-          item.status === 'FAILED' || item.status === 'DEAD'
-            ? item.lastErrorCode === 'IMPORT_IDENTITY_CONFLICT'
-              ? 'IMPORT_IDENTITY_CONFLICT'
-              : 'IMPORT_PROCESSING_FAILED'
-            : null,
-        lastError:
-          item.status === 'FAILED' || item.status === 'DEAD'
-            ? this.i18n.t(
-                item.lastErrorCode === 'IMPORT_IDENTITY_CONFLICT'
-                  ? 'common.error.import_identity_conflict'
-                  : 'common.error.internal',
-              )
-            : null,
-        startedAt: item.startedAt,
-        completedAt: item.completedAt,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        sourceObject: item.sourceObject,
-        canonicalSnapshot: item.canonicalSnapshot,
-        activity: item.activity,
-      })),
+      items: items.map((item) => {
+        const failed = item.status === 'FAILED' || item.status === 'DEAD';
+        const presentation =
+          item.status === 'SKIPPED' && item.outcome === 'UPSTREAM_DATA_UNAVAILABLE'
+            ? { code: 'IMPORT_SOURCE_UNAVAILABLE', key: 'common.error.activity_not_found_or_no_permission' as const }
+            : failed ? importFailurePresentation(item) : null;
+        return {
+          id: item.id,
+          position: item.position,
+          status: item.status,
+          sourceKind: item.sourceKind,
+          sourceUid: item.sourceUid,
+          dedupeKey: item.dedupeKey,
+          attempts: item.attempts,
+          // Keep operator diagnostics on the server.
+          lastErrorCode: presentation?.code ?? null,
+          lastError: presentation ? this.i18n.t(presentation.key) : null,
+          startedAt: item.startedAt,
+          completedAt: item.completedAt,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          sourceObject: item.sourceObject,
+          canonicalSnapshot: item.canonicalSnapshot,
+          activity: item.activity,
+        };
+      }),
     };
   }
   async createPostProcessJob(
@@ -1573,4 +1567,15 @@ export class ImportBatchService {
   ) {
     return this.importJobs.refreshBatchProgress(batchJobId, tx);
   }
+}
+
+function importFailurePresentation(item: { outcome: string | null; lastErrorCode: string | null }) {
+  if (item.lastErrorCode === 'IMPORT_IDENTITY_CONFLICT')
+    return { code: item.lastErrorCode, key: 'common.error.import_identity_conflict' as const };
+  if (item.outcome === 'UPSTREAM_ACCESS_DENIED')
+    return { code: 'IMPORT_SOURCE_ACCESS_DENIED', key: 'common.error.activity_not_found_or_no_permission' as const };
+  return {
+    code: item.outcome === 'UPSTREAM_FETCH_FAILED' ? 'IMPORT_SOURCE_FETCH_FAILED' : 'IMPORT_PROCESSING_FAILED',
+    key: 'common.error.internal' as const,
+  };
 }

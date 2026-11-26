@@ -24,11 +24,13 @@ import timezone = require('dayjs/plugin/timezone');
 import isoWeek = require('dayjs/plugin/isoWeek');
 import { round } from 'lodash';
 import { isCalendarDate } from '@shared/plan-calendar';
+import { formatPaceSeconds } from '@shared/vdot';
 import { ActivityService } from '@/api/activity/activity.service';
 import { ActivityQueryService } from '@/api/activity/activity-query.service';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { UserQueryService } from '@/api/user/user-query.service';
 import type { UserProfileResponse } from '@/api/user/user.interface';
+import { validateFitnessMetricCandidate } from '@/api/user/fitness-metric-validator';
 import type { UserZoneSetting } from '@/utils/zones';
 import {
   describeCoachZoneBasis,
@@ -1202,7 +1204,7 @@ export class CoachToolsService {
       this.normalizeSportType(input?.sportType) ?? SportType.RUN;
     const [profile, pairs, autoUpdateConfigs] = await Promise.all([
       ctx.userService.getComposedUserProfile(userId, sportType),
-      ctx.userService.getFitnessMetricPairs({ userId, sportType }),
+      ctx.userService.getFitnessMetricPairs({ userId, sportType, paceRepresentation: 'speed' }),
       ctx.userService.listAutoUpdateConfigs(userId),
     ]);
     const autoUpdateEnabled = new Map(
@@ -1265,13 +1267,14 @@ export class CoachToolsService {
             ? selected.source
             : null;
 
-        const hasManual = typeof manual === 'number' && Number.isFinite(manual);
-        const hasEstimated =
-          typeof estimated === 'number' && Number.isFinite(estimated);
-        const hasAutomatic =
-          typeof automatic === 'number' && Number.isFinite(automatic);
-        const hasEffective =
-          typeof effective === 'number' && Number.isFinite(effective);
+        const isSpeed = type === UserFitnessMetricType.TP || type === UserFitnessMetricType.CS;
+        const readValue = (value: number | null) => {
+          if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+          if (isSpeed && !validateFitnessMetricCandidate({ type, value, sport: sportType }).valid)
+            return null;
+          return round(value, spec.decimals);
+        };
+        const effectiveValue = readValue(effective);
         const supportsAutoUpdate =
           ctx.userService.isAutoUpdateMetricSupported(type);
 
@@ -1279,19 +1282,19 @@ export class CoachToolsService {
           metric: spec.metric,
           compareKey: spec.compareKey,
           unit: spec.unit,
-          manual: hasManual ? round(Number(manual), spec.decimals) : null,
-          estimated: hasEstimated
-            ? round(Number(estimated), spec.decimals)
-            : null,
-          automatic: hasAutomatic
-            ? round(Number(automatic), spec.decimals)
-            : null,
-          effectiveCurrent: hasEffective
-            ? round(Number(effective), spec.decimals)
-            : null,
-          effectiveSource,
+          manual: readValue(manual),
+          estimated: readValue(estimated),
+          automatic: readValue(automatic),
+          effectiveCurrent: effectiveValue,
+          effectiveSource: effectiveValue !== null ? effectiveSource : null,
+          ...(isSpeed && effectiveValue !== null && sportType === SportType.RUN
+            ? { displayPace: formatPaceSeconds(1_000 / effectiveValue) }
+            : {}),
+          ...(isSpeed && effective !== null && effectiveValue === null
+            ? { dataIssue: 'SPEED_OUT_OF_RANGE' as const }
+            : {}),
           effectiveRecordedAt:
-            !estimatedOnly && selected?.recordedAt
+            effectiveValue !== null && !estimatedOnly && selected?.recordedAt
               ? dayjs(selected.recordedAt).format('YYYY-MM-DD')
               : null,
           autoUpdateSupported: supportsAutoUpdate,

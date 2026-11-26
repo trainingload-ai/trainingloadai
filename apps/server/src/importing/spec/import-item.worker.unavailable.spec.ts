@@ -1,7 +1,7 @@
 import { ImportIdentityConflictError } from '../import-identity-conflict.error';
 import { describe, expect, it, jest } from '@jest/globals';
 import { ImportItemWorkerService } from '../import-item.worker';
-import { ImportSourceDataUnavailableError } from '../import-item-provider.port';
+import { ImportSourceDataUnavailableError, ImportSourceFetchError } from '../import-item-provider.port';
 import { IntervalsIcuApiError } from '../../integrations/intervals-icu/intervals-icu.client';
 import { registerExternalActivityOriginRoutingExtension } from '../external-activity-origin-routing.port';
 
@@ -139,6 +139,34 @@ describe('unavailable import source completion', () => {
         data: expect.objectContaining({ status: 'SKIPPED' }),
       }),
     );
+  });
+
+  it('keeps a transport failure retryable without misclassifying the source as unavailable', async () => {
+    const h = setup();
+    await h.worker.failClaimedItem(job,
+      new ImportSourceFetchError('STRAVA_ACTIVITY_DETAIL_TRANSPORT', 'activity_detail', true),
+    );
+    expect(h.items.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        status: 'FAILED',
+        lastErrorCode: 'STRAVA_ACTIVITY_DETAIL_TRANSPORT',
+      }),
+    }));
+    expect(h.router.keepUnavailableSource).not.toHaveBeenCalled();
+  });
+
+  it('ends an access-denied fetch without using the remaining retry budget', async () => {
+    const h = setup();
+    await h.worker.failClaimedItem(job,
+      new ImportSourceFetchError('STRAVA_ACTIVITY_DETAIL_ACCESS_DENIED', 'activity_detail', false, 403),
+    );
+    expect(h.items.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        status: 'DEAD',
+        lastErrorCode: 'STRAVA_ACTIVITY_DETAIL_ACCESS_DENIED',
+      }),
+    }));
+    expect(h.router.keepUnavailableSource).not.toHaveBeenCalled();
   });
 
   it('uses the same lease-fenced completion for the existing origin-routing case', async () => {

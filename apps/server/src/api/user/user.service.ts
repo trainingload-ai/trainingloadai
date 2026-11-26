@@ -2517,8 +2517,9 @@ export class UserService {
   async getFitnessMetricPairs(options: {
     userId: string;
     sportType: SportType;
+    paceRepresentation?: 'seconds' | 'speed';
   }) {
-    const { userId, sportType } = options;
+    const { userId, sportType, paceRepresentation = 'seconds' } = options;
 
     // Dashboard 用户配置类指标（单次返回，减少前端请求次数）
     const types: UserFitnessMetricType[] = [
@@ -2533,7 +2534,7 @@ export class UserService {
       UserFitnessMetricType.VO2_MAX,
     ];
 
-    // CS/TP 统一返回 paceSeconds，前端可直接按配速格式展示
+    // The dashboard expects rounded pace seconds. Coach requests stored speed.
     const paceDistanceMeters = sportType === SportType.SWIM ? 100 : 1000;
 
     const normalizeSportType = (type: UserFitnessMetricType) => {
@@ -2550,6 +2551,7 @@ export class UserService {
       ) {
         const speed = typeof v === 'number' ? v : Number(v);
         if (!Number.isFinite(speed) || speed <= 0) return null;
+        if (paceRepresentation === 'speed') return speed;
         const paceSeconds = Math.round(paceDistanceMeters / speed);
         if (!Number.isFinite(paceSeconds) || paceSeconds <= 0) return null;
         return paceSeconds;

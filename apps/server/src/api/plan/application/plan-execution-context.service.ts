@@ -169,6 +169,8 @@ export type PlanExecutionContext = {
     tsb: number | null;
     currentWeekLoad: number | null;
     previousWeekLoad: number | null;
+    rolling7DayLoad: number;
+    loadUnit: 'recorded_load_points';
     /** Compares completed days this week with the same weekdays last week. */
     weekToDateLoadChangePercent?: number;
     /** 锚点往前 7 天，最旧在前。缺日补 0。 */
@@ -1201,6 +1203,7 @@ export class PlanExecutionContextService {
     rows: Array<{ date: Date; dailyValue: number }>,
   ): PlanExecutionContext['recentLoad'] {
     const week = this.weekLoad(anchorDate, rows);
+    const dailyLoadLast7d = this.dailyLoadLast7d(anchorDate, rows);
     const activeDays = rows
       .filter((row) => this.dayDiff(ymdFromDate(row.date), anchorDate) <= 13)
       .filter((row) => row.dailyValue >= 10).length;
@@ -1210,10 +1213,12 @@ export class PlanExecutionContextService {
       tsb: roundNumber(latestPmc?.TSB),
       currentWeekLoad: week.current,
       previousWeekLoad: week.previous,
+      rolling7DayLoad: Math.round(dailyLoadLast7d.reduce((sum, value) => sum + value, 0) * 10) / 10,
+      loadUnit: 'recorded_load_points',
       ...(week.changePercent !== undefined
         ? { weekToDateLoadChangePercent: week.changePercent }
         : {}),
-      dailyLoadLast7d: this.dailyLoadLast7d(anchorDate, rows),
+      dailyLoadLast7d,
       restDaysLast14d: Math.max(0, 14 - activeDays),
     };
   }

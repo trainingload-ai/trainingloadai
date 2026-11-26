@@ -24,6 +24,20 @@ const INCREASE =
 const DECREASE =
   /\b(?:lower|less|down|below|decreas\w*|niedriger\w*|weniger|gesunken|minus|moins|menor|lebih rendah|redu[cz]\w*)\b|下[跌降]|[减減]少|低[于於]|比.{0,18}[低少]/i;
 const PERCENT = /([+\-−]?\d+(?:[.,]\d+)?)\s*(?:%|(?:percent|prozent)\b)/gi;
+const ROLLING_WEEK =
+  /\b(?:last|past|previous)\s+(?:7|seven)\s+days\b|\b(?:letzten|vergangenen)\s+(?:7|sieben)\s+Tagen?\b|\b(?:7|sieben)[ -]?Tage[ -]?(?:Last|Belastung)\b|\b(?:7|sept)\s+derniers?\s+jours\b|(?:过去|過去|近|最近)\s*[七7]\s*[天日]/i;
+const EXPLICIT_CURRENT_WEEK =
+  /\b(?:this|current)\s+(?:calendar\s+)?week\b|\b(?:dieser|diese|aktuellen)\s+(?:kalender)?woche\b|\bcette semaine\b|本[周週]|这[周週]|這[周週]/i;
+const LOAD_AVERAGE =
+  /\b(?:average|mean|Durchschnitt|Mittelwert|moyenne)\b|\d+\s*[-–]?\s*Tag(?:e[s-]?)?[-–]?\s*Durchschnitt|(?:平均|均值)/i;
+const LOAD_POINTS =
+  /(?<![\d.,])([+\-−]?\d+(?:[.,]\d+)?)\s*(?:(?:training\s+load\s+)?points?\b|Punkt(?:e|en)?\b|[点點分](?![钟鐘])(?:训练负荷|訓練負荷|负荷|負荷)?|TSS\b)/gi;
+const TRAINING_LOAD_TERM = /\b(?:training load|training stress|Trainingslast|(?:Trainings)?belastung|charge d['’]entraînement|CTL|ATL|TSB)\b|[负負][荷载載]/i;
+const PMC_METRIC = /\b(?:CTL|ATL|TSB)\b/i;
+const UNSUPPORTED_AVERAGE_WINDOW = /(?:\b28[ -]?(?:day|tage|jours)|28\s*[天日])/i;
+const LOAD_TOTAL_WITHOUT_UNIT =
+  /(?:added up to|totall?ed|beträgt|ergibt|était de|合计|合計|约为|約為)\s*[+\-−]?\d/i;
+const OTHER_SCORE = /\b(?:sleep|readiness|recovery|Schlaf)\s*(?:score|rating|wert)\b|(?:睡眠|恢复|恢復)评分/i;
 const WORKOUT_DETAIL =
   /\b(?:including|includes?|with|warm[- ]?up|cool[- ]?down|davon|inkl\.?|mit|dont|con)\b|其中|包含|热身|熱身/i;
 const AMOUNT = String.raw`\d+(?:[.,]\d+)?`;
@@ -39,6 +53,37 @@ const DURATION = new RegExp(
 
 function decimal(value: string) {
   return Number(value.replace(',', '.').replace('−', '-'));
+}
+
+type ProjectedLoad = {
+  rolling7DayLoad?: number;
+  currentWeekLoad?: number | null;
+  previousWeekLoad?: number | null;
+  weekToDateLoadChangePercent?: number;
+};
+
+function disagreesWithAbsoluteLoad(sentence: string, load?: ProjectedLoad) {
+  const rolling = ROLLING_WEEK.test(sentence);
+  const current = EXPLICIT_CURRENT_WEEK.test(sentence);
+  const previous = PREVIOUS_WEEK.test(sentence);
+  const average = LOAD_AVERAGE.test(sentence);
+  const claims = [...sentence.matchAll(LOAD_POINTS)];
+  if (average && PMC_METRIC.test(sentence) && UNSUPPORTED_AVERAGE_WINDOW.test(sentence))
+    return true;
+  const hasWindow = rolling || current || previous;
+  const hasLoad = TRAINING_LOAD_TERM.test(sentence) || WEEK_LOAD.test(sentence);
+  if (OTHER_SCORE.test(sentence) && !hasLoad) return false;
+  if (!claims.length) return hasWindow && LOAD_TOTAL_WITHOUT_UNIT.test(sentence);
+  if (!hasWindow && !hasLoad && !UNSUPPORTED_AVERAGE_WINDOW.test(sentence)) return false;
+  if (hasWindow && PMC_METRIC.test(sentence)) return true;
+  if (average || claims.length !== 1 || [rolling, current, previous].filter(Boolean).length !== 1)
+    return true;
+  const [claim, amount] = claims[0];
+  if (/TSS$/i.test(claim)) return true;
+  const actual = rolling ? load?.rolling7DayLoad : current ? load?.currentWeekLoad : load?.previousWeekLoad;
+  if (typeof actual !== 'number' || !Number.isFinite(actual)) return true;
+  const fractionDigits = amount.split(/[.,]/)[1]?.length ?? 0;
+  return Math.abs(decimal(amount) - actual) > 0.5 * 10 ** -fractionDigits + Number.EPSILON;
 }
 
 function disagreesWithWeeklyLoad(sentence: string, actual: unknown) {
@@ -104,14 +149,13 @@ export function groundTodaySuggestionNumbers(
   const scheduled = (projection.tomorrowWorkouts ?? []).filter((workout) =>
     ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
   );
-  const load = projection.lightContext?.load as
-    | { weekToDateLoadChangePercent?: number }
-    | undefined;
+  const load = projection.lightContext?.load as ProjectedLoad | undefined;
 
   const isSupported = (sentence: string) => {
     const normalized = sentence.normalize('NFKC');
     if (
-      disagreesWithWeeklyLoad(normalized, load?.weekToDateLoadChangePercent)
+      disagreesWithWeeklyLoad(normalized, load?.weekToDateLoadChangePercent) ||
+      disagreesWithAbsoluteLoad(normalized, load)
     ) {
       return false;
     }
@@ -156,7 +200,7 @@ export function groundTodaySuggestionNumbers(
     throw new CoachTaskResultValidationError(
       'TODAY_SUGGESTION_OUTPUT_REJECTED_NUMERIC_FACTS',
       'UNSUPPORTED_NUMERIC_FACTS_IN_MAIN_ADVICE',
-      'Restate the main advice using supported facts. Use the projected workout duration and weekly load change when available, or omit the numbers.',
+      'Restate the main advice using supported facts. Use projected durations and the matching load window, or omit the numbers. CTL is not an arithmetic mean.',
     );
   }
   draft.headline = headline;

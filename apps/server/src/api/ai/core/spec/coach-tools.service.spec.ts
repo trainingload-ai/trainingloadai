@@ -195,6 +195,45 @@ describe('CoachToolsService zone range priorities', () => {
     expect(result.body).toEqual({ heightCm: 178.4, weightKg: 70.2 });
   });
 
+  it('formats the running threshold pace from the effective speed and suppresses an out-of-range speed', async () => {
+    const getFitnessMetricPairs = jest.fn(async () => ({
+      effective: { TP: 4.4, CS: 440 },
+      effectiveDetails: { TP: { source: 'AUTO' }, CS: { source: 'AUTO' } },
+    }));
+    const result = await createService().metricCurrent(
+      {
+        session: { user: { id: 'user-1' } },
+        userService: {
+          getComposedUserProfile: async () => ({}),
+          getFitnessMetricPairs,
+          listAutoUpdateConfigs: async () => [],
+          isAutoUpdateMetricSupported: () => true,
+        },
+      } as never,
+      { sportType: 'RUN', metrics: ['tp', 'cs'] },
+    );
+
+    expect(getFitnessMetricPairs).toHaveBeenCalledWith({
+      userId: 'user-1', sportType: 'RUN', paceRepresentation: 'speed',
+    });
+    expect(result.sportType).toBe('RUN');
+    expect(result.items).toEqual([
+      expect.objectContaining({
+        metric: 'tp',
+        unit: 'm/s',
+        effectiveCurrent: 4.4,
+        effectiveSource: 'AUTO',
+        displayPace: '3:47/km',
+      }),
+      expect.objectContaining({
+        metric: 'cs',
+        effectiveCurrent: null,
+        effectiveSource: null,
+        dataIssue: 'SPEED_OUT_OF_RANGE',
+      }),
+    ]);
+  });
+
   it('reports the AUTO FTP as effective when it is newer than the manual FTP', async () => {
     const result = await createService().metricCurrent(
       {

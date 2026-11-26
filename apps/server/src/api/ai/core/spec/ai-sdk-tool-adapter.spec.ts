@@ -1,5 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { createAiSdkCoachTools } from '../ai-sdk-tool-adapter';
+import {
+  createAiSdkCoachTools,
+  stringifyAiSdkToolResultForModel,
+} from '../ai-sdk-tool-adapter';
 import type { AiToolContext, AiToolDef } from '../tool.types';
 import { askUserQuestionToolParametersSchema } from '../../../../../../../packages/shared/ai-coach-schema';
 import { skillActivateTool } from '../tools/skillActivate.tool';
@@ -362,5 +365,97 @@ describe('createAiSdkCoachTools', () => {
     ]);
 
     expect(order).toEqual(['start:1', 'end:1', 'start:2', 'end:2']);
+  });
+});
+
+describe('stringifyAiSdkToolResultForModel', () => {
+  const ctx = {} as AiToolContext;
+
+  it('returns small payloads unchanged without wrapping', async () => {
+    const output = { sportType: 'RUN', effectiveSource: 'AUTO', value: 4.4 };
+    const serialized = await stringifyAiSdkToolResultForModel({
+      tool: undefined,
+      ctx,
+      input: {},
+      output,
+    });
+    expect(JSON.parse(serialized)).toEqual(output);
+  });
+
+  it('compacts bulky early fields while preserving late factual fields as valid JSON within budget', async () => {
+    const serialized = await stringifyAiSdkToolResultForModel({
+      tool: undefined,
+      ctx,
+      input: {},
+      output: {
+        bulky: 'x'.repeat(12_100),
+        loadBasis: 'late-field',
+        sportType: 'RUN',
+      },
+    });
+    expect(serialized.length).toBeLessThanOrEqual(12_000);
+    const parsed = JSON.parse(serialized);
+    expect(parsed).toMatchObject({
+      truncated: true,
+      reason: 'tool_result_budget_exceeded',
+      maxChars: 12_000,
+    });
+    expect(parsed).not.toHaveProperty('preview');
+    expect(parsed.summary).toMatchObject({
+      loadBasis: 'late-field',
+      sportType: 'RUN',
+    });
+    expect(parsed.summary.bulky).toContain('truncated 12100 chars');
+  });
+
+  it('compacts oversized arrays while retaining head, tail, omitted count, and trailing keys', async () => {
+    const items = Array.from({ length: 400 }, (_, i) => ({
+      id: `item-${i}`,
+      note: 'n'.repeat(80),
+    }));
+    const serialized = await stringifyAiSdkToolResultForModel({
+      tool: { maxResultChars: 2_000 } as AiToolDef,
+      ctx,
+      input: {},
+      output: {
+        items,
+        trailingFact: { ctl: 51, rolling7DayLoad: 496.7 },
+      },
+    });
+    expect(serialized.length).toBeLessThanOrEqual(2_000);
+    const parsed = JSON.parse(serialized);
+    expect(parsed.truncated).toBe(true);
+    expect(parsed.summary.trailingFact).toEqual({
+      ctl: 51,
+      rolling7DayLoad: 496.7,
+    });
+    expect(Array.isArray(parsed.summary.items)).toBe(true);
+    expect(parsed.summary.items[0]).toMatchObject({ id: 'item-0' });
+    expect(parsed.summary.items.at(-1)).toMatchObject({ id: 'item-399' });
+    expect(
+      parsed.summary.items.some(
+        (entry: Record<string, unknown>) =>
+          typeof entry?._omittedItems === 'number' && entry._omittedItems > 0,
+      ),
+    ).toBe(true);
+  });
+
+  it('handles wide objects within a tight budget by keeping compact metadata keys first', async () => {
+    const wide: Record<string, unknown> = {};
+    for (let i = 0; i < 60; i++) {
+      wide[`longField_${i}`] = 'v'.repeat(60);
+    }
+    wide.loadBasis = 'keep-me';
+    const serialized = await stringifyAiSdkToolResultForModel({
+      tool: { maxResultChars: 500 } as AiToolDef,
+      ctx,
+      input: {},
+      output: wide,
+    });
+    expect(serialized.length).toBeLessThanOrEqual(500);
+    const parsed = JSON.parse(serialized);
+    expect(parsed.truncated).toBe(true);
+    expect(parsed.summary.loadBasis).toBe('keep-me');
+    expect(parsed.summary._omittedKeys).toBeGreaterThan(0);
   });
 });

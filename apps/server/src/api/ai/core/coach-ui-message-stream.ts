@@ -18,6 +18,7 @@ import type {
 import { coachAssistantBlockIsUiSurface } from './coach-message.util';
 import {
   COACH_TURN_ERROR_PART_TYPE,
+  coachTurnErrorRecoveryReason,
   type CoachTurnErrorData,
 } from '@shared/coach-turn-error';
 
@@ -286,13 +287,18 @@ export function coachQueryYieldsToUIMessageStream(
         if (event.type === 'result' && event.is_error) {
           hasTerminalError = true;
           const errorText = event.result || 'AI Coach failed';
+          const recoveryReason = coachTurnErrorRecoveryReason(event.error_code, event.data);
           // A message part first, so the failure renders inline (and matches the
           // persisted row after refresh); then the protocol-level error chunk.
           closeTextSegment();
           writer.write({
             type: COACH_TURN_ERROR_PART_TYPE,
             id: 'coach-turn-error',
-            data: { code: event.error_code || 'internal', message: errorText },
+            data: {
+              code: event.error_code || 'internal',
+              message: errorText,
+              ...(recoveryReason && { recoveryReason }),
+            },
           });
           writer.write({ type: 'error', errorText });
         }
