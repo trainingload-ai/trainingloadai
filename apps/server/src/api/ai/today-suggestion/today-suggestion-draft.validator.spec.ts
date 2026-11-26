@@ -7,7 +7,8 @@ import type { TodaySuggestionConstraintProjection } from './today-suggestion.typ
 describe('validateTodaySuggestionDraft', () => {
   const valid = {
     headline: 'Easy run today',
-    summary: 'An easy session fits the time available. Keep the session conversational and stop if pain appears.',
+    summary:
+      'An easy session fits the time available. Keep the session conversational and stop if pain appears.',
     recommendation: {
       kind: 'TRAIN',
       durationMinutes: 30,
@@ -64,26 +65,49 @@ describe('validateTodaySuggestionDraft', () => {
 
   it('rejects extra training justified by low recorded load when history is sparse', () => {
     const reason = '整体训练负荷很低，所以今天适合再骑一段。';
-    expect(() => validateTodaySuggestionDraftForProjection({
-      ...valid, summary: reason,
-      trainingBasis: { kind: 'ADDITIONAL', reason },
-    }, { ...projection, lightContext: { activityCoverage: { readyCount: 3 } } }))
-      .toThrow(expect.objectContaining({ code: 'TRAINING_BASIS_SPARSE_LOAD' }));
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          summary: reason,
+          trainingBasis: { kind: 'ADDITIONAL', reason },
+        },
+        {
+          ...projection,
+          lightContext: { activityCoverage: { readyCount: 3 } },
+        },
+      ),
+    ).toThrow(expect.objectContaining({ code: 'TRAINING_BASIS_SPARSE_LOAD' }));
   });
 
   it('keeps the right rolling load and removes a wrong absolute load and unsupported average', () => {
-    const result = validateTodaySuggestionDraftForProjection({
-      ...valid,
-      summary: 'Plane Erholung ein. In den letzten sieben Tagen waren es rund 458 Punkte. Der 28-Tage-Durchschnitt liegt bei 51 Punkten.',
-      recommendation: { kind: 'RECOVER', details: ['Die letzten 7 Tage ergeben 496,7 Punkte.'] },
-      preferredIntent: 'ASK_COACH',
-      trainingBasis: undefined,
-    }, {
-      ...projection,
-      lightContext: { load: { rolling7DayLoad: 496.7, currentWeekLoad: 140, previousWeekLoad: 472 } },
-    });
+    const result = validateTodaySuggestionDraftForProjection(
+      {
+        ...valid,
+        summary:
+          'Plane Erholung ein. In den letzten sieben Tagen waren es rund 458 Punkte. Der 28-Tage-Durchschnitt liegt bei 51 Punkten.',
+        recommendation: {
+          kind: 'RECOVER',
+          details: ['Die letzten 7 Tage ergeben 496,7 Punkte.'],
+        },
+        preferredIntent: 'ASK_COACH',
+        trainingBasis: undefined,
+      },
+      {
+        ...projection,
+        lightContext: {
+          load: {
+            rolling7DayLoad: 496.7,
+            currentWeekLoad: 140,
+            previousWeekLoad: 472,
+          },
+        },
+      },
+    );
     expect(result.summary).toBe('Plane Erholung ein.');
-    expect(result.recommendation.details).toEqual(['Die letzten 7 Tage ergeben 496,7 Punkte.']);
+    expect(result.recommendation.details).toEqual([
+      'Die letzten 7 Tage ergeben 496,7 Punkte.',
+    ]);
   });
 
   it.each([' ', {}])(
@@ -94,7 +118,9 @@ describe('validateTodaySuggestionDraft', () => {
           { ...valid, trainingBasis: { kind: 'ADDITIONAL', reason } },
           projection,
         ),
-      ).toThrow(expect.objectContaining({ code: 'TRAINING_BASIS_REASON_REQUIRED' }));
+      ).toThrow(
+        expect.objectContaining({ code: 'TRAINING_BASIS_REASON_REQUIRED' }),
+      );
     },
   );
 
@@ -227,6 +253,63 @@ describe('validateTodaySuggestionDraft', () => {
         summary: 'Open https://example.com and continue.',
       }),
     ).toThrow(expect.objectContaining({ code: 'URL_NOT_ALLOWED' }));
+  });
+
+  it('rejects overlong athlete-facing text instead of slicing mid-word', () => {
+    const overlongSummary = `${'a'.repeat(689)}Zone-2-Bereich extra words.`;
+    expect(() =>
+      validateTodaySuggestionDraft({
+        ...valid,
+        summary: overlongSummary,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'SUMMARY_TOO_LONG',
+        correction: expect.stringContaining('700'),
+      }),
+    );
+
+    const overlongUncertainty = `${'b'.repeat(230)}but it will help later.`;
+    expect(() =>
+      validateTodaySuggestionDraft({
+        ...valid,
+        uncertainty: overlongUncertainty,
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'UNCERTAINTY_TOO_LONG',
+        correction: expect.stringContaining('240'),
+      }),
+    );
+
+    expect(() =>
+      validateTodaySuggestionDraft({
+        ...valid,
+        recommendation: {
+          ...valid.recommendation,
+          details: ['c'.repeat(161)],
+        },
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'RECOMMENDATION_DETAILS_TOO_LONG',
+        correction: expect.stringContaining('160'),
+      }),
+    );
+  });
+
+  it('accepts complete athlete-facing prose right at the 700/240 boundaries', () => {
+    const exactSummary = `${valid.trainingBasis.reason} ${'a'.repeat(700 - valid.trainingBasis.reason.length - 1)}`;
+    const exactUncertainty = 'u'.repeat(240);
+    const result = validateTodaySuggestionDraft({
+      ...valid,
+      summary: exactSummary,
+      uncertainty: exactUncertainty,
+    });
+    expect(result.summary).toBe(exactSummary);
+    expect(result.summary.length).toBe(700);
+    expect(result.uncertainty).toBe(exactUncertainty);
+    expect(result.uncertainty?.length).toBe(240);
   });
 
   it.each([

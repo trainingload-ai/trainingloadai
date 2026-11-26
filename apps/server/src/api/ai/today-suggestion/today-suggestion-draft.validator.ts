@@ -88,6 +88,13 @@ function record(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+function fieldTooLongCode(field: string) {
+  return `${field
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_|_$/g, '')
+    .toUpperCase()}_TOO_LONG`;
+}
+
 function requiredText(
   value: unknown,
   max: number,
@@ -102,10 +109,16 @@ function requiredText(
       'Remove URLs from athlete-facing text.',
     );
   }
-  return text.slice(0, max);
+  if (text.length > max) {
+    rejectDraftField(
+      fieldTooLongCode(field),
+      `Shorten ${field} to at most ${max} characters using complete sentences without dropping key limitations or next steps (received ${text.length}).`,
+    );
+  }
+  return text;
 }
 
-function optionalText(value: unknown, max: number) {
+function optionalText(value: unknown, max: number, field: string) {
   const text = String(value ?? '').trim();
   if (/\b(?:https?:\/\/|www\.)/i.test(text)) {
     rejectDraftField(
@@ -113,26 +126,46 @@ function optionalText(value: unknown, max: number) {
       'Remove URLs from athlete-facing text.',
     );
   }
-  return text ? text.slice(0, max) : undefined;
+  if (!text) return undefined;
+  if (text.length > max) {
+    rejectDraftField(
+      fieldTooLongCode(field),
+      `Shorten ${field} to at most ${max} characters using complete sentences without dropping key limitations (received ${text.length}).`,
+    );
+  }
+  return text;
 }
 
-function stringList(value: unknown, maxItems: number, maxLength: number) {
-  const result = Array.isArray(value)
+function stringList(
+  value: unknown,
+  maxItems: number,
+  maxLength: number,
+  rejectOverlongField?: string,
+) {
+  const items = Array.isArray(value)
     ? [
         ...new Set(
           value.map((item) => String(item ?? '').trim()).filter(Boolean),
         ),
-      ]
-        .slice(0, maxItems)
-        .map((item) => item.slice(0, maxLength))
+      ].slice(0, maxItems)
     : [];
-  if (result.some((item) => /\b(?:https?:\/\/|www\.)/i.test(item))) {
+  if (items.some((item) => /\b(?:https?:\/\/|www\.)/i.test(item))) {
     rejectDraftField(
       'URL_NOT_ALLOWED',
       'Remove URLs from athlete-facing text.',
     );
   }
-  return result;
+  if (rejectOverlongField) {
+    const tooLong = items.find((item) => item.length > maxLength);
+    if (tooLong) {
+      rejectDraftField(
+        fieldTooLongCode(rejectOverlongField),
+        `Shorten each entry in ${rejectOverlongField} to at most ${maxLength} characters using complete sentences (received ${tooLong.length}).`,
+      );
+    }
+    return items;
+  }
+  return items.map((item) => item.slice(0, maxLength));
 }
 
 function trainingBasis(value: unknown): TodaySuggestionDraft['trainingBasis'] {
@@ -213,6 +246,13 @@ export function validateTodaySuggestionDraft(
     isTodaySuggestionIntentType,
   );
   const basis = trainingBasis(row.trainingBasis);
+  const details = stringList(
+    recommendation.details,
+    4,
+    160,
+    'recommendation.details',
+  );
+  const uncertainty = optionalText(row.uncertainty, 240, 'uncertainty');
   return {
     headline: requiredText(row.headline, 120, 'HEADLINE_REQUIRED', 'headline'),
     summary: requiredText(row.summary, 700, 'SUMMARY_REQUIRED', 'summary'),
@@ -220,9 +260,7 @@ export function validateTodaySuggestionDraft(
       kind: kind as TodaySuggestionRecommendationKind,
       ...(durationMinutes ? { durationMinutes } : {}),
       ...(intensity ? { intensity } : {}),
-      ...(stringList(recommendation.details, 4, 160).length
-        ? { details: stringList(recommendation.details, 4, 160) }
-        : {}),
+      ...(details.length ? { details } : {}),
     },
     confidence: ['HIGH', 'MEDIUM', 'LOW'].includes(
       String(row.confidence ?? '').toUpperCase(),
@@ -231,9 +269,7 @@ export function validateTodaySuggestionDraft(
           row.confidence,
         ).toUpperCase() as TodaySuggestionDraft['confidence'])
       : 'LOW',
-    ...(optionalText(row.uncertainty, 240)
-      ? { uncertainty: optionalText(row.uncertainty, 240) }
-      : {}),
+    ...(uncertainty ? { uncertainty } : {}),
     evidenceCodes: stringList(row.evidenceCodes, 6, 64),
     preferredIntent: isTodaySuggestionIntentType(preferredIntent)
       ? preferredIntent
@@ -252,7 +288,12 @@ export function validateTodaySuggestionDraft(
               ).toUpperCase() as NonNullable<
                 TodaySuggestionDraft['coachDecisionHandling']
               >[number]['handling'],
-              reason: optionalText(handling?.reason, 320) ?? null,
+              reason:
+                optionalText(
+                  handling?.reason,
+                  320,
+                  'coachDecisionHandling.reason',
+                ) ?? null,
             };
           }),
         }
@@ -281,7 +322,9 @@ export function validateTodaySuggestionDraftForProjection(
       rejectTrainingBasis('TRAINING_BASIS_WORKOUT_UNAVAILABLE');
     }
     if (basis?.kind === 'ADDITIONAL') {
-      const readyCount = record(projection.lightContext?.activityCoverage)?.readyCount;
+      const readyCount = record(
+        projection.lightContext?.activityCoverage,
+      )?.readyCount;
       if (
         typeof readyCount === 'number' &&
         readyCount <= 3 &&

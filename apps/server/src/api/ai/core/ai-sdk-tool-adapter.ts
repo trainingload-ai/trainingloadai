@@ -66,13 +66,19 @@ export async function recordPlanToolValidationRejection(args: {
   if (!isAuditedPlanTool(toolName)) return;
   const code = validation.code ?? 'INVALID_INPUT';
   await ctx.onPlanValidationRejected?.({
-    toolCallId, toolName, stage, candidate, code,
+    toolCallId,
+    toolName,
+    stage,
+    candidate,
+    code,
     message: validation.message,
     ...(validation.modelRepair && { modelRepair: validation.modelRepair }),
     feedback: validation.feedback,
     diagnostics: validation.diagnostics ?? validation.issues,
   });
-  logger.warn(`Plan candidate rejected tool=${toolName} toolCall=${toolCallId} stage=${stage} code=${code}`);
+  logger.warn(
+    `Plan candidate rejected tool=${toolName} toolCall=${toolCallId} stage=${stage} code=${code}`,
+  );
 }
 
 function shouldLogToolOutputs(): boolean {
@@ -108,7 +114,8 @@ export function previewToolInputForLog(
   input: Record<string, unknown>,
   maxChars: number,
 ): string {
-  return providerToolName === 'ask_user_question' || isAuditedPlanTool(providerToolName)
+  return providerToolName === 'ask_user_question' ||
+    isAuditedPlanTool(providerToolName)
     ? '[omitted]'
     : safeJsonPreview(input, maxChars);
 }
@@ -157,6 +164,151 @@ async function summarizeToolResultForModel(args: {
   }
 }
 
+function clipCodePointSafe(text: string, maxChars: number): string {
+  if (text.length <= maxChars) return text;
+  const suffix = `... [truncated ${text.length} chars]`;
+  const keep = Math.max(0, maxChars - suffix.length);
+  if (keep === 0) return suffix.slice(0, maxChars);
+  let slice = text.slice(0, keep);
+  const last = slice.charCodeAt(slice.length - 1);
+  if (last >= 0xd800 && last <= 0xdbff) {
+    slice = slice.slice(0, -1);
+  }
+  return `${slice}${suffix}`;
+}
+
+function compactValueForBudget(
+  value: unknown,
+  limits: { maxString: number; maxArray: number; maxDepth: number },
+  depth = 0,
+): unknown {
+  if (
+    value == null ||
+    typeof value === 'boolean' ||
+    typeof value === 'number'
+  ) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return clipCodePointSafe(value, limits.maxString);
+  }
+  if (Array.isArray(value)) {
+    if (depth >= limits.maxDepth) {
+      return { _omittedArrayLength: value.length };
+    }
+    if (value.length <= limits.maxArray) {
+      return value.map((item) =>
+        compactValueForBudget(item, limits, depth + 1),
+      );
+    }
+    const headCount = Math.max(1, Math.ceil(limits.maxArray / 2));
+    const tailCount = Math.max(0, limits.maxArray - headCount);
+    const omitted = value.length - headCount - tailCount;
+    return [
+      ...value
+        .slice(0, headCount)
+        .map((item) => compactValueForBudget(item, limits, depth + 1)),
+      { _omittedItems: omitted },
+      ...(tailCount > 0
+        ? value
+            .slice(-tailCount)
+            .map((item) => compactValueForBudget(item, limits, depth + 1))
+        : []),
+    ];
+  }
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (depth >= limits.maxDepth) {
+      return { _omittedKeys: entries.length };
+    }
+    const compacted: Record<string, unknown> = {};
+    for (const [key, entry] of entries) {
+      if (entry === undefined) continue;
+      compacted[key] = compactValueForBudget(entry, limits, depth + 1);
+    }
+    return compacted;
+  }
+  return String(value);
+}
+
+function buildStructuredBudgetEnvelope(
+  value: unknown,
+  maxChars: number,
+  originalChars: number,
+): string {
+  const passes = [
+    { maxString: 2_000, maxArray: 20, maxDepth: 6 },
+    { maxString: 600, maxArray: 10, maxDepth: 5 },
+    { maxString: 240, maxArray: 6, maxDepth: 4 },
+    { maxString: 100, maxArray: 3, maxDepth: 3 },
+    { maxString: 48, maxArray: 2, maxDepth: 2 },
+  ];
+  let lastSummary: unknown = null;
+  for (const limits of passes) {
+    const summary = compactValueForBudget(value, limits);
+    lastSummary = summary;
+    const envelope = JSON.stringify({
+      truncated: true,
+      reason: 'tool_result_budget_exceeded',
+      maxChars,
+      originalChars,
+      summary,
+    });
+    if (envelope.length <= maxChars) return envelope;
+  }
+
+  // Wide object fallback: keep compact scalar fields first so late metadata stays visible.
+  if (
+    lastSummary &&
+    typeof lastSummary === 'object' &&
+    !Array.isArray(lastSummary)
+  ) {
+    const entries = Object.entries(lastSummary as Record<string, unknown>);
+    const ordered = [...entries].sort(([, a], [, b]) => {
+      const lenA = JSON.stringify(a)?.length ?? 0;
+      const lenB = JSON.stringify(b)?.length ?? 0;
+      return lenA - lenB;
+    });
+    const kept: Record<string, unknown> = {};
+    let omitted = 0;
+    for (const [key, entry] of ordered) {
+      const candidate = { ...kept, [key]: entry };
+      const remaining = entries.length - Object.keys(candidate).length;
+      const envelope = JSON.stringify({
+        truncated: true,
+        reason: 'tool_result_budget_exceeded',
+        maxChars,
+        originalChars,
+        summary:
+          remaining > 0 ? { ...candidate, _omittedKeys: remaining } : candidate,
+      });
+      if (envelope.length <= maxChars) {
+        kept[key] = entry;
+      } else {
+        omitted++;
+      }
+    }
+    return JSON.stringify({
+      truncated: true,
+      reason: 'tool_result_budget_exceeded',
+      maxChars,
+      originalChars,
+      summary: omitted > 0 ? { ...kept, _omittedKeys: omitted } : kept,
+    });
+  }
+
+  return JSON.stringify({
+    truncated: true,
+    reason: 'tool_result_budget_exceeded',
+    maxChars,
+    originalChars,
+    summary: clipCodePointSafe(
+      String(lastSummary ?? ''),
+      Math.max(64, maxChars - 160),
+    ),
+  });
+}
+
 export async function stringifyAiSdkToolResultForModel(args: {
   tool: AiToolDef | undefined;
   ctx: AiToolContext;
@@ -176,13 +328,7 @@ export async function stringifyAiSdkToolResultForModel(args: {
     const json = JSON.stringify(summarized);
     if (json.length <= maxChars) return json;
 
-    return JSON.stringify({
-      truncated: true,
-      reason: 'tool_result_budget_exceeded',
-      maxChars,
-      originalChars: json.length,
-      preview: json.slice(0, maxChars),
-    });
+    return buildStructuredBudgetEnvelope(summarized, maxChars, json.length);
   } catch (err) {
     return JSON.stringify({
       truncated: true,
@@ -231,12 +377,22 @@ async function executeCoachTool(args: {
     providerToolName === 'present_coach_plan_draft' &&
     Object.keys(input).length === 0
   ) {
-    const invalidShape = rawInput === null || Array.isArray(rawInput) || typeof rawInput !== 'object';
+    const invalidShape =
+      rawInput === null ||
+      Array.isArray(rawInput) ||
+      typeof rawInput !== 'object';
     const stage = invalidShape ? 'validate_input' : 'parse_arguments';
     const code = invalidShape ? 'INVALID_INPUT' : 'EMPTY_TOOL_ARGUMENTS';
-    const message = 'Provide a complete plan draft JSON object with title, periodWeeks and workouts.';
-    await recordPlanToolValidationRejection({ ctx, toolCallId, toolName: providerToolName, candidate: rawInput ?? null,
-      stage, validation: { ok: false, code, message } });
+    const message =
+      'Provide a complete plan draft JSON object with title, periodWeeks and workouts.';
+    await recordPlanToolValidationRejection({
+      ctx,
+      toolCallId,
+      toolName: providerToolName,
+      candidate: rawInput ?? null,
+      stage,
+      validation: { ok: false, code, message },
+    });
     logger.warn(
       '[AI][教练][工具] 参数为空 name=present_coach_plan_draft expected=title,periodWeeks,workouts',
     );
@@ -247,8 +403,12 @@ async function executeCoachTool(args: {
   const validation = await validateAiToolInput(recordTool, ctx, input);
   if (validation.ok === false) {
     await recordPlanToolValidationRejection({
-      ctx, toolCallId, toolName: providerToolName, candidate: rawInput,
-      validation, stage: 'validate_input',
+      ctx,
+      toolCallId,
+      toolName: providerToolName,
+      candidate: rawInput,
+      validation,
+      stage: 'validate_input',
     });
     if (shouldLogToolDebug() && !isAuditedPlanTool(providerToolName)) {
       logger.warn(
@@ -263,7 +423,10 @@ async function executeCoachTool(args: {
         `Plan draft validation failed code=${validation.code ?? 'none'}`,
       );
     }
-    if (!isAuditedPlanTool(providerToolName) && UI_SURFACE_TOOL_NAMES.has(providerToolName)) {
+    if (
+      !isAuditedPlanTool(providerToolName) &&
+      UI_SURFACE_TOOL_NAMES.has(providerToolName)
+    ) {
       logUiSurfaceValidationFailure({
         providerToolName,
         validation,
@@ -279,7 +442,9 @@ async function executeCoachTool(args: {
       code: validation.code,
       stage: 'validate_input',
       ...(validation.issues ? { issues: validation.issues } : {}),
-      ...(validation.feedback && !validation.modelRepair ? { feedback: validation.feedback } : {}),
+      ...(validation.feedback && !validation.modelRepair
+        ? { feedback: validation.feedback }
+        : {}),
     };
   }
 
@@ -396,15 +561,31 @@ export function createAiSdkCoachTools(args: {
         })
       : toolSchemaValidator<Record<string, unknown>>(toolDef.parameters);
     // UI tools return actionable validation errors through the normal tool loop.
-    const inputSchema = jsonSchema(toolDef.parameters, { validate: validateProviderInput });
-    const assembledSchema = providerToolName === 'present_coach_plan_draft' ? jsonSchema({
-      type: 'object', additionalProperties: false, required: ['assessmentId', 'title'],
-      properties: { assessmentId: { type: 'string' }, title: { type: 'string', minLength: 1 }, description: { type: 'string' } },
-    }, { validate: validateProviderInput }) : undefined;
+    const inputSchema = jsonSchema(toolDef.parameters, {
+      validate: validateProviderInput,
+    });
+    const assembledSchema =
+      providerToolName === 'present_coach_plan_draft'
+        ? jsonSchema(
+            {
+              type: 'object',
+              additionalProperties: false,
+              required: ['assessmentId', 'title'],
+              properties: {
+                assessmentId: { type: 'string' },
+                title: { type: 'string', minLength: 1 },
+                description: { type: 'string' },
+              },
+            },
+            { validate: validateProviderInput },
+          )
+        : undefined;
     const sdkTool: Tool<Record<string, unknown>, unknown> = {
       description: toolDef.description,
       get inputSchema() {
-        return assembledSchema && planPhaseProgress(ctx)?.next === null ? assembledSchema : inputSchema;
+        return assembledSchema && planPhaseProgress(ctx)?.next === null
+          ? assembledSchema
+          : inputSchema;
       },
       metadata: {
         canonicalName: toolDef.name,

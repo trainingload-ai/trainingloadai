@@ -990,7 +990,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
-          "line": 93
+          "line": 99
         },
         {
           "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
@@ -1015,7 +1015,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
-          "line": 86
+          "line": 92
         },
         {
           "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
@@ -1432,7 +1432,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
-          "line": 79
+          "line": 85
         },
         {
           "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
