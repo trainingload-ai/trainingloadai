@@ -65,9 +65,8 @@ export function getMetricHistoryChartFixture(key: FitnessMetricKey) {
 
 export function buildMetricDocsLink(
   key: FitnessMetricKey,
-  title: string,
   lang: string,
-  aboutMetricLabel: string,
+  label: string,
 ): { label: string; href: string } {
   const docsLocale = lang.startsWith("zh") ? "zh" : "en";
   const href =
@@ -76,7 +75,7 @@ export function buildMetricDocsLink(
       : `https://www.trainingload.ai/${docsLocale}/docs/metrics`;
 
   return {
-    label: aboutMetricLabel.replace("{title}", title),
+    label,
     href,
   };
 }

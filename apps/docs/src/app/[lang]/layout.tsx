@@ -4,7 +4,7 @@ import "@fontsource-variable/jost";
 import { Suspense, type ReactNode } from "react";
 import type { Metadata } from "next";
 import type { Translations } from "fumadocs-ui/i18n";
-import { isSeoIndexedLanguage } from "@/lib/i18n";
+import { isSeoIndexedLanguage, SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 import { LOCALE_OPTIONS } from "@/lib/locale-options";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -12,7 +12,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { resolveGa4MeasurementId } from "@shared/product-analytics";
 import { openGraphLocale } from "@/lib/seo-schema";
 import {
-  absoluteAlternatesForPath,
+  absoluteAlternatesForLocales,
   absoluteLocalizedUrl,
 } from "@/lib/locale-url";
 import { LocalePreferenceSync } from "@/components/LocalePreferenceSync";
@@ -57,7 +57,7 @@ export async function generateMetadata({
     publisher: "Trainingload.ai",
     metadataBase: new URL(siteUrl),
     alternates: {
-      languages: absoluteAlternatesForPath(siteUrl, "/"),
+      languages: absoluteAlternatesForLocales(siteUrl, "/", SEO_INDEXED_LANGUAGES),
     },
     openGraph: {
       type: "website",

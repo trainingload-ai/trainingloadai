@@ -443,6 +443,9 @@ importers:
       '@trainingloadai/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@trainingloadai/messages':
+        specifier: workspace:*
+        version: link:../../packages/messages
       '@trainingloadai/shared':
         specifier: workspace:*
         version: link:../../packages/shared

@@ -1,3 +1,4 @@
+import "@/i18n/mock-server-translations";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -46,11 +47,11 @@ const routes: Array<{
 describe("official race-plan long-tail SEO", () => {
   it.each(routes)(
     "owns a distinct intent and canonical URL for $slug",
-    ({ slug, path, titleIntent }) => {
-      const metadata = officialPlanTemplateMetadata({ lang: "zh", slug });
+    async ({ slug, path, titleIntent }) => {
+      const metadata = await officialPlanTemplateMetadata({ lang: "zh", slug });
 
       expect(String(metadata.title)).toContain(titleIntent);
-      expect(officialPlanTemplateHeading({ lang: "zh", slug })).toBe(
+      expect(await officialPlanTemplateHeading({ lang: "zh", slug })).toBe(
         titleIntent,
       );
       expect(String(metadata.alternates?.canonical)).toBe(
@@ -65,20 +66,24 @@ describe("official race-plan long-tail SEO", () => {
     },
   );
 
-  it("keeps all six Chinese long-tail titles distinct", () => {
-    const titles = routes.map(({ slug }) =>
-      String(officialPlanTemplateMetadata({ lang: "zh", slug }).title),
+  it("keeps all six Chinese long-tail titles distinct", async () => {
+    const metadata = await Promise.all(
+      routes.map(({ slug }) => officialPlanTemplateMetadata({ lang: "zh", slug })),
     );
+    const titles = metadata.map(({ title }) => String(title));
 
     expect(new Set(titles).size).toBe(routes.length);
   });
 
-  it("prevents unsupported locale variants from being indexed", () => {
-    const metadata = officialPlanTemplateMetadata({
-      lang: "fr",
+  it("keeps non-indexed locales out of the index", async () => {
+    const metadata = await officialPlanTemplateMetadata({
+      lang: "nl",
       slug: "improve-10k",
     });
 
     expect(metadata.robots).toMatchObject({ index: false, follow: true });
+    expect(
+      (await officialPlanTemplateMetadata({ lang: "fr", slug: "improve-10k" })).robots,
+    ).toMatchObject({ index: false, follow: true });
   });
 });

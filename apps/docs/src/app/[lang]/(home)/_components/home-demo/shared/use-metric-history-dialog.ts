@@ -18,7 +18,7 @@ export type MetricHistoryStatInput = {
   description?: string;
 };
 
-export function useMetricHistoryDialog(lang: string, aboutMetric: string) {
+export function useMetricHistoryDialog(lang: string, aboutMetric: (title: string) => string) {
   const [metricDialog, setMetricDialog] = useState<MetricHistoryDialogState>(
     createInitialMetricHistoryDialogState,
   );
@@ -33,7 +33,7 @@ export function useMetricHistoryDialog(lang: string, aboutMetric: string) {
         currentValue: stat.value,
         unit: stat.unit ?? "",
         description: stat.details ?? stat.description ?? "",
-        links: [buildMetricDocsLink(key, stat.title, lang, aboutMetric)],
+        links: [buildMetricDocsLink(key, lang, aboutMetric(stat.title))],
       });
     },
     [aboutMetric, lang],

@@ -5,7 +5,11 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { TrackedLink } from "@/components/TrackedLink";
 import { VdotCalculatorClient } from "./client";
 import { VdotAppPromo, VdotFooterCta } from "./promo";
@@ -114,6 +118,7 @@ export async function generateMetadata({
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/vdot-calculator"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, path),

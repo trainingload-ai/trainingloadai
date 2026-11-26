@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { isSeoIndexedLanguage } from "@/lib/i18n";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
-import {
-  createDistanceTrainingPlan,
-  type RunningPlan,
-  type RunningPlanPageLabels,
-} from "@/lib/running-plan-pages";
-import { FiveKPlanExperience } from "./_components/FiveKPlanExperience";
+import { getRunningPlan } from "@/lib/running-plan-pages";
+import { DistancePlanExperience } from "@/components/DistancePlanExperience";
 
 function getSiteUrl() {
   const raw = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.trainingload.ai";
@@ -21,16 +17,9 @@ export async function generateMetadata({
   const { lang } = await params;
   const prefix = localePrefix(lang);
   const siteUrl = getSiteUrl();
-  const t = await getTranslations({
-    locale: lang,
-    namespace: "runningPlanPages.plans",
-  });
-  const plan = createDistanceTrainingPlan(
-    t.raw("5k-training-plan") as RunningPlan,
-    lang,
-  );
+  const plan = await getRunningPlan("5k-training-plan", lang);
   const path = plan.routePath ?? `/${plan.slug}`;
-  const indexed = ["en", "zh", "zh-hant", "ja"].includes(lang);
+  const indexed = isSeoIndexedLanguage(lang);
 
   return {
     title: plan.metaTitle,
@@ -61,15 +50,6 @@ export default async function FiveKTrainingPlanPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const t = await getTranslations({
-    locale: lang,
-    namespace: "runningPlanPages",
-  });
-  const plan = createDistanceTrainingPlan(
-    t.raw("plans.5k-training-plan") as RunningPlan,
-    lang,
-  );
-  const labels = t.raw("labels") as RunningPlanPageLabels;
-
-  return <FiveKPlanExperience lang={lang} plan={plan} labels={labels} />;
+  const plan = await getRunningPlan("5k-training-plan", lang);
+  return <DistancePlanExperience lang={lang} plan={plan} />;
 }

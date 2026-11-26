@@ -21,7 +21,6 @@ export type DemoSportOption = { value: "all" | "RUN" | "CYCLING" | "SWIM"; label
 export type DemoTimeOption = { key: "thisYear" | "last30" | "last90"; label: string };
 
 export type MetricDemoCopy = {
-  back: string;
   sportOptions: DemoSportOption[];
   timeOptions: DemoTimeOption[];
   pmc: {
@@ -87,5 +86,3 @@ export type MetricDemoCopy = {
     table: Record<string, string>;
   };
 };
-
-export type MetricDemoCopyMap = Record<string, MetricDemoCopy>;

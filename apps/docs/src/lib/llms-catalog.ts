@@ -1,5 +1,4 @@
-import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
-import { localePrefix } from "@/lib/locale-url";
+import { localePrefix, seoIndexedLanguagesForPath } from "@/lib/locale-url";
 
 export type LlmToolPage = {
   title: string;
@@ -533,7 +532,7 @@ export const llmToolPages: LlmToolPage[] = [
 
 export function localizedPageUrls(siteUrl: string, path: string) {
   const base = siteUrl.replace(/\/+$/, "");
-  return SEO_INDEXED_LANGUAGES.map((lang) => {
+  return seoIndexedLanguagesForPath(path).map((lang) => {
     const prefix = localePrefix(lang);
     return { lang, url: `${base}${prefix}${path}` };
   });

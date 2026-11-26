@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { FitFileViewerClient } from "./client";
 import type messages from "../../../../../../../packages/messages/docs/en.json";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import {
   breadcrumbSchema,
   faqPageSchema,
@@ -13,7 +17,6 @@ import {
   webApplicationSchema,
   webPageSchema,
 } from "@/lib/seo-schema";
-import { isSeoIndexedLanguage } from "@/lib/i18n";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 
 function getSiteUrl() {
@@ -43,7 +46,6 @@ export async function generateMetadata({
           ? "fit-file-viewer-ja.png"
           : "fit-file-viewer.png";
   const ogImageUrl = `${siteUrl}/og/${ogImageName}`;
-  const isIndexedLocale = isSeoIndexedLanguage(lang);
   const seo = optimizeSeoText({
     locale: lang,
     context: "converter",
@@ -56,6 +58,7 @@ export async function generateMetadata({
     description: seo.description,
     keywords: t.raw("metadata.keywords") as string[],
     category: "technology",
+    robots: robotsForPublicPath(lang, "/fit-file-viewer"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, "/fit-file-viewer"),
@@ -81,17 +84,6 @@ export async function generateMetadata({
       title: seo.title,
       description: seo.description,
       images: [ogImageUrl],
-    },
-    robots: {
-      index: isIndexedLocale,
-      follow: true,
-      googleBot: {
-        index: isIndexedLocale,
-        follow: true,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-        "max-video-preview": -1,
-      },
     },
   };
 }

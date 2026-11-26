@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -27,113 +28,33 @@ const clients = [
   "opencode",
 ];
 
-const copy = {
-  en: {
-    title: "Your AI can read your training. You can see exactly how.",
-    description:
-      "Connect TrainingLoad to your AI client through a read-only, OAuth-protected MCP server. Ask a real training question, inspect every tool call, and verify the conclusion against returned data.",
-    eyebrow: "TrainingLoad MCP",
-    connect: "Connect MCP",
-    docs: "Read the docs",
-    supported: "Works with",
-    contractEyebrow: "A product surface, not a raw API",
-    contractTitle: "24 bounded tools. Three resources. Three reusable prompts.",
-    contractText:
-      "The server prefers an aggregate snapshot, then exposes narrower detail only when the question needs it. Every list has a time bound, a limit, and an opaque cursor.",
-    groups: [
-      ["Current state", "Snapshot, readiness indicators, and load series"],
-      [
-        "Progress",
-        "Period comparison, sport breakdown, activity statistics, consistency, fitness, zones, and bests",
-      ],
-      [
-        "Execution",
-        "Activity zones and splits, plan summaries, adherence, and competition detail",
-      ],
-      ["Connections", "Sync readiness plus optional health context"],
-    ],
-    workflowEyebrow: "From connection to evidence",
-    workflowTitle: "Add one URL, approve the data you want, then ask normally.",
-    workflowText:
-      "The client discovers OAuth and tools from the server. TrainingLoad keeps authorization and data boundaries on the server, while every answer remains inspectable in the conversation.",
-    workflow: [
-      [
-        "01",
-        "Add the server",
-        "Use the same remote URL in any supported client.",
-      ],
-      ["02", "Review consent", "Approve read scopes; health remains separate."],
-      [
-        "03",
-        "Ask a real question",
-        "The client selects the smallest useful tool path.",
-      ],
-      [
-        "04",
-        "Verify the answer",
-        "Inspect calls, ranges, returned facts, and missing data.",
-      ],
-    ],
-    recipes: "See native prompts, resources, and tool paths",
-    safetyTitle: "Private by construction",
-    safetyText:
-      "OAuth scopes are checked when tools are listed and again when they execute. Results exclude direct identity fields, raw sensor streams, precise routes, credentials, and complete FIT data.",
-    safety: [
-      "Read-only tools; no hidden write path",
-      "Current athlete only; opaque IDs are user-scoped",
-      "Untrusted notes are sanitized and never treated as instructions",
-      "Schema validation, output budgets, timeouts, limits, audit, and traces",
-    ],
-    finalTitle: "Connect once. Ask in the client you already use.",
-    finalText:
-      "The same endpoint works across supported MCP clients. Health access remains optional and can be revoked with the rest of the connection from your account.",
-  },
-  zh: {
-    title: "让你的 AI 读懂训练，也让你看清它是怎么得出结论的。",
-    description:
-      "通过只读、OAuth 保护的 MCP 服务，把 TrainingLoad 连接到你的 AI 客户端。提出真实训练问题，查看每一次工具调用，再用返回数据验证结论。",
-    eyebrow: "TrainingLoad MCP",
-    connect: "配置 MCP",
-    docs: "查看文档",
-    supported: "支持客户端",
-    contractEyebrow: "不是裸 API，而是完整产品能力",
-    contractTitle: "24 个有边界的工具，3 个 Resources，3 个可复用 Prompts。",
-    contractText:
-      "服务优先返回聚合快照，只有问题确实需要时才调用更细的工具。所有列表都有限定时间窗、limit 和 opaque cursor。",
-    groups: [
-      ["当前状态", "训练快照、readiness 指标与负荷时间序列"],
-      [
-        "进展变化",
-        "周期比较、项目拆分、活动统计、一致性、体能趋势、区间与最佳成绩",
-      ],
-      ["计划执行", "活动 zones/splits、计划总结、完成率与比赛详情"],
-      ["连接状态", "同步 readiness 与可选健康背景"],
-    ],
-    workflowEyebrow: "从连接到证据",
-    workflowTitle: "添加一个地址，确认数据权限，然后像平常一样提问。",
-    workflowText:
-      "客户端从服务发现 OAuth 和工具。TrainingLoad 在服务端守住授权和数据边界，同时让每个答案都能在对话中核验。",
-    workflow: [
-      ["01", "添加服务", "所有支持的客户端都使用同一个远程地址。"],
-      ["02", "确认授权", "批准只读 scopes；健康权限始终单独选择。"],
-      ["03", "提出真实问题", "客户端选择能回答问题的最小工具组合。"],
-      ["04", "核验答案", "查看调用、日期范围、返回事实与缺失数据。"],
-    ],
-    recipes: "查看原生 Prompts、Resources 与工具路径",
-    safetyTitle: "从设计上保护隐私",
-    safetyText:
-      "OAuth scope 在工具列出时检查一次，执行时再次做权威校验。结果不包含直接身份字段、原始传感器流、精确路线、凭证或完整 FIT 数据。",
-    safety: [
-      "全部只读，没有隐藏写入路径",
-      "仅当前运动员，opaque ID 绑定用户",
-      "清理不可信备注，绝不把它当作指令",
-      "Schema 校验、输出预算、超时、限流、审计与 tracing",
-    ],
-    finalTitle: "连接一次，就在你已经使用的客户端里提问。",
-    finalText:
-      "同一个端点适用于所有支持的 MCP 客户端。健康数据始终可选，也可以和整条连接一起从账号中撤销。",
-  },
+type McpFeatureCopy = {
+  title: string;
+  description: string;
+  eyebrow: string;
+  connect: string;
+  docs: string;
+  supported: string;
+  contractEyebrow: string;
+  contractTitle: string;
+  contractText: string;
+  groups: [string, string][];
+  workflowEyebrow: string;
+  workflowTitle: string;
+  workflowText: string;
+  workflow: [string, string, string][];
+  recipes: string;
+  safetyTitle: string;
+  safetyText: string;
+  safety: string[];
+  finalTitle: string;
+  finalText: string;
 };
+
+async function getMcpCopy(locale: string): Promise<McpFeatureCopy> {
+  const t = await getTranslations({ locale, namespace: "features.mcp" });
+  return t.raw("content") as McpFeatureCopy;
+}
 
 export async function generateMetadata({
   params,
@@ -142,7 +63,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const prefix = localePrefix(lang);
-  const localized = lang === "zh" ? copy.zh : copy.en;
+  const localized = await getMcpCopy(lang);
   return {
     title: `TrainingLoad MCP | ${localized.title}`,
     description: localized.description,
@@ -166,7 +87,7 @@ export default async function McpFeaturePage({
 }) {
   const { lang } = await params;
   const prefix = localePrefix(lang);
-  const t = lang === "zh" ? copy.zh : copy.en;
+  const t = await getMcpCopy(lang);
 
   return (
     <div className="bg-neutral-950 text-white">

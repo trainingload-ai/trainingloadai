@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ComponentType, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -36,7 +37,6 @@ import {
 import { HomeDayDemoApp } from "./home-day-demo/home-day-demo-app";
 import { HomeProductDemoWeeklyLoadChart } from "./home-product-demo-weekly-load-chart";
 import { MetricDemoApp } from "./metric-demo/metric-demo-app";
-import { metricDemoCopy } from "./metric-demo/copy";
 import {
   type MetricDemoView,
   type SummaryMetricKey,
@@ -2796,7 +2796,8 @@ export function HomeProductDemo({
   variant?: "preview" | "expanded";
 }) {
   const copy = resolveDemoCopy(demoCopy, lang);
-  const metricCopy = resolveDemoCopy(metricDemoCopy, lang);
+  const tCommon = useTranslations("commonLinks");
+  const backLabel = tCommon("demoOverviewBack");
   const isExpanded = variant === "expanded";
   const [view, setView] = useState<HomeDemoView>("home");
   const [metricDialog, setMetricDialog] = useState<MetricHistoryDialogState>(
@@ -2814,7 +2815,7 @@ export function HomeProductDemo({
       currentValue: stat.value,
       unit: stat.unit ?? "",
       description: stat.details ?? stat.description,
-      links: [buildMetricDocsLink(key, stat.title, lang, copy.aboutMetric)],
+      links: [buildMetricDocsLink(key, lang, copy.aboutMetric.replace("{title}", stat.title))],
     });
   };
 
@@ -2830,12 +2831,12 @@ export function HomeProductDemo({
     }
 
     setLightboxBack({
-      ariaLabel: metricCopy.back,
+      ariaLabel: backLabel,
       onClick: () => setView("home"),
     });
 
     return () => setLightboxBack(null);
-  }, [isExpanded, view, metricCopy.back, setLightboxBack]);
+  }, [isExpanded, view, backLabel, setLightboxBack]);
 
   return (
     <div
@@ -2896,7 +2897,7 @@ export function HomeProductDemo({
             onBackHome={() => setView("home")}
           />
         ) : (
-          <MetricDemoApp lang={lang} view={view} />
+          <MetricDemoApp view={view} />
         )}
       </div>
     </div>

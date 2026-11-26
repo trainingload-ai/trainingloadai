@@ -9,7 +9,11 @@ import { PowerZonesCalculatorClient } from "./client";
 import { PowerZonesAppPromo, PowerZonesFooterCta } from "./promo";
 import { readPowerZonesInputs } from "./share-inputs";
 import styles from "./power-zones-calculator.module.css";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { TrackedLink } from "@/components/TrackedLink";
 import {
   breadcrumbSchema,
@@ -139,6 +143,7 @@ export async function generateMetadata({
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/power-zones-calculator"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, "/power-zones-calculator"),

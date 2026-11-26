@@ -14,12 +14,13 @@ import {
   SlidersHorizontal,
   Zap,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PlanScheduleViewTracker } from "@/components/PlanScheduleViewTracker";
 import { WorkoutStructurePreview } from "@/components/WorkoutStructurePreview";
 import { withLocalePath } from "@/lib/locale-url";
-import { getRpeScaleContent, RPE_SCALE_PATH } from "@/lib/rpe-scale-content";
+import { RPE_SCALE_PATH } from "@/lib/rpe-scale-content";
 import type {
   LocalizedRunningPlanSchedule,
   RunningPlanDayKind,
@@ -247,7 +248,7 @@ function rpeGuideHref(lang: string, intensity?: string) {
   return `${withLocalePath(lang, RPE_SCALE_PATH)}#${anchor}`;
 }
 
-export function RunningPlanSchedule({
+export async function RunningPlanSchedule({
   schedule,
   slug,
   templateSlug,
@@ -268,7 +269,10 @@ export function RunningPlanSchedule({
   anchorPrefix?: string;
   showGuidance?: boolean;
 }) {
-  const rpeCopy = getRpeScaleContent(lang);
+  const t = await getTranslations({
+    locale: lang,
+    namespace: "rpeScale.content",
+  });
   return (
     <section
       id={`${anchorPrefix}schedule`}
@@ -310,7 +314,7 @@ export function RunningPlanSchedule({
             className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/80 bg-white/80 px-4 py-2 text-sm font-bold text-emerald-800 shadow-sm transition hover:border-emerald-500 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-300/20 dark:bg-emerald-300/[0.08] dark:text-emerald-200 dark:hover:bg-emerald-300/[0.12]"
           >
             <BookOpenCheck aria-hidden="true" className="size-4" />
-            {rpeCopy.scheduleGuideLabel}
+            {t("scheduleGuideLabel")}
           </Link>
         </div>
 
@@ -529,7 +533,7 @@ export function RunningPlanSchedule({
                                       <Link
                                         href={rpeGuideHref(lang, day.intensity)}
                                         prefetch={false}
-                                        aria-label={`${day.intensity}: ${rpeCopy.intensityLinkLabel}`}
+                                        aria-label={`${day.intensity}: ${t("intensityLinkLabel")}`}
                                         className="mt-1 inline-flex text-[10px] font-black text-emerald-700 tabular-nums hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-emerald-300"
                                       >
                                         {day.intensity}
@@ -639,7 +643,7 @@ export function RunningPlanSchedule({
                             <Link
                               href={rpeGuideHref(lang, content.intensity)}
                               prefetch={false}
-                              aria-label={`${content.intensity}: ${rpeCopy.intensityLinkLabel}`}
+                              aria-label={`${content.intensity}: ${t("intensityLinkLabel")}`}
                               className={`mt-2 inline-flex rounded-full px-2 py-1 text-[10px] font-black tabular-nums ${styles.badge}`}
                             >
                               {content.intensity}
@@ -682,7 +686,7 @@ export function RunningPlanSchedule({
                                   <Link
                                     href={rpeGuideHref(lang, day.intensity)}
                                     prefetch={false}
-                                    aria-label={`${day.intensity}: ${rpeCopy.intensityLinkLabel}`}
+                                    aria-label={`${day.intensity}: ${t("intensityLinkLabel")}`}
                                     className={`rounded-full px-2 py-1 text-[10px] font-black tabular-nums ${styles.badge}`}
                                   >
                                     {day.intensity}

@@ -184,12 +184,7 @@ describe("converter direction SEO copy", () => {
 
       for (const slug of getConverterDirectionSlugs()) {
         const direction = buildConverterDirection(slug, localeCopy);
-        const expectedFaqLength = (indexedLocales as readonly string[]).includes(
-          locale,
-        )
-          ? 8
-          : 6;
-        expect(direction?.faq).toHaveLength(expectedFaqLength);
+        expect(direction?.faq).toHaveLength(8);
         expect(
           direction?.faq.every((item) => item.question && item.answer),
         ).toBe(true);

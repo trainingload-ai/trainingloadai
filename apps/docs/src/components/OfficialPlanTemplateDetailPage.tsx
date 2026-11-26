@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+import type messages from "@trainingloadai/messages/docs/en.json";
 import type { Metadata } from "next";
 import Script from "next/script";
 import {
@@ -21,6 +23,7 @@ import { WorkoutStructurePreview } from "@/components/WorkoutStructurePreview";
 import { RunningPlanIntentGuide } from "@/components/RunningPlanIntentGuide";
 import { getPlanIntentGuide } from "@/lib/running-plan-intents";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import { i18n, isSeoIndexedLanguage } from "@/lib/i18n";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import {
   breadcrumbSchema,
@@ -29,7 +32,6 @@ import {
   schemaLanguage,
 } from "@/lib/seo-schema";
 
-type IndexedLocale = "en" | "zh" | "zh-hant" | "ja";
 export type OfficialPlanSlug =
   | "improve-10k"
   | "target-10k"
@@ -38,202 +40,24 @@ export type OfficialPlanSlug =
   | "improve-marathon"
   | "target-marathon";
 
-const LABELS: Record<
-  IndexedLocale,
-  {
-    official: string;
-    improve: string;
-    target: string;
-    weeks: string;
-    runsPerWeek: string;
-    level: string;
-    schedule: string;
-    scheduleText: string;
-    example: string;
-    exampleText: string;
-    cta: string;
-    back: string;
-    currentPlan: string;
-    workoutCount: string;
-    finalTitle: string;
-    finalText: string;
-  }
-> = {
-  en: {
-    official: "Official training plan",
-    improve: "Performance build",
-    target: "Goal-time preparation",
-    weeks: "Weeks",
-    runsPerWeek: "Runs per week",
-    level: "Plan type",
-    schedule: "Complete week-by-week schedule",
-    scheduleText:
-      "Open each week to review the sessions, structure and effort guidance before adding the plan to your calendar.",
-    example: "Example intensity",
-    exampleText:
-      "Paces shown below use a VDOT 40 example and are not your personal training paces. After sign-in, Trainingload.ai uses reliable current capability data. A Target plan also requires a qualified goal race.",
-    cta: "Build my plan",
-    back: "Back to the distance guide",
-    currentPlan: "Current plan",
-    workoutCount: "sessions",
-    finalTitle: "Put the complete plan on your calendar",
-    finalText:
-      "Use the public schedule to understand the structure, then create a personal preview with your current capability and available training days.",
-  },
-  zh: {
-    official: "官方训练计划",
-    improve: "进阶提高",
-    target: "目标成绩备赛",
-    weeks: "周期",
-    runsPerWeek: "每周跑步",
-    level: "计划类型",
-    schedule: "完整逐周训练安排",
-    scheduleText:
-      "展开每一周，查看训练内容、结构和强度说明；确认适合自己后，再加入日历。",
-    example: "示例强度",
-    exampleText:
-      "下方配速使用 VDOT 40 示例，不是你的个人训练配速。登录后会使用可靠的当前能力数据；目标成绩计划还需要符合条件的目标赛事。",
-    cta: "生成我的计划",
-    back: "返回该距离训练主页",
-    currentPlan: "当前计划",
-    workoutCount: "次训练",
-    finalTitle: "把完整计划加入训练日历",
-    finalText:
-      "先通过公开课表确认结构，再结合当前能力和可训练日期生成个人预览。",
-  },
-  "zh-hant": {
-    official: "官方訓練計畫",
-    improve: "進階提高",
-    target: "目標成績備賽",
-    weeks: "週期",
-    runsPerWeek: "每週跑步",
-    level: "計畫類型",
-    schedule: "完整逐週訓練安排",
-    scheduleText:
-      "展開每一週，查看訓練內容、結構和強度說明；確認適合自己後，再加入日曆。",
-    example: "示例強度",
-    exampleText:
-      "下方配速使用 VDOT 40 示例，不是你的個人訓練配速。登入後會使用可靠的目前能力資料；目標成績計畫還需要符合條件的目標賽事。",
-    cta: "產生我的計畫",
-    back: "返回該距離訓練主頁",
-    currentPlan: "目前計畫",
-    workoutCount: "次訓練",
-    finalTitle: "把完整計畫加入訓練日曆",
-    finalText:
-      "先透過公開課表確認結構，再結合目前能力和可訓練日期產生個人預覽。",
-  },
-  ja: {
-    official: "公式トレーニングプラン",
-    improve: "記録向上",
-    target: "目標タイム対策",
-    weeks: "期間",
-    runsPerWeek: "週のラン回数",
-    level: "プラン種別",
-    schedule: "週ごとの全トレーニング",
-    scheduleText:
-      "各週を開き、セッション内容・構成・強度を確認してからカレンダーに追加できます。",
-    example: "強度の例",
-    exampleText:
-      "下記のペースは VDOT 40 の例で、あなた個人のペースではありません。ログイン後は信頼できる現在の走力データを使用し、目標プランには条件を満たす目標レースも必要です。",
-    cta: "自分のプランを作る",
-    back: "距離別ガイドに戻る",
-    currentPlan: "現在のプラン",
-    workoutCount: "セッション",
-    finalTitle: "完全なプランをカレンダーへ",
-    finalText:
-      "公開メニューで構成を確認し、現在の走力と走れる曜日を使って個人向けプレビューを作成します。",
-  },
-};
+function getPlanTranslations(locale: string) {
+  return getTranslations({
+    locale: (i18n.languages as readonly string[]).includes(locale)
+      ? locale
+      : i18n.defaultLanguage,
+    namespace: "runningPlanPages",
+  });
+}
 
-const SEO_TITLES: Record<IndexedLocale, Record<OfficialPlanSlug, string>> = {
-  en: {
-    "improve-10k": "Intermediate 10K Training Plan | 8-Week Schedule",
-    "target-10k": "10K Goal-Time Training Plan | Sub-40, 45 & 50",
-    "improve-half-marathon":
-      "Intermediate Half Marathon Plan | 12-Week Schedule",
-    "target-half-marathon":
-      "Half Marathon Goal-Time Plan | Sub-2 Hour Training",
-    "improve-marathon":
-      "Intermediate Marathon Training Plan | 18-Week Schedule",
-    "target-marathon": "Marathon Goal-Time Plan | Sub-3 & Sub-4, 18 Weeks",
-  },
-  zh: {
-    "improve-10k": "10公里进阶训练计划：8周提高成绩课表",
-    "target-10k": "10公里目标成绩训练计划：跑进40、45或50分钟",
-    "improve-half-marathon": "半马进阶训练计划：12周提高成绩课表",
-    "target-half-marathon": "半马目标成绩训练计划：14周备战半马破二",
-    "improve-marathon": "马拉松进阶训练计划：18周提高成绩课表",
-    "target-marathon": "马拉松目标成绩训练计划：18周备战破三与破四",
-  },
-  "zh-hant": {
-    "improve-10k": "10公里進階訓練計畫：8週提高成績課表",
-    "target-10k": "10公里目標成績訓練計畫：跑進40、45或50分鐘",
-    "improve-half-marathon": "半馬進階訓練計畫：12週提高成績課表",
-    "target-half-marathon": "半馬目標成績訓練計畫：14週備戰半馬破二",
-    "improve-marathon": "馬拉松進階訓練計畫：18週提高成績課表",
-    "target-marathon": "馬拉松目標成績訓練計畫：18週備戰破三與破四",
-  },
-  ja: {
-    "improve-10k": "10km中級者向け練習メニュー｜8週間で記録向上",
-    "target-10k": "10km目標タイム練習メニュー｜40分・45分・50分切り",
-    "improve-half-marathon": "ハーフマラソン中級者向け練習メニュー｜12週間",
-    "target-half-marathon":
-      "ハーフマラソン目標タイム練習｜14週間で2時間切りを目指す",
-    "improve-marathon": "フルマラソン中級者向け練習メニュー｜18週間",
-    "target-marathon": "フルマラソン目標タイム練習｜サブ3・サブ4の18週間",
-  },
-};
-
-const PAGE_HEADINGS: Record<IndexedLocale, Record<OfficialPlanSlug, string>> = {
-  en: {
-    "improve-10k": "Intermediate 10K Training Plan",
-    "target-10k": "10K Goal-Time Training Plan",
-    "improve-half-marathon": "Intermediate Half Marathon Training Plan",
-    "target-half-marathon": "Half Marathon Goal-Time Training Plan",
-    "improve-marathon": "Intermediate Marathon Training Plan",
-    "target-marathon": "Marathon Goal-Time Training Plan",
-  },
-  zh: {
-    "improve-10k": "10公里进阶训练计划",
-    "target-10k": "10公里目标成绩训练计划",
-    "improve-half-marathon": "半马进阶训练计划",
-    "target-half-marathon": "半马目标成绩训练计划",
-    "improve-marathon": "马拉松进阶训练计划",
-    "target-marathon": "马拉松目标成绩训练计划",
-  },
-  "zh-hant": {
-    "improve-10k": "10公里進階訓練計畫",
-    "target-10k": "10公里目標成績訓練計畫",
-    "improve-half-marathon": "半馬進階訓練計畫",
-    "target-half-marathon": "半馬目標成績訓練計畫",
-    "improve-marathon": "馬拉松進階訓練計畫",
-    "target-marathon": "馬拉松目標成績訓練計畫",
-  },
-  ja: {
-    "improve-10k": "10km中級者向け練習メニュー",
-    "target-10k": "10km目標タイム練習メニュー",
-    "improve-half-marathon": "ハーフマラソン中級者向け練習メニュー",
-    "target-half-marathon": "ハーフマラソン目標タイム練習メニュー",
-    "improve-marathon": "フルマラソン中級者向け練習メニュー",
-    "target-marathon": "フルマラソン目標タイム練習メニュー",
-  },
-};
-
-export function officialPlanTemplateHeading({
+export async function officialPlanTemplateHeading({
   lang,
   slug,
 }: {
   lang: string;
   slug: OfficialPlanSlug;
 }) {
-  return PAGE_HEADINGS[indexedLocale(lang)][slug];
-}
-
-function indexedLocale(lang: string): IndexedLocale {
-  if (lang === "zh-hant") return "zh-hant";
-  if (lang.startsWith("zh")) return "zh";
-  if (lang === "ja") return "ja";
-  return "en";
+  const t = await getPlanTranslations(lang);
+  return t(`officialTemplate.pageHeadings.${slug}`);
 }
 
 function routeForTemplate(slug: OfficialPlanSlug) {
@@ -252,16 +76,16 @@ function getSiteUrl() {
   ).replace(/\/+$/, "");
 }
 
-export function officialPlanTemplateMetadata({
+export async function officialPlanTemplateMetadata({
   lang,
   slug,
 }: {
   lang: string;
   slug: OfficialPlanSlug;
-}): Metadata {
+}): Promise<Metadata> {
   const template = getRunPlanTemplate(slug);
   if (!template) throw new Error(`Missing official template: ${slug}`);
-  const locale = indexedLocale(lang);
+  const t = await getPlanTranslations(lang);
   const copy = template.copy[normalizePlanTemplateLocale(lang)];
   const path = `${routeForTemplate(slug)}/${routeSuffix(slug)}`;
   const siteUrl = getSiteUrl();
@@ -269,7 +93,7 @@ export function officialPlanTemplateMetadata({
   const seo = optimizeSeoText({
     locale: lang,
     context: "plan",
-    title: SEO_TITLES[locale][slug],
+    title: t(`officialTemplate.seoTitles.${slug}`),
     description: getPlanIntentGuide(slug, lang)?.intro ?? copy.description,
   });
 
@@ -291,13 +115,13 @@ export function officialPlanTemplateMetadata({
       title: seo.title,
       description: seo.description,
     },
-    robots: ["en", "zh", "zh-hant", "ja"].includes(lang)
+    robots: isSeoIndexedLanguage(lang)
       ? undefined
       : { index: false, follow: true },
   };
 }
 
-export function OfficialPlanTemplateDetailPage({
+export async function OfficialPlanTemplateDetailPage({
   lang,
   slug,
 }: {
@@ -310,9 +134,9 @@ export function OfficialPlanTemplateDetailPage({
     throw new Error(`Missing official template: ${slug}`);
 
   const normalizedLocale = normalizePlanTemplateLocale(lang);
-  const locale = indexedLocale(lang);
-  const labels = LABELS[locale];
-  const pageHeading = officialPlanTemplateHeading({ lang, slug });
+  const t = await getPlanTranslations(lang);
+  const labels = t.raw("officialTemplate.labels") as typeof messages.runningPlanPages.officialTemplate.labels;
+  const pageHeading = await officialPlanTemplateHeading({ lang, slug });
   const copy = template.copy[normalizedLocale];
   const hubPath = routeForTemplate(slug);
   const pagePath = `${hubPath}/${routeSuffix(slug)}`;

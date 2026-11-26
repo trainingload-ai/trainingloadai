@@ -4,10 +4,8 @@ import { cn } from "@/lib/utils";
 import { CoachDemoApp } from "./coach-demo/coach-demo-app";
 
 export function HomeChatPreview({
-  lang,
   variant = "preview",
 }: {
-  lang: string;
   variant?: "preview" | "expanded";
 }) {
   const isExpanded = variant === "expanded";
@@ -18,7 +16,7 @@ export function HomeChatPreview({
         className="client-demo-radius flex h-full min-h-0 flex-col bg-background text-foreground"
         data-demo-mode={variant}
       >
-        <CoachDemoApp lang={lang} interactive={isExpanded} />
+        <CoachDemoApp interactive={isExpanded} />
       </div>
     );
   }
@@ -37,7 +35,7 @@ export function HomeChatPreview({
           transform: "translate(-50%, -50%) scale(var(--chat-preview-scale))",
         }}
       >
-        <CoachDemoApp lang={lang} interactive={isExpanded} />
+        <CoachDemoApp interactive={isExpanded} />
       </div>
     </div>
   );

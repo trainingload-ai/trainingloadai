@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { DistancePlanExperience } from "@/components/DistancePlanExperience";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 import { optimizeSeoText } from "@/lib/seo-metadata";
-import {
-  createDistanceTrainingPlan,
-  type RunningPlan,
-  type RunningPlanPageLabels,
-} from "@/lib/running-plan-pages";
+import { getRunningPlan } from "@/lib/running-plan-pages";
 
 function getSiteUrl() {
   const raw = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.trainingload.ai";
@@ -22,14 +17,7 @@ export async function generateMetadata({
   const { lang } = await params;
   const prefix = localePrefix(lang);
   const siteUrl = getSiteUrl();
-  const t = await getTranslations({
-    locale: lang,
-    namespace: "runningPlanPages.plans",
-  });
-  const plan = createDistanceTrainingPlan(
-    t.raw("half-marathon-training-plan") as RunningPlan,
-    lang,
-  );
+  const plan = await getRunningPlan("half-marathon-training-plan", lang);
   const seo = optimizeSeoText({
     locale: lang,
     context: "plan",
@@ -65,14 +53,6 @@ export default async function HalfMarathonTrainingPlanPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const t = await getTranslations({
-    locale: lang,
-    namespace: "runningPlanPages",
-  });
-  const plan = createDistanceTrainingPlan(
-    t.raw("plans.half-marathon-training-plan") as RunningPlan,
-    lang,
-  );
-  const labels = t.raw("labels") as RunningPlanPageLabels;
-  return <DistancePlanExperience lang={lang} plan={plan} labels={labels} />;
+  const plan = await getRunningPlan("half-marathon-training-plan", lang);
+  return <DistancePlanExperience lang={lang} plan={plan} />;
 }

@@ -3,9 +3,8 @@
 import { useMemo, useState } from "react";
 import { ArrowUp, History, Plus, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { resolveDemoCopy } from "@/lib/demo-i18n";
 
-import { coachDemoCopy } from "./copy";
+import { useCoachDemoCopy } from "./copy";
 import { DemoThread } from "./demo-thread";
 import type { CoachDemoCopy, CoachDemoSession } from "./types";
 
@@ -61,13 +60,11 @@ function DemoSessionRow({
 }
 
 export function CoachDemoApp({
-  lang,
   interactive = false,
 }: {
-  lang: string;
   interactive?: boolean;
 }) {
-  const copy = resolveDemoCopy(coachDemoCopy, lang);
+  const copy = useCoachDemoCopy();
   const [activeSessionId, setActiveSessionId] = useState(
     copy.sessions[0]?.id ?? "",
   );

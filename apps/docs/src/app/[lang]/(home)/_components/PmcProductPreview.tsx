@@ -44,7 +44,7 @@ export function PmcProductPreview({
         dialogClassName="md:h-[min(900px,calc(100dvh-40px))] md:w-[min(1240px,calc(100vw-40px))]"
         expanded={
           <div className="client-demo-radius min-h-full bg-background px-1 pb-4 pt-2 text-foreground md:p-5">
-            <PmcDemoApp lang={lang} />
+            <PmcDemoApp />
           </div>
         }
       >
@@ -53,7 +53,7 @@ export function PmcProductPreview({
             className="pointer-events-none absolute left-6 top-5 h-[760px] w-[1120px] origin-top-left bg-background text-foreground"
             style={{ transform: "scale(0.82)" }}
           >
-            <PmcDemoApp lang={lang} />
+            <PmcDemoApp />
           </div>
           <div
             aria-hidden="true"

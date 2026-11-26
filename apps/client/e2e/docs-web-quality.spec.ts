@@ -622,3 +622,129 @@ for (const route of [
     expect(unusedSpace.every((space) => space < 2)).toBe(true);
   });
 }
+
+test("indexes the homepage and tools in every supported locale", async ({
+  page,
+  request,
+}) => {
+  const sitemap = await request.get("/sitemap.xml");
+  expect(sitemap.ok()).toBe(true);
+  const xml = await sitemap.text();
+  const alternateLocales = [
+    "en",
+    "de",
+    "fr",
+    "es",
+    "pt-BR",
+    "it",
+    "ko",
+    "ja",
+    "zh-Hans",
+    "zh-Hant",
+    "x-default",
+  ].sort();
+
+  const toolPaths = ["/fr", "/fr/tools", "/fr/ftp-calculator", "/fr/fit-to-gpx"];
+  for (const path of toolPaths) {
+    await page.goto(path);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /^index, follow$/,
+    );
+    await expect(page.locator('meta[name="googlebot"]')).toHaveAttribute(
+      "content",
+      /^index, follow/,
+    );
+    const alternates = page.locator('link[rel="alternate"][hreflang]');
+    await expect(alternates).toHaveCount(alternateLocales.length);
+    const hreflangs = await alternates.evaluateAll((links) =>
+      links.map((link) => link.getAttribute("hreflang")),
+    );
+    expect(hreflangs.sort()).toEqual(alternateLocales);
+    expect(xml).toContain(`<loc>https://www.trainingload.ai${path}</loc>`);
+  }
+
+  for (const path of ["/fr/docs", "/fr/pricing"]) {
+    await page.goto(path);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /^noindex, follow$/,
+    );
+    expect(xml).not.toContain(`<loc>https://www.trainingload.ai${path}</loc>`);
+  }
+  expect(xml).toContain("<loc>https://www.trainingload.ai/ja/docs</loc>");
+});
+
+test("renders localized controls in the features demos", async ({
+  page,
+}) => {
+  const translationErrors: string[] = [];
+  page.on("console", (message) => {
+    if (
+      message.type() === "error" &&
+      /INVALID_KEY|MISSING_MESSAGE|FORMATTING_ERROR/.test(message.text())
+    ) {
+      translationErrors.push(message.text());
+    }
+  });
+  await page.goto("/fr/features");
+
+  const planName = "Agrandir la démo: Plan d'entraînement";
+  await page.getByRole("button", { name: planName, exact: true }).click();
+  const planDialog = page.getByRole("dialog", { name: planName });
+  await expect(
+    planDialog.getByText("Charge de la semaine", { exact: true }),
+  ).toBeVisible();
+  await expect(planDialog.getByText("S5", { exact: true }).first()).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(planDialog).toBeHidden();
+
+  const calendarName = "Agrandir la démo: Calendrier du plan";
+  await page.getByRole("button", { name: calendarName, exact: true }).click();
+  const calendarDialog = page.getByRole("dialog", { name: calendarName });
+  await expect(
+    calendarDialog.getByText("2 séances prévues", { exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(calendarDialog).toBeHidden();
+
+  const coachName = "Agrandir la démo: Revue workout AI";
+  await page.getByRole("button", { name: coachName, exact: true }).click();
+  const coachDialog = page.getByRole("dialog", { name: coachName });
+  await coachDialog
+    .getByRole("button", { name: "Plan semi-marathon 12 semaines", exact: true })
+    .click();
+  await expect(
+    coachDialog.getByText("4 semaines · 15 séances", { exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(coachDialog).toBeHidden();
+
+  const metricName = "Agrandir la démo: Charge d'entraînement";
+  await page.getByRole("button", { name: metricName, exact: true }).click();
+  const metricDialog = page.getByRole("dialog", { name: metricName });
+  await expect(
+    metricDialog.getByText("Tous les sports", { exact: true }),
+  ).toBeVisible();
+  await metricDialog.getByText("Stress d'entraînement", { exact: true }).click();
+  await expect(
+    metricDialog.getByRole("button", { name: "Recalculer", exact: true }),
+  ).toBeVisible();
+  await expect(
+    metricDialog.getByRole("button", { name: "Retour à l'accueil", exact: true }),
+  ).toBeVisible();
+  expect(translationErrors).toEqual([]);
+});
+
+test("loads the localized metric messages in the standalone PMC preview", async ({
+  page,
+}) => {
+  await page.goto("/zh/features/pmc-fitness-chart");
+  const name = "展开完整 PMC 桌面端演示";
+  await page.getByRole("button", { name, exact: true }).click();
+  await expect(
+    page
+      .getByRole("dialog", { name })
+      .getByRole("button", { name: "重新计算", exact: true }),
+  ).toBeVisible();
+});

@@ -1,13 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 import { optimizeSeoText, seoDisplayUnits } from "@/lib/seo-metadata";
-import en from "../../../../../../../packages/messages/docs/en.json";
-import ja from "../../../../../../../packages/messages/docs/ja.json";
-import zhHant from "../../../../../../../packages/messages/docs/zh-hant.json";
-import zh from "../../../../../../../packages/messages/docs/zh.json";
+import en from "@trainingloadai/messages/docs/en.json";
+import ja from "@trainingloadai/messages/docs/ja.json";
+import zhHant from "@trainingloadai/messages/docs/zh-hant.json";
+import zh from "@trainingloadai/messages/docs/zh.json";
+import de from "@trainingloadai/messages/docs/de.json";
+import es from "@trainingloadai/messages/docs/es.json";
+import fr from "@trainingloadai/messages/docs/fr.json";
+import itMsg from "@trainingloadai/messages/docs/it.json";
+import ko from "@trainingloadai/messages/docs/ko.json";
+import ptBR from "@trainingloadai/messages/docs/pt-BR.json";
 
 const messages = {
   en,
+  de,
+  fr,
+  es,
+  "pt-BR": ptBR,
+  it: itMsg,
+  ko,
   ja,
   zh,
   "zh-hant": zhHant,
@@ -37,11 +49,9 @@ describe("Training load calculator messages", () => {
       );
       expect(copy.page.proof).toHaveLength(3);
       expect(copy.page.sections.formula.rows).toHaveLength(3);
-      expect(copy.page.sections.formula.rows.map((row) => row.result)).toEqual([
-        "51.19",
-        "57.14",
-        "−5.95",
-      ]);
+      expect(
+        copy.page.sections.formula.rows.map((row) => row.result.replace(",", ".")),
+      ).toEqual(["51.19", "57.14", "−5.95"]);
       expect(copy.page.promo.steps).toHaveLength(3);
       expect(copy.page.promo.benefits).toHaveLength(3);
       expect(copy.page.promo.cta.button.length).toBeGreaterThan(1);
@@ -62,7 +72,10 @@ describe("Training load calculator messages", () => {
         messages[lang].commonLinks.trainingLoadCalculatorAction.length,
       ).toBeGreaterThan(2);
       expect(copy.page.title.length).toBeGreaterThan(4);
-      const faqText = copy.page.faq.map((item) => item.answer).join("\n");
+      const faqText = copy.page.faq
+        .map((item) => item.answer)
+        .join("\n")
+        .replace(/(\d),(\d)/g, "$1.$2");
       expect(faqText).toContain("51.19");
       expect(faqText).toContain("57.14");
       expect(faqText).toContain("58.57");

@@ -1,0 +1,434 @@
+{
+  "labels": {
+    "eyebrow": "Nächsten Schritt finden",
+    "faq": "Fragen vor dem Start",
+    "goal": "Zielzeit-Grenze",
+    "perKm": "Durchschnitt / km",
+    "perMile": "Durchschnitt / Meile",
+    "paceNote": "Gerundete durchschnittliche Wettkampf-Paces – keine Zielwerte für lockere Läufe oder Intervalle. Um unter einer Zielzeit zu bleiben, muss Ihr tatsächlicher Durchschnitt schneller als die exakte Grenze sein. Strecke, Wetter und tatsächlich gelaufene Distanz spielen ebenfalls eine Rolle.",
+    "paceTool": "Wettkampf-Splits berechnen",
+    "vdotTool": "Trainingspaces aus einem aktuellen Ergebnis bestimmen",
+    "viewSchedule": "Kostenlosen Plan ansehen",
+    "addPlan": "10K-Plan kostenlos hinzufügen",
+    "startFoundation": "Lauf-Geh-Plan kostenlos starten",
+    "showFoundation": "9-Wochen-Lauf-Geh-Plan öffnen",
+    "foundationSchedule": "Stufe 1 · Durchgehendes Laufen aufbauen",
+    "tenKSchedule": "Stufe 2 · Der 10-Wochen-10K-Plan",
+    "stageNote": "Fügen Sie beide Stufen separat zu Ihrem Kalender hinzu. Starten Sie die 10K-Stufe erst, wenn die erste Woche gut machbar wirkt; wiederholen oder verlängern Sie die Grundlagenstufe nach Bedarf.",
+    "freeNote": "Der gesamte Trainingsplan ist kostenlos lesbar. Fügen Sie den offiziellen Plan kostenlos zu Ihrem Kalender hinzu und starten Sie ins Training.",
+    "screenshotNote": "Web und iPhone · Produktansichten mit Beispiel-Trainingsdaten",
+    "relatedTitle": "Den passenden Einstieg wählen",
+    "hub5K": "Alle 5K-Trainingspläne",
+    "hub10K": "Alle 10K-Trainingspläne",
+    "bridge5K": "Von 5K auf 10K",
+    "couch10K": "Couch to 10K",
+    "sources": "Über diesen Aufbau",
+    "sourceNote": "Dies sind Trainingspläne von Trainingload.ai. Leitlinien des NHS erläutern den Lauf-Geh-Ansatz und die Möglichkeit, mehr als neun Wochen einzuplanen; Polar betont die Bedeutung einer lockeren Laufbasis vor einem 10K-Block. Keine der beiden Quellen spricht eine Empfehlung für diesen Plan aus."
+  },
+  "guides": {
+    "couch-to-5k-training-plan": {
+      "title": "Was kommt nach Couch to 5K?",
+      "intro": "Der Abschluss des Programms ist ein Ausgangspunkt, keine Frist für längere Wettkämpfe. Dreißig Minuten Laufen entsprechen nicht automatisch 5 Kilometern.",
+      "items": [
+        {
+          "title": "Die ersten 5K zuverlässig wiederholbar machen",
+          "text": "Üben Sie weiter lockere, durchgehende Läufe, bevor Sie Distanz oder Tempo steigern. In der 5K-Übersicht wählen Sie zwischen einem ersten Ziel-Finish und einem Steigerungsblock.",
+          "href": "/5k-training-plan",
+          "link": "5K-Plan auswählen"
+        },
+        {
+          "title": "Schrittweise Richtung 10K aufbauen",
+          "text": "Nutzen Sie den Couch-to-10K-Weg, um die Grundlagenstufe, den Bereitschafts-Check und den anschließenden 10-Wochen-Block im Zusammenhang zu sehen.",
+          "href": "/couch-to-10k-training-plan",
+          "link": "Couch-to-10K-Aufbau ansehen"
+        }
+      ],
+      "faq": []
+    },
+    "5k-training-plan": {
+      "title": "Nach den ersten 5K: schneller oder weiter?",
+      "intro": "Wählen Sie ein klares nächstes Ziel, damit Ihr Training eine eindeutige Ausrichtung hat. Sie müssen Distanz und Intensität nicht gleichzeitig steigern.",
+      "items": [
+        {
+          "title": "Einen schnelleren 5K laufen",
+          "text": "Der 8-Wochen-Plan für Fortgeschrittene ergänzt kontrollierte Intervalle und Tempoarbeit für Läuferinnen und Läufer mit stabiler Laufbasis und einem aktuellen Ergebnis.",
+          "href": "/5k-training-plan/intermediate",
+          "link": "5K-Plan für Fortgeschrittene ansehen"
+        },
+        {
+          "title": "Von 5K auf 10K steigern",
+          "text": "Bleiben Sie bei drei Lauftagen pro Woche und verlängern Sie schrittweise den langen Lauf. Prüfen Sie die Belastung der ersten Woche, bevor Sie in den 10-Wochen-Plan wechseln.",
+          "href": "/5k-to-10k-training-plan",
+          "link": "5K-auf-10K-Plan ansehen"
+        }
+      ],
+      "faq": []
+    },
+    "5k-training-plan-intermediate": {
+      "title": "Auf dem Weg zu Sub-25 oder Sub-20 über 5K?",
+      "intro": "Für 5K unter 25 Minuten braucht es im Schnitt schneller als 5:00/km; für unter 20 Minuten schneller als 4:00/km. Das sind Wettkampf-Grenzen, nicht das Tempo für jede Einheit.",
+      "items": [
+        {
+          "title": "Von der aktuellen Fitness ausgehen",
+          "text": "Nutzen Sie ein aktuelles Wettkampfergebnis, um Ihre Trainingspaces abzuschätzen. Dieselbe achtwöchige Struktur garantiert keine der beiden Zielzeiten; entscheidend sind Ihre Ausgangslage und Ihre Regenerationsfähigkeit.",
+          "href": "/vdot-calculator",
+          "link": "Trainingspaces abschätzen"
+        },
+        {
+          "title": "Wettkampftempo klar vom Training trennen",
+          "text": "Prüfen Sie Kilometer-Splits getrennt von lockeren Läufen, Tempoläufen und Intervallen. Ist die aktuelle Belastung nicht stabil wiederholbar, kehren Sie zunächst zum Plan für das erste Finish zurück, bevor Sie schnellere Einheiten hinzufügen.",
+          "href": "/5k-training-plan",
+          "link": "5K-Einstiegspunkte vergleichen"
+        }
+      ],
+      "faq": []
+    },
+    "10k-training-plan": {
+      "title": "Welcher 10K-Trainingsplan passt zu Ihrem Einstieg?",
+      "intro": "Dieser Einsteigerplan dauert 10 Wochen mit drei Läufen pro Woche. Ein kürzerer Zeitrahmen oder ein schnelleres Ziel erfordert eine andere Ausgangsbasis.",
+      "items": [
+        {
+          "title": "5K laufen bereits locker",
+          "text": "Sehen Sie, wie die erste Woche, die Steigerung der langen Läufe von 45 auf 65 Minuten und die Regenerationstage die Brücke zu 10K schlagen.",
+          "href": "/5k-to-10k-training-plan",
+          "link": "Aufbau von 5K auf 10K"
+        },
+        {
+          "title": "Start mit Gehen",
+          "text": "Bauen Sie zuerst durchgehendes Laufen auf und prüfen Sie dann die Bereitschaft für den 10K-Block. Der Couch-to-10K-Weg verbindet beide Stufen ohne feste Fertigstellungsfrist.",
+          "href": "/couch-to-10k-training-plan",
+          "link": "Couch-to-10K-Aufbau"
+        },
+        {
+          "title": "Auf der Suche nach einem 8-Wochen-Plan für Fortgeschrittene",
+          "text": "Wählen Sie den eigenen Steigerungsblock, wenn Sie bereits eine konstante Laufbasis haben. Es handelt sich um einen eigenständigen Plan, nicht um diesen Einsteigerplan ohne zwei Wochen.",
+          "href": "/10k-training-plan/improve",
+          "link": "8-Wochen-10K-Plan für Fortgeschrittene"
+        }
+      ],
+      "faq": []
+    },
+    "half-marathon-training-plan": {
+      "title": "Erster Halbmarathon, 12-Wochen-Aufbau oder Sub-2-Ziel?",
+      "intro": "Der 14-Wochen-Einsteigerplan konzentriert sich auf das Ankommen. Wählen Sie einen anderen Block, wenn die Ausdauer bereits vorhanden ist und Sie Ihre Zeit verbessern möchten.",
+      "items": [
+        {
+          "title": "12-Wochen-Halbmarathonplan für Fortgeschrittene",
+          "text": "Für etablierte Läuferinnen und Läufer bietet der Steigerungsblock spezifischere Einheiten. Vergleichen Sie die erste Woche mit Ihrem jüngsten Training, bevor Sie sich dafür entscheiden.",
+          "href": "/half-marathon-training-plan/improve",
+          "link": "12-Wochen-Plan ansehen"
+        },
+        {
+          "title": "Halbmarathon unter 2 Stunden (Sub-2)",
+          "text": "Zwei Stunden im Halbmarathon entsprechen im Schnitt rund 5:41/km. Die Zielzeit-Seite erklärt diese Pace, die Voraussetzungen und den 14-Wochen-Zielzeitplan.",
+          "href": "/half-marathon-training-plan/target",
+          "link": "Sub-2-Ziel erkunden"
+        }
+      ],
+      "faq": []
+    },
+    "marathon-training-plan": {
+      "title": "Wählen Sie Ihren 18-Wochen-Marathonaufbau",
+      "intro": "Achtzehn Wochen beschreiben die Dauer, nicht den Schwierigkeitsgrad. Ein erster Marathon, eine persönliche Bestzeit und eine konkrete Zielzeit erfordern unterschiedliche Vorbereitung.",
+      "items": [
+        {
+          "title": "Einen früheren Marathon verbessern",
+          "text": "Nutzen Sie den Fortgeschrittenen-Block, wenn eine konstante Laufbasis und längere Läufe bereits fest etabliert sind. Prüfen Sie vor dem Start den tatsächlichen Wochenumfang.",
+          "href": "/marathon-training-plan/improve",
+          "link": "18-Wochen-Marathonplan für Fortgeschrittene"
+        },
+        {
+          "title": "Richtung Sub-4 oder Sub-3 arbeiten",
+          "text": "Vier Stunden entsprechen im Schnitt etwa 5:41/km, drei Stunden etwa 4:16/km. Eine reine Pace-Berechnung sagt allein noch nicht aus, ob Sie für eines dieser Ziele bereit sind.",
+          "href": "/marathon-training-plan/target",
+          "link": "Marathon-Zielzeiten vergleichen"
+        }
+      ],
+      "faq": []
+    },
+    "improve-10k": {
+      "title": "Ein 8-Wochen-10K-Plan für Fortgeschrittene: der richtige Schritt?",
+      "intro": "Dies ist ein Steigerungsblock für eine gefestigte Laufroutine. Vergleichen Sie Woche 1 mit Ihrem jüngsten Training – einschließlich der Qualitätseinheiten und der verfügbaren Zeit für Regeneration.",
+      "items": [
+        {
+          "title": "Wenn Ihr erster 10K noch das Hauptziel ist",
+          "text": "Wählen Sie den 10-Wochen-Einsteigerplan mit drei Läufen pro Woche, wenn der Ausbau lockerer Laufdistanzen im Vordergrund steht.",
+          "href": "/10k-training-plan",
+          "link": "10K-Einsteigerplan ansehen"
+        },
+        {
+          "title": "Wenn Sie eine bestimmte Zielzeit anpeilen",
+          "text": "Vergleichen Sie auf der Zielzeit-Seite die Wettkampf-Durchschnitte für Sub-40, Sub-45 und Sub-50 und gleichen Sie diese mit einem aktuellen Ergebnis ab.",
+          "href": "/10k-training-plan/target",
+          "link": "10K-Zielzeiten erkunden"
+        }
+      ],
+      "faq": [
+        [
+          "Kann ich diesen 8-Wochen-Plan als komplette Einsteigerin oder Einsteiger nutzen?",
+          "Nein. Acht Wochen sind die Dauer dieses Fortgeschrittenen-Blocks, keine Abkürzung ohne Lauferfahrung. Beginnen Sie mit dem Grundlagen- oder Einsteigerplan, wenn Woche 1 über Ihrer aktuellen Routine liegt."
+        ],
+        [
+          "Soll ich die im Plan abgedruckte Beispiel-Pace verwenden?",
+          "Das öffentliche Pace-Beispiel nutzt VDOT 40 zur Veranschaulichung und ist keine persönliche Vorgabe. Bestimmen Sie Ihre Trainingspaces anhand eines aktuellen Ergebnisses und laufen Sie lockere Tage im Gesprächstempo."
+        ]
+      ]
+    },
+    "target-10k": {
+      "title": "10K unter 40, 45 oder 50 Minuten: das Ziel in Pace übersetzen",
+      "intro": "Der 10-Wochen-Zielzeitblock ist eine gemeinsame Struktur, keine drei separaten Pläne mit Erfolgsgarantie. Prüfen Sie die erforderliche Wettkampf-Pace anhand Ihrer jüngsten Leistung, bevor Sie ein Ziel festlegen.",
+      "items": [
+        {
+          "title": "Ein aktuelles Rennen als Maßstab nutzen",
+          "text": "Ein aktueller 5K oder 10K hilft Ihnen, den Abstand realistisch einzuschätzen. Schätzen Sie damit Ihre aktuellen Trainingspaces ab, statt jeden Lauf auf den Zielschnitt zu zwingen.",
+          "href": "/vdot-calculator",
+          "link": "Aktuelle Trainingspaces prüfen"
+        },
+        {
+          "title": "Erstes Finish und Zeitziele getrennt halten",
+          "text": "Wenn sich lockeres, durchgehendes Laufen noch im Aufbau befindet, nutzen Sie zuerst den Einsteigerplan. Ein zeitorientierter Block folgt, sobald diese Belastung stabil wiederholbar ist.",
+          "href": "/10k-training-plan",
+          "link": "10K-Pläne vergleichen"
+        }
+      ],
+      "faq": [
+        [
+          "Welche Pace brauche ich für 10K unter 50 Minuten?",
+          "Im Schnitt schneller als 5:00 pro Kilometer. Für unter 45 Minuten sind schneller als 4:30/km nötig, für unter 40 Minuten schneller als 4:00/km. Das sind Wettkampf-Durchschnitte, keine Zielwerte für lockere Läufe."
+        ],
+        [
+          "Garantiert dieser Plan eine Zeit unter 40 oder 50 Minuten?",
+          "Nein. Der zehnwöchige Plan kann keine Zielzeit garantieren. Ihre jüngsten Leistungen, Trainingskonstanz, Regeneration und die Wettkampfbedingungen beeinflussen das Ergebnis."
+        ]
+      ]
+    },
+    "improve-half-marathon": {
+      "title": "So nutzen Sie einen 12-Wochen-Halbmarathonplan für Fortgeschrittene",
+      "intro": "Starten Sie diesen Block mit einer gefestigten Laufroutine. Die zwölf Wochen dienen dem Ausbau der Wettkampfform, nicht dem vollständigen Grundlagenaufbau von null an.",
+      "items": [
+        {
+          "title": "Die erste Woche genau prüfen",
+          "text": "Betrachten Sie den langen Lauf und die Qualitätseinheiten zusammen. Bedeuten sie einen großen Sprung gegenüber Ihrem jüngsten Training, planen Sie mehr Grundlagenzeit ein.",
+          "href": "/half-marathon-training-plan",
+          "link": "Mit dem 14-Wochen-Einsteigerplan vergleichen"
+        },
+        {
+          "title": "Ein realistisches Zeitziel wählen",
+          "text": "Wenn Sie Sub-2 in Betracht ziehen, vergleichen Sie die Wettkampf-Pace mit einem aktuellen Ergebnis und Ihrer Ausdauer auf längeren Läufen, bevor Sie in den Zielzeitblock wechseln.",
+          "href": "/half-marathon-training-plan/target",
+          "link": "Halbmarathon-Zielzeitplan ansehen"
+        }
+      ],
+      "faq": [
+        [
+          "Kann ich den Einsteigerplan einfach auf zwölf Wochen verkürzen?",
+          "Dies ist ein eigenständiger Fortgeschrittenen-Plan. Streicht man Wochen aus dem vierzehnwöchigen Einsteigerplan, geht ein Teil der Progression verloren – daraus wird nicht dieser Plan."
+        ],
+        [
+          "Sollten meine langen Läufe im Halbmarathon-Zieltempo stattfinden?",
+          "Nicht standardmäßig. Folgen Sie der vorgegebenen Belastung und Struktur jeder Einheit. Das Zieltempo ersetzt nicht die Vorgabe für lockeres Laufen."
+        ]
+      ]
+    },
+    "target-half-marathon": {
+      "title": "Ein Halbmarathon unter 2 Stunden beginnt mit einer realistischen Pace",
+      "intro": "Zwei Stunden über 21,0975 km entsprechen im Schnitt etwa 5:41/km oder 9:09/Meile. Dieser 14-Wochen-Zielzeitblock strukturiert Ihre Vorbereitung; das Ziel muss dennoch zu Ihrer aktuellen Fitness passen.",
+      "items": [
+        {
+          "title": "Sowohl Tempo als auch Ausdauer prüfen",
+          "text": "Ein aktueller 5K oder 10K liefert einen nützlichen Anhaltspunkt, doch eine Hochrechnung zeigt nicht, ob Sie diese Belastung über 21,1 km halten können. Beurteilen Sie auch lange Läufe und Regeneration.",
+          "href": "/race-time-predictor",
+          "link": "Aktuelles Wettkampfergebnis vergleichen"
+        },
+        {
+          "title": "Bei Bedarf einen Plan für das erste Finish wählen",
+          "text": "Ist der Belastungssprung des Zielzeitblocks zu groß, bleibt der Fokus im Einsteigerplan auf dem Ausdaueraufbau für Ihr erstes Finish.",
+          "href": "/half-marathon-training-plan",
+          "link": "Alle Halbmarathonpläne ansehen"
+        }
+      ],
+      "faq": [
+        [
+          "Reichen 5:41/km für einen Sub-2-Halbmarathon?",
+          "Das ist ein gerundeter Richtwert. Die exakte Zwei-Stunden-Grenze liegt bei etwa 5:41,27/km; Ihr Durchschnitt muss schneller sein, und die tatsächlich gelaufene Distanz kann über 21,0975 km liegen."
+        ],
+        [
+          "Laufe ich jede Einheit im Sub-2-Tempo?",
+          "Nein. Lockere Läufe, lange Läufe und Qualitätseinheiten erfüllen unterschiedliche Zwecke. Folgen Sie der jeweils vorgegebenen Intensität, statt überall im Wettkampftempo zu laufen."
+        ]
+      ]
+    },
+    "improve-marathon": {
+      "title": "Ein 18-Wochen-Marathonplan für Fortgeschrittene braucht eine bestehende Basis",
+      "intro": "Der Zeitrahmen gibt Ihnen Raum zum Aufbauen, zum Testen der Verpflegung und für das Tapering. Die Trainingskonstanz, die für Woche 1 nötig ist, ersetzt er nicht.",
+      "items": [
+        {
+          "title": "Die ganze Woche prüfen, nicht nur den langen Lauf",
+          "text": "Vergleichen Sie den Einstieg mit den vergangenen Wochen und lassen Sie Spielraum für Regeneration. Verpasste Einheiten sollten nicht in die nächste Woche nachgeholt und gestapelt werden.",
+          "href": "/marathon-training-plan",
+          "link": "Marathon-Einstiegspunkte vergleichen"
+        },
+        {
+          "title": "Leistungssteigerung von einer Zielzeit-Garantie trennen",
+          "text": "Nutzen Sie den Zielzeitplan, wenn eine konkrete Zielzeit durch aktuelle Leistungen gestützt ist. Sub-4 und Sub-3 verlangen deutlich unterschiedliche Wettkampf-Paces.",
+          "href": "/marathon-training-plan/target",
+          "link": "Marathon-Zielzeiten erkunden"
+        }
+      ],
+      "faq": [
+        [
+          "Ist ein 18-Wochen-Marathonplan auch für Einsteiger geeignet?",
+          "Für das erste Finish gibt es einen eigenen achtzehnwöchigen Einsteigerplan. Diese Fortgeschrittenen-Variante setzt eine etablierte Laufroutine voraus – vergleichen Sie die tatsächliche Einstiegsbelastung statt nur die Dauer."
+        ],
+        [
+          "Soll ich zusätzliche lange Läufe einbauen, um mich schneller zu verbessern?",
+          "Halten Sie sich an die geplante Progression und die Regenerationstage. Ein weiterer langer Lauf erhöht die Belastung ohne besseres Ergebnis zu garantieren – besonders, wenn Sie sich bereits schwer erholen."
+        ]
+      ]
+    },
+    "target-marathon": {
+      "title": "Sub-4- oder Sub-3-Marathon: erst das Ziel wählen, dann die Pace",
+      "intro": "Vier Stunden entsprechen im Schnitt etwa 5:41/km, drei Stunden etwa 4:16/km. Diese 18-Wochen-Zielzeitstruktur muss zu Ihrer aktuellen Fitness, Ausdauer und Regenerationsfähigkeit passen.",
+      "items": [
+        {
+          "title": "Mehr prüfen als nur eine prognostizierte Zielzeit",
+          "text": "Ein aktueller Halbmarathon ist ein wertvoller Nachweis, aber ein Rechner beurteilt weder Verpflegung noch Belastbarkeit oder wie gut Sie sich von langen Läufen erholen.",
+          "href": "/race-time-predictor",
+          "link": "Wettkampfleistungen vergleichen"
+        },
+        {
+          "title": "Trainingspaces an der aktuellen Leistungsfähigkeit ausrichten",
+          "text": "Verwenden Sie den gewünschten Marathon-Schnitt nicht für jeden lockeren Lauf. Vorgaben für Trainingspaces sollten auf aktuellen Leistungen und dem Ziel der jeweiligen Einheit beruhen.",
+          "href": "/vdot-calculator",
+          "link": "Aktuelle Trainingspaces abschätzen"
+        }
+      ],
+      "faq": [
+        [
+          "Welche Pace entspricht einem Sub-4- oder Sub-3-Marathon?",
+          "Über 42,195 km liegt die exakte Vier-Stunden-Grenze bei etwa 5:41,27/km und die Drei-Stunden-Grenze bei etwa 4:15,95/km. Für ein Finish unter der Marke ist ein schnellerer Durchschnitt erforderlich; die Tabelle rundet diese Werte zur besseren Lesbarkeit."
+        ],
+        [
+          "Garantiert derselbe Plan sowohl Sub-3 als auch Sub-4?",
+          "Nein. Es handelt sich um eine zielzeitorientierte Trainingsstruktur. Der passende Umfang und die Intensität hängen von Ihrer aktuellen Leistungsfähigkeit ab, und keine der Zielzeiten ist garantiert. Nutzen Sie den Plan für das erste Finish, wenn dieser Block Ihre Basis übersteigt."
+        ]
+      ]
+    }
+  },
+  "bridges": {
+    "5k-to-10k-training-plan": {
+      "metaTitle": "Trainingsplan von 5K auf 10K | Kostenloser 10-Wochen-Plan (3 Tage)",
+      "metaDescription": "Steigern Sie sich von lockeren 5K bis zu Ihren ersten 10K mit einem kostenlosen 10-Wochen-Plan: drei Läufe pro Woche, Bereitschafts-Check, alle Einheiten und Kalenderzugang.",
+      "eyebrow": "5K → 10K · kostenloser Trainingsplan",
+      "heading": ["Von 5K auf 10K", "Trainingsplan."],
+      "intro": "Sie laufen bereits locker 5K? Bauen Sie über zehn Wochen mit drei Läufen pro Woche, Regenerationstagen und schrittweiser Steigerung der langen Läufe auf 10K auf.",
+      "facts": [
+        ["Dauer", "10 Wochen"],
+        ["Häufigkeit", "3 Läufe / Woche"],
+        ["Ausgangspunkt", "Lockere 5K"],
+        ["Ziel", "Erstes 10K-Finish"]
+      ],
+      "readinessTitle": "Bevor Sie die Distanz steigern",
+      "readiness": [
+        "Sie können lockere 5K oder etwa 30–40 Minuten durchgehendes Laufen regelmäßig wiederholen; ein einzelner maximaler 5K-Lauf ist nicht dieselbe Basis.",
+        "Die erste Woche umfasst zwei lockere Läufe und einen 45-minütigen langen Lauf. Prüfen Sie, ob das im Vergleich zu Ihrem jüngsten Training gut machbar ist.",
+        "Sie können Regenerationstage zwischen den Läufen einplanen. Wenn Müdigkeit anhält oder Schmerzen Ihren Laufstil verändern, steigern Sie die Belastung nicht."
+      ],
+      "stages": [
+        {
+          "title": "Laufrhythmus halten",
+          "text": "Starten Sie mit drei voneinander getrennten Lauftagen. Halten Sie die kürzeren Einheiten locker, während Sie sich an die Einstiegsbelastung gewöhnen."
+        },
+        {
+          "title": "Den langen Lauf ausbauen",
+          "text": "Die langen Läufe steigern sich von 45 Minuten bis zum Höhepunkt von 65 Minuten in Woche 7. In den Wochen 4, 6 und 8 stehen kontrollierte gleichmäßige Läufe auf dem Plan, keine maximalen Intervalle."
+        },
+        {
+          "title": "Bereit für 10K ankommen",
+          "text": "Reduzieren Sie die Belastung vor der Wettkampfwoche und gehen Sie die abschließenden 10K konservativ an. Kurze Gehpausen sind erlaubt – das Ziel ist es, die Distanz zu schaffen."
+        }
+      ],
+      "faq": [
+        [
+          "Wie lange dauert der Schritt von 5K auf 10K?",
+          "Dieser Block umfasst zehn Wochen für Läuferinnen und Läufer mit einer bestehenden Grundlage im lockeren Laufen. Möglicherweise benötigen Sie zusätzliche Grundlagen- oder Wiederholungswochen; ein einzelnes 5K-Finish belegt noch keine Bereitschaft für ein festes Wettkampfdatum."
+        ],
+        [
+          "Kann ich mit drei Lauftagen pro Woche für 10K trainieren?",
+          "Dieser offizielle Plan sieht drei Lauftage vor, in der Regel getrennt durch Ruhetage. Die meisten Einheiten sind locker oder lang; kurze, kontrollierte gleichmäßige Läufe folgen in den Wochen 4, 6 und 8."
+        ],
+        [
+          "Kann ich den Übergang in sechs oder acht Wochen schaffen?",
+          "Streichen Sie keine Erholungs- oder Aufbauwochen, um ein Datum einzuhalten. Der separate achtwöchige 10K-Steigerungsplan richtet sich an etablierte Läuferinnen und Läufer und ist keine verkürzte Version dieses Einstiegsaufbaus."
+        ],
+        [
+          "Muss ich vor dem Wettkampftag schon einmal volle 10K laufen?",
+          "In diesem Plan nicht. Der längste Trainingslauf ist mit 65 Minuten angegeben und richtet sich nach dem Belastungsgefühl; die gelaufene Distanz hängt von Ihrer Pace ab. Die Abschlusseinheit sind 10K."
+        ],
+        [
+          "Worin unterscheidet sich diese Seite von der 10K-Einsteigerseite?",
+          "Sie nutzt dieselben offiziellen finish-10k-Einheiten. Diese Seite erklärt den Übergang aus einer bestehenden 5K-Basis; die 10K-Übersicht vergleicht Einsteiger-, Fortgeschrittenen- und Zielzeit-Optionen."
+        ]
+      ]
+    },
+    "couch-to-10k-training-plan": {
+      "metaTitle": "Couch-to-10K-Trainingsplan | Kostenloser Einsteiger-Aufbau",
+      "metaDescription": "Starten Sie mit Gehen und Laufen, bauen Sie durchgehendes Laufen auf und steigern Sie sich dann auf 10K. Zwei kostenlose Pläne, drei Läufe pro Woche und ein klarer Bereitschafts-Check.",
+      "eyebrow": "Couch to 10K · mit Gehen starten",
+      "heading": ["Couch to 10K.", "Mit Gehen starten."],
+      "intro": "Bauen Sie zunächst mit neun Wochen Lauf-Geh-Training eine Laufroutine auf. Sobald durchgehendes Laufen sich angenehm anfühlt, wechseln Sie in den zehnwöchigen 10K-Plan.",
+      "facts": [
+        ["Grundlage", "9-Wochen-Lauf-Geh-Plan"],
+        ["Nächste Stufe", "10-Wochen-10K-Plan"],
+        ["Häufigkeit", "3 Läufe / Woche"],
+        ["Übergang", "Sobald Sie bereit sind"]
+      ],
+      "readinessTitle": "Der Schritt zwischen beiden Plänen ist entscheidend",
+      "readiness": [
+        "Beenden Sie die Lauf-Geh-Phase mit lockerem, durchgehendem Laufen. Dreißig Minuten entsprechen nicht automatisch 5K – die Distanz hängt von Ihrer Pace ab.",
+        "Etablieren Sie vor dem Start des 10K-Blocks wiederholbare lockere 5K oder etwa 30–40 Minuten Laufen und prüfen Sie den 45-minütigen langen Lauf in Woche 1.",
+        "Planen Sie bei Bedarf zusätzliche Grundlagen- oder Wiederholungswochen ein. Neun plus zehn beschreibt die Dauer beider Pläne, kein garantiertes 19-Wochen-Ergebnis von null auf 10K."
+      ],
+      "stages": [
+        {
+          "title": "01 / Gewohnheit aufbauen · 9 Wochen",
+          "text": "Wechseln Sie kurze, lockere Laufabschnitte mit Gehen ab, bleiben Sie bei drei Einheiten pro Woche und arbeiten Sie sich schrittweise auf 30 Minuten durchgehendes Laufen hin."
+        },
+        {
+          "title": "02 / Festigen · im eigenen Tempo",
+          "text": "Halten Sie das Laufen angenehm und verlässlich wiederholbar. Prüfen Sie Ihre Regeneration und die Einstiegsbelastung des nächsten Plans, bevor Sie den langen Lauf verlängern."
+        },
+        {
+          "title": "03 / Auf 10K aufbauen · 10 Wochen",
+          "text": "Starten Sie den offiziellen 10K-Einsteigerblock, sobald Sie bereit sind. Er bleibt bei drei Lauftagen, steigert den langen Lauf und beinhaltet ein Tapering vor den abschließenden 10K."
+        }
+      ],
+      "faq": [
+        [
+          "Wie viele Wochen dauert Couch to 10K?",
+          "Dieser Weg besteht aus einem neunwöchigen Grundlagenplan und einem anschließenden zehnwöchigen 10K-Plan, ergänzt durch Festigungs- oder Wiederholungswochen nach Bedarf. Ein festes 19-Wochen-Versprechen ist es nicht."
+        ],
+        [
+          "Kann ich den zehnwöchigen 10K-Plan ohne Lauferfahrung beginnen?",
+          "Nein. Die erste Woche setzt eine Grundlage im lockeren Laufen voraus. Starten Sie mit der Lauf-Geh-Stufe, wenn Sie mit Gehen beginnen."
+        ],
+        [
+          "Gibt es hier einen NHS-Couch-to-10K-Plan?",
+          "Nein. Dies sind Trainingspläne von Trainingload.ai. NHS Couch to 5K ist ein eigenständiges Programm; die unten genannte NHS-Quelle erläutert den Lauf-Geh-Ansatz und stellt keine Empfehlung für diesen 10K-Aufbau dar."
+        ],
+        [
+          "Was, wenn ich Couch to 5K abschließe, aber noch keine fünf Kilometer laufe?",
+          "Das ist durchaus möglich: Dreißig Minuten Laufen ergeben je nach Pace unterschiedliche Distanzen. Festigen Sie zunächst lockeres, durchgehendes Laufen, bevor Sie den 10K-Bereitschafts-Check anwenden."
+        ],
+        [
+          "Kann ich den gesamten Aufbau auf einmal zum Kalender hinzufügen?",
+          "Fügen Sie zuerst den neunwöchigen Grundlagenplan hinzu und danach den zehnwöchigen 10K-Plan, sobald Sie bereit sind. Da es zwei separate offizielle Vorlagen sind, bestimmen Sie das Übergangsdatum selbst."
+        ],
+        [
+          "Was, wenn ich bereits locker 5K laufe?",
+          "Nutzen Sie den Weg von 5K auf 10K und prüfen Sie die Einstiegsbelastung. Sie müssen die Lauf-Geh-Grundlage nicht wiederholen, nur um diesem Aufbau zu folgen."
+        ]
+      ]
+    }
+  }
+}

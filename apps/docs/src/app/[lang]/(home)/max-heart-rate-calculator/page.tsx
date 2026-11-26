@@ -9,7 +9,11 @@ import { MaxHeartRateCalculatorClient } from "./client";
 import { MaxHrAppPromo, MaxHrFooterCta } from "./promo";
 import { readMaxHeartRateInputs } from "./share-inputs";
 import styles from "./max-heart-rate-calculator.module.css";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { TrackedLink } from "@/components/TrackedLink";
 import {
   estimateMaxHr,
@@ -107,6 +111,7 @@ export async function generateMetadata({
       url: pageUrl,
       images: [{ url: ogImageUrl }],
     },
+    robots: robotsForPublicPath(lang, "/max-heart-rate-calculator"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(

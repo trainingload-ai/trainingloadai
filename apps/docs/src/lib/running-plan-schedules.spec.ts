@@ -1,43 +1,8 @@
-import { readFileSync } from "node:fs";
-
+import "@/i18n/mock-server-translations";
 import { describe, expect, it } from "vitest";
 
-import {
-  createCouchTo5kPlan,
-  createDistanceTrainingPlan,
-  createIntermediateFiveKPlan,
-  type RunningPlan,
-} from "./running-plan-pages";
+import { getRunningPlan } from "./running-plan-pages";
 import { getRunningPlanSchedule } from "./running-plan-schedules";
-
-const baseFiveKPlan = {
-  slug: "5k-training-plan",
-  relatedLinks: [],
-} as unknown as RunningPlan;
-
-function localizedCouchPlan(locale: string) {
-  const messagePath = new URL(
-    `../../../../packages/messages/docs/${locale}.json`,
-    import.meta.url,
-  );
-  const messages = JSON.parse(readFileSync(messagePath, "utf8"));
-  return createCouchTo5kPlan(
-    messages.runningPlanPages.plans["couch-to-5k-training-plan"] as RunningPlan,
-    locale,
-  );
-}
-
-function localizedDistancePlan(slug: "10k-training-plan", locale: string) {
-  const messagePath = new URL(
-    `../../../../packages/messages/docs/${locale}.json`,
-    import.meta.url,
-  );
-  const messages = JSON.parse(readFileSync(messagePath, "utf8"));
-  return createDistanceTrainingPlan(
-    messages.runningPlanPages.plans[slug] as RunningPlan,
-    locale,
-  );
-}
 
 describe("shared official schedules in Docs", () => {
   it.each([
@@ -175,10 +140,12 @@ describe("shared official schedules in Docs", () => {
 
   it.each(["en", "zh", "zh-hant", "ja"])(
     "keeps all three %s SEO pages distinct and cross-linked",
-    (locale) => {
-      const first = localizedCouchPlan(locale);
-      const finish = createDistanceTrainingPlan(baseFiveKPlan, locale);
-      const improve = createIntermediateFiveKPlan(baseFiveKPlan, locale);
+    async (locale) => {
+      const [first, finish, improve] = await Promise.all([
+        getRunningPlan("couch-to-5k-training-plan", locale),
+        getRunningPlan("5k-training-plan", locale),
+        getRunningPlan("5k-training-plan-intermediate", locale),
+      ]);
       expect([
         first.templateSlug,
         finish.templateSlug,
@@ -209,8 +176,8 @@ describe("shared official schedules in Docs", () => {
     },
   );
 
-  it("uses the dedicated free Couch to 5K search intent and product boundary", () => {
-    const plan = localizedCouchPlan("en");
+  it("uses the dedicated free Couch to 5K search intent and product boundary", async () => {
+    const plan = await getRunningPlan("couch-to-5k-training-plan", "en");
     expect(plan).toMatchObject({
       metaTitle: "Free Couch to 5K Training Plan: 9-Week Schedule",
       title:
@@ -246,21 +213,21 @@ describe("shared official schedules in Docs", () => {
     ["it", "Piano Couch to 5K gratis"],
     ["ko", "무료 Couch to 5K 훈련 계획"],
     ["pt-BR", "Plano Couch to 5K grátis"],
-  ])("uses localized Couch to 5K page copy for %s", (locale, title) => {
-    const plan = localizedCouchPlan(locale);
+  ])("uses localized Couch to 5K page copy for %s", async (locale, title) => {
+    const plan = await getRunningPlan("couch-to-5k-training-plan", locale);
     expect(plan.title).toContain(title);
     expect(plan.metaTitle).toMatch(/Couch(?:-| )to(?:-| )5K/);
     expect(plan.keywords).toContain("couch to 5k");
     expect(plan.primaryCtaTarget).toBe("schedule");
     expect(plan.secondaryCtaTarget).toBe("app");
-    expect(plan.faq).toHaveLength(8);
+    expect(plan.faq).toHaveLength(11);
     expect(plan.title).not.toContain("Free Couch to 5K Training Plan");
   });
 
   it.each(["en", "zh", "zh-hant", "ja"])(
     "maps the %s 10K landing page to the active shared template",
-    (locale) => {
-      const plan = localizedDistancePlan("10k-training-plan", locale);
+    async (locale) => {
+      const plan = await getRunningPlan("10k-training-plan", locale);
       expect(plan).toMatchObject({
         slug: "10k-training-plan",
         routePath: "/10k-training-plan",

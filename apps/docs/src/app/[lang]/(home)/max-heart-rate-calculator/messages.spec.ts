@@ -1,12 +1,29 @@
 import { describe, expect, it } from "vitest";
 import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 import { optimizeSeoText, seoDisplayUnits } from "@/lib/seo-metadata";
-import en from "../../../../../../../packages/messages/docs/en.json";
-import ja from "../../../../../../../packages/messages/docs/ja.json";
-import zhHant from "../../../../../../../packages/messages/docs/zh-hant.json";
-import zh from "../../../../../../../packages/messages/docs/zh.json";
+import en from "@trainingloadai/messages/docs/en.json";
+import ja from "@trainingloadai/messages/docs/ja.json";
+import zhHant from "@trainingloadai/messages/docs/zh-hant.json";
+import zh from "@trainingloadai/messages/docs/zh.json";
+import de from "@trainingloadai/messages/docs/de.json";
+import es from "@trainingloadai/messages/docs/es.json";
+import fr from "@trainingloadai/messages/docs/fr.json";
+import itMsg from "@trainingloadai/messages/docs/it.json";
+import ko from "@trainingloadai/messages/docs/ko.json";
+import ptBR from "@trainingloadai/messages/docs/pt-BR.json";
 
-const messages = { en, ja, zh, "zh-hant": zhHant } as const;
+const messages = {
+  en,
+  de,
+  fr,
+  es,
+  "pt-BR": ptBR,
+  it: itMsg,
+  ko,
+  ja,
+  zh,
+  "zh-hant": zhHant,
+} as const;
 
 const LOCKED_TITLE = "Max Heart Rate Calculator | HRmax by Age & Formula";
 const LOCKED_H1 = "Max Heart Rate Calculator";
@@ -30,10 +47,10 @@ function messagePaths(value: unknown, prefix = ""): string[] {
 
 describe("max heart rate calculator messages", () => {
   it("keeps the same structure and non-empty copy in every indexed locale", () => {
-    const base = messagePaths(en.maxHeartRateCalculator);
+    const base = messagePaths(en.maxHeartRateCalculator).sort();
     for (const lang of SEO_INDEXED_LANGUAGES) {
       const copy = messages[lang].maxHeartRateCalculator;
-      expect(messagePaths(copy)).toEqual(base);
+      expect(messagePaths(copy).sort()).toEqual(base);
       expect(copy.metadata.title.trim()).not.toBe("");
       expect(copy.metadata.description.trim()).not.toBe("");
       expect(copy.page.title.trim()).not.toBe("");
@@ -42,7 +59,7 @@ describe("max heart rate calculator messages", () => {
       expect(copy.page.limitations.items).toHaveLength(4);
       expect(copy.page.measure.steps).toHaveLength(4);
       expect(copy.page.formulas.hunt.name).toMatch(/HUNT\s*\/\s*Nes/);
-      expect(copy.page.zones.z5.label).toContain("VO2max");
+      expect(copy.page.zones.z5.label).toMatch(/VO2\s*m[aá]x/i);
       for (const item of copy.page.proof) expect(item.trim()).not.toBe("");
       for (const item of copy.page.faq) {
         expect(item.question.trim()).not.toBe("");

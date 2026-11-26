@@ -1,4 +1,6 @@
+import "@/i18n/mock-server-translations";
 import { readFileSync, existsSync } from "node:fs";
+import { prerenderToNodeStream } from "react-dom/static";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
@@ -17,6 +19,17 @@ import {
   runningPlanIntentContent,
   type BridgePlanSlug,
 } from "./running-plan-intents";
+
+async function renderBridge(lang: string, slug: BridgePlanSlug) {
+  const { prelude } = await prerenderToNodeStream(
+    <TenKBridgePage lang={lang} slug={slug} />,
+  );
+  let html = "";
+  for await (const chunk of prelude) {
+    html += chunk;
+  }
+  return html;
+}
 
 const locales = ["en", "zh", "zh-hant", "ja"];
 
@@ -67,7 +80,7 @@ describe("running-plan long-tail content", () => {
     },
   );
 
-  it("uses real 9-week and 10-week templates, without inventing a combined template", () => {
+  it("uses real 9-week and 10-week templates, without inventing a combined template", async () => {
     for (const [slug, weeks] of [
       ["first-5k", 9],
       ["finish-10k", 10],
@@ -76,9 +89,7 @@ describe("running-plan long-tail content", () => {
       expect(variant?.periodWeeks).toBe(weeks);
       expect(variant?.trainingDaysPerWeek).toBe(3);
     }
-    const html = renderToStaticMarkup(
-      <TenKBridgePage lang="zh" slug="couch-to-10k-training-plan" />,
-    );
+    const html = await renderBridge("zh", "couch-to-10k-training-plan");
     expect(html).toContain("/plans/templates/first-5k?");
     expect(html).toContain("/plans/templates/finish-10k?");
     expect(html).not.toContain("/plans/templates/couch-to-10k");
@@ -93,10 +104,8 @@ describe("running-plan long-tail content", () => {
 
   it.each(locales)(
     "renders full bridge schedules and localized light/dark screenshots in %s",
-    (lang) => {
-      const html = renderToStaticMarkup(
-        <TenKBridgePage lang={lang} slug="5k-to-10k-training-plan" />,
-      );
+    async (lang) => {
+      const html = await renderBridge(lang, "5k-to-10k-training-plan");
       expect(html.match(/data-plan-week=/g)).toHaveLength(10);
       expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
       expect(html).toContain(`web-plan-v2-${lang}.png`);
@@ -109,7 +118,10 @@ describe("running-plan long-tail content", () => {
     },
   );
 
-  it("keeps unsupported language variants out of the index", () => {
+  it("keeps non-indexed locales out of the index", () => {
+    expect(
+      tenKBridgeMetadata("nl", "couch-to-10k-training-plan").robots,
+    ).toMatchObject({ index: false, follow: true });
     expect(
       tenKBridgeMetadata("fr", "couch-to-10k-training-plan").robots,
     ).toMatchObject({ index: false, follow: true });

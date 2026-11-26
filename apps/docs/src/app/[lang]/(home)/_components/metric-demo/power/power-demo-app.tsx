@@ -23,10 +23,10 @@ import {
   DEFAULT_PADDING,
 } from "@/components/charts/uplot/uPlotConfig";
 import { useElementSize } from "@/components/charts/uplot/useElementSize";
-import { resolveDemoCopy } from "@/lib/demo-i18n";
 import { cn } from "@/lib/utils";
 
-import { metricDemoCopy } from "../copy";
+import { useMetricDemoCopy } from "../copy";
+import type { MetricDemoCopy } from "../types";
 import {
   DEMO_POWER_MAXIMUM,
   DEMO_POWER_PROFILE,
@@ -160,7 +160,7 @@ function PowerMaximumChart({
   );
 }
 
-function PowerProfilePanel({ copy }: { copy: (typeof metricDemoCopy)["en"] }) {
+function PowerProfilePanel({ copy }: { copy: MetricDemoCopy }) {
   const grid = [
     [14.5, 10.8, 7.2, 5.8],
     [12.8, 9.6, 6.4, 5.1],
@@ -225,8 +225,8 @@ function PowerProfilePanel({ copy }: { copy: (typeof metricDemoCopy)["en"] }) {
   );
 }
 
-export function PowerDemoApp({ lang }: { lang: string }) {
-  const copy = resolveDemoCopy(metricDemoCopy, lang);
+export function PowerDemoApp() {
+  const copy = useMetricDemoCopy();
   const filters = useDemoFilters({ sportType: "all" });
   const [activeTab, setActiveTab] = useState("curve");
 

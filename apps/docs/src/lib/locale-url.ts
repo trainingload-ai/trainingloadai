@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { getConverterDirectionSlugs } from "@/lib/converter-directions";
 import { i18n, SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 
 const HREFLANG_CODE_BY_LOCALE: Readonly<Record<string, string>> = {
@@ -24,6 +26,60 @@ function normalizeSitePath(path: string) {
   return withLeadingSlash === "/"
     ? "/"
     : withLeadingSlash.replace(/\/+$/, "");
+}
+
+export const ALL_LOCALE_INDEXED_PATHS = [
+  "/",
+  "/tools",
+  "/free-ai-workout-review",
+  "/workout-editor",
+  "/fit-file-viewer",
+  "/converter",
+  "/fit-course-converter",
+  "/ftp-calculator",
+  "/critical-power-calculator",
+  "/lactate-threshold-calculator",
+  "/lactate-curve-calculator",
+  "/max-heart-rate-calculator",
+  "/heart-rate-zones-calculator",
+  "/zone-2-heart-rate-calculator",
+  "/css-calculator",
+  "/vo2-max-calculator",
+  "/vdot-calculator",
+  "/daniels-running-formula",
+  "/running-pace-calculator",
+  "/race-time-predictor",
+  "/power-zones-calculator",
+  "/tss-calculator",
+  "/training-load-calculator",
+  "/brick-workout",
+  ...getConverterDirectionSlugs().map((slug) => `/${slug}`),
+] as const;
+
+const allLocaleIndexedPaths = new Set<string>(ALL_LOCALE_INDEXED_PATHS);
+
+export function seoIndexedLanguagesForPath(path: string): readonly string[] {
+  return allLocaleIndexedPaths.has(normalizeSitePath(path))
+    ? i18n.languages
+    : SEO_INDEXED_LANGUAGES;
+}
+
+export function robotsForPublicPath(
+  locale: string,
+  path: string,
+): Metadata["robots"] {
+  const index = seoIndexedLanguagesForPath(path).includes(locale);
+  return {
+    index,
+    follow: true,
+    googleBot: {
+      index,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  };
 }
 
 /** Build a site-relative path with as-needed locale prefix */
@@ -67,7 +123,7 @@ export function absoluteAlternatesForLocales(
 export function alternatesLanguagesForPath(path: string) {
   return {
     ...Object.fromEntries(
-      SEO_INDEXED_LANGUAGES.map((locale) => [
+      seoIndexedLanguagesForPath(path).map((locale) => [
         seoHreflangCodeForLocale(locale),
         withLocalePath(locale, path),
       ]),
@@ -80,6 +136,6 @@ export function absoluteAlternatesForPath(siteUrl: string, path: string) {
   return absoluteAlternatesForLocales(
     siteUrl,
     path,
-    SEO_INDEXED_LANGUAGES,
+    seoIndexedLanguagesForPath(path),
   );
 }

@@ -6,7 +6,11 @@ import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import { getLactateCopy } from "@/lib/lactate-curve-copy";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { formatClock, formatPaceClock, KM_PER_MILE } from "@/lib/running-pace";
 import {
   buildThresholdPaceChart,
@@ -140,6 +144,7 @@ export async function generateMetadata({
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/lactate-threshold-calculator"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(
@@ -272,7 +277,7 @@ export default async function LactateThresholdCalculatorPage({
   >;
 
   const relatedLinks = [
-    [`${prefix}/lactate-curve-calculator`, getLactateCopy(lang).title],
+    [`${prefix}/lactate-curve-calculator`, (await getLactateCopy(lang)).title],
     [
       `${prefix}/heart-rate-zones-calculator`,
       tCommon("heartRateZonesCalculatorAction"),

@@ -1,29 +1,14 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { isSeoIndexedLanguage } from "@/lib/i18n";
 
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
-import {
-  createIntermediateFiveKPlan,
-  type RunningPlan,
-  type RunningPlanPageLabels,
-} from "@/lib/running-plan-pages";
-import { FiveKPlanExperience } from "../_components/FiveKPlanExperience";
+import { getRunningPlan } from "@/lib/running-plan-pages";
+import { DistancePlanExperience } from "@/components/DistancePlanExperience";
 
 function getSiteUrl() {
   return (
     process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.trainingload.ai"
   ).replace(/\/+$/, "");
-}
-
-async function getPlan(lang: string) {
-  const t = await getTranslations({
-    locale: lang,
-    namespace: "runningPlanPages.plans",
-  });
-  return createIntermediateFiveKPlan(
-    t.raw("5k-training-plan") as RunningPlan,
-    lang,
-  );
 }
 
 export async function generateMetadata({
@@ -32,11 +17,11 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const plan = await getPlan(lang);
+  const plan = await getRunningPlan("5k-training-plan-intermediate", lang);
   const path = plan.routePath ?? "/5k-training-plan/intermediate";
   const prefix = localePrefix(lang);
   const siteUrl = getSiteUrl();
-  const indexed = ["en", "zh", "zh-hant", "ja"].includes(lang);
+  const indexed = isSeoIndexedLanguage(lang);
   return {
     title: plan.metaTitle,
     description: plan.metaDescription,
@@ -66,15 +51,6 @@ export default async function IntermediateFiveKTrainingPlanPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const [plan, t] = await Promise.all([
-    getPlan(lang),
-    getTranslations({ locale: lang, namespace: "runningPlanPages" }),
-  ]);
-  return (
-    <FiveKPlanExperience
-      lang={lang}
-      plan={plan}
-      labels={t.raw("labels") as RunningPlanPageLabels}
-    />
-  );
+  const plan = await getRunningPlan("5k-training-plan-intermediate", lang);
+  return <DistancePlanExperience lang={lang} plan={plan} />;
 }

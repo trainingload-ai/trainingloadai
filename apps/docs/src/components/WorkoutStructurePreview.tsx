@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type {
   EndurancePlanBlock,
   EnduranceWorkRestStep,
@@ -5,43 +6,9 @@ import type {
 import type { WorkoutStructure } from "@shared/workout-structure";
 import { enduranceStructureToChartSegments } from "@/lib/plan-share-chart";
 
-type PreviewLocale = "en" | "zh" | "zh-hant" | "ja";
 type PreviewStepKind = NonNullable<EnduranceWorkRestStep["stepKind"]>;
 
-const STEP_COPY: Record<PreviewLocale, Record<PreviewStepKind, string>> = {
-  en: {
-    WARMUP: "Warm-up",
-    WORK: "Work",
-    RECOVERY: "Recovery",
-    REST: "Rest",
-    COOLDOWN: "Cool-down",
-    OTHER: "Step",
-  },
-  zh: {
-    WARMUP: "热身",
-    WORK: "主训练",
-    RECOVERY: "恢复",
-    REST: "休息",
-    COOLDOWN: "放松",
-    OTHER: "训练",
-  },
-  "zh-hant": {
-    WARMUP: "熱身",
-    WORK: "主訓練",
-    RECOVERY: "恢復",
-    REST: "休息",
-    COOLDOWN: "放鬆",
-    OTHER: "訓練",
-  },
-  ja: {
-    WARMUP: "ウォームアップ",
-    WORK: "メイン",
-    RECOVERY: "リカバリー",
-    REST: "休息",
-    COOLDOWN: "クールダウン",
-    OTHER: "ステップ",
-  },
-};
+type StepLabels = Record<PreviewStepKind, string>;
 
 const STEP_TONE: Record<PreviewStepKind, { chip: string; color: string }> = {
   WARMUP: {
@@ -70,13 +37,6 @@ const STEP_TONE: Record<PreviewStepKind, { chip: string; color: string }> = {
   },
 };
 
-function previewLocale(lang: string): PreviewLocale {
-  if (lang.toLowerCase().startsWith("zh-hant")) return "zh-hant";
-  if (lang.toLowerCase().startsWith("zh")) return "zh";
-  if (lang.toLowerCase().startsWith("ja")) return "ja";
-  return "en";
-}
-
 function durationLabel(step: EnduranceWorkRestStep) {
   const meta = step.durationMeta;
   if (meta?.kind === "DISTANCE") {
@@ -95,10 +55,10 @@ function durationLabel(step: EnduranceWorkRestStep) {
 
 function StepChip({
   step,
-  locale,
+  labels,
 }: {
   step: EnduranceWorkRestStep;
-  locale: PreviewLocale;
+  labels: StepLabels;
 }) {
   const stepKind = step.stepKind ?? "OTHER";
   const tone = STEP_TONE[stepKind];
@@ -111,7 +71,7 @@ function StepChip({
         className="size-1.5 rounded-full"
         style={{ backgroundColor: tone.color }}
       />
-      {STEP_COPY[locale][stepKind]}
+      {labels[stepKind]}
       <span className="font-black tabular-nums">{durationLabel(step)}</span>
     </span>
   );
@@ -119,10 +79,10 @@ function StepChip({
 
 function StructureBlock({
   block,
-  locale,
+  labels,
 }: {
   block: EndurancePlanBlock;
-  locale: PreviewLocale;
+  labels: StepLabels;
 }) {
   if (block.type === "repeat") {
     return (
@@ -135,7 +95,7 @@ function StructureBlock({
             <StepChip
               key={`${childIndex}-${stepIndex}`}
               step={step}
-              locale={locale}
+              labels={labels}
             />
           )),
         )}
@@ -145,13 +105,13 @@ function StructureBlock({
   return (
     <>
       {block.steps.map((step, index) => (
-        <StepChip key={index} step={step} locale={locale} />
+        <StepChip key={index} step={step} labels={labels} />
       ))}
     </>
   );
 }
 
-export function WorkoutStructurePreview({
+export async function WorkoutStructurePreview({
   structure,
   lang,
   compact = false,
@@ -161,23 +121,19 @@ export function WorkoutStructurePreview({
   compact?: boolean;
 }) {
   if (!structure || structure.kind !== "ENDURANCE") return null;
+  const t = await getTranslations({
+    locale: lang,
+    namespace: "runningPlanPages.workoutStructure",
+  });
   const segments = enduranceStructureToChartSegments(structure);
   const total = segments.at(-1)?.t1 ?? 0;
-  const locale = previewLocale(lang);
+  const labels = t.raw("stepLabels") as StepLabels;
   return (
     <div className={compact ? "mt-3" : "mt-4"}>
       {segments.length > 0 && total > 0 ? (
         <div
           role="img"
-          aria-label={
-            locale === "zh"
-              ? "训练结构图"
-              : locale === "zh-hant"
-                ? "訓練結構圖"
-                : locale === "ja"
-                  ? "ワークアウト構成図"
-                  : "Workout structure chart"
-          }
+          aria-label={t("chartAriaLabel")}
           className={`relative overflow-hidden rounded-control border border-neutral-200/80 bg-white/80 dark:border-white/10 dark:bg-neutral-950/35 ${compact ? "h-10" : "h-16"}`}
         >
           {[25, 50, 75].map((top) => (
@@ -206,7 +162,7 @@ export function WorkoutStructurePreview({
       {!compact ? (
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {structure.blocks.map((block, index) => (
-            <StructureBlock key={index} block={block} locale={locale} />
+            <StructureBlock key={index} block={block} labels={labels} />
           ))}
         </div>
       ) : null}
