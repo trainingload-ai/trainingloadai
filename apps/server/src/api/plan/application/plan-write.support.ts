@@ -1032,6 +1032,9 @@ export class PlanWriteSupport {
         planId,
         type: 'ADAPTATION_APPLIED',
         source: meta?.source ?? 'system',
+        decisionId: meta?.decisionId ?? null,
+        branchId: meta?.branchId ?? null,
+        commitId: meta?.commitId ?? null,
         payload: {
           action: meta?.action ?? 'workout_create',
           workoutId: row.id,
@@ -1155,6 +1158,9 @@ export class PlanWriteSupport {
         planId,
         type: 'ADAPTATION_APPLIED',
         source: meta?.source ?? 'system',
+        decisionId: meta?.decisionId ?? null,
+        branchId: meta?.branchId ?? null,
+        commitId: meta?.commitId ?? null,
         payload: {
           action: meta?.action ?? 'workout_attach_to_plan',
           workoutId,
@@ -2877,6 +2883,16 @@ export class PlanWriteSupport {
         tx,
       );
 
+      const lockWorkoutIds = [
+        ...new Set([
+          ...(dto.deletedWorkoutIds ?? []),
+          ...(dto.workouts ?? []).flatMap((w) => (w.id ? [w.id] : [])),
+        ]),
+      ].sort();
+      for (const wid of lockWorkoutIds) {
+        await this.workouts.lockForUpdate?.(wid, tx);
+      }
+
       if (
         Array.isArray(dto.deletedWorkoutIds) &&
         dto.deletedWorkoutIds.length > 0
@@ -3104,12 +3120,22 @@ export class PlanWriteSupport {
 
       await this.attachActualLoadToWorkouts(full);
 
+      const affectedWorkoutIds = [
+        ...new Set([
+          ...(dto.deletedWorkoutIds ?? []),
+          ...touchedWorkoutIds,
+        ]),
+      ];
+
       await this.coachContext.appendEvent({
         tx: tx,
         userId,
         planId,
         type: 'ADAPTATION_APPLIED',
         source: meta?.source ?? 'system',
+        decisionId: meta?.decisionId ?? null,
+        branchId: meta?.branchId ?? null,
+        commitId: meta?.commitId ?? null,
         payload: {
           action: meta?.action ?? 'plan_update',
           reason: meta?.reason ?? null,
@@ -3119,6 +3145,7 @@ export class PlanWriteSupport {
           commitId: meta?.commitId ?? null,
           hasWorkoutEdits: Boolean(dto.workouts?.length),
           deletedWorkoutCount: dto.deletedWorkoutIds?.length ?? 0,
+          workoutIds: affectedWorkoutIds,
         },
       });
 
@@ -3323,6 +3350,9 @@ export class PlanWriteSupport {
         planId,
         type: 'ADAPTATION_APPLIED',
         source: meta?.source ?? 'system',
+        decisionId: meta?.decisionId ?? null,
+        branchId: meta?.branchId ?? null,
+        commitId: meta?.commitId ?? null,
         payload: {
           action: meta?.action ?? 'plan_activate',
           reason: meta?.reason ?? null,
@@ -3385,6 +3415,9 @@ export class PlanWriteSupport {
         planId,
         type: 'ADAPTATION_APPLIED',
         source: meta?.source ?? 'system',
+        decisionId: meta?.decisionId ?? null,
+        branchId: meta?.branchId ?? null,
+        commitId: meta?.commitId ?? null,
         payload: {
           action: meta?.action ?? 'plan_pause',
           reason: meta?.reason ?? _reason ?? null,
@@ -3601,6 +3634,7 @@ export class PlanWriteSupport {
   ) {
     const run = async (tx: Tx) => {
       await acquireHashtextAdvisoryXactLock(tx, userId);
+      await this.workouts.lockForUpdate?.(workoutId, tx);
       const workout = await this.assertWorkoutOwnership(
         userId,
         planId,
@@ -3654,6 +3688,9 @@ export class PlanWriteSupport {
         planId,
         type: 'ADAPTATION_APPLIED',
         source: meta?.source ?? 'system',
+        decisionId: meta?.decisionId ?? null,
+        branchId: meta?.branchId ?? null,
+        commitId: meta?.commitId ?? null,
         payload: {
           action: meta?.action ?? 'workout_status_update',
           reason: meta?.reason ?? null,
@@ -3944,6 +3981,7 @@ export class PlanWriteSupport {
     // 单节课编辑仍会重建 step 树，保证 text/steps 永远保持一致。
     const run = async (tx: Tx) => {
       await acquireHashtextAdvisoryXactLock(tx, userId);
+      await this.workouts.lockForUpdate?.(workoutId, tx);
       const workout = await this.assertWorkoutOwnership(
         userId,
         planId,
@@ -4121,6 +4159,9 @@ export class PlanWriteSupport {
         planId,
         type: 'ADAPTATION_APPLIED',
         source: meta?.source ?? 'system',
+        decisionId: meta?.decisionId ?? null,
+        branchId: meta?.branchId ?? null,
+        commitId: meta?.commitId ?? null,
         payload: {
           action: meta?.action ?? 'workout_update',
           reason: meta?.reason ?? dto.reason ?? null,
@@ -4550,6 +4591,19 @@ export class PlanWriteSupport {
           'USER_UNLINKED',
           tx,
         );
+        await this.coachContext.appendEvent({
+          tx,
+          userId,
+          planId,
+          type: 'WORKOUT_LINKED',
+          source: 'manual',
+          payload: {
+            action: 'unlink_workout_activity',
+            workoutId,
+            activityId: link.activityId,
+            linkId,
+          },
+        });
         return { success: true };
       }),
     );
@@ -4596,7 +4650,11 @@ export class PlanWriteSupport {
     await this.workouts.update(
       {
         where: { id: workoutId },
-        data: { status: 'PLANNED', completedAt: null },
+        data: {
+          status: 'PLANNED',
+          completedAt: null,
+          revision: { increment: 1 },
+        },
       },
       tx,
     );
@@ -5229,6 +5287,7 @@ export class PlanWriteSupport {
         {
           where: { activityId: activity.id, unlinkedAt: null },
           select: {
+            planId: true,
             planWorkoutId: true,
             autoMarkedWorkoutDone: true,
             source: true,
@@ -5256,6 +5315,7 @@ export class PlanWriteSupport {
           {
             where: { activityId: activity.id, unlinkedAt: null },
             select: {
+              planId: true,
               planWorkoutId: true,
               autoMarkedWorkoutDone: true,
               source: true,
@@ -5274,6 +5334,21 @@ export class PlanWriteSupport {
           await this.revertAutoDoneIfOrphan(tx, l.planWorkoutId, {
             autoMarkedWorkoutDone: l.autoMarkedWorkoutDone,
           });
+          if (l.planId) {
+            await this.coachContext.appendEvent({
+              tx,
+              userId,
+              planId: l.planId,
+              type: 'WORKOUT_LINKED',
+              source: 'manual',
+              payload: {
+                action: 'remove_activity_plan_link',
+                hashId,
+                activityId: activity.id,
+                workoutId: l.planWorkoutId,
+              },
+            });
+          }
         }
       }
 

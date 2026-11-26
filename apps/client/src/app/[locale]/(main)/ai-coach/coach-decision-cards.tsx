@@ -136,7 +136,11 @@ function CoachDecisionDraftTabs({
         <p className="text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
           {t("selectedDraft", { index: activeDraftIndex + 1 })}
         </p>
-        {onConfirmDecision && !activeDraftApplied ? (
+        {onConfirmDecision &&
+        !activeDraftApplied &&
+        !["APPLIED", "REJECTED", "SUPERSEDED", "APPROVED"].includes(
+          String(activeDraft.state ?? "").toUpperCase(),
+        ) ? (
           <Button
             type="button"
             size="sm"

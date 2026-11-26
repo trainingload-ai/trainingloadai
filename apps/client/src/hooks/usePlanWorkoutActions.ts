@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   getPlanDetail,
   isWorkoutPlannedOrInProgress,
@@ -38,9 +38,12 @@ export type SkipWorkoutInput = {
 
 export function usePlanWorkoutActions() {
   const [pendingWorkoutId, setPendingWorkoutId] = useState<string | null>(null);
+  const inFlightRef = useRef(false);
 
   const postponeWorkout = async (input: PostponeWorkoutInput) => {
-    if (!isWorkoutPlannedOrInProgress(input.status)) return false;
+    if (!isWorkoutPlannedOrInProgress(input.status) || inFlightRef.current)
+      return false;
+    inFlightRef.current = true;
     setPendingWorkoutId(input.workoutId);
     try {
       const targetOffset = Math.max(0, input.sourceDayOffset + 1);
@@ -66,6 +69,7 @@ export function usePlanWorkoutActions() {
         name: input.name ?? null,
         sportType: input.sportType,
         sportDefinitionCode: input.sportDefinitionCode ?? null,
+        expectedRevision: sourceWorkout?.revision,
         definition: sourceWorkout?.structure
           ? {
               kind: sourceWorkout.structureKind,
@@ -78,12 +82,15 @@ export function usePlanWorkoutActions() {
       });
       return true;
     } finally {
+      inFlightRef.current = false;
       setPendingWorkoutId(null);
     }
   };
 
   const skipWorkout = async (input: SkipWorkoutInput) => {
-    if (!isWorkoutPlannedOrInProgress(input.status)) return false;
+    if (!isWorkoutPlannedOrInProgress(input.status) || inFlightRef.current)
+      return false;
+    inFlightRef.current = true;
     setPendingWorkoutId(input.workoutId);
     try {
       await updatePlanWorkoutStatus(input.planId, input.workoutId, {
@@ -91,6 +98,7 @@ export function usePlanWorkoutActions() {
       });
       return true;
     } finally {
+      inFlightRef.current = false;
       setPendingWorkoutId(null);
     }
   };

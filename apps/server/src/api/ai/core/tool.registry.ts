@@ -53,14 +53,9 @@ import { activityDescriptionMutationTool } from './tools/mutationActivityDescrip
 import { activitySessionRpeMutationTool } from './tools/mutationActivitySessionRpe.tool';
 import { activityPlanLinkMutationTool } from './tools/mutationActivityPlanLink.tool';
 import { activityPlanUnlinkMutationTool } from './tools/mutationActivityPlanUnlink.tool';
-import { planWorkoutStatusMutationTool } from './tools/mutationPlanWorkoutStatus.tool';
 import { activityDeleteMutationTool } from './tools/mutationDeleteActivity.tool';
 import { userFitnessMetricMutationTool } from './tools/mutationUserFitnessMetric.tool';
 import { userBodyWeightMutationTool } from './tools/mutationUserBodyWeight.tool';
-import { planLifecycleMutationTool } from './tools/mutationPlanLifecycle.tool';
-import { planWorkoutUpdateMutationTool } from './tools/mutationPlanWorkoutUpdate.tool';
-import { planWorkoutPostponeMutationTool } from './tools/mutationPlanWorkoutPostpone.tool';
-import { planWorkoutAddMutationTool } from './tools/mutationPlanWorkoutAdd.tool';
 import { coachDecisionDraftTool } from './tools/coachDecisionDraft.tool';
 import { coachDecisionApplyTool } from './tools/coachDecisionApply.tool';
 import { competitionEventsListTool } from './tools/competitionEventsList.tool';
@@ -215,14 +210,11 @@ export const COACH_TOOL_DEFINITIONS: readonly AiToolDef[] = [
   activitySessionRpeMutationTool,
   activityPlanLinkMutationTool,
   activityPlanUnlinkMutationTool,
-  planWorkoutStatusMutationTool,
   activityDeleteMutationTool,
   userFitnessMetricMutationTool,
   userBodyWeightMutationTool,
-  planLifecycleMutationTool,
-  planWorkoutUpdateMutationTool,
-  planWorkoutPostponeMutationTool,
-  planWorkoutAddMutationTool,
+  // Plan and plan-workout mutations must flow through CoachDecision / PlanProposalPreview
+  // confirmation rather than direct unconfirmed mutation_plan_* tools.
 ];
 
 export async function getCoachTools(args: {

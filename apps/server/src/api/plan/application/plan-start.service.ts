@@ -642,7 +642,12 @@ export class PlanStartService {
     );
   }
 
-  async invalidate(userId: string, planId: string, tx: PlanDb) {
+  async invalidate(
+    userId: string,
+    planId: string,
+    tx: PlanDb,
+    scope?: { sid?: string; branchId?: string },
+  ) {
     const old = await tx.planProposalPreview.findMany({
       where: {
         userId,
@@ -654,10 +659,14 @@ export class PlanStartService {
       select: { id: true, decisionId: true, proposal: true },
     });
     await this.expirePreviews(
-      old.filter(
-        (row) =>
-          !(row.proposal as unknown as CanonicalStartProposal).calendarMove,
-      ),
+      old.filter((row) => {
+        const proposal = row.proposal as unknown as CanonicalStartProposal;
+        if (proposal.calendarMove) return false;
+        if (scope?.sid && proposal.binding?.sid !== scope.sid) return false;
+        if (scope?.branchId && proposal.binding?.branchId !== scope.branchId)
+          return false;
+        return true;
+      }),
       tx,
     );
   }
@@ -710,7 +719,7 @@ export class PlanStartService {
         select: { sourcePlanId: true },
       });
       for (const id of new Set(pending.map((p) => p.sourcePlanId)))
-        await this.invalidate(userId, id, tx);
+        await this.invalidate(userId, id, tx, { sid });
       return;
     }
     await acquireHashtextAdvisoryXactLock(tx, userId);
@@ -779,7 +788,7 @@ export class PlanStartService {
     if (!exactCard) {
       if (isCalendarMoveSession(sid))
         await this.expireCalendarCoachPreviews(userId, planId, sid, tx);
-      else await this.invalidate(userId, planId, tx);
+      else await this.invalidate(userId, planId, tx, { sid });
     }
   }
 
@@ -3245,8 +3254,18 @@ export class PlanStartService {
               calendarSid,
               tx,
             );
-          else if (!calendarMove && !adjustment && !(request.mode === 'SCHEDULE' && request.calendarAdjustment))
-            await this.invalidate(userId, source.id, tx);
+          else if (
+            !automation &&
+            !calendarMove &&
+            !adjustment &&
+            !(request.mode === 'SCHEDULE' && request.calendarAdjustment)
+          )
+            await this.invalidate(
+              userId,
+              source.id,
+              tx,
+              binding?.sid ? { sid: binding.sid } : undefined,
+            );
           const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
           const data = {
             userId,

@@ -548,6 +548,9 @@ describe('PlanService plan status transitions', () => {
       planId: 'plan-1',
       type: 'ADAPTATION_APPLIED',
       source: 'manual',
+      decisionId: null,
+      branchId: null,
+      commitId: null,
       payload: {
         action: 'coach_pause',
         reason: 'rest week',
@@ -714,6 +717,7 @@ describe('PlanService workout status transitions', () => {
   const createService = (workout: Record<string, unknown>) => {
     const findActiveLink = jest.fn(async () => null);
     const tx = {
+      $queryRaw: jest.fn(async () => []),
       planWorkout: {
         findUnique: jest.fn(async () => workout),
         update: jest.fn(async ({ data }: { data: Record<string, unknown> }) =>
@@ -808,6 +812,9 @@ describe('PlanService workout status transitions', () => {
       planId: 'plan-1',
       type: 'ADAPTATION_APPLIED',
       source: 'manual',
+      decisionId: 'decision-1',
+      branchId: null,
+      commitId: null,
       payload: {
         action: 'quick_done',
         reason: null,
@@ -1122,6 +1129,9 @@ describe('PlanService workout editing', () => {
       planId: 'plan-1',
       type: 'ADAPTATION_APPLIED',
       source: 'manual',
+      decisionId: null,
+      branchId: null,
+      commitId: null,
       payload: {
         action: 'edit_workout',
         reason: null,
@@ -1470,6 +1480,7 @@ describe('PlanService workout activity links', () => {
       data: {
         status: 'DONE',
         completedAt: activityStart,
+        revision: { increment: 1 },
       },
     });
     expect(tx.planWorkoutActivityLink.create).toHaveBeenCalledWith(
@@ -1610,7 +1621,11 @@ describe('PlanService workout activity links', () => {
     });
     expect(tx.planWorkout.update).toHaveBeenCalledWith({
       where: { id: 'workout-1' },
-      data: { status: 'PLANNED', completedAt: null },
+      data: {
+        status: 'PLANNED',
+        completedAt: null,
+        revision: { increment: 1 },
+      },
     });
     expect(result).toEqual({ success: true });
   });

@@ -204,12 +204,25 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
       const planId = String(input.payload.planId ?? '').trim();
       if (!planId)
         throw new Error('planId is required to open an adjustment branch');
-      const opened = await ctx.coachBranching.openBranch({
-        userId,
-        planId,
-        openReason: 'conversation_adjustment',
-      });
-      branchId = opened.branch.id;
+      if (
+        ctx.sid &&
+        typeof ctx.coachBranching.ensureConversationBranch === 'function'
+      ) {
+        branchId = await ctx.coachBranching.ensureConversationBranch({
+          userId,
+          sid: ctx.sid,
+          userMessageId: ctx.currentUserMessageId,
+          planId,
+          openReason: 'conversation_adjustment',
+        });
+      } else {
+        const opened = await ctx.coachBranching.openBranch({
+          userId,
+          planId,
+          openReason: 'conversation_adjustment',
+        });
+        branchId = opened.branch.id;
+      }
     }
 
     const { decision, options } = await ctx.coachBranching.squashBranch({

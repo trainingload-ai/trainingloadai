@@ -115,6 +115,12 @@ function asUpdatePlanWorkoutDto(value: unknown): UpdatePlanWorkoutDto | null {
     notes: asNullableString(rec.notes),
     name: asNullableString(rec.name),
     reason: asOptionalString(rec.reason),
+    expectedRevision:
+      typeof rec.expectedRevision === 'number' &&
+      Number.isInteger(rec.expectedRevision) &&
+      rec.expectedRevision >= 1
+        ? rec.expectedRevision
+        : undefined,
     definition:
       rec.definition && typeof rec.definition === 'object'
         ? (rec.definition as UpdatePlanWorkoutDto['definition'])
@@ -608,6 +614,11 @@ export class CoachBranchingService {
           this.fail('Editable workout not found in branch plan');
         const dto = {
           ...change.dto,
+          ...(typeof before.revision === 'number' &&
+          Number.isInteger(before.revision) &&
+          before.revision >= 1
+            ? { expectedRevision: before.revision }
+            : {}),
           sessionIndex: change.dto.sessionIndex ?? before.sessionIndex,
           name: change.dto.name === undefined ? before.name : change.dto.name,
           notes:
@@ -706,6 +717,18 @@ export class CoachBranchingService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
+      const latestContext =
+        typeof tx.coachContext?.findUnique === 'function'
+          ? await tx.coachContext.findUnique({
+              where: { id: branch.contextId },
+              select: { headEventSeq: true },
+            })
+          : null;
+      const effectiveBaseEventSeq =
+        typeof latestContext?.headEventSeq === 'number'
+          ? latestContext.headEventSeq
+          : branch.baseEventSeq;
       const decision = await tx.coachDecision.create({
         data: {
           branchId: branch.id,
@@ -727,7 +750,7 @@ export class CoachBranchingService {
               ? Number(args.confidence)
               : null,
           createdBy: args.userId,
-          baseEventSeq: branch.baseEventSeq,
+          baseEventSeq: effectiveBaseEventSeq,
         },
       });
 
@@ -788,7 +811,10 @@ export class CoachBranchingService {
 
       await tx.coachBranch.update({
         where: { id: branch.id },
-        data: { status: CoachFlowStatus.SQUASHED },
+        data: {
+          status: CoachFlowStatus.SQUASHED,
+          baseEventSeq: effectiveBaseEventSeq,
+        },
       });
 
       await tx.coachAssessmentCase.updateMany({
@@ -899,24 +925,174 @@ export class CoachBranchingService {
     });
   }
 
+  /**
+   * Reuse an open/squashed branch already attached to this conversation and plan
+   * so repeated drafts in the same general chat supersede earlier drafts instead
+   * of creating orphaned parallel branches.
+   */
+  async ensureConversationBranch(args: {
+    userId: string;
+    sid?: string | null;
+    userMessageId?: string | null;
+    planId: string;
+    openReason?: string;
+    sourceNode?: unknown;
+  }) {
+    const sid = toSafeString(args.sid);
+    if (!sid) {
+      const opened = await this.openBranch({
+        userId: args.userId,
+        planId: args.planId,
+        openReason: args.openReason ?? 'conversation_adjustment',
+        sourceNode: args.sourceNode,
+      });
+      return opened.branch.id;
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
+      const context = await this.coachContext.ensureContext({
+        userId: args.userId,
+        planId: args.planId,
+        tx,
+      });
+      if (!canOpenCoachBranch({ status: context.status })) {
+        this.fail('Context is not active');
+      }
+
+      const existingRun = await tx.coachRun.findFirst({
+        where: {
+          userId: args.userId,
+          sessionId: sid,
+          branchId: { not: null },
+        },
+        orderBy: [{ startedAt: 'desc' }, { id: 'desc' }],
+        select: { id: true, branchId: true },
+      });
+      let branchId: string | null = null;
+      if (existingRun?.branchId) {
+        const existingBranch = await tx.coachBranch.findFirst({
+          where: {
+            id: existingRun.branchId,
+            contextId: context.id,
+            status: {
+              in: [
+                CoachFlowStatus.OPEN,
+                CoachFlowStatus.SQUASHED,
+                CoachFlowStatus.REBASE_REQUIRED,
+              ],
+            },
+          },
+          select: { id: true },
+        });
+        if (existingBranch) branchId = existingBranch.id;
+      }
+
+      if (!branchId) {
+        const thread = await this.getOrCreateMainThread(tx, context.id);
+        const latestCommit = await tx.coachCommit.findFirst({
+          where: { contextId: context.id },
+          orderBy: [{ eventToSeq: 'desc' }, { createdAt: 'desc' }],
+        });
+        let branch = await tx.coachBranch.create({
+          data: {
+            threadId: thread.id,
+            contextId: context.id,
+            status: CoachFlowStatus.OPEN,
+            baseEventSeq: context.headEventSeq,
+            baseCommitId: latestCommit?.id || null,
+            openedBy: args.userId,
+            openReason: toSafeString(args.openReason) || 'conversation_adjustment',
+          },
+        });
+        if (args.sourceNode != null) {
+          const msgSeq = await this.nextThreadMessageSeq(tx, thread.id);
+          await tx.coachBranchMessage.create({
+            data: {
+              threadId: thread.id,
+              branchId: branch.id,
+              msgSeq,
+              role: 'system',
+              content: {
+                kind: 'branch_open',
+                sourceNode: asJson(args.sourceNode),
+              } as Prisma.InputJsonValue,
+            },
+          });
+          branch = await tx.coachBranch.update({
+            where: { id: branch.id },
+            data: { headMsgSeq: msgSeq },
+          });
+        }
+        branchId = branch.id;
+      }
+
+      const userMessageId = toSafeString(args.userMessageId);
+      if (userMessageId) {
+        const attempt = await tx.coachRunAttempt.findFirst({
+          where: {
+            userId: args.userId,
+            inputMessageId: userMessageId,
+            status: 'running',
+            run: { userId: args.userId, sessionId: sid, status: 'running' },
+          },
+          select: { runId: true, run: { select: { branchId: true } } },
+        });
+        if (attempt && !attempt.run.branchId) {
+          await tx.coachRun.update({
+            where: { id: attempt.runId },
+            data: { branchId },
+          });
+        }
+      }
+
+      return branchId;
+    });
+  }
+
   async decisionConversationBranch(
     userId: string,
     sid: string,
     decisionId: string,
   ) {
     const decision = await this.requireDecisionOwner(userId, decisionId);
-    if (!['PLAN_START', 'PLAN_SCHEDULE'].includes(decision.decisionType))
-      return null;
-    const previewId = toSafeString(asRecord(decision.payload)?.previewId);
-    const preview = await this.prisma.planProposalPreview.findUnique({
-      where: { id: previewId },
+    if (['PLAN_START', 'PLAN_SCHEDULE'].includes(decision.decisionType)) {
+      const previewId = toSafeString(asRecord(decision.payload)?.previewId);
+      const preview = await this.prisma.planProposalPreview.findUnique({
+        where: { id: previewId },
+      });
+      const binding = asRecord(asRecord(preview?.proposal)?.binding);
+      return preview?.userId === userId &&
+        binding?.sid === sid &&
+        binding?.branchId === decision.branchId
+        ? decision.branchId
+        : null;
+    }
+
+    // For non-START/non-SCHEDULE decisions drafted in a general chat, verify the
+    // decision card actually belongs to an assistant turn in this session.
+    const assistantMessages = await this.prisma.aiCoachMessage.findMany({
+      where: { userId, sessionId: sid, role: 'ASSISTANT' },
+      orderBy: { sequence: 'desc' },
+      take: 30,
+      select: { message: true },
     });
-    const binding = asRecord(asRecord(preview?.proposal)?.binding);
-    return preview?.userId === userId &&
-      binding?.sid === sid &&
-      binding?.branchId === decision.branchId
-      ? decision.branchId
-      : null;
+    const matched = assistantMessages.some((row) => {
+      const content = asRecord(getStoredCoachLegacyMessage(row.message))?.content;
+      if (!Array.isArray(content)) return false;
+      return content.some((block) => {
+        const entry = asRecord(block);
+        const input = asRecord(entry?.input);
+        return (
+          entry?.type === 'tool_use' &&
+          (entry.name === 'CoachDecisionDraft' ||
+            entry.name === 'PlanWorkoutAdjustmentDraft' ||
+            entry.name === 'present_plan_workout_adjustment_draft') &&
+          input?.decisionId === decision.id
+        );
+      });
+    });
+    return matched ? decision.branchId : null;
   }
 
   listCalendarAdjustments(userId: string, planId: string) {
@@ -994,8 +1170,8 @@ export class CoachBranchingService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
       if (PREVIEW_BACKED_PLAN_DECISION_TYPES.includes(decision.decisionType)) {
-        await acquireHashtextAdvisoryXactLock(tx, args.userId);
         const preview = await tx.planProposalPreview.findUnique({
           where: { decisionId: decision.id },
           select: {
@@ -1020,7 +1196,8 @@ export class CoachBranchingService {
           const current = await tx.coachDecision.findUniqueOrThrow({
             where: { id: decision.id },
           });
-          if (current.state === CoachDecisionState.APPLIED) return { decision: current };
+          if (current.state === CoachDecisionState.APPLIED)
+            return { decision: current };
           this.fail('DECISION_STATE_CHANGED');
         }
         if (preview.expiresAt.getTime() <= Date.now()) {
@@ -1067,28 +1244,24 @@ export class CoachBranchingService {
             : decision.rationale,
       };
 
-      let updated;
+      // Guard every decision type with a conditional CAS transition so late
+      // approvals cannot regress APPLIED / REJECTED / SUPERSEDED back to APPROVED.
+      const claim = await tx.coachDecision.updateMany({
+        where: {
+          id: decision.id,
+          state: { in: ['DRAFT', 'PROPOSED', 'APPROVED'] },
+        },
+        data: approvalData,
+      });
+      const updated = await tx.coachDecision.findUnique({
+        where: { id: decision.id },
+      });
       if (
-        decision.decisionType === 'PLAN_START' ||
-        decision.decisionType === 'PLAN_SCHEDULE'
+        !updated ||
+        (claim.count !== 1 && updated.state !== CoachDecisionState.APPLIED)
       ) {
-        const claim = await tx.coachDecision.updateMany({
-          where: {
-            id: decision.id,
-            state: { in: ['DRAFT', 'PROPOSED', 'APPROVED'] },
-          },
-          data: approvalData,
-        });
-        updated = await tx.coachDecision.findUnique({
-          where: { id: decision.id },
-        });
-        if (!updated || (claim.count !== 1 && updated.state !== 'APPLIED'))
-          this.fail('DECISION_STATE_CHANGED');
-      } else
-        updated = await tx.coachDecision.update({
-          where: { id: decision.id },
-          data: approvalData,
-        });
+        this.fail('DECISION_STATE_CHANGED');
+      }
 
       return { decision: updated };
     });
@@ -1218,28 +1391,24 @@ export class CoachBranchingService {
               .join('\n')
           : decision.rationale,
     };
-    if (decision.decisionType === 'PLAN_SCHEDULE') {
-      // Compete with apply on the decision state, without rewriting a committed proposal.
-      await this.prisma.coachDecision.updateMany({
+    return this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
+      // Compete atomically with apply/supersede without rewriting a committed decision.
+      await tx.coachDecision.updateMany({
         where: {
           id: decision.id,
           state: { in: ['DRAFT', 'PROPOSED', 'APPROVED'] },
         },
         data,
       });
-      const current = await this.prisma.coachDecision.findUniqueOrThrow({
+      const current = await tx.coachDecision.findUniqueOrThrow({
         where: { id: decision.id },
       });
-      if (current.state !== CoachDecisionState.REJECTED)
+      if (current.state !== CoachDecisionState.REJECTED) {
         this.fail('DECISION_STATE_CHANGED');
+      }
       return { decision: current };
-    }
-    const updated = await this.prisma.coachDecision.update({
-      where: { id: decision.id },
-      data,
     });
-
-    return { decision: updated };
   }
 
   private async recordApplyAttempt(
@@ -1253,23 +1422,36 @@ export class CoachBranchingService {
     tx?: PrismaTx,
   ) {
     const db = tx ?? this.prisma;
-    const last = await db.coachApplyAttempt.findFirst({
-      where: { decisionId: args.decisionId },
-      orderBy: { attemptNo: 'desc' },
-      select: { attemptNo: true },
-    });
-    return db.coachApplyAttempt.create({
-      data: {
-        decisionId: args.decisionId,
-        attemptNo: (last?.attemptNo ?? 0) + 1,
-        baseEventSeq:
-          typeof args.baseEventSeq === 'number' ? args.baseEventSeq : null,
-        headEventSeq:
-          typeof args.headEventSeq === 'number' ? args.headEventSeq : null,
-        result: args.result,
-        error: args.error == null ? undefined : asJson(args.error),
-      },
-    });
+    const maxAttempts = tx ? 1 : 3;
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      const last = await db.coachApplyAttempt.findFirst({
+        where: { decisionId: args.decisionId },
+        orderBy: { attemptNo: 'desc' },
+        select: { attemptNo: true },
+      });
+      try {
+        return await db.coachApplyAttempt.create({
+          data: {
+            decisionId: args.decisionId,
+            attemptNo: (last?.attemptNo ?? 0) + 1,
+            baseEventSeq:
+              typeof args.baseEventSeq === 'number' ? args.baseEventSeq : null,
+            headEventSeq:
+              typeof args.headEventSeq === 'number' ? args.headEventSeq : null,
+            result: args.result,
+            error: args.error == null ? undefined : asJson(args.error),
+          },
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const uniqueConflict =
+          message.includes('t_coach_apply_attempt_decision_id_attempt_no_key') ||
+          message.includes('Unique constraint failed') ||
+          (error as { code?: unknown })?.code === 'P2002';
+        if (!uniqueConflict || attempt + 1 >= maxAttempts) throw error;
+      }
+    }
+    return null;
   }
 
   private workoutChanges(
@@ -1324,7 +1506,11 @@ export class CoachBranchingService {
     branchId: string;
     decisionType: string;
     payload: Record<string, unknown>;
-  }) {
+    tx: PrismaTx;
+  }): Promise<{
+    afterCommit?: () => Promise<void>;
+    notifyPlanId?: string | null;
+  }> {
     const meta = {
       source: 'ai' as const,
       action: `decision_apply_${args.decisionType.toLowerCase()}`,
@@ -1341,37 +1527,45 @@ export class CoachBranchingService {
         const action = toSafeString(args.payload.action).toLowerCase();
         if (!planId || !action) this.fail('Invalid PLAN_LIFECYCLE payload');
         if (action === 'activate') {
-          return this.planService.activatePlan(
+          await this.planService.activatePlan(
             args.userId,
             planId,
             toSafeString(args.payload.startDate) || undefined,
             meta,
+            { tx: args.tx },
           );
+          return { notifyPlanId: planId };
         }
         if (action === 'pause') {
-          return this.planService.pausePlan(
+          await this.planService.pausePlan(
             args.userId,
             planId,
             toSafeString(args.payload.reason) || undefined,
             meta,
+            { tx: args.tx },
           );
+          return { notifyPlanId: planId };
         }
         if (action === 'complete') {
-          return this.planService.completePlan(
+          const completed = await this.planService.completePlan(
             args.userId,
             planId,
             toSafeString(args.payload.completedAt) || undefined,
             toSafeString(args.payload.reason) || undefined,
             meta,
+            { tx: args.tx },
           );
+          return { afterCommit: completed.afterCommit, notifyPlanId: planId };
         }
         if (action === 'cancel') {
-          return this.planService.cancelPlan(
+          const cancelled = await this.planService.cancelPlan(
             args.userId,
             planId,
             toSafeString(args.payload.reason) || undefined,
             meta,
+            { tx: args.tx },
           );
+          return { afterCommit: cancelled.afterCommit, notifyPlanId: planId };
         }
         if (action === 'open_next') {
           await this.assertNextCycleEligible(args.userId, {
@@ -1380,6 +1574,7 @@ export class CoachBranchingService {
             context: { planId },
           });
           await this.coachContext.appendEvent({
+            tx: args.tx,
             userId: args.userId,
             planId,
             type: 'ADAPTATION_APPLIED',
@@ -1391,39 +1586,9 @@ export class CoachBranchingService {
               summaryId: toSafeString(args.payload.summaryId) || null,
             },
           });
-          return {
-            openedNextPlan: true,
-            planId,
-            summaryId: toSafeString(args.payload.summaryId) || null,
-          };
+          return {};
         }
         this.fail('Unsupported lifecycle action');
-      }
-      case 'PLAN_WORKOUT_UPDATE': {
-        const planId = toSafeString(args.payload.planId);
-        const workoutId = toSafeString(args.payload.workoutId);
-        const dto = asUpdatePlanWorkoutDto(
-          args.payload.dto ?? args.payload.change,
-        );
-        if (!planId || !workoutId || !dto)
-          this.fail('Invalid PLAN_WORKOUT_UPDATE payload');
-        return this.planService.updateWorkout(
-          args.userId,
-          planId,
-          workoutId,
-          dto,
-          meta,
-        );
-      }
-      case 'PLAN_WORKOUT_ADD': {
-        const planId = toSafeString(args.payload.planId);
-        const dto = asUpdatePlanWorkoutInput(
-          args.payload.dto ?? args.payload.change,
-        );
-        if (!planId || !dto) {
-          this.fail('Invalid PLAN_WORKOUT_ADD payload');
-        }
-        return this.planService.addWorkout(args.userId, planId, dto, meta);
       }
       case 'PLAN_WORKOUT_STATUS': {
         const planId = toSafeString(args.payload.planId);
@@ -1432,52 +1597,17 @@ export class CoachBranchingService {
         if (!planId || !workoutId || !isPlanWorkoutStatus(statusRaw)) {
           this.fail('Invalid PLAN_WORKOUT_STATUS payload');
         }
-        return this.planService.updateWorkoutStatus(
+        await this.planService.updateWorkoutStatus(
           args.userId,
           planId,
           workoutId,
           statusRaw,
           meta,
+          { tx: args.tx },
         );
+        return { notifyPlanId: planId };
       }
-      case 'PLAN_WORKOUT_POSTPONE': {
-        const planId = toSafeString(args.payload.planId);
-        const workoutId = toSafeString(args.payload.workoutId);
-        const weekIndex = Number(args.payload.weekIndex);
-        const dayIndex = Number(args.payload.dayIndex);
-        if (
-          !planId ||
-          !workoutId ||
-          !Number.isFinite(weekIndex) ||
-          !Number.isFinite(dayIndex)
-        ) {
-          this.fail('Invalid PLAN_WORKOUT_POSTPONE payload');
-        }
-        const detail = await this.planService.getWorkoutDetail(
-          args.userId,
-          planId,
-          workoutId,
-        );
-        const w = detail.workout;
-        const sportType = asPlanSportType(w.sportType);
-        if (!sportType) this.fail('Invalid PLAN_WORKOUT_POSTPONE payload');
-        return this.planService.updateWorkout(
-          args.userId,
-          planId,
-          workoutId,
-          {
-            weekIndex,
-            dayIndex,
-            sessionIndex: w.sessionIndex ?? 1,
-            sportType,
-            text: w.text,
-            notes: w.notes ?? undefined,
-            name: w.name ?? undefined,
-            reason: 'postpone',
-          },
-          meta,
-        );
-      }
+      case 'PLAN_WORKOUT_POSTPONE':
       case 'PLAN_WORKOUT_RESCHEDULE': {
         const planId = toSafeString(args.payload.planId);
         const workoutId = toSafeString(args.payload.workoutId);
@@ -1489,17 +1619,25 @@ export class CoachBranchingService {
           !Number.isFinite(weekIndex) ||
           !Number.isFinite(dayIndex)
         ) {
-          this.fail('Invalid PLAN_WORKOUT_RESCHEDULE payload');
+          this.fail(`Invalid ${args.decisionType} payload`);
         }
         const detail = await this.planService.getWorkoutDetail(
           args.userId,
           planId,
           workoutId,
+          args.tx,
         );
         const workout = detail.workout;
         const sportType = asPlanSportType(workout.sportType);
-        if (!sportType) this.fail('Invalid PLAN_WORKOUT_RESCHEDULE payload');
-        return this.planService.updateWorkout(
+        if (!sportType) this.fail(`Invalid ${args.decisionType} payload`);
+        const expectedRevision =
+          typeof args.payload.expectedRevision === 'number' &&
+          Number.isInteger(args.payload.expectedRevision)
+            ? args.payload.expectedRevision
+            : typeof workout.revision === 'number'
+              ? workout.revision
+              : undefined;
+        const updated = await this.planService.updateWorkout(
           args.userId,
           planId,
           workoutId,
@@ -1511,10 +1649,16 @@ export class CoachBranchingService {
             text: workout.text,
             notes: workout.notes ?? undefined,
             name: workout.name ?? undefined,
-            reason: 'reschedule_missed',
+            expectedRevision,
+            reason:
+              args.decisionType === 'PLAN_WORKOUT_POSTPONE'
+                ? 'postpone'
+                : 'reschedule_missed',
           },
           meta,
+          { tx: args.tx },
         );
+        return { afterCommit: updated.afterCommit, notifyPlanId: planId };
       }
       case 'ACTIVITY_PLAN_LINK': {
         const hashId = toSafeString(args.payload.hashId);
@@ -1522,12 +1666,15 @@ export class CoachBranchingService {
         if (!hashId || !workoutId) {
           this.fail('Invalid ACTIVITY_PLAN_LINK payload');
         }
-        return this.planService.replaceActivityPlanLinkByHash(
+        const linked = await this.planService.replaceActivityPlanLinkByHash(
           args.userId,
           hashId,
           { workoutId },
           meta,
+          undefined,
+          { tx: args.tx },
         );
+        return { notifyPlanId: linked.linkedPlanWorkout.planId ?? null };
       }
       default:
         this.fail(`Unsupported decisionType: ${args.decisionType}`);
@@ -1674,40 +1821,37 @@ export class CoachBranchingService {
       decision.decisionType === 'PLAN_START' ||
       decision.decisionType === 'PLAN_SCHEDULE' ||
       decision.decisionType === 'PLAN_SUPERSESSION';
-    const isAtomicPlanWrite = isWorkoutChange || isPlanProposal;
 
     try {
-      if (!isAtomicPlanWrite)
-        await this.executeDecisionMutation({
-          userId: args.userId,
-          decisionId: decision.id,
-          branchId: decision.branchId,
-          decisionType: decision.decisionType,
-          payload,
-        });
-
       const result = await this.prisma.$transaction(
         async (tx) => {
           let receipt: Record<string, unknown> | null = null;
-          if (isAtomicPlanWrite)
-            await acquireHashtextAdvisoryXactLock(tx, args.userId);
-          if (isAtomicPlanWrite) {
-            // Claim the decision before writing. A concurrent apply/reject/supersede cannot apply it twice.
-            const claimed = await tx.coachDecision.updateMany({
-              where: { id: decision.id, state: CoachDecisionState.APPROVED },
-              data: { state: CoachDecisionState.APPLIED },
-            });
-            if (claimed.count !== 1) this.fail('DECISION_STATE_CHANGED');
-            const current = await this.planQuery.findContextById(
-              decision.contextId,
-              { headEventSeq: true },
-              tx,
-            );
-            if (current?.headEventSeq !== beforeHead)
-              this.fail('REBASE_REQUIRED');
-            if (payload.planId !== decision.context.planId)
-              this.fail('Decision must target the branch plan');
-          }
+          let afterCommit: (() => Promise<void>) | undefined;
+          let notifyPlanId: string | null =
+            isWorkoutChange || isPlanProposal ? decision.context.planId : null;
+
+          // Serialize every decision apply per user and claim APPROVED -> APPLIED
+          // atomically before performing any domain write so concurrent applies,
+          // rejects, or supersedes cannot double-apply or split state.
+          await acquireHashtextAdvisoryXactLock(tx, args.userId);
+          const claimed = await tx.coachDecision.updateMany({
+            where: { id: decision.id, state: CoachDecisionState.APPROVED },
+            data: { state: CoachDecisionState.APPLIED },
+          });
+          if (claimed.count !== 1) this.fail('DECISION_STATE_CHANGED');
+          const current = await this.planQuery.findContextById(
+            decision.contextId,
+            { headEventSeq: true },
+            tx,
+          );
+          if (current?.headEventSeq !== beforeHead)
+            this.fail('REBASE_REQUIRED');
+          if (
+            (isWorkoutChange || isPlanProposal || payload.planId != null) &&
+            payload.planId !== decision.context.planId
+          )
+            this.fail('Decision must target the branch plan');
+
           if (
             decision.decisionType === 'PLAN_START' ||
             decision.decisionType === 'PLAN_SCHEDULE'
@@ -1748,8 +1892,10 @@ export class CoachBranchingService {
               previewId,
               tx,
             });
-          }
-          if (isWorkoutChange) {
+            if (typeof receipt?.createdPlanId === 'string') {
+              notifyPlanId = receipt.createdPlanId;
+            }
+          } else if (isWorkoutChange) {
             const changes =
               decision.decisionType === 'PLAN_WORKOUT_ADD'
                 ? []
@@ -1810,6 +1956,17 @@ export class CoachBranchingService {
               (change) => change.fields.length > 0,
             ).length;
             receipt = workoutReceipt;
+          } else {
+            const executed = await this.executeDecisionMutation({
+              userId: args.userId,
+              decisionId: decision.id,
+              branchId: decision.branchId,
+              decisionType: decision.decisionType,
+              payload,
+              tx,
+            });
+            afterCommit = executed.afterCommit;
+            notifyPlanId = executed.notifyPlanId ?? null;
           }
           const refreshedContext = await this.planQuery.findContextById(
             decision.contextId,
@@ -1872,41 +2029,35 @@ export class CoachBranchingService {
             },
           });
 
-          if (isAtomicPlanWrite)
-            await this.recordApplyAttempt(
-              {
-                decisionId: decision.id,
-                result: CoachApplyResult.APPLIED,
-                baseEventSeq: expectedBaseEventSeq,
-                headEventSeq: afterHead,
-              },
-              tx,
-            );
+          await this.recordApplyAttempt(
+            {
+              decisionId: decision.id,
+              result: CoachApplyResult.APPLIED,
+              baseEventSeq: expectedBaseEventSeq,
+              headEventSeq: afterHead,
+            },
+            tx,
+          );
           return {
             commit,
             decision: updatedDecision,
             headEventSeq: afterHead,
             receipt,
+            afterCommit,
+            notifyPlanId,
           };
         },
         { isolationLevel: 'Serializable', timeout: 60_000 },
       );
 
-      if (isAtomicPlanWrite)
+      if (result.afterCommit) {
+        await result.afterCommit();
+      } else if (result.notifyPlanId) {
         await this.planService.notifyWorkoutChanges(
           args.userId,
-          typeof result.receipt?.createdPlanId === 'string'
-            ? result.receipt.createdPlanId
-            : decision.context.planId,
+          result.notifyPlanId,
         );
-
-      if (!isAtomicPlanWrite)
-        await this.recordApplyAttempt({
-          decisionId: decision.id,
-          result: CoachApplyResult.APPLIED,
-          baseEventSeq: expectedBaseEventSeq,
-          headEventSeq: result.headEventSeq,
-        });
+      }
 
       return {
         result: 'APPLIED',
@@ -1919,25 +2070,23 @@ export class CoachBranchingService {
         },
       };
     } catch (error) {
-      if (isAtomicPlanWrite) {
-        const committed = await this.requireDecisionOwner(
-          args.userId,
-          args.decisionId,
+      const committed = await this.requireDecisionOwner(
+        args.userId,
+        args.decisionId,
+      );
+      if (
+        committed.state === CoachDecisionState.APPLIED ||
+        committed.state === CoachDecisionState.SUPERSEDED
+      )
+        return this.applyDecision(args);
+      if (
+        isPrismaSerializableConflict(error) &&
+        retryAttempt + 1 < MAX_SERIALIZABLE_ATTEMPTS
+      ) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, serializableRetryDelayMs(retryAttempt + 1)),
         );
-        if (
-          committed.state === CoachDecisionState.APPLIED ||
-          committed.state === CoachDecisionState.SUPERSEDED
-        )
-          return this.applyDecision(args);
-        if (
-          isPrismaSerializableConflict(error) &&
-          retryAttempt + 1 < MAX_SERIALIZABLE_ATTEMPTS
-        ) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, serializableRetryDelayMs(retryAttempt + 1)),
-          );
-          return this.applyDecisionAttempt(args, retryAttempt + 1);
-        }
+        return this.applyDecisionAttempt(args, retryAttempt + 1);
       }
       await this.recordApplyAttempt({
         decisionId: decision.id,
@@ -2197,6 +2346,13 @@ export class CoachBranchingService {
           include: {
             options: { orderBy: { createdAt: 'asc' } },
             branch: { select: { id: true, openReason: true } },
+            planProposalPreview: {
+              select: {
+                id: true,
+                calendarAdjustmentId: true,
+                calendarVersion: true,
+              },
+            },
             context: {
               select: {
                 id: true,
@@ -2244,10 +2400,41 @@ export class CoachBranchingService {
         nextCycleIds,
       ),
     );
+    const calendarPlanIds = [
+      ...new Set(
+        decisions
+          .filter((d) => d.planProposalPreview?.calendarAdjustmentId)
+          .map((d) => d.context.planId),
+      ),
+    ];
+    const readyAdjustmentDecisions = new Set<string>();
+    const checkedAdjustmentPlans = new Set<string>();
+    if (
+      calendarPlanIds.length &&
+      typeof this.planProposalPreviews?.listCalendarAdjustments === 'function'
+    ) {
+      for (const planId of calendarPlanIds) {
+        const adjustments =
+          await this.planProposalPreviews.listCalendarAdjustments(
+            args.userId,
+            planId,
+          );
+        checkedAdjustmentPlans.add(planId);
+        for (const adjustment of adjustments) {
+          if (adjustment.state === 'READY' && adjustment.decisionId) {
+            readyAdjustmentDecisions.add(adjustment.decisionId);
+          }
+        }
+      }
+    }
+
     const listable = decisions.filter(
       (decision) =>
         (!isOpenNextLifecyclePayload(decision.decisionType, decision.payload) ||
           eligibleNextCycles.has(decision.context.planId)) &&
+        (!decision.planProposalPreview?.calendarAdjustmentId ||
+          !checkedAdjustmentPlans.has(decision.context.planId) ||
+          readyAdjustmentDecisions.has(decision.id)) &&
         isListablePendingCoachDecision({
           contextStatus: decision.context.status,
           decisionType: decision.decisionType,

@@ -85,6 +85,52 @@ export async function invalidatePlanListsAndActive(qc: QueryClient) {
   ]);
 }
 
+const PLAN_MUTATION_CHANNEL = "trainingload-plan-sync";
+
+type PlanMutationBroadcastMessage = {
+  type: "plan-mutated";
+  planId?: string;
+};
+
+function broadcastPlanMutation(planId?: string) {
+  if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") {
+    return;
+  }
+  try {
+    const channel = new BroadcastChannel(PLAN_MUTATION_CHANNEL);
+    const message: PlanMutationBroadcastMessage = {
+      type: "plan-mutated",
+      ...(planId ? { planId } : {}),
+    };
+    channel.postMessage(message);
+    channel.close();
+  } catch {
+    // Ignore restricted browser contexts where BroadcastChannel cannot open.
+  }
+}
+
+export function subscribePlanMutationBroadcast(qc: QueryClient): () => void {
+  if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") {
+    return () => {};
+  }
+  try {
+    const channel = new BroadcastChannel(PLAN_MUTATION_CHANNEL);
+    channel.onmessage = (event: MessageEvent<PlanMutationBroadcastMessage>) => {
+      if (event.data?.type !== "plan-mutated") return;
+      void invalidateAfterPlanMutation(qc, {
+        planId: event.data.planId,
+        skipBroadcast: true,
+      });
+      void qc.invalidateQueries({ queryKey: ["ai-coach", "messages"] });
+    };
+    return () => {
+      channel.close();
+    };
+  } catch {
+    return () => {};
+  }
+}
+
 /**
  * 计划结构或状态变更后的通用失效（含 plan-detail / plan-workout-detail 前缀）。
  */
@@ -95,6 +141,8 @@ export async function invalidateAfterPlanMutation(
     workout?: { planId: string; workoutId: string };
     /** 默认 true：失效 plan-detail、plan-workout-detail 整棵子树 */
     includePlanDetailTrees?: boolean;
+    /** 内部用：避免跨标签广播回环 */
+    skipBroadcast?: boolean;
   },
 ) {
   const includeTrees = options?.includePlanDetailTrees !== false;
@@ -103,6 +151,8 @@ export async function invalidateAfterPlanMutation(
     qc.invalidateQueries({ queryKey: ["scheduled-workouts"] }),
     qc.invalidateQueries({ queryKey: ["coach-calendar-move"] }),
     qc.invalidateQueries({ queryKey: ["calendar-adjustments"] }),
+    qc.invalidateQueries({ queryKey: queryKeys.activity.cards() }),
+    qc.invalidateQueries({ queryKey: queryKeys.activity.planLink() }),
     qc.invalidateQueries({ queryKey: queryKeys.root.planAutomation }),
     qc.invalidateQueries({ queryKey: ["ai-plan-execution-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.account.intervalsIcu() }),
@@ -142,4 +192,7 @@ export async function invalidateAfterPlanMutation(
   }
 
   await Promise.all(tasks);
+  if (!options?.skipBroadcast) {
+    broadcastPlanMutation(options?.planId);
+  }
 }

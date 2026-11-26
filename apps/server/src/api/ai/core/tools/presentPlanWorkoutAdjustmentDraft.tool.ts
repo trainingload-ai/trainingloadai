@@ -126,17 +126,32 @@ export const presentPlanWorkoutAdjustmentDraftTool: AiToolDef<Input, Output> =
       if (userId && ctx.coachBranching) {
         let branchId = String(ctx.branchId ?? '').trim();
         if (!branchId) {
-          const opened = await ctx.coachBranching.openBranch({
-            userId,
+          const sourceNode = {
+            page: 'conversation_adjustment',
             planId: draft.planId,
-            openReason: 'conversation_adjustment',
-            sourceNode: {
-              page: 'conversation_adjustment',
+            workoutId: draft.workoutId,
+          };
+          if (
+            ctx.sid &&
+            typeof ctx.coachBranching.ensureConversationBranch === 'function'
+          ) {
+            branchId = await ctx.coachBranching.ensureConversationBranch({
+              userId,
+              sid: ctx.sid,
+              userMessageId: ctx.currentUserMessageId,
               planId: draft.planId,
-              workoutId: draft.workoutId,
-            },
-          });
-          branchId = opened.branch.id;
+              openReason: 'conversation_adjustment',
+              sourceNode,
+            });
+          } else {
+            const opened = await ctx.coachBranching.openBranch({
+              userId,
+              planId: draft.planId,
+              openReason: 'conversation_adjustment',
+              sourceNode,
+            });
+            branchId = opened.branch.id;
+          }
         }
         const squashed = await ctx.coachBranching.squashBranch({
           userId,

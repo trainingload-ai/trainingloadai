@@ -624,6 +624,12 @@ export function CoachDecisionDraftCard({
   const [isCancelling, setIsCancelling] = React.useState(false);
   const [isCancelled, setIsCancelled] = React.useState(false);
   const [cancelFailed, setCancelFailed] = React.useState(false);
+  const actionLockRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!confirmDisabled && !isCancelling) {
+      actionLockRef.current = false;
+    }
+  }, [confirmDisabled, isCancelling]);
   const moveCopy = useTranslations("CalendarMove");
   const workspaceCopy = useTranslations("AiCoachPage.workspace");
   const schedulePlanId = result.decisionType === "PLAN_SCHEDULE" ? asText(result.payload?.planId) : "";
@@ -769,6 +775,8 @@ export function CoachDecisionDraftCard({
               variant="ghost"
               disabled={confirmDisabled || isCancelling || schedulePreview?.isEditingAdjustment?.(result.decisionId)}
               onClick={() => {
+                if (actionLockRef.current) return;
+                actionLockRef.current = true;
                 setIsCancelling(true);
                 setCancelFailed(false);
                 void rejectCoachDecision(
@@ -777,7 +785,10 @@ export function CoachDecisionDraftCard({
                 )
                   .then(() => setIsCancelled(true))
                   .catch(() => setCancelFailed(true))
-                  .finally(() => setIsCancelling(false));
+                  .finally(() => {
+                    actionLockRef.current = false;
+                    setIsCancelling(false);
+                  });
               }}
             >
               {t("cancelButton")}
@@ -787,7 +798,11 @@ export function CoachDecisionDraftCard({
             type="button"
             size="sm"
             disabled={confirmDisabled || isCancelling || schedulePreview?.isEditingAdjustment?.(result.decisionId)}
-            onClick={() => onConfirm?.(result.decisionId)}
+            onClick={() => {
+              if (actionLockRef.current) return;
+              actionLockRef.current = true;
+              onConfirm?.(result.decisionId);
+            }}
           >
             {proposal?.mode === "SCHEDULE"
               ? t("applyScheduleButton")

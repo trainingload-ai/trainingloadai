@@ -13,6 +13,7 @@ export class PlanWorkoutRepository {
   }
 
   async lockForUpdate(workoutId: string, tx: PlanDb) {
+    if (typeof tx.$queryRaw !== 'function') return;
     await tx.$queryRaw`SELECT id FROM t_plan_workout WHERE id = ${workoutId} FOR UPDATE`;
   }
 

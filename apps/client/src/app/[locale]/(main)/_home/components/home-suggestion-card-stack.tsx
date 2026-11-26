@@ -191,6 +191,14 @@ export function HomeSuggestionCardStack({
       if (isOpenNextCoachDecision(decision))
         router.push(coachCycleStartHref(decision));
     },
+    onError: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.ai.pendingDecisions(),
+        }),
+        invalidateAfterPlanMutation(queryClient),
+      ]);
+    },
   });
   const rejectMutation = useMutation({
     mutationFn: (decisionId: string) => rejectCoachDecision(decisionId),
@@ -203,6 +211,11 @@ export function HomeSuggestionCardStack({
         }),
         queryClient.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
       ]);
+    },
+    onError: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.ai.pendingDecisions(),
+      });
     },
   });
   const openInquiryMutation = useMutation({
