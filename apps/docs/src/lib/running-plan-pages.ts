@@ -10,16 +10,11 @@ import {
   TEN_K_PLAN_FACTS,
 } from "./running-plan-facts";
 
-const runningPlanSlugs = [
-  "couch-to-5k-training-plan",
-  "5k-training-plan",
-  "5k-training-plan-intermediate",
-  "10k-training-plan",
-  "half-marathon-training-plan",
-  "marathon-training-plan",
-] as const;
-
-export type RunningPlanSlug = (typeof runningPlanSlugs)[number];
+export type RunningPlanSlug =
+  | "couch-to-5k-training-plan"
+  | "5k-training-plan"
+  | "5k-training-plan-intermediate"
+  | RacePlanSlug;
 
 export type RunningPlan = {
   slug: RunningPlanSlug;
