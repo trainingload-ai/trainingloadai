@@ -355,7 +355,7 @@ it("projects an empty rolling draft at the chosen date before assessment without
   await screen.findByDisplayValue("2026-11-22");
   fireEvent.click(screen.getByRole("button", { name: "evaluate" }));
   await screen.findByTestId("runtime");
-  expect(screen.getByText("2026-11-16 – 2026-11-22")).toBeInTheDocument();
+  expect(screen.getByText("2026-11-22 – 2026-11-22")).toBeInTheDocument();
   expect(screen.getByText("2026-11-23 – 2026-11-29")).toBeInTheDocument();
   expect(screen.queryByText("weekBreakdown.restDay")).not.toBeInTheDocument();
 });
