@@ -277,7 +277,7 @@ export default async function LactateThresholdCalculatorPage({
   >;
 
   const relatedLinks = [
-    [`${prefix}/lactate-curve-calculator`, getLactateCopy(lang).title],
+    [`${prefix}/lactate-curve-calculator`, (await getLactateCopy(lang)).title],
     [
       `${prefix}/heart-rate-zones-calculator`,
       tCommon("heartRateZonesCalculatorAction"),

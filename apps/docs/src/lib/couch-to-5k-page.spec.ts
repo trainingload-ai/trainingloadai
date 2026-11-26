@@ -13,7 +13,7 @@ function localizedPlan(locale: string) {
   const messages = JSON.parse(readFileSync(path, "utf8"));
   return createCouchTo5kPlan(
     messages.runningPlanPages.plans["couch-to-5k-training-plan"] as RunningPlan,
-    locale,
+    messages.runningPlanPages.derived,
   );
 }
 

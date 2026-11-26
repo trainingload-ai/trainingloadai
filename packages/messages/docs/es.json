@@ -1,4 +1,673 @@
 {
+  "danielsRunningFormula": {
+    "content": {
+      "metadataTitle": "Daniels' Running Formula: guía de VDOT e intensidades E/M/T/I/R | Trainingload.ai",
+      "metadataDescription": "Comprende los principios públicamente documentados de Jack Daniels, el VDOT, las intensidades E/M/T/I/R y lo que debe considerar una adaptación no oficial responsable.",
+      "eyebrow": "Guía de métodos de entrenamiento",
+      "title": "Daniels' Running Formula: del VDOT a un plan que realmente puedas seguir",
+      "subtitle": "Aprende qué significa el VDOT, por qué cada intensidad E/M/T/I/R cumple un papel distinto y cómo convertir tu estado de forma actual —no un objetivo deseado— en un plan estructurado.",
+      "directAnswer": "Jack Daniels sistematizó un enfoque basado en el rendimiento que usa el VDOT para representar la forma física actual y aprovechable del corredor. El entrenamiento se divide en intensidades Easy, Marathon, Threshold, Interval y Repetition para que cada sesión busque una adaptación concreta.",
+      "primaryCta": "Calcular mi VDOT actual",
+      "secondaryCta": "Explorar herramientas de entrenamiento",
+      "toc": "En esta página",
+      "tocItems": [
+        [
+          "what",
+          "En qué consiste el método"
+        ],
+        [
+          "vdot",
+          "Qué significa VDOT"
+        ],
+        [
+          "paces",
+          "Ritmos E/M/T/I/R"
+        ],
+        [
+          "periodization",
+          "Cómo se construye un plan"
+        ],
+        [
+          "mistakes",
+          "Errores comunes"
+        ],
+        [
+          "faq",
+          "Preguntas frecuentes"
+        ]
+      ],
+      "whatTitle": "¿Qué es Daniels' Running Formula?",
+      "whatParagraphs": [
+        "El método es mucho más que una tabla de ritmos. Combina una referencia de forma actual, intensidades con propósito definido, límites de carga, recuperación y periodización específica para cada distancia.",
+        "La cuarta edición de Daniels' Running Formula abarca principios de entrenamiento, VDOT, intensidades, planificación por temporadas y aplicaciones desde medio fondo hasta maratón y distancias mayores."
+      ],
+      "lawsTitle": "La idea clave detrás del método",
+      "lawsText": "Distintos corredores pueden lograr marcas parecidas con combinaciones diferentes de potencia aeróbica, economía de carrera, técnica y resistencia. Por eso un buen plan parte del rendimiento actual demostrado y asigna a cada sesión exigente un propósito claro.",
+      "vdotTitle": "El VDOT es una referencia de entrenamiento, no un VO₂max de laboratorio",
+      "vdotParagraphs": [
+        "El VDOT se relaciona con el uso de oxígeno, pero no es intercambiable con un VO₂max medido en laboratorio ni con la estimación de un reloj. Refleja lo que un corredor puede convertir hoy en rendimiento de carrera, incluida su economía de carrera.",
+        "Los ritmos de entrenamiento deben seguir el VDOT actual. Un tiempo objetivo puede orientar la dirección del plan, pero no debe forzar ritmos más rápidos antes de haberlos ganado."
+      ],
+      "paceTitle": "Las cinco intensidades principales de entrenamiento",
+      "paceIntro": "Las letras expresan la intención de cada sesión. No son cinco zonas con el mismo peso: la mayor parte del volumen semanal sigue siendo suave y la calidad se dosifica con criterio.",
+      "intensities": [
+        {
+          "key": "E",
+          "name": "Easy (Suave)",
+          "purpose": "Desarrollo aeróbico, durabilidad, recuperación y la mayoría de las tiradas largas.",
+          "feel": "Conversacional y controlado.",
+          "mistake": "Convertir cada día suave en un rodaje de intensidad media."
+        },
+        {
+          "key": "M",
+          "name": "Marathon (Maratón)",
+          "purpose": "Ritmo específico de carrera, práctica de avituallamiento y familiaridad mental.",
+          "feel": "Constante y controlado, con fatiga que se acumula con el tiempo.",
+          "mistake": "Usarlo como ritmo por defecto para el kilometraje aeróbico habitual."
+        },
+        {
+          "key": "T",
+          "name": "Threshold (Umbral de lactato)",
+          "purpose": "Mejorar la velocidad sostenible y la capacidad de aclarar y tolerar el lactato.",
+          "feel": "Cómodamente exigente; frases cortas, no conversación fluida.",
+          "mistake": "Correr la sesión como una competición en lugar de mantener un esfuerzo repetible."
+        },
+        {
+          "key": "I",
+          "name": "Interval (Intervalo)",
+          "purpose": "Acumular tiempo efectivo cerca de la potencia aeróbica máxima.",
+          "feel": "Duro pero controlado, habitualmente en repeticiones de varios minutos.",
+          "mistake": "Empezar cada repetición como un esprint."
+        },
+        {
+          "key": "R",
+          "name": "Repetition (Repetición)",
+          "purpose": "Mejorar la economía de carrera, la coordinación, la velocidad y la fluidez a ritmos rápidos.",
+          "feel": "Rápido, suelto y respaldado por recuperaciones amplias.",
+          "mistake": "Recortar la recuperación hasta convertir la sesión en una prueba de resistencia."
+        }
+      ],
+      "periodizationTitle": "Cómo las intensidades se convierten en un plan de entrenamiento",
+      "periodizationText": "Un plan suele avanzar desde la constancia aeróbica hacia la economía y la calidad, para luego volverse más específico de la carrera objetivo antes del tapering. La mezcla exacta depende de la distancia objetivo, la duración del plan, el volumen actual, los días disponibles y la recuperación, no solo del VDOT.",
+      "goalRows": [
+        [
+          "5K",
+          "Base E, economía R, potencia aeróbica I, apoyo de T"
+        ],
+        [
+          "10K",
+          "Base E, resistencia en T, intervalos más largos I"
+        ],
+        [
+          "Media maratón",
+          "E y tiradas largas, T, trabajo específico controlado"
+        ],
+        [
+          "Maratón",
+          "E y tiradas largas, especificidad M, T, nutrición y tapering"
+        ]
+      ],
+      "mistakesTitle": "Seis errores que un plan adaptado debe evitar",
+      "mistakes": [
+        "Entrenar con el VDOT objetivo en lugar del VDOT actual.",
+        "Usar el VDOT para prescribir volumen sin preguntar por el kilometraje actual.",
+        "Programar días exigentes en jornadas consecutivas.",
+        "Aumentar de forma agresiva volumen e intensidad en la misma semana.",
+        "Intentar compensar una sesión perdida acumulando entrenamientos de calidad.",
+        "Sostener un ritmo fijo cuando el calor, las cuestas, la altitud o la fatiga cambian el costo fisiológico."
+      ],
+      "generatorTitle": "El VDOT por sí solo no es un plan completo",
+      "generatorText": "El VDOT puede fijar las intensidades, pero un plan responsable también necesita volumen reciente, tolerancia en tiradas largas, días disponibles, recuperación, distancia objetivo y reglas metodológicas trazables. Trainingload.ai no publica actualmente un plan oficial ni adaptado bajo la marca Daniels.",
+      "generatorCta": "Calcular mi VDOT actual",
+      "sourcesTitle": "Fuentes y aviso de relación",
+      "sourcesText": "Jack Daniels, Daniels' Running Formula y VDOT se citan únicamente para explicar principios públicamente documentados e identificar material fuente. Trainingload.ai no está afiliado, patrocinado, certificado ni respaldado por Jack Daniels, V.O2 ni organizaciones relacionadas. Esta guía educativa no es un plan de entrenamiento.",
+      "faqTitle": "Preguntas frecuentes",
+      "faq": [
+        [
+          "¿El VDOT es lo mismo que el VO₂max?",
+          "No. El VDOT es un valor de entrenamiento basado en el rendimiento. El VO₂max de laboratorio y la estimación del reloj miden o estiman algo relacionado, pero no son entradas intercambiables."
+        ],
+        [
+          "¿Debo entrenar con mi VDOT actual o con el objetivo?",
+          "Usa tu VDOT actual. El tiempo objetivo puede guiar el enfoque del plan, pero no debe hacer más rápidos los entrenamientos de hoy."
+        ],
+        [
+          "¿Cada cuánto debería cambiar el VDOT?",
+          "Actualízalo tras una carrera representativa o un test controlado, no después de cada rodaje cotidiano. Mantén sin cambios las prescripciones de sesiones ya completadas."
+        ],
+        [
+          "¿Es este un plan oficial de Daniels?",
+          "No. Esta es una guía educativa y Trainingload.ai no publica actualmente un plan de entrenamiento oficial ni adaptado con la marca Daniels."
+        ]
+      ],
+      "safety": "Esta guía educativa no constituye consejo médico. Detén el entrenamiento y busca atención cualificada ante dolor en el pecho, desmayo, falta de aire inusual o dolor persistente o que empeora."
+    }
+  },
+  "rpeScale": {
+    "content": {
+      "metadataTitle": "Escala RPE para correr: tabla de esfuerzo 1–10 | Trainingload.ai",
+      "metadataDescription": "Usa la escala RPE 1–10 y la prueba del habla para guiar rodajes suaves, carreras de tempo, intervalos y planes de 5K. Compara el RPE con el ritmo y la frecuencia cardíaca.",
+      "keywords": [
+        "escala RPE",
+        "escala RPE running",
+        "esfuerzo percibido",
+        "escala de esfuerzo correr",
+        "RPE 3-4",
+        "prueba del habla running",
+        "RPE vs frecuencia cardíaca",
+        "RPE vs ritmo"
+      ],
+      "shortTitle": "Escala de esfuerzo RPE",
+      "eyebrow": "Guía de intensidad de entrenamiento",
+      "title": "Escala RPE para correr: entiende el esfuerzo del 1 al 10",
+      "subtitle": "Aprende cómo deben sentirse RPE 3–4, 5–6 y 7–9, cómo la prueba del habla mantiene honesto el esfuerzo y por qué un buen plan no siempre necesita un ritmo objetivo.",
+      "directAnswer": "RPE significa Rating of Perceived Exertion (escala de esfuerzo percibido): una puntuación sobre lo duro que se siente el ejercicio. Trainingload.ai usa una escala práctica del 1 al 10, donde 1 es casi ningún esfuerzo y 10 es un esfuerzo máximo muy breve. Describe la carga interna, no un ritmo fijo.",
+      "effortFirstLabel": "Primero el esfuerzo. Después el ritmo.",
+      "primaryCta": "Ver la tabla RPE",
+      "secondaryCta": "Elegir un plan de 5K",
+      "toc": "En esta página",
+      "tocItems": [
+        [
+          "what-is-rpe",
+          "Qué significa RPE"
+        ],
+        [
+          "rpe-scale",
+          "Tabla RPE 1–10"
+        ],
+        [
+          "5k-plans",
+          "El RPE en los planes de 5K"
+        ],
+        [
+          "rpe-vs-pace-heart-rate",
+          "RPE vs ritmo y frecuencia cardíaca"
+        ],
+        [
+          "ai-coach",
+          "Cómo usa el RPE el Entrenador con IA"
+        ],
+        [
+          "rpe-meanings",
+          "Tres significados del RPE"
+        ],
+        [
+          "faq",
+          "Preguntas frecuentes"
+        ]
+      ],
+      "definitionTitle": "¿Qué es el RPE?",
+      "definitionParagraphs": [
+        "El RPE es una medida subjetiva de la intensidad. En lugar de preguntar solo qué tan rápido corriste o cuál fue tu pulso, evalúa cuán exigente resultó el esfuerzo según tu respiración, la fatiga muscular y la sensación general.",
+        "La escala original de Borg suele ir de 6 a 20. En running también se emplea una escala más sencilla de 0 o 1 a 10. Todas las etiquetas de los planes de Trainingload.ai en esta página usan 1–10, de modo que RPE 4 nunca equivale a 4 en la escala 6–20.",
+        "El RPE resulta especialmente útil cuando el calor, las cuestas, el viento, la fatiga, el sueño o un terreno desconocido alteran el costo de un ritmo. Puede utilizarse solo cuando hay pocos datos base, o junto con el ritmo y la frecuencia cardíaca cuando existen referencias fiables."
+      ],
+      "scaleTitle": "Tabla RPE 1–10 para correr",
+      "scaleIntro": "Combina respiración, habla, control y capacidad de repetir el esfuerzo. Fijarte en una sola señal puede llevar a error.",
+      "scaleHeaders": [
+        "RPE",
+        "Esfuerzo",
+        "Cómo se siente",
+        "Prueba del habla",
+        "Uso habitual"
+      ],
+      "scaleRows": [
+        {
+          "id": "rpe-1-2",
+          "range": "1–2",
+          "label": "Muy suave",
+          "feel": "Casi sin tensión; movimiento relajado",
+          "talkTest": "Conversación normal",
+          "training": "Caminar, calentamiento, recuperación"
+        },
+        {
+          "id": "rpe-3-4",
+          "range": "3–4",
+          "label": "Suave",
+          "feel": "Cómodo y controlado",
+          "talkTest": "Frases completas",
+          "training": "Rodajes suaves, recuperación, correr-caminar"
+        },
+        {
+          "id": "rpe-5-6",
+          "range": "5–6",
+          "label": "Constante",
+          "feel": "Activo pero sostenible",
+          "talkTest": "Frases cortas",
+          "training": "Rodajes sostenidos, tiradas largas controladas"
+        },
+        {
+          "id": "rpe-7-8",
+          "range": "7–8",
+          "label": "Duro",
+          "feel": "Alta concentración; repetible en la sesión",
+          "talkTest": "Frases muy breves o pocas palabras",
+          "training": "Tempo, intervalos largos, esfuerzo de 5K"
+        },
+        {
+          "id": "rpe-9",
+          "range": "9",
+          "label": "Muy duro",
+          "feel": "Casi máximo; sostenible solo brevemente",
+          "talkTest": "Una o dos palabras",
+          "training": "Intervalos cortos, tramo final de carrera"
+        },
+        {
+          "id": "rpe-10",
+          "range": "10",
+          "label": "Máximo",
+          "feel": "Al límite; irrepetible sin recuperación total",
+          "talkTest": "Sin poder hablar",
+          "training": "Esprint corto o remate final"
+        }
+      ],
+      "scaleCaution": "Son referencias prácticas, no conversiones fisiológicas exactas. El RPE no se puede traducir uno a uno a un ritmo fijo, porcentaje de frecuencia cardíaca, valor de lactato o zona de entrenamiento para todos los corredores.",
+      "plansTitle": "Cómo usan el RPE los planes oficiales de 5K",
+      "plansIntro": "El mismo número cumple un papel claro en cada plan. Quienes empiezan toman menos decisiones de intensidad; los corredores con experiencia añaden sesiones de calidad solo cuando su base lo respalda.",
+      "plans": [
+        {
+          "title": "Primer 5K",
+          "range": "Sobre todo RPE 3–4",
+          "description": "Las sesiones de correr-caminar se mantienen a ritmo conversacional mientras se alargan poco a poco los bloques corriendo. No hace falta inventar un ritmo objetivo.",
+          "href": "/couch-to-5k-training-plan"
+        },
+        {
+          "title": "Completar 5K",
+          "range": "RPE 3–6",
+          "description": "Los rodajes suaves y largos se mantienen en RPE 3–4, mientras el trabajo constante controlado sube a RPE 5–6.",
+          "href": "/5k-training-plan"
+        },
+        {
+          "title": "Mejorar en 5K",
+          "range": "RPE 3–9",
+          "description": "Los días suaves siguen siendo suaves; las sesiones de tempo, intervalos y específicas de 5K llegan a RPE 6–9 con recuperación entre días de calidad.",
+          "href": "/5k-training-plan/intermediate"
+        }
+      ],
+      "compareTitle": "RPE vs ritmo vs frecuencia cardíaca",
+      "compareIntro": "Estas métricas responden preguntas distintas. Un buen plan elige el conjunto mínimo más fiable en lugar de fingir que una sola métrica siempre es superior.",
+      "comparisons": [
+        {
+          "title": "RPE",
+          "strength": "Funciona sin dispositivo y responde al instante al calor, las cuestas, la fatiga y el sueño.",
+          "limitation": "Requiere práctica y usar siempre la misma definición de la escala."
+        },
+        {
+          "title": "Ritmo",
+          "strength": "Es concreto y fácil de comprobar cuando una marca reciente ofrece una referencia fiable.",
+          "limitation": "El terreno, el clima, la altitud y los errores de GPS cambian su costo fisiológico."
+        },
+        {
+          "title": "Frecuencia cardíaca",
+          "strength": "Muestra la respuesta cardiovascular interna y resulta útil para revisar tendencias aeróbicas.",
+          "limitation": "Tiene retardo en intervalos cortos y se ve afectada por el sensor, el calor, la hidratación y el estrés."
+        }
+      ],
+      "compareConclusion": "Con un resultado reciente fiable, el ritmo puede guiar el trabajo de calidad mientras el RPE comprueba si el costo del día es adecuado. Sin esa referencia, el RPE y la prueba del habla son más seguros que inventar un ritmo.",
+      "coachTitle": "Cómo usa el RPE el Entrenador con IA de Trainingload.ai",
+      "coachParagraphs": [
+        "Las plantillas oficiales se generan, se validan estructuralmente, se revisan y luego se congelan. Abrir o crear una de estas plantillas no pide al modelo que reescriba las sesiones; el RPE publicado y el calendario son estables.",
+        "Para un plan personalizado, el Entrenador con IA puede usar la información de corredor que autorices. Si no existe un resultado reciente fiable de 5K ni un ritmo de referencia, el RPE se convierte en el idioma principal de intensidad. Si la base es sólida, los ritmos objetivo guían las partes de calidad mientras el RPE actúa como control de seguridad y realidad."
+      ],
+      "coachSteps": [
+        {
+          "title": "Leer la base actual",
+          "description": "Usa el historial de carrera disponible, la capacidad de correr de forma continua, los días disponibles y resultados recientes fiables."
+        },
+        {
+          "title": "Elegir la referencia",
+          "description": "Emplea RPE cuando hay pocos datos; añade objetivos de ritmo o VDOT solo cuando los datos los respaldan."
+        },
+        {
+          "title": "Mantener sesiones ejecutables",
+          "description": "Cada paso conserva su objetivo, referencia de esfuerzo, recuperación necesaria y supuestos claros para el corredor."
+        }
+      ],
+      "meaningsTitle": "Tres significados del RPE que no conviene mezclar",
+      "meaningsIntro": "La sigla aparece en planes de resistencia, en el análisis de carga de entrenamiento y en el entrenamiento de fuerza, pero responde a preguntas distintas.",
+      "meanings": [
+        {
+          "title": "RPE por segmento de sesión",
+          "description": "Cuán exigente debe sentirse el bloque actual de carrera. Eso significa RPE 3–4 en un calendario de 5K."
+        },
+        {
+          "title": "RPE de sesión (Session RPE)",
+          "description": "Una única puntuación sobre la dureza de toda la sesión completada, combinada con la duración para estimar la carga de entrenamiento interna.",
+          "href": "/training-load"
+        },
+        {
+          "title": "RPE de serie en fuerza",
+          "description": "Cuán cerca del fallo quedó una serie completada, a menudo interpretado junto con las repeticiones en reserva (RIR). No apliques esa definición directamente a un intervalo de carrera.",
+          "href": "/docs/planning/strength-workout-dsl"
+        }
+      ],
+      "calibrateTitle": "Calibra tu RPE durante las primeras dos o tres semanas",
+      "calibrateIntro": "El RPE se vuelve mucho más útil con práctica constante. No necesitas dominar la fisiología para usarlo bien.",
+      "calibrateSteps": [
+        "Antes de mirar el reloj, ponle número al esfuerzo y comprueba si puedes hablar al nivel esperado.",
+        "En los intervalos, puntúa el tramo de trabajo y no la recuperación suave entre repeticiones.",
+        "Al terminar, registra aparte un RPE global de toda la sesión en lugar de copiar solo el instante más duro.",
+        "Compara recorridos parecidos a lo largo de varias semanas. Si el mismo ritmo se siente más cómodo en condiciones similares, es una buena prueba de progreso."
+      ],
+      "mistakesTitle": "Errores comunes con el RPE",
+      "mistakes": [
+        "Llamar RPE 1–2 a todos los rodajes suaves aunque correr siga implicando un esfuerzo apreciable.",
+        "Dejar que los días suaves suban a RPE 6 porque el ritmo del reloj parece demasiado lento.",
+        "Tratar el RPE como una tabla de conversión exacta para frecuencia cardíaca, ritmo o potencia.",
+        "Evaluar solo el cansancio de las piernas ignorando la respiración y el esfuerzo global, o hacer justo lo contrario.",
+        "Usar la definición de RPE/RIR del entrenamiento de fuerza para toda una sesión de carrera.",
+        "Convertir el RPE 10 en un objetivo habitual en lugar de reservarlo para esfuerzos máximos muy breves."
+      ],
+      "faqTitle": "Preguntas frecuentes",
+      "faq": [
+        [
+          "¿Qué significa RPE?",
+          "RPE significa Rating of Perceived Exertion (esfuerzo percibido). Es una puntuación sobre cuán exigente se siente el ejercicio según la respiración, la carga muscular y el esfuerzo global, en lugar de depender de un solo sensor."
+        ],
+        [
+          "¿Cómo se siente un RPE 3–4 al correr?",
+          "Debe sentirse suave y controlado. Puedes hablar con frases completas, la respiración es claramente mayor que en reposo pero sin agobio, y podrías seguir corriendo más tiempo del previsto."
+        ],
+        [
+          "¿Qué RPE debe tener un rodaje suave?",
+          "La mayoría de los rodajes suaves y de recuperación de estos planes están en RPE 3–4. El ritmo exacto puede cambiar por el calor, las cuestas, la fatiga o la experiencia, pero el esfuerzo sigue siendo suave."
+        ],
+        [
+          "¿Qué RPE corresponde a una carrera de 5K?",
+          "Un 5K bien regulado suele ir de duro y controlado a muy duro cerca de la meta, aproximadamente RPE 7–9 para muchos corredores. Los principiantes que solo buscan terminar pueden quedarse conscientemente más abajo."
+        ],
+        [
+          "¿Puedo entrenar por RPE sin pulsómetro?",
+          "Sí. El RPE y la prueba del habla permiten prescribir una intensidad útil sin dispositivos. Un pulsómetro añade otra señal, pero no sustituye tu criterio ni vuelve innecesario el RPE."
+        ],
+        [
+          "¿Por qué el mismo ritmo tiene un RPE distinto en diferentes días?",
+          "El calor, el viento, las cuestas, el sueño, la hidratación, el estrés, el malestar y la fatiga acumulada alteran el costo de un mismo ritmo. Esa sensibilidad es precisamente una razón para usar el RPE."
+        ],
+        [
+          "¿Se puede convertir el RPE directamente a zonas de pulso o ritmo?",
+          "No existe una conversión universal exacta. Las medidas están relacionadas, pero el nivel físico, el entorno, el tipo de ejercicio y el método de medición cambian esa relación."
+        ],
+        [
+          "¿En qué se diferencia el RPE al correr del RPE/RIR en fuerza?",
+          "En carrera, el RPE describe la intensidad percibida de un tramo o sesión. En fuerza suele indicar cuántas repeticiones quedaban antes del fallo. Por eso el mismo número no tiene un significado operativo idéntico."
+        ],
+        [
+          "¿Cuándo debo bajar el ritmo o parar?",
+          "Baja el ritmo cuando no puedas cumplir la prueba del habla o la señal de esfuerzo prevista. Detente y busca atención médica cualificada ante dolor en el pecho, mareo, falta de aire inusual o dolor persistente o que empeora."
+        ],
+        [
+          "¿Cuánto se tarda en aprender a usar el RPE?",
+          "La mayoría de los corredores logran mayor consistencia tras dos o tres semanas valorando sesiones comparables. Usa siempre la misma escala, las mismas indicaciones y el mismo momento para registrarlo."
+        ]
+      ],
+      "sourcesTitle": "Fuentes y alcance",
+      "sourceNote": "Esta guía se apoya en investigación consolidada sobre esfuerzo percibido y guías públicas de intensidad, adaptadas a la escala 1–10 que utilizan los planes de Trainingload.ai.",
+      "safety": "Esta guía educativa no es consejo médico. Detén el entrenamiento y busca atención cualificada ante dolor en el pecho, desmayo, falta de aire inusual o dolor persistente o que empeora.",
+      "relatedTitle": "Pon en práctica la escala de esfuerzo",
+      "related": [
+        [
+          "Plan Primer 5K",
+          "/couch-to-5k-training-plan",
+          "Empieza con sesiones de correr-caminar a ritmo conversacional en RPE 3–4."
+        ],
+        [
+          "Plan Completar 5K",
+          "/5k-training-plan",
+          "Usa esfuerzos suaves y constantes para construir un 5K completo."
+        ],
+        [
+          "Plan Mejorar en 5K",
+          "/5k-training-plan/intermediate",
+          "Combina el RPE con sesiones de tempo, intervalos y referencias opcionales de ritmo VDOT."
+        ],
+        [
+          "Calculadora VDOT",
+          "/vdot-calculator",
+          "Añade ritmos objetivo cuando tengas una marca de referencia fiable."
+        ],
+        [
+          "Carga de entrenamiento",
+          "/training-load",
+          "Comprende cómo se diferencia el RPE de sesión del RPE por segmento."
+        ]
+      ],
+      "homeLabel": "Inicio",
+      "scheduleGuideLabel": "¿No tienes claro qué es el RPE? Lee la guía de esfuerzo RPE 1–10.",
+      "intensityLinkLabel": "Abrir la guía de esfuerzo RPE"
+    }
+  },
+  "lactateCurveCalculator": {
+    "copy": {
+      "title": "Calculadora de curva de lactato",
+      "description": "Analiza el lactato sanguíneo medido en pruebas incrementales de ciclismo o carrera. Compara métodos de umbral, define dominios de intensidad y exporta el análisis.",
+      "badge": "Prueba escalonada incremental",
+      "privacy": "Gratis y sin registro. Los datos de prueba permanecen en esta pestaña del navegador y se pierden al recargar a menos que los exportes.",
+      "inputTitle": "Datos de tu prueba",
+      "resultTitle": "Análisis de la prueba",
+      "empty": "Ingresa los datos de cada etapa o carga un ejemplo para ver cómo funciona el análisis.",
+      "stale": "Tus datos han cambiado. Vuelve a analizar antes de usar o exportar estos resultados.",
+      "sample": "Ejemplo ilustrativo — no son los datos de tu prueba",
+      "cycling": "Ciclismo",
+      "running": "Carrera",
+      "intensity": "Intensidad",
+      "lactate": "Lactato",
+      "heartRate": "Frecuencia cardíaca",
+      "stage": "Etapa",
+      "rest": "Usa 0 para una muestra en reposo",
+      "example": "Cargar ejemplo",
+      "clear": "Borrar datos",
+      "add": "Añadir etapa",
+      "remove": "Eliminar etapa",
+      "analyze": "Analizar datos",
+      "calculating": "Analizando…",
+      "paste": "Pegar una tabla",
+      "import": "Importar CSV",
+      "template": "Descargar plantilla CSV",
+      "confirmImport": "Usar estas columnas",
+      "cancel": "Cancelar",
+      "mapping": "Revisar columnas y unidades",
+      "noColumn": "Sin registrar",
+      "sort": "Ordenar etapas por intensidad",
+      "overwrite": "¿Reemplazar los datos actuales de las etapas?",
+      "resetSport": "Cambiar de deporte borra los datos actuales. ¿Deseas continuar?",
+      "pasteHelp": "Pega filas separadas por comas o tabulaciones. Punto decimal: “.”. Confirma la asignación de columnas antes de reemplazar los datos.",
+      "inputHelp": "Ingresa de 4 a 30 etapas de ejercicio; lo ideal son 6–10. Lactato: mmol/L. La frecuencia cardíaca es opcional. Cada fila debe estar completa; 0 indica una muestra opcional en reposo.",
+      "method": "Método",
+      "threshold": "Umbral",
+      "selected": "Método mostrado en el gráfico",
+      "unavailable": "No disponible",
+      "partial": "Algunos métodos no pudieron hallar un umbral. A continuación se muestran los resultados disponibles.",
+      "noResult": "No se encontró ningún umbral aplicable. Revisa los datos de las etapas y las notas del método; los resultados no se extrapolan fuera de la prueba.",
+      "lt1": "Primer umbral (LT1)",
+      "lt2": "Segundo umbral (LT2)",
+      "zones": "Tres zonas de intensidad",
+      "zoneNames": [
+        "Por debajo de LT1",
+        "LT1 a LT2",
+        "Por encima de LT2"
+      ],
+      "methodHelp": "La elección del método cambia los límites. Los umbrales de lactato son estimaciones; no equivalen automáticamente al FTP.",
+      "export": "Descargar resultados CSV",
+      "print": "Imprimir informe",
+      "report": "Informe de prueba de lactato",
+      "source": "Referencia de cálculo",
+      "copied": "Copiado",
+      "copy": "Copiar resultados",
+      "quality": "Notas sobre la calidad de los datos",
+      "methodsTitle": "Métodos y aplicabilidad",
+      "instructionsTitle": "Requisitos de datos y flujo de trabajo",
+      "instructions": [
+        "Registra la intensidad y el lactato sanguíneo medido al final de cada etapa. Las frecuencias cardíacas opcionales deben corresponder a las mismas etapas.",
+        "Elige el deporte y las unidades usadas en tu registro; luego ingresa, pega o importa las filas.",
+        "Inspecciona la curva y las advertencias, compara los métodos y exporta la interpretación elegida. Repite las pruebas con un protocolo comparable."
+      ],
+      "faqTitle": "Preguntas sobre el análisis de pruebas de lactato",
+      "faq": [
+        {
+          "question": "¿Puedo usar datos de Garmin sin muestras de lactato en sangre?",
+          "answer": "Esta herramienta necesita lactato medido en cada etapa. Para una estimación a partir de resultados de carrera o una prueba de campo, usa la calculadora de umbral de lactato aparte."
+        },
+        {
+          "question": "¿Por qué los métodos arrojan valores diferentes?",
+          "answer": "Las concentraciones fijas, los incrementos sobre la línea base y la geometría de la curva describen características distintas. Algunos métodos buscan el primer ascenso y otros estiman un límite superior. Que coincidan no demuestra precisión fisiológica."
+        },
+        {
+          "question": "¿Son LT1 y LT2 un diagnóstico o una prescripción de entrenamiento?",
+          "answer": "Son referencias de intensidad que dependen del método. La duración de las etapas, la toma de muestras y la variación diaria afectan la interpretación. Conserva el método y el protocolo junto al resultado; un entrenador cualificado puede ayudarte a aplicarlo."
+        },
+        {
+          "question": "¿Qué ocurre con los datos de mi prueba?",
+          "answer": "El cálculo, la lectura de CSV y la generación del informe se ejecutan localmente. Los datos no se suben ni se incluyen en la URL. Recargar la pestaña los borra; descarga un informe si necesitas conservar un registro."
+        }
+      ],
+      "alternative": "¿No tienes muestras medidas de lactato?",
+      "alternativeBody": "Estima una referencia de entrenamiento a partir de una carrera o prueba de campo con nuestra calculadora de umbral de lactato.",
+      "related": "Herramientas relacionadas",
+      "cta": "Sigue tu carga de entrenamiento y recuperación a lo largo del tiempo",
+      "ctaBody": "Combina tus registros diarios de entrenamiento, la distribución de intensidad y las tendencias de estado para planificar tu ciclo y dar contexto a futuras pruebas.",
+      "protocol": "Información opcional de la prueba",
+      "stageMinutes": "Minutos por etapa",
+      "sampleSite": "Sitio de toma de muestra",
+      "notRecorded": "Sin registrar",
+      "earlobe": "Lóbulo de la oreja",
+      "fingertip": "Yema del dedo",
+      "other": "Otro",
+      "incomplete": "La última etapa no se completó",
+      "excluded": "Excluir la última etapa del análisis",
+      "runtimeError": "No se pudo ejecutar el análisis. Tus datos siguen aquí; por favor, inténtalo de nuevo.",
+      "exportError": "No se pudo preparar la exportación. Por favor, inténtalo de nuevo.",
+      "recordingError": "Revisa el archivo, las filas, los valores numéricos y la asignación de columnas. Límite CSV: 256 KiB, 100 líneas de texto, 16 columnas.",
+      "methodDescriptions": {
+        "obla_2": "Intensidad en la que la curva cúbica ajustada cruza por última vez hacia arriba los 2 mmol/L. Una concentración fija no es el primer umbral de todas las personas.",
+        "obla_4": "Intensidad en la que la curva cúbica ajustada cruza por última vez hacia arriba los 4 mmol/L. Este valor fijo no equivale universalmente a LT2.",
+        "bsln_05": "Intensidad en la línea base más 0,5 mmol/L. La línea base es la muestra en reposo o la primera etapa de ejercicio si no se registró reposo.",
+        "bsln_10": "Intensidad en la línea base más 1,0 mmol/L. Una sola muestra base puede desplazar esta estimación.",
+        "log_log": "Dos rectas ajustadas al logaritmo de la intensidad y del lactato que comparten una etapa medida de división. La división de residuo mínimo determina su intersección. Se necesitan al menos cinco etapas.",
+        "dmax": "Mayor distancia por debajo de la recta que une el primer y el último punto de la curva cúbica ajustada. Solo se ajustan las etapas de ejercicio.",
+        "moddmax": "La línea de referencia comienza antes del primer aumento adyacente de lactato de al menos 0,4 mmol/L, usando valores de anclaje observados.",
+        "log_poly_moddmax": "La línea de referencia va desde la intensidad Log-log sobre la curva cúbica hasta el último punto de lactato medido. Depende de un resultado válido de Log-log."
+      },
+      "reasons": {
+        "invalid_value": "Revisa la fila resaltada. Usa valores finitos y positivos para el lactato y la frecuencia cardíaca opcional; la intensidad solo puede ser 0 para el reposo.",
+        "too_few_stages": "Se necesitan al menos cuatro etapas de ejercicio; Log-log requiere cinco.",
+        "too_many_stages": "Usa como máximo 30 etapas de ejercicio.",
+        "duplicate_intensity": "Cada intensidad debe aparecer solo una vez. Revisa las etapas duplicadas.",
+        "unsorted_stages": "Las intensidades de las etapas deben ser crecientes. Confirma el orden antes de analizar.",
+        "fit_degenerate": "Estas etapas no permiten determinar un ajuste cúbico estable.",
+        "target_not_reached": "La curva ajustada no cruza hacia arriba este objetivo dentro del rango evaluado.",
+        "loglog_unavailable": "No se encontró ninguna intersección Log-log válida dentro de las etapas de ejercicio.",
+        "no_lactate_rise": "No se encontró ningún aumento adyacente de al menos 0,4 mmol/L.",
+        "no_distance": "No se encontró ninguna distancia positiva por debajo de la línea de referencia.",
+        "no_resting_sample": "Sin muestra en reposo: los métodos de incremento sobre la base usan la primera etapa de ejercicio.",
+        "few_stages": "Pocas etapas: una sola muestra puede influir notablemente en el ajuste.",
+        "early_dip": "El lactato desciende en las primeras etapas. Revisa las muestras y el calentamiento.",
+        "final_not_rising": "El lactato no aumenta en la última etapa. Comprueba si la prueba alcanzó la intensidad prevista.",
+        "uneven_steps": "Los incrementos de intensidad varían. Conserva el protocolo de la prueba junto a este resultado.",
+        "threshold_at_edge": "Esta estimación se sitúa en un extremo del rango medido.",
+        "negative_fit": "La curva ajustada cae por debajo de cero. Revisa la calidad del ajuste y los valores de las muestras.",
+        "invalid_pair": "Elige métodos disponibles con LT1 por debajo de LT2 antes de usar las zonas."
+      }
+    },
+    "methodContext": {
+      "originLabel": "Origen",
+      "interpretationLabel": "Aplicación y límites",
+      "referencesTitle": "Referencias e implementación",
+      "introduction": "Estos métodos identifican distintas características de la misma prueba. Sus nombres no establecen por sí solos el LT1, el LT2 ni el máximo estado estable de lactato (MLSS) de un individuo; la duración de las etapas, el muestreo y la población estudiada afectan la interpretación.",
+      "implementation": "Los cálculos se verifican contra la versión fija de lactater indicada abajo. Coincidir con un software de referencia no constituye una validación fisiológica independiente.",
+      "methods": {
+        "obla_2": {
+          "origin": "Forma parte de la familia de concentraciones fijas. {jamnick} incluyó 2 mmol/L entre las concentraciones comparadas en pruebas incrementales de ciclismo.",
+          "interpretation": "Útil como punto de comparación estandarizado. Una concentración fija de 2 mmol/L no establece el primer umbral individual; compara pruebas con protocolos consistentes."
+        },
+        "obla_4": {
+          "origin": "El criterio de 4 mmol/L fue discutido por {kindermann} y examinado por {heck}, mucho antes de las herramientas modernas de análisis automático de curvas.",
+          "interpretation": "Es una concentración convencional, no un LT2 universal ni un MLSS medido. Los niveles individuales de lactato y el diseño de la prueba pueden situar esta estimación por encima o por debajo del límite relevante."
+        },
+        "bsln_05": {
+          "origin": "Un criterio de incremento sobre la línea base. {jamnick} comparó esta familia y citó a {berg} y {zoladz} como antecedentes previos.",
+          "interpretation": "Sensible a la muestra base y a la variación de medición. Esta herramienta utiliza el lactato en reposo si está disponible, o de lo contrario la primera etapa de ejercicio, sin promediar etapas iniciales."
+        },
+        "bsln_10": {
+          "origin": "La misma familia de incremento sobre la línea base, con un aumento mayor. {jamnick} comparó +0,5, +1,0 y +1,5 mmol/L como criterios separados.",
+          "interpretation": "Un resultado de +1,0 es un criterio distinto de +0,5, no prueba de un segundo umbral fisiológico. Cambiar la definición de la línea base también cambia la estimación."
+        },
+        "log_log": {
+          "origin": "{beaver} analizó el lactato frente al consumo de oxígeno en ejes logarítmicos. Aplicaciones posteriores en ciclismo, incluida {bishop}, usaron potencia; esta herramienta usa la intensidad de la prueba.",
+          "interpretation": "Requiere al menos cinco etapas de ejercicio y una intersección dentro del rango evaluado. Usar la intensidad no reproduce el protocolo original de consumo de oxígeno."
+        },
+        "dmax": {
+          "origin": "{cheng} propuso Dmax: hallar la mayor separación entre una curva ajustada y la recta que une sus extremos.",
+          "interpretation": "Depende del rango evaluado y del ajuste. Aquí ambos extremos de referencia están sobre la curva cúbica; cambiar la primera o la última etapa puede desplazar la estimación."
+        },
+        "moddmax": {
+          "origin": "{bishop} modificó el inicio de la línea de referencia de Dmax para reducir la influencia de las primeras etapas planas. {heuberger} describió después un aumento de al menos 0,4 mmol/L.",
+          "interpretation": "Esta herramienta incluye un aumento exacto de 0,4 mmol/L y usa el lactato medido inicial y final. {jamnick} describe >0,4; la regla inclusiva sigue la formulación de Heuberger."
+        },
+        "log_poly_moddmax": {
+          "origin": "{jamnick} introdujo esta combinación: una intensidad inicial por Log-log seguida de un cálculo Dmax modificado sobre una curva cúbica.",
+          "interpretation": "Su estimación más cercana al MLSS utilizó etapas de 4 minutos en 17 ciclistas varones entrenados. Ese hallazgo no valida todos los protocolos de carrera o ciclismo. Se requiere un resultado válido de Log-log."
+        }
+      }
+    },
+    "presentation": {
+      "engineVersion": "Versión del motor",
+      "tooltipStage": "Etapa",
+      "tooltipMeasured": "Lactato medido",
+      "tooltipFitted": "Lactato ajustado",
+      "tooltipResidual": "Residuo",
+      "tooltipZone": "Dominio de intensidad",
+      "hoverHint": "Pasa el cursor, toca o enfoca una muestra para ver los valores de la etapa",
+      "ctaAction": "Crear una cuenta gratuita",
+      "ctaExplore": "Explorar carga de entrenamiento",
+      "ctaNote": "Los datos de prueba de esta herramienta no se guardan automáticamente en tu cuenta.",
+      "ctaImageAlt": "Gestión de la forma física en Trainingload.ai con tendencias de carga de entrenamiento y estado",
+      "ctaImageCaption": "Trainingload.ai · vista de ejemplo de carga de entrenamiento",
+      "ctaBenefitLoad": "Tendencias de carga",
+      "ctaBenefitZones": "Distribución de intensidad",
+      "ctaBenefitPlan": "Planificación de ciclos",
+      "workflowInput": "Ingresar prueba",
+      "workflowReport": "Informe de análisis",
+      "editData": "Editar datos de la prueba",
+      "readCurve": "Perfil lactato–intensidad",
+      "readCurveBody": "Ajuste polinómico cúbico sobre las muestras de las etapas de ejercicio. Pasa el cursor o selecciona una etapa para revisar el lactato medido, el ajustado y la frecuencia cardíaca.",
+      "thresholdBasis": "Criterios de umbral",
+      "inputGuide": "4–30 etapas de ejercicio · lactato en mmol/L · frecuencia cardíaca opcional",
+      "returnReport": "Volver al informe",
+      "overview": "Resumen de la prueba",
+      "stages": "etapas de ejercicio",
+      "peak": "Última intensidad evaluada",
+      "fit": "Ajuste cúbico",
+      "curve": "Curva de lactato",
+      "samples": "Muestras medidas",
+      "fitted": "Curva ajustada",
+      "anchor": "Línea de referencia",
+      "distance": "Distancia máxima",
+      "compareTitle": "Comparación de métodos de umbral",
+      "compareBody": "Estimaciones de la misma prueba, alineadas por intensidad de ejercicio. Selecciona un método para revisar su cálculo y aplicabilidad.",
+      "sharedScale": "Escala de intensidad compartida",
+      "earlyGroup": "Línea base y punto de giro",
+      "dmaxGroup": "Familia Dmax",
+      "fixedGroup": "Concentración fija",
+      "notInterval": "Los marcadores muestran estimaciones de distintos métodos, no un intervalo de confianza.",
+      "zonesBody": "Los límites siguen los métodos LT1 y LT2 seleccionados. Las bandas de color muestran los tres dominios de intensidad.",
+      "lowDomain": "Por debajo de LT1",
+      "middleDomain": "Entre LT1 y LT2",
+      "highDomain": "Por encima de LT2",
+      "qualityFitTitle": "Diagnóstico del ajuste",
+      "qualityFitBody": "Residuo = lactato medido menos lactato ajustado. Un ajuste cercano no demuestra precisión fisiológica.",
+      "rmse": "Error cuadrático medio (RMSE)",
+      "maxResidual": "Mayor residuo absoluto",
+      "residuals": "Residuos por etapa",
+      "logAxes": "Vista Log-log · ambos ejes usan escala logarítmica",
+      "noHr": "No se registraron muestras de frecuencia cardíaca",
+      "preview": "Análisis de ejemplo",
+      "previewBody": "Un análisis completo de prueba escalonada, incluyendo LT1/LT2, dominios de intensidad y respuesta de frecuencia cardíaca.",
+      "previewCaption": "Datos de demostración · no es un resultado personal",
+      "moreDetails": "Detalles del método",
+      "available": "métodos disponibles"
+    }
+  },
   "fileInspection": {
     "checking": "Comprobando el archivo…",
     "recognized": "Archivo {format} reconocido",
@@ -2895,6 +3564,73 @@
     }
   },
   "features": {
+    "mcp": {
+      "content": {
+        "title": "Tu IA puede leer tu entrenamiento. Y tú ves exactamente cómo.",
+        "description": "Conecta TrainingLoad a tu cliente de IA mediante un servidor MCP de solo lectura protegido con OAuth. Haz una pregunta real sobre tu entrenamiento, inspecciona cada llamada de herramienta y verifica la conclusión con los datos devueltos.",
+        "eyebrow": "TrainingLoad MCP",
+        "connect": "Conectar MCP",
+        "docs": "Leer la documentación",
+        "supported": "Funciona con",
+        "contractEyebrow": "Una superficie de producto, no una API sin procesar",
+        "contractTitle": "24 herramientas acotadas. Tres recursos. Tres prompts reutilizables.",
+        "contractText": "El servidor prioriza una instantánea agregada y solo expone mayor detalle cuando la pregunta lo requiere. Cada lista tiene ventana temporal, límite y un cursor opaco.",
+        "groups": [
+          [
+            "Estado actual",
+            "Instantánea, indicadores de preparación y series de carga de entrenamiento"
+          ],
+          [
+            "Progreso",
+            "Comparación de períodos, desglose por deporte, estadísticas de actividad, constancia, estado físico, zonas y marcas personales"
+          ],
+          [
+            "Ejecución",
+            "Zonas y parciales de actividad, resúmenes de plan, cumplimiento y detalles de competición"
+          ],
+          [
+            "Conexiones",
+            "Estado de sincronización más contexto de salud opcional"
+          ]
+        ],
+        "workflowEyebrow": "De la conexión a la evidencia",
+        "workflowTitle": "Añade una URL, aprueba los datos que quieras y pregunta con normalidad.",
+        "workflowText": "El cliente descubre OAuth y las herramientas directamente desde el servidor. TrainingLoad mantiene la autorización y los límites de datos en el servidor, mientras cada respuesta sigue siendo auditable en la conversación.",
+        "workflow": [
+          [
+            "01",
+            "Añade el servidor",
+            "Usa la misma URL remota en cualquier cliente compatible."
+          ],
+          [
+            "02",
+            "Revisa el consentimiento",
+            "Aprueba scopes de solo lectura; los datos de salud van por separado."
+          ],
+          [
+            "03",
+            "Haz una pregunta real",
+            "El cliente elige la ruta mínima de herramientas necesaria."
+          ],
+          [
+            "04",
+            "Verifica la respuesta",
+            "Inspecciona llamadas, rangos de fechas, hechos devueltos y datos faltantes."
+          ]
+        ],
+        "recipes": "Ver prompts nativos, recursos y rutas de herramientas",
+        "safetyTitle": "Privado por diseño",
+        "safetyText": "Los scopes OAuth se comprueban al listar las herramientas y nuevamente al ejecutarlas. Los resultados excluyen campos de identidad directa, flujos brutos de sensores, rutas precisas, credenciales y archivos FIT completos.",
+        "safety": [
+          "Herramientas de solo lectura; sin rutas de escritura ocultas",
+          "Solo el deportista actual; los ID opacos están aislados por usuario",
+          "Las notas no confiables se sanean y nunca se tratan como instrucciones",
+          "Validación de esquemas, presupuestos de salida, timeouts, límites, auditoría y trazas"
+        ],
+        "finalTitle": "Conéctalo una vez. Pregunta desde el cliente que ya utilizas.",
+        "finalText": "El mismo endpoint funciona en todos los clientes MCP compatibles. El acceso a datos de salud es opcional y se puede revocar junto con toda la conexión desde tu cuenta."
+      }
+    },
     "metadata": {
       "title": "Funciones de Trainingload.ai | Planes adaptativos, carga y AI Coach",
       "description": "Explora el flujo de Trainingload.ai para análisis de entrenamiento: planes adaptativos, calendario, entrenamientos completados, señales PMC y effective VO2max, revisión con AI Coach y ajustes confirmados.",
@@ -2922,6 +3658,12 @@
       }
     },
     "page": {
+      "mcpShowcase": {
+        "eyebrow": "TrainingLoad MCP",
+        "title": "Deja que tu IA lea tu entrenamiento y haz verificable cada conclusión.",
+        "text": "24 herramientas de entrenamiento de solo lectura, junto con recursos y prompts nativos para el estado actual, comparación de períodos, detalle de actividades, ejecución del plan, competiciones y diagnóstico de sincronización.",
+        "cta": "Explorar MCP"
+      },
       "hero": {
         "title": "Las páginas clave que mantienen el entrenamiento encaminado",
         "subtitle": "Empieza por hoy, revisa el plan, consulta el calendario, entiende la carga y usa la revisión con AI Coach cuando el próximo entrenamiento pueda necesitar cambios."
@@ -4548,6 +5290,206 @@
   },
   "home": {
     "demo": {
+      "calendar": {
+        "overview": {
+          "title": "Plan actual",
+          "cycle": "Bloque base de maratón",
+          "weekLabel": "Semana 5 / 12",
+          "targetLoadLabel": "Objetivo",
+          "targetLoadValue": "420",
+          "completedLabel": "Completado",
+          "completedValue": "248",
+          "driftLabel": "Vs semana ant.",
+          "driftValue": "+17",
+          "syncLabel": "Sincronizado"
+        },
+        "monthModeLabel": "Vista mensual",
+        "weekModeLabel": "Enfoque semanal",
+        "today": "Hoy",
+        "addButton": "Añadir",
+        "calendarSubscriptionButton": "Suscribirse",
+        "viewDay": "Ver día",
+        "selectedDateLabel": "Fecha seleccionada",
+        "loadLabel": "Carga",
+        "activityTab": "Actividad",
+        "trainingTab": "Entrenamiento",
+        "planCycleLabel": "Bloque de entrenamiento",
+        "planWorkoutCount": "{count, plural, =1 {1 sesión planificada} other {{count} sesiones planificadas}}",
+        "noPlannedTraining": "Sin entrenamiento planificado",
+        "noActivities": "Sin actividades completadas",
+        "summaryScope": {
+          "plan": "Plan",
+          "month": "Mes"
+        },
+        "planProgressTitle": "Progreso del plan",
+        "monthOverview": "Vista mensual",
+        "comparisonLabelPlan": "vs bloque anterior",
+        "comparisonLabelMonth": "vs mes pasado",
+        "delta": {
+          "up": "al alza",
+          "down": "a la baja",
+          "flat": "estable"
+        },
+        "summary": {
+          "count": "Sesiones",
+          "tss": "TSS",
+          "distance": "Distancia",
+          "duration": "Duración"
+        },
+        "workoutMeta": {
+          "duration": "Duración",
+          "steps": "Pasos",
+          "repeats": "Repetición",
+          "parsed": "DSL analizado"
+        },
+        "sportLabels": {
+          "RUN": "Carrera",
+          "CYCLING": "Ciclismo",
+          "SWIM": "Natación"
+        },
+        "workoutNames": {
+          "easyRun": "Rodaje suave 45 min",
+          "tempoRun": "Rodaje constante 35 min",
+          "strength": "Activación de fuerza 20 min",
+          "longRun": "Tirada larga 90 min",
+          "recoveryRide": "Rodaje ciclista suave 50 min",
+          "swim": "Natación técnica 1,6 km"
+        },
+        "workoutNotes": {
+          "easyRun": "Volumen aeróbico Z2",
+          "tempoRun": "Control aeróbico constante",
+          "strength": "Movilidad y activación",
+          "longRun": "Resistencia larga",
+          "recoveryRide": "Pedaleo de baja intensidad",
+          "swim": "Enfoque técnico"
+        },
+        "activityNames": {
+          "easyRun": "Rodaje suave",
+          "tempoRun": "Carrera aeróbica constante",
+          "longRun": "Tirada larga",
+          "ride": "Rodaje ciclista suave"
+        },
+        "distanceUnit": "km",
+        "minuteUnit": "min"
+      },
+      "dashboard": {
+        "aboutMetric": "Más información sobre {title}",
+        "overview": {
+          "title": "Resumen",
+          "recent30Days": "Últimos 30 días"
+        },
+        "sportFilter": "Todos los deportes",
+        "editLabel": "Editar",
+        "stats": {
+          "vo2Max": {
+            "title": "VO2max",
+            "detail": "Excelente",
+            "details": "El VO2max estima tu techo aeróbico. En Training Load se analiza como tendencia y no como un pico aislado de un solo día."
+          },
+          "atl": {
+            "title": "Fatiga",
+            "detail": "Alta",
+            "details": "ATL refleja la fatiga a corto plazo del entrenamiento reciente. Un aumento de ATL suele indicar varias sesiones exigentes seguidas."
+          },
+          "ctl": {
+            "title": "Forma física",
+            "detail": "Estable",
+            "details": "CTL es una señal de condición a largo plazo construida con carga de entrenamiento sostenida. Sube despacio con constancia y baja al reducir el volumen."
+          },
+          "tsb": {
+            "title": "Estado",
+            "detail": "Entrenable",
+            "details": "TSB compara condición física y fatiga. Los valores negativos indican que acumulas más fatiga que frescura."
+          }
+        },
+        "charts": {
+          "weekPressure": "Estrés de entrenamiento",
+          "ctl": "Forma física",
+          "atl": "Fatiga",
+          "tsb": "Estado"
+        }
+      },
+      "plan": {
+        "weekStrip": {
+          "title": "Progreso del ciclo",
+          "stateCurrent": "Actual"
+        },
+        "weekLoad": {
+          "title": "Carga de esta semana",
+          "currentWeek": "S{week}",
+          "plannedSessions": "Sesiones previstas"
+        },
+        "workout": {
+          "title": "Sesiones de la semana",
+          "loadBadge": "Carga prevista",
+          "linked": "Vinculada · {activity}",
+          "notLinked": "Sin actividad vinculada",
+          "session": "Sesión {index}"
+        },
+        "actions": {
+          "postpone": "Posponer",
+          "skip": "Omitir",
+          "delete": "Eliminar",
+          "deleteDisabledTip": "Eliminar no está disponible"
+        },
+        "today": {
+          "title": "Hoy",
+          "viewTodayPlan": "Abrir hoy",
+          "postponeToday": "Posponer hoy"
+        },
+        "goal": {
+          "title": "Objetivo semanal",
+          "weekSessions": "Sesiones",
+          "completed": "Completadas",
+          "progressTo": "Progreso",
+          "dayNumber": "D{day}"
+        },
+        "example": {
+          "header": {
+            "cycleLabel": "Ciclo actual",
+            "title": "Bloque base de maratón",
+            "weekStatus": "Semana 5 / 12 · ACTIVE",
+            "totalSessions": "36 sesiones",
+            "remainingLabel": "Restante",
+            "remainingWeeks": "7 semanas",
+            "createPlan": "Crear plan"
+          },
+          "weekdayLabels": [
+            "L",
+            "M",
+            "X",
+            "J",
+            "V",
+            "S",
+            "D"
+          ],
+          "workouts": [
+            {
+              "dayLabel": "Lun",
+              "title": "Rodaje suave 45 min",
+              "detail": "RUN · Z2 45 min",
+              "statusLabel": "Hecho",
+              "linkedActivity": "Rodaje suave dom."
+            },
+            {
+              "dayLabel": "Mié",
+              "title": "Rodaje constante 35 min",
+              "detail": "RUN · aeróbico sostenido",
+              "statusLabel": "Hoy"
+            },
+            {
+              "dayLabel": "Sáb",
+              "title": "Tirada larga 90 min",
+              "detail": "RUN · resistencia larga",
+              "statusLabel": "Previsto"
+            }
+          ],
+          "coach": {
+            "title": "Nota del entrenador",
+            "summary": "Mantén la calidad del jueves. Ajusta la tirada larga según tus sensaciones."
+          }
+        }
+      },
       "coach": {
         "review": "Revisión IA",
         "history": "Historial",
@@ -8598,6 +9540,534 @@
     ]
   },
   "runningPlanPages": {
+    "derived": {
+      "fiveKChooserLabels": {
+        "options": [
+          "Empezar desde cero",
+          "Correr 20–30 minutos",
+          "Ya compites"
+        ],
+        "current": "Plan actual"
+      },
+      "raceDistanceChooserCopy": {
+        "10k": {
+          "title": "Elige el plan de 10K adecuado",
+          "subtitle": "Empieza por tu base actual y tu objetivo, no por el calendario que parezca más rápido.",
+          "options": [
+            {
+              "label": "Terminar",
+              "title": "Primer 10K",
+              "description": "Diez semanas, tres carreras por semana y sin trabajo obligatorio de umbral."
+            },
+            {
+              "label": "Mejorar",
+              "title": "Correr un 10K más rápido",
+              "description": "Añade sesiones de calidad repetibles cuando ya completes la distancia con soltura."
+            },
+            {
+              "label": "Objetivo",
+              "title": "Entrenar para una marca",
+              "description": "Usa una marca reciente y la fecha de la carrera para fijar un objetivo concreto."
+            }
+          ]
+        },
+        "half-marathon": {
+          "title": "Elige el plan de media maratón adecuado",
+          "subtitle": "Ajusta el plan a tu base actual de tirada larga y a si buscas terminar o competir.",
+          "options": [
+            {
+              "label": "Terminar",
+              "title": "Primera media maratón",
+              "description": "Catorce semanas con cuatro carreras por semana y una tirada larga progresiva."
+            },
+            {
+              "label": "Mejorar",
+              "title": "Mejorar tu media maratón",
+              "description": "Desarrolla calidad sostenible una vez que la distancia te resulte familiar."
+            },
+            {
+              "label": "Objetivo",
+              "title": "Entrenar para una marca",
+              "description": "Convierte un resultado reciente en un objetivo concreto para el día de la carrera."
+            }
+          ]
+        },
+        "marathon": {
+          "title": "Elige el plan de maratón adecuado",
+          "subtitle": "Tu base de tirada larga y tu meta deciden si conviene terminar, mejorar o ir a por una marca.",
+          "options": [
+            {
+              "label": "Terminar",
+              "title": "Primera maratón",
+              "description": "Dieciocho semanas, cuatro carreras por semana y un tapering protegido de tres semanas."
+            },
+            {
+              "label": "Mejorar",
+              "title": "Mejorar tu maratón",
+              "description": "Añade calidad controlada cuando el entrenamiento de maratón ya sea repetible."
+            },
+            {
+              "label": "Objetivo",
+              "title": "Entrenar para una marca",
+              "description": "Usa tu forma actual y la fecha de la carrera para perseguir un resultado específico."
+            }
+          ]
+        }
+      },
+      "fiveKCopy": {
+        "weeks": "8 semanas",
+        "level": "Principiante a intermedio",
+        "weeklyVolume": "4 carreras/semana",
+        "metaTitle": "Plan de entrenamiento 5K gratis de 8 semanas para principiantes",
+        "metaDescription": "Plan de entrenamiento 5K gratis de 8 semanas para corredores que ya pueden correr 20–30 minutos. Cuatro salidas semanales, volumen suave, una sesión constante y un breve tapering.",
+        "keywords": [
+          "plan de entrenamiento 5k",
+          "5k training plan",
+          "plan para correr 5k",
+          "plan 5k principiantes",
+          "plan 5k 8 semanas"
+        ],
+        "eyebrow": "Plan de running 5K de 8 semanas",
+        "title": "Plan de entrenamiento 5K: calendario gratuito de 8 semanas para principiantes",
+        "subtitle": "Este plan de 5K es para corredores que ya completan de 20 a 30 minutos de carrera suave y quieren un calendario claro hasta la meta. Combina rodajes conversacionales, una sesión de calidad controlada, una tirada larga semanal, recuperación y un breve tapering antes del día de la carrera.",
+        "primaryCta": "Personalizar mi plan de 5K",
+        "secondaryCta": "Ver todos los planes",
+        "promise": "El calendario completo es gratis más abajo. Personalízalo cuando tus días disponibles, tu entrenamiento reciente, tu ritmo o tu recuperación hagan que un calendario genérico no encaje contigo.",
+        "planChooser": {
+          "title": "Elige el plan de 5K adecuado",
+          "subtitle": "Empieza por el plan que coincide con lo que puedes correr hoy. Cada opción parte de un punto y una carga de entrenamiento distintos.",
+          "options": [
+            {
+              "label": "Empezar desde cero",
+              "title": "Couch to 5K",
+              "description": "Usa una progresión de correr y caminar si todavía no te resultan cómodos 20 minutos seguidos de trote suave.",
+              "href": "/couch-to-5k-training-plan"
+            },
+            {
+              "label": "Plan actual",
+              "title": "Terminar un 5K",
+              "description": "Elige este plan de 8 semanas si ya corres suave 20–30 minutos y puedes entrenar cuatro días por semana.",
+              "href": null
+            },
+            {
+              "label": "Ya compites",
+              "title": "Correr un 5K más rápido",
+              "description": "Usa el plan intermedio cuando tengas una marca reciente en 5K y busques series y trabajo de tempo estructurados.",
+              "href": "/5k-training-plan/intermediate"
+            }
+          ]
+        },
+        "trustItems": [
+          "Calendario completo gratis",
+          "8 semanas",
+          "4 carreras por semana",
+          "Base de 20–30 minutos corriendo"
+        ],
+        "forTitle": "Para quién es este plan de entrenamiento 5K",
+        "forItems": [
+          "Puedes correr suavemente de 20 a 30 minutos sin necesitar una progresión de correr y caminar.",
+          "Quieres terminar tu primer 5K con confianza o mejorar una marca reciente sin exigirte al máximo en cada salida.",
+          "Puedes reservar cuatro días de carrera por semana, incluyendo una sesión de calidad y una tirada larga suave.",
+          "Actualmente no tienes dolor, enfermedad ni lesión que altere tu técnica de carrera."
+        ],
+        "previewTitle": "Cómo progresa el plan de 5K de 8 semanas",
+        "previewSubtitle": "El plan avanza desde rodajes suaves repetibles hacia trabajo específico de 5K y luego reduce la fatiga antes de la carrera. El calendario completo día a día está debajo.",
+        "previewRows": [
+          [
+            "Semanas 1–2",
+            "Establecer el ritmo",
+            "Mantén la mayoría de los rodajes suaves e introduce rectas relajadas o cuestas cortas."
+          ],
+          [
+            "Semanas 3–6",
+            "Construir solidez para 5K",
+            "Alterna series controladas y trabajo de tempo mientras la tirada larga crece gradualmente."
+          ],
+          [
+            "Semanas 7–8",
+            "Tapering y carrera",
+            "Reduce el volumen, mantén algo de chispa y llega fresco al 5K."
+          ]
+        ],
+        "contentTitle": "Qué hace práctico a este plan de 5K",
+        "contentSubtitle": "Un buen calendario de 5K separa el volumen suave del trabajo de calidad, da un propósito claro a cada sesión y deja recuperación suficiente para repetir la semana con constancia.",
+        "contentSections": [
+          [
+            "Volumen suave",
+            "Los rodajes suaves construyen constancia sin convertir cada día en un examen.",
+            [
+              "Usa un esfuerzo conversacional",
+              "Baja el ritmo con calor y cuestas",
+              "Respeta los días de recuperación"
+            ]
+          ],
+          [
+            "Una sesión de calidad",
+            "Las series, cuestas o el tempo desarrollan velocidad específica de 5K sin dominar la semana.",
+            [
+              "Corre las repeticiones con control",
+              "Detente antes de que empeore la técnica",
+              "No compenses rodajes suaves perdidos con intensidad"
+            ]
+          ],
+          [
+            "Tirada larga y tapering",
+            "Una tirada larga moderada sostiene la resistencia; la última semana reduce la fatiga sin perder el ritmo.",
+            [
+              "Mantén la tirada larga suave",
+              "Reduce el volumen antes de la carrera",
+              "Evita pruebas de forma de última hora"
+            ]
+          ]
+        ],
+        "conversionTitle": "Convierte el calendario gratis de 5K en tu agenda",
+        "conversionText": "Elige tu fecha de carrera, días disponibles, ritmo actual y entrenamiento reciente. Trainingload.ai prepara el borrador alrededor de esas condiciones y mantiene cada ajuste posterior revisable antes de llegar a tu calendario.",
+        "aiTitle": "Cómo personaliza Trainingload.ai un plan de 5K",
+        "aiSubtitle": "El calendario público indica qué hacer. La personalización decide qué día encaja cada sesión, qué referencias de ritmo aplicar y si las salidas completadas respaldan construir, mantener o recuperar.",
+        "aiSignals": [
+          [
+            "Plan frente a realidad",
+            "Compara el entrenamiento previsto con la carrera completada en lugar de juzgar solo el ritmo."
+          ],
+          [
+            "Carga de entrenamiento",
+            "Revisa la carga reciente y la recuperación antes de subir volumen o añadir otra sesión exigente."
+          ],
+          [
+            "Cambios confirmados",
+            "El Entrenador con IA propone un ajuste; tú o tu entrenador lo confirmáis antes de actualizar el calendario."
+          ]
+        ],
+        "relatedTitle": "Continúa con tu plan de running",
+        "relatedLinks": [
+          [
+            "¿Empiezas desde cero? Usa Couch to 5K",
+            "/couch-to-5k-training-plan",
+            "Usa una progresión de correr y caminar si 20 minutos seguidos de carrera suave aún no resultan cómodos."
+          ],
+          [
+            "Da el salto de 5K a 10K",
+            "/10k-training-plan",
+            "Amplía tu resistencia y el trabajo de umbral con el calendario completo de 10K."
+          ],
+          [
+            "Define ritmos de entrenamiento con VDOT",
+            "/vdot-calculator",
+            "Usa una marca reciente como referencia para establecer ritmos de entrenamiento controlados."
+          ]
+        ],
+        "faq": [
+          [
+            "¿Cuántas semanas debo entrenar para un 5K?",
+            "Este calendario dura ocho semanas. Los corredores con menos base pueden necesitar más tiempo; quienes ya entrenan con constancia solo deben incorporarse más adelante tras revisar la carga."
+          ],
+          [
+            "¿Cuántos días a la semana debo correr?",
+            "El plan incluye cuatro días de carrera. Mantén fáciles los días suaves y conserva días de descanso o fuerza entre las sesiones más exigentes."
+          ],
+          [
+            "¿Es un plan de 5K para principiantes?",
+            "Sí, para un principiante que ya puede correr suave de 20 a 30 minutos. Quienes nunca han corrido deben usar el plan independiente Couch to 5K."
+          ],
+          [
+            "¿Qué pasa si pierdo un entrenamiento?",
+            "Sáltalo o muévelo solo si la recuperación sigue protegida. No acumules dos sesiones de calidad seguidas ni metas todo el kilometraje perdido el fin de semana."
+          ],
+          [
+            "¿La IA cambia el plan automáticamente?",
+            "Trainingload.ai puede preparar ajustes a partir de tus carreras completadas y la carga de entrenamiento, pero el calendario solo se actualiza tras tu confirmación."
+          ]
+        ]
+      },
+      "finishFiveKDetails": {
+        "previewTitle": "Cómo progresa el plan de 8 semanas para terminar",
+        "previewSubtitle": "Cuatro salidas repetibles cada semana desarrollan resistencia continua, recuperan en el momento oportuno y afinan el cuerpo para el 5K final.",
+        "previewRows": [
+          [
+            "Semanas 1–3",
+            "Construir la base",
+            "Lleva la tirada larga de 25 a 35 minutos progresivamente."
+          ],
+          [
+            "Semana 4",
+            "Asimilar el trabajo",
+            "Reduce la tirada larga y mantén controlada cada sesión."
+          ],
+          [
+            "Semanas 5–6",
+            "Volver a construir",
+            "Alcanza una tirada larga conversacional de 40 y luego 45 minutos."
+          ],
+          [
+            "Semanas 7–8",
+            "Tapering y meta",
+            "Reduce la fatiga y completa el 5K con un inicio controlado."
+          ]
+        ],
+        "contentTitle": "Para qué sirve cada carrera de la semana",
+        "contentSubtitle": "El calendario separa el volumen suave, la carrera constante controlada y la tirada larga para que ninguna sesión tenga que hacerlo todo.",
+        "contentSections": [
+          [
+            "Dos rodajes suaves",
+            "La carrera suave y de recuperación construye constancia mientras conserva energía.",
+            [
+              "Mantén un ritmo conversacional",
+              "Baja el ritmo con calor y cuestas",
+              "No acumules sesiones perdidas"
+            ]
+          ],
+          [
+            "Una carrera constante",
+            "Un esfuerzo controlado a RPE 5 desarrolla ritmo sin convertirse en una competición.",
+            [
+              "Mantén el esfuerzo repetible",
+              "Termina con buena técnica",
+              "Usa RPE cuando haya pocos datos de ritmo"
+            ]
+          ],
+          [
+            "Una tirada larga",
+            "La tirada larga crece en dos bloques con semanas de descarga y tapering entre medias.",
+            [
+              "Mantén una respiración conversacional",
+              "Reduce carga en las semanas 4 y 7",
+              "Controla el arranque del 5K final"
+            ]
+          ]
+        ]
+      },
+      "fiveKHubRelatedLink": [
+        "Explorar la guía de planes de 5K",
+        "/5k-training-plan",
+        "Compara los planes de 5K de correr-caminar, primer objetivo e intermedio."
+      ],
+      "productLoopRelatedLinks": [
+        [
+          "Ajusta la carga de entrenamiento con el Entrenador con IA",
+          "/ai-training-plan",
+          "Genera cambios confirmables a partir de tus sesiones completadas y tu carga, en lugar de seguir un calendario fijo."
+        ],
+        [
+          "Calcula tus ritmos de entrenamiento con VDOT",
+          "/vdot-calculator",
+          "Usa una marca reciente como referencia verificable de ritmo."
+        ],
+        [
+          "Calcula tu ritmo de carrera con tiempo y distancia",
+          "/running-pace-calculator",
+          "Convierte ritmo, tiempo y distancia, o crea una tabla de parciales uniformes de 5K a maratón."
+        ],
+        [
+          "Predice tus tiempos de carrera desde una marca reciente",
+          "/race-time-predictor",
+          "Convierte una carrera reciente o un ritmo conocido en estimaciones para 5K, 10K, media maratón y maratón."
+        ],
+        [
+          "Gestiona la carga de entrenamiento en tu plan",
+          "/training-load",
+          "Revisa CTL, ATL y TSB antes de aumentar el volumen o la intensidad."
+        ]
+      ],
+      "intermediateLink": [
+        "Plan de entrenamiento 5K intermedio",
+        "/5k-training-plan/intermediate",
+        "Añade series y trabajo de tempo cuando tengas una referencia reciente de 5K."
+      ],
+      "intermediateFiveK": {
+        "title": "Plan de rendimiento 5K de 8 semanas",
+        "promise": "Mejora tu capacidad para sostener un esfuerzo exigente controlado sin sacrificar la constancia aeróbica.",
+        "heroSubtitle": "Construye un 5K más sólido cada semana con dos rodajes aeróbicos suaves, una sesión de calidad controlada y una tirada larga. Las semanas impares incluyen series repetibles y las pares un tempo controlado, con un día suave entre la calidad y la tirada larga. La semana 4 descarga, las semanas 5–6 vuelven a construir, la semana 7 aplica tapering y la semana 8 culmina con un 5K.",
+        "previewRows": [
+          [
+            "Semanas 1–3",
+            "Construir capacidad de 5K",
+            "Alterna series y tempo mientras la tirada larga alcanza los 50 minutos."
+          ],
+          [
+            "Semana 4",
+            "Recuperar",
+            "Acorta la sesión de calidad y la tirada larga para asimilar el primer bloque."
+          ],
+          [
+            "Semanas 5–6",
+            "Volver a construir",
+            "Avanza hasta series de 6×2 minutos y un tempo de 20 minutos."
+          ],
+          [
+            "Semanas 7–8",
+            "Tapering y correr 5K",
+            "Mantén un breve toque de calidad, reduce volumen y completa el 5K."
+          ]
+        ],
+        "contentTitle": "Cómo hace repetible la velocidad este plan de 5K intermedio",
+        "contentSubtitle": "Hay una única sesión principal de calidad por semana. El resto de los rodajes sirve para asimilar ese estímulo en lugar de convertir cada día en un examen.",
+        "contentSections": [
+          [
+            "Los rodajes suaves protegen la sesión de calidad",
+            "Mantén conversacional la mayor parte del kilometraje para llegar a la sesión clave con buen ritmo y técnica.",
+            [
+              "No persigas ritmos en días suaves",
+              "Recupera entre días de calidad",
+              "Reduce primero el volumen cuando suba la fatiga"
+            ]
+          ],
+          [
+            "Las series hacen repetible el ritmo de 5K",
+            "Repeticiones cortas acumulan tiempo cerca del esfuerzo de 5K sin convertir ninguna serie en un esprint.",
+            [
+              "Usa una marca reciente o RPE",
+              "Mantén las repeticiones homogéneas",
+              "Deja de sumar trabajo cuando decaiga la técnica"
+            ]
+          ],
+          [
+            "El tempo y la tirada larga aportan resistencia",
+            "El tempo eleva el esfuerzo sostenible y la tirada larga amplía el tiempo aeróbico para la segunda mitad del 5K.",
+            [
+              "Mantén el tempo controlado",
+              "Corre suave la tirada larga",
+              "Descarga en las semanas 4 y 7–8"
+            ]
+          ]
+        ],
+        "level": "Intermedio",
+        "metaTitle": "Plan de entrenamiento 5K intermedio: calendario gratis de 8 semanas",
+        "metaDescription": "Plan de 5K intermedio gratis de 8 semanas para corredores que ya entrenan cuatro días a la semana. Series, tempo, tiradas largas y tapering con VDOT o RPE.",
+        "keywords": [
+          "plan de entrenamiento 5k intermedio",
+          "5k training plan intermediate",
+          "plan mejorar 5k 8 semanas",
+          "series 5k",
+          "plan tempo 5k",
+          "VDOT 5K"
+        ],
+        "eyebrow": "Plan de 5K intermedio de 8 semanas",
+        "forTitle": "Para quién es este plan de 5K intermedio",
+        "forItems": [
+          "Puedes correr de forma constante cuatro días por semana.",
+          "Tienes una marca reciente de 5K o una base de entrenamiento adecuada.",
+          "Puedes proteger la recuperación entre sesiones de calidad.",
+          "Actualmente no tienes dolor ni lesión que altere tu pisada."
+        ],
+        "standardFinishLink": [
+          "Usa primero el plan estándar de 5K",
+          "/5k-training-plan",
+          "Construye antes una base repetible si aún no sostienes cuatro días de entrenamiento."
+        ],
+        "faq": [
+          [
+            "¿Es este un plan de entrenamiento 5K intermedio?",
+            "Sí. Está pensado para corredores que ya entrenan cuatro días a la semana y buscan mejorar su 5K con series y tempo, no para un primer debut."
+          ],
+          [
+            "¿En qué se diferencia del plan de 5K para principiantes?",
+            "El plan para principiantes lleva de una base de 20–30 minutos a terminar tu primer 5K. Esta página añade trabajo de calidad más definido sobre una base estable. Usa primero el plan de inicio si todavía no repites cuatro días semanales."
+          ],
+          [
+            "¿Cuántas sesiones de calidad hay por semana?",
+            "Una sesión principal de calidad, además de volumen suave y una tirada larga. No encadenes dos días exigentes."
+          ],
+          [
+            "¿Puede ayudarme este plan a bajar de 25 minutos en 5K?",
+            "Es una buena estructura si tu marca actual ya está cerca de 25 minutos. Ajusta la intensidad con un 5K reciente. Si la diferencia es mayor, completa un ciclo y vuelve a evaluarte en lugar de forzar ese ritmo."
+          ],
+          [
+            "¿La IA cambia este plan intermedio automáticamente?",
+            "Trainingload.ai puede preparar ajustes a partir de tus carreras completadas y la carga de entrenamiento, pero el calendario solo se actualiza cuando lo confirmas."
+          ]
+        ]
+      },
+      "templateMetaDescription": "Plan de entrenamiento 5K gratis de 8 semanas para corredores que ya pueden correr 20–30 minutos. Cuatro salidas semanales, volumen suave, una sesión constante y un breve tapering."
+    },
+    "sectionKickers": {
+      "startHere": "EMPIEZA AQUÍ",
+      "trainingMethod": "MÉTODO DE ENTRENAMIENTO"
+    },
+    "heroHeadings": {
+      "couch": [
+        "Plan gratuito de 9 semanas",
+        "Couch to 5K",
+        "De caminar a tu primer 5K"
+      ],
+      "5k": [
+        "Plan gratuito de 8 semanas",
+        "Plan de entrenamiento 5K",
+        "Llega listo al día de la carrera"
+      ],
+      "5k-intermediate": [
+        "Plan gratuito de 8 semanas",
+        "Plan 5K intermedio",
+        "Entrena para un 5K más rápido"
+      ],
+      "10k": [
+        "Plan gratuito de 10 semanas",
+        "Plan de entrenamiento 10K",
+        "Da el salto más allá de tu primer 5K"
+      ],
+      "half-marathon": [
+        "Plan gratuito de 14 semanas",
+        "Plan de media maratón",
+        "Prepara tus primeros 21,1 km"
+      ],
+      "marathon": [
+        "Plan gratuito de 18 semanas",
+        "Plan de entrenamiento maratón",
+        "Prepara tus primeros 42,2 km"
+      ]
+    },
+    "productPreview": {
+      "webAlt": "Detalle del plan de entrenamiento de TrainingLoad.ai en Web",
+      "mobileAlt": "Pantalla de plan en TrainingLoad.ai iOS con el entrenamiento de hoy",
+      "webCalendarAlt": "Calendario de entrenamiento de TrainingLoad.ai en Web con sesiones completadas y planificadas",
+      "mobileCalendarAlt": "Calendario de entrenamiento de TrainingLoad.ai en iOS con datos de entrenamiento"
+    },
+    "officialTemplate": {
+      "labels": {
+        "official": "Plan de entrenamiento oficial",
+        "improve": "Mejora de rendimiento",
+        "target": "Preparación de marca objetivo",
+        "weeks": "Semanas",
+        "runsPerWeek": "Sesiones por semana",
+        "level": "Tipo de plan",
+        "schedule": "Calendario completo semana a semana",
+        "scheduleText": "Abre cada semana para revisar las sesiones, la estructura y la guía de esfuerzo antes de añadir el plan a tu calendario.",
+        "example": "Intensidad de ejemplo",
+        "exampleText": "Los ritmos mostrados abajo usan un ejemplo de VDOT 40 y no son tus ritmos personales. Al iniciar sesión, Trainingload.ai usa datos fiables de tu capacidad actual. Un plan de marca objetivo también requiere una carrera objetivo válida.",
+        "cta": "Crear mi plan",
+        "back": "Volver a la guía de distancia",
+        "currentPlan": "Plan actual",
+        "workoutCount": "sesiones",
+        "finalTitle": "Lleva el plan completo a tu calendario",
+        "finalText": "Revisa el calendario público para entender la estructura y luego crea una vista previa personalizada con tu capacidad actual y tus días disponibles."
+      },
+      "seoTitles": {
+        "improve-10k": "Plan de entrenamiento 10K intermedio | 8 semanas",
+        "target-10k": "Plan 10K marca objetivo | Sub-40, 45 y 50 min",
+        "improve-half-marathon": "Plan de media maratón intermedio | 12 semanas",
+        "target-half-marathon": "Plan de media maratón marca objetivo | Sub-2 horas",
+        "improve-marathon": "Plan de maratón intermedio | Programa de 18 semanas",
+        "target-marathon": "Plan de maratón marca objetivo | Sub-3 y Sub-4, 18 sem."
+      },
+      "pageHeadings": {
+        "improve-10k": "Plan de entrenamiento 10K intermedio",
+        "target-10k": "Plan de entrenamiento 10K marca objetivo",
+        "improve-half-marathon": "Plan de entrenamiento media maratón intermedio",
+        "target-half-marathon": "Plan de entrenamiento media maratón marca objetivo",
+        "improve-marathon": "Plan de entrenamiento maratón intermedio",
+        "target-marathon": "Plan de entrenamiento maratón marca objetivo"
+      }
+    },
+    "workoutStructure": {
+      "chartAriaLabel": "Gráfico de estructura del entrenamiento",
+      "stepLabels": {
+        "WARMUP": "Calentamiento",
+        "WORK": "Trabajo",
+        "RECOVERY": "Recuperación",
+        "REST": "Descanso",
+        "COOLDOWN": "Enfriamiento",
+        "OTHER": "Bloque"
+      }
+    },
     "collection": {
       "metaTitle": "Planes de running gratis: de 5K a maratón",
       "metaDescription": "Compara planes oficiales gratuitos para 5K, 10K, media maratón y maratón. Consulta todos los entrenamientos y añádelos gratis al calendario.",

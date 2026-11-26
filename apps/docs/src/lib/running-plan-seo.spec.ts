@@ -28,6 +28,7 @@ function distancePlan(slug: (typeof distanceSlugs)[number], locale = "en") {
   return createDistanceTrainingPlan(
     messages(locale).runningPlanPages.plans[slug] as RunningPlan,
     locale,
+    messages(locale).runningPlanPages.derived,
   );
 }
 
@@ -147,6 +148,7 @@ describe("running plan SEO ownership", () => {
     const improve = createIntermediateFiveKPlan(
       messages("en").runningPlanPages.plans["5k-training-plan"] as RunningPlan,
       "en",
+      messages("en").runningPlanPages.derived,
     );
 
     expect(improve.metaTitle).toBe(

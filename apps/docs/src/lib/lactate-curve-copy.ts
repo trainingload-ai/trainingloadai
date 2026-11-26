@@ -1,13 +1,12 @@
-import messages from "@trainingloadai/messages/docs-copy/lactate-curve.json";
+import { getTranslations } from "next-intl/server";
+import type messages from "@trainingloadai/messages/docs/en.json";
 import type {
   LactateMethodId,
   LactateReason,
 } from "@trainingloadai/shared/lactate-analysis";
 
-import {
-  getLactatePresentationCopy,
-  type LactatePresentationCopy,
-} from "./lactate-presentation-copy";
+type LactatePresentationCopy =
+  typeof messages.lactateCurveCalculator.presentation;
 
 export type LactateCopy = BaseLactateCopy & {
   presentation: LactatePresentationCopy;
@@ -103,15 +102,23 @@ const methodNames = {
   log_poly_moddmax: "Log-Poly-ModDmax",
 };
 
-export function getLactateCopy(lang: string): LactateCopy {
-  const copy = Object.hasOwn(messages, lang)
-    ? messages[lang as keyof typeof messages]
-    : messages.en;
+export async function getLactateCopy(locale: string): Promise<LactateCopy> {
+  const t = await getTranslations({ locale, namespace: "lactateCurveCalculator" });
+  return buildLactateCopy({
+    copy: t.raw("copy") as typeof messages.lactateCurveCalculator.copy,
+    presentation: t.raw("presentation") as LactatePresentationCopy,
+  });
+}
+
+export function buildLactateCopy({
+  copy,
+  presentation,
+}: Pick<typeof messages.lactateCurveCalculator, "copy" | "presentation">): LactateCopy {
   const [belowLt1, betweenThresholds, aboveLt2] = copy.zoneNames;
   return {
     ...copy,
     zoneNames: [belowLt1, betweenThresholds, aboveLt2],
     methodNames,
-    presentation: getLactatePresentationCopy(lang),
+    presentation,
   };
 }

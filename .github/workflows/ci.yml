@@ -5,7 +5,6 @@ on:
     paths-ignore:
       - "apps/docs/**"
       - "packages/messages/docs/**"
-      - "packages/messages/docs-copy/**"
       - "scripts/docs/**"
   pull_request:
     branches: [main]

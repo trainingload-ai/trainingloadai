@@ -1,4 +1,4 @@
-import messages from "@trainingloadai/messages/docs-copy/lactate-method-context.json";
+import { getTranslations } from "next-intl/server";
 import type { LactateMethodId } from "@trainingloadai/shared/lactate-analysis";
 
 export const LACTATE_REFERENCES = {
@@ -78,8 +78,9 @@ type MethodContextCopy = {
   methods: Record<LactateMethodId, MethodContext>;
 };
 
-export function getLactateMethodContext(lang: string): MethodContextCopy {
-  return Object.hasOwn(messages, lang)
-    ? messages[lang as keyof typeof messages]
-    : messages.en;
+export async function getLactateMethodContext(
+  locale: string,
+): Promise<MethodContextCopy> {
+  const t = await getTranslations({ locale, namespace: "lactateCurveCalculator" });
+  return t.raw("methodContext") as MethodContextCopy;
 }

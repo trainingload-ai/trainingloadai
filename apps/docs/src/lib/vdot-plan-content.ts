@@ -1,38 +1,4 @@
-import messages from "@trainingloadai/messages/docs-copy/daniels-running-formula.json";
 import { localePrefix } from "@/lib/locale-url";
-
-export const VDOT_CONTENT_LOCALES = [
-  "en",
-  "zh",
-  "zh-hant",
-  "ja",
-  "ko",
-  "de",
-  "fr",
-  "es",
-  "it",
-  "pt-BR",
-] as const;
-
-export type VdotContentLocale = (typeof VDOT_CONTENT_LOCALES)[number];
-
-function isVdotContentLocale(
-  locale: string,
-): locale is VdotContentLocale {
-  return (VDOT_CONTENT_LOCALES as readonly string[]).includes(locale);
-}
-
-function family(locale: string): VdotContentLocale {
-  if (isVdotContentLocale(locale)) return locale;
-  if (locale.startsWith("zh")) return "zh";
-  return "en";
-}
-
-const guide: Record<VdotContentLocale, typeof messages.en> = messages;
-
-export function getDanielsGuideCopy(locale: string) {
-  return guide[family(locale)];
-}
 
 const generator = {
   en: {

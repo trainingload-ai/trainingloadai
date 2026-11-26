@@ -2815,7 +2815,7 @@ export function HomeProductDemo({
       currentValue: stat.value,
       unit: stat.unit ?? "",
       description: stat.details ?? stat.description,
-      links: [buildMetricDocsLink(key, stat.title, lang, copy.aboutMetric)],
+      links: [buildMetricDocsLink(key, lang, copy.aboutMetric.replace("{title}", stat.title))],
     });
   };
 

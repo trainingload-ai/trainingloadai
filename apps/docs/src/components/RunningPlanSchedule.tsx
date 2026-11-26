@@ -14,12 +14,16 @@ import {
   SlidersHorizontal,
   Zap,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PlanScheduleViewTracker } from "@/components/PlanScheduleViewTracker";
-import { WorkoutStructurePreview } from "@/components/WorkoutStructurePreview";
+import {
+  WorkoutStructurePreview,
+  type WorkoutStructureCopy,
+} from "@/components/WorkoutStructurePreview";
 import { withLocalePath } from "@/lib/locale-url";
-import { getRpeScaleContent, RPE_SCALE_PATH } from "@/lib/rpe-scale-content";
+import { RPE_SCALE_PATH, type RpeScaleContent } from "@/lib/rpe-scale-content";
 import type {
   LocalizedRunningPlanSchedule,
   RunningPlanDayKind,
@@ -247,7 +251,29 @@ function rpeGuideHref(lang: string, intensity?: string) {
   return `${withLocalePath(lang, RPE_SCALE_PATH)}#${anchor}`;
 }
 
+export type RunningPlanScheduleCopy = {
+  rpe: Pick<RpeScaleContent, "scheduleGuideLabel" | "intensityLinkLabel">;
+  workoutStructure: WorkoutStructureCopy;
+};
+
+export async function getRunningPlanScheduleCopy(
+  locale: string,
+): Promise<RunningPlanScheduleCopy> {
+  const [plan, rpe] = await Promise.all([
+    getTranslations({ locale, namespace: "runningPlanPages" }),
+    getTranslations({ locale, namespace: "rpeScale.content" }),
+  ]);
+  return {
+    rpe: {
+      scheduleGuideLabel: rpe("scheduleGuideLabel"),
+      intensityLinkLabel: rpe("intensityLinkLabel"),
+    },
+    workoutStructure: plan.raw("workoutStructure") as WorkoutStructureCopy,
+  };
+}
+
 export function RunningPlanSchedule({
+  copy,
   schedule,
   slug,
   templateSlug,
@@ -258,6 +284,7 @@ export function RunningPlanSchedule({
   anchorPrefix = "",
   showGuidance = true,
 }: {
+  copy: RunningPlanScheduleCopy;
   schedule: LocalizedRunningPlanSchedule;
   slug: string;
   templateSlug?: string;
@@ -268,7 +295,7 @@ export function RunningPlanSchedule({
   anchorPrefix?: string;
   showGuidance?: boolean;
 }) {
-  const rpeCopy = getRpeScaleContent(lang);
+  const rpeCopy = copy.rpe;
   return (
     <section
       id={`${anchorPrefix}schedule`}
@@ -557,7 +584,7 @@ export function RunningPlanSchedule({
                                 <div className="w-full md:w-48 md:max-w-none md:justify-self-end">
                                   <WorkoutStructurePreview
                                     structure={day.structure}
-                                    lang={lang}
+                                    copy={copy.workoutStructure}
                                     compact
                                   />
                                 </div>
@@ -648,7 +675,7 @@ export function RunningPlanSchedule({
                           {kind !== "REST" ? (
                             <WorkoutStructurePreview
                               structure={week.structures[dayIndex]}
-                              lang={lang}
+                              copy={copy.workoutStructure}
                               compact
                             />
                           ) : null}
@@ -699,7 +726,7 @@ export function RunningPlanSchedule({
                               ) : null}
                               <WorkoutStructurePreview
                                 structure={day.structure}
-                                lang={lang}
+                                copy={copy.workoutStructure}
                               />
                               <p className="mt-3 text-sm leading-6 text-neutral-700 dark:text-neutral-300">
                                 {day.notes}

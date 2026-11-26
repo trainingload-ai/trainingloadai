@@ -1,4 +1,5 @@
-import messages from "@trainingloadai/messages/docs-copy/official-plan-template.json";
+import { getTranslations } from "next-intl/server";
+import type messages from "@trainingloadai/messages/docs/en.json";
 import type { Metadata } from "next";
 import Script from "next/script";
 import {
@@ -18,11 +19,11 @@ import {
   resolveRunningWorkoutIntensity,
 } from "@shared/plan-templates";
 import { TrackedLink } from "@/components/TrackedLink";
-import { WorkoutStructurePreview } from "@/components/WorkoutStructurePreview";
+import { WorkoutStructurePreview, type WorkoutStructureCopy } from "@/components/WorkoutStructurePreview";
 import { RunningPlanIntentGuide } from "@/components/RunningPlanIntentGuide";
 import { getPlanIntentGuide } from "@/lib/running-plan-intents";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
-import { isSeoIndexedLanguage } from "@/lib/i18n";
+import { i18n, isSeoIndexedLanguage } from "@/lib/i18n";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import {
   breadcrumbSchema,
@@ -31,17 +32,6 @@ import {
   schemaLanguage,
 } from "@/lib/seo-schema";
 
-type CopyLocale =
-  | "en"
-  | "zh"
-  | "zh-hant"
-  | "ja"
-  | "ko"
-  | "de"
-  | "fr"
-  | "es"
-  | "it"
-  | "pt-BR";
 export type OfficialPlanSlug =
   | "improve-10k"
   | "target-10k"
@@ -50,37 +40,24 @@ export type OfficialPlanSlug =
   | "improve-marathon"
   | "target-marathon";
 
-const { labels: LABELS, seoTitles: SEO_TITLES, pageHeadings: PAGE_HEADINGS } =
-  messages;
+function getPlanTranslations(locale: string) {
+  return getTranslations({
+    locale: (i18n.languages as readonly string[]).includes(locale)
+      ? locale
+      : i18n.defaultLanguage,
+    namespace: "runningPlanPages",
+  });
+}
 
-export function officialPlanTemplateHeading({
+export async function officialPlanTemplateHeading({
   lang,
   slug,
 }: {
   lang: string;
   slug: OfficialPlanSlug;
 }) {
-  return PAGE_HEADINGS[copyLocale(lang)][slug];
-}
-
-function copyLocale(lang: string): CopyLocale {
-  const normalized = lang.toLowerCase();
-  if (
-    normalized.startsWith("zh-hant") ||
-    normalized.startsWith("zh-tw") ||
-    normalized.startsWith("zh-hk")
-  ) {
-    return "zh-hant";
-  }
-  if (normalized.startsWith("zh")) return "zh";
-  if (normalized.startsWith("ja")) return "ja";
-  if (normalized.startsWith("ko")) return "ko";
-  if (normalized.startsWith("de")) return "de";
-  if (normalized.startsWith("fr")) return "fr";
-  if (normalized.startsWith("es")) return "es";
-  if (normalized.startsWith("it")) return "it";
-  if (normalized.startsWith("pt")) return "pt-BR";
-  return "en";
+  const t = await getPlanTranslations(lang);
+  return t(`officialTemplate.pageHeadings.${slug}`);
 }
 
 function routeForTemplate(slug: OfficialPlanSlug) {
@@ -99,16 +76,16 @@ function getSiteUrl() {
   ).replace(/\/+$/, "");
 }
 
-export function officialPlanTemplateMetadata({
+export async function officialPlanTemplateMetadata({
   lang,
   slug,
 }: {
   lang: string;
   slug: OfficialPlanSlug;
-}): Metadata {
+}): Promise<Metadata> {
   const template = getRunPlanTemplate(slug);
   if (!template) throw new Error(`Missing official template: ${slug}`);
-  const locale = copyLocale(lang);
+  const t = await getPlanTranslations(lang);
   const copy = template.copy[normalizePlanTemplateLocale(lang)];
   const path = `${routeForTemplate(slug)}/${routeSuffix(slug)}`;
   const siteUrl = getSiteUrl();
@@ -116,7 +93,7 @@ export function officialPlanTemplateMetadata({
   const seo = optimizeSeoText({
     locale: lang,
     context: "plan",
-    title: SEO_TITLES[locale][slug],
+    title: t(`officialTemplate.seoTitles.${slug}`),
     description: getPlanIntentGuide(slug, lang)?.intro ?? copy.description,
   });
 
@@ -144,7 +121,7 @@ export function officialPlanTemplateMetadata({
   };
 }
 
-export function OfficialPlanTemplateDetailPage({
+export async function OfficialPlanTemplateDetailPage({
   lang,
   slug,
 }: {
@@ -157,9 +134,10 @@ export function OfficialPlanTemplateDetailPage({
     throw new Error(`Missing official template: ${slug}`);
 
   const normalizedLocale = normalizePlanTemplateLocale(lang);
-  const locale = copyLocale(lang);
-  const labels = LABELS[locale];
-  const pageHeading = officialPlanTemplateHeading({ lang, slug });
+  const t = await getPlanTranslations(lang);
+  const labels = t.raw("officialTemplate.labels") as typeof messages.runningPlanPages.officialTemplate.labels;
+  const pageHeading = await officialPlanTemplateHeading({ lang, slug });
+  const workoutStructureCopy = t.raw("workoutStructure") as WorkoutStructureCopy;
   const copy = template.copy[normalizedLocale];
   const hubPath = routeForTemplate(slug);
   const pagePath = `${hubPath}/${routeSuffix(slug)}`;
@@ -371,7 +349,7 @@ export function OfficialPlanTemplateDetailPage({
                                   ? resolved.definition.structure
                                   : null
                               }
-                              lang={lang}
+                              copy={workoutStructureCopy}
                             />
                           </div>
                           <p className="mt-4 text-sm leading-6 text-neutral-600 dark:text-neutral-300">

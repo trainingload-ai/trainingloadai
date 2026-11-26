@@ -6,6 +6,7 @@ import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 import {
   createIntermediateFiveKPlan,
   type RunningPlan,
+  type RunningPlanCopy,
   type RunningPlanPageLabels,
 } from "@/lib/running-plan-pages";
 import { FiveKPlanExperience } from "../_components/FiveKPlanExperience";
@@ -19,11 +20,12 @@ function getSiteUrl() {
 async function getPlan(lang: string) {
   const t = await getTranslations({
     locale: lang,
-    namespace: "runningPlanPages.plans",
+    namespace: "runningPlanPages",
   });
   return createIntermediateFiveKPlan(
-    t.raw("5k-training-plan") as RunningPlan,
+    t.raw("plans.5k-training-plan") as RunningPlan,
     lang,
+    t.raw("derived") as RunningPlanCopy,
   );
 }
 

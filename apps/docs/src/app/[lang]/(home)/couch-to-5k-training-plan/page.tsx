@@ -7,6 +7,7 @@ import { optimizeSeoText } from "@/lib/seo-metadata";
 import {
   createCouchTo5kPlan,
   type RunningPlan,
+  type RunningPlanCopy,
   type RunningPlanPageLabels,
 } from "@/lib/running-plan-pages";
 
@@ -18,11 +19,11 @@ function getSiteUrl() {
 async function getPlan(lang: string) {
   const t = await getTranslations({
     locale: lang,
-    namespace: "runningPlanPages.plans",
+    namespace: "runningPlanPages",
   });
   return createCouchTo5kPlan(
-    t.raw("couch-to-5k-training-plan") as RunningPlan,
-    lang,
+    t.raw("plans.couch-to-5k-training-plan") as RunningPlan,
+    t.raw("derived") as RunningPlanCopy,
   );
 }
 

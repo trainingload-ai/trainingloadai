@@ -30,6 +30,7 @@ function plan(locale: string) {
   return createDistanceTrainingPlan(
     messages(locale).runningPlanPages.plans["10k-training-plan"] as RunningPlan,
     locale,
+    messages(locale).runningPlanPages.derived,
   );
 }
 

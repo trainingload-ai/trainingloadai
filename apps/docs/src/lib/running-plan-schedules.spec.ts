@@ -23,7 +23,7 @@ function localizedCouchPlan(locale: string) {
   const messages = JSON.parse(readFileSync(messagePath, "utf8"));
   return createCouchTo5kPlan(
     messages.runningPlanPages.plans["couch-to-5k-training-plan"] as RunningPlan,
-    locale,
+    messages.runningPlanPages.derived,
   );
 }
 
@@ -36,6 +36,7 @@ function localizedDistancePlan(slug: "10k-training-plan", locale: string) {
   return createDistanceTrainingPlan(
     messages.runningPlanPages.plans[slug] as RunningPlan,
     locale,
+    messages.runningPlanPages.derived,
   );
 }
 
@@ -177,8 +178,10 @@ describe("shared official schedules in Docs", () => {
     "keeps all three %s SEO pages distinct and cross-linked",
     (locale) => {
       const first = localizedCouchPlan(locale);
-      const finish = createDistanceTrainingPlan(baseFiveKPlan, locale);
-      const improve = createIntermediateFiveKPlan(baseFiveKPlan, locale);
+      const path = new URL(`../../../../packages/messages/docs/${locale}.json`, import.meta.url);
+      const { runningPlanPages } = JSON.parse(readFileSync(path, "utf8"));
+      const finish = createDistanceTrainingPlan(baseFiveKPlan, locale, runningPlanPages.derived);
+      const improve = createIntermediateFiveKPlan(baseFiveKPlan, locale, runningPlanPages.derived);
       expect([
         first.templateSlug,
         finish.templateSlug,

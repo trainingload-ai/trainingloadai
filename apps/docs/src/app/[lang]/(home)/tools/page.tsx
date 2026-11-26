@@ -113,6 +113,7 @@ export default async function ToolsPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
+  const lactateCopy = await getLactateCopy(lang);
   const t = await getTranslations({ locale: lang, namespace: "tools.page" });
   const tCommon = await getTranslations({
     locale: lang,
@@ -170,21 +171,21 @@ export default async function ToolsPage({
   const tools = [
     {
       key: "lactateCurveCalculator",
-      title: getLactateCopy(lang).title,
-      description: getLactateCopy(lang).description,
+      title: lactateCopy.title,
+      description: lactateCopy.description,
       href: withLocalePath(lang, "/lactate-curve-calculator"),
       icon: FlaskConical,
       tone: toolTones.physiology,
       signal: "LT1 / LT2",
       type: ui.training,
-      bestFor: getLactateCopy(lang).inputTitle,
-      output: getLactateCopy(lang).report,
-      question: getLactateCopy(lang).instructionsTitle,
+      bestFor: lactateCopy.inputTitle,
+      output: lactateCopy.report,
+      question: lactateCopy.instructionsTitle,
       docsHref: withLocalePath(
         lang,
         "/docs/metrics/physiology/lactate-threshold",
       ),
-      docsLabel: getLactateCopy(lang).methodsTitle,
+      docsLabel: lactateCopy.methodsTitle,
       featured: false,
     },
     {

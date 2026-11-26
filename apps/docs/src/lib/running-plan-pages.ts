@@ -1,4 +1,3 @@
-import messages from "@trainingloadai/messages/docs-copy/running-plan-pages.json";
 import {
   getRunPlanTemplate,
   normalizePlanTemplateLocale,
@@ -94,9 +93,9 @@ export type RunningPlan = {
 
 export function createCouchTo5kPlan(
   localizedPlan: RunningPlan,
-  lang = "en",
+  messages: RunningPlanCopy,
 ): RunningPlan {
-  const loopLinks = productLoopRelatedLinks(lang).filter(
+  const loopLinks = messages.productLoopRelatedLinks.filter(
     ([, href]) => href !== "/vdot-calculator",
   );
   return {
@@ -104,54 +103,51 @@ export function createCouchTo5kPlan(
     slug: "couch-to-5k-training-plan",
     routePath: "/couch-to-5k-training-plan",
     templateSlug: "first-5k",
-    planChooser: createFiveKPlanChooser(lang, "couch"),
+    planChooser: createFiveKPlanChooser(messages, "couch"),
     relatedLinks: mergeRelatedLinks(
       mergeRelatedLinks(
         localizedPlan.relatedLinks,
-        fiveKHubRelatedLink(lang, "couch"),
+        [messages.fiveKHubRelatedLink],
       ),
       loopLinks,
     ),
   };
 }
 
-type PlanCopyLocale =
-  | "en"
-  | "zh"
-  | "zh-hant"
-  | "ja"
-  | "ko"
-  | "de"
-  | "fr"
-  | "es"
-  | "it"
-  | "pt-BR";
-
-function planCopyLocale(lang: string): PlanCopyLocale {
-  if (lang === "zh-hant") return "zh-hant";
-  if (lang.startsWith("zh")) return "zh";
-  if (lang === "ja") return "ja";
-  if (lang === "ko") return "ko";
-  if (lang === "de") return "de";
-  if (lang === "fr") return "fr";
-  if (lang === "es") return "es";
-  if (lang === "it") return "it";
-  if (lang === "pt-BR" || lang.toLowerCase() === "pt-br") return "pt-BR";
-  return "en";
-}
-
 type FiveKChooserVariant = "couch" | "finish" | "intermediate";
 type RaceDistance = "10k" | "half-marathon" | "marathon";
 
-const fiveKChooserLabels = messages.fiveKChooserLabels;
+export type RunningPlanCopy = {
+  fiveKChooserLabels: { current: string; options: string[] };
+  raceDistanceChooserCopy: Record<
+    RaceDistance,
+    Omit<NonNullable<RunningPlan["planChooser"]>, "options"> & {
+      options: Array<Omit<NonNullable<RunningPlan["planChooser"]>["options"][number], "href">>;
+    }
+  >;
+  fiveKHubRelatedLink: [string, string, string];
+  productLoopRelatedLinks: Array<[string, string, string]>;
+  fiveKCopy: Partial<RunningPlan> & Pick<Required<RunningPlan>, "planChooser">;
+  finishFiveKDetails: Pick<
+    RunningPlan,
+    | "previewTitle"
+    | "previewSubtitle"
+    | "previewRows"
+    | "contentTitle"
+    | "contentSubtitle"
+    | "contentSections"
+  >;
+  templateMetaDescription: string;
+  intermediateLink: [string, string, string];
+  intermediateFiveK: IntermediateFiveKLocaleCopy;
+};
 
 function createFiveKPlanChooser(
-  lang: string,
+  messages: RunningPlanCopy,
   current: FiveKChooserVariant,
 ): NonNullable<RunningPlan["planChooser"]> {
-  const locale = planCopyLocale(lang);
-  const source = fiveKCopyForLocale(locale).planChooser ?? messages.fiveKCopy.en.planChooser;
-  const labels = fiveKChooserLabels[locale];
+  const source = messages.fiveKCopy.planChooser;
+  const labels = messages.fiveKChooserLabels;
   const routes = [
     "/couch-to-5k-training-plan",
     "/5k-training-plan",
@@ -169,13 +165,11 @@ function createFiveKPlanChooser(
   };
 }
 
-const raceDistanceChooserCopy = messages.raceDistanceChooserCopy;
-
 function createRaceDistancePlanChooser(
-  lang: string,
+  messages: RunningPlanCopy,
   distance: RaceDistance,
 ): NonNullable<RunningPlan["planChooser"]> {
-  const copy = raceDistanceChooserCopy[planCopyLocale(lang)][distance];
+  const copy = messages.raceDistanceChooserCopy[distance];
   const basePath =
     distance === "10k"
       ? "/10k-training-plan"
@@ -194,36 +188,6 @@ function createRaceDistancePlanChooser(
   };
 }
 
-const fiveKHubRelatedLinksByLocale =
-  messages.fiveKHubRelatedLinksByLocale as Record<
-  PlanCopyLocale,
-  [string, string, string]
->;
-
-function fiveKHubRelatedLink(
-  lang: string,
-  variant: Exclude<FiveKChooserVariant, "finish">,
-): Array<[string, string, string]> {
-  const locale = planCopyLocale(lang);
-  if (variant === "couch") {
-    return [fiveKHubRelatedLinksByLocale[locale]];
-  }
-  return [];
-}
-
-const productLoopRelatedLinksByLocale =
-  messages.productLoopRelatedLinksByLocale as Record<
-  PlanCopyLocale,
-  Array<[string, string, string]>
->;
-
-/** Action links that keep distance hubs inside the product loop. */
-export function productLoopRelatedLinks(
-  lang: string,
-): Array<[string, string, string]> {
-  return productLoopRelatedLinksByLocale[planCopyLocale(lang)];
-}
-
 function mergeRelatedLinks(
   existing: Array<[string, string, string]> | undefined,
   extras: Array<[string, string, string]>,
@@ -238,52 +202,16 @@ function mergeRelatedLinks(
   return merged;
 }
 
-function fiveKCopyForLocale(locale: PlanCopyLocale): Partial<RunningPlan> {
-  const copies = messages.fiveKCopy;
-  const copy =
-    locale === "en" || locale === "zh"
-      ? copies[locale]
-      : { ...copies[locale === "zh-hant" ? "zh" : "en"], ...copies[locale] };
-
-  return {
-    ...copy,
-    previewRows: copy.previewRows as RunningPlan["previewRows"],
-    contentSections: copy.contentSections as RunningPlan["contentSections"],
-    aiSignals: copy.aiSignals as RunningPlan["aiSignals"],
-    relatedLinks: copy.relatedLinks as RunningPlan["relatedLinks"],
-    faq: copy.faq as RunningPlan["faq"],
-  };
-}
-
-const finishFiveKDetails =
-  messages.finishFiveKDetails as Record<
-  PlanCopyLocale,
-  Pick<
-    RunningPlan,
-    | "previewTitle"
-    | "previewSubtitle"
-    | "previewRows"
-    | "contentTitle"
-    | "contentSubtitle"
-    | "contentSections"
-  >
->;
-
 export function createFiveKTrainingPlan(
   basePlan: RunningPlan,
-  lang = "en",
+  lang: string,
+  messages: RunningPlanCopy,
 ): RunningPlan {
-  const locale = planCopyLocale(lang);
-  const copy = fiveKCopyForLocale(locale);
+  const copy = messages.fiveKCopy;
   const templateLocale = normalizePlanTemplateLocale(lang);
   const localized = getRunPlanTemplate("finish-5k")!.copy[templateLocale];
-  const details = finishFiveKDetails[locale];
-  const { templateMetaDescriptions } = messages;
   const existingRelatedLinks = copy.relatedLinks ?? basePlan.relatedLinks ?? [];
   const [firstRelated, ...restRelated] = existingRelatedLinks;
-  const intermediateLink = messages.intermediateLinksByLocale[
-    locale
-  ] as [string, string, string];
   return {
     ...basePlan,
     ...copy,
@@ -293,16 +221,15 @@ export function createFiveKTrainingPlan(
     title: copy.title ?? basePlan.title,
     subtitle: copy.subtitle ?? localized.description,
     promise: copy.promise ?? localized.promise,
-    ...details,
-    metaDescription:
-      templateMetaDescriptions[locale] ?? templateMetaDescriptions.en,
+    ...messages.finishFiveKDetails,
+    metaDescription: messages.templateMetaDescription,
     relatedLinks: mergeRelatedLinks(
       [
         ...(firstRelated ? [firstRelated] : []),
-        intermediateLink,
+        messages.intermediateLink,
         ...restRelated,
       ],
-      productLoopRelatedLinks(lang),
+      messages.productLoopRelatedLinks,
     ),
   };
 }
@@ -326,22 +253,16 @@ type IntermediateFiveKLocaleCopy = {
   faq: RunningPlan["faq"];
 };
 
-const intermediateFiveKCopyByLocale =
-  messages.intermediateFiveKCopyByLocale as Record<
-  PlanCopyLocale,
-  IntermediateFiveKLocaleCopy
->;
-
 export function createIntermediateFiveKPlan(
   basePlan: RunningPlan,
-  lang = "en",
+  lang: string,
+  messages: RunningPlanCopy,
 ): RunningPlan {
-  const finish = createFiveKTrainingPlan(basePlan, lang);
-  const locale = planCopyLocale(lang);
-  const sourceCopy = fiveKCopyForLocale(locale);
+  const finish = createFiveKTrainingPlan(basePlan, lang, messages);
+  const sourceCopy = messages.fiveKCopy;
   const localized =
     getRunPlanTemplate("improve-5k")!.copy[normalizePlanTemplateLocale(lang)];
-  const copy = intermediateFiveKCopyByLocale[locale];
+  const copy = messages.intermediateFiveK;
   return {
     ...finish,
     slug: "5k-training-plan-intermediate",
@@ -358,7 +279,7 @@ export function createIntermediateFiveKPlan(
     previewTitle: sourceCopy.previewTitle ?? finish.previewTitle,
     previewSubtitle: sourceCopy.previewSubtitle ?? finish.previewSubtitle,
     previewRows: copy.previewRows,
-    planChooser: createFiveKPlanChooser(lang, "intermediate"),
+    planChooser: createFiveKPlanChooser(messages, "intermediate"),
     contentTitle: copy.contentTitle,
     contentSubtitle: copy.contentSubtitle,
     contentSections: copy.contentSections,
@@ -366,7 +287,7 @@ export function createIntermediateFiveKPlan(
     forItems: copy.forItems,
     relatedLinks: mergeRelatedLinks(
       [copy.standardFinishLink],
-      productLoopRelatedLinks(lang),
+      messages.productLoopRelatedLinks,
     ),
     faq: copy.faq,
   };
@@ -374,85 +295,89 @@ export function createIntermediateFiveKPlan(
 
 export function createHalfMarathonTrainingPlan(
   basePlan: RunningPlan,
-  lang = "en",
+  lang: string,
+  messages: RunningPlanCopy,
 ): RunningPlan {
   return {
     ...basePlan,
     slug: "half-marathon-training-plan",
     routePath: "/half-marathon-training-plan",
     templateSlug: "finish-half-marathon",
-    planChooser: createRaceDistancePlanChooser(lang, "half-marathon"),
+    planChooser: createRaceDistancePlanChooser(messages, "half-marathon"),
     howToTotalTime: isHalfMarathonIndexedLocale(lang)
       ? HALF_MARATHON_PLAN_FACTS.howToTotalTime
       : basePlan.howToTotalTime,
     relatedLinks: mergeRelatedLinks(
       basePlan.relatedLinks,
-      productLoopRelatedLinks(lang),
+      messages.productLoopRelatedLinks,
     ),
   };
 }
 
 export function createMarathonTrainingPlan(
   basePlan: RunningPlan,
-  lang = "en",
+  lang: string,
+  messages: RunningPlanCopy,
 ): RunningPlan {
   return {
     ...basePlan,
     slug: "marathon-training-plan",
     routePath: "/marathon-training-plan",
     templateSlug: "finish-marathon",
-    planChooser: createRaceDistancePlanChooser(lang, "marathon"),
+    planChooser: createRaceDistancePlanChooser(messages, "marathon"),
     howToTotalTime: isMarathonIndexedLocale(lang)
       ? MARATHON_PLAN_FACTS.howToTotalTime
       : basePlan.howToTotalTime,
     relatedLinks: mergeRelatedLinks(
       basePlan.relatedLinks,
-      productLoopRelatedLinks(lang),
+      messages.productLoopRelatedLinks,
     ),
   };
 }
 
 export function createTenKTrainingPlan(
   basePlan: RunningPlan,
-  lang = "en",
+  lang: string,
+  messages: RunningPlanCopy,
 ): RunningPlan {
   return {
     ...basePlan,
     slug: "10k-training-plan",
     routePath: "/10k-training-plan",
     templateSlug: "finish-10k",
-    planChooser: createRaceDistancePlanChooser(lang, "10k"),
+    planChooser: createRaceDistancePlanChooser(messages, "10k"),
     howToTotalTime: isTenKIndexedLocale(lang)
       ? TEN_K_PLAN_FACTS.howToTotalTime
       : basePlan.howToTotalTime,
     relatedLinks: mergeRelatedLinks(
       basePlan.relatedLinks,
-      productLoopRelatedLinks(lang),
+      messages.productLoopRelatedLinks,
     ),
   };
 }
 
 export function createDistanceTrainingPlan(
   basePlan: RunningPlan,
-  lang = "en",
+  lang: string,
+  messages: RunningPlanCopy,
 ): RunningPlan {
   if (basePlan.slug === "5k-training-plan") {
-    return createFiveKTrainingPlan(basePlan, lang);
+    return createFiveKTrainingPlan(basePlan, lang, messages);
   }
   if (basePlan.slug === "10k-training-plan") {
-    return createTenKTrainingPlan(basePlan, lang);
+    return createTenKTrainingPlan(basePlan, lang, messages);
   }
   if (basePlan.slug === "half-marathon-training-plan") {
-    return createHalfMarathonTrainingPlan(basePlan, lang);
+    return createHalfMarathonTrainingPlan(basePlan, lang, messages);
   }
   if (basePlan.slug === "marathon-training-plan") {
-    return createMarathonTrainingPlan(basePlan, lang);
+    return createMarathonTrainingPlan(basePlan, lang, messages);
   }
   return {
     ...basePlan,
     relatedLinks: mergeRelatedLinks(
       basePlan.relatedLinks,
-      productLoopRelatedLinks(lang),
+      messages.productLoopRelatedLinks,
     ),
     routePath: `/${basePlan.slug}`,
   };

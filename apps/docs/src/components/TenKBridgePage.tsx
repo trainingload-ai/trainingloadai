@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
 import { ArrowRight, Check } from "lucide-react";
-import { FiveKProductPreview } from "@/app/[lang]/(home)/5k-training-plan/_components/FiveKProductPreview";
+import { FiveKProductPreview, type FiveKPreviewCopy } from "@/app/[lang]/(home)/5k-training-plan/_components/FiveKProductPreview";
 import styles from "@/app/[lang]/(home)/5k-training-plan/five-k-training-plan.module.css";
-import { RunningPlanSchedule } from "@/components/RunningPlanSchedule";
+import { RunningPlanSchedule, type RunningPlanScheduleCopy } from "@/components/RunningPlanSchedule";
 import { TrackedLink } from "@/components/TrackedLink";
 import { getRunningPlanSchedule } from "@/lib/running-plan-schedules";
 import {
@@ -59,9 +59,13 @@ export function tenKBridgeMetadata(
 export function TenKBridgePage({
   lang,
   slug,
+  previewCopy,
+  scheduleCopy,
 }: {
   lang: string;
   slug: BridgePlanSlug;
+  previewCopy: FiveKPreviewCopy;
+  scheduleCopy: RunningPlanScheduleCopy;
 }) {
   const { labels, bridges } = runningPlanIntentContent(lang);
   const copy = bridges[slug];
@@ -203,6 +207,7 @@ export function TenKBridgePage({
             </div>
             <div>
               <FiveKProductPreview
+                copy={previewCopy}
                 lang={lang}
                 planSlug="10k-training-plan"
                 distance="10K"
@@ -276,6 +281,7 @@ export function TenKBridgePage({
             {labels.showFoundation}
           </summary>
           <RunningPlanSchedule
+            copy={scheduleCopy}
             schedule={{ ...foundation, title: labels.foundationSchedule }}
             slug={slug}
             templateSlug="first-5k"
@@ -289,6 +295,7 @@ export function TenKBridgePage({
       )}
 
       <RunningPlanSchedule
+        copy={scheduleCopy}
         schedule={
           isCouch ? { ...schedule, title: labels.tenKSchedule } : schedule
         }

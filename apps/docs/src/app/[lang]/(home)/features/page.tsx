@@ -1,4 +1,3 @@
-import messages from "@trainingloadai/messages/docs-copy/features.json";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -51,28 +50,6 @@ const coreFeatureIcons = new Set<keyof typeof featureIconMap>([
   "BarChart3",
   "Bot",
 ]);
-
-type FeaturesMcpLocale =
-  | "en"
-  | "zh"
-  | "zh-hant"
-  | "ja"
-  | "ko"
-  | "de"
-  | "fr"
-  | "es"
-  | "it"
-  | "pt-BR";
-
-const mcpCopyByLang: Record<
-  FeaturesMcpLocale,
-  {
-    eyebrow: string;
-    title: string;
-    text: string;
-    cta: string;
-  }
-> = messages;
 
 function getSiteUrl() {
   const raw = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.trainingload.ai";
@@ -330,7 +307,6 @@ export default async function FeaturesPage({
     (item) => !coreFeatureIcons.has(item.iconKey),
   );
   const expandDemoLabel = ui.expandDemoLabel ?? "Expand demo";
-  const mcpCopy = mcpCopyByLang[lang as FeaturesMcpLocale] ?? mcpCopyByLang.en;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -435,20 +411,20 @@ export default async function FeaturesPage({
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="max-w-3xl">
             <div className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-              {mcpCopy.eyebrow}
+              {t("mcpShowcase.eyebrow")}
             </div>
             <h2 className="mt-3 text-3xl font-black tracking-tight md:text-4xl">
-              {mcpCopy.title}
+              {t("mcpShowcase.title")}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-neutral-400">
-              {mcpCopy.text}
+              {t("mcpShowcase.text")}
             </p>
           </div>
           <Link
             href={`${prefix}/features/mcp`}
             className="inline-flex h-11 items-center gap-2 rounded-compact bg-emerald-400 px-5 text-sm font-semibold text-neutral-950 hover:bg-emerald-300"
           >
-            {mcpCopy.cta}
+            {t("mcpShowcase.cta")}
             <ArrowRight className="size-4" />
           </Link>
         </div>
@@ -656,7 +632,13 @@ export default async function FeaturesPage({
   return (
     <ClientMessages
       locale={lang}
-      namespaces={["home.demo.coach", "home.demo.metric"]}
+      namespaces={[
+        "home.demo.calendar",
+        "home.demo.coach",
+        "home.demo.dashboard",
+        "home.demo.metric",
+        "home.demo.plan",
+      ]}
     >
       {content}
     </ClientMessages>

@@ -197,7 +197,7 @@ export default async function PlanCollectionPage({
       slug,
     ),
   );
-  const rpeCopy = getRpeScaleContent(lang);
+  const rpeCopy = await getRpeScaleContent(lang);
   const labels = catalogLabels(lang);
   const templateLocale = normalizePlanTemplateLocale(lang);
   const plans = RUN_PLAN_TEMPLATES.map((template) => {

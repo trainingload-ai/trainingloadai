@@ -55,7 +55,7 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const copy = getRpeScaleContent(lang);
+  const copy = await getRpeScaleContent(lang);
   const siteUrl = getSiteUrl();
   const pageUrl = `${siteUrl}${localePrefix(lang)}${RPE_SCALE_PATH}`;
 
@@ -92,7 +92,7 @@ export default async function RpeScalePage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const copy = getRpeScaleContent(lang);
+  const copy = await getRpeScaleContent(lang);
   const prefix = localePrefix(lang);
   const siteUrl = getSiteUrl();
   const pageUrl = `${siteUrl}${prefix}${RPE_SCALE_PATH}`;

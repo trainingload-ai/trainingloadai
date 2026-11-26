@@ -1,10 +1,29 @@
-import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { createTranslator } from "next-intl";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   officialPlanTemplateHeading,
   officialPlanTemplateMetadata,
   type OfficialPlanSlug,
 } from "./OfficialPlanTemplateDetailPage";
+
+vi.mock("next-intl/server", () => ({
+  getTranslations: ({
+    locale,
+    namespace,
+  }: {
+    locale: string;
+    namespace: string;
+  }) => {
+    const path = new URL(
+      `../../../../packages/messages/docs/${locale}.json`,
+      import.meta.url,
+    );
+    const messages = JSON.parse(readFileSync(path, "utf8"));
+    return Promise.resolve(createTranslator({ locale, namespace, messages }));
+  },
+}));
 
 const routes: Array<{
   slug: OfficialPlanSlug;
@@ -46,11 +65,11 @@ const routes: Array<{
 describe("official race-plan long-tail SEO", () => {
   it.each(routes)(
     "owns a distinct intent and canonical URL for $slug",
-    ({ slug, path, titleIntent }) => {
-      const metadata = officialPlanTemplateMetadata({ lang: "zh", slug });
+    async ({ slug, path, titleIntent }) => {
+      const metadata = await officialPlanTemplateMetadata({ lang: "zh", slug });
 
       expect(String(metadata.title)).toContain(titleIntent);
-      expect(officialPlanTemplateHeading({ lang: "zh", slug })).toBe(
+      expect(await officialPlanTemplateHeading({ lang: "zh", slug })).toBe(
         titleIntent,
       );
       expect(String(metadata.alternates?.canonical)).toBe(
@@ -65,23 +84,24 @@ describe("official race-plan long-tail SEO", () => {
     },
   );
 
-  it("keeps all six Chinese long-tail titles distinct", () => {
-    const titles = routes.map(({ slug }) =>
-      String(officialPlanTemplateMetadata({ lang: "zh", slug }).title),
+  it("keeps all six Chinese long-tail titles distinct", async () => {
+    const metadata = await Promise.all(
+      routes.map(({ slug }) => officialPlanTemplateMetadata({ lang: "zh", slug })),
     );
+    const titles = metadata.map(({ title }) => String(title));
 
     expect(new Set(titles).size).toBe(routes.length);
   });
 
-  it("keeps non-indexed locales out of the index", () => {
-    const metadata = officialPlanTemplateMetadata({
+  it("keeps non-indexed locales out of the index", async () => {
+    const metadata = await officialPlanTemplateMetadata({
       lang: "nl",
       slug: "improve-10k",
     });
 
     expect(metadata.robots).toMatchObject({ index: false, follow: true });
     expect(
-      officialPlanTemplateMetadata({ lang: "fr", slug: "improve-10k" }).robots,
+      (await officialPlanTemplateMetadata({ lang: "fr", slug: "improve-10k" })).robots,
     ).toMatchObject({ index: false, follow: true });
   });
 });

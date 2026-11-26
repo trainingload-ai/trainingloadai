@@ -1,7 +1,6 @@
 "use client";
 
-import messages from "@trainingloadai/messages/docs-copy/home-calendar-demo.json";
-import { formatDemoMessage } from "./home-demo/shared/format-demo-message";
+import { useTranslations } from "next-intl";
 import React from "react";
 import dayjs, { type Dayjs } from "dayjs";
 import {
@@ -153,7 +152,7 @@ type CalendarDemoCopy = {
   activityTab: string;
   trainingTab: string;
   planCycleLabel: string;
-  planWorkoutCount: { one?: string; other: string };
+  planWorkoutCount: (count: number) => string;
   noPlannedTraining: string;
   noActivities: string;
   summaryScope: {
@@ -220,13 +219,6 @@ type CalendarDemoLocale =
   | "it"
   | "pt-BR";
 
-const copyByLang: Record<CalendarDemoLocale, CalendarDemoCopy> = messages;
-
-function formatPlanWorkoutCount(copy: CalendarDemoCopy["planWorkoutCount"], count: number): string {
-  const template = count === 1 ? copy.one ?? copy.other : copy.other;
-  return formatDemoMessage(template, { count });
-}
-
 const INTL_LOCALE_BY_LANG: Record<CalendarDemoLocale, string> = {
   en: "en",
   zh: "zh-CN",
@@ -254,19 +246,15 @@ const DAYJS_LOCALE_BY_LANG: Record<CalendarDemoLocale, string> = {
 };
 
 function resolveLocale(lang: string): CalendarDemoLocale {
-  if (lang in copyByLang) return lang as CalendarDemoLocale;
+  if (lang in INTL_LOCALE_BY_LANG) return lang as CalendarDemoLocale;
   const lower = lang.toLowerCase();
   if (lower === "zh-hant" || lower === "zh-tw" || lower === "zh-hk") {
     return "zh-hant";
   }
   if (lower.startsWith("zh")) return "zh";
   if (lower.startsWith("pt")) return "pt-BR";
-  if (lower in copyByLang) return lower as CalendarDemoLocale;
+  if (lower in INTL_LOCALE_BY_LANG) return lower as CalendarDemoLocale;
   return "en";
-}
-
-function getCopy(lang: string): CalendarDemoCopy {
-  return copyByLang[resolveLocale(lang)];
 }
 
 function getIntlLocale(lang: string) {
@@ -484,9 +472,7 @@ function createDemoPlanWorkout(args: Omit<DemoPlanWorkout, "blocks">) {
   } satisfies DemoPlanWorkout;
 }
 
-function buildCalendarDemoPayload(lang: string): CalendarDemoPayload {
-  const copy = getCopy(lang);
-
+function buildCalendarDemoPayload(copy: CalendarDemoCopy): CalendarDemoPayload {
   return {
     month: "2026-06-01",
     today: "2026-06-17",
@@ -686,10 +672,6 @@ function buildCalendarDemoPayload(lang: string): CalendarDemoPayload {
   };
 }
 
-async function fetchCalendarDemoPayload(lang: string) {
-  return buildCalendarDemoPayload(lang);
-}
-
 function generateCalendarWeeks(month: Dayjs, lang: string): Dayjs[][] {
   const dayjsLocale = getDayjsLocale(lang);
   const firstOfMonth = month.locale(dayjsLocale).startOf("month");
@@ -764,7 +746,11 @@ function buildRangeStats(args: {
   return result;
 }
 
-function useCalendarDemoViewModel(payload: CalendarDemoPayload, lang: string) {
+function useCalendarDemoViewModel(
+  payload: CalendarDemoPayload,
+  lang: string,
+  copy: CalendarDemoCopy,
+) {
   const [currentMonth, setCurrentMonth] = React.useState(() =>
     dayjs(payload.month).startOf("month"),
   );
@@ -843,8 +829,8 @@ function useCalendarDemoViewModel(payload: CalendarDemoPayload, lang: string) {
       defaultKey: "plan" as const,
       plan: {
         key: "plan" as const,
-        title: getCopy(lang).planProgressTitle,
-        comparisonLabel: getCopy(lang).comparisonLabelPlan,
+        title: copy.planProgressTitle,
+        comparisonLabel: copy.comparisonLabelPlan,
         stats: buildRangeStats({
           start: range.startOfWeek,
           end: planProgressEnd,
@@ -860,8 +846,8 @@ function useCalendarDemoViewModel(payload: CalendarDemoPayload, lang: string) {
       },
       month: {
         key: "month" as const,
-        title: getCopy(lang).monthOverview,
-        comparisonLabel: getCopy(lang).comparisonLabelMonth,
+        title: copy.monthOverview,
+        comparisonLabel: copy.comparisonLabelMonth,
         stats: buildRangeStats({
           start: monthStart,
           end: monthEnd,
@@ -876,7 +862,7 @@ function useCalendarDemoViewModel(payload: CalendarDemoPayload, lang: string) {
         }),
       },
     };
-  }, [activitiesByDate, currentMonth, lang, planProgressEnd, range, tssByDate]);
+  }, [activitiesByDate, currentMonth, copy, planProgressEnd, range, tssByDate]);
 
   return {
     currentMonth,
@@ -1348,7 +1334,7 @@ function CalendarDemoDaySheet({
                   {copy.planCycleLabel}
                 </div>
                 <div className="mt-0.5 truncate text-sm font-semibold">
-                  {formatPlanWorkoutCount(copy.planWorkoutCount, planWorkouts.length)}
+                  {copy.planWorkoutCount(planWorkouts.length)}
                 </div>
               </div>
             ) : null}
@@ -1629,14 +1615,46 @@ export function HomeCalendarDemo({
   lang: string;
   variant?: "preview" | "expanded";
 }) {
-  const [payload, setPayload] = React.useState<CalendarDemoPayload>(() =>
-    buildCalendarDemoPayload(lang),
+  const t = useTranslations("home.demo.calendar");
+  const copy = React.useMemo<CalendarDemoCopy>(
+    () => ({
+      overview: t.raw("overview") as CalendarDemoCopy["overview"],
+      monthModeLabel: t("monthModeLabel"),
+      weekModeLabel: t("weekModeLabel"),
+      today: t("today"),
+      addButton: t("addButton"),
+      calendarSubscriptionButton: t("calendarSubscriptionButton"),
+      viewDay: t("viewDay"),
+      selectedDateLabel: t("selectedDateLabel"),
+      loadLabel: t("loadLabel"),
+      activityTab: t("activityTab"),
+      trainingTab: t("trainingTab"),
+      planCycleLabel: t("planCycleLabel"),
+      planWorkoutCount: (count) => t("planWorkoutCount", { count }),
+      noPlannedTraining: t("noPlannedTraining"),
+      noActivities: t("noActivities"),
+      summaryScope: t.raw("summaryScope") as CalendarDemoCopy["summaryScope"],
+      planProgressTitle: t("planProgressTitle"),
+      monthOverview: t("monthOverview"),
+      comparisonLabelPlan: t("comparisonLabelPlan"),
+      comparisonLabelMonth: t("comparisonLabelMonth"),
+      delta: t.raw("delta") as CalendarDemoCopy["delta"],
+      summary: t.raw("summary") as CalendarDemoCopy["summary"],
+      workoutMeta: t.raw("workoutMeta") as CalendarDemoCopy["workoutMeta"],
+      sportLabels: t.raw("sportLabels") as CalendarDemoCopy["sportLabels"],
+      workoutNames: t.raw("workoutNames") as CalendarDemoCopy["workoutNames"],
+      workoutNotes: t.raw("workoutNotes") as CalendarDemoCopy["workoutNotes"],
+      activityNames: t.raw("activityNames") as CalendarDemoCopy["activityNames"],
+      distanceUnit: t("distanceUnit"),
+      minuteUnit: t("minuteUnit"),
+    }),
+    [t],
   );
+  const payload = React.useMemo(() => buildCalendarDemoPayload(copy), [copy]);
   const displayMode = "month" as const;
   const [navigationDirection, setNavigationDirection] = React.useState<1 | -1>(
     1,
   );
-  const copy = React.useMemo(() => getCopy(lang), [lang]);
   const todayDate = React.useMemo(() => dayjs(payload.today), [payload.today]);
   const {
     currentMonth,
@@ -1653,24 +1671,12 @@ export function HomeCalendarDemo({
     tssByDate,
     range,
     summaryScopes,
-  } = useCalendarDemoViewModel(payload, lang);
+  } = useCalendarDemoViewModel(payload, lang, copy);
   const daySheetKey = React.useMemo(
     () =>
       `${selectedDate.format("YYYY-MM-DD")}|${selectedPlanWorkouts.map((w) => w.id).join(",")}|${summaryScopes.defaultKey}`,
     [selectedDate, selectedPlanWorkouts, summaryScopes.defaultKey],
   );
-
-  React.useEffect(() => {
-    let ignore = false;
-
-    void fetchCalendarDemoPayload(lang).then((data) => {
-      if (!ignore) setPayload(data);
-    });
-
-    return () => {
-      ignore = true;
-    };
-  }, [lang]);
 
   const applySelectedDate = React.useCallback(
     (nextDate: Dayjs) => {

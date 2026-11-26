@@ -18,6 +18,18 @@ import {
   type BridgePlanSlug,
 } from "./running-plan-intents";
 
+function bridgeCopy(locale: string) {
+  const path = new URL(`../../../../packages/messages/docs/${locale}.json`, import.meta.url);
+  const messages = JSON.parse(readFileSync(path, "utf8"));
+  return {
+    previewCopy: messages.runningPlanPages.productPreview,
+    scheduleCopy: {
+      rpe: messages.rpeScale.content,
+      workoutStructure: messages.runningPlanPages.workoutStructure,
+    },
+  };
+}
+
 const locales = ["en", "zh", "zh-hant", "ja"];
 
 function shape(value: unknown): unknown {
@@ -77,7 +89,7 @@ describe("running-plan long-tail content", () => {
       expect(variant?.trainingDaysPerWeek).toBe(3);
     }
     const html = renderToStaticMarkup(
-      <TenKBridgePage lang="zh" slug="couch-to-10k-training-plan" />,
+      <TenKBridgePage lang="zh" slug="couch-to-10k-training-plan" {...bridgeCopy("zh")} />,
     );
     expect(html).toContain("/plans/templates/first-5k?");
     expect(html).toContain("/plans/templates/finish-10k?");
@@ -95,7 +107,7 @@ describe("running-plan long-tail content", () => {
     "renders full bridge schedules and localized light/dark screenshots in %s",
     (lang) => {
       const html = renderToStaticMarkup(
-        <TenKBridgePage lang={lang} slug="5k-to-10k-training-plan" />,
+        <TenKBridgePage lang={lang} slug="5k-to-10k-training-plan" {...bridgeCopy(lang)} />,
       );
       expect(html.match(/data-plan-week=/g)).toHaveLength(10);
       expect(html.match(/<h1[\s>]/g)).toHaveLength(1);

@@ -1,3 +1,5 @@
+import frenchMessages from "@trainingloadai/messages/docs/fr.json";
+import simplifiedChineseMessages from "@trainingloadai/messages/docs/zh.json";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -20,7 +22,7 @@ describe("WorkoutStructurePreview", () => {
     const html = renderToStaticMarkup(
       <WorkoutStructurePreview
         structure={workout.definition.structure}
-        lang="zh"
+        copy={simplifiedChineseMessages.runningPlanPages.workoutStructure}
       />,
     );
 
@@ -38,7 +40,7 @@ describe("WorkoutStructurePreview", () => {
     const frenchHtml = renderToStaticMarkup(
       <WorkoutStructurePreview
         structure={workout.definition.structure}
-        lang="fr"
+        copy={frenchMessages.runningPlanPages.workoutStructure}
       />,
     );
     expect(frenchHtml).toContain(

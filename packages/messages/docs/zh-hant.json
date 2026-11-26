@@ -1,4 +1,671 @@
 {
+  "danielsRunningFormula": {
+    "content": {
+      "metadataTitle": "丹尼爾斯經典跑步訓練法：VDOT 與 E/M/T/I/R 完整指南 | Trainingload.ai",
+      "metadataDescription": "了解公開資料中的 Daniels 訓練原則、VDOT、E/M/T/I/R 強度，以及負責任的非官方適配計畫還需要哪些輸入。",
+      "eyebrow": "跑步訓練方法指南",
+      "title": "丹尼爾斯經典跑步訓練法：從 VDOT 到一份能執行的訓練計畫",
+      "subtitle": "理解 VDOT、E/M/T/I/R 各自解決什麼問題，並把當前跑力——而不是願望中的目標跑力——轉化為結構化計畫。",
+      "directAnswer": "Jack Daniels 系統化提出了一套基於跑步表現的訓練方法：以 VDOT 表示跑者當前能夠兌現的能力，再將訓練分為輕鬆、馬拉松、閾值、間歇與重複跑，讓不同 Workout 服務於不同的適應目標。",
+      "primaryCta": "計算我的當前 VDOT",
+      "secondaryCta": "查看訓練工具",
+      "toc": "本文內容",
+      "tocItems": [
+        [
+          "what",
+          "訓練法是什麼"
+        ],
+        [
+          "vdot",
+          "VDOT 是什麼"
+        ],
+        [
+          "paces",
+          "E/M/T/I/R 配速"
+        ],
+        [
+          "periodization",
+          "如何組成計畫"
+        ],
+        [
+          "mistakes",
+          "常見錯誤"
+        ],
+        [
+          "faq",
+          "常見問題"
+        ]
+      ],
+      "whatTitle": "什麼是丹尼爾斯經典跑步訓練法？",
+      "whatParagraphs": [
+        "它不只是一張配速表，而是把當前跑力、具明確目的的訓練強度、訓練量上限、恢復與比賽專項週期結合在一起。",
+        "《Daniels' Running Formula》第四版涵蓋訓練原則、VDOT、訓練強度、賽季規劃，以及從中距離到馬拉松等項目的應用。"
+      ],
+      "lawsTitle": "這套方法最有價值的核心思想",
+      "lawsText": "不同跑者可能憑藉最大攝氧能力、跑步經濟性、動作效率與耐受性的不同組合跑出相近成績。因此訓練計畫應從已展現的當前能力出發，並讓每次品質訓練都有明確目的。",
+      "vdotTitle": "VDOT 是訓練錨點，不是實驗室 VO₂max",
+      "vdotParagraphs": [
+        "VDOT 與氧氣利用能力有關，但不能直接等同於實驗室最大攝氧量或手錶估算值。它反映跑者當前能在比賽中兌現的綜合表現，也間接包含跑步經濟性的影響。",
+        "訓練配速應依照當前 VDOT。目標成績可以決定計畫方向，但不應在能力尚未達到前強行拉高訓練配速。"
+      ],
+      "paceTitle": "五種核心訓練強度",
+      "paceIntro": "這些字母代表 Workout 的訓練意圖，並不意味著五種強度應該平均分配；絕大多數跑量仍應保持輕鬆，品質訓練只在必要時安排。",
+      "intensities": [
+        {
+          "key": "E",
+          "name": "Easy｜輕鬆跑",
+          "purpose": "建立有氧能力、耐久性與恢復，也是多數長跑的基礎。",
+          "feel": "可以交談，呼吸平穩受控。",
+          "mistake": "把每次輕鬆跑都跑成中等強度。"
+        },
+        {
+          "key": "M",
+          "name": "Marathon｜馬拉松配速",
+          "purpose": "熟悉專項節奏、練習補給並建立比賽信心。",
+          "feel": "穩定可控，但持續時間越長疲勞越明顯。",
+          "mistake": "把 M 配速當成日常有氧跑的預設配速。"
+        },
+        {
+          "key": "T",
+          "name": "Threshold｜乳酸閾值",
+          "purpose": "提升可持續速度以及清除與耐受乳酸的能力。",
+          "feel": "舒適地吃力，只能說短句。",
+          "mistake": "把訓練跑成比賽，導致後半程失控。"
+        },
+        {
+          "key": "I",
+          "name": "Interval｜間歇跑",
+          "purpose": "累積接近最大有氧功率的有效訓練時間。",
+          "feel": "吃力但可控，單趟通常持續數分鐘。",
+          "mistake": "每一趟一開始就全力衝刺。"
+        },
+        {
+          "key": "R",
+          "name": "Repetition｜重複跑",
+          "purpose": "改善跑步經濟性、協調性、速度與高速跑時的放鬆度。",
+          "feel": "快速、流暢，組間恢復充裕。",
+          "mistake": "縮短恢復時間，把動作與速度訓練變成耐力測試。"
+        }
+      ],
+      "periodizationTitle": "這些強度如何組成一份訓練計畫",
+      "periodizationText": "計畫通常先建立穩定的有氧基礎，再發展跑步經濟性與品質能力，接著逐步貼近目標賽事的專項需求，最後減量調整。具體組合取決於目標距離、週期長度、當前跑量、可訓練日與恢復，而不只取決於 VDOT。",
+      "goalRows": [
+        [
+          "5K",
+          "E 打底，R 改善經濟性，I 提升有氧功率，T 提供持續能力"
+        ],
+        [
+          "10K",
+          "E 打底，T 提升耐力，I 使用較長間歇"
+        ],
+        [
+          "半程馬拉松",
+          "E 與長跑為主，結合 T 與受控專項訓練"
+        ],
+        [
+          "馬拉松",
+          "E 與長跑、M 專項、T、補給練習與賽前減量"
+        ]
+      ],
+      "mistakesTitle": "方法適配計畫需要避免的六個錯誤",
+      "mistakes": [
+        "按照目標 VDOT，而不是當前 VDOT 訓練。",
+        "只憑 VDOT 決定跑量，卻不評估當前週跑量。",
+        "連續安排兩個高強度訓練日。",
+        "同一週內同時大幅拉高跑量與強度。",
+        "漏訓後透過堆疊品質課來補課。",
+        "天氣炎熱、爬坡、海拔或疲勞明顯變化時仍死守固定配速。"
+      ],
+      "generatorTitle": "VDOT 本身不是一份完整計畫",
+      "generatorText": "VDOT 可以錨定強度，但負責任的計畫還需要近期跑量、長跑耐受度、可訓練日、恢復狀況、目標距離與可追溯的方法規則。Trainingload.ai 目前不發布 Daniels 命名或 Daniels 方法適配計畫。",
+      "generatorCta": "計算我的當前 VDOT",
+      "sourcesTitle": "資料來源與關係聲明",
+      "sourcesText": "Jack Daniels、《Daniels' Running Formula》與 VDOT 僅用於說明公開資料中的訓練原則與參考出處。Trainingload.ai 與 Jack Daniels、V.O2 及相關機構不存在隸屬、贊助、認證或背書關係。本頁為訓練教育指南，並非訓練計畫。",
+      "faqTitle": "常見問題",
+      "faq": [
+        [
+          "VDOT 等於最大攝氧量嗎？",
+          "不等於。VDOT 是基於跑步表現的訓練數值；實驗室 VO₂max 與手錶估算值雖然相關，但不能直接互換。"
+        ],
+        [
+          "應該按照當前 VDOT 還是目標 VDOT 訓練？",
+          "請按照當前 VDOT。目標成績可以決定計畫方向，但不能直接讓今天的訓練配速變快。"
+        ],
+        [
+          "多久更新一次 VDOT？",
+          "在有代表性的比賽或可控測試後再更新，不要因為每一次普通跑步而變動；已完成的 Workout 處方保持不變。"
+        ],
+        [
+          "這是官方 Daniels 計畫嗎？",
+          "不是。本頁為訓練教育指南，Trainingload.ai 目前不發布 Daniels 命名或 Daniels 方法適配計畫。"
+        ]
+      ],
+      "safety": "本文為訓練教育內容，不構成醫療建議。出現胸痛、暈厥、異常呼吸困難或持續加重的疼痛時，請停止訓練並尋求合格專業醫療協助。"
+    }
+  },
+  "rpeScale": {
+    "content": {
+      "metadataTitle": "RPE 是什麼？跑步 1–10 主觀強度表 | Trainingload.ai",
+      "metadataDescription": "了解跑步 RPE 1–10 強度表、談話測試，以及輕鬆跑、節奏跑、間歇與 5K 訓練應使用什麼 RPE，並比較 RPE、配速與心率。",
+      "keywords": [
+        "RPE 是什麼",
+        "RPE 強度",
+        "RPE 量表",
+        "跑步 RPE",
+        "主觀用力程度",
+        "談話測試"
+      ],
+      "shortTitle": "RPE 主觀強度表",
+      "eyebrow": "訓練強度指南",
+      "title": "RPE 是什麼？看懂跑步 1–10 主觀強度",
+      "subtitle": "弄清 RPE 3–4、5–6 和 7–9 應有的體感，學會以談話測試校驗強度，也理解可靠計畫為何不一定總要給出配速。",
+      "directAnswer": "RPE 是主觀用力程度評分，用來描述運動感覺有多吃力。Trainingload.ai 使用 1–10 分量表：1 代表幾乎沒有負荷，10 代表只能短時間維持的最大努力。它描述內部負荷，而非固定配速。",
+      "effortFirstLabel": "先判斷體感，再參考配速。",
+      "primaryCta": "查看 RPE 強度表",
+      "secondaryCta": "選擇 5K 計畫",
+      "toc": "本文內容",
+      "tocItems": [
+        [
+          "what-is-rpe",
+          "RPE 是什麼"
+        ],
+        [
+          "rpe-scale",
+          "RPE 1–10 強度表"
+        ],
+        [
+          "5k-plans",
+          "5K 計畫如何使用 RPE"
+        ],
+        [
+          "rpe-vs-pace-heart-rate",
+          "RPE、配速與心率"
+        ],
+        [
+          "ai-coach",
+          "AI 教練如何使用 RPE"
+        ],
+        [
+          "rpe-meanings",
+          "三種 RPE 的差異"
+        ],
+        [
+          "faq",
+          "常見問題"
+        ]
+      ],
+      "definitionTitle": "什麼是 RPE？",
+      "definitionParagraphs": [
+        "RPE 是主觀強度指標。它不只問跑了多快、心率多少，而是綜合呼吸、肌肉負擔與全身感受，判斷運動有多難。",
+        "傳統 Borg 量表常見 6–20 分版本，耐力訓練也常使用 0 或 1–10 分版本。Trainingload.ai 計畫統一使用 1–10 分。",
+        "炎熱、爬坡、逆風、疲勞、睡眠與陌生路線都會改變同一配速的代價。基線不足時可單獨使用 RPE；有可靠資料時則可結合配速與心率。"
+      ],
+      "scaleTitle": "跑步 RPE 1–10 強度表",
+      "scaleIntro": "同時觀察呼吸、說話能力、控制感與能否重複完成。",
+      "scaleHeaders": [
+        "RPE",
+        "強度",
+        "身體感覺",
+        "談話測試",
+        "典型訓練"
+      ],
+      "scaleRows": [
+        {
+          "id": "rpe-1-2",
+          "range": "1–2",
+          "label": "非常輕鬆",
+          "feel": "幾乎沒有壓力，動作放鬆",
+          "talkTest": "可以正常交談",
+          "training": "步行、熱身、恢復"
+        },
+        {
+          "id": "rpe-3-4",
+          "range": "3–4",
+          "label": "輕鬆",
+          "feel": "舒適、穩定、可控制",
+          "talkTest": "可以說完整句子",
+          "training": "輕鬆跑、恢復跑、跑走交替"
+        },
+        {
+          "id": "rpe-5-6",
+          "range": "5–6",
+          "label": "穩態",
+          "feel": "需要專注，但可以持續",
+          "talkTest": "可以說短句",
+          "training": "穩態跑、受控長跑"
+        },
+        {
+          "id": "rpe-7-8",
+          "range": "7–8",
+          "label": "較難",
+          "feel": "需要高度專注，仍能按計畫重複",
+          "talkTest": "只能說短語或幾個詞",
+          "training": "節奏跑、較長間歇、5K 強度"
+        },
+        {
+          "id": "rpe-9",
+          "range": "9",
+          "label": "非常難",
+          "feel": "接近最大，只能短時間維持",
+          "talkTest": "只能說一兩個詞",
+          "training": "短間歇、比賽後段"
+        },
+        {
+          "id": "rpe-10",
+          "range": "10",
+          "label": "最大努力",
+          "feel": "全力輸出，充分恢復前無法重複",
+          "talkTest": "無法說話",
+          "training": "短衝刺、終點衝刺"
+        }
+      ],
+      "scaleCaution": "這些是便於執行的體感線索，不是精確生理換算。RPE 無法對所有人一一對應到固定配速、最大心率百分比、乳酸值或訓練區間。",
+      "plansTitle": "三個官方 5K 計畫如何使用 RPE",
+      "plansIntro": "初學者減少強度決策，具備可靠基線後才逐步加入品質訓練。",
+      "plans": [
+        {
+          "title": "零基礎第一個 5K",
+          "range": "以 RPE 3–4 為主",
+          "description": "跑走訓練保持可以交談，再逐步延長跑步段；不需要編造目標配速。",
+          "href": "/couch-to-5k-training-plan"
+        },
+        {
+          "title": "穩定完成 5K",
+          "range": "RPE 3–6",
+          "description": "輕鬆跑和長跑保持 RPE 3–4，受控穩態訓練提高到 RPE 5–6。",
+          "href": "/5k-training-plan"
+        },
+        {
+          "title": "提升 5K 表現",
+          "range": "RPE 3–9",
+          "description": "輕鬆日保持輕鬆，節奏、間歇和 5K 專項達到 RPE 6–9。",
+          "href": "/5k-training-plan/intermediate"
+        }
+      ],
+      "compareTitle": "RPE、配速和心率應該看哪個？",
+      "compareIntro": "三個指標回答不同問題。可靠計畫會選擇最少但可信的指標。",
+      "comparisons": [
+        {
+          "title": "RPE",
+          "strength": "不需裝置，能立即反映炎熱、坡度、疲勞和睡眠。",
+          "limitation": "需要練習並保持相同量表定義。"
+        },
+        {
+          "title": "配速",
+          "strength": "近期成績提供可靠錨點時，目標具體且容易核對。",
+          "limitation": "地形、天氣、海拔與 GPS 誤差會改變代價。"
+        },
+        {
+          "title": "心率",
+          "strength": "可觀察心血管內部反應，適合檢視有氧趨勢。",
+          "limitation": "短間歇存在延遲，也受裝置、炎熱、補水與壓力影響。"
+        }
+      ],
+      "compareConclusion": "有可靠近期成績時，可用配速指導品質課、以 RPE 檢查當天代價；沒有錨點時，RPE 和談話測試比編造配速更穩妥。",
+      "coachTitle": "Trainingload.ai 的 AI 教練如何使用 RPE",
+      "coachParagraphs": [
+        "官方範本先由模型生成候選，再經結構校驗、審核與凍結。使用者開啟或建立範本時，模型不會重新改寫 Workout，RPE 與日程是穩定版本。",
+        "AI 客製計畫可讀取使用者授權的運動基線。沒有可靠近期 5K 成績時以 RPE 為主；基線可靠時可增加配速目標，同時保留 RPE 檢查當天狀態。"
+      ],
+      "coachSteps": [
+        {
+          "title": "讀取運動基線",
+          "description": "使用跑步歷史、連續跑能力、可訓練日與可靠近期成績。"
+        },
+        {
+          "title": "選擇強度錨點",
+          "description": "證據稀疏時使用 RPE；資料足夠才加入配速或 VDOT。"
+        },
+        {
+          "title": "保持訓練可執行",
+          "description": "每個步驟保留目的、體感提示、恢復要求與可理解的假設。"
+        }
+      ],
+      "meaningsTitle": "不要混淆三種 RPE",
+      "meaningsIntro": "這個縮寫出現在耐力計畫、訓練負荷與力量訓練中，但回答的問題不同。",
+      "meanings": [
+        {
+          "title": "Workout 步驟 RPE",
+          "description": "目前跑步訓練段應有多難。5K 日曆裡的 RPE 3–4 指的就是這個。"
+        },
+        {
+          "title": "Session RPE",
+          "description": "整次訓練完成後的總體難度，可結合時長估算內部訓練負荷。",
+          "href": "/training-load"
+        },
+        {
+          "title": "力量訓練 Set RPE",
+          "description": "一組動作距離力竭有多近，常結合剩餘重複次數解釋，不能直接套用到跑步間歇。",
+          "href": "/docs/planning/strength-workout-dsl"
+        }
+      ],
+      "calibrateTitle": "用前兩到三週校準自己的 RPE",
+      "calibrateIntro": "持續使用相同量表後，判斷會越來越穩定。",
+      "calibrateSteps": [
+        "看手錶前先說出體感等級，再檢查能否達到對應談話程度。",
+        "間歇訓練評價工作段，不要用組間恢復的感覺代替。",
+        "訓練後另記整節 Session RPE，不要直接複製最難的一刻。",
+        "連續數週比較相似路線與條件。"
+      ],
+      "mistakesTitle": "常見 RPE 錯誤",
+      "mistakes": [
+        "因為叫輕鬆跑，就把所有輕鬆跑評為 RPE 1–2。",
+        "因手錶配速看起來太慢，讓輕鬆日跑到 RPE 6。",
+        "把 RPE 當成心率、配速或功率的精確換算表。",
+        "只評價腿部不適或只看呼吸。",
+        "把力量訓練 RPE/RIR 直接用於整次跑步。",
+        "把 RPE 10 當成日常目標。"
+      ],
+      "faqTitle": "常見問題",
+      "faq": [
+        [
+          "RPE 是什麼意思？",
+          "RPE 是 Rating of Perceived Exertion，即主觀用力程度評分，綜合呼吸、肌肉負擔與整體努力感表示運動有多難。"
+        ],
+        [
+          "跑步 RPE 3–4 是什麼感覺？",
+          "應該輕鬆、穩定、可控制，可以說完整句子，呼吸比靜息明顯但不緊張。"
+        ],
+        [
+          "輕鬆跑應保持多少 RPE？",
+          "這些計畫中的輕鬆與恢復跑多為 RPE 3–4。天氣、坡度與疲勞會改變配速，但體感目標不變。"
+        ],
+        [
+          "5K 比賽通常是多少 RPE？",
+          "許多跑者會從較難但可控逐步提高到終點附近的非常難，約 RPE 7–9；只求完賽的初學者可刻意保持更低。"
+        ],
+        [
+          "沒有心率錶，可以只用 RPE 訓練嗎？",
+          "可以。RPE 配合談話測試足以指導有效強度；心率只是一個額外訊號，不能取代判斷。"
+        ],
+        [
+          "為什麼同樣配速每天 RPE 不同？",
+          "炎熱、風、坡度、睡眠、補水、壓力、身體狀況與累積疲勞都會改變同一配速的代價。"
+        ],
+        [
+          "RPE 能直接換算心率區間或配速嗎？",
+          "不能精確換算。個人能力、環境、運動類型與測量方法都會改變彼此關係。"
+        ],
+        [
+          "跑步 RPE 和力量訓練 RPE/RIR 有何差異？",
+          "跑步 RPE 描述一段或整次運動的主觀強度；力量 RPE 常與力竭前剩餘次數相關，因此同一數字含義不完全相同。"
+        ],
+        [
+          "何時應減速或停止？",
+          "無法維持計畫的談話或體感提示時先減速；胸痛、暈厥、異常呼吸困難或持續加重的疼痛時應停止並尋求專業醫療協助。"
+        ],
+        [
+          "初學者多久能學會判斷 RPE？",
+          "多數跑者連續兩到三週評價相似訓練後會更穩定。請使用相同量表和記錄時機。"
+        ]
+      ],
+      "sourcesTitle": "資料來源與適用範圍",
+      "sourceNote": "本指南依據主觀用力程度研究與公開運動強度指南，再轉化為 Trainingload.ai 計畫使用的 1–10 分語言。",
+      "safety": "本頁是訓練教育內容，不構成醫療建議。出現胸痛、暈厥、異常呼吸困難，或持續、加重的疼痛時，請停止訓練並尋求專業醫療協助。",
+      "relatedTitle": "把 RPE 強度表用到計畫中",
+      "related": [
+        [
+          "零基礎第一個 5K",
+          "/couch-to-5k-training-plan",
+          "從 RPE 3–4、可以交談的跑走訓練開始。"
+        ],
+        [
+          "穩定完成 5K",
+          "/5k-training-plan",
+          "用輕鬆與穩態強度建立完整 5K 能力。"
+        ],
+        [
+          "提升 5K 表現",
+          "/5k-training-plan/intermediate",
+          "把 RPE 與節奏、間歇及可選 VDOT 配速結合。"
+        ],
+        [
+          "VDOT 計算器",
+          "/vdot-calculator",
+          "有可靠表現錨點時再加入配速目標。"
+        ],
+        [
+          "訓練負荷",
+          "/training-load",
+          "理解 Session RPE 與 Workout 步驟 RPE 的差異。"
+        ]
+      ],
+      "homeLabel": "首頁",
+      "scheduleGuideLabel": "不熟悉 RPE？先看 RPE 1–10 主觀強度表。",
+      "intensityLinkLabel": "開啟 RPE 主觀強度指南"
+    }
+  },
+  "lactateCurveCalculator": {
+    "copy": {
+      "title": "乳酸曲線分析工具",
+      "description": "分析騎行或跑步階梯負荷測試的實測血乳酸資料，比較閾值判定方法，產生強度區間與測試報告。",
+      "badge": "階梯負荷測試",
+      "privacy": "免費，無需註冊。測試資料僅保留於目前瀏覽器分頁，重新整理前請依需要匯出。",
+      "inputTitle": "測試資料",
+      "resultTitle": "分析結果",
+      "empty": "輸入各階段資料，或載入範例了解分析過程。",
+      "stale": "輸入已修改，請重新分析後再使用或匯出結果。",
+      "sample": "教學範例，並非你的測試資料",
+      "cycling": "自行車",
+      "running": "跑步",
+      "intensity": "強度",
+      "lactate": "乳酸",
+      "heartRate": "心率",
+      "stage": "階段",
+      "rest": "靜息樣本的強度填 0",
+      "example": "載入範例",
+      "clear": "清空資料",
+      "add": "新增階段",
+      "remove": "移除階段",
+      "analyze": "分析資料",
+      "calculating": "正在分析…",
+      "paste": "貼上表格",
+      "import": "匯入 CSV",
+      "template": "下載 CSV 範本",
+      "confirmImport": "確認使用這些欄位",
+      "cancel": "取消",
+      "mapping": "確認欄位與單位",
+      "noColumn": "未記錄",
+      "sort": "依強度排序階段",
+      "overwrite": "取代目前的階段資料？",
+      "resetSport": "切換運動會清空目前資料，是否繼續？",
+      "pasteHelp": "貼上逗號或定位字元分隔的資料，小數點使用「.」。取代資料前請確認欄位對應。",
+      "inputHelp": "輸入 4–30 個運動階段，建議 6–10 個。乳酸單位為 mmol/L，心率可留空。每列必填資料需完整；可另加一列強度為 0 的靜息樣本。",
+      "method": "方法",
+      "threshold": "閾值",
+      "selected": "圖中顯示的方法",
+      "unavailable": "無法計算",
+      "partial": "部分方法未找到閾值，以下保留可用結果。",
+      "noResult": "未找到可用閾值。請檢查階段資料與方法說明；不會推測測試範圍以外的結果。",
+      "lt1": "第一乳酸閾值 LT1",
+      "lt2": "第二乳酸閾值 LT2",
+      "zones": "三個強度區間",
+      "zoneNames": [
+        "低於 LT1",
+        "LT1 至 LT2",
+        "高於 LT2"
+      ],
+      "methodHelp": "方法選擇會改變分界。乳酸閾值是估計的強度參考，不能直接當作 FTP。",
+      "export": "下載結果 CSV",
+      "print": "列印報告",
+      "report": "乳酸測試報告",
+      "source": "計算參考",
+      "copied": "已複製",
+      "copy": "複製結果",
+      "quality": "資料品質提示",
+      "methodsTitle": "計算方法與適用條件",
+      "instructionsTitle": "資料要求與操作流程",
+      "instructions": [
+        "在每個階段結束時記錄運動強度和實測血乳酸。選填心率應與對應階段一致。",
+        "選擇運動和記錄時使用的單位，再手動輸入、貼上或匯入資料。",
+        "檢查曲線和提示，比較不同方法後匯出。複測時盡量使用一致的測試方案。"
+      ],
+      "faqTitle": "乳酸測試分析常見問題",
+      "faq": [
+        {
+          "question": "只有 Garmin 活動資料，沒有採血結果，可以使用嗎？",
+          "answer": "這裡需要每個階段的實測乳酸。若希望依比賽成績或場地測試估算訓練參考，請使用另一個乳酸閾值計算器。"
+        },
+        {
+          "question": "為什麼不同方法算出的數值不同？",
+          "answer": "固定濃度、基線增量與曲線幾何研究的是不同特徵。有些方法尋找第一處上升，有些估計較高強度的分界；數值接近也不能證明生理上準確。"
+        },
+        {
+          "question": "LT1、LT2 是診斷或訓練處方嗎？",
+          "answer": "它們是依賴計算方法的強度參考。每個階段的時間、採樣方式和跨日波動都會影響解讀。請同時保存方法與測試方案，需要時由有經驗的教練協助應用。"
+        },
+        {
+          "question": "測試資料會儲存在哪裡？",
+          "answer": "計算、CSV 解析與報告產生都在本機完成，輸入不會上傳或寫入網址。重新整理後資料清空，需要留存時請下載報告。"
+        }
+      ],
+      "alternative": "沒有實測乳酸資料？",
+      "alternativeBody": "可用乳酸閾值計算器，依比賽或場地測試估算訓練強度參考。",
+      "related": "相關工具",
+      "cta": "持續追蹤訓練負荷與恢復趨勢",
+      "ctaBody": "結合日常訓練記錄、強度分布與狀態趨勢，安排訓練週期，並為下一次測試提供對照。",
+      "protocol": "選填測試資訊",
+      "stageMinutes": "每個階段的時間（分鐘）",
+      "sampleSite": "採血位置",
+      "notRecorded": "未記錄",
+      "earlobe": "耳垂",
+      "fingertip": "指尖",
+      "other": "其他",
+      "incomplete": "最後一個階段未完成",
+      "excluded": "從分析中排除最後一個階段",
+      "runtimeError": "分析暫時無法執行，輸入仍然保留，請重試。",
+      "exportError": "未能準備好匯出內容，請重試。",
+      "recordingError": "請檢查檔案、列、數值和欄位對應。CSV 限制為 256 KiB、100 行文字、16 欄。",
+      "methodDescriptions": {
+        "obla_2": "三次擬合曲線最後一次向上穿過 2 mmol/L 時的強度。固定濃度不一定是每個人的第一閾值。",
+        "obla_4": "三次擬合曲線最後一次向上穿過 4 mmol/L 時的強度，不能統一當作每個人的 LT2。",
+        "bsln_05": "擬合曲線達到基線加 0.5 mmol/L 時的強度。基線優先採用靜息樣本，否則採用第一個運動階段。",
+        "bsln_10": "擬合曲線達到基線加 1.0 mmol/L 時的強度，單個基線樣本可能影響結果。",
+        "log_log": "對強度與乳酸取對數後，擬合共用分割階段的兩條直線，選殘差最小的分割並求交點，至少需要五個階段。",
+        "dmax": "三次曲線位於其首末擬合點連線下方、距離最大的位置，只擬合運動階段。",
+        "moddmax": "從首次相鄰乳酸上升至少 0.4 mmol/L 之前的階段，到末階段觀測點作連線，再求曲線的最大距離。",
+        "log_poly_moddmax": "連線起於 Log-log 強度在三次曲線上的位置，止於最後一個實測乳酸點，因此需要有效的 Log-log 結果。"
+      },
+      "reasons": {
+        "invalid_value": "請檢查對應列。乳酸和選填心率需為有限正數，只有靜息樣本的強度可以為 0。",
+        "too_few_stages": "至少需要四個運動階段；Log-log 需要五個。",
+        "too_many_stages": "最多支援 30 個運動階段。",
+        "duplicate_intensity": "每個強度只能出現一次，請檢查重複階段。",
+        "unsorted_stages": "階段強度需遞增，請先確認排序。",
+        "fit_degenerate": "這些階段無法確定穩定的三次擬合曲線。",
+        "target_not_reached": "曲線未在測試範圍內向上穿過此目標濃度。",
+        "loglog_unavailable": "未在運動階段範圍內找到有效的 Log-log 交點。",
+        "no_lactate_rise": "未找到相鄰階段至少上升 0.4 mmol/L 的位置。",
+        "no_distance": "未找到曲線位於參考連線下方的有效距離點。",
+        "no_resting_sample": "沒有靜息樣本，基線增量方法使用第一個運動階段。",
+        "few_stages": "階段較少，單個樣本可能明顯影響擬合。",
+        "early_dip": "前幾個階段乳酸有所下降，請結合樣本與熱身情況檢查。",
+        "final_not_rising": "末階段乳酸未繼續上升，請檢查測試是否達到預定強度。",
+        "uneven_steps": "階段強度增幅不一致，請連同測試方案解讀。",
+        "threshold_at_edge": "這個估計值位於實測範圍的邊緣。",
+        "negative_fit": "擬合曲線出現負值，請檢查擬合與樣本。",
+        "invalid_pair": "請選用有效的方法，並確保 LT1 低於 LT2 後再使用區間。"
+      }
+    },
+    "methodContext": {
+      "originLabel": "方法來源",
+      "interpretationLabel": "適用與限制",
+      "referencesTitle": "參考文獻與實作依據",
+      "introduction": "這些方法辨識的是同一次測試中的不同特徵。方法名稱本身不能確立個人的 LT1、LT2 或最大乳酸穩態（MLSS）；每階段時長、採血方式和研究族群都會影響解讀。",
+      "implementation": "本工具使用下列固定版本的 lactater 核對計算結果。與參考軟體一致，不等於經過獨立的生理效度驗證。",
+      "methods": {
+        "obla_2": {
+          "origin": "屬於固定乳酸濃度法。{jamnick} 在自行車階梯負荷測試中，將 2 mmol/L 納入多種固定濃度判據的比較。",
+          "interpretation": "可作為統一濃度下的比較點，但不能直接認定為個人第一乳酸閾值。複測比較應保持測試方案一致。"
+        },
+        "obla_4": {
+          "origin": "4 mmol/L 判據在 {kindermann} 的研究中已有討論，{heck} 進一步論證了這項經典固定濃度標準。",
+          "interpretation": "它是約定的濃度標準，並非所有人的 LT2 或實測 MLSS。個人乳酸水準與測試方案不同，估計值可能位於相應邊界的兩側。"
+        },
+        "bsln_05": {
+          "origin": "屬於基線加固定增量的方法。{jamnick} 比較了這個方法族，並引用 {berg} 及 {zoladz} 作為早期研究背景。",
+          "interpretation": "對基線樣本與測量波動較敏感。本工具優先使用安靜時乳酸，否則採用首個運動階段；不取前幾階段的平均值。"
+        },
+        "bsln_10": {
+          "origin": "與 +0.5 屬於同一方法族，只是增量較大。{jamnick} 將 +0.5、+1.0、+1.5 mmol/L 作為不同判據分別比較。",
+          "interpretation": "+1.0 是另一項判據，不能僅因增量較大就視為第二生理閾值。基線定義改變，結果也會改變。"
+        },
+        "log_log": {
+          "origin": "{beaver} 最初在雙對數座標中分析乳酸與攝氧量的關係。{bishop} 等後續自行車研究使用功率；本工具使用測試強度。",
+          "interpretation": "至少需要 5 個運動階段，且兩段近似的交點須位於實測範圍內。以強度為橫軸，並不等同於重現原始攝氧量測試方案。"
+        },
+        "dmax": {
+          "origin": "{cheng} 提出 Dmax：在近似曲線與其首尾端點連線之間，尋找最大距離對應的位置。",
+          "interpretation": "結果取決於測試涵蓋範圍與近似。本工具將參考線的兩個端點放在三次近似曲線上；改變起始或末階段，估計值可能移動。"
+        },
+        "moddmax": {
+          "origin": "{bishop} 修改了 Dmax 參考線的起點，以減少前段平緩樣本的影響。{heuberger} 進一步描述了「至少上升 0.4 mmol/L」的判據。",
+          "interpretation": "本工具計入恰好上升 0.4 mmol/L 的情況，並使用實測起點、終點乳酸。{jamnick} 寫作 >0.4；這裡採用 Heuberger 的包含等號規則。"
+        },
+        "log_poly_moddmax": {
+          "origin": "{jamnick} 提出這項組合變體：先由 Log-log 確定起始強度，再對三次近似曲線計算修正 Dmax。",
+          "interpretation": "該研究在 17 名受過訓練的男性自行車選手、每階段 4 分鐘的方案中得到最接近 MLSS 的估計，不能據此推廣至所有跑步或自行車方案。計算須先取得有效的 Log-log 結果。"
+        }
+      }
+    },
+    "presentation": {
+      "engineVersion": "計算引擎版本",
+      "tooltipStage": "階段",
+      "tooltipMeasured": "實測乳酸",
+      "tooltipFitted": "擬合乳酸",
+      "tooltipResidual": "殘差",
+      "tooltipZone": "強度區域",
+      "hoverHint": "懸停、點選或鍵盤聚焦樣本，查看階段資料",
+      "ctaAction": "建立免費帳號",
+      "ctaExplore": "查看訓練負荷功能",
+      "ctaNote": "本工具的測試資料不會自動儲存到帳號。",
+      "ctaImageAlt": "Trainingload.ai 訓練負荷與體能狀態趨勢分析介面",
+      "ctaImageCaption": "Trainingload.ai · 訓練負荷分析範例",
+      "ctaBenefitLoad": "訓練負荷趨勢",
+      "ctaBenefitZones": "強度分布分析",
+      "ctaBenefitPlan": "週期訓練計畫",
+      "workflowInput": "輸入測試",
+      "workflowReport": "分析報告",
+      "editData": "編輯測試資料",
+      "readCurve": "乳酸–強度曲線",
+      "readCurveBody": "以運動階段樣本進行三次多項式擬合。懸停或點選階段，查看實測乳酸、擬合值與心率。",
+      "thresholdBasis": "閾值判定方法",
+      "inputGuide": "4–30 個運動階段 · 乳酸 mmol/L · 心率選填",
+      "returnReport": "返回報告",
+      "overview": "測試概覽",
+      "stages": "個運動階段",
+      "peak": "最後測試強度",
+      "fit": "三次曲線擬合",
+      "curve": "乳酸曲線",
+      "samples": "實測樣本",
+      "fitted": "擬合曲線",
+      "anchor": "參考連線",
+      "distance": "最大距離",
+      "compareTitle": "閾值方法比較",
+      "compareBody": "各方法採用相同測試資料，估計值依運動強度對齊。選擇方法可查看計算依據與適用條件。",
+      "sharedScale": "共用強度軸",
+      "earlyGroup": "基線與轉折",
+      "dmaxGroup": "Dmax 曲線形態",
+      "fixedGroup": "固定乳酸濃度",
+      "notInterval": "圓點表示不同方法的估計值，不代表信賴區間。",
+      "zonesBody": "邊界由你選擇的 LT1、LT2 方法決定，色帶對應三個強度區域。",
+      "lowDomain": "低於 LT1",
+      "middleDomain": "LT1 至 LT2",
+      "highDomain": "高於 LT2",
+      "qualityFitTitle": "擬合診斷",
+      "qualityFitBody": "殘差 = 實測乳酸 − 擬合乳酸。擬合貼近樣本，並不能證明閾值在生理上準確。",
+      "rmse": "均方根誤差",
+      "maxResidual": "最大絕對殘差",
+      "residuals": "逐階段殘差",
+      "logAxes": "Log-log 視圖 · 兩條座標軸均為對數刻度",
+      "noHr": "未記錄心率樣本",
+      "preview": "範例分析",
+      "previewBody": "完整呈現階梯負荷測試的 LT1、LT2、強度區間與心率反應。",
+      "previewCaption": "示範資料 · 非個人測試結果",
+      "moreDetails": "方法說明",
+      "available": "種方法可用"
+    }
+  },
   "conversionQuality": {
     "reference": "參考編號",
     "noGpsTitle": "此檔案無法轉換為 GPS 軌跡",
@@ -2684,6 +3351,73 @@
     }
   },
   "features": {
+    "mcp": {
+      "content": {
+        "title": "讓你的 AI 讀懂訓練，也讓你看清它是怎麼得出結論的。",
+        "description": "透過唯讀、受 OAuth 保護的 MCP 服務，將 TrainingLoad 連線到你的 AI 用戶端。提出真實訓練問題，檢視每一次工具呼叫，再用回傳資料驗證結論。",
+        "eyebrow": "TrainingLoad MCP",
+        "connect": "設定 MCP",
+        "docs": "閱讀文件",
+        "supported": "支援用戶端",
+        "contractEyebrow": "不是裸 API，而是完整產品介面",
+        "contractTitle": "24 個有邊界的工具、3 個 Resources、3 個可重複使用的 Prompts。",
+        "contractText": "服務優先回傳彙總快照，僅在問題確實需要時才揭露更細部的資料。每份清單都設有時間範圍、筆數上限與 opaque cursor。",
+        "groups": [
+          [
+            "目前狀態",
+            "訓練快照、準備度指標與負荷時間序列"
+          ],
+          [
+            "進度變化",
+            "週期比較、運動項目拆解、活動統計、訓練規律性、體能趨勢、區間與最佳成績"
+          ],
+          [
+            "課表執行",
+            "活動區間與分段、計畫總覽、執行率與賽事詳情"
+          ],
+          [
+            "連線狀態",
+            "同步就緒度與可選的健康背景資料"
+          ]
+        ],
+        "workflowEyebrow": "從連線到證據",
+        "workflowTitle": "加入一個網址，核准所需資料權限，接著照常提問。",
+        "workflowText": "用戶端會自動從伺服器探索 OAuth 與可用工具。TrainingLoad 在伺服器端把關授權與資料邊界，同時讓每個回答都能在對話中查驗。",
+        "workflow": [
+          [
+            "01",
+            "加入伺服器",
+            "在任何支援的用戶端使用同一個遠端網址。"
+          ],
+          [
+            "02",
+            "確認授權範圍",
+            "核准唯讀 scopes；健康資料權限一律分開授權。"
+          ],
+          [
+            "03",
+            "提出真實問題",
+            "用戶端會挑選足以回答問題的最小工具路徑。"
+          ],
+          [
+            "04",
+            "查驗回答",
+            "檢視工具呼叫、日期區間、回傳事實與缺漏資料。"
+          ]
+        ],
+        "recipes": "查看原生 Prompts、Resources 與工具路徑",
+        "safetyTitle": "從架構層面保護隱私",
+        "safetyText": "列出工具時會檢查 OAuth scopes，執行工具時會再次進行權威驗證。回傳結果不含直接身分欄位、原始感測器串流、精確 GPS 路線、憑證或完整 FIT 資料。",
+        "safety": [
+          "全部為唯讀工具，無任何隱藏寫入路徑",
+          "僅限目前運動員，opaque ID 與使用者綁定",
+          "會清理不受信任的備註內容，絕不視為指令執行",
+          "具備 Schema 驗證、輸出預算、逾時、限流、稽核與追蹤機制"
+        ],
+        "finalTitle": "連線一次，就能在你平常使用的用戶端裡直接提問。",
+        "finalText": "同一個端點適用於所有支援的 MCP 用戶端。健康資料存取始終為可選項，也可隨時在帳號設定中與整條連線一併撤銷。"
+      }
+    },
     "metadata": {
       "title": "Trainingload.ai 功能 | 計畫、負荷與 AI 教練",
       "description": "了解 Trainingload.ai 的如何把自適應訓練計畫、日曆、完成情況、PMC、effective VO2max 和 AI 教練回顧連在一起。",
@@ -2711,6 +3445,12 @@
       }
     },
     "page": {
+      "mcpShowcase": {
+        "eyebrow": "TrainingLoad MCP",
+        "title": "讓你的 AI 讀取訓練資料，也讓每個結論都可驗證。",
+        "text": "24 個唯讀訓練工具，搭配原生 Resources 與 Prompts，涵蓋目前狀態、週期比較、活動細節、課表執行、賽事與同步診斷。",
+        "cta": "探索 MCP"
+      },
       "hero": {
         "title": "讓訓練持續在正轨上的核心頁面",
         "subtitle": "從今天開始，看計畫、查日歷、理解負荷，並在下一次訓練可能需要變化時使用 AI 教練回顧。"
@@ -4268,6 +5008,206 @@
   },
   "home": {
     "demo": {
+      "calendar": {
+        "overview": {
+          "title": "目前計畫",
+          "cycle": "馬拉松基礎週期",
+          "weekLabel": "第 5 / 12 週",
+          "targetLoadLabel": "目標",
+          "targetLoadValue": "420",
+          "completedLabel": "已完成",
+          "completedValue": "248",
+          "driftLabel": "較上週",
+          "driftValue": "+17",
+          "syncLabel": "已同步"
+        },
+        "monthModeLabel": "月曆概覽",
+        "weekModeLabel": "本週聚焦",
+        "today": "今天",
+        "addButton": "新增",
+        "calendarSubscriptionButton": "訂閱",
+        "viewDay": "查看當天",
+        "selectedDateLabel": "選中日期",
+        "loadLabel": "負荷",
+        "activityTab": "活動",
+        "trainingTab": "訓練",
+        "planCycleLabel": "訓練週期",
+        "planWorkoutCount": "{count} 個計畫訓練",
+        "noPlannedTraining": "暫無計畫訓練",
+        "noActivities": "暫無已完成活動",
+        "summaryScope": {
+          "plan": "計畫",
+          "month": "月份"
+        },
+        "planProgressTitle": "計畫進度",
+        "monthOverview": "本月概覽",
+        "comparisonLabelPlan": "較前一週期",
+        "comparisonLabelMonth": "較上月",
+        "delta": {
+          "up": "上升",
+          "down": "下降",
+          "flat": "持平"
+        },
+        "summary": {
+          "count": "訓練次數",
+          "tss": "TSS",
+          "distance": "距離",
+          "duration": "時長"
+        },
+        "workoutMeta": {
+          "duration": "時長",
+          "steps": "步驟",
+          "repeats": "重複",
+          "parsed": "已解析 DSL"
+        },
+        "sportLabels": {
+          "RUN": "跑步",
+          "CYCLING": "騎行",
+          "SWIM": "游泳"
+        },
+        "workoutNames": {
+          "easyRun": "輕鬆跑 45 min",
+          "tempoRun": "穩態跑 35 min",
+          "strength": "力量啟動 20 min",
+          "longRun": "長距離跑 90 min",
+          "recoveryRide": "恢復騎 50 min",
+          "swim": "技術游 1.6 km"
+        },
+        "workoutNotes": {
+          "easyRun": "Z2 有氧容量",
+          "tempoRun": "穩態有氧控制",
+          "strength": "靈活性與啟動",
+          "longRun": "長距離耐力",
+          "recoveryRide": "低強度轉腿",
+          "swim": "技術動作"
+        },
+        "activityNames": {
+          "easyRun": "輕鬆跑",
+          "tempoRun": "穩態有氧跑",
+          "longRun": "長距離跑",
+          "ride": "恢復騎"
+        },
+        "distanceUnit": "km",
+        "minuteUnit": "分鐘"
+      },
+      "dashboard": {
+        "aboutMetric": "了解 {title}",
+        "overview": {
+          "title": "概覽",
+          "recent30Days": "最近 30 天"
+        },
+        "sportFilter": "全部項目",
+        "editLabel": "編輯",
+        "stats": {
+          "vo2Max": {
+            "title": "最大攝氧量",
+            "detail": "極好",
+            "details": "最大摄氧量反映有氧能力上限，更适合看趋势而不是单日波动。"
+          },
+          "atl": {
+            "title": "疲勞",
+            "detail": "偏高",
+            "details": "ATL 反映近期训练带来的短期疲劳，连续高强度训练后通常会上升。"
+          },
+          "ctl": {
+            "title": "體能",
+            "detail": "穩定",
+            "details": "CTL 反映长期体能积累，需要持续训练才会缓慢上升，停训后会逐渐下降。"
+          },
+          "tsb": {
+            "title": "狀態",
+            "detail": "可訓練",
+            "details": "TSB 对比体能与疲劳，负值通常表示当前疲劳高于新鲜度。"
+          }
+        },
+        "charts": {
+          "weekPressure": "訓練壓力",
+          "ctl": "體能",
+          "atl": "疲勞",
+          "tsb": "狀態"
+        }
+      },
+      "plan": {
+        "weekStrip": {
+          "title": "週期進度",
+          "stateCurrent": "本週"
+        },
+        "weekLoad": {
+          "title": "本週負荷",
+          "currentWeek": "第 {week} 週",
+          "plannedSessions": "計畫訓練"
+        },
+        "workout": {
+          "title": "本週訓練",
+          "loadBadge": "計畫負荷",
+          "linked": "已關聯 · {activity}",
+          "notLinked": "未關聯活動",
+          "session": "第 {index} 課"
+        },
+        "actions": {
+          "postpone": "順延",
+          "skip": "跳過",
+          "delete": "刪除",
+          "deleteDisabledTip": "暫不支援刪除"
+        },
+        "today": {
+          "title": "今日訓練",
+          "viewTodayPlan": "進入今日",
+          "postponeToday": "延後今日訓練"
+        },
+        "goal": {
+          "title": "週目標",
+          "weekSessions": "訓練次數",
+          "completed": "已完成",
+          "progressTo": "進度",
+          "dayNumber": "第 {day} 天"
+        },
+        "example": {
+          "header": {
+            "cycleLabel": "目前週期",
+            "title": "馬拉松基礎週期",
+            "weekStatus": "第 5 / 12 週 · ACTIVE",
+            "totalSessions": "36 次訓練",
+            "remainingLabel": "剩餘",
+            "remainingWeeks": "7 週",
+            "createPlan": "建立計畫"
+          },
+          "weekdayLabels": [
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六",
+            "日"
+          ],
+          "workouts": [
+            {
+              "dayLabel": "週一",
+              "title": "輕鬆跑 45 min",
+              "detail": "RUN · Z2 45 min",
+              "statusLabel": "已完成",
+              "linkedActivity": "周日轻松跑"
+            },
+            {
+              "dayLabel": "週三",
+              "title": "穩態跑 35 min",
+              "detail": "RUN · steady aerobic",
+              "statusLabel": "今天"
+            },
+            {
+              "dayLabel": "週六",
+              "title": "長距離跑 90 min",
+              "detail": "RUN · long endurance",
+              "statusLabel": "計畫中"
+            }
+          ],
+          "coach": {
+            "title": "教練建議",
+            "summary": "保留週四質量訓練，週末長距離按狀態微調。"
+          }
+        }
+      },
       "coach": {
         "review": "AI 複盤",
         "history": "歷史對話",
@@ -8260,6 +9200,530 @@
     ]
   },
   "runningPlanPages": {
+    "derived": {
+      "fiveKChooserLabels": {
+        "options": [
+          "從零開始",
+          "能連續跑 20–30 分鐘",
+          "已有比賽基礎"
+        ],
+        "current": "目前計畫"
+      },
+      "raceDistanceChooserCopy": {
+        "10k": {
+          "title": "選擇適合你的 10 公里計畫",
+          "subtitle": "先看目前跑步基礎和目標，不要直接選擇看起來最難的課表。",
+          "options": [
+            {
+              "label": "完賽",
+              "title": "首次完成 10 公里",
+              "description": "10 週、每週三跑，不要求閾值或間歇訓練。"
+            },
+            {
+              "label": "進階",
+              "title": "提高 10 公里成績",
+              "description": "已經能輕鬆完賽後，再加入可重複的品質訓練。"
+            },
+            {
+              "label": "目標",
+              "title": "按目標成績備賽",
+              "description": "根據近期成績和比賽日期，安排更具體的訓練。"
+            }
+          ]
+        },
+        "half-marathon": {
+          "title": "選擇適合你的半馬計畫",
+          "subtitle": "根據目前長跑基礎，選擇首次完賽、進階提高或目標成績。",
+          "options": [
+            {
+              "label": "完賽",
+              "title": "首次完成半馬",
+              "description": "14 週、每週四跑，逐步延長長跑時間。"
+            },
+            {
+              "label": "進階",
+              "title": "提高半馬成績",
+              "description": "熟悉半馬距離後，再加入穩定可控的品質訓練。"
+            },
+            {
+              "label": "目標",
+              "title": "按目標成績備賽",
+              "description": "用近期比賽成績和目標賽事制定專項安排。"
+            }
+          ]
+        },
+        "marathon": {
+          "title": "選擇適合你的馬拉松計畫",
+          "subtitle": "目前長跑基礎和比賽目標，決定你該先完賽、進階還是挑戰成績。",
+          "options": [
+            {
+              "label": "完賽",
+              "title": "完成首場馬拉松",
+              "description": "18 週、每週四跑，並保留完整的三週減量。"
+            },
+            {
+              "label": "進階",
+              "title": "提高馬拉松成績",
+              "description": "已能穩定完成馬拉松訓練後，再增加可控品質課。"
+            },
+            {
+              "label": "目標",
+              "title": "按目標成績備賽",
+              "description": "結合目前能力和比賽日期，準備更明確的目標。"
+            }
+          ]
+        }
+      },
+      "fiveKCopy": {
+        "weeks": "8 週",
+        "level": "新手到進階",
+        "weeklyVolume": "每週 4 次跑步",
+        "metaTitle": "免費 8 週 5 公里訓練計畫：新手完賽安排",
+        "metaDescription": "給已能連續跑 20–30 分鐘的跑者：免費 8 週 5 公里訓練計畫，每週 4 跑，含輕鬆跑、受控穩定跑、長跑和賽前減量。",
+        "keywords": [
+          "5 公里訓練計畫",
+          "5k training plan",
+          "5 公里跑步計畫",
+          "5 公里訓練安排",
+          "8 週 5 公里計畫"
+        ],
+        "eyebrow": "8 週 5 公里跑步計畫",
+        "title": "免費 8 週 5 公里訓練計畫：面向新手完賽。",
+        "subtitle": "這份 5 公里計畫適合已經能輕鬆連續跑 20–30 分鐘、希望有明確備賽安排的跑者。計畫結合可對話強度的輕鬆跑、每週一次可控品質課、一次長距離、恢復和賽前短減量。",
+        "primaryCta": "個人化我的 5 公里計畫",
+        "secondaryCta": "瀏覽全部計畫",
+        "promise": "下方完整訓練安排免費公開。當可訓練日期、近期訓練、配速或恢復情況讓通用日曆不再合適時，再進行個人化。",
+        "planChooser": {
+          "title": "選擇適合你的 5 公里計畫",
+          "subtitle": "按照你現在能完成的跑步能力選擇起點。三種計畫的起步要求和訓練負荷不同。",
+          "options": [
+            {
+              "label": "從零開始",
+              "title": "Couch to 5K",
+              "description": "如果連續輕鬆跑 20 分鐘仍不舒服，先從跑走交替計畫開始。",
+              "href": "/couch-to-5k-training-plan"
+            },
+            {
+              "label": "目前計畫",
+              "title": "完成一次 5 公里",
+              "description": "如果你已經能輕鬆連續跑 20–30 分鐘，並能每週安排四次跑步，選擇這份 8 週計畫。",
+              "href": null
+            },
+            {
+              "label": "已有比賽基礎",
+              "title": "提高 5 公里成績",
+              "description": "如果已有近期 5 公里成績，並希望系統加入間歇和節奏跑，選擇進階計畫。",
+              "href": "/5k-training-plan/intermediate"
+            }
+          ]
+        },
+        "trustItems": [
+          "完整課表免費",
+          "8 週",
+          "每週 4 跑",
+          "需連續跑 20–30 分鐘"
+        ],
+        "forTitle": "這份 5 公里訓練計畫適合誰",
+        "forItems": [
+          "你已經能輕鬆連續跑 20–30 分鐘，不再需要跑走交替入門。",
+          "你希望穩妥完成第一次 5 公里，或提升近期 5 公里成績，而不是每次都跑到很累。",
+          "你每週可以保留 4 個跑步日，包括一次品質課和一次較長輕鬆跑。",
+          "你目前沒有會改變跑姿的疼痛、疾病或傷病。"
+        ],
+        "previewTitle": "8 週 5 公里計畫如何推進",
+        "previewSubtitle": "計畫從可重複的輕鬆跑逐步進入 5 公里專項訓練，再在比賽前降低疲勞。下方提供完整逐日安排。",
+        "previewRows": [
+          [
+            "第 1–2 週",
+            "建立節奏",
+            "保持大部分訓練輕鬆，加入放鬆加速跑或短上坡。"
+          ],
+          [
+            "第 3–6 週",
+            "建立 5 公里能力",
+            "交替進行可控間歇和節奏跑，長距離逐步增加。"
+          ],
+          [
+            "第 7–8 週",
+            "減量與比賽",
+            "降低總量、保留少量速度，讓身體清爽地進入比賽。"
+          ]
+        ],
+        "contentTitle": "一份實用 5 公里計畫需要什麼",
+        "contentSubtitle": "訓練安排應把輕鬆跑量與品質課分開，讓每次訓練都有目的，並留下足夠恢復來穩定重複。",
+        "contentSections": [
+          [
+            "輕鬆跑量",
+            "輕鬆跑建立一致性，不把每一天都變成測驗。",
+            [
+              "保持能對話的強度",
+              "炎熱和上坡時主動降速",
+              "保留恢復日"
+            ]
+          ],
+          [
+            "每週一次品質課",
+            "間歇、上坡或節奏跑發展 5 公里專項速度，但不主導整週。",
+            [
+              "可控地完成重複跑",
+              "動作開始變形前停止",
+              "不要用強度補償錯過的輕鬆跑"
+            ]
+          ],
+          [
+            "長距離與減量",
+            "適度長距離支援耐力；最後一週降低疲勞同時保留節奏。",
+            [
+              "長距離保持輕鬆",
+              "比賽前降低總量",
+              "避免臨時測試體能"
+            ]
+          ]
+        ],
+        "conversionTitle": "把免費 5 公里安排放進你的日曆",
+        "conversionText": "選擇比賽日期、可訓練日、目前配速和近期訓練。Trainingload.ai 可以依照這些限制產生草案，並讓後續變化在進入日曆前保持可審閱。",
+        "aiTitle": "Trainingload.ai 如何個人化 5 公里計畫",
+        "aiSubtitle": "公開計畫回答練什麼；個人化決定訓練放在哪一天、使用什麼配速基準，以及完成訓練後該建立、維持還是恢復。",
+        "aiSignals": [
+          [
+            "計畫與實際",
+            "比較計畫訓練與真實完成情況，而不是只看配速。"
+          ],
+          [
+            "訓練負荷",
+            "增加跑量或加入更多強度前，先查看近期負荷和恢復。"
+          ],
+          [
+            "確認後調整",
+            "AI 產生調整草案；你或教練確認後才更新日曆。"
+          ]
+        ],
+        "relatedTitle": "繼續選擇跑步計畫",
+        "relatedLinks": [
+          [
+            "從零開始？使用 Couch to 5K",
+            "/couch-to-5k-training-plan",
+            "如果連續輕鬆跑 20 分鐘仍不舒服，先使用跑走交替計畫。"
+          ],
+          [
+            "從 5 公里進階到 10 公里",
+            "/10k-training-plan",
+            "透過完整 10 公里計畫延長耐力並發展閾值能力。"
+          ],
+          [
+            "使用 VDOT 參考訓練配速",
+            "/vdot-calculator",
+            "用近期表現作為可控訓練配速的一個參考。"
+          ]
+        ],
+        "faq": [
+          [
+            "5 公里應該訓練多久？",
+            "本計畫為 8 週。基礎較少的跑者可能需要更久；已經穩定訓練的跑者也應先核對負荷再決定是否從中段開始。"
+          ],
+          [
+            "每週應該跑幾天？",
+            "計畫使用每週 4 個跑步日。輕鬆日必須輕鬆，並在品質課之間保留休息或肌力訓練日。"
+          ],
+          [
+            "這是新手 5 公里計畫嗎？",
+            "是，但適合已經能輕鬆連續跑 20–30 分鐘的新手。完全沒有跑步基礎的人應使用獨立 Couch to 5K 計畫。"
+          ],
+          [
+            "錯過訓練怎麼辦？",
+            "可以跳過，或只在仍能保護恢復時移動。不要連續堆疊兩次品質課，也不要把漏掉的跑量塞進週末。"
+          ],
+          [
+            "AI 會自動改計畫嗎？",
+            "Trainingload.ai 可以根據完成訓練和負荷背景產生調整草案，但更新日曆前仍需確認。"
+          ]
+        ]
+      },
+      "finishFiveKDetails": {
+        "previewTitle": "8 週完賽計畫如何進階",
+        "previewSubtitle": "每週四次可重複訓練逐步建立連續跑耐力，在正確時間恢復，並減量進入最終 5K。",
+        "previewRows": [
+          [
+            "第 1–3 週",
+            "建立基礎",
+            "長跑從 25 分鐘逐步增加到 35 分鐘。"
+          ],
+          [
+            "第 4 週",
+            "吸收訓練",
+            "降低長跑時長，所有訓練保持受控。"
+          ],
+          [
+            "第 5–6 週",
+            "再次構建",
+            "依次完成 40 和 45 分鐘可對話長跑。"
+          ],
+          [
+            "第 7–8 週",
+            "減量與完賽",
+            "先降低疲勞，再控制開局完成 5K。"
+          ]
+        ],
+        "contentTitle": "每週四次跑步分別解決什麼",
+        "contentSubtitle": "計畫把輕鬆跑量、受控穩定跑和長跑分開，讓每次訓練只承擔清晰目的。",
+        "contentSections": [
+          [
+            "兩次輕鬆跑",
+            "輕鬆跑和恢復跑在累積連續性的同時保留精力。",
+            [
+              "保持可對話",
+              "炎熱和坡路主動降速",
+              "不要堆疊錯過的訓練"
+            ]
+          ],
+          [
+            "一次穩定跑",
+            "受控的 RPE 5 訓練改善節奏感，但不把訓練跑成比賽。",
+            [
+              "強度應可重複",
+              "保持良好跑姿結束",
+              "配速證據不足時使用 RPE"
+            ]
+          ],
+          [
+            "一次長跑",
+            "長跑分兩輪遞增，中間安排恢復週，最後安排減量。",
+            [
+              "保持可對話呼吸",
+              "第 4 和第 7 週降低負荷",
+              "最終 5K 主動控制開局"
+            ]
+          ]
+        ]
+      },
+      "fiveKHubRelatedLink": [
+        "查看 5K 訓練計畫主頁",
+        "/5k-training-plan",
+        "比較從零跑走、完賽與進階提速三種 5K 計畫。"
+      ],
+      "productLoopRelatedLinks": [
+        [
+          "用 AI 教練依訓練負荷調整計畫",
+          "/ai-training-plan",
+          "根據完成訓練和負荷產生可確認的調整草案，而不是沿用固定日曆。"
+        ],
+        [
+          "用 VDOT 計算訓練配速",
+          "/vdot-calculator",
+          "用近期成績建立可驗證的配速基準。"
+        ],
+        [
+          "用時間和距離計算跑步配速",
+          "/running-pace-calculator",
+          "換算配速、時間和距離，或產生 5 公里到馬拉松的均勻分段表。"
+        ],
+        [
+          "用近期成績預測完賽時間",
+          "/race-time-predictor",
+          "從一場近期比賽或已知配速預測 5 公里、10 公里、半馬和全馬完賽時間。"
+        ],
+        [
+          "在計畫裡管理訓練負荷",
+          "/training-load",
+          "在增加跑量或強度前，先查看 CTL、ATL 和 TSB。"
+        ]
+      ],
+      "intermediateLink": [
+        "進階 5K 訓練計畫",
+        "/5k-training-plan/intermediate",
+        "已有近期 5K 成績時，加入更明確的間歇和節奏訓練。"
+      ],
+      "intermediateFiveK": {
+        "heroSubtitle": "每週用兩次輕鬆有氧跑、一次受控品質課和一次長跑提升 5K 表現。單數週安排可重複間歇，雙數週安排受控節奏跑，並用輕鬆日隔開品質課和長跑。第 4 週降低負荷，第 5–6 週重新構建，第 7 週減量，第 8 週完成 5K。",
+        "previewRows": [
+          [
+            "第 1–3 週",
+            "建立專項能力",
+            "間歇與節奏跑交替，長跑增加至 50 分鐘。"
+          ],
+          [
+            "第 4 週",
+            "恢復",
+            "縮短品質課和長跑，吸收前三週負荷。"
+          ],
+          [
+            "第 5–6 週",
+            "重新構建",
+            "間歇增加至 6×2 分鐘，節奏跑增加至 20 分鐘。"
+          ],
+          [
+            "第 7–8 週",
+            "減量與 5K",
+            "保留短品質刺激，降低總量後完成 5K。"
+          ]
+        ],
+        "contentTitle": "進階 5K 如何把速度練成可重複的能力",
+        "contentSubtitle": "每週只安排一堂主要品質課，其他跑量用來吸收刺激，避免把每次訓練都跑成測驗。",
+        "contentSections": [
+          [
+            "輕鬆跑保護品質課",
+            "大部分跑量保持可對話強度，讓你能在關鍵訓練中完成正確的節奏與動作。",
+            [
+              "不追逐輕鬆跑配速",
+              "品質課之間保留恢復",
+              "疲勞上升時先減量"
+            ]
+          ],
+          [
+            "間歇讓 5K 配速可重複",
+            "用短組數累積接近 5K 強度的時間，不把任何一組做成衝刺。",
+            [
+              "以近期成績或 RPE 定強度",
+              "每組保持一致",
+              "動作走樣就停止增加"
+            ]
+          ],
+          [
+            "節奏跑與長跑建立耐力",
+            "節奏跑提高可持續強度，長跑延長有氧時間，兩者共同支撐比賽後半段。",
+            [
+              "節奏跑保持受控",
+              "長跑維持輕鬆",
+              "第 4、7–8 週主動減量"
+            ]
+          ]
+        ],
+        "level": "進階",
+        "metaTitle": "進階 5 公里訓練計畫：免費 8 週提速安排",
+        "metaDescription": "給已能穩定每週跑 4 天的跑者：免費 8 週進階 5K 計畫，含間歇、節奏跑、長跑和減量。有成績用 VDOT，沒有則用 RPE。",
+        "keywords": [
+          "進階 5K 訓練計畫",
+          "5k training plan intermediate",
+          "5 公里提速計畫",
+          "VDOT 5K"
+        ],
+        "eyebrow": "8 週進階 5 公里計畫",
+        "forTitle": "這份進階 5K 計畫適合誰",
+        "forItems": [
+          "你能穩定完成每週 4 次跑步。",
+          "你有近期 5K 成績或足夠訓練基線。",
+          "你能在品質課之間保留恢復日。",
+          "你目前沒有影響跑姿的疼痛或傷病。"
+        ],
+        "standardFinishLink": [
+          "先使用標準 5K 完賽計畫",
+          "/5k-training-plan",
+          "如果尚未穩定訓練 4 天，先建立可重複的基礎。"
+        ],
+        "faq": [
+          [
+            "這是進階 5 公里訓練計畫嗎？",
+            "是。給已經能穩定每週跑 4 天、想用間歇和節奏跑提高 5K 的人，不是第一次完賽課表。"
+          ],
+          [
+            "和免費新手 5K 計畫有何不同？",
+            "新手頁從連續跑 20–30 分鐘開始完賽。這頁在基礎穩定後加入更明確的品質課。還不能穩定跑 4 天時，先用 5K 完賽計畫。"
+          ],
+          [
+            "每週有幾次品質課？",
+            "一次主要品質課，再加輕鬆跑量和長跑。不要連續兩天高強度。"
+          ],
+          [
+            "這份計畫能幫我跑進 25 分鐘嗎？",
+            "如果你目前成績已接近 25 分鐘，它可以作為提速框架；請用近期 5K 成績設定強度。若差距較大，先完成一輪並重新測試，不要直接套用過快配速。"
+          ],
+          [
+            "AI 會自動改這份進階計畫嗎？",
+            "Trainingload.ai 可以根據完成訓練和訓練負荷產生調整草案，但日曆只有在你確認後才會更新。"
+          ]
+        ]
+      },
+      "templateMetaDescription": "給已能連續跑 20–30 分鐘的跑者：免費 8 週 5 公里訓練計畫，每週 4 跑，含輕鬆跑、受控穩定跑、長跑和賽前減量。"
+    },
+    "sectionKickers": {
+      "startHere": "從這裡開始",
+      "trainingMethod": "訓練方法"
+    },
+    "heroHeadings": {
+      "couch": [
+        "免費 9 週",
+        "Couch to 5K 訓練計畫",
+        "從走路開始，完成第一個 5K"
+      ],
+      "5k": [
+        "免費 8 週",
+        "5K 訓練計畫",
+        "穩步完成首個 5K"
+      ],
+      "5k-intermediate": [
+        "免費 8 週",
+        "進階 5K 訓練計畫",
+        "用間歇與節奏跑提速"
+      ],
+      "10k": [
+        "免費 10 週",
+        "10 公里訓練計畫",
+        "從 5K 穩步跑向 10K"
+      ],
+      "half-marathon": [
+        "免費 14 週",
+        "半馬訓練計畫",
+        "為首個 21.1 公里打好基礎"
+      ],
+      "marathon": [
+        "免費 18 週",
+        "馬拉松訓練計畫",
+        "完成你的首場全馬"
+      ]
+    },
+    "productPreview": {
+      "webAlt": "TrainingLoad.ai Web 端訓練計畫詳情頁",
+      "mobileAlt": "TrainingLoad.ai iOS 端今日訓練頁",
+      "webCalendarAlt": "TrainingLoad.ai Web 端含已完成與計畫訓練的訓練日曆",
+      "mobileCalendarAlt": "TrainingLoad.ai iOS 端含訓練資料的日曆頁面"
+    },
+    "officialTemplate": {
+      "labels": {
+        "official": "官方訓練計畫",
+        "improve": "進階提高",
+        "target": "目標成績備賽",
+        "weeks": "週期",
+        "runsPerWeek": "每週跑步",
+        "level": "計畫類型",
+        "schedule": "完整逐週訓練安排",
+        "scheduleText": "展開每一週，查看訓練內容、結構和強度說明；確認適合自己後，再加入日曆。",
+        "example": "示例強度",
+        "exampleText": "下方配速使用 VDOT 40 示例，不是你的個人訓練配速。登入後會使用可靠的目前能力資料；目標成績計畫還需要符合條件的目標賽事。",
+        "cta": "產生我的計畫",
+        "back": "返回該距離訓練主頁",
+        "currentPlan": "目前計畫",
+        "workoutCount": "次訓練",
+        "finalTitle": "把完整計畫加入訓練日曆",
+        "finalText": "先透過公開課表確認結構，再結合目前能力和可訓練日期產生個人預覽。"
+      },
+      "seoTitles": {
+        "improve-10k": "10公里進階訓練計畫：8週提高成績課表",
+        "target-10k": "10公里目標成績訓練計畫：跑進40、45或50分鐘",
+        "improve-half-marathon": "半馬進階訓練計畫：12週提高成績課表",
+        "target-half-marathon": "半馬目標成績訓練計畫：14週備戰半馬破二",
+        "improve-marathon": "馬拉松進階訓練計畫：18週提高成績課表",
+        "target-marathon": "馬拉松目標成績訓練計畫：18週備戰破三與破四"
+      },
+      "pageHeadings": {
+        "improve-10k": "10公里進階訓練計畫",
+        "target-10k": "10公里目標成績訓練計畫",
+        "improve-half-marathon": "半馬進階訓練計畫",
+        "target-half-marathon": "半馬目標成績訓練計畫",
+        "improve-marathon": "馬拉松進階訓練計畫",
+        "target-marathon": "馬拉松目標成績訓練計畫"
+      }
+    },
+    "workoutStructure": {
+      "chartAriaLabel": "訓練結構圖",
+      "stepLabels": {
+        "WARMUP": "熱身",
+        "WORK": "主訓練",
+        "RECOVERY": "恢復",
+        "REST": "休息",
+        "COOLDOWN": "放鬆",
+        "OTHER": "訓練"
+      }
+    },
     "collection": {
       "metaTitle": "免費跑步訓練計畫：5 公里、10 公里、半馬與全馬",
       "metaDescription": "比較 12 套免費官方跑步訓練計畫，涵蓋 5 公里、10 公里、半程馬拉松和馬拉松。完整課表可直接跟練，也可免費加入日曆。",

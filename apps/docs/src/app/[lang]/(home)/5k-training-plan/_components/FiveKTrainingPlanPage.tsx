@@ -1,4 +1,3 @@
-import messages from "@trainingloadai/messages/docs-copy/five-k-training-plan.json";
 import { JsonLd } from "@/components/JsonLd";
 import {
   ArrowRight,
@@ -10,7 +9,10 @@ import {
   Route,
   ShieldCheck,
 } from "lucide-react";
-import { RunningPlanSchedule } from "@/components/RunningPlanSchedule";
+import {
+  RunningPlanSchedule,
+  type RunningPlanScheduleCopy,
+} from "@/components/RunningPlanSchedule";
 import { RunningPlanIntentGuide } from "@/components/RunningPlanIntentGuide";
 import { TrackedLink } from "@/components/TrackedLink";
 import { localePrefix } from "@/lib/locale-url";
@@ -29,6 +31,7 @@ import { getRunningPlanSchedule } from "@/lib/running-plan-schedules";
 import {
   FiveKProductPreview,
   FiveKWorkflowPreview,
+  type FiveKPreviewCopy,
 } from "./FiveKProductPreview";
 import { FiveKSystemShowcase } from "./FiveKSystemShowcase";
 import styles from "../five-k-training-plan.module.css";
@@ -92,27 +95,11 @@ type DistancePlanVariant =
   | "half-marathon"
   | "marathon";
 
-type PlanPageLocale =
-  | "en"
-  | "zh"
-  | "zh-hant"
-  | "ja"
-  | "ko"
-  | "de"
-  | "fr"
-  | "es"
-  | "it"
-  | "pt-BR";
-
-const SECTION_KICKERS: Record<
-  PlanPageLocale,
-  { startHere: string; trainingMethod: string }
-> = messages.sectionKickers;
-
-const HERO_HEADINGS: Record<
-  DistancePlanVariant,
-  Record<PlanPageLocale, string[]>
-> = messages.heroHeadings;
+export type DistancePlanPresentationCopy = {
+  sectionKickers: { startHere: string; trainingMethod: string };
+  heroHeadings: Record<DistancePlanVariant, string[]>;
+  productPreview: FiveKPreviewCopy;
+};
 
 function planVariant(slug: RunningPlan["slug"]): DistancePlanVariant {
   if (slug === "couch-to-5k-training-plan") return "couch";
@@ -123,34 +110,6 @@ function planVariant(slug: RunningPlan["slug"]): DistancePlanVariant {
   return "5k";
 }
 
-function resolvePlanPageLocale(lang: string): PlanPageLocale | null {
-  const normalized = lang.toLowerCase();
-  if (
-    normalized.startsWith("zh-hant") ||
-    normalized.startsWith("zh-tw") ||
-    normalized.startsWith("zh-hk")
-  ) {
-    return "zh-hant";
-  }
-  if (normalized.startsWith("zh")) return "zh";
-  if (normalized.startsWith("ja")) return "ja";
-  if (normalized.startsWith("ko")) return "ko";
-  if (normalized.startsWith("de")) return "de";
-  if (normalized.startsWith("fr")) return "fr";
-  if (normalized.startsWith("es")) return "es";
-  if (normalized.startsWith("it")) return "it";
-  if (normalized.startsWith("pt")) return "pt-BR";
-  if (normalized.startsWith("en")) return "en";
-  return null;
-}
-
-function heroHeading(lang: string, plan: RunningPlan) {
-  const headings = HERO_HEADINGS[planVariant(plan.slug)];
-  const locale = resolvePlanPageLocale(lang);
-  if (locale) return headings[locale];
-  return [plan.title];
-}
-
 export function FiveKTrainingPlanPage({
   lang,
   plan,
@@ -159,6 +118,8 @@ export function FiveKTrainingPlanPage({
   planValue,
   workflow,
   signup,
+  presentation,
+  scheduleCopy,
 }: {
   lang: string;
   plan: RunningPlan;
@@ -167,9 +128,11 @@ export function FiveKTrainingPlanPage({
   planValue: FiveKPlanValueCopy;
   workflow: FiveKWorkflowCopy;
   signup: FiveKSignupCopy;
+  presentation: DistancePlanPresentationCopy;
+  scheduleCopy: RunningPlanScheduleCopy;
 }) {
   const prefix = localePrefix(lang);
-  const sectionKickers = SECTION_KICKERS[resolvePlanPageLocale(lang) ?? "en"];
+  const { sectionKickers, heroHeadings, productPreview } = presentation;
   const siteUrl = getSiteUrl();
   const appUrl = `https://app.trainingload.ai/${lang}`;
   const routePath = plan.routePath ?? `/${plan.slug}`;
@@ -186,7 +149,7 @@ export function FiveKTrainingPlanPage({
     product.modules[0],
   ].filter((module): module is ProductModule => Boolean(module));
   const systemModules = orderedModules.slice(1);
-  const headingLines = heroHeading(lang, plan);
+  const headingLines = heroHeadings[planVariant(plan.slug)];
 
   const jsonLd = schemaGraph([
     {
@@ -329,6 +292,7 @@ export function FiveKTrainingPlanPage({
 
             <div className={styles.heroProduct}>
               <FiveKProductPreview
+                copy={productPreview}
                 lang={lang}
                 planSlug={plan.slug}
                 distance={plan.distance}
@@ -426,6 +390,7 @@ export function FiveKTrainingPlanPage({
       ) : null}
 
       <RunningPlanSchedule
+        copy={scheduleCopy}
         schedule={schedule}
         slug={plan.slug}
         templateSlug={plan.templateSlug}
@@ -545,6 +510,7 @@ export function FiveKTrainingPlanPage({
               </TrackedLink>
             </div>
             <FiveKWorkflowPreview
+              copy={productPreview}
               lang={lang}
               planSlug={plan.slug}
               distance={plan.distance}

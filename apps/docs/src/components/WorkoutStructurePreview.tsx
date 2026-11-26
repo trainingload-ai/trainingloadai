@@ -1,4 +1,3 @@
-import messages from "@trainingloadai/messages/docs-copy/workout-structure-preview.json";
 import type {
   EndurancePlanBlock,
   EnduranceWorkRestStep,
@@ -6,22 +5,12 @@ import type {
 import type { WorkoutStructure } from "@shared/workout-structure";
 import { enduranceStructureToChartSegments } from "@/lib/plan-share-chart";
 
-type PreviewLocale =
-  | "en"
-  | "zh"
-  | "zh-hant"
-  | "ja"
-  | "ko"
-  | "de"
-  | "fr"
-  | "es"
-  | "it"
-  | "pt-BR";
 type PreviewStepKind = NonNullable<EnduranceWorkRestStep["stepKind"]>;
 
-const CHART_ARIA_LABEL: Record<PreviewLocale, string> = messages.chartAriaLabel;
-
-const STEP_COPY: Record<PreviewLocale, Record<PreviewStepKind, string>> = messages.stepLabels;
+export type WorkoutStructureCopy = {
+  chartAriaLabel: string;
+  stepLabels: Record<PreviewStepKind, string>;
+};
 
 const STEP_TONE: Record<PreviewStepKind, { chip: string; color: string }> = {
   WARMUP: {
@@ -50,26 +39,6 @@ const STEP_TONE: Record<PreviewStepKind, { chip: string; color: string }> = {
   },
 };
 
-function previewLocale(lang: string): PreviewLocale {
-  const normalized = lang.toLowerCase();
-  if (
-    normalized.startsWith("zh-hant") ||
-    normalized.startsWith("zh-tw") ||
-    normalized.startsWith("zh-hk")
-  ) {
-    return "zh-hant";
-  }
-  if (normalized.startsWith("zh")) return "zh";
-  if (normalized.startsWith("ja")) return "ja";
-  if (normalized.startsWith("ko")) return "ko";
-  if (normalized.startsWith("de")) return "de";
-  if (normalized.startsWith("fr")) return "fr";
-  if (normalized.startsWith("es")) return "es";
-  if (normalized.startsWith("it")) return "it";
-  if (normalized.startsWith("pt")) return "pt-BR";
-  return "en";
-}
-
 function durationLabel(step: EnduranceWorkRestStep) {
   const meta = step.durationMeta;
   if (meta?.kind === "DISTANCE") {
@@ -88,10 +57,10 @@ function durationLabel(step: EnduranceWorkRestStep) {
 
 function StepChip({
   step,
-  locale,
+  labels,
 }: {
   step: EnduranceWorkRestStep;
-  locale: PreviewLocale;
+  labels: WorkoutStructureCopy["stepLabels"];
 }) {
   const stepKind = step.stepKind ?? "OTHER";
   const tone = STEP_TONE[stepKind];
@@ -104,7 +73,7 @@ function StepChip({
         className="size-1.5 rounded-full"
         style={{ backgroundColor: tone.color }}
       />
-      {STEP_COPY[locale][stepKind]}
+      {labels[stepKind]}
       <span className="font-black tabular-nums">{durationLabel(step)}</span>
     </span>
   );
@@ -112,10 +81,10 @@ function StepChip({
 
 function StructureBlock({
   block,
-  locale,
+  labels,
 }: {
   block: EndurancePlanBlock;
-  locale: PreviewLocale;
+  labels: WorkoutStructureCopy["stepLabels"];
 }) {
   if (block.type === "repeat") {
     return (
@@ -128,7 +97,7 @@ function StructureBlock({
             <StepChip
               key={`${childIndex}-${stepIndex}`}
               step={step}
-              locale={locale}
+              labels={labels}
             />
           )),
         )}
@@ -138,7 +107,7 @@ function StructureBlock({
   return (
     <>
       {block.steps.map((step, index) => (
-        <StepChip key={index} step={step} locale={locale} />
+        <StepChip key={index} step={step} labels={labels} />
       ))}
     </>
   );
@@ -146,23 +115,22 @@ function StructureBlock({
 
 export function WorkoutStructurePreview({
   structure,
-  lang,
+  copy,
   compact = false,
 }: {
   structure?: WorkoutStructure | null;
-  lang: string;
+  copy: WorkoutStructureCopy;
   compact?: boolean;
 }) {
   if (!structure || structure.kind !== "ENDURANCE") return null;
   const segments = enduranceStructureToChartSegments(structure);
   const total = segments.at(-1)?.t1 ?? 0;
-  const locale = previewLocale(lang);
   return (
     <div className={compact ? "mt-3" : "mt-4"}>
       {segments.length > 0 && total > 0 ? (
         <div
           role="img"
-          aria-label={CHART_ARIA_LABEL[locale]}
+          aria-label={copy.chartAriaLabel}
           className={`relative overflow-hidden rounded-control border border-neutral-200/80 bg-white/80 dark:border-white/10 dark:bg-neutral-950/35 ${compact ? "h-10" : "h-16"}`}
         >
           {[25, 50, 75].map((top) => (
@@ -191,7 +159,7 @@ export function WorkoutStructurePreview({
       {!compact ? (
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {structure.blocks.map((block, index) => (
-            <StructureBlock key={index} block={block} locale={locale} />
+            <StructureBlock key={index} block={block} labels={copy.stepLabels} />
           ))}
         </div>
       ) : null}

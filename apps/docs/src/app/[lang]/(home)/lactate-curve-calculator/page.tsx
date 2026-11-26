@@ -64,7 +64,7 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const c = getLactateCopy(lang);
+  const c = await getLactateCopy(lang);
   const url = absoluteLocalizedUrl(siteUrl(), lang, PATH);
   const title = `${c.title} | LT1, LT2 & Dmax`;
   return {
@@ -97,8 +97,8 @@ export default async function LactateCurveCalculatorPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const c = getLactateCopy(lang);
-  const context = getLactateMethodContext(lang);
+  const c = await getLactateCopy(lang);
+  const context = await getLactateMethodContext(lang);
   const url = absoluteLocalizedUrl(siteUrl(), lang, PATH);
   const schema = schemaGraph([
     webPageSchema({

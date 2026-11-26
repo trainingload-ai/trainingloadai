@@ -11,7 +11,10 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
-import { RunningPlanSchedule } from "@/components/RunningPlanSchedule";
+import {
+  getRunningPlanScheduleCopy,
+  RunningPlanSchedule,
+} from "@/components/RunningPlanSchedule";
 import { TrackedLink } from "@/components/TrackedLink";
 import { localePrefix } from "@/lib/locale-url";
 import {
@@ -38,7 +41,7 @@ function withLocalePath(prefix: string, href: string) {
   return `${prefix}${href.startsWith("/") ? href : `/${href}`}`;
 }
 
-export function RunningPlanPage({
+export async function RunningPlanPage({
   lang,
   plan,
   labels,
@@ -47,6 +50,7 @@ export function RunningPlanPage({
   plan: RunningPlan;
   labels: RunningPlanPageLabels;
 }) {
+  const scheduleCopy = await getRunningPlanScheduleCopy(lang);
   const prefix = localePrefix(lang);
   const siteUrl = getSiteUrl();
   const appUrl = `https://app.trainingload.ai/${lang}`;
@@ -434,6 +438,7 @@ export function RunningPlanPage({
       ) : null}
 
       <RunningPlanSchedule
+        copy={scheduleCopy}
         schedule={schedule}
         slug={plan.slug}
         templateSlug={plan.templateSlug}

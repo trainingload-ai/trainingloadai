@@ -1,4 +1,3 @@
-import messages from "@trainingloadai/messages/docs-copy/five-k-product-preview.json";
 import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import Image from "next/image";
 import { ProductBrowserChrome } from "@/components/ProductBrowserChrome";
@@ -6,7 +5,7 @@ import { publicDemoDestination } from "@/lib/public-demo-url";
 import type { RunningPlanSlug } from "@/lib/running-plan-pages";
 import styles from "../five-k-training-plan.module.css";
 
-type PreviewCopy = {
+export type FiveKPreviewCopy = {
   webAlt: string;
   mobileAlt: string;
   webCalendarAlt: string;
@@ -15,18 +14,8 @@ type PreviewCopy = {
 
 type SystemPreviewKind = "calendar" | "analysis" | "coach";
 type PreviewLocale = "en" | "zh" | "zh-hant" | "ja";
-type PreviewCopyLocale =
-  | PreviewLocale
-  | "ko"
-  | "de"
-  | "fr"
-  | "es"
-  | "it"
-  | "pt-BR";
 type WebPreviewSurface = "web-plan" | "web-calendar" | "web-coach";
 type MobilePreviewSurface = "mobile-plan" | "mobile-calendar" | "mobile-coach";
-
-const COPY: Record<PreviewCopyLocale, PreviewCopy> = messages;
 
 function previewLocale(lang: string): PreviewLocale {
   const normalized = lang.toLowerCase();
@@ -39,26 +28,6 @@ function previewLocale(lang: string): PreviewLocale {
   }
   if (normalized.startsWith("zh")) return "zh";
   if (normalized.startsWith("ja")) return "ja";
-  return "en";
-}
-
-function previewCopyLocale(lang: string): PreviewCopyLocale {
-  const normalized = lang.toLowerCase();
-  if (
-    normalized.startsWith("zh-hant") ||
-    normalized.startsWith("zh-tw") ||
-    normalized.startsWith("zh-hk")
-  ) {
-    return "zh-hant";
-  }
-  if (normalized.startsWith("zh")) return "zh";
-  if (normalized.startsWith("ja")) return "ja";
-  if (normalized.startsWith("ko")) return "ko";
-  if (normalized.startsWith("de")) return "de";
-  if (normalized.startsWith("fr")) return "fr";
-  if (normalized.startsWith("es")) return "es";
-  if (normalized.startsWith("it")) return "it";
-  if (normalized.startsWith("pt")) return "pt-BR";
   return "en";
 }
 
@@ -235,13 +204,14 @@ export function FiveKProductPreview({
   lang,
   planSlug,
   distance,
+  copy,
 }: {
   lang: string;
   planSlug: RunningPlanSlug;
   distance: string;
+  copy: FiveKPreviewCopy;
 }) {
   const locale = previewLocale(lang);
-  const copy = COPY[previewCopyLocale(lang)];
   const showPlan = usesPlanDetail(planSlug);
   const showMobilePlan = usesDistanceSpecificMobilePlan(planSlug);
   const appPath = showPlan ? "/plans" : "/calendar";
@@ -274,13 +244,14 @@ export function FiveKWorkflowPreview({
   lang,
   planSlug,
   distance,
+  copy,
 }: {
   lang: string;
   planSlug: RunningPlanSlug;
   distance: string;
+  copy: FiveKPreviewCopy;
 }) {
   const locale = previewLocale(lang);
-  const copy = COPY[previewCopyLocale(lang)];
   const showPlan = usesPlanDetail(planSlug);
   const showMobilePlan = usesDistanceSpecificMobilePlan(planSlug);
   const appPath = showPlan ? "/plans" : "/calendar";

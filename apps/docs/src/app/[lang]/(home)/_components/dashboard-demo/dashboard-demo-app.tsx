@@ -1,7 +1,5 @@
 "use client";
 
-import { resolveDemoCopy } from "@/lib/demo-i18n";
-
 import { MetricHistoryDemoDialog } from "../home-demo/metric-history/metric-history-demo-dialog";
 import { chartIdToMetricView } from "../home-demo/shared/chart-id-to-metric-view";
 import { useDemoSubView } from "../home-demo/shared/use-demo-sub-view";
@@ -9,7 +7,7 @@ import { useMetricHistoryDialog } from "../home-demo/shared/use-metric-history-d
 import { MetricDemoApp } from "../metric-demo/metric-demo-app";
 import type { MetricDemoView } from "../metric-demo/types";
 
-import { dashboardDemoCopy } from "./copy";
+import { useDashboardDemoCopy } from "./copy";
 import {
   DashboardDemoFitnessGrid,
   DashboardDemoOverviewGrid,
@@ -23,7 +21,7 @@ export function DashboardDemoApp({
   lang: string;
   interactive?: boolean;
 }) {
-  const copy = resolveDemoCopy(dashboardDemoCopy, lang);
+  const copy = useDashboardDemoCopy();
   const { view, openMetric } = useDemoSubView({ interactive });
   const { metricDialog, openMetricHistory, closeMetricHistory } =
     useMetricHistoryDialog(lang, copy.aboutMetric);

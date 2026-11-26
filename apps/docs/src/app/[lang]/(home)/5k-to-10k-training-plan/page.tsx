@@ -1,3 +1,6 @@
+import { getTranslations } from "next-intl/server";
+import { getRunningPlanScheduleCopy } from "@/components/RunningPlanSchedule";
+import type { FiveKPreviewCopy } from "../5k-training-plan/_components/FiveKProductPreview";
 import {
   TenKBridgePage,
   tenKBridgeMetadata,
@@ -18,5 +21,16 @@ export default async function Page({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  return <TenKBridgePage lang={lang} slug="5k-to-10k-training-plan" />;
+  const [t, scheduleCopy] = await Promise.all([
+    getTranslations({ locale: lang, namespace: "runningPlanPages" }),
+    getRunningPlanScheduleCopy(lang),
+  ]);
+  return (
+    <TenKBridgePage
+      lang={lang}
+      slug="5k-to-10k-training-plan"
+      previewCopy={t.raw("productPreview") as FiveKPreviewCopy}
+      scheduleCopy={scheduleCopy}
+    />
+  );
 }

@@ -32,6 +32,7 @@ function plan(locale: string) {
       "half-marathon-training-plan"
     ] as RunningPlan,
     locale,
+    messages(locale).runningPlanPages.derived,
   );
 }
 

@@ -6,6 +6,7 @@ import { optimizeSeoText } from "@/lib/seo-metadata";
 import {
   createDistanceTrainingPlan,
   type RunningPlan,
+  type RunningPlanCopy,
   type RunningPlanPageLabels,
 } from "@/lib/running-plan-pages";
 
@@ -24,11 +25,12 @@ export async function generateMetadata({
   const siteUrl = getSiteUrl();
   const t = await getTranslations({
     locale: lang,
-    namespace: "runningPlanPages.plans",
+    namespace: "runningPlanPages",
   });
   const plan = createDistanceTrainingPlan(
-    t.raw("half-marathon-training-plan") as RunningPlan,
+    t.raw("plans.half-marathon-training-plan") as RunningPlan,
     lang,
+    t.raw("derived") as RunningPlanCopy,
   );
   const seo = optimizeSeoText({
     locale: lang,
@@ -72,6 +74,7 @@ export default async function HalfMarathonTrainingPlanPage({
   const plan = createDistanceTrainingPlan(
     t.raw("plans.half-marathon-training-plan") as RunningPlan,
     lang,
+    t.raw("derived") as RunningPlanCopy,
   );
   const labels = t.raw("labels") as RunningPlanPageLabels;
   return <DistancePlanExperience lang={lang} plan={plan} labels={labels} />;

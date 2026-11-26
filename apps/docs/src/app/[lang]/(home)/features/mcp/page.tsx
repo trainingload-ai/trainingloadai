@@ -1,4 +1,4 @@
-import messages from "@trainingloadai/messages/docs-copy/mcp-feature.json";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -28,18 +28,6 @@ const clients = [
   "opencode",
 ];
 
-type McpFeatureLocale =
-  | "en"
-  | "zh"
-  | "zh-hant"
-  | "ja"
-  | "ko"
-  | "de"
-  | "fr"
-  | "es"
-  | "it"
-  | "pt-BR";
-
 type McpFeatureCopy = {
   title: string;
   description: string;
@@ -63,10 +51,9 @@ type McpFeatureCopy = {
   finalText: string;
 };
 
-const copy: Record<McpFeatureLocale, McpFeatureCopy> = messages as Record<McpFeatureLocale, McpFeatureCopy>;
-
-function getMcpCopy(lang: string): McpFeatureCopy {
-  return copy[lang as McpFeatureLocale] ?? copy.en;
+async function getMcpCopy(locale: string): Promise<McpFeatureCopy> {
+  const t = await getTranslations({ locale, namespace: "features.mcp" });
+  return t.raw("content") as McpFeatureCopy;
 }
 
 export async function generateMetadata({
@@ -76,7 +63,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const prefix = localePrefix(lang);
-  const localized = getMcpCopy(lang);
+  const localized = await getMcpCopy(lang);
   return {
     title: `TrainingLoad MCP | ${localized.title}`,
     description: localized.description,
@@ -100,7 +87,7 @@ export default async function McpFeaturePage({
 }) {
   const { lang } = await params;
   const prefix = localePrefix(lang);
-  const t = getMcpCopy(lang);
+  const t = await getMcpCopy(lang);
 
   return (
     <div className="bg-neutral-950 text-white">

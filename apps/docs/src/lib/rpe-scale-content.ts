@@ -1,4 +1,4 @@
-import messages from "@trainingloadai/messages/docs-copy/rpe-scale.json";
+import { getTranslations } from "next-intl/server";
 
 export const RPE_SCALE_PATH = "/rpe-scale";
 
@@ -81,7 +81,6 @@ export type RpeScaleContent = {
 };
 
 type RpeScaleLocale = (typeof RPE_SCALE_CONTENT_LOCALES)[number];
-const content = messages as Record<RpeScaleLocale, RpeScaleContent>;
 
 export function isRpeScaleContentLocale(
   locale: string,
@@ -89,9 +88,12 @@ export function isRpeScaleContentLocale(
   return (RPE_SCALE_CONTENT_LOCALES as readonly string[]).includes(locale);
 }
 
-export function getRpeScaleContent(locale: string): RpeScaleContent {
-  if (isRpeScaleContentLocale(locale)) {
-    return content[locale];
-  }
-  return content.en;
+export async function getRpeScaleContent(
+  locale: string,
+): Promise<RpeScaleContent> {
+  const t = await getTranslations({
+    locale: isRpeScaleContentLocale(locale) ? locale : "en",
+    namespace: "rpeScale",
+  });
+  return t.raw("content") as RpeScaleContent;
 }

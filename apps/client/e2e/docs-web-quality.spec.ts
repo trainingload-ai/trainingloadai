@@ -675,7 +675,7 @@ test("indexes the homepage and tools in every supported locale", async ({
   expect(xml).toContain("<loc>https://www.trainingload.ai/ja/docs</loc>");
 });
 
-test("renders localized Coach and metric controls in the features demos", async ({
+test("renders localized controls in the features demos", async ({
   page,
 }) => {
   const translationErrors: string[] = [];
@@ -688,6 +688,25 @@ test("renders localized Coach and metric controls in the features demos", async 
     }
   });
   await page.goto("/fr/features");
+
+  const planName = "Agrandir la démo: Plan d'entraînement";
+  await page.getByRole("button", { name: planName, exact: true }).click();
+  const planDialog = page.getByRole("dialog", { name: planName });
+  await expect(
+    planDialog.getByText("Charge de la semaine", { exact: true }),
+  ).toBeVisible();
+  await expect(planDialog.getByText("S5", { exact: true }).first()).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(planDialog).toBeHidden();
+
+  const calendarName = "Agrandir la démo: Calendrier du plan";
+  await page.getByRole("button", { name: calendarName, exact: true }).click();
+  const calendarDialog = page.getByRole("dialog", { name: calendarName });
+  await expect(
+    calendarDialog.getByText("2 séances prévues", { exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(calendarDialog).toBeHidden();
 
   const coachName = "Agrandir la démo: Revue workout AI";
   await page.getByRole("button", { name: coachName, exact: true }).click();
@@ -704,6 +723,9 @@ test("renders localized Coach and metric controls in the features demos", async 
   const metricName = "Agrandir la démo: Charge d'entraînement";
   await page.getByRole("button", { name: metricName, exact: true }).click();
   const metricDialog = page.getByRole("dialog", { name: metricName });
+  await expect(
+    metricDialog.getByText("Tous les sports", { exact: true }),
+  ).toBeVisible();
   await metricDialog.getByText("Stress d'entraînement", { exact: true }).click();
   await expect(
     metricDialog.getByRole("button", { name: "Recalculer", exact: true }),

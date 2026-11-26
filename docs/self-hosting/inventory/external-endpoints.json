@@ -332,11 +332,11 @@
         },
         {
           "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
-          "line": 170
+          "line": 148
         },
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
-          "line": 75
+          "line": 79
         },
         {
           "file": "apps/docs/src/lib/analytics.ts",
@@ -354,7 +354,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/_components/FiveKTrainingPlanPage.tsx",
-          "line": 174
+          "line": 137
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
@@ -394,7 +394,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 296
+          "line": 273
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
@@ -454,7 +454,7 @@
         },
         {
           "file": "apps/docs/src/components/RunningPlanPage.tsx",
-          "line": 52
+          "line": 56
         }
       ],
       "capability": "product-internal",
@@ -486,7 +486,7 @@
       "references": [
         {
           "file": "apps/docs/src/lib/vdot-plan-content.ts",
-          "line": 293
+          "line": 259
         }
       ],
       "capability": "product-internal",
@@ -684,7 +684,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
-          "line": 483
+          "line": 484
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2232,7 +2232,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 336
+          "line": 312
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
@@ -2453,7 +2453,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
-          "line": 378
+          "line": 384
         },
         {
           "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
@@ -2555,7 +2555,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
-          "line": 368
+          "line": 374
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2569,7 +2569,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
-          "line": 358
+          "line": 364
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2851,7 +2851,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
-          "line": 346
+          "line": 353
         },
         {
           "file": "apps/docs/src/lib/running-plan-schedules.ts",
@@ -2929,7 +2929,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
-          "line": 352
+          "line": 359
         }
       ],
       "capability": "third-party-sync",
@@ -3100,19 +3100,19 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/10k-training-plan/page.tsx",
-          "line": 13
+          "line": 14
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/_components/FiveKTrainingPlanPage.tsx",
-          "line": 75
+          "line": 78
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/intermediate/page.tsx",
-          "line": 15
+          "line": 16
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/page.tsx",
-          "line": 13
+          "line": 14
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
@@ -3168,7 +3168,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/couch-to-5k-training-plan/page.tsx",
-          "line": 14
+          "line": 15
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/cp-ftp-lthr-estimator/page.tsx",
@@ -3200,7 +3200,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
-          "line": 31
+          "line": 37
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/effective-vo2max-trend/page.tsx",
@@ -3212,7 +3212,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 78
+          "line": 55
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-course-converter/page.tsx",
@@ -3244,7 +3244,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/half-marathon-training-plan/page.tsx",
-          "line": 13
+          "line": 14
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/heart-rate-zones-calculator/page.tsx",
@@ -3272,7 +3272,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/marathon-training-plan/page.tsx",
-          "line": 13
+          "line": 14
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
@@ -3372,7 +3372,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
-          "line": 126
+          "line": 127
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",
@@ -3480,11 +3480,11 @@
         },
         {
           "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
-          "line": 98
+          "line": 75
         },
         {
           "file": "apps/docs/src/components/RunningPlanPage.tsx",
-          "line": 31
+          "line": 34
         },
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
@@ -3530,11 +3530,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/_components/home-demo/metric-history/demo-fixtures.ts",
-          "line": 75
+          "line": 74
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/_components/home-demo/metric-history/demo-fixtures.ts",
-          "line": 76
+          "line": 75
         }
       ],
       "capability": "product-internal",

@@ -21,8 +21,14 @@ import {
   localePrefix,
   robotsForPublicPath,
 } from "@/lib/locale-url";
-import { getDanielsGuideCopy } from "@/lib/vdot-plan-content";
+import { getTranslations } from "next-intl/server";
+import type messages from "@trainingloadai/messages/docs/en.json";
 import { optimizeSeoText } from "@/lib/seo-metadata";
+
+async function getDanielsGuideCopy(locale: string) {
+  const t = await getTranslations({ locale, namespace: "danielsRunningFormula" });
+  return t.raw("content") as typeof messages.danielsRunningFormula.content;
+}
 
 const GUIDE_PATH = "/daniels-running-formula";
 
@@ -38,7 +44,7 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const copy = getDanielsGuideCopy(lang);
+  const copy = await getDanielsGuideCopy(lang);
   const base = siteUrl();
   const pageUrl = `${base}${localePrefix(lang)}${GUIDE_PATH}`;
   const seo = optimizeSeoText({
@@ -75,7 +81,7 @@ export default async function DanielsRunningFormulaPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const copy = getDanielsGuideCopy(lang);
+  const copy = await getDanielsGuideCopy(lang);
   const prefix = localePrefix(lang);
   const base = siteUrl();
   const pageUrl = `${base}${prefix}${GUIDE_PATH}`;

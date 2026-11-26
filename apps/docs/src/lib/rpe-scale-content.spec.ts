@@ -1,9 +1,29 @@
-import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { createTranslator } from "next-intl";
+import { describe, expect, it, vi } from "vitest";
+
 import {
   getRpeScaleContent,
   RPE_SCALE_CONTENT_LOCALES,
   RPE_SCALE_PATH,
 } from "./rpe-scale-content";
+
+vi.mock("next-intl/server", () => ({
+  getTranslations: ({
+    locale,
+    namespace,
+  }: {
+    locale: string;
+    namespace: string;
+  }) => {
+    const path = new URL(
+      `../../../../packages/messages/docs/${locale}.json`,
+      import.meta.url,
+    );
+    const messages = JSON.parse(readFileSync(path, "utf8"));
+    return Promise.resolve(createTranslator({ locale, namespace, messages }));
+  },
+}));
 
 describe("RPE scale content", () => {
   it("owns one stable canonical route", () => {
@@ -12,8 +32,8 @@ describe("RPE scale content", () => {
 
   it.each(RPE_SCALE_CONTENT_LOCALES)(
     "provides complete reviewed content for %s",
-    (locale) => {
-      const copy = getRpeScaleContent(locale);
+    async (locale) => {
+      const copy = await getRpeScaleContent(locale);
       const rowIds = copy.scaleRows.map((row) => row.id);
 
       expect(copy.title).toBeTruthy();
@@ -30,13 +50,14 @@ describe("RPE scale content", () => {
     },
   );
 
-  it("falls back to English without making unsupported locales indexable", () => {
-    expect(getRpeScaleContent("nl")).toBe(getRpeScaleContent("en"));
+  it("falls back to English for an unsupported locale", async () => {
+    expect(await getRpeScaleContent("nl")).toEqual(await getRpeScaleContent("en"));
   });
 
-  it("keeps every FAQ answer visible and schema-ready", () => {
+  it("keeps every FAQ answer visible and schema-ready", async () => {
     for (const locale of RPE_SCALE_CONTENT_LOCALES) {
-      for (const [question, answer] of getRpeScaleContent(locale).faq) {
+      const copy = await getRpeScaleContent(locale);
+      for (const [question, answer] of copy.faq) {
         expect(question.length).toBeGreaterThan(8);
         expect(answer.length).toBeGreaterThan(24);
       }
