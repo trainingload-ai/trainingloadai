@@ -109,7 +109,7 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   const reviewSettled = !accessLoading && !reviewQuery.isLoading;
   const streamEligible =
-    Boolean(activityId) &&
+    !!activityId &&
     hasReviewAccess &&
     hasAiDataConsent &&
     reviewSettled &&
@@ -125,9 +125,11 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
       !workerFailed
     ) {
       setStreamAttempt((previous) =>
-        previous?.activityId === activityId && previous.lang === lang
+        previous !== null &&
+        previous.activityId === activityId &&
+        previous.lang === lang
           ? previous
-          : { activityId: activityId!, lang, restartKey: 0 },
+          : { activityId, lang, restartKey: 0 },
       );
     }
   }, [
@@ -145,7 +147,8 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
     Boolean(activityId) &&
     hasReviewAccess &&
     hasAiDataConsent &&
-    streamAttempt?.activityId === activityId &&
+    streamAttempt !== null &&
+    streamAttempt.activityId === activityId &&
     streamAttempt.lang === lang;
 
   const {
