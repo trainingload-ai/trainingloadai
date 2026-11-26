@@ -139,3 +139,15 @@ export class PlanWorkoutRepository {
     return markWorkoutDoneIfApplicable(tx, workoutId, eventTime);
   }
 }
+
+export function listRollingWorkoutDays(tx: PlanDb, planId: string, start: Date, end: Date) {
+  return tx.planWorkout.findMany({
+    where: {
+      planId,
+      scheduledDate: { gte: start, lte: end },
+      status: { not: 'MOVED' },
+    },
+    orderBy: { scheduledDate: 'desc' },
+    select: { scheduledDate: true, status: true },
+  });
+}

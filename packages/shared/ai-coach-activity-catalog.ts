@@ -73,6 +73,7 @@ export const COACH_TOOL_LABELS = {
   "training.weekSummary": "weekSummary",
   "workout.intensity_strategy": "intensity",
   present_coach_plan_draft: "planDraft",
+  present_independent_workout_draft: "decisionDraft",
   present_plan_workout_adjustment_draft: "workoutAdjustment",
   present_training_visualization: "visualization",
   present_coach_health: "visualization",

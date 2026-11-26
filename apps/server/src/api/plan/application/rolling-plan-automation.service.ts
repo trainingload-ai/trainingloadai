@@ -1,3 +1,4 @@
+import { listRollingWorkoutDays } from '../persistence/plan-workout.repository';
 import { PlanRepository } from '../persistence/plan.repository';
 import { UserService } from '@/api/user/user.service';
 import {
@@ -119,18 +120,12 @@ export class RollingPlanAutomationService {
               return 0;
             const monthStart = `${today.slice(0, 7)}-01`;
             const monthEnd = calendarMonthEnd(today);
-            const workouts = await tx.planWorkout.findMany({
-              where: {
-                planId: plan.id,
-                scheduledDate: {
-                  gte: date(monthStart < week ? monthStart : week),
-                  lte: date(monthEnd > weekEnd ? monthEnd : weekEnd),
-                },
-                status: { not: 'MOVED' },
-              },
-              orderBy: { scheduledDate: 'desc' },
-              select: { scheduledDate: true, status: true },
-            });
+            const workouts = await listRollingWorkoutDays(
+              tx,
+              plan.id,
+              date(monthStart < week ? monthStart : week),
+              date(monthEnd > weekEnd ? monthEnd : weekEnd),
+            );
             const published = await tx.rollingWeekGeneration.findMany({
               where: {
                 planId: plan.id,

@@ -183,7 +183,7 @@ describe('model and runtime tool contracts', () => {
     const execute = jest.fn(async () => ({ kind: 'coach_plan_draft' }));
     const tools = createAiSdkCoachTools({
       tools: [{ ...presentCoachPlanDraftTool, execute: execute as never }],
-      ctx: { signal: new AbortController().signal } as AiToolContext,
+      ctx: { signal: new AbortController().signal, activeSkillName: 'plan-builder' } as AiToolContext,
     });
     const tool = tools.present_coach_plan_draft;
     const validate = (

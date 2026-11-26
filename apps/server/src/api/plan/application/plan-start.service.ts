@@ -1,3 +1,4 @@
+import { findConsumedTemplatePlan } from '@/api/plan-template/persistence/plan-template-preview.repository';
 import type { WorkoutStructure } from '@shared/workout-structure';
 import { RollingPlanAuthorizationService } from './rolling-plan-authorization.service';
 import { RollingPlanService } from './rolling-plan.service';
@@ -795,10 +796,7 @@ export class PlanStartService {
   private async officialStartContext(userId: string, planId: string, tx: PlanDb) {
     const source = await this.source(userId, planId, tx, true);
     const template = source.sourceType === 'TEMPLATE' && source.planningMode === 'FIXED'
-      ? await tx.planTemplatePreview.findUnique({
-          where: { createdPlanId: planId },
-          select: { userId: true, consumedAt: true, normalizedInput: true },
-        })
+      ? await findConsumedTemplatePlan(tx, planId)
       : null;
     if (!template?.consumedAt || template.userId !== userId)
       fail('An official template draft is required');
@@ -845,7 +843,7 @@ export class PlanStartService {
       this.assertFutureStart(startDate, current.calendarTimeZone);
       if (current.startDate === startDate) return { startDate, revision };
       const metadata = current.source.generationMetadata;
-      await tx.plan.update({
+      await this.storage.updatePlan(tx, {
         where: { id: planId },
         data: {
           generationMetadata: {
@@ -1227,7 +1225,7 @@ export class PlanStartService {
   private async calendarAdjustmentEligibility(
     userId: string, planId: string, edits: CalendarEdit[], presentation: PlanProposalPresentation, tx: PlanDb,
   ) {
-    const plan = await tx.plan.findFirst({
+    const plan = await this.storage.findPlan(tx, {
       where: { id: planId, userId },
       select: {
         status: true, startDate: true, endDate: true, planningMode: true,
@@ -1243,7 +1241,7 @@ export class PlanStartService {
     )?.calendarTimeZone ?? plan?.activationTimezone ?? (await this.users.getPreferredTimezone(userId, tx)) ?? 'UTC';
     const today = this.earliestStartDate(timezone);
     const replacement = plan?.supersededBy?.status === 'SCHEDULED' ? ymd(plan.supersededBy.startDate) : undefined;
-    const workouts = await tx.planWorkout.findMany({
+    const workouts = await this.storage.findWorkouts(tx, {
       where: {
         userId, planId,
         id: { in: edits.flatMap((edit) => edit.workoutId ? [edit.workoutId] : []) },
@@ -1531,8 +1529,8 @@ export class PlanStartService {
     tx: PlanDb,
   ): Promise<PlanSchedulePreviewRequest> {
     const [plan, workouts] = await Promise.all([
-      tx.plan.findFirst({ where: { id: planId, userId }, select: { startDate: true } }),
-      tx.planWorkout.findMany({
+      this.storage.findPlan(tx, { where: { id: planId, userId }, select: { startDate: true } }),
+      this.storage.findWorkouts(tx, {
         where: {
           planId,
           userId,
@@ -1565,12 +1563,7 @@ export class PlanStartService {
       const offset = (Date.parse(date) - Date.parse(startDate)) / 86400000;
       let sessionIndex = prior?.sessionIndex ?? 1;
       if (date !== originalDate) {
-        const occupied = nextPosition.get(offset) ?? (
-          await tx.planWorkout.aggregate({
-            where: { planId, userId, dayOffset: offset },
-            _max: { sessionIndex: true },
-          })
-        )._max.sessionIndex ?? 0;
+        const occupied = nextPosition.get(offset) ?? (await this.storage.lastSessionIndex(tx, planId, userId, offset));
         sessionIndex = occupied + 1;
         nextPosition.set(offset, sessionIndex);
       }
@@ -1802,7 +1795,7 @@ export class PlanStartService {
       requests.push((draft.proposal as unknown as CanonicalStartProposal).request);
     const workoutIds = new Set(requests.flatMap(({ changes, deletions }) =>
       [...changes, ...deletions].map(({ sourceWorkoutId }) => sourceWorkoutId)));
-    const mutableWorkouts = await tx.planWorkout.count({
+    const mutableWorkouts = await this.storage.countWorkouts(tx, {
       where: {
         userId,
         planId: preview.sourcePlanId,
@@ -1919,7 +1912,7 @@ export class PlanStartService {
     }
     if (impact.from < today || impact.to < today)
       throw new CalendarMoveRefreshBlocked('datesPassed');
-    const workout = await tx.planWorkout.findFirst({
+    const workout = await this.storage.findWorkout(tx, {
       where: { id: impact.workoutId, userId, planId: preview.sourcePlanId },
       select: { revision: true, status: true, scheduledDate: true },
     });
@@ -2082,7 +2075,7 @@ export class PlanStartService {
     if (!replay && !expired) {
       if (!this.automationAccess) fail('Plan advice access is unavailable');
       await this.automationAccess.assertAllowed(userId, tx);
-      const workout = await tx.planWorkout.findFirst({
+      const workout = await this.storage.findWorkout(tx, {
         where: { id: impact.workoutId, userId, planId: parent.sourcePlanId },
         select: { revision: true },
       });
@@ -2243,7 +2236,7 @@ export class PlanStartService {
     tx: PlanDb,
   ) {
     if (!isCalendarDate(input.targetDate)) fail('Invalid calendar move date');
-    const row = await tx.planWorkout.findFirst({
+    const row = await this.storage.findWorkout(tx, {
       where: { id: input.workoutId, planId: input.planId, userId },
       include: { ...sourceInclude.workouts.include, plan: true },
     });
@@ -2259,10 +2252,7 @@ export class PlanStartService {
     const calendarMove = { workoutId: row.id, from, to };
     const offset = (Date.parse(to) - row.plan.startDate.getTime()) / 86400000;
     if (offset < 0) fail('Candidate target is outside the plan');
-    const occupied = await tx.planWorkout.aggregate({
-      where: { planId: input.planId, userId, dayOffset: offset },
-      _max: { sessionIndex: true },
-    });
+    const occupied = await this.storage.lastSessionIndex(tx, input.planId, userId, offset);
     const w = normalizePlanWorkoutRow(row, {
       workoutService: this.workout,
       workoutDefinitionService: this.definitions,
@@ -2281,7 +2271,7 @@ export class PlanStartService {
           workout: {
             weekIndex: Math.floor(offset / 7) + 1,
             dayIndex: (offset % 7) + 1,
-            sessionIndex: (occupied._max.sessionIndex ?? 0) + 1,
+            sessionIndex: occupied + 1,
             sportType: w.sportType,
             sportDefinitionCode: w.sportDefinitionCode,
             name: w.name ?? undefined,
