@@ -183,4 +183,78 @@ describe('ActivityFitnessContextResolverService', () => {
       });
     },
   );
+
+  it('falls back to generated zones after a custom zone reset tombstone (zones: [])', async () => {
+    const prisma = {
+      activityPeakMetric: { findFirst: jest.fn(async () => null) },
+      activitySource: {
+        findMany: jest.fn(async () => [
+          { metadata: { datasetQuality: { powerCoverage: 1 } } },
+        ]),
+      },
+      userBodyMetric: { findMany: jest.fn(async () => []) },
+      userZoneSettingVersion: {
+        findMany: jest.fn(async () => [
+          {
+            id: 'tombstone-1',
+            sportType: SportType.CYCLING,
+            zoneType: 'POWER',
+            benchmark: null,
+            zones: [],
+            rawPayload: { action: 'delete' },
+            createdAt: new Date('2026-09-17T05:00:00.000Z'),
+          },
+        ]),
+      },
+    };
+    const users = {
+      getComposedUserProfile: jest.fn(async () => ({
+        loadSources: 'POWER',
+        powerZoneModel: 'FRIEL',
+      })),
+      listBodyMetricEvidenceAt: jest.fn(async () => []),
+    };
+    const service = new ActivityFitnessContextResolverService(
+      prisma as never,
+      users as never,
+      new ActivityDependencyFingerprintService(),
+      {
+        resolveAt: jest.fn(async () => ({
+          versionId: 'config-1',
+          version: 1,
+          effectiveAt: new Date('1970-01-01T00:00:00.000Z'),
+          fingerprint: 'analysis-config-1',
+          loadSources: ['POWER', 'HEART_RATE', 'PACE', 'SESSIONRPE'],
+          altitudeOptimizationModel: 'THRESHOLDMETHOD',
+          altitudeThreshold: null,
+          defaultVdotSource: 'FACTOR',
+          vo2maxCorrectionFactor: 1,
+          heartRateZoneModel: 'MHR',
+          paceZoneModel: 'DANIELS',
+          powerZoneModel: 'FRIEL',
+        })),
+      } as never,
+      {
+        resolve: jest.fn(async () => ({ overall: 'input', dimensions: {} })),
+      } as never,
+    );
+
+    const resolved = await service.resolve({
+      activity: {
+        id: 77,
+        userId: 'user-1',
+        sportType: SportType.CYCLING,
+        startTime: new Date('2026-09-17T06:00:00.000Z'),
+        endTime: new Date('2026-09-17T07:00:00.000Z'),
+        timerTime: 3600,
+        elapsedTime: 3600,
+        eftp: 260,
+      },
+      projector: new FitnessTimelineProjector(),
+    });
+
+    const powerZone = resolved.zones.find((zone) => zone.zoneType === 'POWER');
+    expect(powerZone?.setting.configurationSource).toBe('generated');
+    expect(powerZone?.setting.zones.length).toBeGreaterThan(0);
+  });
 });

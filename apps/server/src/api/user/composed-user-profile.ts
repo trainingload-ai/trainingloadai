@@ -172,9 +172,9 @@ export function composeUserProfile(args: {
     args.sport === SportType.SWIM
       ? {}
       : readPowerSnapshot(args.fitnessMetrics, args.sport);
-  const run =
-    args.sport === SportType.RUN
-      ? readRunPaceSnapshot(args.fitnessMetrics)
+  const pace =
+    args.sport === SportType.RUN || args.sport === SportType.SWIM
+      ? readPaceSnapshot(args.fitnessMetrics, args.sport)
       : {};
   const includeRunPrefs = args.sport === SportType.RUN || args.sport == null;
 
@@ -186,7 +186,7 @@ export function composeUserProfile(args: {
     bikeWeight: undefined,
     ...heartRate,
     ...power,
-    ...run,
+    ...pace,
     loadSources: parseLoadSourcesCsv(args.base?.loadSources),
     altitudeOptimizationModel:
       args.base?.altitudeOptimizationModel ?? undefined,
@@ -290,12 +290,20 @@ function readPowerSnapshot(
   };
 }
 
-function readRunPaceSnapshot(rows: EffectiveFitnessMetricCandidate[]) {
-  const sport = SportType.RUN;
+function readPaceSnapshot(
+  rows: EffectiveFitnessMetricCandidate[],
+  sport: typeof SportType.RUN | typeof SportType.SWIM,
+) {
   const cs = metricValue(rows, UserFitnessMetricType.CS, sport);
   const tp = metricValue(rows, UserFitnessMetricType.TP, sport);
-  const aet = metricValue(rows, UserFitnessMetricType.AET_PACE, sport);
-  const vo2max = metricValue(rows, UserFitnessMetricType.VO2_MAX, sport);
+  const aet =
+    sport === SportType.RUN
+      ? metricValue(rows, UserFitnessMetricType.AET_PACE, sport)
+      : undefined;
+  const vo2max =
+    sport === SportType.RUN
+      ? metricValue(rows, UserFitnessMetricType.VO2_MAX, sport)
+      : undefined;
   return {
     cs: cs ? numericMetricValue(cs.value) : undefined,
     tp: thresholdPaceToMetersPerSecond(

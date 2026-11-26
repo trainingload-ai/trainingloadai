@@ -65,7 +65,7 @@ export function useUpdateUserProfile() {
       return await updateUserProfile(profile);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.user.profile() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.root.userProfile });
       queryClient.invalidateQueries({ queryKey: USER_ZONES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: queryKeys.pace.zonesRoot() });
       queryClient.invalidateQueries({
@@ -103,8 +103,11 @@ export function useReplaceUserBodyMetrics() {
     }) => {
       return await replaceUserBodyMetrics(payload.type, payload.metrics);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.user.profile() });
+    onSuccess: (_data, payload) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.root.userProfile });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.user.bodyMetrics(payload.type),
+      });
       toast.success(t("updateSuccess"));
     },
     onError: (error) => {

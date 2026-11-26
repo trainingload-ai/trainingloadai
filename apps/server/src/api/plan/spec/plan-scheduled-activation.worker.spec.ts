@@ -109,4 +109,67 @@ describe('PlanScheduledActivationWorker', () => {
     );
     expect(contexts.ensureContext).not.toHaveBeenCalled();
   });
+
+  it('fences superseded rolling automation jobs and emits PLAN_WORKOUTS_CHANGED_EVENT', async () => {
+    const tx = { $executeRawUnsafe: jest.fn(async () => 1) };
+    const prisma = {
+      $transaction: jest.fn(
+        async (run: (value: typeof tx) => Promise<unknown>) => run(tx),
+      ),
+    };
+    const plans = {
+      findUnique: jest.fn(async () => ({
+        id: 'next-plan',
+        userId: 'user-1',
+        title: 'Next plan',
+        status: 'SCHEDULED',
+        startDate: new Date('2026-10-01T00:00:00.000Z'),
+        endDate: new Date('2026-11-01T00:00:00.000Z'),
+        scheduledActivationAt: new Date('2026-10-01T00:00:00.000Z'),
+        activationBlockedAt: null,
+        supersedesPlanId: 'rolling-source',
+        supersedes: {
+          id: 'rolling-source',
+          userId: 'user-1',
+          status: 'ACTIVE',
+          planningMode: 'ROLLING',
+        },
+      })),
+      findFirst: jest.fn(async () => null),
+      update: jest.fn(async () => ({})),
+      fenceAutomationJobs: jest.fn(async () => undefined),
+    };
+    const contexts = {
+      supersedeContext: jest.fn(async () => undefined),
+      ensureContext: jest.fn(async () => undefined),
+    };
+    const notifications = {
+      ensureNotification: jest.fn(async () => undefined),
+    };
+    const events = { emitAsync: jest.fn(async () => []) };
+    const worker = new PlanScheduledActivationWorker(
+      prisma as never,
+      plans as never,
+      contexts as never,
+      notifications as never,
+      events as never,
+    );
+
+    await activate(worker);
+
+    expect(plans.fenceAutomationJobs).toHaveBeenCalledWith(
+      'rolling-source',
+      'SUPERSEDED',
+      true,
+      tx,
+    );
+    expect(events.emitAsync).toHaveBeenCalledWith(
+      'plan.workoutsChanged',
+      expect.objectContaining({
+        userId: 'user-1',
+        reason: 'scheduled_plan_activated',
+        planId: 'next-plan',
+      }),
+    );
+  });
 });

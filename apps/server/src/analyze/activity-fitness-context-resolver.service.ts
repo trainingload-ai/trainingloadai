@@ -368,21 +368,33 @@ export class ActivityFitnessContextResolverService {
       },
       orderBy: { createdAt: 'desc' },
     });
-    const selected = new Map<ZoneType, (typeof rows)[number]>();
+    const isLiveSavedZoneVersion = (row?: (typeof rows)[number]) =>
+      Boolean(
+        row &&
+        Array.isArray(row.zones) &&
+        row.zones.length > 0 &&
+        (row.rawPayload as { action?: unknown } | null)?.action !== 'delete',
+      );
+    const selected = new Map<ZoneType, (typeof rows)[number] | undefined>();
     for (const zoneType of Object.values(ZoneType)) {
+      const sportRow = rows.find(
+        (row) => row.zoneType === zoneType && row.sportType === sport,
+      );
+      const fallbackRow = rows.find(
+        (row) =>
+          row.zoneType === zoneType && row.sportType === SportType.UNKNOWN,
+      );
       selected.set(
         zoneType,
-        rows.find(
-          (row) => row.zoneType === zoneType && row.sportType === sport,
-        ) ??
-          rows.find(
-            (row) =>
-              row.zoneType === zoneType && row.sportType === SportType.UNKNOWN,
-          )!,
+        isLiveSavedZoneVersion(sportRow)
+          ? sportRow
+          : isLiveSavedZoneVersion(fallbackRow)
+            ? fallbackRow
+            : undefined,
       );
     }
     return [...selected.entries()].flatMap(([zoneType, row]) => {
-      const saved = row && Array.isArray(row.zones);
+      const saved = isLiveSavedZoneVersion(row);
       const generated = saved
         ? null
         : zoneType === ZoneType.HEART_RATE
@@ -400,8 +412,8 @@ export class ActivityFitnessContextResolverService {
       const raw: UserZoneSetting = saved
         ? {
             configurationSource: 'saved',
-            benchmark: row.benchmark,
-            zones: row.zones as unknown as UserZoneValue[],
+            benchmark: row!.benchmark,
+            zones: row!.zones as unknown as UserZoneValue[],
           }
         : {
             ...generated,
@@ -423,11 +435,11 @@ export class ActivityFitnessContextResolverService {
                 FTP: profile.ftp,
                 CP: profile.cp,
               })
-            : resolvePaceZoneSettings(raw, profile);
+            : resolvePaceZoneSettings(raw, { ...profile, sportType: sport });
       if (!resolved?.length) return [];
       const calculationFingerprint = fitnessTimelineFingerprint({
         zoneType,
-        sport: saved ? row.sportType : sport,
+        sport: saved ? row!.sportType : sport,
         benchmark: raw.benchmark,
         zones: resolved,
       });

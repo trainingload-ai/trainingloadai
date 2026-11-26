@@ -1,7 +1,11 @@
 import { describe, expect, it } from '@jest/globals';
-import { fillTimedValuesToZones, fillValueToPaceZones } from '../zones';
-import { resolveHeartRateSettings } from '../zones';
-import { ZoneBase } from '@prisma/client';
+import {
+  fillTimedValuesToZones,
+  fillValueToPaceZones,
+  resolveHeartRateSettings,
+  resolvePaceZoneSettings,
+} from '../zones';
+import { SportType, ZoneBase } from '@prisma/client';
 
 describe('fillValueToPaceZones', () => {
   it('keeps configured pace zones when there are no speed samples', () => {
@@ -89,5 +93,47 @@ describe('resolveHeartRateSettings', () => {
         {},
       ),
     ).toBeUndefined();
+  });
+});
+
+describe('resolvePaceZoneSettings', () => {
+  it('converts CUSTOM running pace zones from sec/km to sec/m', () => {
+    const zones = resolvePaceZoneSettings(
+      {
+        benchmark: ZoneBase.CUSTOM,
+        zones: [
+          { name: 'z1', order: 1, min: 300, max: 360 },
+          { name: 'z2', order: 2, min: 240, max: 300 },
+        ],
+      },
+      { sportType: SportType.RUN },
+    );
+
+    expect(zones).toEqual([
+      { name: 'z1', order: 1, min: 0.3, max: 0.36 },
+      { name: 'z2', order: 2, min: 0.24, max: 0.3 },
+    ]);
+  });
+
+  it('converts CUSTOM swimming pace zones from sec/100m to sec/m and stays idempotent for sec/m', () => {
+    expect(
+      resolvePaceZoneSettings(
+        {
+          benchmark: ZoneBase.CUSTOM,
+          zones: [{ name: 'z1', order: 1, min: 90, max: 110 }],
+        },
+        { sportType: SportType.SWIM },
+      ),
+    ).toEqual([{ name: 'z1', order: 1, min: 0.9, max: 1.1 }]);
+
+    expect(
+      resolvePaceZoneSettings(
+        {
+          benchmark: ZoneBase.CUSTOM,
+          zones: [{ name: 'z1', order: 1, min: 0.24, max: 0.3 }],
+        },
+        { sportType: SportType.RUN },
+      ),
+    ).toEqual([{ name: 'z1', order: 1, min: 0.24, max: 0.3 }]);
   });
 });

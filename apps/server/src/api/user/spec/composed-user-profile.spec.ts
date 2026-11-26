@@ -156,4 +156,34 @@ describe('composed user profile helpers', () => {
 
     expect(profile.age).toBe(19);
   });
+
+  it('includes SWIM CS, TP, and dPrime in composed SWIM profile', () => {
+    const swim = composeUserProfile({
+      sport: SportType.SWIM,
+      base: null,
+      bodyMetrics: [],
+      fitnessMetrics: [
+        {
+          type: UserFitnessMetricType.CS,
+          sport: SportType.SWIM,
+          source: MetricSource.MANUAL,
+          recordedAt: new Date('2026-08-01T00:00:00.000Z'),
+          value: 1.25,
+          value2: 35,
+        },
+        {
+          type: UserFitnessMetricType.TP,
+          sport: SportType.SWIM,
+          source: MetricSource.MANUAL,
+          recordedAt: new Date('2026-08-01T00:00:00.000Z'),
+          value: 1.3,
+        },
+      ],
+    });
+
+    expect(swim.cs).toBe(1.25);
+    expect(swim.dPrime).toBe(35);
+    expect(swim.tp).toBe(1.3);
+    expect(swim.vo2max).toBeUndefined();
+  });
 });

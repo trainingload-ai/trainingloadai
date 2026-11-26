@@ -600,10 +600,17 @@ export class AiController {
   refreshCalendarMoveCoach(
     @CurrentUserId() userId: string,
     @Param('sid') sid: string,
-    @Body('previousConfirmationId', new ParseUUIDPipe({ version: '4', optional: true }))
+    @Body(
+      'previousConfirmationId',
+      new ParseUUIDPipe({ version: '4', optional: true }),
+    )
     previousConfirmationId?: string,
   ) {
-    return this.planStarts.refreshCalendarMoveCoach(userId, sid, previousConfirmationId);
+    return this.planStarts.refreshCalendarMoveCoach(
+      userId,
+      sid,
+      previousConfirmationId,
+    );
   }
 
   @SkipThrottle({ default: true, ai: true })
@@ -618,9 +625,21 @@ export class AiController {
     @Param('sid') sid: string,
     @Param('messageId') messageId: string,
     @Param('deliveryId') deliveryId: string,
-    @Query() options: { date?: string; hrvSource?: string; metricSource?: string; byActivity?: string },
+    @Query()
+    options: {
+      date?: string;
+      hrvSource?: string;
+      metricSource?: string;
+      byActivity?: string;
+    },
   ) {
-    return this.aiService.readCoachMetricChart(userId, sid, messageId, deliveryId, options);
+    return this.aiService.readCoachMetricChart(
+      userId,
+      sid,
+      messageId,
+      deliveryId,
+      options,
+    );
   }
 
   /** Read the message history used to restore the conversation thread. */
@@ -929,12 +948,13 @@ export class AiController {
     const findMissingRequestBranch = command && !body.branchId;
     const existingRequestBranch = findMissingRequestBranch
       ? await this.coachRuns.existingRequestBranch(
-        userId,
-        String(body.sid ?? ''),
-        command,
+          userId,
+          String(body.sid ?? ''),
+          command,
         )
       : null;
-    if (existingRequestBranch) body = { ...body, branchId: existingRequestBranch };
+    if (existingRequestBranch)
+      body = { ...body, branchId: existingRequestBranch };
     if (command?.kind === 'answer' && !body.branchId) {
       const branchId = await this.coachRuns.answerBranch(
         userId,
@@ -1687,7 +1707,8 @@ export class AiController {
         caseId: body.caseId ?? null,
         signal: abort.signal,
         onPlanValidationRejected: runHandle
-          ? (event) => this.coachRuns.recordPlanValidationRejection(runHandle, event)
+          ? (event) =>
+              this.coachRuns.recordPlanValidationRejection(runHandle, event)
           : undefined,
         onActivity: v2
           ? async (activity) => {
@@ -2410,27 +2431,9 @@ export class AiController {
         subscriber.complete();
       });
     }
-    let stream: Awaited<ReturnType<AiService['streamActivityAiAnalysis']>>;
-    try {
-      stream = await this.aiService.streamActivityAiAnalysis(
-        hashId,
-        userId,
-        publicDemo ? true : useCache,
-        lang,
-        purpose,
-        operationId,
-        Boolean(publicDemo),
-      );
-    } catch (error) {
-      await this.operations.fail({
-        userId,
-        operationId,
-        errorCode: 'ACTIVITY_ANALYSIS_START_FAILED',
-      });
-      throw error;
-    }
     return new Observable((subscriber) => {
-      // Nest @Sse 会负责外层 event-stream，这里只把模型 delta 包成 MessageEvent.data。
+      // Nest @Sse wraps the outer event-stream; run generation inside the
+      // Observable so heartbeat stays active and disconnect settlement is consistent.
       (async () => {
         let completionPending = false;
         let activityReviewId: string | null = null;
@@ -2444,12 +2447,19 @@ export class AiController {
             );
         }, 30_000);
         try {
+          const stream = await this.aiService.streamActivityAiAnalysis(
+            hashId,
+            userId,
+            publicDemo ? true : useCache,
+            lang,
+            purpose,
+            operationId,
+            Boolean(publicDemo),
+          );
+          let clientDisconnected = false;
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           for await (const chunk of stream) {
-            if (subscriber.closed) {
-              throw new Error('ACTIVITY_ANALYSIS_CLIENT_DISCONNECTED');
-            }
             const anyChunk = chunk as {
               __activityReviewId?: string;
               choices?: Array<{ delta?: { content?: string } }>;
@@ -2458,16 +2468,19 @@ export class AiController {
             if (anyChunk.__activityReviewId) {
               activityReviewId = anyChunk.__activityReviewId;
             }
+            if (subscriber.closed) {
+              clientDisconnected = true;
+              continue;
+            }
             const content = anyChunk.choices?.[0]?.delta?.content || '';
             this.logger.debug(`收到流式片段：${content}`);
             if (content) {
               subscriber.next({ data: { content } } as MessageEvent);
             }
           }
-          if (subscriber.closed) {
-            throw new Error('ACTIVITY_ANALYSIS_CLIENT_DISCONNECTED');
-          }
           if (!activityReviewId) throw new Error('AI_RESULT_NOT_PERSISTED');
+          // Once the review is persisted in DB for the user, mark delivered and
+          // complete the operation even if the SSE client disconnected mid-stream.
           await this.operations.markDelivered({
             userId,
             operationId,
@@ -2485,33 +2498,37 @@ export class AiController {
             this.logger.error(
               `Activity analysis operation completion pending operationId=${operationId} userId=${userId} error=${String(completionError)}`,
             );
+            if (!subscriber.closed && !clientDisconnected) {
+              subscriber.next({
+                data: {
+                  type: 'operation',
+                  operation: {
+                    operationId,
+                    status: 'RUNNING',
+                    replayed: false,
+                    pending: true,
+                    purpose,
+                    recovery: {
+                      kind: 'ACTIVITY_REVIEW',
+                      activityHashId: hashId,
+                      reviewId: activityReviewId,
+                    },
+                  },
+                },
+              } as MessageEvent);
+              subscriber.complete();
+            }
+            return;
+          }
+          if (!subscriber.closed && !clientDisconnected) {
             subscriber.next({
               data: {
                 type: 'operation',
-                operation: {
-                  operationId,
-                  status: 'RUNNING',
-                  replayed: false,
-                  pending: true,
-                  purpose,
-                  recovery: {
-                    kind: 'ACTIVITY_REVIEW',
-                    activityHashId: hashId,
-                    reviewId: activityReviewId,
-                  },
-                },
+                operation: toAiOperationResult(operation, false),
               },
             } as MessageEvent);
             subscriber.complete();
-            return;
           }
-          subscriber.next({
-            data: {
-              type: 'operation',
-              operation: toAiOperationResult(operation, false),
-            },
-          } as MessageEvent);
-          subscriber.complete();
         } catch (err) {
           if (!completionPending) {
             await this.operations

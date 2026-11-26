@@ -113,7 +113,8 @@ export class ActivityAiReviewWorkerService
       WITH picked AS (
         SELECT id
         FROM t_activity_ai_review
-        WHERE (
+        WHERE trigger <> 'MANUAL'
+          AND (
             status IN ('PENDING','FAILED')
             OR (
               status = 'RUNNING'

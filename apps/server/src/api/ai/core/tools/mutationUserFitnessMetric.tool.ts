@@ -208,7 +208,11 @@ export const userFitnessMetricMutationBundle = mutationToolFactory<
         type: 'string',
         enum: [...METRIC_ENUM],
       },
-      value: { type: 'number' },
+      value: {
+        type: 'number',
+        description:
+          'Metric value in canonical units (FTP/CP/P_MAX in watts, W_PRIME in joules, HR in bpm, TP/CS in m/s, VO2_MAX in ml/kg/min).',
+      },
       value2: {
         type: 'number',
         description: "Optional second value (e.g. CS D')",
@@ -311,7 +315,11 @@ export const userFitnessMetricMutationBundle = mutationToolFactory<
     const userId = ctx.session!.user!.id;
     const metricType = String(input.metricType).trim() as UserFitnessMetricType;
     const parsedSport = parseSport(input.sportType);
-    const sport = parsedSport ?? SportType.UNKNOWN;
+    // VO2_MAX is always stored on the global UNKNOWN track so settings edits remain consistent.
+    const sport =
+      metricType === UserFitnessMetricType.VO2_MAX
+        ? SportType.UNKNOWN
+        : (parsedSport ?? SportType.UNKNOWN);
 
     const resolvedDate = await resolveEffectiveDate(ctx, input.effectiveDate);
     if (!resolvedDate.effectiveDate) throw new Error('Invalid effectiveDate');

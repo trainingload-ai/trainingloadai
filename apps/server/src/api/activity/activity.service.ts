@@ -966,7 +966,6 @@ export class ActivityService {
           sessionRpe: normalized,
           processingStatus: $Enums.ActivityProcessingStatus.ANALYZING,
           processingUpdatedAt: new Date(),
-          readyAt: null,
         } as Prisma.ActivityUpdateInput,
       });
       await createActivityInputReplayJob(tx, {
@@ -2282,10 +2281,12 @@ export class ActivityService {
     userId: string,
     source: string = 'import-post-process-heavy',
   ): Promise<void> {
+    const language = await this.userService.getPreferredLocale(userId);
     await this.activityAiReviewService.enqueueForActivity({
       activityId,
       userId,
       trigger: $Enums.ActivityAiReviewTrigger.IMPORT,
+      language,
       metadata: { source },
     });
   }
@@ -3063,7 +3064,6 @@ export class ActivityService {
               subSport: null,
               processingStatus: 'ANALYZING',
               processingUpdatedAt: new Date(),
-              readyAt: null,
             },
           });
           if (updated.count > 0) {

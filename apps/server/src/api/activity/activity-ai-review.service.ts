@@ -321,7 +321,11 @@ export class ActivityAiReviewService {
           (existing.status !== $Enums.ActivityAiReviewStatus.SUCCEEDED ||
             readStoredCoachMarkdown(existing.content, language))))
     ) {
-      return { id: existing.id, status: existing.status };
+      return {
+        id: existing.id,
+        status: existing.status,
+        priorSucceeded: undefined,
+      };
     }
 
     const resetPending = {
@@ -335,8 +339,19 @@ export class ActivityAiReviewService {
       failedAt: null,
     };
 
+    const priorSucceeded =
+      args.runInline &&
+      existing &&
+      existing.status === $Enums.ActivityAiReviewStatus.SUCCEEDED &&
+      readStoredCoachMarkdown(existing.content, language)
+        ? {
+            trigger: existing.trigger,
+            finishedAt: existing.finishedAt,
+          }
+        : undefined;
+
     if (existing) {
-      return await this.prisma.activityAiReview.update({
+      const updated = await this.prisma.activityAiReview.update({
         where: { id: existing.id },
         data: {
           trigger: args.trigger,
@@ -353,23 +368,96 @@ export class ActivityAiReviewService {
         },
         select: { id: true, status: true },
       });
+      return { ...updated, priorSucceeded };
     }
 
-    return await this.prisma.activityAiReview.create({
-      data: {
-        activityId: args.activityId,
-        userId: args.userId,
-        ...resetPending,
-        trigger: args.trigger,
-        availableAt: new Date(),
-        language,
-        promptVersion: ACTIVITY_AI_REVIEW_PROMPT_VERSION,
-        evidenceVersion: ACTIVITY_COACH_EVIDENCE_VERSION,
-        evidenceHash,
-        evidence: evidenceSnapshot as unknown as Prisma.InputJsonValue,
-        metadata: args.metadata as unknown as Prisma.InputJsonValue,
+    try {
+      const created = await this.prisma.activityAiReview.create({
+        data: {
+          activityId: args.activityId,
+          userId: args.userId,
+          ...resetPending,
+          trigger: args.trigger,
+          availableAt: new Date(),
+          language,
+          promptVersion: ACTIVITY_AI_REVIEW_PROMPT_VERSION,
+          evidenceVersion: ACTIVITY_COACH_EVIDENCE_VERSION,
+          evidenceHash,
+          evidence: evidenceSnapshot as unknown as Prisma.InputJsonValue,
+          metadata: args.metadata as unknown as Prisma.InputJsonValue,
+        },
+        select: { id: true, status: true },
+      });
+      return { ...created, priorSucceeded: undefined };
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        const raced = await this.findLatestAiReviewForActivity({
+          activityId: args.activityId,
+          userId: args.userId,
+          language,
+        });
+        if (raced) {
+          return {
+            id: raced.id,
+            status: raced.status,
+            priorSucceeded: undefined,
+          };
+        }
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Recover an inline manual review row after generation fails so we neither
+   * erase a previously succeeded review nor leave a stale RUNNING row for the
+   * background worker to claim later.
+   */
+  async recoverInlineRunFailure(args: {
+    reviewId: string;
+    priorSucceeded?: {
+      trigger: $Enums.ActivityAiReviewTrigger;
+      finishedAt: Date | null;
+    };
+    error: unknown;
+  }): Promise<void> {
+    if (args.priorSucceeded) {
+      await this.prisma.activityAiReview.updateMany({
+        where: {
+          id: args.reviewId,
+          status: $Enums.ActivityAiReviewStatus.RUNNING,
+        },
+        data: {
+          status: $Enums.ActivityAiReviewStatus.SUCCEEDED,
+          trigger: args.priorSucceeded.trigger,
+          finishedAt: args.priorSucceeded.finishedAt,
+          lockedAt: null,
+          failedAt: null,
+          errorCode: null,
+          errorMessage: null,
+        },
+      });
+      return;
+    }
+    const message =
+      args.error instanceof Error
+        ? args.error.message
+        : String(args.error ?? 'Unknown error');
+    await this.prisma.activityAiReview.updateMany({
+      where: {
+        id: args.reviewId,
+        status: $Enums.ActivityAiReviewStatus.RUNNING,
       },
-      select: { id: true, status: true },
+      data: {
+        status: $Enums.ActivityAiReviewStatus.DEAD,
+        lockedAt: null,
+        failedAt: new Date(),
+        errorCode: 'INLINE_RUN_FAILED',
+        errorMessage: message.slice(0, 500),
+      },
     });
   }
 
@@ -445,7 +533,10 @@ export class ActivityAiReviewService {
     operationId: string;
     usage: ParsedAiUsage;
   }) {
-    const markdown = validateActivityReviewMarkdown(args.markdown, args.prepared.lang);
+    const markdown = validateActivityReviewMarkdown(
+      args.markdown,
+      args.prepared.lang,
+    );
     const {
       inputTokens,
       outputTokens,
@@ -648,9 +739,10 @@ export class ActivityAiReviewService {
       row.promptVersion === ACTIVITY_AI_REVIEW_PROMPT_VERSION &&
       row.evidenceVersion === ACTIVITY_COACH_EVIDENCE_VERSION;
     const succeeded = row.status === $Enums.ActivityAiReviewStatus.SUCCEEDED;
-    const markdown = currentContract && succeeded
-      ? readStoredCoachMarkdown(row.content, language)
-      : null;
+    const markdown =
+      currentContract && succeeded
+        ? readStoredCoachMarkdown(row.content, language)
+        : null;
     const usable = currentContract && (!succeeded || Boolean(markdown));
     const needsLanguageRepair = currentContract && succeeded && !markdown;
 

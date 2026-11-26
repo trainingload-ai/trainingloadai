@@ -15,39 +15,57 @@ describe('ActivityAiReviewService locale lookup', () => {
   const wrongLanguage = '本次训练节奏稳定，后半程仍能保持相近的配速。';
 
   it('treats an English cache row containing Chinese prose as a cache miss', async () => {
-    const service = Object.create(ActivityAiReviewService.prototype) as ActivityAiReviewService;
+    const service = Object.create(
+      ActivityAiReviewService.prototype,
+    ) as ActivityAiReviewService;
     Object.assign(service, {
       prisma: {
         activity: { findFirst: async () => ({ id: 42 }) },
-        activityAiReview: { findFirst: async () => ({
-          id: 'old-review',
-          status: 'SUCCEEDED',
-          promptVersion: ACTIVITY_AI_REVIEW_PROMPT_VERSION,
-          evidenceVersion: ACTIVITY_COACH_EVIDENCE_VERSION,
-          content: wrongLanguage,
-          summary: wrongLanguage,
-          verdict: wrongLanguage,
-          updatedAt: new Date('2026-01-01T00:00:00Z'),
-        }) },
+        activityAiReview: {
+          findFirst: async () => ({
+            id: 'old-review',
+            status: 'SUCCEEDED',
+            promptVersion: ACTIVITY_AI_REVIEW_PROMPT_VERSION,
+            evidenceVersion: ACTIVITY_COACH_EVIDENCE_VERSION,
+            content: wrongLanguage,
+            summary: wrongLanguage,
+            verdict: wrongLanguage,
+            updatedAt: new Date('2026-01-01T00:00:00Z'),
+          }),
+        },
       },
     });
-    await expect(service.getAiReviewForActivityHash({
-      userId: 'test', activityHashId: 'activity', language: 'en',
-    })).resolves.toMatchObject({ markdown: null, summary: null, verdict: null });
+    await expect(
+      service.getAiReviewForActivityHash({
+        userId: 'test',
+        activityHashId: 'activity',
+        language: 'en',
+      }),
+    ).resolves.toMatchObject({ markdown: null, summary: null, verdict: null });
   });
 
   it('refuses to persist generated Chinese prose for an English review', async () => {
     const write = jest.fn();
-    const service = Object.create(ActivityAiReviewService.prototype) as ActivityAiReviewService;
+    const service = Object.create(
+      ActivityAiReviewService.prototype,
+    ) as ActivityAiReviewService;
     Object.assign(service, {
       prisma: { $transaction: write },
       aiUsage: { computeUsageMetrics: () => ({}) },
     });
-    await expect(service.persistGeneratedReview({
-      prepared: { lang: 'en', review: { id: 'review', activityId: 42 } } as never,
-      markdown: wrongLanguage,
-      model: 'test', provider: 'test', operationId: 'test', usage: {} as never,
-    })).rejects.toMatchObject({ code: 'ACTIVITY_REVIEW_LANGUAGE_MISMATCH' });
+    await expect(
+      service.persistGeneratedReview({
+        prepared: {
+          lang: 'en',
+          review: { id: 'review', activityId: 42 },
+        } as never,
+        markdown: wrongLanguage,
+        model: 'test',
+        provider: 'test',
+        operationId: 'test',
+        usage: {} as never,
+      }),
+    ).rejects.toMatchObject({ code: 'ACTIVITY_REVIEW_LANGUAGE_MISMATCH' });
     expect(write).not.toHaveBeenCalled();
   });
 
@@ -285,5 +303,60 @@ describe('ActivityAiReviewService locale lookup', () => {
       }),
     ).resolves.toEqual({ id: 'review-1' });
     expect(tx.activityAiReview.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects pure Chinese prose when persisting a Japanese review', async () => {
+    const write = jest.fn();
+    const service = Object.create(
+      ActivityAiReviewService.prototype,
+    ) as ActivityAiReviewService;
+    Object.assign(service, {
+      prisma: { $transaction: write },
+      aiUsage: { computeUsageMetrics: () => ({}) },
+    });
+    await expect(
+      service.persistGeneratedReview({
+        prepared: {
+          lang: 'ja',
+          review: { id: 'review', activityId: 42 },
+        } as never,
+        markdown: wrongLanguage,
+        model: 'test',
+        provider: 'test',
+        operationId: 'test',
+        usage: {} as never,
+      }),
+    ).rejects.toMatchObject({ code: 'ACTIVITY_REVIEW_LANGUAGE_MISMATCH' });
+    expect(write).not.toHaveBeenCalled();
+  });
+
+  it('restores a previously succeeded review when inline regeneration fails', async () => {
+    const updateMany = jest.fn(async () => ({ count: 1 }));
+    const service = Object.create(
+      ActivityAiReviewService.prototype,
+    ) as ActivityAiReviewService;
+    Object.assign(service, {
+      prisma: { activityAiReview: { updateMany } },
+    });
+    const priorFinishedAt = new Date('2026-01-01T00:00:00Z');
+    await service.recoverInlineRunFailure({
+      reviewId: 'review-1',
+      priorSucceeded: {
+        trigger: 'IMPORT',
+        finishedAt: priorFinishedAt,
+      },
+      error: new Error('upstream timeout'),
+    });
+    expect(updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'review-1', status: 'RUNNING' },
+        data: expect.objectContaining({
+          status: 'SUCCEEDED',
+          trigger: 'IMPORT',
+          finishedAt: priorFinishedAt,
+          lockedAt: null,
+        }),
+      }),
+    );
   });
 });

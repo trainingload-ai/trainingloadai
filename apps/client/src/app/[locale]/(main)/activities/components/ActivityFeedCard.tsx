@@ -5,6 +5,10 @@ import { useGuestAccessText } from "@deployment/managed-ui";
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { removeActivityAnalysisCaches } from "@/lib/activity-analysis-cache";
+import {
+  invalidateActivePlanAndPlanDetails,
+  invalidateActivityDerivedCaches,
+} from "@/lib/query-invalidation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Download, Eye, MoreHorizontal, Trash2 } from "lucide-react";
@@ -124,7 +128,11 @@ export function ActivityFeedCard({
       setDeleting(true);
       const deleted = await deleteActivity(activity.hashId);
       if (deleted) {
-        await removeActivityAnalysisCaches(queryClient, activity.hashId);
+        await Promise.all([
+          removeActivityAnalysisCaches(queryClient, activity.hashId),
+          invalidateActivityDerivedCaches(queryClient),
+          invalidateActivePlanAndPlanDetails(queryClient),
+        ]);
         onDeleted?.(activity.hashId);
       }
     } finally {

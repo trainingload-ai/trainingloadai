@@ -166,6 +166,7 @@ export function useAiAnalysisStream(
               retryTimer = setTimeout(waitForResult, 3_000);
               return;
             }
+            clearPendingAiOperation("ACTIVITY_REVIEW", activityId, operationId);
             const localized = localizedAiOperationError(e, operationErrorT);
             setError(localized ? new Error(localized) : e);
             setIsLoading(false);
@@ -201,6 +202,15 @@ export function useAiAnalysisStream(
           activityId,
           operation.operationId,
         );
+        if (
+          operation.status === "FAILED" ||
+          operation.status === "ABANDONED"
+        ) {
+          setError(
+            new Error(operation.errorCode || "ACTIVITY_ANALYSIS_FAILED"),
+          );
+          setIsLoading(false);
+        }
       }
       return;
     }

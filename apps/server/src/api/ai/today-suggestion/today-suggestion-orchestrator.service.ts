@@ -373,11 +373,16 @@ export class TodaySuggestionOrchestratorService {
         draft = run.draft;
         lease.failure = undefined;
         if (draft.preferredIntent === 'CREATE_TODAY_WORKOUT') {
+          const workoutController = new AbortController();
+          const workoutTimeout = setTimeout(
+            () => workoutController.abort('timeout'),
+            60_000,
+          );
           try {
             const generated = await this.workoutGenerator.generate({
               projection,
               draft,
-              signal: controller.signal,
+              signal: workoutController.signal,
               allowWithoutConsent: args.allowWithoutConsent,
             });
             if (
@@ -407,6 +412,8 @@ export class TodaySuggestionOrchestratorService {
                 (intent) => intent !== 'CREATE_TODAY_WORKOUT',
               ),
             };
+          } finally {
+            clearTimeout(workoutTimeout);
           }
         }
         provider = run.provider;

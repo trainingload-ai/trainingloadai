@@ -540,23 +540,63 @@ describe('UserService estimated fitness metric tracks', () => {
 
   it('returns stored speed for Coach and keeps rounded pace seconds for dashboard clients', async () => {
     const { service } = createService();
-    jest.spyOn(service, 'getUserFitnessMetric').mockImplementation(
-      async (_user, type, _date, sport, source) =>
+    jest
+      .spyOn(service, 'getUserFitnessMetric')
+      .mockImplementation(async (_user, type, _date, sport, source) =>
         type === UserFitnessMetricType.TP && source === MetricSource.AUTO
           ? createMetric({
-              type, sport: sport ?? SportType.RUN, source,
+              type,
+              sport: sport ?? SportType.RUN,
+              source,
               value: sport === SportType.SWIM ? 1.25 : 4.4,
               recordedAt: new Date('2026-08-04T00:00:00Z'),
             })
           : null,
-    );
+      );
     for (const [sportType, speed, pace] of [
-      [SportType.RUN, 4.4, 227], [SportType.SWIM, 1.25, 80],
+      [SportType.RUN, 4.4, 227],
+      [SportType.SWIM, 1.25, 80],
     ] as const) {
       const args = { userId: 'user-1', sportType };
-      expect((await service.getFitnessMetricPairs(args)).effective.TP).toBe(pace);
-      const forCoach = await service.getFitnessMetricPairs({ ...args, paceRepresentation: 'speed' });
-      expect(forCoach.effectiveDetails.TP).toMatchObject({ value: speed, source: 'AUTO' });
+      expect((await service.getFitnessMetricPairs(args)).effective.TP).toBe(
+        pace,
+      );
+      const forCoach = await service.getFitnessMetricPairs({
+        ...args,
+        paceRepresentation: 'speed',
+      });
+      expect(forCoach.effectiveDetails.TP).toMatchObject({
+        value: speed,
+        source: 'AUTO',
+      });
     }
+  });
+
+  it('preserves SYSTEM_IMPORTED rows when replacing editable manual fitness metrics', async () => {
+    const { service, prisma } = createService();
+    const deleteMany = jest.fn(async () => ({ count: 0 }));
+    const upsert = jest.fn(async () => ({
+      id: 'm1',
+      recordedAt: new Date('2026-11-26T00:00:00.000Z'),
+    }));
+    Object.assign(prisma.userFitnessMetric, { deleteMany, upsert });
+
+    await service.replaceManualFitnessMetricsForDialog({
+      userId: 'user-1',
+      type: UserFitnessMetricType.FTP,
+      sportType: SportType.CYCLING,
+      metrics: [{ effectiveDate: '2026-11-26', value: '275' }],
+      tx: prisma as never,
+    });
+
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        userId: 'user-1',
+        type: UserFitnessMetricType.FTP,
+        source: MetricSource.MANUAL,
+        sport: SportType.CYCLING,
+        OR: [{ changeSource: null }, { changeSource: 'USER_MANUAL' }],
+      }),
+    });
   });
 });
