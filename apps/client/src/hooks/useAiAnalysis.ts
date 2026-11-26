@@ -57,6 +57,7 @@ export function useAiAnalysisStream(
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [operation, setOperation] = useState<AiOperationResult | null>(null);
   const purpose = "DEFAULT" as const;
 
@@ -67,6 +68,7 @@ export function useAiAnalysisStream(
         setIsDone(false);
         setData("");
         setError(null);
+        setErrorCode(null);
       }
       return;
     }
@@ -90,6 +92,7 @@ export function useAiAnalysisStream(
 
     setIsLoading(true);
     setError(null);
+    setErrorCode(null);
     setIsDone(false);
     setData("");
     setOperation(null);
@@ -167,7 +170,9 @@ export function useAiAnalysisStream(
               return;
             }
             clearPendingAiOperation("ACTIVITY_REVIEW", activityId, operationId);
+            const code = aiOperationErrorCode(e);
             const localized = localizedAiOperationError(e, operationErrorT);
+            setErrorCode(code);
             setError(localized ? new Error(localized) : e);
             setIsLoading(false);
           }
@@ -206,6 +211,7 @@ export function useAiAnalysisStream(
           operation.status === "FAILED" ||
           operation.status === "ABANDONED"
         ) {
+          setErrorCode(aiOperationErrorCode(operation.errorCode));
           setError(
             new Error(operation.errorCode || "ACTIVITY_ANALYSIS_FAILED"),
           );
@@ -241,6 +247,7 @@ export function useAiAnalysisStream(
             activityId,
             action.operationId,
           );
+          setErrorCode(aiOperationErrorCode(action.errorCode));
           setError(new Error(action.errorCode || "AI analysis failed"));
           setIsLoading(false);
           setIsDone(true);
@@ -260,5 +267,5 @@ export function useAiAnalysisStream(
     };
   }, [activityId, operation, locale, queryClient]);
 
-  return { data, isLoading, isDone, error, operation };
+  return { data, isLoading, isDone, error, errorCode, operation };
 }

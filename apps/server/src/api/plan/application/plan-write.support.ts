@@ -3383,7 +3383,7 @@ export class PlanWriteSupport {
         {
           where: {
             userId,
-            status: 'ACTIVE',
+            status: { in: ['ACTIVE', 'PAUSED'] },
             id: { not: planId },
           },
           select: { id: true },
