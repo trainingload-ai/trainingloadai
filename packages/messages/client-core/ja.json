@@ -521,6 +521,7 @@
       "workoutDialogSessionMeta": "セッション {ordinal} · {sport}",
       "workoutDialogSessionFallback": "セッション {ordinal}",
       "workoutDialogClose": "閉じる",
+      "workoutDialogBackToCalendar": "カレンダーに戻る",
       "scheduleConflict": "トレーニング可能日と競合しています"
     },
     "readCards": {
@@ -577,6 +578,7 @@
         "colMin": "下限",
         "colMax": "上限",
         "unitPace": "(分/km)",
+        "unitPaceMi": "(分/mi)",
         "unitPace100m": "(分/100m)",
         "unitHr": "(bpm)",
         "unitPower": "(W)",
@@ -666,6 +668,7 @@
       "showLess": "折りたたむ",
       "evidence": "使用したデータ",
       "loadDelta": "推定負荷の変化",
+      "expectedImpact": "予想される影響",
       "syncImpact": "デバイス同期への影響",
       "total": "評価",
       "changed": "変更",
@@ -6260,6 +6263,11 @@
     "home": "ホーム"
   },
   "PlanActivationDialog": {
+    "officialDescription": "下書きのスケジュールを確認・編集して、開始日を選択します。",
+    "loadingDraft": "下書きのスケジュールを読み込み中…",
+    "changedDraft": "下書きが別の画面で変更されました。開始前にスケジュールを確認してください。",
+    "startFailed": "プランを開始できませんでした。スケジュールを確認して再試行してください。",
+    "editFailed": "ワークアウトの変更を保存できませんでした。もう一度お試しください。",
     "title": "プランを有効化",
     "description": "実際の開始日を選んでください。ワークアウト日はこの日付と各ワークアウトのオフセットから計算されます。",
     "cancel": "キャンセル",
@@ -6621,6 +6629,8 @@
     "adjustmentConflicts": {
       "PLAN_STATUS": "The plan can no longer be edited",
       "WORKOUT_REMOVED": "The workout was removed",
+      "WORKOUT_CHANGED": "このトレーニングは別の操作で変更されました",
+      "WORKOUT_NOT_VERIFIED": "更新時にこのトレーニングを確認できませんでした",
       "WORKOUT_STATUS": "The workout status has changed",
       "ACTIVITY_LINKED": "The workout is linked to an activity",
       "HISTORY": "The workout date has passed",
@@ -6633,11 +6643,17 @@
     "stageEdit": "下書きに追加",
     "batchSaved": "プランの変更を保存しました。",
     "batchFailed": "変更を保存できませんでした。もう一度お試しください。",
+    "adjustmentUnavailable": "この調整の下書きは無効になりました。確定済みの予定は変更されていません。現在の予定表から調整をやり直せます。",
     "batchReloadTitle": "最新の予定を読み込みますか？",
     "batchConflict": "The schedule changed or the edits could not be saved. Load the latest schedule and review your changes before confirming.",
     "missedDrop": "実施できなかったトレーニングの日程は変更できません。",
     "completedDrop": "完了したトレーニングの日程は変更できません。",
     "recovery": {
+      "unavailableTitle": "調整の下書きは無効です",
+      "localDraftRolledBack": "未保存の変更をすべて取り消しました。",
+      "localDraftWillBeRolledBack": "未保存の変更も取り消されます。",
+      "retryDraft": "更新して再試行",
+      "refreshSchedule": "予定表を更新",
       "title": "日程変更のプレビューの有効期限が切れました",
       "action": "最新の予定を読み込む",
       "expired": "最新の予定を読み込むと、この会話で調整を続けられます。",

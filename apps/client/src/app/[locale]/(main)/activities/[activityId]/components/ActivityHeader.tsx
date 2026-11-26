@@ -65,6 +65,7 @@ import { getActivityDetailState } from "@shared/activity-detail";
 
 interface ActivityHeaderProps {
   activity: Activity;
+  readOnly?: boolean;
 }
 
 const SPORT_TYPE_CHIP_CLASS =
@@ -120,7 +121,7 @@ function formatThirdPartyProvider(provider: string, uploadLabel: string) {
   return getThirdPartyProviderName(normalized) ?? provider;
 }
 
-export function ActivityHeader({ activity }: ActivityHeaderProps) {
+export function ActivityHeader({ activity, readOnly = false }: ActivityHeaderProps) {
   const t = useTranslations();
   const tDetail = useTranslations("ActivityDetail");
   const tActivityTitle = useTranslations("ActivityTitle");
@@ -142,6 +143,7 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
   const { data: sportCatalog = [] } = useSportCatalog();
   const currentSportType = (activity.sportType as SportType) || "UNKNOWN";
   const detailPolicy = getActivityDetailPolicy(activity);
+  const canEditSportType = !readOnly && detailPolicy.canEditSportType;
   const currentSportDefinition =
     sportCatalog.find(
       (sport) =>
@@ -256,7 +258,7 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
           {displayTitle}
         </h1>
         <div className="flex shrink-0 items-center gap-2">
-          {isEditing ? (
+          {canEditSportType && isEditing ? (
             <div className="flex shrink-0 items-center gap-2">
               <Select
                 value={selectedSportCode}
@@ -294,7 +296,7 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
               )}
             </div>
-          ) : detailPolicy.canEditSportType ? (
+          ) : canEditSportType ? (
             <button
               type="button"
               aria-label={`${t("activityDetails.editSportType")}: ${currentSportLabel}`}
@@ -352,14 +354,14 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
         <div className="flex flex-wrap items-center gap-2">
           {activity.hashId &&
           getActivityDetailState(activity).canShowEnhancedDetail ? (
-            <ActivityDetailPlanLinkControl hashId={activity.hashId} />
+            <ActivityDetailPlanLinkControl hashId={activity.hashId} readOnly={readOnly} />
           ) : null}
-          <ActivitySessionRpeControl activity={activity} />
+          <ActivitySessionRpeControl activity={activity} readOnly={readOnly} />
         </div>
       </div>
 
       <AlertDialog
-        open={confirmOpen}
+        open={canEditSportType && confirmOpen}
         onOpenChange={(open) => {
           if (setSportTypeMutation.isPending) return;
           if (!open) {

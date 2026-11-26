@@ -61,7 +61,7 @@ function toPreviewText(markdown: string) {
     .trim();
 }
 
-const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
+const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
   const t = useTranslations("AIAnalysis");
   const queryClient = useQueryClient();
   const activityId = useActivityId();
@@ -116,7 +116,7 @@ const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
     review?.found === true && ["DEAD", "SKIPPED"].includes(review.status ?? "");
   useEffect(() => {
     if (
-      autoStart &&
+      !readOnly &&
       streamEligible &&
       !hasStoredMarkdown &&
       !workerPending &&
@@ -129,7 +129,7 @@ const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
       );
     }
   }, [
-    autoStart,
+    readOnly,
     streamEligible,
     hasStoredMarkdown,
     workerPending,
@@ -138,6 +138,7 @@ const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
   ]);
   // Once started, keep this request alive while canonical status changes to RUNNING.
   const streamEnabled =
+    !readOnly &&
     Boolean(activityId) &&
     hasReviewAccess &&
     hasAiDataConsent &&
@@ -197,7 +198,7 @@ const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
     !loadingCombined &&
     (reviewQuery.isError || Boolean(error) || workerFailed);
   const showFreeUpsell =
-    !accessLoading && !hasReviewAccess && !hasContent && !loadingCombined;
+    !readOnly && !accessLoading && !hasReviewAccess && !hasContent && !loadingCombined;
 
   const handleCardClick = () => {
     if (loadingCombined && !markdownBody) {
@@ -218,11 +219,15 @@ const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
   return (
     <div className="min-h-0 min-w-0">
       {!accessLoading && !hasAiDataConsent ? (
-        <AiDataConsentPrompt
-          className="mx-auto w-full max-w-md"
-          source="ACCOUNT_SETTINGS"
-          variant="compact"
-        />
+        readOnly ? (
+          <p className="text-mobile-caption text-muted-foreground pc:text-xs">{t("emptyHint")}</p>
+        ) : (
+          <AiDataConsentPrompt
+            className="mx-auto w-full max-w-md"
+            source="ACCOUNT_SETTINGS"
+            variant="compact"
+          />
+        )
       ) : (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col md:min-h-0">
           {showFreeUpsell ? (
@@ -232,7 +237,7 @@ const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
               <p className="text-mobile-caption pc:text-xs text-muted-foreground">
                 {error instanceof Error ? error.message : t("analysisFailed")}
               </p>
-              <Button
+              {!readOnly ? <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
@@ -245,14 +250,14 @@ const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
                 }}
               >
                 {t("regenerate")}
-              </Button>
+              </Button> : null}
             </div>
           ) : hasContent ? (
             <button
               type="button"
               onClick={handleCardClick}
-              onMouseEnter={preloadActivityCoachConversation}
-              onFocus={preloadActivityCoachConversation}
+              onMouseEnter={readOnly ? undefined : preloadActivityCoachConversation}
+              onFocus={readOnly ? undefined : preloadActivityCoachConversation}
               className="group flex min-h-12 w-full min-w-0 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[42rem]/activity-detail:min-h-[96px]"
             >
               <div className="relative max-h-[72px] min-h-0 flex-1 overflow-hidden">
@@ -267,7 +272,7 @@ const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
                 <span>{t("expand")} ›</span>
               </div>
             </button>
-          ) : !autoStart && !loadingCombined ? (
+          ) : readOnly && !loadingCombined ? (
             <p className="text-mobile-caption text-muted-foreground pc:text-xs">
               {t("emptyHint")}
             </p>
@@ -295,7 +300,11 @@ const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
                 </DialogDescription>
               </DialogHeader>
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                {open && activityId && markdownBody ? (
+                {readOnly ? (
+                  <div className="prose prose-sm max-w-none overflow-y-auto px-4 py-3 dark:prose-invert pc:px-5">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdownBody}</ReactMarkdown>
+                  </div>
+                ) : open && activityId && markdownBody ? (
                   <ActivityCoachDialogBody
                     activityId={activityId}
                     markdown={markdownBody}

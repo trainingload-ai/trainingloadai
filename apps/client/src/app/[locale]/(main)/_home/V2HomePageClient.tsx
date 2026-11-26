@@ -1148,15 +1148,17 @@ function HomeTwoColumnSection({
       }
     >
       <main className="contents md:flex md:min-h-0 md:min-w-0 md:flex-col md:gap-3 md:[grid-area:main] md:order-none">
-        {!isRollingPlan(homeData.currentPlan.planning) ? (
-          <div className="order-2 min-w-0 md:order-none">
-            <DeferredMount
-              fallback={<Skeleton className="h-64 w-full" aria-hidden="true" />}
-            >
-              <LoadComparisonChart homeData={homeData} plannedWorkouts={plannedWorkouts} t={t} />
-            </DeferredMount>
-          </div>
-        ) : null}
+        <div className="order-2 min-w-0 md:order-none">
+          <DeferredMount
+            fallback={<Skeleton className="h-64 w-full" aria-hidden="true" />}
+          >
+            <LoadComparisonChart
+              homeData={homeData}
+              plannedWorkouts={plannedWorkouts}
+              t={t}
+            />
+          </DeferredMount>
+        </div>
         <div className="order-1 min-w-0 md:order-none">
           <TodayExecutionPanel homeData={homeData} t={t} />
         </div>

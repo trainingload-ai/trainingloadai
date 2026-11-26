@@ -275,6 +275,10 @@
       "types": "./src/api/plan/application/plan-lifecycle.service.ts",
       "default": "./src/api/plan/application/plan-lifecycle.service.ts"
     },
+    "./api/plan/plan-execution-context.service": {
+      "types": "./src/api/plan/plan-execution-context.service.ts",
+      "default": "./src/api/plan/plan-execution-context.service.ts"
+    },
     "./api/plan/application/plan-query.service": {
       "types": "./src/api/plan/application/plan-query.service.ts",
       "default": "./src/api/plan/application/plan-query.service.ts"

@@ -4,7 +4,7 @@ import type {
   V2ActivityThirdPartyMapping,
   V2ActivityThirdPartyProvider,
   V2ExternalActivityMirror,
-} from "@/api/v2-activities";
+} from "./v2-activities";
 
 function normalizeProvider(
   provider: string | null | undefined,

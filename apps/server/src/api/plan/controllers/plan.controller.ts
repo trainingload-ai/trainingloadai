@@ -9,6 +9,7 @@ import {
   Get,
   Logger,
   Param,
+  Patch,
   ParseBoolPipe,
   ParseUUIDPipe,
   Post,
@@ -24,13 +25,18 @@ import { PlanService } from '../plan.service';
 import { PlanSummaryService } from '../application/plan-summary.service';
 import { CreatePlanDto } from '../dto/create-plan.dto';
 import { UpdatePlanDto } from '../dto/update-plan.dto';
-import { ActivatePlanDto } from '../dto/activate-plan.dto';
+import { ActivatePlanDto, StartOfficialPlanDraftDto } from '../dto/activate-plan.dto';
 import { PauseOrCancelPlanDto } from '../dto/pause-or-cancel-plan.dto';
 import { CompletePlanDto } from '../dto/complete-plan.dto';
 import { LinkPlanWorkoutActivityDto } from '../dto/link-plan-workout-activity.dto';
 import { UpdatePlanWorkoutStatusDto } from '../dto/update-plan-workout-status.dto';
 import { UpdatePlanWorkoutDto } from '../dto/update-plan-workout.dto';
-import { CreateScheduledWorkoutDto } from '../dto/create-scheduled-workout.dto';
+import {
+  CreateIndependentWorkoutDto,
+  CreateScheduledWorkoutDto,
+  TransitionIndependentWorkoutDraftDto,
+  UpdateIndependentWorkoutDto,
+} from '../dto/create-scheduled-workout.dto';
 import { PreviewCalendarMoveDto } from '../dto/preview-calendar-move.dto';
 import { ReviseCalendarAdjustmentDto, SaveCalendarAdjustmentDto, RebaseCalendarAdjustmentDto } from '../dto/apply-calendar-edits.dto';
 import { AllowPublicDemo } from '@/public-demo/allow-public-demo.decorator';
@@ -196,10 +202,24 @@ export class PlanController {
     return this.planService.listScheduledWorkouts(userId, start, end);
   }
 
+  @Get('workouts/independent-drafts/:id')
+  getIndependentWorkoutDraft(@CurrentUserId() userId: string, @Param('id') id: string) {
+    return this.planService.getIndependentWorkoutDraft(userId, id);
+  }
+
+  @Put('workouts/independent-drafts/:id')
+  transitionIndependentWorkoutDraft(
+    @CurrentUserId() userId: string,
+    @Param('id') id: string,
+    @Body() input: TransitionIndependentWorkoutDraftDto,
+  ) {
+    return this.planService.transitionIndependentWorkoutDraft(userId, id, input);
+  }
+
   @Post('workouts/independent')
   async createIndependentWorkout(
     @CurrentUserId() userId: string,
-    @Body() dto: CreateScheduledWorkoutDto,
+    @Body() dto: CreateIndependentWorkoutDto,
   ) {
     return this.planService.createIndependentWorkout(userId, dto);
   }
@@ -211,6 +231,15 @@ export class PlanController {
     @CurrentUserId() userId: string,
   ) {
     return this.planService.getIndependentWorkoutDetail(userId, workoutId);
+  }
+
+  @Put('workouts/independent/:workoutId')
+  async updateIndependentWorkout(
+    @Param('workoutId') workoutId: string,
+    @CurrentUserId() userId: string,
+    @Body() dto: UpdateIndependentWorkoutDto,
+  ) {
+    return this.planService.updateIndependentWorkout(userId, workoutId, dto);
   }
 
   @Delete('workouts/independent/:workoutId')
@@ -293,6 +322,29 @@ export class PlanController {
     @Body() dto?: UpdatePlanDto,
   ) {
     return this.planService.updatePlan(userId, planId, dto!);
+  }
+
+  @Get(':planId/official-start')
+  async officialDraft(@Param('planId') planId: string, @CurrentUserId() userId: string) {
+    return this.starts.officialDraft(userId, planId);
+  }
+
+  @Post(':planId/official-start')
+  async startOfficialDraft(
+    @Param('planId') planId: string,
+    @CurrentUserId() userId: string,
+    @Body() dto: StartOfficialPlanDraftDto,
+  ) {
+    return this.starts.startOfficialDraft(userId, planId, dto.startDate, dto.revision);
+  }
+
+  @Patch(':planId/official-start')
+  async saveOfficialStartDate(
+    @Param('planId') planId: string,
+    @CurrentUserId() userId: string,
+    @Body() dto: StartOfficialPlanDraftDto,
+  ) {
+    return this.starts.saveOfficialStartDate(userId, planId, dto.startDate, dto.revision);
   }
 
   @Post(':planId/start-conversation')

@@ -13,6 +13,41 @@ import type {
 } from '../coach-query-yield';
 
 describe('coach history UIMessage-first persistence', () => {
+  it('shows the current card confirmation to the model using the actual reply shape', () => {
+    const confirmation = (assistantId: string, decisionId: string): CoachUserMessageBody => ({
+      content: [
+        { type: 'text', text: '我确认应用当前选中的这个决策。' },
+        {
+          type: 'tool_result',
+          tool_use_id: assistantId,
+          content: {
+            kind: 'coach_decision_confirmation',
+            repliesToAssistantMessageId: assistantId,
+            decisionId,
+          },
+        },
+      ],
+    });
+    const history = buildHistoryMessages({
+      provider: 'deepseek',
+      thinking: false,
+      rows: [
+        {
+          role: 'USER',
+          content: '我确认应用当前选中的这个决策。',
+          message: confirmation('earlier-assistant', 'earlier-decision'),
+        },
+        { role: 'ASSISTANT', content: '请查看更新后的开始方案。', message: null },
+      ],
+      currentUserMessage: confirmation('current-assistant', 'current-decision'),
+    });
+    const context = JSON.stringify(history);
+    expect(context).toContain('decision_confirmation');
+    expect(context).toContain('current-assistant');
+    expect(context).toContain('current-decision');
+    expect(context).not.toContain('earlier-decision');
+  });
+
   it('restores a calendar from the successful plan range read in an earlier reply', () => {
     const text = { type: 'text', text: 'Here is the plan for these weeks.' };
     const run = { type: 'data-coach-run', data: { status: 'completed' } };

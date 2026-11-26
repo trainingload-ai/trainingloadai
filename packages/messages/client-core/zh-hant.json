@@ -521,6 +521,7 @@
       "workoutDialogSessionMeta": "第 {ordinal} 節 · {sport}",
       "workoutDialogSessionFallback": "第 {ordinal} 節",
       "workoutDialogClose": "關閉",
+      "workoutDialogBackToCalendar": "返回課表",
       "scheduleConflict": "與可訓練時間衝突"
     },
     "readCards": {
@@ -577,6 +578,7 @@
         "colMin": "下限",
         "colMax": "上限",
         "unitPace": "(分/km)",
+        "unitPaceMi": "(分/mi)",
         "unitPace100m": "(分/100m)",
         "unitHr": "(bpm)",
         "unitPower": "(W)",
@@ -666,6 +668,7 @@
       "showLess": "收起",
       "evidence": "採用的資料",
       "loadDelta": "預計負荷變化",
+      "expectedImpact": "預計影響",
       "syncImpact": "裝置同步影響",
       "total": "評估",
       "changed": "修改",
@@ -6354,6 +6357,11 @@
     "home": "首頁"
   },
   "PlanActivationDialog": {
+    "officialDescription": "預覽並調整草稿課表，然後選擇開始日期。",
+    "loadingDraft": "正在載入草稿課表…",
+    "changedDraft": "草稿已在其他地方變更，請核對課表後再開始。",
+    "startFailed": "無法開始這個計畫，請檢查課表後重試。",
+    "editFailed": "課程修改未儲存，請重試。",
     "title": "啟用計畫",
     "description": "選擇實際開始日期。訓練日期會依此日期和每次訓練的偏移量計算。",
     "cancel": "取消",
@@ -6719,6 +6727,8 @@
     "adjustmentConflicts": {
       "PLAN_STATUS": "該計畫已無法編輯",
       "WORKOUT_REMOVED": "該訓練已被移除",
+      "WORKOUT_CHANGED": "這項訓練已由其他操作修改",
+      "WORKOUT_NOT_VERIFIED": "這次重新整理無法核對這項訓練",
       "WORKOUT_STATUS": "訓練狀態已變更",
       "ACTIVITY_LINKED": "訓練已連結活動",
       "HISTORY": "訓練日期已過",
@@ -6731,11 +6741,17 @@
     "stageEdit": "加入草稿",
     "batchSaved": "計畫變更已儲存。",
     "batchFailed": "無法儲存這些變更，請重試。",
+    "adjustmentUnavailable": "這份調課草稿已失效，正式課表未變更。你可以依目前的課表重新調整。",
     "batchReloadTitle": "載入最新課表？",
     "batchConflict": "課表已變更或目前安排無法儲存。載入最新課表後，請核對變更再確認。",
     "missedDrop": "已錯過的訓練無法改期。",
     "completedDrop": "已完成的訓練無法改期。",
     "recovery": {
+      "unavailableTitle": "調課草稿已失效",
+      "localDraftRolledBack": "這批未儲存的調課已全部撤回。",
+      "localDraftWillBeRolledBack": "這次未儲存的調整也會撤回。",
+      "retryDraft": "重新整理後重試",
+      "refreshSchedule": "重新整理課表",
       "title": "調課預覽已過期",
       "action": "載入最新課表",
       "expired": "載入最新課表後，可以在這段對話中繼續調整。",

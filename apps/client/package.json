@@ -3,6 +3,10 @@
   "version": "1.1.27",
   "private": true,
   "type": "module",
+  "exports": {
+    "./embedded-plan-calendar": "./src/embedded-plan-calendar.tsx",
+    "./globals.css": "./src/app/globals.css"
+  },
   "scripts": {
     "dev": "NEXT_PUBLIC_SELF_HOST_MODE=core-local next dev -p 3002",
     "build": "NEXT_PUBLIC_SELF_HOST_MODE=core-local next build && node scripts/finalize-selfhost-build.mjs",

@@ -411,6 +411,17 @@ describe('RollingPlanCandidateService', () => {
     });
   });
 
+  it('rejects a monthly target the week segments cannot collectively reach', async () => {
+    const { service } = runtime({
+      ...month,
+      strategy: { ...month.strategy, durationMinutesRange: { min: 150, max: 180 } },
+    });
+    await expect(service.propose(input)).rejects.toMatchObject({
+      code: 'ROLLING_CANDIDATE_INVALID',
+      reason: expect.stringContaining('durationMinutesRange'),
+    });
+  });
+
   it.each([
     ['different plan', { ...week.schedule, planId: 'other-plan' }],
     [

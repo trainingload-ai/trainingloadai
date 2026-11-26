@@ -1,5 +1,8 @@
 {
   "coach_plan_quality": {
+    "WEEK_TARGET_LOAD_UNVERIFIED": "A carga semanal estimada não pode ser totalmente verificada em relação à faixa alvo. Revise os dados disponíveis das sessões.",
+    "POST_RECOVERY_LOAD_JUMP_REVIEW": "A carga estimada supera consideravelmente a de antes da recuperação. Revise a retomada do treino.",
+    "RECOVERY_LOAD_UNVERIFIED": "Faltam estimativas de carga para a semana de recuperação ou redução. Revise as sessões e o esforço planejados.",
     "UNKNOWN_DURATION": "Algumas sessões são por distância ou duração aberta; o tempo semanal total exato é desconhecido.",
     "LONG_SESSION_NOT_REDUCED": "A sessão mais longa de recuperação ou redução não foi encurtada; revise intensidade e recuperação.",
     "VOLUME_JUMP_REVIEW": "Alguns aumentos semanais passam de 30%; revise com base nos treinos recentes. Não é um limite universal de segurança.",
@@ -14,6 +17,7 @@
     "success": "Solicitação concluída"
   },
   "coachRuntime": {
+    "planDraftSummaryFallback": "Este rascunho de {weeks} semanas inclui {sessions} sessões de treino e ainda não foi salvo. Confira o calendário e selecione “Salvar plano” se ele estiver adequado. Você também pode me dizer qual dia ou sessão deseja alterar.",
     "optionKeepPlan": "Manter o plano",
     "optionPostponeOneDay": "Adiar um dia",
     "optionSkipSession": "Pular esta sessão",

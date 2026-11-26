@@ -106,14 +106,16 @@ const HEALTH_PROVIDER_NAMES: Record<string, string> = {
   HEALTH_CONNECT: "Health Connect",
 };
 
+export function formatHealthProviderLabel(provider: string | null | undefined) {
+  return provider ? (HEALTH_PROVIDER_NAMES[provider] ?? provider) : undefined;
+}
+
 export function formatHealthHrvLabel(
   card: Pick<HealthOverviewCard, "hrvType" | "provider">,
 ) {
   if (!card.hrvType) return undefined;
   const method = card.hrvType === "HRV_RMSSD_MS" ? "RMSSD" : "SDNN";
-  const source = card.provider
-    ? (HEALTH_PROVIDER_NAMES[card.provider] ?? card.provider)
-    : null;
+  const source = formatHealthProviderLabel(card.provider);
   return source ? `${method} · ${source}` : method;
 }
 

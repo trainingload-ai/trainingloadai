@@ -629,6 +629,7 @@
       "workoutDialogSessionMeta": "Session {ordinal} · {sport}",
       "workoutDialogSessionFallback": "Session {ordinal}",
       "workoutDialogClose": "Close",
+      "workoutDialogBackToCalendar": "Back to calendar",
       "scheduleConflict": "Conflicts with your availability"
     },
     "readCards": {
@@ -693,6 +694,7 @@
         "colMin": "Low",
         "colMax": "High",
         "unitPace": "(min/km)",
+        "unitPaceMi": "(min/mi)",
         "unitPace100m": "(min/100m)",
         "unitHr": "(bpm)",
         "unitPower": "(W)",
@@ -782,6 +784,7 @@
       "showLess": "Show less",
       "evidence": "Evidence used",
       "loadDelta": "Estimated load change",
+      "expectedImpact": "Expected impact",
       "syncImpact": "Device sync impact",
       "total": "Assessed",
       "changed": "Changed",
@@ -5342,6 +5345,11 @@
     }
   },
   "PlanActivationDialog": {
+    "officialDescription": "Review and edit the draft schedule, then choose when to start.",
+    "loadingDraft": "Loading the draft schedule…",
+    "changedDraft": "The draft changed elsewhere. Review the schedule before starting.",
+    "startFailed": "Could not start the plan. Review the schedule and try again.",
+    "editFailed": "Could not save the workout changes. Try again.",
     "title": "Activate Plan",
     "description": "Choose the actual start date. Workout dates will be calculated from this date and each workout offset.",
     "cancel": "Cancel",
@@ -7279,6 +7287,8 @@
     "adjustmentConflicts": {
       "PLAN_STATUS": "The plan can no longer be edited",
       "WORKOUT_REMOVED": "The workout was removed",
+      "WORKOUT_CHANGED": "This workout was changed elsewhere",
+      "WORKOUT_NOT_VERIFIED": "This workout could not be verified during refresh",
       "WORKOUT_STATUS": "The workout status has changed",
       "ACTIVITY_LINKED": "The workout is linked to an activity",
       "HISTORY": "The workout date has passed",
@@ -7291,11 +7301,17 @@
     "stageEdit": "Add to draft",
     "batchSaved": "Plan changes saved.",
     "batchFailed": "Couldn’t save the changes. Try again.",
+    "adjustmentUnavailable": "This adjustment draft is no longer usable. Your schedule was not changed. You can start a new adjustment from your current schedule.",
     "batchReloadTitle": "Load the latest schedule?",
     "batchConflict": "The schedule changed or the edits could not be saved. Load the latest schedule and review your changes before confirming.",
     "missedDrop": "Missed workouts can't be rescheduled.",
     "completedDrop": "Completed workouts can't be rescheduled.",
     "recovery": {
+      "unavailableTitle": "Adjustment draft unavailable",
+      "localDraftRolledBack": "The unsaved batch was rolled back.",
+      "localDraftWillBeRolledBack": "The unsaved edits will also be rolled back.",
+      "retryDraft": "Refresh and retry",
+      "refreshSchedule": "Refresh schedule",
       "title": "Workout move preview expired",
       "action": "Load latest schedule",
       "expired": "Load the latest schedule to continue this adjustment in the same chat.",

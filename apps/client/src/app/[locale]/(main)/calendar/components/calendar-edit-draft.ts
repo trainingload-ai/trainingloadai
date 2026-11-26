@@ -2,6 +2,7 @@ import type { PlanCalendarEdit } from "@shared/plan-proposal";
 import type { PlanWorkout } from "@/api/plans";
 import type { WorkoutEditorPayload } from "@/components/plan/WorkoutEditorSheet";
 import {
+  calendarToday,
   canMoveCalendarWorkout,
   type CalendarProposalMark,
 } from "./calendar-move-model";
@@ -115,31 +116,44 @@ export function refreshCalendarEditDraft(
   draft: CalendarEditDraft,
   workouts: ReadonlyMap<string, PlanWorkout>,
   batchId: string,
-  baseVersionId?: string,
-): CalendarEditDraft {
+) {
+  const conflicts: Array<{ key: string; name: string | null | undefined; reason: string }> = [];
+  const entries = Object.entries(draft.entries).flatMap(([id, entry]): Array<[string, CalendarDraftEntry]> => {
+    const published = workouts.get(id);
+    const original = entry.kind === "ADD" ? entry.after : entry.before;
+    const today = published?.calendarTodayYmd ?? original.calendarTodayYmd ?? calendarToday();
+    let reason: string | undefined;
+    if (published?.links?.some((link) => !link.unlinkedAt)) reason = "ACTIVITY_LINKED";
+    else if (published && published.status !== "PLANNED") reason = "WORKOUT_STATUS";
+    else if (published?.scheduledDate && published.scheduledDate < today) reason = "HISTORY";
+    else if (entry.kind !== "DELETE" && entry.after.scheduledDate && entry.after.scheduledDate < today) reason = "TARGET_DATE";
+    else if (entry.kind !== "ADD") {
+      if (!canMoveCalendarWorkout(published)) reason = "WORKOUT_NOT_VERIFIED";
+      else if (entry.kind === "UPDATE" && !entry.payload &&
+        published.scheduledDate === entry.after.scheduledDate) return [];
+      else if (published.scheduledDate !== entry.before.scheduledDate ||
+        ((entry.kind === "DELETE" || entry.payload) && published.revision !== entry.before.revision) ||
+        (entry.kind === "DELETE" && published.capabilities?.delete === false)) reason = "WORKOUT_CHANGED";
+    }
+
+    if (reason) {
+      conflicts.push({ key: id, name: published?.name ?? original.name, reason });
+      return [];
+    }
+    if (entry.kind === "ADD" || !canMoveCalendarWorkout(published))
+      return [[id, entry]];
+    if (entry.kind === "DELETE")
+      return [[id, { ...entry, before: published }]];
+    return [[id, {
+      ...entry,
+      before: published,
+      after: { ...published, ...entry.payload, scheduledDate: entry.after.scheduledDate },
+    }]];
+  });
   return {
-    batchId,
-    baseVersionId,
-    entries: Object.fromEntries(
-      Object.entries(draft.entries).map(([id, entry]) => {
-        const published = workouts.get(id);
-        if (entry.kind === "ADD" || !canMoveCalendarWorkout(published))
-          return [id, entry];
-        if (entry.kind === "DELETE")
-          return [id, { ...entry, before: published }];
-        return [
-          id,
-          {
-            ...entry,
-            before: published,
-            after: {
-              ...published,
-              ...entry.payload,
-              scheduledDate: entry.after.scheduledDate,
-            },
-          },
-        ];
-      }),
-    ),
+    draft: !conflicts.length && entries.length
+      ? { batchId, baseVersionId: draft.baseVersionId, entries: Object.fromEntries(entries) }
+      : null,
+    conflicts,
   };
 }

@@ -10,8 +10,10 @@ import {
   type FitnessUserAction,
 } from "./fitness-assessment";
 import {
+  parsePlanAssessment,
   parsePlanQualityContract,
   planQualityContractSchema,
+  type PlanAssessment,
   type PlanQualityContract,
 } from "./plan-quality";
 import {
@@ -215,6 +217,7 @@ export type CoachPlanDraftWorkout = {
   sessionIndex?: number;
   text: string;
   notes?: string;
+  plannedSessionRpe?: number;
   name?: string;
   sportType?: string;
   sportDefinitionCode?: string;
@@ -229,6 +232,7 @@ export type CoachPlanDraftWorkout = {
 export type CoachPlanDraftData = {
   scheduleConstraints?: ScheduleConstraints;
   qualityContract?: PlanQualityContract;
+  planAssessment?: PlanAssessment;
   title: string;
   description?: string;
   periodWeeks: number;
@@ -236,6 +240,17 @@ export type CoachPlanDraftData = {
   goal?: string;
   workouts: CoachPlanDraftWorkout[];
 };
+
+export function coachPlanDraftOpeningWeek<Workout extends Pick<CoachPlanDraftWorkout, "weekIndex" | "dayIndex" | "sessionIndex">>(
+  draft: { workouts: readonly Workout[] },
+) {
+  if (!draft.workouts.length) return;
+  const week = Math.min(...draft.workouts.map((workout) => workout.weekIndex));
+  const workouts = draft.workouts
+    .filter((workout) => workout.weekIndex === week)
+    .sort((a, b) => a.dayIndex - b.dayIndex || (a.sessionIndex ?? 1) - (b.sessionIndex ?? 1));
+  return { week, workouts: workouts.slice(0, 3) };
+}
 
 export type PlanWorkoutAdjustmentWorkout = {
   weekIndex: number;
@@ -577,6 +592,7 @@ export function safeParseAskUserQuestionPayload(
 
 export function parseCoachPlanDraftData(
   raw: unknown,
+  options?: { allowEmptyWorkouts?: boolean },
 ): ParseResult<CoachPlanDraftData> {
   const obj = asRecord(raw);
   if (!obj) return err("input must be an object");
@@ -604,13 +620,14 @@ export function parseCoachPlanDraftData(
     min: 1,
   });
   if (!periodWeeks.ok) return err(periodWeeks.error);
+  const planAssessment = parsePlanAssessment(obj.planAssessment, periodWeeks.data);
   const rolling = obj.planningMode === "ROLLING";
   if (rolling && periodWeeks.data !== 1) return err("Continuous draft must preview one week");
   const goal = readOptionalTrimmedString(obj.goal);
 
   const workoutsRaw = obj.workouts;
   if (!Array.isArray(workoutsRaw)) return err("workouts must be an array");
-  if (workoutsRaw.length < 1) {
+  if (!workoutsRaw.length && !options?.allowEmptyWorkouts) {
     return err("workouts must contain at least one item");
   }
 
@@ -640,6 +657,12 @@ export function parseCoachPlanDraftData(
 
     const text = readNonEmptyString(workoutObj.text, `workouts[${i}].text`);
     if (!text.ok) return err(text.error);
+
+    const plannedSessionRpe = workoutObj.plannedSessionRpe;
+    if (plannedSessionRpe !== undefined &&
+      (typeof plannedSessionRpe !== "number" || !Number.isFinite(plannedSessionRpe) || plannedSessionRpe < 1 || plannedSessionRpe > 10)) {
+      return err(`workouts[${i}].plannedSessionRpe must be between 1 and 10`);
+    }
 
     const rawStructureKind = String(
       workoutObj.structureKind ?? "ENDURANCE",
@@ -676,6 +699,7 @@ export function parseCoachPlanDraftData(
       dayIndex: dayIndex.data,
       ...(sessionIndex !== undefined ? { sessionIndex } : {}),
       text: text.data,
+      ...(typeof plannedSessionRpe === "number" ? { plannedSessionRpe } : {}),
       structureKind,
       dslVersion,
       ...(readOptionalTrimmedString(workoutObj.notes)
@@ -707,6 +731,7 @@ export function parseCoachPlanDraftData(
   return ok({
     title: title.data,
     ...(qualityContract ? { qualityContract } : {}),
+    ...(planAssessment ? { planAssessment } : {}),
     ...(scheduleConstraints ? { scheduleConstraints } : {}),
     ...(readOptionalTrimmedString(obj.description)
       ? { description: readOptionalTrimmedString(obj.description) }
@@ -1168,6 +1193,7 @@ export const coachPlanDraftToolParametersSchema = {
               "Workout DSL family. Use ENDURANCE for step DSL and STRENGTH for exercise/set DSL.",
           },
           dslVersion: { type: "integer", enum: [1] },
+          plannedSessionRpe: { type: "number", minimum: 1, maximum: 10 },
           text: {
             type: "string",
             minLength: 1,

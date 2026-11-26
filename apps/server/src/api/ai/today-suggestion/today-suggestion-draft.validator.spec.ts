@@ -145,7 +145,7 @@ describe('validateTodaySuggestionDraft', () => {
         ...valid,
         preferredIntent: 'OPEN_ARBITRARY_URL',
       }),
-    ).toThrow('TODAY_SUGGESTION_INVALID_INTENT');
+    ).toThrow(expect.objectContaining({ code: 'INVALID_INTENT' }));
     expect(
       validateTodaySuggestionDraft({
         ...valid,
@@ -160,8 +160,28 @@ describe('validateTodaySuggestionDraft', () => {
         ...valid,
         summary: 'Open https://example.com and continue.',
       }),
-    ).toThrow('TODAY_SUGGESTION_URL_NOT_ALLOWED');
+    ).toThrow(expect.objectContaining({ code: 'URL_NOT_ALLOWED' }));
   });
+
+  it.each([
+    ['SCHEDULED', 'TRAINING_BASIS_WORKOUT_REQUIRED', 'trainingBasis.workoutId'],
+    ['ADDITIONAL', 'TRAINING_BASIS_REASON_REQUIRED', 'trainingBasis.reason'],
+  ])(
+    'names the missing %s basis field in the correction',
+    (kind, code, field) => {
+      expect(() =>
+        validateTodaySuggestionDraft({
+          ...valid,
+          trainingBasis: { kind },
+        }),
+      ).toThrow(
+        expect.objectContaining({
+          code,
+          correction: expect.stringContaining(field),
+        }),
+      );
+    },
+  );
 
   it('rejects drafts that conflict with authoritative safety facts', () => {
     expect(() =>

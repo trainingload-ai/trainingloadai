@@ -23,6 +23,7 @@ import { coachFailureReceiptContext } from './coach-failure-receipt';
 import { safeParseCoachQuestionReplyLikeToolResultPayload } from '@shared/ai-coach-schema';
 import { isCalendarDate } from '@shared/plan-calendar';
 import { coachPlanCalendarBlock } from './coach-plan-calendar';
+import { currentDecisionConfirmation } from './coach-workout-change';
 
 export type StoredCoachMessageRow = {
   role: AiCoachMessageRole;
@@ -646,7 +647,6 @@ function isClientContextToolResult(block: CoachUserToolResultBlock): boolean {
     block.tool_use_id === 'client:activity_ai_analysis_context' ||
     block.tool_use_id === 'client:today_suggestion_context' ||
     block.tool_use_id === 'client:pmc_projection_context' ||
-    block.tool_use_id === 'client:coach_decision_confirm' ||
     block.tool_use_id === 'client:coach_decision_rebase' ||
     Boolean(coachQuestionResponseContext(block)) ||
     Boolean(savedPlanDraftContext(block))
@@ -858,19 +858,6 @@ function buildOpenAiUserAndToolMessages(args: {
             } satisfies ChatCompletionMessageParam)
           : null;
       }
-      if (block.tool_use_id === 'client:coach_decision_confirm') {
-        return {
-          role: 'user',
-          content: buildCoachUserContext(
-            'decision_confirmation',
-            [
-              'The user confirmed this exact selected decision:',
-              stableJson(block.content),
-              'Use its reference only to apply the confirmed decision; do not display the reference.',
-            ].join('\n'),
-          ),
-        } satisfies ChatCompletionMessageParam;
-      }
       return {
         role: 'user',
         content: buildCoachUserContext(
@@ -1064,6 +1051,20 @@ export function buildHistoryMessages(args: {
       args.provider,
       row === latestFailureReceiptRow,
     );
+  }
+  const confirmation = currentDecisionConfirmation(args.currentUserMessage);
+  if (confirmation?.assistantMessageId) {
+    out.push({
+      role: 'user',
+      content: buildCoachUserContext(
+        'decision_confirmation',
+        [
+          'The user confirmed this exact selected decision:',
+          stableJson(confirmation),
+          'Apply this existing decision with coach_decision_apply. Use the exact visible user confirmation. Do not display the internal references.',
+        ].join('\n'),
+      ),
+    });
   }
   out.push(
     ...buildOpenAiUserAndToolMessages({

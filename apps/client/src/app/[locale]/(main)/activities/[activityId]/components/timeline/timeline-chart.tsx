@@ -217,6 +217,7 @@ export const TimelineChart = memo(function TimelineChart({
   onMove,
   canMoveUp,
   canMoveDown,
+  readOnly,
 }: PlotProps & {
   viewWidth: number;
   current: number | null;
@@ -227,6 +228,7 @@ export const TimelineChart = memo(function TimelineChart({
   onMove: (direction: -1 | 1) => void;
   canMoveUp: boolean;
   canMoveDown: boolean;
+  readOnly: boolean;
 }) {
   const t = useTranslations("ActivityTimeline");
   const label = t(`metrics.${metric.id}`);
@@ -278,7 +280,11 @@ export const TimelineChart = memo(function TimelineChart({
     >
       <div className="sticky left-0 z-10 flex flex-col justify-center gap-1 bg-card px-3 py-1">
         <div className="flex min-w-0 items-center gap-1">
-          <TimelineRowSettings
+          {readOnly ? (
+            <span className="min-w-0 truncate text-xs text-muted-foreground" title={label}>
+              {label}
+            </span>
+          ) : <TimelineRowSettings
             config={config}
             metrics={metrics}
             color={config.color ?? getMetricColor(metric.colorMetric)}
@@ -287,7 +293,7 @@ export const TimelineChart = memo(function TimelineChart({
             onMove={onMove}
             canMoveUp={canMoveUp}
             canMoveDown={canMoveDown}
-          />
+          />}
           <ChartExpandDialog
             title={label}
             triggerLabel={t("expandChart", { metric: label })}

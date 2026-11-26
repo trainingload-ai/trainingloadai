@@ -81,6 +81,8 @@ import {
 const IMPORT_SOURCE_KIND_VALUES = new Set<string>(
   Object.values($Enums.ImportSourceKind),
 );
+// Prisma binds Dates as timestamptz; import job columns store UTC without a timezone.
+const IMPORT_ITEM_NOW_SQL = "($1::timestamptz AT TIME ZONE 'UTC')";
 
 function asImportSourceKind(value: string): ImportSourceKind {
   if (!IMPORT_SOURCE_KIND_VALUES.has(value)) {
@@ -234,10 +236,10 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         SELECT id
         FROM t_import_item_job
         WHERE (
-          (status IN ('QUEUED','FAILED') AND available_at <= $1)
+          (status IN ('QUEUED','FAILED') AND available_at <= ${IMPORT_ITEM_NOW_SQL})
           OR (
             status IN ('NORMALIZING','DEDUPING','MATERIALIZING','PARQUET_BUILDING','ANALYZING')
-            AND (lease_expires_at IS NULL OR lease_expires_at <= $1)
+            AND (lease_expires_at IS NULL OR lease_expires_at <= ${IMPORT_ITEM_NOW_SQL})
           )
         )
         ORDER BY position ASC, created_at ASC
@@ -246,12 +248,12 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       )
       UPDATE t_import_item_job j
       SET status='NORMALIZING',
-          started_at=COALESCE(j.started_at, $1),
+          started_at=COALESCE(j.started_at, ${IMPORT_ITEM_NOW_SQL}),
           lock_token=$3,
-          lease_expires_at=$4,
+          lease_expires_at=($4::timestamptz AT TIME ZONE 'UTC'),
           source_revision=COALESCE(source_revision, CASE WHEN source_ref->>'kind'='canonical_payload'
             THEN 'legacy-unversioned-canonical' ELSE (SELECT import_revision FROM t_import_source_object s WHERE s.id=j.source_object_id) END),
-          updated_at=$1
+          updated_at=${IMPORT_ITEM_NOW_SQL}
       FROM picked
       WHERE j.id = picked.id
       RETURNING j.id, j.batch_job_id, j.user_id, j.source_object_id, j.source_kind, j.lock_token, j.source_revision;

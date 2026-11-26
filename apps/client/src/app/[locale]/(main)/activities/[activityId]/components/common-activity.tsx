@@ -99,15 +99,14 @@ type ActivityDetailPreview = {
 export function ActivityDetailContent({
   activity,
   activityId,
-  navigation,
   preview,
 }: {
   activity: Activity | undefined;
   activityId: string;
-  navigation?: ReactNode;
   preview?: ActivityDetailPreview;
 }) {
   const [pageSection, setPageSection] = useState<ActivityDetailSection>("overview");
+  const readOnly = Boolean(preview);
   const activeSection = preview?.section ?? pageSection;
   const { charts: dataChartConfig } = useActivityDataChartConfig();
 
@@ -181,6 +180,7 @@ export function ActivityDetailContent({
         activity={activity}
         activityId={activityId}
         initialFocus={preview?.focus}
+        readOnly={readOnly}
       />
     ) : null,
     bestIntervals: <BestIntervals activityId={activityId} />,
@@ -195,11 +195,10 @@ export function ActivityDetailContent({
   return (
     <ActivityAnalysisLinkProvider>
       <div className="@container/activity-detail flex w-full min-w-0 flex-col gap-3">
-        {navigation}
         <div className="flex min-w-0 flex-col gap-4">
           <section className="flex flex-col gap-4">
             <div className="px-1 py-1">
-              {activity ? <ActivityHeader activity={activity} /> : null}
+              {activity ? <ActivityHeader activity={activity} readOnly={readOnly} /> : null}
             </div>
             {isSwimming ? null : <Overview />}
             {activity ? (
@@ -220,7 +219,7 @@ export function ActivityDetailContent({
               </span>
             </div>
             <div className="relative mt-2.5">
-              <AIAnalysis autoStart={!preview} />
+              <AIAnalysis readOnly={readOnly} />
             </div>
           </section>}
         </div>
@@ -251,7 +250,7 @@ export function ActivityDetailContent({
                 ))}
               </TabsList>
             </div>
-            {activeSection === "overview" && canConfigureOverview ? (
+            {!readOnly && activeSection === "overview" && canConfigureOverview ? (
               <ActivityConfigDialog defaultTab="dataCharts" tabs={["dataCharts"]} />
             ) : null}
           </div>

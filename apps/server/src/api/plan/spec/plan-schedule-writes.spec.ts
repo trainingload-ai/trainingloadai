@@ -1,5 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import { PlanWriteSupport } from '../application/plan-write.support';
+import { PlanLoadEstimatorService } from '../application/plan-load-estimator.service';
 import { WorkoutService } from '@/api/workout/workout.service';
 import { WorkoutDefinitionService } from '@/api/workout/workout-definition.service';
 import { WorkoutCodecRegistry } from '@/api/workout/workout-codec.registry';
@@ -140,10 +141,12 @@ function setup(
     },
     userService: { getPreferredTimezone: async () => timezone },
     workoutMutability: new PlanWorkoutMutabilityPolicy(),
-    planLoadEstimator: {
+    planLoadEstimator: Object.assign(new PlanLoadEstimatorService(
+      {} as never, { getComposedUserProfile: async () => ({}) } as never, workoutService, {} as never, {} as never,
+    ), {
       applyForPlan: async () => undefined,
       applyForWorkout: async () => undefined,
-    },
+    }),
     coachContext: {
       ensureContext: async () => undefined,
       appendEvent: async () => undefined,

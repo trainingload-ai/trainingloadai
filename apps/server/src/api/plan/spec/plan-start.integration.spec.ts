@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
 import { planStartFixture } from './plan-start.fixture';
 import type { PlanStartPreviewRequest } from '@shared/plan-proposal';
+import { PlanLoadEstimatorService } from '../application/plan-load-estimator.service';
 
 describe('saved draft START / PostgreSQL', () => {
   let database: ChildProcess;
@@ -49,7 +50,11 @@ describe('saved draft START / PostgreSQL', () => {
       "INSERT INTO t_user(id) VALUES ('user'),('other')",
     );
   });
-  async function draft(count = 2) {
+  async function draft(
+    count = 2,
+    overrides?: Partial<Parameters<typeof f.service.createPlan>[1]>,
+    startDate = '2099-11-22',
+  ) {
     const created = await f.service.createPlan('user', {
       title: 'Draft',
       periodWeeks: Math.max(1, Math.ceil(count / 7)),
@@ -64,9 +69,10 @@ describe('saved draft START / PostgreSQL', () => {
           text: 'Run 30m',
         },
       })),
+      ...overrides,
     });
     const planId = created.plan!.id;
-    const session = await f.starts.conversation('user', planId, '2099-11-22');
+    const session = await f.starts.conversation('user', planId, startDate);
     const context = await f.context.ensureContext({ userId: 'user', planId });
     const thread = await prisma.coachThread.create({
       data: { contextId: context.id },
@@ -81,7 +87,7 @@ describe('saved draft START / PostgreSQL', () => {
     const request: PlanStartPreviewRequest = {
       mode: 'START',
       planId,
-      startDate: '2099-11-22',
+      startDate,
       rationale: 'Reviewed current evidence',
       evidenceRefs: [],
       changes: [],
@@ -190,6 +196,117 @@ describe('saved draft START / PostgreSQL', () => {
       'ACTIVE',
     );
     expect(await prisma.plan.count()).toBe(1);
+  });
+  it.each([undefined, '2099-12-01'])('keeps the same workouts on their original weekdays when starting on Wednesday (rule ends %s)', async (effectiveUntil) => {
+    const workoutDefinition = {
+      kind: 'FREEFORM',
+      version: 1,
+      source: 'TEXT',
+      text: 'Run 30m',
+    } as const;
+    const workouts = [1, 3, 6].map((dayIndex) => ({
+      weekIndex: 1,
+      dayIndex,
+      sportType: 'RUN' as const,
+      definition: workoutDefinition,
+    }));
+    const d = await draft(3, {
+      sourceType: 'AI',
+      workouts,
+      generationMetadata: {
+        qualityContract: { startDate: '2099-11-23', maxTrainingDaysPerWeek: 3 },
+        scheduleConstraints: {
+          version: 1,
+          revision: 1,
+          calendarTimeZone: 'Asia/Shanghai',
+          effectiveFrom: '2099-11-23',
+          ...(effectiveUntil && { effectiveUntil }),
+          fixedRestWeekdays: [2, 4, 5, 7],
+          unavailableDates: [],
+          availableDateOverrides: [],
+          confirmation: { source: 'USER', reference: 'confirmed-brief' },
+        },
+      },
+    }, '2099-11-25');
+    const before = (await f.service.getPlanDetail('user', d.planId)).plan!;
+    const unaligned = {
+      ...d.request,
+      preserveUnmentioned: false,
+      preserved: before.workouts.map((workout) => ({
+        sourceWorkoutId: workout.id,
+        expectedRevision: workout.revision!,
+      })),
+    };
+    await expect(f.proposals.createPreview('user', unaligned, d.binding)).rejects.toMatchObject({
+      response: {
+        code: 'PLAN_SCHEDULE_INVALID',
+        issues: [expect.objectContaining({ code: 'FIXED_REST_DAY', date: '2099-11-27' })],
+      },
+    });
+    const { args, preview } = await confirmed(d);
+    expect(preview.presentation.counts).toMatchObject({ changed: 3, added: 0, deleted: 0 });
+    const receipt = await prisma.$transaction(
+      (tx) => f.apply.apply({ ...args, tx }),
+      { isolationLevel: 'Serializable' },
+    );
+    expect(receipt).toMatchObject({
+      planId: d.planId,
+      createdPlanId: null,
+      readbackVerified: true,
+    });
+    expect(receipt.identityMap.map(({ workoutId, scheduledDate }) => ({
+      workoutId,
+      scheduledDate,
+    })).sort((a, b) => a.scheduledDate!.localeCompare(b.scheduledDate!))).toEqual([
+      { workoutId: before.workouts[1].id, scheduledDate: '2099-11-25' },
+      { workoutId: before.workouts[2].id, scheduledDate: '2099-11-28' },
+      { workoutId: before.workouts[0].id, scheduledDate: '2099-11-30' },
+    ]);
+  });
+
+  it('enforces the saved weekday limits when changing the start date and moving an active workout', async () => {
+    const saturday = '2099-11-28';
+    const metadata = { qualityContract: { startDate: saturday, maxDailyMinutes: 90, maxMinutesByIsoWeekday: { 3: 45, 6: 90 } } };
+    const d = await draft(1, {
+      sourceType: 'AI', generationMetadata: metadata,
+      workouts: [{ weekIndex: 1, dayIndex: 1, sportType: 'RUN', text: 'work 75m' }],
+    }, saturday);
+    await f.starts.conversation('user', d.planId, '2099-12-02');
+    await expect(f.proposals.createPreview('user', { ...d.request, startDate: '2099-12-02' }, d.binding)).rejects.toMatchObject({
+      response: { code: 'PLAN_QUALITY_INVALID', issues: expect.arrayContaining([
+        expect.objectContaining({ code: 'DAILY_TIME_BUDGET', message: expect.stringContaining('45-minute') }),
+      ]) },
+    });
+    await f.starts.conversation('user', d.planId, saturday);
+    const { args } = await confirmed(d);
+    const receipt = await prisma.$transaction(tx => f.apply.apply({ ...args, tx }), { isolationLevel: 'Serializable' });
+    expect(receipt).toMatchObject({ planId: d.planId, readbackVerified: true });
+    const { plan } = await f.service.getPlanDetail('user', d.planId);
+    expect(plan?.generationMetadata).toMatchObject(metadata);
+    await expect(f.service.updateWorkout('user', d.planId, plan!.workouts[0].id, {
+      weekIndex: 1, dayIndex: 5, sportType: 'RUN', text: 'work 75m',
+    })).rejects.toMatchObject({
+      response: { code: 'PLAN_SCHEDULE_INVALID', issues: expect.arrayContaining([
+        expect.objectContaining({ code: 'DAILY_TIME_BUDGET', date: '2099-12-02' }),
+      ]) },
+    });
+    expect((await f.service.getPlanDetail('user', d.planId)).plan?.workouts[0].scheduledDate).toBe(saturday);
+  });
+
+  it('defaults an AI draft to its assessed preview date and honors a later date the user selects', async () => {
+    const created = await f.service.createPlan('user', {
+      title: 'Dated plan', sourceType: 'AI', periodWeeks: 1,
+      generationMetadata: { qualityContract: { startDate: '2099-11-23' } },
+      workouts: [{ weekIndex: 1, dayIndex: 1, sportType: 'RUN', definition: {
+        kind: 'FREEFORM', version: 1, source: 'TEXT', text: 'Run 30m',
+      } }],
+    });
+    const planId = created.plan!.id;
+    const proposed = await f.starts.conversation('user', planId);
+    expect(proposed.startDate).toBe('2099-11-23');
+    const selected = await f.starts.conversation('user', planId, '2099-11-25');
+    expect(selected).toMatchObject({ startDate: '2099-11-25', sid: proposed.sid });
+    expect((await f.starts.conversation('user', planId)).startDate).toBe('2099-11-25');
   });
   it('rejects a missing source identity rather than treating it as a deletion', async () => {
     const d = await draft();
@@ -574,6 +691,52 @@ describe('saved draft START / PostgreSQL', () => {
       f.starts.conversation('user', d.planId, '2000-01-01'),
     ).rejects.toMatchObject({
       response: { code: 'PLAN_START_REASSESSMENT_REQUIRED' },
+    });
+  });
+  it('starts the edited official template draft in place and rejects an out-of-date preview', async () => {
+    const { plan } = await f.service.createPlan('user', {
+      title: 'Official 5K',
+      sourceType: 'TEMPLATE',
+      periodWeeks: 12,
+      workouts: [{ weekIndex: 1, dayIndex: 1, sportType: 'RUN', text: 'work 30m' }],
+    });
+    await prisma.planTemplatePreview.create({
+      data: {
+        userId: 'user', tokenHash: 'official-start-test', templateKey: 'RUN_5K_FIRST',
+        templateVersion: '1.0.1', templateContentHash: 'test', variantId: '12-week',
+        locale: 'zh', normalizedInput: { requestedStartDate: '2099-11-23' },
+        payload: {}, expiresAt: new Date(), consumedAt: new Date(), createdPlanId: plan!.id,
+      },
+    });
+    const { id } = plan!;
+    const initial = await f.starts.officialDraft('user', id);
+    const workoutId = initial.plan.workouts[0].id;
+    await f.service.updateWorkout('user', id, workoutId, {
+      weekIndex: 1, dayIndex: 3, sportType: 'RUN', text: 'work 25m', name: 'Edited run',
+    });
+    await expect(f.starts.startOfficialDraft('user', id, '2099-11-23', initial.revision))
+      .rejects.toMatchObject({ response: { code: 'PLAN_START_REASSESSMENT_REQUIRED' } });
+    const fresh = await f.starts.officialDraft('user', id);
+    const date = await f.starts.saveOfficialStartDate('user', id, '2099-11-24', fresh.revision);
+    expect((await f.starts.officialDraft('user', id))).toMatchObject(date);
+    await expect(f.starts.saveOfficialStartDate('user', id, '2099-11-25', fresh.revision))
+      .rejects.toMatchObject({ status: 409 });
+    const estimate = jest.spyOn(PlanLoadEstimatorService.prototype, 'applyForWorkout')
+      .mockRejectedValueOnce(Object.assign(new Error('Serializable conflict'), { code: 'P2034' }));
+    try {
+      await f.starts.startOfficialDraft('user', id, date.startDate, date.revision);
+      expect(estimate).toHaveBeenCalledTimes(2);
+    } finally {
+      estimate.mockRestore();
+    }
+    await f.starts.startOfficialDraft('user', id, date.startDate, date.revision);
+    await expect(f.service.updateWorkout('user', id, workoutId, {
+      expectedPlanStatus: 'DRAFT', weekIndex: 1, dayIndex: 5, sportType: 'RUN', text: 'work 30m',
+    })).rejects.toMatchObject({ status: 409 });
+    expect((await f.service.getPlanDetail('user', id)).plan).toMatchObject({
+      id, status: 'ACTIVE', startDate: '2099-11-24',
+      workouts: [{ id: workoutId, name: 'Edited run', scheduledDate: '2099-11-26',
+        summary: { durationSeconds: 1500 } }],
     });
   });
   it('retains the saved session RPE when a freeform workout is only moved', async () => {

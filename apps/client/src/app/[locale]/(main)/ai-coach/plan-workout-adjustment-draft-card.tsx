@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, PencilLine } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, PencilLine } from "lucide-react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,8 @@ import {
   normalizeAdjustmentSportType,
   type PlanWorkoutAdjustmentDraft,
 } from "@/lib/plan-workout-adjustment-draft";
-import { CoachCard } from "./cards/CoachCard";
+import { CoachReviewCard } from "./cards/coach-plan-review-card";
+import { PlanWorkoutAdjustmentComparison } from "./plan-workout-adjustment-comparison";
 import { CoachWorkoutPreview } from "./coach-workout-preview";
 
 /**
@@ -21,40 +22,6 @@ import { CoachWorkoutPreview } from "./coach-workout-preview";
  * 有 decisionId：走 CoachDecision 的 confirmAndApply（账本路径）。
  * 旧消息没有 id：仍 PATCH 课次，兼容历史对话。
  */
-
-function WorkoutPane({
-  title,
-  workout,
-  position,
-}: {
-  title: string;
-  workout: PlanWorkoutAdjustmentDraft["before"];
-  position: string;
-}) {
-  return (
-    <div className="min-w-0 rounded-md bg-background/80 p-3 dark:bg-background/45">
-      <div className="text-mobile-caption pc:text-xs font-medium text-muted-foreground">
-        {title}
-      </div>
-      <div className="mt-1 truncate text-sm font-semibold text-foreground">
-        {workout.name || workout.sportType}
-      </div>
-      <div className="mt-1 text-mobile-caption pc:text-xs text-muted-foreground">
-        {position}
-        {workout.scheduledDate ? ` · ${workout.scheduledDate}` : ""}
-      </div>
-      <CoachWorkoutPreview
-        text={workout.text}
-        sportType={normalizeAdjustmentSportType(workout.sportType)}
-      />
-      {workout.notes ? (
-        <p className="mt-2 text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
-          {workout.notes}
-        </p>
-      ) : null}
-    </div>
-  );
-}
 
 export function PlanWorkoutAdjustmentDraftCard({
   draft,
@@ -68,14 +35,19 @@ export function PlanWorkoutAdjustmentDraftCard({
   onApplied?: (payload: { planId: string; workoutId: string }) => Promise<void>;
 }) {
   const t = useTranslations("AiCoachPage.workoutAdjustment");
+  const review = useTranslations("AiCoachPage.decision");
   const updateWorkout = useUpdatePlanWorkout();
+  const inFlight = useRef(false);
+  const [applyError, setApplyError] = useState(false);
   const [applyingDecision, setApplyingDecision] = useState(false);
   const [appliedLocally, setAppliedLocally] = useState(false);
   const applied = alreadyApplied || appliedLocally;
   const applying = updateWorkout.isPending || applyingDecision;
 
   const applyDraft = async () => {
-    if (disabled || applied || applying) return;
+    if (disabled || applied || inFlight.current) return;
+    inFlight.current = true;
+    setApplyError(false);
     try {
       if (draft.decisionId) {
         setApplyingDecision(true);
@@ -94,8 +66,9 @@ export function PlanWorkoutAdjustmentDraftCard({
       });
       toast.success(t("applySuccess"));
     } catch {
-      toast.error(t("applyFailed"));
+      setApplyError(true);
     } finally {
+      inFlight.current = false;
       setApplyingDecision(false);
     }
   };
@@ -123,37 +96,20 @@ export function PlanWorkoutAdjustmentDraftCard({
   );
 
   return (
-    <CoachCard
-      tone="info"
-      icon={<PencilLine className="h-4 w-4" />}
-      title={draft.title}
-      subtitle={draft.reason}
-      footer={applyButton}
-    >
-      <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-stretch">
-        <WorkoutPane
-          title={t("before")}
-          workout={draft.before}
-          position={t("position", {
-            week: draft.before.weekIndex,
-            day: draft.before.dayIndex,
-          })}
-        />
-        <div className="hidden items-center justify-center text-muted-foreground md:flex">
-          <ArrowRight className="h-4 w-4" />
-        </div>
-        <WorkoutPane
-          title={t("after")}
-          workout={draft.after}
-          position={t("position", {
-            week: draft.after.weekIndex,
-            day: draft.after.dayIndex,
-          })}
-        />
-      </div>
+    <CoachReviewCard title={draft.title} summary={draft.reason} icon={PencilLine}
+      cardKind="workout-adjustment-review" status={applied ? t("applied") : review("reviewBadge")}
+      facts={<span className="text-muted-foreground">{review("changed")} <strong className="text-foreground">1</strong></span>}
+      footer={<>
+        {applyError ? <p role="alert" className="w-full text-sm text-destructive">{t("applyFailed")}</p> : null}
+        {applyButton}
+      </>}>
+      <PlanWorkoutAdjustmentComparison
+        draft={draft}
+        renderWorkout={(workout) => <CoachWorkoutPreview text={workout.text} sportType={normalizeAdjustmentSportType(workout.sportType)} />}
+      />
 
       <div className="pt-1">
-        <CoachCard.SectionTitle>{t("changes")}</CoachCard.SectionTitle>
+        <h3 className="text-sm font-semibold">{t("changes")}</h3>
         <div className="mt-2 space-y-1.5">
           {draft.changes.map((change, index) => (
             <div
@@ -177,6 +133,6 @@ export function PlanWorkoutAdjustmentDraftCard({
           ))}
         </div>
       </div>
-    </CoachCard>
+    </CoachReviewCard>
   );
 }

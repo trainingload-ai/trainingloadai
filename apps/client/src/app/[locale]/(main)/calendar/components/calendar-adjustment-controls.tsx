@@ -16,6 +16,7 @@ import {
   rebaseCalendarAdjustment,
 } from "@/api/plans";
 import {
+  calendarAdjustmentRecoveryKeys,
   CalendarAdjustmentState,
   type CalendarAdjustment,
 } from "@shared/plan-proposal";
@@ -32,13 +33,135 @@ import {
 import { ApiFetchError } from "@/lib/api";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
 import { usePublishCalendarAdjustment } from "./use-calendar-adjustments";
+import { CalendarScheduleReloadOverlay } from "./calendar-schedule-reload-overlay";
+
+function adjustmentLabels(adjustment: CalendarAdjustment) {
+  return new Map(adjustment.presentation.rows.map((row) => [
+    row.candidateKey ? `candidate:${row.candidateKey}` : row.workoutId,
+    row.name,
+  ]));
+}
+
+export function CalendarAdjustmentUnavailableNotice({
+  adjustment,
+  className = "space-y-1 rounded-md bg-muted/60 px-3 py-2 text-sm",
+  onViewSchedule,
+}: {
+  adjustment: CalendarAdjustment;
+  className?: string;
+  onViewSchedule?: () => void;
+}) {
+  const t = useTranslations("CalendarMove");
+  const tw = useTranslations("AiCoachPage.workspace");
+  const labels = adjustmentLabels(adjustment);
+
+  return (
+    <div className={className}>
+      <p>{t("adjustmentUnavailable")}</p>
+      {adjustment.conflicts.length ? (
+        <ul className="max-h-24 space-y-1 overflow-y-auto text-muted-foreground">
+          {adjustment.conflicts.map(({ key, reason }) => (
+            <li key={key}>
+              {[labels.get(key), t.has(`adjustmentConflicts.${reason}`)
+                ? t(`adjustmentConflicts.${reason}`)
+                : t("recovery.scheduleChanged")].filter(Boolean).join(" · ")}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {onViewSchedule && (
+        <Button type="button" size="sm" variant="secondary" onClick={onViewSchedule}>
+          {tw("openCalendar")}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+export function CalendarAdjustmentRecoveryOverlay({
+  adjustment,
+  reloadSchedule,
+  onReloaded,
+}: {
+  adjustment: CalendarAdjustment;
+  reloadSchedule: () => Promise<unknown>;
+  onReloaded: () => void;
+}) {
+  const t = useTranslations("CalendarMove");
+  const publish = usePublishCalendarAdjustment();
+  const [deselected, setDeselected] = useState<string[]>([]);
+  const [versionId, setVersionId] = useState(() => crypto.randomUUID());
+  const recoverable = calendarAdjustmentRecoveryKeys(adjustment) ?? [];
+  const selected = recoverable.filter((key) => !deselected.includes(key));
+  const labels = adjustmentLabels(adjustment);
+  const load = async () => {
+    await reloadSchedule();
+    try {
+      const next = await rebaseCalendarAdjustment(adjustment.planId, adjustment.id, {
+        versionId,
+        baseVersionId: adjustment.versionId,
+        operationKeys: selected,
+      });
+      if (!next) throw new Error("Missing refreshed calendar adjustment");
+      await publish(next);
+    } catch (error) {
+      if (error instanceof ApiFetchError && [409, 422].includes(error.status)) {
+        const current = await getCalendarAdjustment(adjustment.planId, adjustment.id).catch(() => undefined);
+        if (current) await publish(current);
+      }
+      throw error;
+    }
+  };
+
+  return (
+    <CalendarScheduleReloadOverlay
+      title={t(`adjustmentStates.${adjustment.state}`)}
+      retryDraft
+      disabled={!selected.length}
+      onReload={load}
+      onReloaded={onReloaded}
+    >
+      <p>{t(adjustment.state === CalendarAdjustmentState.Expired ? "recovery.expired" : "batchConflict")}</p>
+      {adjustment.conflicts.length > 0 && (
+        <div className="max-h-36 space-y-2 overflow-y-auto">
+          <ul className="space-y-1">
+            {adjustment.conflicts.map(({ key, reason }) => (
+              <li key={key}>
+                {[labels.get(key), t.has(`adjustmentConflicts.${reason}`)
+                  ? t(`adjustmentConflicts.${reason}`)
+                  : t("recovery.scheduleChanged")].filter(Boolean).join(" · ")}
+              </li>
+            ))}
+          </ul>
+          {recoverable.map((key) => (
+            <label key={key} className="flex items-center gap-2 text-foreground">
+              <input
+                type="checkbox"
+                checked={selected.includes(key)}
+                onChange={(event) => {
+                  setVersionId(crypto.randomUUID());
+                  setDeselected((current) => event.target.checked
+                    ? current.filter((value) => value !== key)
+                    : [...current, key]);
+                }}
+              />
+              {labels.get(key) ?? key}
+            </label>
+          ))}
+        </div>
+      )}
+    </CalendarScheduleReloadOverlay>
+  );
+}
 
 export function CalendarAdjustmentControls({
   adjustment,
   disabled,
+  onOpenRecovery,
 }: {
   adjustment: CalendarAdjustment;
   disabled?: boolean;
+  onOpenRecovery?: (state: CalendarAdjustmentState) => void;
 }) {
   const t = useTranslations("CalendarMove");
   const queryClient = useQueryClient();
@@ -47,14 +170,8 @@ export function CalendarAdjustmentControls({
   const [requestId, setRequestId] = useState<string>();
   const { id, planId, versionId, state } = adjustment;
   const ready = state === CalendarAdjustmentState.Ready;
-  const recoverable =
-    state === CalendarAdjustmentState.Stale ||
-    state === CalendarAdjustmentState.Expired ||
-    state === CalendarAdjustmentState.Invalidated;
-  const blocked = new Set(adjustment.conflicts.map(({ key }) => key));
-  const validOperations = adjustment.operationKeys.filter(
-    (key) => !blocked.has(key),
-  );
+  const recoveryKeys = calendarAdjustmentRecoveryKeys(adjustment);
+  const validOperations = recoveryKeys ?? [];
   const [deselected, setDeselected] = useState<string[]>([]);
   const selected = validOperations.filter((key) => !deselected.includes(key));
 
@@ -78,7 +195,7 @@ export function CalendarAdjustmentControls({
       const next =
         action === "discard"
           ? await discardCalendarAdjustment(planId, id, versionId)
-          : recoverable
+          : recoveryKeys
             ? await rebaseCalendarAdjustment(planId, id, {
                 versionId: requestId ?? crypto.randomUUID(),
                 baseVersionId: versionId,
@@ -90,15 +207,30 @@ export function CalendarAdjustmentControls({
     },
     onSuccess: () => setDialog(null),
     onError: async (error, action) => {
-      if (action !== "confirm") return;
-      if (error instanceof ApiFetchError && [409, 422].includes(error.status)) {
-        setDialog("refresh");
+      if (action !== "discard" && error instanceof ApiFetchError && [409, 422].includes(error.status)) {
         const current = await getCalendarAdjustment(planId, id).catch(
           () => undefined,
         );
-        if (current) await publish(current);
+        if (current) {
+          await publish(current);
+          if (current.state === CalendarAdjustmentState.Applied) {
+            await invalidateAfterPlanMutation(queryClient, { planId });
+          }
+          const keys = calendarAdjustmentRecoveryKeys(current);
+          if (current.state === CalendarAdjustmentState.Ready || keys?.length) {
+            if (onOpenRecovery) onOpenRecovery(current.state);
+            else setDialog("refresh");
+          } else {
+            if (keys?.length === 0) onOpenRecovery?.(current.state);
+            setDialog(null);
+          }
+        } else if (action === "confirm") {
+          if (onOpenRecovery) onOpenRecovery(CalendarAdjustmentState.Ready);
+          else toast.error(t("recovery.failed"));
+        }
         return;
       }
+      if (action !== "confirm") return;
       const submitted = await getCalendarAdjustment(
         planId,
         id,
@@ -111,26 +243,22 @@ export function CalendarAdjustmentControls({
         await publish(submitted);
         await invalidateAfterPlanMutation(queryClient, { planId });
       } else {
-        toast.error(t("batchFailed"));
+        if (onOpenRecovery) onOpenRecovery(CalendarAdjustmentState.Ready);
+        else toast.error(t("batchFailed"));
       }
     },
   });
   const terminal =
     state === CalendarAdjustmentState.Applied ||
     state === CalendarAdjustmentState.Discarded;
-  if (terminal) return null;
+  if (terminal || recoveryKeys?.length === 0) return null;
   const open = (next: typeof dialog) => {
     mutation.reset();
     setRequestId(crypto.randomUUID());
     setDeselected([]);
     setDialog(next);
   };
-  const labels = new Map(
-    adjustment.presentation.rows.map((row) => [
-      row.candidateKey ? `candidate:${row.candidateKey}` : row.workoutId,
-      row.name,
-    ]),
-  );
+  const labels = adjustmentLabels(adjustment);
   return (
     <>
       <Button
@@ -149,6 +277,7 @@ export function CalendarAdjustmentControls({
         disabled={disabled || pending}
         onClick={() => {
           if (ready) mutation.mutate("confirm");
+          else if (onOpenRecovery) onOpenRecovery(state);
           else open("refresh");
         }}
       >
@@ -189,7 +318,7 @@ export function CalendarAdjustmentControls({
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {dialog === "refresh" && recoverable && (
+          {dialog === "refresh" && recoveryKeys && (
             <div className="max-h-56 space-y-2 overflow-y-auto text-sm">
               {adjustment.conflicts.map(({ key, reason }) => (
                 <p key={key} className="text-muted-foreground">
@@ -232,7 +361,7 @@ export function CalendarAdjustmentControls({
               type="button"
               disabled={
                 mutation.isPending ||
-                (dialog === "refresh" && recoverable && !selected.length)
+                (dialog === "refresh" && Boolean(recoveryKeys) && !selected.length)
               }
               onClick={() =>
                 mutation.mutate(dialog === "discard" ? "discard" : "refresh")

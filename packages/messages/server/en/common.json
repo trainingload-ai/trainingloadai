@@ -1,5 +1,8 @@
 {
   "coach_plan_quality": {
+    "WEEK_TARGET_LOAD_UNVERIFIED": "The estimated weekly load cannot be fully verified against the target range. Review the available workout evidence.",
+    "POST_RECOVERY_LOAD_JUMP_REVIEW": "Estimated load rises substantially above the pre-recovery week. Review the return to training.",
+    "RECOVERY_LOAD_UNVERIFIED": "The recovery or taper week has incomplete load estimates. Review the planned sessions and effort.",
     "UNKNOWN_DURATION": "Some sessions use distance or open duration, so exact weekly time is unknown; known minutes are not the full total.",
     "LONG_SESSION_NOT_REDUCED": "The longest recovery/taper session did not shorten; review intensity and recovery cost.",
     "VOLUME_JUMP_REVIEW": "Some weekly duration increases exceed 30%; review against recent training. This is not a universal safety threshold.",
@@ -14,6 +17,7 @@
     "success": "Request succeeded"
   },
   "coachRuntime": {
+    "planDraftSummaryFallback": "This {weeks}-week draft contains {sessions} training sessions and has not been saved. Review the schedule, then select Save plan if it works for you. You can also tell me which day or session you would like to change.",
     "optionKeepPlan": "Keep the plan",
     "optionPostponeOneDay": "Postpone by one day",
     "optionSkipSession": "Skip this session",

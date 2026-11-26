@@ -1686,6 +1686,9 @@ export class AiController {
         branchId: coachBranchId,
         caseId: body.caseId ?? null,
         signal: abort.signal,
+        onPlanValidationRejected: runHandle
+          ? (event) => this.coachRuns.recordPlanValidationRejection(runHandle, event)
+          : undefined,
         onActivity: v2
           ? async (activity) => {
               const reason = await this.coachRuns.heartbeat(runHandle);

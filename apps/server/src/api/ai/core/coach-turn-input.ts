@@ -33,4 +33,5 @@ export type CoachTurnInput = {
   allowWithoutConsent?: boolean;
   signal: AbortSignal;
   onActivity?: (event: CoachActivityEvent) => Promise<void>;
+  onPlanValidationRejected?: AiToolContext['onPlanValidationRejected'];
 };

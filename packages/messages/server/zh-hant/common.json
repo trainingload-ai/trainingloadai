@@ -1,8 +1,12 @@
 {
+  "coach_plan_quality": {
+    "WEEK_TARGET_LOAD_UNVERIFIED": "暫時無法完整核對本週預估負荷是否在目標範圍內，請查看現有課程依據。"
+  },
   "response": {
     "success": "請求成功"
   },
   "coachRuntime": {
+    "planDraftSummaryFallback": "這份 {weeks} 週草案共安排 {sessions} 次訓練，目前尚未儲存。請先查看課表，確認合適後再儲存。你也可以告訴我想調整哪一天或哪堂課。",
     "optionKeepPlan": "保持原計畫",
     "optionPostponeOneDay": "推遲一天",
     "optionSkipSession": "跳過該課次",

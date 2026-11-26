@@ -1,5 +1,8 @@
 {
   "coach_plan_quality": {
+    "WEEK_TARGET_LOAD_UNVERIFIED": "暂时无法完整核对本周预估负荷是否在目标范围内，请查看现有课程依据。",
+    "POST_RECOVERY_LOAD_JUMP_REVIEW": "恢复周后预估负荷比减量前高出较多，请复核训练衔接。",
+    "RECOVERY_LOAD_UNVERIFIED": "恢复／减量周的预估负荷依据不完整，请结合课程安排和体感复核。",
     "UNKNOWN_DURATION": "部分课程按距离或开放时长完成，周总时长无法精确计算；请勿将已知时长小计当作总量。",
     "LONG_SESSION_NOT_REDUCED": "恢复／减量周的最长单课没有缩短，请结合强度和恢复情况复核。",
     "VOLUME_JUMP_REVIEW": "部分周的时长增幅超过 30%，需要结合近期训练基线复核；这不是通用的安全阈值。",
@@ -14,6 +17,7 @@
     "success": "请求成功"
   },
   "coachRuntime": {
+    "planDraftSummaryFallback": "这份 {weeks} 周草案共安排 {sessions} 次训练，目前还未保存。请先查看课表，确认合适后点击「保存计划」。你也可以告诉我想调整哪一天或哪节课。",
     "optionKeepPlan": "保持原计划",
     "optionPostponeOneDay": "推迟一天",
     "optionSkipSession": "跳过该课次",

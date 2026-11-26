@@ -7,15 +7,9 @@ import { useActivityId } from "@/hooks/useActivityId";
 import { useGetActivity } from "@/hooks/useActivities";
 import { formatValue, getUnit } from "@/hooks/useFormatterBySettings";
 import { getActivityDetailPolicy } from "@/lib/activity-detail-policy";
-import { ActivityMetricGrid } from "./activity-metric-grid";
+import { ActivitySummaryMetrics, type SummaryMetric } from "./activity-summary-metrics";
 import { useSportCatalog } from "@/api/sports";
 import { getOtherActivitySummaryCapabilities } from "@/lib/activity-presentation";
-
-type SummaryMetric = {
-  label: string;
-  value: string;
-  unit?: string;
-};
 
 function valueOrDash(
   value: number | null | undefined,
@@ -24,29 +18,6 @@ function valueOrDash(
 ) {
   if (typeof value !== "number" || !Number.isFinite(value)) return "—";
   return formatValue(value, metric, unitSystem);
-}
-
-function SummaryMetricCell({ label, unit, value }: SummaryMetric) {
-  return (
-    <div
-      data-testid="activity-summary-metric"
-      className="flex min-h-16 min-w-0 flex-col justify-center px-3 py-2 @min-[44rem]/activity-metrics:min-h-[76px] @min-[44rem]/activity-metrics:py-3 @min-[52rem]/activity-metrics:px-4"
-    >
-      <div className="truncate text-mobile-caption font-medium text-muted-foreground pc:text-xs">
-        {label}
-      </div>
-      <div className="mt-1 flex min-w-0 flex-wrap items-baseline gap-x-1 tabular-nums">
-        <span className="min-w-0 wrap-anywhere text-xl font-semibold tracking-tight text-foreground">
-          {value}
-        </span>
-        {unit ? (
-          <span className="shrink-0 text-sm font-medium text-muted-foreground">
-            {unit}
-          </span>
-        ) : null}
-      </div>
-    </div>
-  );
 }
 
 /** 与 Mobile 活动详情保持同一组固定摘要指标，不参与图表切换。 */
@@ -156,11 +127,7 @@ const Overview = React.memo(function Overview() {
 
   return (
     <section>
-      <ActivityMetricGrid desktopColumns={6} variant="cards">
-        {metrics.map((metric) => (
-          <SummaryMetricCell key={metric.label} {...metric} />
-        ))}
-      </ActivityMetricGrid>
+      <ActivitySummaryMetrics metrics={metrics} />
     </section>
   );
 });

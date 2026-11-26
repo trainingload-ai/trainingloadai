@@ -16,6 +16,7 @@ const COACH_UI_SURFACE_TOOL_NAMES = new Set([
   'FitnessAssessment',
   'FitnessTracking',
   'PresentCoachPlanDraft',
+  'PresentIndependentWorkoutDraft',
   'PresentPlanWorkoutAdjustmentDraft',
   'PlanDayView',
   COACH_PLAN_CALENDAR_TOOL,
@@ -62,6 +63,7 @@ export function coachAssistantBlockIsUiSurface(block: {
 }
 
 const UI_SURFACE_FALLBACK_ERROR_CODES: Record<string, string> = {
+  plan_stage_phase: 'invalid_plan_draft_payload',
   ask_user_question: 'invalid_ask_user_question_payload',
   present_plan_workout_adjustment_draft:
     'invalid_plan_workout_adjustment_payload',
@@ -69,6 +71,7 @@ const UI_SURFACE_FALLBACK_ERROR_CODES: Record<string, string> = {
 };
 
 const UI_SURFACE_FALLBACK_I18N_KEYS: Record<string, string> = {
+  plan_stage_phase: 'common.error.ai_coach_invalid_plan_draft_payload',
   ask_user_question: 'common.error.ai_coach_invalid_ask_user_question_payload',
   present_plan_workout_adjustment_draft:
     'common.error.ai_coach_invalid_plan_workout_adjustment_payload',

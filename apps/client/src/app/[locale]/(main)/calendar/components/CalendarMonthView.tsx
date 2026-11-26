@@ -10,14 +10,16 @@ export function CalendarMonthView({
   grid,
   compact,
   className,
+  inert,
 }: {
   header: ComponentProps<typeof CalendarHeader>;
   grid: ComponentProps<typeof CalendarStage>;
   compact?: ReactNode;
   className?: string;
+  inert?: boolean;
 }) {
   return (
-    <div className={cn("@container flex min-h-0 min-w-0 flex-1 flex-col gap-3", className)}>
+    <div inert={inert} className={cn("@container flex min-h-0 min-w-0 flex-1 flex-col gap-3", className)}>
       <CalendarHeader {...header} />
       {compact ? (
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain @min-[35rem]:hidden">

@@ -189,13 +189,6 @@ export function ActivitiesSearchPageClient() {
   const [isFilterSwitching, setIsFilterSwitching] = React.useState(false);
   const [listHeight, setListHeight] = React.useState(560);
   const activityListRef = React.useRef<HTMLDivElement>(null);
-  const handleOpenActivity = React.useCallback(
-    (hashId: string) => {
-      if (!hashId) return;
-      router.push(`/activities/${hashId}`);
-    },
-    [router],
-  );
   const handleDeletedActivity = React.useCallback((hashId: string) => {
     setItems((prev) => prev.filter((item) => item.hashId !== hashId));
     setTotal((prev) => Math.max(0, prev - 1));
@@ -429,7 +422,6 @@ export function ActivitiesSearchPageClient() {
                       sportCatalog={sportCatalog}
                       activity={activity}
                       t={tCard}
-                      onOpen={handleOpenActivity}
                       onDeleted={handleDeletedActivity}
                       onPlanLinkChange={handlePlanLinkChange}
                     />
@@ -456,7 +448,6 @@ export function ActivitiesSearchPageClient() {
                         sportCatalog={sportCatalog}
                         activity={activity}
                         t={tCard}
-                        onOpen={handleOpenActivity}
                         onDeleted={handleDeletedActivity}
                         onPlanLinkChange={handlePlanLinkChange}
                       />

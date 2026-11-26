@@ -13,11 +13,35 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { CoachPlanChangeComparison } from "./coach-plan-change-comparison";
+import { CoachPlanProposalContext } from "./coach-plan-proposal-context";
+
 const sides = ["before", "after"] as const;
+
+export function CoachScheduleReview({ proposal, initialMove }: {
+  proposal: PlanProposalPresentation;
+  initialMove?: PlanCalendarMoveImpact;
+}) {
+  return (
+    <>
+      <CoachPlanChangeComparison
+        rows={proposal.rows.filter((row) => row.changeKind && row.changeKind !== "PRESERVED")}
+        mode={proposal.mode}
+        effectiveFrom={proposal.effectiveFrom}
+        initialMove={initialMove}
+      />
+      {proposal.calendarAdjustmentWeeks?.length ? (
+        <CalendarMoveWeekComparison batchWeeks={proposal.calendarAdjustmentWeeks} />
+      ) : null}
+      <CoachPlanProposalContext proposal={proposal} />
+    </>
+  );
+}
 
 export function CoachScheduleComparison({
   proposal,
@@ -51,7 +75,6 @@ export function CoachScheduleComparison({
         {
           name: side === "before" ? (row.beforeName ?? row.name) : row.name,
           date: date ?? null,
-          text: row[side],
           number: index + 1,
         },
       ];
@@ -128,35 +151,17 @@ export function CoachScheduleComparison({
             <DialogTitle id={titleId}>{t("changeDetails")}</DialogTitle>
             <DialogDescription>{proposal.title}</DialogDescription>
           </DialogHeader>
-          {proposal.calendarAdjustmentWeeks?.length ? (
-            <CalendarMoveWeekComparison batchWeeks={proposal.calendarAdjustmentWeeks} />
+          <CoachScheduleReview proposal={proposal} initialMove={initialMove} />
+          {onOpenPreview ? (
+            <DialogFooter className="flex-row flex-wrap items-center gap-2">
+              <Button type="button" size="sm" variant="secondary" onClick={() => {
+                setDetailsOpen(false);
+                onOpenPreview();
+              }}>
+                {workspace("openCalendar")}
+              </Button>
+            </DialogFooter>
           ) : null}
-          <div className="grid gap-3 sm:grid-cols-2">
-            {sides.map((side) => (
-              <section key={side} className="flex min-w-0 flex-col gap-3">
-                <h3 className="text-sm font-semibold">{t(side)}</h3>
-                {entries(side).map(({ name, date, text, number }) => (
-                  <div
-                    key={number}
-                    className="flex min-w-0 flex-col gap-1 rounded-md bg-muted p-3 text-sm"
-                  >
-                    <span className="font-medium">{name}</span>
-                    {date ? (
-                      <time
-                        dateTime={date}
-                        className="text-xs text-muted-foreground"
-                      >
-                        {date}
-                      </time>
-                    ) : null}
-                    <pre className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
-                      {text}
-                    </pre>
-                  </div>
-                ))}
-              </section>
-            ))}
-          </div>
         </DialogContent>
       </Dialog>
     </div>

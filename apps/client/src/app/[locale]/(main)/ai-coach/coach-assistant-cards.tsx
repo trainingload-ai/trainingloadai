@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useContext, useMemo, useState } from "react";
-import { ArrowUpRight, CalendarDays } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import {
   coachPlanSaveErrorKind,
   type CoachPlanSaveErrorKind,
@@ -23,6 +23,7 @@ import { useCreateCoachPlanFromDraft } from "@/api/usePlanMutations";
 import { getPlanLibraryHref } from "@/lib/plan-navigation";
 import {
   COACH_PLAN_DRAFT_SAVED_KIND,
+  coachPlanDraftOpeningWeek,
   COACH_QUESTION_REPLY_KIND,
   COACH_QUESTION_SKIP_KIND,
   PLAN_WORKOUT_ADJUSTMENT_APPLIED_KIND,
@@ -46,6 +47,7 @@ import {
   type PlanWorkoutAdjustmentDraft,
 } from "@/lib/plan-workout-adjustment-draft";
 import { MutationAppliedCard } from "./cards/MutationAppliedCard";
+import { CoachPreviewCard } from "./cards/coach-preview-card";
 import { COACH_READ_TOOL_CARD_NAMES } from "./coach-conversation-items";
 import { CoachPlanDraftCalendarPreview } from "./coach-plan-draft-calendar-preview";
 import { CoachPlanDraftPreviewContext } from "./coach-preview-panel";
@@ -56,9 +58,11 @@ import {
 } from "./coach-question-flow";
 import { CoachReadToolCard } from "./coach-read-tool-cards";
 import { CoachVolatileDecisionCards } from "./coach-decision-cards";
+import { CoachIndependentWorkoutDraftCard } from "./coach-independent-workout-draft";
 import { PlanWorkoutAdjustmentDraftCard } from "./plan-workout-adjustment-draft-card";
 import { CoachInvalidStructuredCard } from "./coach-invalid-structured-card";
 import { useCoachThreadReceipts } from "./coach-thread-receipts";
+import { getSportDisplayName } from "@/api/sports";
 import {
   buildQuestionAnswerMessage,
   dedupeCoachToolCards,
@@ -137,6 +141,7 @@ function CoachV2AssistantCardsInner({
   const twa = useTranslations("AiCoachPage.workoutAdjustment");
   const td = useTranslations("AiCoachPage.decision");
   const tPreview = useTranslations("AiCoachPage.workspace");
+  const sports = useTranslations("SportCatalog");
   const openDraftPreview = useContext(CoachPlanDraftPreviewContext);
 
   const assistantMessageId = message?.id ?? "";
@@ -177,6 +182,7 @@ function CoachV2AssistantCardsInner({
         : null,
     [planDraftTool],
   );
+  const openingWeek = planDraft ? coachPlanDraftOpeningWeek(planDraft) : null;
 
   const workoutAdjustmentDraft = useMemo(() => {
     const tool = tools.find(
@@ -186,6 +192,8 @@ function CoachV2AssistantCardsInner({
       ? safeParsePlanWorkoutAdjustmentDraftToolUseInput(tool.input)
       : null;
   }, [tools]);
+  const independentWorkoutDraft = tools.find((tool) => tool.name === "PresentIndependentWorkoutDraft")
+    ?.input as { draftId?: unknown } | undefined;
 
   const invalidStructuredCardCount = useMemo(
     () =>
@@ -460,23 +468,31 @@ function CoachV2AssistantCardsInner({
         <Plan open>
           <PlanContent className="p-0">
             {openDraftPreview && planDraftTool ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() =>
-                  openDraftPreview(
-                    `${assistantMessageId}:tool:${planDraftTool.toolCallId}`,
-                  )
-                }
+              <CoachPreviewCard
+                title={planDraft.title}
+                subtitle={tpd("summary", { weeks: planDraft.periodWeeks, sessions: planDraft.workouts.length })}
+                icon={CalendarDays}
+                actionLabel={tPreview("openCalendar")}
+                onOpen={() => openDraftPreview(`${assistantMessageId}:tool:${planDraftTool.toolCallId}`)}
               >
-                <CalendarDays aria-hidden />
-                <span className="min-w-0 truncate">{planDraft.title}</span>
-                <span className="ms-auto shrink-0">
-                  {tPreview("openCalendar")}
-                </span>
-                <ArrowUpRight aria-hidden />
-              </Button>
+                {planDraft.description ? <p className="line-clamp-2 text-sm leading-5 text-muted-foreground">
+                  {planDraft.description}
+                </p> : null}
+                {openingWeek?.workouts.length ? (
+                  <div className="space-y-1.5 border-t border-border/70 pt-2">
+                    <p className="text-xs text-muted-foreground">{tpd("weekLabel", { week: openingWeek.week })}</p>
+                    <ul className="flex flex-wrap gap-1.5">
+                      {openingWeek.workouts.map((workout, index) => (
+                        <li key={index} className="max-w-full rounded-control bg-background/70 px-2 py-1 text-xs [overflow-wrap:anywhere]">
+                          {workout.name?.trim() || getSportDisplayName([], {
+                            sportType: workout.sportType, sportDefinitionCode: workout.sportDefinitionCode,
+                          }, sports)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </CoachPreviewCard>
             ) : (
               <CoachPlanDraftCalendarPreview
                 draft={planDraft}
@@ -536,6 +552,9 @@ function CoachV2AssistantCardsInner({
         </Plan>
       ) : null}
 
+      {typeof independentWorkoutDraft?.draftId === "string" && (
+        <CoachIndependentWorkoutDraftCard id={independentWorkoutDraft.draftId} />
+      )}
       {workoutAdjustmentDraft ? (
         <PlanWorkoutAdjustmentDraftCard
           draft={workoutAdjustmentDraft as PlanWorkoutAdjustmentDraft}

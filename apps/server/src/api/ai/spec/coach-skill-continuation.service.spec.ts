@@ -89,7 +89,7 @@ describe('AiService continuation ownership', () => {
     ).toBe('plan-followup');
   });
 
-  it('re-reads changed facts and continues the same plan brief and operation before publishing a question', async () => {
+  it.each([{ intent: 'plan-builder' }, {}])('re-reads changed facts before publishing a plan question with entry %j', async (entry) => {
     const f = fixture();
     const oldFacts = {
       date: '2026-11-20',
@@ -174,9 +174,9 @@ describe('AiService continuation ownership', () => {
         };
         yield terminal;
       });
-    const prompt = 'Build a continuous running plan with my current training.';
+    const prompt = 'Build an eight-week running plan with my current training.';
     const events = await f.reply(prompt, {
-      intent: 'plan-builder',
+      ...entry,
       runtimeRunId: 'run',
       currentUserMessageId: 'input',
       operationId: 'operation',
@@ -185,6 +185,9 @@ describe('AiService continuation ownership', () => {
     expect(JSON.stringify(events)).toContain('PresentCoachPlanDraft');
     expect(JSON.stringify(events)).not.toContain('old-question');
     expect(streamCoachAnswer).toHaveBeenCalledTimes(2);
+    expect(jest.mocked(streamCoachAnswer).mock.calls[0][0].activeSkill?.name).toBe(
+      entry.intent,
+    );
     const nextCall = jest.mocked(streamCoachAnswer).mock.calls[1][0];
     expect(nextCall.ctx).toMatchObject({
       sid: 'session',

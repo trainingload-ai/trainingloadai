@@ -1,5 +1,7 @@
 import { ApiFetchError } from "@/lib/api-error";
+import { apiFetch } from "@/lib/api";
 import { getPendingAuthFailure, handleUnauthorized } from "@/lib/auth-failure";
+import { mapV2ActivityListItem } from "./activity-feed-mapper";
 
 export type V2ActivitySourceProvider = string;
 
@@ -131,6 +133,18 @@ export type V2ActivitiesFeedResponse = {
 /** Next Route：`app/api/v2/activities/feed/route.ts`（勿改成 `/api/activities/feed`，RSC 会 404） */
 export const V2_ACTIVITIES_FEED_API_PATH = "/api/v2/activities/feed";
 export const ACTIVITY_TIMELINE_API_PATH = "/api/activities/timeline";
+
+export async function getActivityCards(hashIds: readonly string[]) {
+  const params = new URLSearchParams({ hashIds: hashIds.join(",") });
+  const response = await apiFetch<{ activities: unknown[] }>(
+    `/activities/cards?${params}`,
+    { cache: "no-store", suppressErrorToast: true },
+  );
+  return new Map((response?.activities ?? []).map((row) => {
+    const activity = mapV2ActivityListItem(row);
+    return [activity.hashId, activity];
+  }));
+}
 
 export type V2ActivitiesFeedQuery = {
   q?: string;

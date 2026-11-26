@@ -2,13 +2,14 @@ import { PlanCalendarRepository } from '../persistence/plan-calendar.repository'
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import {
   addCalendarDays,
+  calendarIsoWeekday,
   assessPlanSchedule,
   scheduleDateConflict,
   createScheduleRuleResolver,
   type ScheduleConstraints,
   type ScheduledPlanWorkout,
 } from '@shared/plan-calendar';
-import type { PlanQualityContract } from '@shared/plan-quality';
+import { planDailyMinuteLimit, type PlanQualityContract } from '@shared/plan-quality';
 import type { PlanDb } from '../persistence/plan-db';
 
 type Candidate = {
@@ -129,7 +130,7 @@ export class PlanCalendarValidationService {
         this.dailyIssues(
           [date],
           rows,
-          rulesAt(date).qualityContract?.maxDailyMinutes,
+          planDailyMinuteLimit(rulesAt(date).qualityContract, calendarIsoWeekday(date)),
         ),
       ),
     );
@@ -272,7 +273,7 @@ export class PlanCalendarValidationService {
           this.dailyIssues(
             [date],
             rows,
-            rulesAt(date).qualityContract?.maxDailyMinutes,
+            planDailyMinuteLimit(rulesAt(date).qualityContract, calendarIsoWeekday(date)),
           ),
         ),
       );

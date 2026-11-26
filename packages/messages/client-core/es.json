@@ -521,6 +521,7 @@
       "workoutDialogSessionMeta": "Sesión {ordinal} · {sport}",
       "workoutDialogSessionFallback": "Sesión {ordinal}",
       "workoutDialogClose": "Cerca",
+      "workoutDialogBackToCalendar": "Volver al calendario",
       "scheduleConflict": "Conflicto con tu disponibilidad"
     },
     "readCards": {
@@ -577,6 +578,7 @@
         "colMin": "Bajo",
         "colMax": "Alto",
         "unitPace": "(minutos/km)",
+        "unitPaceMi": "(minutos/mi)",
         "unitPace100m": "(mín./100m)",
         "unitHr": "(lpm)",
         "unitPower": "(W)",
@@ -666,6 +668,7 @@
       "showLess": "Ver menos",
       "evidence": "Datos utilizados",
       "loadDelta": "Cambio de carga estimado",
+      "expectedImpact": "Impacto previsto",
       "syncImpact": "Impacto de sincronización",
       "total": "Evaluadas",
       "changed": "Modificadas",
@@ -4889,6 +4892,11 @@
     }
   },
   "PlanActivationDialog": {
+    "officialDescription": "Revisa y edita el borrador del calendario y elige la fecha de inicio.",
+    "loadingDraft": "Cargando el calendario del borrador…",
+    "changedDraft": "El borrador cambió en otro lugar. Revisa el calendario antes de empezar.",
+    "startFailed": "No se pudo iniciar el plan. Revisa el calendario y vuelve a intentarlo.",
+    "editFailed": "No se pudieron guardar los cambios del entrenamiento. Inténtalo de nuevo.",
     "title": "Activar plan",
     "description": "Elija la fecha de inicio real. Las fechas de entrenamiento se calcularán a partir de esta fecha y de cada compensación de entrenamiento.",
     "cancel": "Cancelar",
@@ -6622,6 +6630,8 @@
     "adjustmentConflicts": {
       "PLAN_STATUS": "The plan can no longer be edited",
       "WORKOUT_REMOVED": "The workout was removed",
+      "WORKOUT_CHANGED": "Este entrenamiento se modificó en otro lugar",
+      "WORKOUT_NOT_VERIFIED": "No se pudo verificar este entrenamiento al actualizar",
       "WORKOUT_STATUS": "The workout status has changed",
       "ACTIVITY_LINKED": "The workout is linked to an activity",
       "HISTORY": "The workout date has passed",
@@ -6634,11 +6644,17 @@
     "stageEdit": "Añadir al borrador",
     "batchSaved": "Cambios del plan guardados.",
     "batchFailed": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+    "adjustmentUnavailable": "Este borrador de ajuste ya no se puede usar. Tu calendario no ha cambiado. Puedes iniciar un nuevo ajuste desde el calendario actual.",
     "batchReloadTitle": "¿Cargar el calendario más reciente?",
     "batchConflict": "The schedule changed or the edits could not be saved. Load the latest schedule and review your changes before confirming.",
     "missedDrop": "Los entrenamientos perdidos no se pueden reprogramar.",
     "completedDrop": "Los entrenamientos completados no se pueden reprogramar.",
     "recovery": {
+      "unavailableTitle": "Borrador de ajuste no disponible",
+      "localDraftRolledBack": "Se revirtieron todos los cambios sin guardar.",
+      "localDraftWillBeRolledBack": "También se revertirán los cambios sin guardar.",
+      "retryDraft": "Actualizar y reintentar",
+      "refreshSchedule": "Actualizar calendario",
       "title": "La vista previa del cambio ha caducado",
       "action": "Cargar calendario actualizado",
       "expired": "Carga el calendario actualizado para continuar el ajuste en este chat.",

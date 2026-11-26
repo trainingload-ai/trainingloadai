@@ -25,6 +25,7 @@ export const COACH_READ_TOOL_CARD_NAMES = new Set([
 export const COACH_ARTIFACT_TOOL_CARD_NAMES = new Set([
   "AskUserQuestion",
   "PresentCoachPlanDraft",
+  "PresentIndependentWorkoutDraft",
   "PresentPlanWorkoutAdjustmentDraft",
   "CoachDecisionDraft",
 ]);
@@ -54,6 +55,7 @@ const CANONICAL_TO_RENDERABLE_TOOL_NAME: Record<string, string> = {
   "competition.events.list": "CompetitionEvents",
   ask_user_question: "AskUserQuestion",
   present_coach_plan_draft: "PresentCoachPlanDraft",
+  present_independent_workout_draft: "PresentIndependentWorkoutDraft",
   present_plan_workout_adjustment_draft: "PresentPlanWorkoutAdjustmentDraft",
   coach_decision_draft: "CoachDecisionDraft",
   coach_decision_apply: "CoachDecisionApplied",
@@ -74,6 +76,7 @@ const RENDERABLE_TOOL_LABEL_KEYS: Record<string, string> = {
   CompetitionEvents: "competitionEvents",
   AskUserQuestion: "question",
   PresentCoachPlanDraft: "planDraft",
+  PresentIndependentWorkoutDraft: "workoutAdjustment",
   PresentPlanWorkoutAdjustmentDraft: "workoutAdjustment",
   CoachDecisionDraft: "decisionDraft",
   CoachDecisionApplied: "decisionApply",

@@ -33,6 +33,7 @@ export function CalendarSelect({
   toDate,
   fromYear,
   toYear,
+  weekStartsOn,
   size = "sm",
 }: {
   date?: Date;
@@ -47,6 +48,7 @@ export function CalendarSelect({
   toDate?: Date;
   fromYear?: number;
   toYear?: number;
+  weekStartsOn?: 0 | 1;
   size?: ButtonProps["size"];
 }) {
   const [open, setOpen] = React.useState(false);
@@ -71,6 +73,8 @@ export function CalendarSelect({
     <Calendar
       mode="single"
       selected={date}
+      defaultMonth={date}
+      weekStartsOn={weekStartsOn}
       className={isMobile ? "w-full" : "w-[300px] "}
       captionLayout="dropdown"
       fromDate={fromDate}
@@ -90,7 +94,7 @@ export function CalendarSelect({
     return (
       <AdaptiveDialog open={open} onOpenChange={setOpen}>
         <AdaptiveDialogTrigger asChild>{trigger}</AdaptiveDialogTrigger>
-        <AdaptiveDialogContent mobileClassName="p-0">
+        <AdaptiveDialogContent mobileClassName="p-0" mobileProps={{ "aria-describedby": undefined }}>
           <AdaptiveDialogHeader className="px-4 pt-4">
             <AdaptiveDialogTitle className="text-base font-medium">
               {title ?? placeholder}

@@ -1,4 +1,6 @@
 import type { FitnessCalculationService } from '@/fitness-calculation/fitness-calculation.service';
+import type { PlanPhaseTarget, PlanQualityContract, PlanWeekTarget } from '@shared/plan-quality';
+import type { CoachPlanDraftData } from '@shared/ai-coach-schema';
 import type { FitnessAssessmentApplyService } from '../fitness-assessment-apply.service';
 import type { FitnessAssessmentFollowupService } from '../fitness-assessment-followup.service';
 import type {
@@ -25,6 +27,8 @@ import type { ExternalProviderStatusQueryService } from '@/integrations/external
 import type { ActivitySeriesQueryService } from '@/api/activity/activity-series-query.service';
 import type { WorkoutService } from '@/api/workout/workout.service';
 import type { WorkoutDefinitionService } from '@/api/workout/workout-definition.service';
+import type { PlanLoadEstimatorService } from '@/api/plan/plan-load-estimator.service';
+import type { PlanRepairTarget } from '@shared/plan-quality';
 import type { AiUsageKind } from '@prisma/client';
 import type { AthleteMemoryQueryService } from '@/athlete-memory/application/athlete-memory-query.service';
 import type { WebEvidenceGateway } from './web-evidence.gateway';
@@ -35,6 +39,7 @@ import {
 } from './tool-input-validation';
 
 export type JsonSchemaObject = {
+  description?: string;
   /**
    * 仅支持 object 入参（与 OpenAI function calling 的 parameters 对齐）
    */
@@ -64,14 +69,44 @@ export type AiToolContext = {
    * context copies made for individual tool calls.
    */
   planSuitability?: {
+    rejectedPhase?: {
+      assessmentId: string;
+      startWeek: number;
+      endWeek: number;
+      startDate: string;
+      scheduleConstraints?: unknown;
+      templates: Record<string, unknown>[];
+      workouts?: unknown[];
+    };
+    stagedPhases?: {
+      assessmentId: string;
+      completedThroughWeek: number;
+      completedWindows: number;
+      draft: CoachPlanDraftData;
+      templates: Record<string, unknown>[];
+    };
+    rejectedRecoveryPrescriptions?: Map<number, string>;
+    rejectedDraft?: {
+      assessmentId: string;
+      draft: CoachPlanDraftData;
+      repairableWeeks: number[];
+      templateIds?: WeakMap<CoachPlanDraftData['workouts'][number], string>;
+      templates: Record<string, unknown>[];
+    };
     latest?: {
       assessmentId: string;
+      skillName?: string;
       goalSummary?: string;
       status: 'READY' | 'NEEDS_INPUT' | 'NEEDS_ADJUSTMENT';
+      weekTargets?: PlanWeekTarget[];
+      phases?: PlanPhaseTarget[];
       constraints: {
         periodWeeks: number;
         maxTrainingDaysPerWeek: number;
         maxDailyMinutes: number;
+        maxMinutesByIsoWeekday?: PlanQualityContract['maxMinutesByIsoWeekday'];
+        fixedTrainingWeekdays?: number[];
+        raceDiscipline?: 'RUN' | 'TRIATHLON' | 'CYCLING' | 'SWIM';
         requiredSports: string[];
         strengthPreference: 'AUTO' | 'INCLUDE' | 'EXCLUDE';
       };
@@ -182,6 +217,8 @@ export type AiToolContext = {
   activitySeries?: ActivitySeriesQueryService;
   workoutService: WorkoutService;
   workoutDefinitions: WorkoutDefinitionService;
+  planLoadEstimator?: PlanLoadEstimatorService;
+  onPlanValidationRejected?: (event: PlanValidationRejection) => Promise<void>;
   /**
    * 当前登录会话（用于拿 userId，以及权限控制）
    */
@@ -228,11 +265,58 @@ export type AiRiskTier = 'low' | 'high';
 
 export type AiToolCheckOk = { ok: true };
 
+export type PlanValidationFeedback = {
+  code: string;
+  target: PlanRepairTarget;
+  message: string;
+  weeks?: Array<{
+    weekIndex: number;
+    phase: string | null;
+    totalEstimatedLoad: number | null;
+    knownDurationSeconds?: number;
+    unknownDurationSessions?: number;
+    unknownLoadSessions?: number;
+  }>;
+  mainWorkouts?: Array<{
+    dayIndex: number;
+    sessionIndex: number;
+    durationSeconds: number | null;
+    plannedSessionRpe: number | null;
+    estimatedLoad: number | null;
+    method?: string;
+    templateId?: string;
+    prescription?: string;
+    timedIntervals?: {
+      equation: string;
+      outsideRepeatsSeconds: number;
+      hasRepeats: boolean;
+      workRestSet?: { count: number; workSeconds: number; restSeconds: number; endsWithRest: boolean; expanded: boolean };
+      editableSteps: { kind: 'work' | 'cooldown'; seconds: number; count: number; stepIndex: number }[];
+    };
+  }>;
+};
+
+export type PlanValidationRejection = {
+  toolCallId: string;
+  toolName: string;
+  stage: 'parse_arguments' | 'validate_input';
+  code: string;
+  message: string;
+  modelRepair?: string;
+  candidate: unknown;
+  feedback?: PlanValidationFeedback[];
+  diagnostics?: unknown;
+};
+
 export type AiToolCheckError = {
   ok: false;
   message: string;
   code?: string;
   issues?: ToolInputIssue[];
+  feedback?: PlanValidationFeedback[];
+  /** Complete compact repair instructions for the model. Detailed feedback remains in the audit. */
+  modelRepair?: string;
+  diagnostics?: unknown;
 };
 
 export type AiToolCheckResult = AiToolCheckOk | AiToolCheckError;
@@ -291,6 +375,8 @@ export type AiToolDef<Input extends object = object, Output = unknown> = {
    * 不声明 = 全 skill 可见（兼容现有工具）。
    */
   applicableSkills?: string[];
+  /** Require one of the applicable skills before exposing or executing the tool. */
+  requiresActiveSkill?: boolean;
   /**
    * 是否应暴露给当前会话/上下文（默认 true）
    */
@@ -402,6 +488,16 @@ export async function isAiToolEnabled<Input extends object>(
   return Boolean(await tool.isEnabled(ctx));
 }
 
+export function matchesAiToolSkill(
+  tool: Pick<AiToolDef, 'applicableSkills' | 'requiresActiveSkill'>,
+  activeSkillName?: string,
+): boolean {
+  if (!activeSkillName || !tool.applicableSkills?.length)
+    return !tool.requiresActiveSkill;
+  const activeName = activeSkillName.toLowerCase();
+  return tool.applicableSkills.some((name) => name.toLowerCase() === activeName);
+}
+
 function resolveFlag<Input extends object>(
   flag: boolean | ((input: Input) => boolean) | undefined,
   input: Input,
@@ -447,11 +543,25 @@ export async function validateAiToolInput<Input extends object>(
   return await tool.validateInput(ctx, input);
 }
 
+export function checkAiToolActiveSkill<Input extends object>(
+  tool: AiToolDef<Input>,
+  ctx: AiToolContext,
+): AiToolPermissionResult {
+  if (tool.requiresActiveSkill && !matchesAiToolSkill(tool, ctx.activeSkillName))
+    return aiToolError(
+      `Use skill.activate before calling ${tool.name}. Supported skills: ${tool.applicableSkills?.join(', ')}.`,
+      'ACTIVE_SKILL_REQUIRED',
+    );
+  return aiToolOk();
+}
+
 export async function checkAiToolPermissions<Input extends object>(
   tool: AiToolDef<Input>,
   ctx: AiToolContext,
   input: Input,
 ): Promise<AiToolPermissionResult> {
+  const skill = checkAiToolActiveSkill(tool, ctx);
+  if (skill.ok === false) return skill;
   if (!tool.checkPermissions) return aiToolOk();
   return await tool.checkPermissions(ctx, input);
 }

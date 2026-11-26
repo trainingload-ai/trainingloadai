@@ -9,6 +9,7 @@ import { getScheduledWorkouts, type PlanWorkout } from "@/api/plans";
 import type { ParsedPlan } from "@/api/workout";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LoadErrorState } from "@/components/ui/load-error-state";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { WorkoutDetailActions } from "@/components/plan/workout-detail-actions";
@@ -41,20 +42,25 @@ export function CalendarMovePreviewCalendar({
   instanceId,
   planId,
   presentation,
+  schedule,
   draft,
   canEdit,
   onEdit,
+  saveLabel,
   renderActions,
+  renderScheduleOverlay,
+  inlineWorkoutEditor = false,
 }: {
   initialDate: string;
   instanceId?: string;
   planId: string;
   presentation: PlanProposalPresentation | null;
+  schedule?: Record<string, PlanWorkout[]>;
   draft?: {
     value: CalendarEditDraft | null;
     move: (workout: PlanWorkout, date: string) => void;
-    add: (date: string, workout: WorkoutEditorPayload) => void;
-    remove: (workout: PlanWorkout) => void;
+    add?: (date: string, workout: WorkoutEditorPayload) => void;
+    remove?: (workout: PlanWorkout) => void;
     disabled: boolean;
   };
   canEdit?: (workout: PlanWorkout) => boolean;
@@ -62,7 +68,10 @@ export function CalendarMovePreviewCalendar({
     workout: PlanWorkout,
     update: WorkoutEditorPayload,
   ) => Promise<void>;
+  saveLabel?: string;
   renderActions?: (reloadSchedule: () => Promise<Map<string, PlanWorkout>>) => ReactNode;
+  renderScheduleOverlay?: (reloadSchedule: () => Promise<Map<string, PlanWorkout>>) => ReactNode;
+  inlineWorkoutEditor?: boolean;
 }) {
   const locale = useLocale();
   const t = useTranslations("CalendarExperience");
@@ -77,7 +86,10 @@ export function CalendarMovePreviewCalendar({
     : undefined;
   const [date, setDate] = useState(() => dayjs(previousView?.date ?? initialDate));
   const { currentMonth, setCurrentMonth, displayedMonth, scroll, resetScrollAnchor } =
-    useCalendarScrollPosition(() => dayjs(previousView?.month ?? date).startOf("month"));
+    useCalendarScrollPosition(
+      () => dayjs(previousView?.month ?? date).startOf("month"),
+      schedule ? date : undefined,
+    );
   const [direction, setDirection] = useState<1 | -1>(1);
   const [selectedWorkout, setSelectedWorkout] = useState<PlanWorkout | null>(
     null,
@@ -108,8 +120,8 @@ export function CalendarMovePreviewCalendar({
         : undefined,
     [selectedWorkout],
   );
-  const { weeks, workoutsByDate, fetchStart, fetchEnd } = useCalendarSchedule(
-    currentMonth, calendarScrollFetchRange(currentMonth),
+  const { weeks, workoutsByDate, fetchStart, fetchEnd, scheduleQuery } = useCalendarSchedule(
+    currentMonth, calendarScrollFetchRange(currentMonth), { errorSurface: "inline" }, !schedule,
   );
   const reloadSchedule = async () => {
     if (!fetchStart || !fetchEnd) throw new Error("Missing calendar window");
@@ -128,9 +140,9 @@ export function CalendarMovePreviewCalendar({
     weeks[0] ??
     [];
   const projected = useMemo(() => {
-    const published = projectCalendarProposal(workoutsByDate, presentation, planId);
+    const published = projectCalendarProposal(schedule ?? workoutsByDate, presentation, planId);
     return draft?.value ? projectCalendarEdits(published.workoutsByDate, draft.value, published.marks) : published;
-  }, [planId, presentation, workoutsByDate, draft?.value]);
+  }, [planId, presentation, schedule, workoutsByDate, draft?.value]);
   const selectDate = (next: Dayjs, jump = false) => {
     setDate(next);
     if (instanceId) queryClient.setQueryData(viewKey, {
@@ -163,7 +175,7 @@ export function CalendarMovePreviewCalendar({
     if (draft) selectDate(workoutDate);
     openWorkout(workout, document.activeElement);
   };
-  const createOnDate = draft && !draft.disabled ? (kind: CalendarCreateKind, target: Dayjs) => {
+  const createOnDate = draft?.add && !draft.disabled ? (kind: CalendarCreateKind, target: Dayjs) => {
     if (kind !== "workout" || target.format("YYYY-MM-DD") < calendarToday()) return;
     selectDate(target);
     setCreatingDate(target.format("YYYY-MM-DD"));
@@ -194,18 +206,24 @@ export function CalendarMovePreviewCalendar({
     return source && canEdit?.(source) ? source : undefined;
   } : undefined;
 
+  const editingInPanel = inlineWorkoutEditor && Boolean(creatingDate || (editing && selectedWorkout));
+  if (!schedule && scheduleQuery.isLoadingError && !editingInPanel && !renderScheduleOverlay) {
+    return <LoadErrorState retrying={scheduleQuery.isFetching}
+      onRetry={() => void scheduleQuery.refetch({ cancelRefetch: false })} />;
+  }
   return (
     <div
       ref={calendar}
       tabIndex={-1}
       className={cn(
         "relative flex h-full min-h-0 min-w-0 flex-col",
-        draft && "pb-12",
+        draft && !schedule && !editingInPanel && "pb-12",
       )}
       data-calendar-proposal
     >
       <CalendarMonthView
-        className="gap-2"
+        className={cn("gap-2", editingInPanel && "hidden")}
+        inert={Boolean(renderScheduleOverlay)}
         header={{
           monthLabel: new Intl.DateTimeFormat(locale, {
             year: "numeric",
@@ -291,9 +309,9 @@ export function CalendarMovePreviewCalendar({
                       openWorkout(workout, document.activeElement);
                       setEditing(true);
                     }}>{tm("editWorkout")}</ContextMenuItem>
-                    {workout.capabilities?.delete !== false ? (
+                    {draft.remove && workout.capabilities?.delete !== false ? (
                       <ContextMenuItem onSelect={() => {
-                        draft.remove(workout);
+                        draft.remove?.(workout);
                         requestAnimationFrame(() => calendar.current?.focus({ preventScroll: true }));
                       }}>
                         {td("actionDelete")}
@@ -306,16 +324,18 @@ export function CalendarMovePreviewCalendar({
           },
         }}
       />
-      {renderActions?.(reloadSchedule)}
+      {!editingInPanel && renderActions?.(reloadSchedule)}
+      {renderScheduleOverlay?.(reloadSchedule)}
       {selectedWorkout ? (
         <WorkoutEditorSheet
           open
+          inline={inlineWorkoutEditor && editing}
           onOpenChange={closeWorkout}
           title={selectedWorkout.name || t("plannedTraining")}
           readOnly={!editing || !canEdit?.(selectedWorkout)}
           initialValue={initialValue}
           showNameField={editing}
-          saveLabel={tm(draft ? "stageEdit" : "updateDraft")}
+          saveLabel={saveLabel ?? tm(draft ? "stageEdit" : "updateDraft")}
           onSave={async (update) => onEdit?.(selectedWorkout, update)}
           footerActions={
             !editing && canEdit?.(selectedWorkout) ? (
@@ -327,8 +347,8 @@ export function CalendarMovePreviewCalendar({
                 } : undefined}
                 capabilities={{ delete: selectedWorkout.capabilities?.delete !== false }}
                 confirmDelete={false}
-                onDelete={draft ? () => {
-                  draft.remove(selectedWorkout);
+                onDelete={draft?.remove ? () => {
+                  draft.remove?.(selectedWorkout);
                   closeWorkout(false);
                 } : undefined}
               />
@@ -336,15 +356,20 @@ export function CalendarMovePreviewCalendar({
           }
         />
       ) : null}
-      {creatingDate && draft ? (
+      {creatingDate && draft?.add ? (
         <WorkoutEditorSheet
           open
+          inline={inlineWorkoutEditor}
           title={tc("title")}
-          onOpenChange={(open) => { if (!open) setCreatingDate(null); }}
+          onOpenChange={(open) => {
+            if (open) return;
+            setCreatingDate(null);
+            if (inlineWorkoutEditor) requestAnimationFrame(() => calendar.current?.focus({ preventScroll: true }));
+          }}
           initialValue={newWorkout}
           showNameField
           saveLabel={tm("stageEdit")}
-          onSave={async (workout) => draft.add(creatingDate, workout)}
+          onSave={async (workout) => draft.add?.(creatingDate, workout)}
         />
       ) : null}
       {moveTarget?.scheduledDate ? (

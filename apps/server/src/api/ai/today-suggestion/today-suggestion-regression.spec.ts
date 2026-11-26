@@ -1,4 +1,6 @@
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { Logger } from '@nestjs/common';
+import type { LanguageModel } from 'ai';
 import { convertArrayToReadableStream, MockLanguageModelV3 } from 'ai/test';
 import { executeBackgroundCoachTask } from '../core/coach-task-runtime';
 import type { CoachTurnInput } from '../core/coach-turn-input';
@@ -15,7 +17,7 @@ import { TodayGenerationLeaseLost } from './today-suggestion-generation.service'
 import { validateTodaySuggestionDraftForProjection } from './today-suggestion-draft.validator';
 import type { TodaySuggestionDraft } from './today-suggestion.types';
 
-let coachModel: MockLanguageModelV3;
+let coachModel: LanguageModel;
 jest.mock('../core/coach-upstream.adapter', () => ({
   ...jest.requireActual<typeof import('../core/coach-upstream.adapter')>(
     '../core/coach-upstream.adapter',
@@ -177,12 +179,263 @@ function harness() {
   };
 }
 
+function attachCoachRuntime(
+  agent: ReturnType<typeof harness>['agent'],
+  model: LanguageModel,
+  { runId = 'today-run', maxSteps = 1 } = {},
+) {
+  coachModel = model;
+  const projector = {
+    run: { runId, attemptId: 'attempt', messageId: 'message' },
+    consume: jest.fn(() => []),
+    finish: jest.fn(),
+  };
+  const runs = {
+    beginBackground: jest.fn(async () => ({
+      handle: {
+        projector,
+        sessionId: 'background:today',
+        operationId: 'operation',
+      },
+    })),
+    checkpoint: jest.fn(async (_handle: unknown, _state?: string) => undefined),
+    heartbeat: jest.fn(async () => null),
+  };
+  const submit = jest.fn(coachTaskSubmitResultTool.execute);
+  const usage = { recordUsageEvent: jest.fn() };
+  const background = {
+    runs,
+    logger: new Logger('TodaySuggestionRegression'),
+    usage,
+    runTurn: async ({
+      backgroundTask,
+      lang,
+      prompt,
+      session,
+      signal,
+      onActivity,
+    }: CoachTurnInput) => {
+      for (const toolName of backgroundTask!.requiredToolNames ?? []) {
+        backgroundTask!.completedToolNames!.add(toolName);
+      }
+      return streamCoachAnswer({
+        tools: [{ ...coachTaskSubmitResultTool, execute: submit }],
+        ctx: {
+          backgroundTask,
+          signal,
+          onActivity,
+          session,
+          lang,
+          userService: { getPreferredTimezone: async () => 'UTC' },
+        } as never,
+        messages: [{ role: 'user', content: prompt }],
+        model: 'test-model',
+        maxSteps,
+      });
+    },
+  };
+  const todayAgent = new TodaySuggestionAgentService({
+    runBackgroundCoachTask: (
+      params: Parameters<typeof executeBackgroundCoachTask>[1],
+    ) =>
+      executeBackgroundCoachTask(
+        background as unknown as Parameters<
+          typeof executeBackgroundCoachTask
+        >[0],
+        { ...params, model: 'test-model' },
+      ),
+  } as never);
+  agent.run.mockImplementation((params) => todayAgent.run(params) as never);
+  return { projector, runs, submit, usage };
+}
+
 describe('activity-first today suggestion regressions', () => {
   const args = { userId: 'athlete', locale: 'zh', allowAi: true };
   beforeEach(() =>
     jest.useFakeTimers().setSystemTime(new Date('2026-11-11T10:00:00Z')),
   );
   afterEach(() => jest.useRealTimers());
+
+  describe('model transport faults', () => {
+    afterEach(() => jest.restoreAllMocks());
+
+    it.each([
+      { fault: 'transient DNS', attempts: 2, timeoutMs: 0 },
+      { fault: 'persistent DNS', attempts: 3, timeoutMs: 0 },
+      { fault: 'idle timeout', attempts: 1, timeoutMs: 20_000 },
+      { fault: 'step timeout', attempts: 1, timeoutMs: 10_000 },
+    ])(
+      'handles $fault before delivering today’s suggestion',
+      async ({ fault, attempts, timeoutMs }) => {
+        jest.replaceProperty(process, 'env', {
+          ...process.env,
+          AI_COACH_STREAM_IDLE_TIMEOUT_MS: '20000',
+          AI_COACH_STEP_TIMEOUT_MS:
+            fault === 'step timeout' ? '10000' : '300000',
+        });
+        const { service, agent, workoutGenerator, prisma, execution } =
+          harness();
+        execution.day.unlinkedActivities.push({
+          hashId: 'morning-run',
+          startTime: '2026-11-11T01:07:00Z',
+        } as never);
+        const draft = {
+          headline: 'Recover today',
+          summary: 'Use today for easy recovery after the recorded activity.',
+          recommendation: { kind: 'RECOVER' },
+          confidence: 'MEDIUM',
+          evidenceCodes: ['RECENT_ACTIVITY'],
+        };
+        const startedAt = Date.now();
+        let abortAfterMs: number | undefined;
+        let transportRecovered = false;
+        const chunk = (choice: unknown) =>
+          JSON.stringify({
+            id: 'fixture',
+            object: 'chat.completion.chunk',
+            created: 0,
+            model: 'test-model',
+            choices: [choice],
+          });
+        const fetchModel = jest.fn<
+          ReturnType<typeof fetch>,
+          Parameters<typeof fetch>
+        >(async (_input, init) => {
+          if (fault === 'step timeout') {
+            return new Response(
+              new ReadableStream({
+                start(controller) {
+                  const started = chunk({
+                    index: 0,
+                    delta: { content: 'Reviewing the recorded activity.' },
+                    finish_reason: null,
+                  });
+                  controller.enqueue(
+                    new TextEncoder().encode(`data: ${started}\n\n`),
+                  );
+                  init?.signal?.addEventListener(
+                    'abort',
+                    () => {
+                      abortAfterMs = Date.now() - startedAt;
+                      controller.error(
+                        new DOMException('Model request aborted', 'AbortError'),
+                      );
+                    },
+                    { once: true },
+                  );
+                },
+              }),
+              { headers: { 'content-type': 'text/event-stream' } },
+            );
+          }
+          if (timeoutMs) {
+            return new Promise<Response>((_resolve, reject) => {
+              init?.signal?.addEventListener(
+                'abort',
+                () => {
+                  abortAfterMs = Date.now() - startedAt;
+                  reject(
+                    new DOMException('Model request aborted', 'AbortError'),
+                  );
+                },
+                { once: true },
+              );
+            });
+          }
+          if (
+            !transportRecovered &&
+            (fault === 'persistent DNS' || fetchModel.mock.calls.length === 1)
+          ) {
+            throw new TypeError('fetch failed', {
+              cause: Object.assign(
+                new Error('getaddrinfo EAI_AGAIN fixture.invalid'),
+                {
+                  code: 'EAI_AGAIN',
+                },
+              ),
+            });
+          }
+          const events = [
+            chunk({
+              index: 0,
+              delta: {
+                tool_calls: [
+                  {
+                    index: 0,
+                    id: 'submit',
+                    type: 'function',
+                    function: {
+                      name: 'coach_task_submit_result',
+                      arguments: JSON.stringify({ result: draft }),
+                    },
+                  },
+                ],
+              },
+              finish_reason: null,
+            }),
+            chunk({ index: 0, delta: {}, finish_reason: 'tool_calls' }),
+            '[DONE]',
+          ];
+          return new Response(
+            events.map((event) => `data: ${event}\n\n`).join(''),
+            {
+              headers: { 'content-type': 'text/event-stream' },
+            },
+          );
+        });
+        const model = createOpenAICompatible({
+          name: 'openrouter',
+          baseURL: 'https://fixture.invalid/v1',
+          apiKey: 'fixture',
+          fetch: fetchModel,
+        })('test-model');
+        const { runs, submit, usage } = attachCoachRuntime(agent, model);
+        const pending = service.get({ ...args, locale: 'en' });
+        await jest.advanceTimersByTimeAsync(timeoutMs ? 61_000 : 8_000);
+        const result = await pending;
+
+        expect(fetchModel).toHaveBeenCalledTimes(attempts);
+        expect(prisma.aiTodaySuggestion.upsert).toHaveBeenCalledTimes(1);
+        expect(workoutGenerator.generate).not.toHaveBeenCalled();
+        expect(result.recommendation.kind).toBe('RECOVER');
+        if (fault === 'transient DNS') {
+          expect(result.delivery).toMatchObject({
+            state: 'GENERATED',
+            reasonCode: 'GENERATED',
+          });
+          expect(submit).toHaveBeenCalledTimes(1);
+          expect(usage.recordUsageEvent).toHaveBeenCalledTimes(1);
+          expect(runs.checkpoint.mock.lastCall?.[1]).toBe('completed');
+          return;
+        }
+
+        expect(result.delivery).toMatchObject({
+          state: 'FACT_FALLBACK',
+          reasonCode: timeoutMs ? 'UPSTREAM_TIMEOUT' : 'UPSTREAM_ERROR',
+        });
+        expect(submit).not.toHaveBeenCalled();
+        expect(usage.recordUsageEvent).not.toHaveBeenCalled();
+        expect(runs.checkpoint.mock.lastCall?.[1]).toBe('failed');
+        if (timeoutMs) {
+          expect(abortAfterMs).toBe(timeoutMs);
+          return;
+        }
+
+        const cached = await service.get({ ...args, locale: 'en' });
+        expect(cached.delivery).toMatchObject({
+          reasonCode: 'UPSTREAM_ERROR',
+          cached: true,
+        });
+        expect(fetchModel).toHaveBeenCalledTimes(attempts);
+        transportRecovered = true;
+        await jest.advanceTimersByTimeAsync(61_000);
+        const recovered = await service.get({ ...args, locale: 'en' });
+        expect(recovered.delivery.state).toBe('GENERATED');
+        expect(fetchModel).toHaveBeenCalledTimes(attempts + 1);
+        expect(prisma.aiTodaySuggestion.upsert).toHaveBeenCalledTimes(2);
+      },
+    );
+  });
 
   it('rejects an ungrounded moved-course recommendation through projection, generation and cached delivery', async () => {
     const { service, execution, agent } = harness();
@@ -217,7 +470,93 @@ describe('activity-first today suggestion regressions', () => {
     expect(agent.run).toHaveBeenCalledTimes(1);
   });
 
-  describe('training basis rejection in a background run', () => {
+  it('keeps in-flight and cached advice stable across unapplied calendar proposal states', async () => {
+    const { service, coachState, agent } = harness();
+    const proposal = {
+      id: 'unapplied-calendar-move',
+      decisionType: 'PLAN_SCHEDULE',
+      state: 'PROPOSED',
+      stateRole: 'ACTIVE_PROPOSAL',
+      riskTier: 'HIGH',
+      relevance: 'TODAY',
+    };
+    const normalRun = agent.run.getMockImplementation()!;
+    agent.run.mockImplementationOnce(async (input) => {
+      coachState.decisions = [proposal];
+      return normalRun(input);
+    });
+    const first = await service.get(args);
+    expect(first.delivery.state).toBe('GENERATED');
+    for (const state of ['PROPOSED', 'APPROVED', 'SUPERSEDED']) {
+      coachState.decisions = [{
+        ...proposal,
+        state,
+        stateRole: state === 'SUPERSEDED' ? 'SUPERSEDED_HISTORY' : 'ACTIVE_PROPOSAL',
+      }];
+      const cached = await service.get(args);
+      expect(cached.delivery.state).toBe('CACHED');
+      expect(cached.suggestionId).toBe(first.suggestionId);
+      expect(cached.decisionRef).toBeUndefined();
+    }
+    coachState.decisions = [];
+    expect((await service.get(args)).suggestionId).toBe(first.suggestionId);
+    expect(agent.run).toHaveBeenCalledTimes(1);
+  });
+
+  it('generates without asking the model to classify inactive schedule decisions', async () => {
+    const { service, coachState, agent } = harness();
+    coachState.decisions.push(
+      {
+        id: 'superseded-schedule',
+        state: 'SUPERSEDED',
+        stateRole: 'SUPERSEDED_HISTORY',
+        relevance: 'UNKNOWN',
+      },
+      {
+        id: 'draft-schedule',
+        state: 'DRAFT',
+        stateRole: 'INTERNAL_DRAFT',
+        relevance: 'TODAY',
+      },
+    );
+
+    expect((await service.get(args)).delivery.state).toBe('GENERATED');
+    expect(
+      agent.run.mock.calls[0][0].projection.lightContext.relevantDecisions,
+    ).toEqual([]);
+  });
+
+  it('replaces a still-live cached suggestion produced with an expired calendar proposal', async () => {
+    const { service, prisma, agent } = harness();
+    const original = await service.get(args);
+    const legacyId = 'advice-from-before-calendar-policy';
+    await prisma.aiTodaySuggestion.update({
+      data: {
+        signatureHash: 'old-projection-that-included-the-calendar-proposal',
+        generationToken: legacyId,
+        summary: 'Move the run to tomorrow after accepting the proposal.',
+        structuredResult: {
+          ...original,
+          suggestionId: legacyId,
+          summary: 'Move the run to tomorrow after accepting the proposal.',
+          decisionRef: { decisionId: 'expired-calendar-proposal' },
+        },
+      },
+    });
+    expect(Date.parse(original.validUntil)).toBeGreaterThan(Date.now());
+
+    const updated = await service.get(args);
+    expect(updated.delivery.state).toBe('GENERATED');
+    expect(updated.suggestionId).not.toBe(legacyId);
+    expect(updated.summary).toBe(original.summary);
+    expect(updated.decisionRef).toBeUndefined();
+    await expect(service.get(args)).resolves.toMatchObject({
+      suggestionId: updated.suggestionId, delivery: { state: 'CACHED' },
+    });
+    expect(agent.run).toHaveBeenCalledTimes(2);
+  });
+
+  describe('draft rejection in a background run', () => {
     const draft = {
       headline: 'A short easy workout',
       summary: 'Optional extra training fits the current load and schedule.',
@@ -253,21 +592,89 @@ describe('activity-first today suggestion regressions', () => {
 
     afterEach(() => jest.restoreAllMocks());
 
-    const scenarios = rejectedDrafts.flatMap((scenario) => [
-      { ...scenario, repaired: true },
-      { ...scenario, repaired: false },
-    ]);
+    const decisionDraft = {
+      ...draft,
+      recommendation: { kind: 'RECOVER' },
+      coachDecisionHandling: [
+        { decisionId: 'rejected-schedule', handling: 'IGNORE' },
+      ],
+    };
+    const scenarios = [
+      ...rejectedDrafts.flatMap((scenario) =>
+        [true, false].map((repaired) => ({
+          ...scenario,
+          decision: false,
+          repaired,
+          attempts: repaired ? 2 : 1,
+          maxSteps: repaired ? 3 : 1,
+          category: 'TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS',
+        })),
+      ),
+      ...[true, false].map((repaired) => ({
+        code: 'INVALID_RECOMMENDATION',
+        correction: 'Use a supported recommendation.kind',
+        input: { ...draft, recommendation: { kind: 'RESUME_PLAN' } },
+        decision: false,
+        repaired,
+        attempts: repaired ? 2 : 1,
+        maxSteps: repaired ? 3 : 1,
+        category: 'TODAY_SUGGESTION_OUTPUT_REJECTED_DRAFT',
+      })),
+      {
+        code: 'UNNECESSARY_CHECK_IN',
+        correction: 'without requiring a check-in',
+        input: { ...draft, recommendation: { kind: 'CHECK_IN' } },
+        decision: false,
+        repaired: false,
+        attempts: 1,
+        maxSteps: 1,
+        category: 'TODAY_SUGGESTION_OUTPUT_REJECTED_UNNECESSARY_CHECK_IN',
+      },
+      ...[true, false].map((repaired) => ({
+        code: 'COACH_DECISION_INVALID_HANDLING',
+        correction: 'Set handling for decisionId "rejected-schedule" to HISTORY.',
+        input: decisionDraft,
+        decision: true,
+        repaired,
+        attempts: repaired ? 2 : 3,
+        maxSteps: 6,
+        category: 'TODAY_SUGGESTION_OUTPUT_REJECTED_COACH_DECISION',
+      })),
+    ];
     it.each(scenarios)(
       'surfaces $code and correlates the outcome (repaired=$repaired)',
-      async ({ code, correction, input, repaired }) => {
+      async ({
+        code,
+        correction,
+        input,
+        repaired,
+        decision,
+        attempts,
+        maxSteps,
+        category,
+      }) => {
         const log = jest
           .spyOn(Logger.prototype, 'log')
           .mockImplementation(() => undefined);
         const warn = jest
           .spyOn(Logger.prototype, 'warn')
           .mockImplementation(() => undefined);
-        const { service, execution, agent, workoutGenerator, prisma } =
-          harness();
+        const {
+          service,
+          execution,
+          agent,
+          workoutGenerator,
+          prisma,
+          coachState,
+        } = harness();
+        if (decision) {
+          coachState.decisions.push({
+            id: 'rejected-schedule',
+            state: 'REJECTED',
+            stateRole: 'REJECTED_HISTORY',
+            relevance: 'TODAY',
+          });
+        }
         execution.day.plannedWorkouts.push({
           id: 'moved-course',
           status: 'MOVED',
@@ -275,24 +682,6 @@ describe('activity-first today suggestion regressions', () => {
           linkedActivities: [],
         } as never);
         const runId = repaired ? 'repaired-run' : 'rejected-run';
-        const run = { runId, attemptId: 'attempt', messageId: 'message' };
-        const projector = {
-          run,
-          consume: jest.fn(() => []),
-          finish: jest.fn(),
-        };
-        const handle = {
-          projector,
-          sessionId: 'background:today',
-          operationId: 'operation',
-        };
-        const runs = {
-          beginBackground: jest.fn(async () => ({ handle })),
-          checkpoint: jest.fn(
-            async (_handle: unknown, _state?: string) => undefined,
-          ),
-        };
-        const submit = jest.fn(coachTaskSubmitResultTool.execute);
         const usage = {
           inputTokens: { total: 10, noCache: 10, cacheRead: 0, cacheWrite: 0 },
           outputTokens: { total: 10, text: 10, reasoning: 0 },
@@ -302,6 +691,11 @@ describe('activity-first today suggestion regressions', () => {
           headline: 'Recover today',
           summary: 'Use today for recovery.',
           recommendation: { kind: 'RECOVER' },
+          ...(decision && {
+            coachDecisionHandling: [
+              { decisionId: 'rejected-schedule', handling: 'HISTORY' },
+            ],
+          }),
         };
         let modelStep = 0;
         const model = new MockLanguageModelV3({
@@ -315,7 +709,7 @@ describe('activity-first today suggestion regressions', () => {
                   toolCallId: `submit-${step}`,
                   toolName: 'coach_task_submit_result',
                   input: JSON.stringify({
-                    result: step === 0 ? input : corrected,
+                    result: step > 0 && repaired ? corrected : input,
                   }),
                 },
                 {
@@ -330,65 +724,30 @@ describe('activity-first today suggestion regressions', () => {
             };
           },
         });
-        coachModel = model;
-        const background = {
-          runs,
-          logger: new Logger('Case06'),
-          usage: { recordUsageEvent: jest.fn() },
-          runTurn: async ({
-            backgroundTask,
-            lang,
-            prompt,
-            session,
-            signal,
-            onActivity,
-          }: CoachTurnInput) => {
-            for (const toolName of backgroundTask!.requiredToolNames ?? []) {
-              backgroundTask!.completedToolNames!.add(toolName);
-            }
-            return streamCoachAnswer({
-              tools: [{ ...coachTaskSubmitResultTool, execute: submit }],
-              ctx: {
-                backgroundTask,
-                signal,
-                onActivity,
-                session,
-                lang,
-                userService: { getPreferredTimezone: async () => 'UTC' },
-              } as never,
-              messages: [{ role: 'user', content: prompt }],
-              model: 'test-model',
-              maxSteps: repaired ? 3 : 1,
-            });
-          },
-        };
-        const todayAgent = new TodaySuggestionAgentService({
-          runBackgroundCoachTask: (
-            params: Parameters<typeof executeBackgroundCoachTask>[1],
-          ) =>
-            executeBackgroundCoachTask(
-              background as unknown as Parameters<
-                typeof executeBackgroundCoachTask
-              >[0],
-              { ...params, model: 'test-model' },
-            ),
-        } as never);
-        agent.run.mockImplementation(
-          (params) => todayAgent.run(params) as never,
-        );
+        const { runs, submit, projector } = attachCoachRuntime(agent, model, {
+          runId,
+          maxSteps,
+        });
 
         const result = await service.get(args);
-        expect(model.doStreamCalls).toHaveLength(repaired ? 2 : 1);
-        expect(submit).toHaveBeenCalledTimes(repaired ? 2 : 1);
+        expect(model.doStreamCalls).toHaveLength(attempts);
+        expect(submit).toHaveBeenCalledTimes(attempts);
         await expect(submit.mock.results[0].value).resolves.toEqual({
           code,
           error: expect.stringContaining(correction),
           stage: 'execute',
         });
         if (repaired) {
-          expect(JSON.stringify(model.doStreamCalls[1].prompt)).toContain(
-            correction,
-          );
+          const toolReply = model.doStreamCalls[1].prompt
+            .flatMap((message) =>
+              message.role === 'tool' ? message.content : [],
+            )
+            .find((part) => part.toolName === 'coach_task_submit_result');
+          expect(
+            toolReply?.output.type === 'text'
+              ? JSON.parse(toolReply.output.value)
+              : null,
+          ).toMatchObject({ code, error: expect.stringContaining(correction) });
           await expect(submit.mock.results[1].value).resolves.toEqual({
             kind: 'coach_task_result_accepted',
             taskType: 'TODAY_SUGGESTION',
@@ -420,9 +779,7 @@ describe('activity-first today suggestion regressions', () => {
         const rejectionLog = warn.mock.calls
           .map(([message]) => String(message))
           .find((message) => message.includes(`runId=${runId}`));
-        expect(rejectionLog).toContain(
-          'TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS',
-        );
+        expect(rejectionLog).toContain(category);
         expect(rejectionLog).toContain(`attemptId=attempt`);
         expect(rejectionLog).toContain(`reasonCode=${code}`);
         expect(rejectionLog).not.toContain(input.summary);

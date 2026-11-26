@@ -85,6 +85,48 @@ function createService(overrides?: {
 }
 
 describe('ActivityQueryService', () => {
+  it('reads the same card metadata as the feed for a batch of owned, ready activities', async () => {
+    const { service, prisma, mapDerivation, externalActivityMirrors } = createService({
+      activities: [{
+        id: 7,
+        hashId: 'matched-ride',
+        activityName: 'Morning ride',
+        sportType: 'CYCLING',
+        startTime: new Date('2026-08-21T01:00:00Z'),
+        activitySources: [{ sourceKind: 'FILE', isPrimary: true }],
+        thirdPartyMappings: [{
+          id: 24,
+          syncDirection: 'EXPORT',
+          thirdPartyActivity: { provider: 'INTERVALS_ICU', externalId: 'ride-24' },
+        }],
+        planWorkoutLinks: [{
+          source: 'MANUAL',
+          planWorkout: { id: 'workout-7', planId: 'plan-1', name: 'Easy ride' },
+        }],
+      }],
+    });
+
+    await expect(service.getActivityCards('user-1', ['matched-ride', 'missing-ride']))
+      .resolves.toEqual([expect.objectContaining({
+        hashId: 'matched-ride',
+        activitySources: [expect.objectContaining({ sourceKind: 'FILE' })],
+        thirdPartyMappings: [expect.objectContaining({ provider: 'INTERVALS_ICU', syncDirection: 'EXPORT' })],
+        linkedPlanWorkout: expect.objectContaining({ workoutId: 'workout-7', name: 'Easy ride' }),
+        planLinkUiVisible: true,
+      })]);
+    expect(prisma.activity.findMany).toHaveBeenCalledTimes(1);
+    expect(prisma.activity.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { AND: [
+        { userId: 'user-1', hashId: { in: ['matched-ride', 'missing-ride'] } },
+        { state: 1 },
+        { OR: [{ processingStatus: 'READY' }, { readyAt: { not: null } }] },
+      ] },
+    }));
+    expect(prisma.activity.count).not.toHaveBeenCalled();
+    expect(externalActivityMirrors.listForUser).not.toHaveBeenCalled();
+    expect(mapDerivation.ensureThumbsBestEffort).not.toHaveBeenCalled();
+  });
+
   it.each([
     { sport: 'RUN', courseSport: 'RUN', date: '2026-08-21', visible: true },
     { sport: 'RUN', courseSport: 'UNKNOWN', date: '2026-08-21', visible: true },

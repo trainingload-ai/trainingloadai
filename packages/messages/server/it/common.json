@@ -1,5 +1,8 @@
 {
   "coach_plan_quality": {
+    "WEEK_TARGET_LOAD_UNVERIFIED": "La stima del carico settimanale non è interamente verificabile rispetto all’intervallo obiettivo. Controlla i dati disponibili delle sedute.",
+    "POST_RECOVERY_LOAD_JUMP_REVIEW": "Il carico stimato supera nettamente quello prima del recupero. Verifica la ripresa dell’allenamento.",
+    "RECOVERY_LOAD_UNVERIFIED": "Mancano alcune stime di carico per la settimana di recupero o scarico. Verifica le sedute e lo sforzo previsti.",
     "UNKNOWN_DURATION": "Alcune sessioni sono basate sulla distanza o hanno durata aperta: il tempo settimanale totale non è noto.",
     "LONG_SESSION_NOT_REDUCED": "La sessione più lunga di recupero o scarico non è stata accorciata: verifica intensità e recupero.",
     "VOLUME_JUMP_REVIEW": "Alcuni aumenti settimanali superano il 30%: verifica il carico recente. Non è una soglia universale di sicurezza.",
@@ -14,6 +17,7 @@
     "success": "Richiesta completata"
   },
   "coachRuntime": {
+    "planDraftSummaryFallback": "Questa bozza di {weeks} settimane include {sessions} sessioni di allenamento e non è ancora stata salvata. Controlla il calendario e seleziona «Salva piano» se ti va bene. Puoi anche indicarmi quale giorno o sessione vuoi cambiare.",
     "optionKeepPlan": "Mantieni il piano",
     "optionPostponeOneDay": "Posticipa di un giorno",
     "optionSkipSession": "Salta questa sessione",

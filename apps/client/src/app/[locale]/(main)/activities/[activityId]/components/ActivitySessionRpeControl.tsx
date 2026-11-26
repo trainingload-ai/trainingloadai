@@ -29,6 +29,7 @@ const RPE_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 type Props = {
   activity: Activity;
   variant?: "chip" | "card";
+  readOnly?: boolean;
 };
 
 function normalizeSessionRpe(raw: number | null | undefined): number | null {
@@ -41,6 +42,7 @@ function normalizeSessionRpe(raw: number | null | undefined): number | null {
 export function ActivitySessionRpeControl({
   activity,
   variant = "chip",
+  readOnly = false,
 }: Props) {
   const t = useTranslations("ActivityDetail.sessionRpe");
   const publicDemo = usePublicDemo();
@@ -90,6 +92,13 @@ export function ActivitySessionRpeControl({
   };
 
   if (!hashId) return null;
+  if (readOnly) {
+    return storedRpe === null ? null : (
+      <span className="rounded-md bg-neutral-100 px-2 py-1 text-mobile-caption font-medium tabular-nums text-muted-foreground dark:bg-muted/45 pc:text-xs">
+        {t("chipLabel")} {storedRpe}/10
+      </span>
+    );
+  }
 
   const options = (
     <SelectContent>

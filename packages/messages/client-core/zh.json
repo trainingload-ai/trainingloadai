@@ -587,6 +587,7 @@
       "workoutDialogSessionMeta": "第 {ordinal} 节 · {sport}",
       "workoutDialogSessionFallback": "第 {ordinal} 节",
       "workoutDialogClose": "关闭",
+      "workoutDialogBackToCalendar": "返回课表",
       "scheduleConflict": "与可训练时间冲突"
     },
     "readCards": {
@@ -651,6 +652,7 @@
         "colMin": "下限",
         "colMax": "上限",
         "unitPace": "(分/km)",
+        "unitPaceMi": "(分/mi)",
         "unitPace100m": "(分/100m)",
         "unitHr": "(bpm)",
         "unitPower": "(W)",
@@ -740,6 +742,7 @@
       "showLess": "收起",
       "evidence": "采用的数据",
       "loadDelta": "预计负荷变化",
+      "expectedImpact": "预计影响",
       "syncImpact": "设备同步影响",
       "total": "评估",
       "changed": "修改",
@@ -5323,6 +5326,11 @@
     }
   },
   "PlanActivationDialog": {
+    "officialDescription": "预览并调整草稿课表，然后选择开始日期。",
+    "loadingDraft": "正在加载草稿课表…",
+    "changedDraft": "草稿已在其他地方变更，请核对课表后再开始。",
+    "startFailed": "无法开始这个计划，请检查课表后重试。",
+    "editFailed": "课程修改未保存，请重试。",
     "title": "开始计划",
     "description": "请选择计划实际开始日期。系统会按该日期结合训练偏移量计算每节训练的实际日期。",
     "cancel": "取消",
@@ -7278,6 +7286,8 @@
     "adjustmentConflicts": {
       "PLAN_STATUS": "该计划已无法编辑",
       "WORKOUT_REMOVED": "该训练已被移除",
+      "WORKOUT_CHANGED": "这节训练已被其他操作修改",
+      "WORKOUT_NOT_VERIFIED": "本次刷新无法核对这节训练",
       "WORKOUT_STATUS": "训练状态已变化",
       "ACTIVITY_LINKED": "训练已关联活动",
       "HISTORY": "训练日期已过",
@@ -7290,11 +7300,17 @@
     "stageEdit": "加入草稿",
     "batchSaved": "计划变更已保存。",
     "batchFailed": "无法保存这些变更，请重试。",
+    "adjustmentUnavailable": "这份调课草稿已失效，未改动正式课表。你可以按当前课表重新调整。",
     "batchReloadTitle": "加载最新课表？",
     "batchConflict": "课表已变化或当前安排无法保存。加载最新课表后，请核对变更再确认。",
     "missedDrop": "已错过的训练不能改期。",
     "completedDrop": "已完成的训练不能改期。",
     "recovery": {
+      "unavailableTitle": "调课草稿已失效",
+      "localDraftRolledBack": "本次未保存的调课已整批撤回。",
+      "localDraftWillBeRolledBack": "这次未保存的调整也会撤回。",
+      "retryDraft": "刷新重试",
+      "refreshSchedule": "刷新课表",
       "title": "调课预览已过期",
       "action": "加载最新课表",
       "expired": "加载最新课表后，可以在这段对话中继续调整。",

@@ -55,6 +55,7 @@ import {
 } from './core/coach-workout-change';
 import { getStoredCoachLegacyMessage } from './core/coach-history-messages';
 import { CoachAssessmentCaseQueryService } from './athlete-state/coach-assessment-case-query.service';
+import { PREVIEW_BACKED_PLAN_DECISION_TYPES } from './coach-state-context.service';
 
 function toSafeString(v: unknown): string {
   return String(v ?? '').trim();
@@ -993,11 +994,42 @@ export class CoachBranchingService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      if (
-        decision.decisionType === 'PLAN_START' ||
-        decision.decisionType === 'PLAN_SCHEDULE'
-      )
+      if (PREVIEW_BACKED_PLAN_DECISION_TYPES.includes(decision.decisionType)) {
         await acquireHashtextAdvisoryXactLock(tx, args.userId);
+        const preview = await tx.planProposalPreview.findUnique({
+          where: { decisionId: decision.id },
+          select: {
+            id: true,
+            userId: true,
+            sourcePlanId: true,
+            appliedAt: true,
+            discardedAt: true,
+            expiresAt: true,
+          },
+        });
+        if (
+          !preview ||
+          preview.id !== asRecord(decision.payload)?.previewId ||
+          preview.userId !== args.userId ||
+          preview.sourcePlanId !== decision.context.planId ||
+          preview.discardedAt
+        ) {
+          this.fail('Plan proposal preview is unavailable');
+        }
+        if (preview.appliedAt) {
+          const current = await tx.coachDecision.findUniqueOrThrow({
+            where: { id: decision.id },
+          });
+          if (current.state === CoachDecisionState.APPLIED) return { decision: current };
+          this.fail('DECISION_STATE_CHANGED');
+        }
+        if (preview.expiresAt.getTime() <= Date.now()) {
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.PLAN_PROPOSAL_EXPIRED,
+            message: 'Plan proposal has expired; generate a fresh preview',
+          });
+        }
+      }
       const startConfirmation =
         decision.decisionType === 'PLAN_START' ||
         decision.decisionType === 'PLAN_SCHEDULE'
@@ -2134,7 +2166,7 @@ export class CoachBranchingService {
     return { commits };
   }
 
-  /** GET /ai/coach/pending-decisions：ACTIVE 全要，FINALIZED 只留 open_next。APPROVED 留给 apply 失败后重试。 */
+  /** List actionable decisions, including approved decisions that can still be retried. */
   async listPendingDecisions(args: { userId: string }) {
     const [decisions, latestReview, inquiry, workoutMatching] =
       await Promise.all([
@@ -2146,6 +2178,21 @@ export class CoachBranchingService {
             context: {
               userId: args.userId,
             },
+            OR: [
+              {
+                decisionType: { notIn: PREVIEW_BACKED_PLAN_DECISION_TYPES },
+                planProposalPreview: { is: null },
+              },
+              {
+                planProposalPreview: {
+                  is: {
+                    expiresAt: { gt: new Date() },
+                    discardedAt: null,
+                    appliedAt: null,
+                  },
+                },
+              },
+            ],
           },
           include: {
             options: { orderBy: { createdAt: 'asc' } },

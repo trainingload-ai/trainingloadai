@@ -1,4 +1,5 @@
 import { PlanStartService } from '../plan/application/plan-start.service';
+import type { PlanValidationRejection } from './core/tool.types';
 import { validCoachTimezone } from './core/coach-fact-scope.port';
 import { Inject } from '@nestjs/common';
 import {
@@ -1169,13 +1170,15 @@ export class CoachRunStore {
     const projectedTimezone = topics[0]?.timezone ?? 'UTC';
     if (this.factScopes) {
       for (const run of runs) {
-        const zone = validCoachTimezone(
-          (run.factScope as { timezone?: unknown } | null)?.timezone,
-        );
-        if (zone && zone !== projectedTimezone && !alternate.has(zone)) {
-          const scoped = await this.factScopes.current(userId, zone);
+        const scope = run.factScope as Partial<CoachFactScope> | null;
+        const zone = validCoachTimezone(scope?.timezone) ?? projectedTimezone;
+        const sourceMessageId = scope?.excludeMemorySourceMessageId;
+        if (!sourceMessageId && zone === projectedTimezone) continue;
+        const key = JSON.stringify([zone, sourceMessageId]);
+        if (!alternate.has(key)) {
+          const scoped = await this.factScopes.current(userId, zone, sourceMessageId);
           alternate.set(
-            zone,
+            key,
             new Map(scoped.map((value) => [value.topic, value.revision])),
           );
         }
@@ -1193,15 +1196,18 @@ export class CoachRunStore {
                 topic?: string;
                 revision?: string;
                 timezone?: string;
+                excludeMemorySourceMessageId?: string;
               })
             : { topic: run.triggerRef, revision: run.inputHash };
         const timezone = validCoachTimezone(
           'timezone' in scope ? scope.timezone : undefined,
-        );
+        ) ?? projectedTimezone;
+        const sourceMessageId =
+          'excludeMemorySourceMessageId' in scope
+            ? scope.excludeMemorySourceMessageId
+            : undefined;
         const expected =
-          timezone && alternate.has(timezone)
-            ? alternate.get(timezone)!
-            : current;
+          alternate.get(JSON.stringify([timezone, sourceMessageId])) ?? current;
         if (
           scope.topic &&
           scope.revision &&
@@ -1354,6 +1360,19 @@ export class CoachRunStore {
 
   /** A provider can settle an already-started write after abort/lease expiry.
    * Reconcile the receipt, never revive the attempt or grant permission to replay. */
+  async recordPlanValidationRejection(handle: CoachRunHandle, event: PlanValidationRejection) {
+    const { attemptId } = handle.projector.run;
+    const { toolCallId, ...payload } = event;
+    try {
+      await this.prisma.coachPlanValidationRejection.createMany({
+        data: [{ attemptId, toolCallId, payload: json(payload) }],
+        skipDuplicates: true,
+      });
+    } catch {
+      this.logger.error(`Could not persist plan validation rejection attempt=${attemptId} toolCall=${toolCallId} code=${event.code}`);
+    }
+  }
+
   async recordLateOutcome(handle: CoachRunHandle, event: CoachActivityEvent) {
     if (!event.toolCallId || !['completed', 'failed'].includes(event.status))
       return;

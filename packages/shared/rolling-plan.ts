@@ -98,6 +98,19 @@ export function hasRollingWeekTargets(
   );
 }
 
+/** Check the planning totals within one month window, including partial weeks. */
+export function conflictingRollingMonthTargets(strategy: Pick<RollingMonthDraft, "weekFocus"> &
+  Partial<Pick<RollingMonthDraft, "loadRange" | "durationMinutesRange">>) {
+  return (["loadRange", "durationMinutesRange"] as const).filter((metric) => {
+    const month = strategy[metric];
+    const weeks = strategy.weekFocus.map((week) => week[metric]);
+    if (!month || !weeks.length || weeks.some((week) => !week)) return false;
+    const minimum = weeks.reduce((sum, week) => sum + (week?.min ?? 0), 0);
+    const maximum = weeks.reduce((sum, week) => sum + (week?.max ?? 0), 0);
+    return minimum > month.max || maximum < month.min;
+  });
+}
+
 function validTargetRange(range: RollingTargetRange | null) {
   return (
     range === null ||

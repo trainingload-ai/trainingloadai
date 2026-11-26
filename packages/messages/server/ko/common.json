@@ -1,5 +1,8 @@
 {
   "coach_plan_quality": {
+    "WEEK_TARGET_LOAD_UNVERIFIED": "예상 주간 부하가 목표 범위에 속하는지 충분히 확인할 수 없습니다. 이용 가능한 운동 근거를 검토하세요.",
+    "POST_RECOVERY_LOAD_JUMP_REVIEW": "예상 부하가 회복 주 전보다 크게 높습니다. 훈련 복귀 일정을 확인하세요.",
+    "RECOVERY_LOAD_UNVERIFIED": "회복 또는 테이퍼 주간의 부하 추정치가 불완전합니다. 예정된 세션과 운동 강도를 확인하세요.",
     "UNKNOWN_DURATION": "거리 기준 또는 종료 시간이 정해지지 않은 운동이 있어 정확한 주간 총시간을 알 수 없습니다.",
     "LONG_SESSION_NOT_REDUCED": "회복·테이퍼 주간의 최장 운동 시간이 줄지 않았습니다. 강도와 회복 부담을 확인하세요.",
     "VOLUME_JUMP_REVIEW": "일부 주간 운동 시간이 30% 넘게 증가합니다. 최근 훈련을 기준으로 검토하세요. 보편적인 안전 기준은 아닙니다.",
@@ -14,6 +17,7 @@
     "success": "요청이 완료되었습니다"
   },
   "coachRuntime": {
+    "planDraftSummaryFallback": "이 {weeks}주 초안에는 훈련 {sessions}회가 포함되어 있으며 아직 저장되지 않았습니다. 일정을 확인한 뒤 괜찮으면 계획을 저장해 주세요. 변경할 날짜나 훈련을 알려 주셔도 됩니다.",
     "optionKeepPlan": "기존 계획 유지",
     "optionPostponeOneDay": "하루 미루기",
     "optionSkipSession": "이 세션 건너뛰기",

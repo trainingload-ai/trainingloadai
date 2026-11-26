@@ -1,5 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import {
+  assessPlanSchedule,
   projectPlanCalendar,
   parseScheduleConstraints,
   resolveScheduleQualityContract,
@@ -7,6 +8,42 @@ import {
 } from '@shared/plan-calendar';
 
 describe('plan calendar projection', () => {
+  it('rechecks the actual ISO weekday when starting the same draft on a different date', () => {
+    const candidate = {
+      startDate: '2026-12-05', periodWeeks: 1, projectDates: true,
+      qualityContract: { startDate: '2026-12-05', maxDailyMinutes: 90, maxMinutesByIsoWeekday: { 3: 45 } },
+      workouts: [{ id: 'long', dayOffset: 0, status: 'PLANNED', durationSeconds: 75 * 60 }],
+      changedWorkoutIds: ['long'],
+    };
+    expect(assessPlanSchedule(candidate).valid).toBe(true);
+    expect(assessPlanSchedule({ ...candidate, startDate: '2026-12-09' }).issues).toEqual([
+      { code: 'DAILY_TIME_BUDGET', date: '2026-12-09' },
+    ]);
+  });
+  it('regroups a dated plan for Sunday-first display without moving workouts', () => {
+    const plan = {
+      periodWeeks: 1,
+      startDate: '2026-11-30',
+      calendarTimeZone: 'America/New_York',
+      workouts: [
+        { weekIndex: 1, dayIndex: 1 },
+        { weekIndex: 1, dayIndex: 7 },
+      ],
+    };
+    const mondayFirst = projectPlanCalendar(plan);
+    const sundayFirst = projectPlanCalendar({ ...plan, firstDayOfWeek: 7 });
+
+    expect(sundayFirst.workouts).toEqual(mondayFirst.workouts);
+    expect(sundayFirst.weeks.map((week) => week.startDate)).toEqual([
+      '2026-11-29',
+      '2026-12-06',
+    ]);
+    expect(sundayFirst.weeks[0]?.days.map((day) => day.isoWeekday)).toEqual([
+      7, 1, 2, 3, 4, 5, 6,
+    ]);
+    expect(sundayFirst.weeks[1]?.days[0]?.workouts[0]?.date).toBe('2026-12-06');
+  });
+
   it('uses civil dates across leap days and DST in the explicit calendar time zone', () => {
     const workouts = [
       { weekIndex: 1, dayIndex: 1 },

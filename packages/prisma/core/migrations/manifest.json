@@ -200,7 +200,22 @@
       "id": "0040_calendar_adjustments",
       "file": "0040_calendar_adjustments/migration.sql",
       "sha256": "84d0de2d4a799ef879c197552fa66dac85281496c8e249da95a864247290aaae"
+    },
+    {
+      "id": "0041_independent_workout_creation",
+      "file": "0041_independent_workout_creation/migration.sql",
+      "sha256": "230706e7f247732b06284a50306efa8aef2d2a7b85d600455e3df68dec3d8e7e"
+    },
+    {
+      "id": "0042_independent_workout_drafts",
+      "file": "0042_independent_workout_drafts/migration.sql",
+      "sha256": "c21e2b6e29bd1062739786ee90bfc6de36c21a99855ac8fd67edbbfcd4505e89"
+    },
+    {
+      "id": "0043_coach_plan_validation_rejections",
+      "file": "0043_coach_plan_validation_rejections/migration.sql",
+      "sha256": "952a36f64899aec56839e235f4912b17ec3aa7aeb0214df21e99eb77574bfb21"
     }
   ],
-  "schemaChecksum": "917e37f5f4f39a011d99e861de458462e5ea00f23c382f1dea29afc3b2bbd221"
+  "schemaChecksum": "8e779a9c2f293ccc8448f1baa45685cc7b7f0bb92cc227f02333549dae2bb767"
 }

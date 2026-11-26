@@ -410,6 +410,83 @@ export class PlanQueryService {
     });
   }
 
+  async getPlanWeekForMcp(userId: string, planId: string, requestedWeek?: number) {
+    const plan = await this.plans.findFirst({
+      where: { id: planId, userId },
+      select: {
+        id: true, title: true, description: true, status: true, planningMode: true,
+        periodWeeks: true, startDate: true, generatedThrough: true, currentWeekIndex: true,
+        activationTimezone: true, generationMetadata: true,
+      },
+    });
+    if (!plan) return null;
+
+    const metadata = plan.generationMetadata as {
+      qualityContract?: { startDate?: unknown };
+      scheduleConstraints?: { calendarTimeZone?: unknown };
+    } | null;
+    const draftDate = metadata?.qualityContract?.startDate;
+    const planStart = plan.startDate?.toISOString().slice(0, 10) ??
+      (isCalendarDate(draftDate) ? draftDate : null);
+    const week = requestedWeek ?? Math.max(1, plan.currentWeekIndex ?? 1);
+    const firstDayOffset = (week - 1) * 7;
+    const startDate = planStart ? addCalendarDays(planStart, firstDayOffset) : null;
+    const endDate = startDate ? addCalendarDays(startDate, 6) : null;
+    const dateWhere = startDate && endDate
+      ? [{ scheduledDate: { gte: new Date(startDate), lte: new Date(endDate) } }]
+      : [];
+    const workouts = await this.workouts.findMany({
+      where: {
+        userId, planId, status: { not: 'MOVED' },
+        OR: [
+          ...dateWhere,
+          { scheduledDate: null, dayOffset: { gte: firstDayOffset, lt: firstDayOffset + 7 } },
+        ],
+      },
+      orderBy: [{ dayOffset: 'asc' }, { sessionIndex: 'asc' }, { id: 'asc' }],
+      take: 101,
+      select: {
+        id: true, scheduledDate: true, dayOffset: true, sessionIndex: true, sportType: true,
+        name: true, text: true, notes: true, status: true, structureKind: true,
+        plannedDurationSeconds: true,
+      },
+    });
+    const scheduledZone = metadata?.scheduleConstraints?.calendarTimeZone;
+    return {
+      plan: { id: plan.id, title: plan.title, description: plan.description, status: plan.status,
+        planningMode: plan.planningMode, periodWeeks: plan.periodWeeks },
+      week, firstDayOffset, startDate, endDate,
+      timezone: plan.activationTimezone ?? (typeof scheduledZone === 'string' ? scheduledZone : 'UTC'),
+      hasNextWeek: plan.periodWeeks != null ? week < plan.periodWeeks : Boolean(
+        endDate && plan.generatedThrough && endDate < plan.generatedThrough.toISOString().slice(0, 10),
+      ),
+      workouts,
+    };
+  }
+
+  getDraftChangeStateForMcp(userId: string, planId: string, db?: PlanDb) {
+    return this.plans.findFirst({
+      where: { id: planId, userId },
+      select: {
+        id: true, status: true, title: true, description: true, periodWeeks: true,
+        updatedAt: true, startDate: true, generationMetadata: true,
+        workouts: {
+          where: { userId },
+          orderBy: { id: 'asc' },
+          select: { id: true, revision: true, updatedAt: true, dayOffset: true, sessionIndex: true },
+        },
+      },
+    }, db);
+  }
+
+  getDraftWorkoutForMcp(userId: string, planId: string, workoutId: string, db?: PlanDb) {
+    return this.workouts.findFirst({
+      where: { id: workoutId, userId, planId, plan: { userId, status: 'DRAFT' } },
+      select: { id: true, revision: true, dayOffset: true, sessionIndex: true, name: true,
+        notes: true, text: true, sportType: true, sportDefinitionCode: true, structureKind: true },
+    }, db);
+  }
+
   async readExecutionChart(userId: string, q: ExplorationQuery) {
     const workouts = await this.workouts.findMany({
       where: {

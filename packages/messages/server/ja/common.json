@@ -1,8 +1,12 @@
 {
+  "coach_plan_quality": {
+    "WEEK_TARGET_LOAD_UNVERIFIED": "推定した週間負荷が目標範囲に収まるか確認できません。利用可能なワークアウトの情報を見直してください。"
+  },
   "response": {
     "success": "リクエストが完了しました"
   },
   "coachRuntime": {
+    "planDraftSummaryFallback": "この{weeks}週間の下書きには{sessions}回のトレーニングがあり、まだ保存されていません。日程を確認し、問題なければプランを保存してください。変更したい日やワークアウトがあれば教えてください。",
     "optionKeepPlan": "計画を維持",
     "optionPostponeOneDay": "1日延期",
     "optionSkipSession": "このセッションをスキップ",

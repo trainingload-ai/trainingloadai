@@ -2,14 +2,6 @@ import { PlanCalendarValidationService } from '../application/plan-calendar-vali
 import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PLAN_WORKOUTS_CHANGED_EVENT } from '../events/plan.events';
-import { WorkoutService } from '../../workout/workout.service';
-import { EnduranceWorkoutCodec } from '../../workout/codecs/endurance-workout.codec';
-import { FreeformWorkoutCodec } from '../../workout/codecs/freeform-workout.codec';
-import { StrengthWorkoutCodec } from '../../workout/codecs/strength-workout.codec';
-import { WorkoutCodecRegistry } from '../../workout/workout-codec.registry';
-import { WorkoutDefinitionService } from '../../workout/workout-definition.service';
-import { WorkoutPersistenceService } from '../workout-persistence.service';
-import { PlanWorkoutMutabilityPolicy } from '../application/plan-workout-mutability.policy';
 import { CoachBranchingService } from '../../ai/coach-branching.service';
 import { PlanWorkoutsChangedEvent } from '../events/plan.events';
 import { fork, type ChildProcess } from 'node:child_process';
@@ -24,7 +16,13 @@ import { ActivityReadService } from '../../activity/activity-read.service';
 import { PlanWriteSupport } from '../application/plan-write.support';
 import { PlanActivityLinkService } from '../application/plan-activity-link.service';
 import { ActivityService } from '../../activity/activity.service';
+import { isPrismaSerializableConflict } from '@/prisma/prisma-transaction-errors';
 import { readFileSync } from 'node:fs';
+import {
+  planStartFixture,
+  raceWithPlanWriteCheckpoint,
+  raceWithUncommittedPlanWrite,
+} from './plan-start.fixture';
 
 /** Disposable PostgreSQL engine only; never reads .env or an application database. */
 describe('Planned workout synchronization / PostgreSQL invariants', () => {
@@ -248,13 +246,16 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     },
   );
 
-  function matcher(workouts = new PlanWorkoutRepository(prisma as never)) {
+  function matcher(
+    workouts = new PlanWorkoutRepository(prisma as never),
+    links = new PlanActivityLinkRepository(prisma as never),
+  ) {
     return new PlanLinkMatcherService(
       prisma as never,
       { getPreferredTimezone: async () => 'UTC' } as never,
       new PlanRepository(prisma as never),
       workouts,
-      new PlanActivityLinkRepository(prisma as never),
+      links,
       new ActivityReadService(prisma as never),
       undefined as never,
     );
@@ -857,7 +858,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     expect(await matching.listMatchingReviews('user')).toEqual([]);
   });
 
-  it('routes a late Garmin course with unknown prescription to Coach instead of stealing a known Intervals match', async () => {
+  it('keeps the existing Intervals match when a late Garmin course has an unknown prescription', async () => {
     const f = await independentScenario();
     const matching = matcher();
     await prisma.planWorkoutExternalMapping.create({
@@ -904,19 +905,15 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     expect(
       (await manualLinks().getActivityPlanLinkByHash('user', f.activity.hashId))
         .linkedPlanWorkout,
-    ).toBeNull();
-    expect(await matching.listMatchingReviews('user')).toEqual([
-      expect.objectContaining({
-        reason: 'INSUFFICIENT_EVIDENCE',
-        candidates: expect.arrayContaining([
-          expect.objectContaining({ workoutId: garmin.id }),
-          expect.objectContaining({ workoutId: f.independent.id }),
-        ]),
-      }),
-    ]);
-    expect(await prisma.planWorkout.count({ where: { status: 'DONE' } })).toBe(
-      0,
-    );
+    ).toMatchObject({
+      workoutId: f.independent.id,
+      source: 'AUTO_MATCH',
+      status: 'DONE',
+    });
+    expect(await matching.listMatchingReviews('user')).toEqual([]);
+    await expect(
+      prisma.planWorkout.findUniqueOrThrow({ where: { id: garmin.id } }),
+    ).resolves.toMatchObject({ status: 'PLANNED' });
   });
 
   it('reconciles an activity uploaded before its course was imported', async () => {
@@ -948,7 +945,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     ).toMatchObject({ planWorkoutId: f.independent.id });
   });
 
-  it('withdraws an inference and its completion when a late competing course creates ambiguity', async () => {
+  it('keeps a matched course occupied and uses the late course for a new activity', async () => {
     const f = await independentScenario();
     const matching = matcher();
     await matching.tryAutoLinkForActivity(f.activity.id);
@@ -966,15 +963,34 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     await matching.onWorkoutsChanged(
       new PlanWorkoutsChangedEvent('user', 'external_import', [competitor.id]),
     );
-    expect(
-      await prisma.planWorkoutActivityLink.count({
-        where: { unlinkedAt: null },
-      }),
-    ).toBe(0);
-    expect(await prisma.planWorkout.count({ where: { status: 'DONE' } })).toBe(
-      0,
-    );
-    expect(await matching.listMatchingReviews('user')).toHaveLength(1);
+    await matching.rescanPendingMatches();
+    const second = await prisma.activity.create({
+      data: {
+        hashId: 'separate-second-run',
+        userId: 'user',
+        sportType: 'RUN',
+        startTime: f.activity.startTime,
+        timezone: f.activity.timezone,
+        timerTime: 1800,
+        state: 1,
+        processingStatus: 'READY',
+      },
+    });
+    await matching.tryAutoLinkForActivity(second.id);
+    const readLink = async (hash: string) =>
+      (await manualLinks().getActivityPlanLinkByHash('user', hash))
+        .linkedPlanWorkout;
+    await expect(readLink(f.activity.hashId)).resolves.toMatchObject({
+      workoutId: f.independent.id,
+      source: 'AUTO_MATCH',
+      status: 'DONE',
+    });
+    await expect(readLink(second.hashId)).resolves.toMatchObject({
+      workoutId: competitor.id,
+      source: 'AUTO_MATCH',
+      status: 'DONE',
+    });
+    expect(await matching.listMatchingReviews('user')).toEqual([]);
   });
 
   it('preserves manual correction and remembers explicit unlink across event and scheduled reconciliation', async () => {
@@ -1283,176 +1299,158 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
   const nativeIt = process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN
     ? it
     : it.skip;
+
+  nativeIt('recovers from a concurrent match-state write without duplicating the workout completion', async () => {
+    const { activity, independent } = await independentScenario();
+    const where = { activityId: activity.id };
+    await prisma.planActivityMatchState.create({
+      data: {
+        ...where,
+        userId: 'user',
+        outcome: 'NO_MATCH',
+        reason: 'PENDING',
+        candidateWorkoutIds: [],
+      },
+    });
+
+    const links = new PlanActivityLinkRepository(prisma as never);
+    const putMatchState = links.putMatchState.bind(links);
+    const conflicts: unknown[] = [];
+    jest.spyOn(links, 'putMatchState').mockImplementation(async (...args) => {
+      try {
+        return await putMatchState(...args);
+      } catch (error) {
+        conflicts.push(error);
+        throw error;
+      }
+    });
+    const matching = matcher(undefined, links);
+    const result = await raceWithUncommittedPlanWrite(
+      prisma,
+      (tx) =>
+        tx.planActivityMatchState.update({
+          where,
+          data: { reason: 'NO_ELIGIBLE_WORKOUT' },
+        }),
+      () => matching.tryAutoLinkForActivity(activity.id),
+    );
+
+    expect(result.status).toBe('fulfilled');
+    expect(conflicts.map(isPrismaSerializableConflict)).toEqual([true]);
+    await expect(
+      prisma.planActivityMatchState.findUniqueOrThrow({ where }),
+    ).resolves.toMatchObject({ outcome: 'AUTO_LINKED', reason: 'MATCHED' });
+    await expect(
+      prisma.planWorkoutActivityLink.findMany({ where }),
+    ).resolves.toMatchObject([
+      { planWorkoutId: independent.id, source: 'AUTO_MATCH', unlinkedAt: null },
+    ]);
+    await expect(
+      prisma.planWorkout.findUniqueOrThrow({ where: { id: independent.id } }),
+    ).resolves.toMatchObject({ status: 'DONE' });
+  });
+
+  nativeIt('preserves an automatic activity match when skip arrives during completion', async () => {
+    const f = await matchingScenario();
+    const { service: plans } = planStartFixture(prisma);
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { plannedDurationSeconds: 7200 },
+    });
+    const workouts = new PlanWorkoutRepository(prisma as never);
+    const markDone = workouts.markDoneIfApplicable.bind(workouts);
+    const skip = await raceWithPlanWriteCheckpoint(
+      prisma,
+      (hold) => {
+        jest.spyOn(workouts, 'markDoneIfApplicable').mockImplementation(async (...args) => {
+          const done = await markDone(...args);
+          if (done) await hold();
+          return done;
+        });
+        return matcher(workouts).tryAutoLinkForActivity(f.activity.id);
+      },
+      () => plans.updateWorkoutStatus('user', f.plan.id, f.workout.id, 'SKIPPED'),
+    );
+    expect(skip).toMatchObject({
+      status: 'rejected', reason: { message: 'Only planned workouts can be changed' },
+    });
+    await expect(prisma.planWorkout.findUniqueOrThrow({ where: { id: f.workout.id } }))
+      .resolves.toMatchObject({ status: 'DONE', skippedAt: null });
+    await expect(prisma.planWorkoutActivityLink.findFirst({
+      where: { activityId: f.activity.id, unlinkedAt: null },
+    })).resolves.toMatchObject({
+      planWorkoutId: f.workout.id, source: 'AUTO_MATCH', autoMarkedWorkoutDone: true,
+    });
+  });
+
   nativeIt.each(['replace', 'unlink'])(
     'preserves explicit completion during activity %s',
     async (mode) => {
       const f = await matchingScenario();
-      await prisma.planWorkout.update({
-        where: { id: f.independent.id },
-        data: { plannedDurationSeconds: 7200 },
+      const { write, service: plans } = planStartFixture(prisma);
+      await prisma.planWorkoutActivityLink.create({
+        data: {
+          planId: f.plan.id,
+          planWorkoutId: f.workout.id,
+          activityId: f.activity.id,
+          source: 'MANUAL',
+          role: 'SECONDARY',
+        },
       });
-      const replacing = manualLinks();
-      const confirming = manualLinks();
-      const userWorkouts = new PlanWorkoutRepository(prisma as never);
-      const codec = new WorkoutService({} as never);
-      Object.assign(confirming, {
-        workouts: userWorkouts,
-        workoutMutability: new PlanWorkoutMutabilityPolicy(),
-        workoutService: codec,
-        workoutDefinitionService: new WorkoutDefinitionService(
-          new WorkoutCodecRegistry(
-            new EnduranceWorkoutCodec(codec),
-            new StrengthWorkoutCodec(),
-            new FreeformWorkoutCodec(),
-          ),
-        ),
-        workoutPersistence: new WorkoutPersistenceService(userWorkouts),
-      });
-      let selectedUser!: () => void;
-      let resumeUser!: () => void;
-      const userSelected = new Promise<void>((done) => (selectedUser = done));
-      const userGate = new Promise<void>((done) => (resumeUser = done));
-      const update = userWorkouts.update.bind(userWorkouts);
-      jest
-        .spyOn(userWorkouts, 'update')
-        .mockImplementationOnce(async (args, tx) => {
-          selectedUser();
-          await userGate;
-          return update(args, tx);
-        });
-      const confirmingPromise = confirming.updateWorkoutStatus(
-        'user',
-        f.plan.id,
-        f.workout.id,
-        'DONE',
+      const result = await raceWithUncommittedPlanWrite(
+        prisma,
+        (tx) => write.updateWorkoutStatus('user', f.plan.id, f.workout.id, 'DONE', undefined, { tx }),
+        () => mode === 'replace'
+          ? plans.replaceActivityPlanLinkByHash('user', f.activity.hashId, { workoutId: f.independent.id })
+          : plans.removeActivityPlanLinkByHash('user', f.activity.hashId),
       );
-      await userSelected;
-      await matcher().tryAutoLinkForActivity(f.activity.id);
-      let selected!: () => void;
-      let resume!: () => void;
-      const selectedGate = new Promise<void>((done) => (selected = done));
-      const resumeGate = new Promise<void>((done) => (resume = done));
-      const links = (replacing as any).links as PlanActivityLinkRepository;
-      const findMany = links.findMany.bind(links);
-      jest
-        .spyOn(links, 'findMany')
-        .mockImplementationOnce(async (args: any, tx: any) => {
-          const snapshot = await findMany(args, tx);
-          selected();
-          await resumeGate;
-          return snapshot as never;
-        });
-      const replacingPromise =
-        mode === 'replace'
-          ? replacing.replaceActivityPlanLinkByHash('user', f.activity.hashId, {
-              workoutId: f.independent.id,
-            })
-          : replacing.removeActivityPlanLinkByHash('user', f.activity.hashId);
-      try {
-        await selectedGate;
-        resumeUser();
-        await confirmingPromise;
-      } finally {
-        resume();
-        resumeUser();
-      }
-      await replacingPromise;
-      expect(
-        await prisma.planWorkout.findUnique({ where: { id: f.workout.id } }),
-      ).toMatchObject({ status: 'DONE' });
+      expect(result.status).toBe('fulfilled');
+      await expect(prisma.planWorkout.findUniqueOrThrow({ where: { id: f.workout.id } }))
+        .resolves.toMatchObject({ status: 'DONE', revision: f.workout.revision + 1 });
+      await expect(prisma.planWorkoutActivityLink.findFirst({
+        where: { activityId: f.activity.id, unlinkedAt: null },
+      })).resolves.toEqual(
+        mode === 'replace' ? expect.objectContaining({ planWorkoutId: f.independent.id }) : null,
+      );
     },
   );
+
   nativeIt(
     'preserves a user completion committed between activity evidence and workout locking',
     async () => {
       const f = await matchingScenario();
+      const { service: plans } = planStartFixture(prisma);
       await prisma.planWorkout.update({
         where: { id: f.independent.id },
         data: { plannedDurationSeconds: 7200 },
       });
-      const write = manualLinks();
-      const userWorkouts = new PlanWorkoutRepository(prisma as never);
-      const codec = new WorkoutService({} as never);
-      Object.assign(write, {
-        workouts: userWorkouts,
-        workoutMutability: new PlanWorkoutMutabilityPolicy(),
-        workoutService: codec,
-        workoutDefinitionService: new WorkoutDefinitionService(
-          new WorkoutCodecRegistry(
-            new EnduranceWorkoutCodec(codec),
-            new StrengthWorkoutCodec(),
-            new FreeformWorkoutCodec(),
-          ),
-        ),
-        workoutPersistence: new WorkoutPersistenceService(userWorkouts),
+      const workouts = new PlanWorkoutRepository(prisma as never);
+      const lock = workouts.lockForUpdate.bind(workouts);
+      let reachedWorkoutLock!: () => void;
+      let resumeMatching!: () => void;
+      const beforeWorkoutLock = new Promise<void>((resolve) => { reachedWorkoutLock = resolve; });
+      const proceed = new Promise<void>((resolve) => { resumeMatching = resolve; });
+      jest.spyOn(workouts, 'lockForUpdate').mockImplementationOnce(async (id, tx) => {
+        reachedWorkoutLock();
+        await proceed;
+        return lock(id, tx);
       });
-      let selected!: () => void;
-      let resumeUser!: () => void;
-      const selectedGate = new Promise<void>((done) => (selected = done));
-      const userGate = new Promise<void>((done) => (resumeUser = done));
-      const update = userWorkouts.update.bind(userWorkouts);
-      jest
-        .spyOn(userWorkouts, 'update')
-        .mockImplementationOnce(async (args, tx) => {
-          selected();
-          await userGate;
-          return update(args, tx);
-        });
-      const confirming = write.updateWorkoutStatus(
-        'user',
-        f.plan.id,
-        f.workout.id,
-        'DONE',
-      );
-      await selectedGate;
-      await matcher().tryAutoLinkForActivity(f.activity.id);
-      expect(await prisma.planWorkoutActivityLink.findFirst()).toMatchObject({
-        autoMarkedWorkoutDone: true,
-      });
-      await prisma.planWorkout.update({
-        where: { id: f.independent.id },
-        data: { plannedDurationSeconds: 1800 },
-      });
-      const lockingWorkouts = new PlanWorkoutRepository(prisma as never);
-      let beforeLock!: () => void;
-      let resumeMatch!: () => void;
-      const lockGate = new Promise<void>((done) => (beforeLock = done));
-      const matchGate = new Promise<void>((done) => (resumeMatch = done));
-      const lock = lockingWorkouts.lockForUpdate.bind(lockingWorkouts);
-      jest
-        .spyOn(lockingWorkouts, 'lockForUpdate')
-        .mockImplementationOnce(async (id, tx) => {
-          beforeLock();
-          await matchGate;
-          return lock(id, tx);
-        });
-      const matching = matcher(lockingWorkouts).tryAutoLinkForActivity(
-        f.activity.id,
-      );
+      const matching = matcher(workouts).tryAutoLinkForActivity(f.activity.id);
       try {
-        await lockGate;
-        resumeUser();
-        await confirming;
+        await Promise.race([
+          beforeWorkoutLock,
+          matching.then(() => { throw new Error('Matching did not reach the workout lock'); }),
+        ]);
+        await plans.updateWorkoutStatus('user', f.plan.id, f.workout.id, 'DONE');
       } finally {
-        resumeUser();
-        resumeMatch();
+        resumeMatching();
+        await matching;
       }
-      await matching;
-      expect(
-        await prisma.planWorkout.findUnique({ where: { id: f.workout.id } }),
-      ).toMatchObject({ status: 'DONE' });
-      expect(
-        await prisma.planWorkoutActivityLink.findFirst({
-          where: { unlinkedAt: null },
-        }),
-      ).toMatchObject({
-        planWorkoutId: f.workout.id,
-        autoMarkedWorkoutDone: false,
-      });
-      await write.removeActivityPlanLinkByHash('user', f.activity.hashId);
-      expect(
-        await prisma.planWorkout.findUnique({ where: { id: f.workout.id } }),
-      ).toMatchObject({ status: 'DONE' });
+      await expect(prisma.planWorkout.findUniqueOrThrow({ where: { id: f.workout.id } }))
+        .resolves.toMatchObject({ status: 'DONE', revision: f.workout.revision + 1 });
+      await expect(prisma.planWorkoutActivityLink.findFirst({
+        where: { planWorkoutId: f.workout.id, unlinkedAt: null },
+      })).resolves.toBeNull();
     },
   );
 

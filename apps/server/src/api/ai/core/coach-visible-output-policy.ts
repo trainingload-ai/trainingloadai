@@ -119,9 +119,7 @@ export function resolveCoachVisibleStepText(args: {
   }
 
   const inspection = inspectCoachVisibleText(visibleText);
-  if ('violation' in inspection) {
-    return { text: '', violation: inspection.violation };
-  }
+  const ruleIds = 'violation' in inspection ? inspection.violation.ruleIds : [];
   if (
     isUnverifiedMutationClaim({
       text: visibleText,
@@ -129,11 +127,14 @@ export function resolveCoachVisibleStepText(args: {
       committedWrite: args.committedWrite,
     })
   ) {
+    ruleIds.push('unverified_mutation_claim');
+  }
+  if (ruleIds.length > 0) {
     return {
       text: '',
       violation: {
         code: COACH_INTERNAL_CONTEXT_LEAK_ERROR_CODE,
-        ruleIds: ['unverified_mutation_claim'],
+        ruleIds,
       },
     };
   }

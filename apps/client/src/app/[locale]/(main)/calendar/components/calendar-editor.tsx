@@ -16,6 +16,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { saveCalendarAdjustment, type PlanWorkout } from "@/api/plans";
 import {
+  calendarAdjustmentRecoveryKeys,
   CalendarAdjustmentState,
   type PlanProposalPresentation,
 } from "@shared/plan-proposal";
@@ -43,7 +44,8 @@ import {
   useCalendarAdjustment,
   usePublishCalendarAdjustment,
 } from "./use-calendar-adjustments";
-import { CalendarAdjustmentControls } from "./calendar-adjustment-controls";
+import { CalendarAdjustmentControls, CalendarAdjustmentRecoveryOverlay, CalendarAdjustmentUnavailableNotice } from "./calendar-adjustment-controls";
+import { CalendarScheduleReloadOverlay } from "./calendar-schedule-reload-overlay";
 import {
   calendarDraftEdits,
   refreshCalendarEditDraft,
@@ -63,6 +65,7 @@ export function CalendarEditor({
   onClose,
   showInitialControls,
   instanceId,
+  inlineWorkoutEditor,
 }: {
   planId: string;
   initialDate: string;
@@ -77,8 +80,10 @@ export function CalendarEditor({
   onClose?: () => void;
   showInitialControls?: boolean;
   instanceId?: string;
+  inlineWorkoutEditor?: boolean;
 }) {
   const t = useTranslations("CalendarMove");
+  const tCalendar = useTranslations("CalendarExperience");
   const tEditor = useTranslations("WorkoutEditor.buttons");
   const queryClient = useQueryClient();
   const editorKey = ["published-calendar-edit", planId, instanceId] as const;
@@ -88,8 +93,12 @@ export function CalendarEditor({
   const versionedId = adjustmentId ?? savedId;
   const adjustmentQuery = useCalendarAdjustment(planId, versionedId);
   const versioned = adjustmentQuery.data;
+  const recoveryKeys = versioned && calendarAdjustmentRecoveryKeys(versioned);
+  const recoveryBlocked = recoveryKeys?.length === 0;
+  const [reloadedVersionId, setReloadedVersionId] = useState<string>();
+  const needsScheduleReload = recoveryBlocked && versioned?.versionId !== reloadedVersionId;
   const showAdjustmentControls = Boolean(
-    versioned &&
+    versioned && !recoveryBlocked &&
     (showInitialControls ||
       versioned.isVersioned ||
       versioned.state !== CalendarAdjustmentState.Ready),
@@ -106,10 +115,12 @@ export function CalendarEditor({
     adjustmentId && adjustmentQuery.isError && originalPresentation,
   );
   const container = useRef<HTMLDivElement>(null);
-  const confirmButton = useRef<HTMLButtonElement>(null);
-  const [reloadPrompt, setReloadPrompt] = useState<
-    "closed" | "open" | "loading" | "failed"
-  >("closed");
+  const [reloadPrompt, setReloadPrompt] = useState(false);
+  const [rollback, setRollback] = useState<{
+    conflicts: ReturnType<typeof refreshCalendarEditDraft>["conflicts"];
+    versionChanged?: true;
+  }>();
+  const showReloadOverlay = needsScheduleReload || Boolean(recoveryKeys?.length) || reloadPrompt;
   const [confirmClose, setConfirmClose] = useState(false);
   const mutationKey = ["calendar-edits", planId, versionedId];
   const editing = useIsMutating({ mutationKey });
@@ -139,6 +150,7 @@ export function CalendarEditor({
       return saved;
     },
     onSuccess: (saved, { value, saveOnly }) => {
+      setRollback(undefined);
       setSavedId(saved.id);
       if (instanceId && !adjustmentId)
         queryClient.setQueryData(editorKey, saved.id);
@@ -153,7 +165,7 @@ export function CalendarEditor({
     },
     onError: (error) => {
       if (error instanceof ApiFetchError && [409, 422].includes(error.status)) {
-        setReloadPrompt("open");
+        setReloadPrompt(true);
       } else {
         toast.error(t("batchFailed"));
       }
@@ -166,30 +178,23 @@ export function CalendarEditor({
   const loadLatestSchedule = async (
     reloadSchedule: () => Promise<Map<string, PlanWorkout>>,
   ) => {
-    setReloadPrompt("loading");
-    try {
-      const workouts = await reloadSchedule();
-      const next = versionedId
-        ? (await adjustmentQuery.refetch({ throwOnError: true })).data
-        : undefined;
-      const batchId = crypto.randomUUID();
-      onDraftChange(
-        (current) =>
-          current &&
-          refreshCalendarEditDraft(
-            current,
-            workouts,
-            batchId,
-            next?.state === CalendarAdjustmentState.Ready
-              ? next.versionId
-              : current.baseVersionId,
-          ),
-      );
-      mutation.reset();
-      setReloadPrompt("closed");
-    } catch {
-      setReloadPrompt("failed");
+    const workouts = await reloadSchedule();
+    const next = versionedId
+      ? (await adjustmentQuery.refetch({ throwOnError: true })).data
+      : undefined;
+    if (draft) {
+      const versionChanged = draft.baseVersionId && next &&
+        (next.versionId !== draft.baseVersionId || next.state !== CalendarAdjustmentState.Ready);
+      if (versionChanged) {
+        onDraftChange((current) => current?.batchId === draft.batchId ? null : current);
+        setRollback({ conflicts: [], versionChanged: true });
+      } else {
+        const refreshed = refreshCalendarEditDraft(draft, workouts, crypto.randomUUID());
+        onDraftChange((current) => current?.batchId === draft.batchId ? refreshed.draft : current);
+        setRollback(refreshed.conflicts.length ? { conflicts: refreshed.conflicts } : undefined);
+      }
     }
+    mutation.reset();
   };
   const canEdit = (workout: PlanWorkout) =>
     ready &&
@@ -204,6 +209,7 @@ export function CalendarEditor({
   ) => {
     const batchId = crypto.randomUUID();
     mutation.reset();
+    setRollback(undefined);
     onDraftChange((current) => {
       const entries = { ...current?.entries };
       const entry = update(entries[id]);
@@ -249,6 +255,21 @@ export function CalendarEditor({
     null;
   return (
     <div ref={container} className="flex h-full min-h-0 flex-col">
+      <div role="status" className="shrink-0">
+        {rollback && (
+          <div className="mb-2 space-y-1 rounded-md bg-muted/60 px-3 py-2 text-sm">
+            <p>{t("recovery.localDraftRolledBack")}</p>
+            {rollback.versionChanged && <p className="text-muted-foreground">{t("adjustmentStates.SUPERSEDED")}</p>}
+            {rollback.conflicts.length > 0 && (
+              <ul className="max-h-24 space-y-1 overflow-y-auto text-muted-foreground">
+                {rollback.conflicts.map(({ key, name, reason }) => (
+                  <li key={key}>{name || tCalendar("plannedTraining")} · {t(`adjustmentConflicts.${reason}`)}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
       {base?.presentation.calendarAdjustmentWeeks?.length ? (
         <div className="flex shrink-0 justify-end">
           <Popover>
@@ -273,15 +294,49 @@ export function CalendarEditor({
           initialDate={initialDate}
           instanceId={adjustmentId ?? instanceId}
           planId={planId}
+          inlineWorkoutEditor={inlineWorkoutEditor}
           presentation={presentation}
+          renderScheduleOverlay={showReloadOverlay ? (reloadSchedule) => {
+            if (needsScheduleReload && versioned) return (
+              <CalendarScheduleReloadOverlay
+                onReload={reloadSchedule}
+                onReloaded={() => {
+                  if (draft) onDraftChange((current) => current?.batchId === draft.batchId ? null : current);
+                  setReloadedVersionId(versioned.versionId);
+                  setReloadPrompt(false);
+                }}
+              >
+                <CalendarAdjustmentUnavailableNotice adjustment={versioned} className="space-y-2" />
+                {draft && <p>{t("recovery.localDraftWillBeRolledBack")}</p>}
+              </CalendarScheduleReloadOverlay>
+            );
+            if (recoveryKeys?.length && versioned) return (
+              <CalendarAdjustmentRecoveryOverlay
+                key={versioned.versionId}
+                adjustment={versioned}
+                reloadSchedule={reloadSchedule}
+                onReloaded={() => setReloadPrompt(Boolean(draft))}
+              />
+            );
+            return (
+              <CalendarScheduleReloadOverlay
+                title={t("adjustmentStates.STALE")}
+                retryDraft
+                onReload={() => loadLatestSchedule(reloadSchedule)}
+                onReloaded={() => setReloadPrompt(false)}
+              >
+                <p>{t("batchConflict")}</p>
+              </CalendarScheduleReloadOverlay>
+            );
+          } : undefined}
           canEdit={canEdit}
           onEdit={async (workout, payload) => {
             if (canEdit(workout))
               updateWorkout(workout, workout.scheduledDate!, payload);
           }}
           draft={{
-            value: draft,
-            disabled: pending || !ready,
+            value: recoveryBlocked ? null : draft,
+            disabled: pending || !ready || showReloadOverlay,
             move: updateWorkout,
             add: (scheduledDate, payload) => {
               const id = crypto.randomUUID();
@@ -313,10 +368,10 @@ export function CalendarEditor({
             },
           }}
           renderActions={
-            draft || showAdjustmentControls || legacyActions
-              ? (reloadSchedule) => (
+            !showReloadOverlay && ((!recoveryBlocked && draft) || showAdjustmentControls || legacyActions)
+              ? () => (
                   <>
-                    {draft ? (
+                    {draft && !recoveryBlocked ? (
                       <div className="absolute inset-x-0 bottom-1 z-10 mx-auto flex w-fit gap-2">
                         <Button
                           type="button"
@@ -332,7 +387,6 @@ export function CalendarEditor({
                           {t("cancel")}
                         </Button>
                         <Button
-                          ref={confirmButton}
                           type="button"
                           size="sm"
                           disabled={pending || !ready}
@@ -349,63 +403,16 @@ export function CalendarEditor({
                       </div>
                     ) : versioned && showAdjustmentControls ? (
                       <div className="absolute inset-x-0 bottom-1 z-10 mx-auto flex w-fit gap-2">
-                        <CalendarAdjustmentControls adjustment={versioned} />
+                        <CalendarAdjustmentControls
+                          adjustment={versioned}
+                          onOpenRecovery={(state) => {
+                            if (state === CalendarAdjustmentState.Ready) setReloadPrompt(true);
+                          }}
+                        />
                       </div>
                     ) : ready || showLegacy ? (
                       legacyActions
                     ) : null}
-                    <AlertDialog
-                      open={reloadPrompt !== "closed"}
-                      onOpenChange={(open) => {
-                        if (!open && reloadPrompt !== "loading")
-                          setReloadPrompt("closed");
-                      }}
-                    >
-                      <AlertDialogContent
-                        onCloseAutoFocus={(event) => {
-                          event.preventDefault();
-                          if (confirmButton.current)
-                            confirmButton.current.focus({
-                              preventScroll: true,
-                            });
-                          else restoreFocus();
-                        }}
-                      >
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("batchReloadTitle")}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("batchConflict")}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        {reloadPrompt === "failed" ? (
-                          <p role="status" className="text-sm text-destructive">
-                            {t("recovery.failed")}
-                          </p>
-                        ) : null}
-                        <AlertDialogFooter>
-                          <AlertDialogCancel
-                            disabled={reloadPrompt === "loading"}
-                          >
-                            {t("continueEditing")}
-                          </AlertDialogCancel>
-                          <Button
-                            type="button"
-                            disabled={reloadPrompt === "loading"}
-                            onClick={() =>
-                              void loadLatestSchedule(reloadSchedule)
-                            }
-                          >
-                            {t(
-                              reloadPrompt === "loading"
-                                ? "working"
-                                : "recovery.action",
-                            )}
-                          </Button>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
                   </>
                 )
               : undefined

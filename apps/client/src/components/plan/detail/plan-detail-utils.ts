@@ -1,5 +1,9 @@
 import dayjs from "dayjs";
-import { addCalendarDays, calendarIsoWeekday } from "@shared/plan-calendar";
+import {
+  addCalendarDays,
+  calendarIsoWeekday,
+  isCalendarDate,
+} from "@shared/plan-calendar";
 import {
   isRollingPlan,
   isPlanDateNotGenerated,
@@ -262,7 +266,7 @@ export function rollupPlanDetailExecution(
 
 export function getWorkoutDate(plan: TrainingPlanDetail, workout: PlanWorkout) {
   if (workout.scheduledDate) {
-    return dayjs(workout.scheduledDate).startOf("day");
+    return dayjs(workout.scheduledDate.slice(0, 10)).startOf("day");
   }
   if (!plan.startDate) {
     return null;
@@ -273,7 +277,7 @@ export function getWorkoutDate(plan: TrainingPlanDetail, workout: PlanWorkout) {
       ? workout.dayOffset
       : (workout.weekIndex - 1) * 7 + (workout.dayIndex - 1);
 
-  return dayjs(plan.startDate).startOf("day").add(offsetDays, "day");
+  return dayjs(plan.startDate.slice(0, 10)).startOf("day").add(offsetDays, "day");
 }
 
 export function getPlanWorkoutStatusLabel(
@@ -311,17 +315,21 @@ export function toDerivedWorkout(
   workout: PlanWorkout,
 ): DerivedWorkout {
   const date = getWorkoutDate(plan, workout);
+  const dateKey = date?.format("YYYY-MM-DD") ?? null;
   const displayKind = getPlanWorkoutDisplayKind({
     status: workout.status,
-    scheduledDate: date?.format("YYYY-MM-DD") ?? workout.scheduledDate,
+    scheduledDate: dateKey ?? workout.scheduledDate,
   });
 
   return {
     ...workout,
     planId: workout.planId ?? plan.id,
-    dateKey: date?.format("YYYY-MM-DD") ?? null,
+    dateKey,
     dateLabel: date?.format("M/D") ?? t("workout.unscheduled"),
-    dayLabel: getWeekdayLabel(t, workout.dayIndex ?? 1),
+    dayLabel: getWeekdayLabel(
+      t,
+      isCalendarDate(dateKey) ? calendarIsoWeekday(dateKey) : workout.dayIndex ?? 1,
+    ),
     title: buildWorkoutListTitle(t, workout),
     description: buildWorkoutListNotes(workout),
     displayKind,
@@ -396,18 +404,18 @@ export function buildWeekGroups(
         const firstWorkout = dayWorkouts[0];
         const fallbackDate =
           plan.startDate != null
-            ? dayjs(plan.startDate)
+            ? dayjs(plan.startDate.slice(0, 10))
                 .startOf("day")
                 .add((weekIndex - 1) * 7 + dayOffset, "day")
             : null;
 
+        const dateKey = firstWorkout?.dateKey ?? fallbackDate?.format("YYYY-MM-DD") ?? null;
         return {
           dayIndex,
-          dayLabel: getWeekdayLabel(t, dayIndex),
+          dayLabel: getWeekdayLabel(t, isCalendarDate(dateKey) ? calendarIsoWeekday(dateKey) : dayIndex),
           dateLabel:
             firstWorkout?.dateLabel ?? fallbackDate?.format("M/D") ?? "",
-          dateKey:
-            firstWorkout?.dateKey ?? fallbackDate?.format("YYYY-MM-DD") ?? null,
+          dateKey,
           workouts: dayWorkouts,
         };
       });

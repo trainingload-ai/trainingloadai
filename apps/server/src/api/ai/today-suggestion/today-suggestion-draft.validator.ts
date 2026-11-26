@@ -11,6 +11,7 @@ import type {
 } from './today-suggestion.types';
 import {
   hasRecentTrainingActivity,
+  isRelevantTodaySuggestionDecision,
   todaySuggestionScheduledWorkout,
 } from './today-suggestion.types';
 
@@ -55,17 +56,44 @@ function rejectTrainingBasis(
   );
 }
 
+function rejectDraftField(code: string, correction: string): never {
+  throw new CoachTaskResultValidationError(
+    'TODAY_SUGGESTION_OUTPUT_REJECTED_DRAFT',
+    code,
+    correction,
+  );
+}
+
+function rejectUnsupportedRecommendation(
+  code: string,
+  correction: string,
+): never {
+  throw new CoachTaskResultValidationError(
+    `TODAY_SUGGESTION_OUTPUT_REJECTED_${code}`,
+    code,
+    correction,
+  );
+}
+
 function record(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
 }
 
-function requiredText(value: unknown, max: number, name: string) {
+function requiredText(
+  value: unknown,
+  max: number,
+  code: string,
+  field: string,
+) {
   const text = String(value ?? '').trim();
-  if (!text) throw new Error(`TODAY_SUGGESTION_${name}_REQUIRED`);
+  if (!text) rejectDraftField(code, `Provide a non-empty ${field} field.`);
   if (/\b(?:https?:\/\/|www\.)/i.test(text)) {
-    throw new Error('TODAY_SUGGESTION_URL_NOT_ALLOWED');
+    rejectDraftField(
+      'URL_NOT_ALLOWED',
+      'Remove URLs from athlete-facing text.',
+    );
   }
   return text.slice(0, max);
 }
@@ -73,7 +101,10 @@ function requiredText(value: unknown, max: number, name: string) {
 function optionalText(value: unknown, max: number) {
   const text = String(value ?? '').trim();
   if (/\b(?:https?:\/\/|www\.)/i.test(text)) {
-    throw new Error('TODAY_SUGGESTION_URL_NOT_ALLOWED');
+    rejectDraftField(
+      'URL_NOT_ALLOWED',
+      'Remove URLs from athlete-facing text.',
+    );
   }
   return text ? text.slice(0, max) : undefined;
 }
@@ -89,7 +120,10 @@ function stringList(value: unknown, maxItems: number, maxLength: number) {
         .map((item) => item.slice(0, maxLength))
     : [];
   if (result.some((item) => /\b(?:https?:\/\/|www\.)/i.test(item))) {
-    throw new Error('TODAY_SUGGESTION_URL_NOT_ALLOWED');
+    rejectDraftField(
+      'URL_NOT_ALLOWED',
+      'Remove URLs from athlete-facing text.',
+    );
   }
   return result;
 }
@@ -100,14 +134,27 @@ function trainingBasis(value: unknown): TodaySuggestionDraft['trainingBasis'] {
   if (basis?.kind === 'SCHEDULED')
     return {
       kind: 'SCHEDULED',
-      workoutId: requiredText(basis.workoutId, 160, 'TRAINING_BASIS_WORKOUT'),
+      workoutId: requiredText(
+        basis.workoutId,
+        160,
+        'TRAINING_BASIS_WORKOUT_REQUIRED',
+        'trainingBasis.workoutId',
+      ),
     };
   if (basis?.kind === 'ADDITIONAL')
     return {
       kind: 'ADDITIONAL',
-      reason: requiredText(basis.reason, 240, 'TRAINING_BASIS_REASON'),
+      reason: requiredText(
+        basis.reason,
+        240,
+        'TRAINING_BASIS_REASON_REQUIRED',
+        'trainingBasis.reason',
+      ),
     };
-  throw new Error('TODAY_SUGGESTION_INVALID_TRAINING_BASIS');
+  rejectDraftField(
+    'INVALID_TRAINING_BASIS',
+    'Use SCHEDULED or ADDITIONAL for trainingBasis.kind, or omit trainingBasis for non-TRAIN recommendations.',
+  );
 }
 
 export function validateTodaySuggestionDraft(
@@ -116,7 +163,10 @@ export function validateTodaySuggestionDraft(
   const row = record(raw);
   const recommendation = record(row?.recommendation);
   if (!row || !recommendation) {
-    throw new Error('TODAY_SUGGESTION_INVALID_DRAFT');
+    rejectDraftField(
+      'INVALID_DRAFT',
+      'Submit a draft object with a recommendation object.',
+    );
   }
   const kind = String(recommendation.kind ?? '').toUpperCase();
   const preferredIntent =
@@ -124,20 +174,29 @@ export function validateTodaySuggestionDraft(
       ? null
       : String(row.preferredIntent).toUpperCase();
   if (!RECOMMENDATION_KINDS.has(kind as TodaySuggestionRecommendationKind)) {
-    throw new Error('TODAY_SUGGESTION_INVALID_RECOMMENDATION');
+    rejectDraftField(
+      'INVALID_RECOMMENDATION',
+      'Use a supported recommendation.kind from the task contract.',
+    );
   }
   if (
     preferredIntent !== null &&
     !isTodaySuggestionIntentType(preferredIntent)
   ) {
-    throw new Error('TODAY_SUGGESTION_INVALID_INTENT');
+    rejectDraftField(
+      'INVALID_INTENT',
+      'Use an allowed preferredIntent or set it to null.',
+    );
   }
   const rawIntensity = String(recommendation.intensity ?? '').toUpperCase();
   const intensity = rawIntensity
     ? (rawIntensity as TodaySuggestionIntensity)
     : undefined;
   if (intensity && !INTENSITIES.has(intensity)) {
-    throw new Error('TODAY_SUGGESTION_INVALID_INTENSITY');
+    rejectDraftField(
+      'INVALID_INTENSITY',
+      'Use VERY_EASY, EASY, MODERATE or HARD, or omit intensity.',
+    );
   }
   const rawDuration = Number(recommendation.durationMinutes);
   const durationMinutes = Number.isInteger(rawDuration)
@@ -148,8 +207,8 @@ export function validateTodaySuggestionDraft(
   );
   const basis = trainingBasis(row.trainingBasis);
   return {
-    headline: requiredText(row.headline, 120, 'HEADLINE'),
-    summary: requiredText(row.summary, 700, 'SUMMARY'),
+    headline: requiredText(row.headline, 120, 'HEADLINE_REQUIRED', 'headline'),
+    summary: requiredText(row.summary, 700, 'SUMMARY_REQUIRED', 'summary'),
     recommendation: {
       kind: kind as TodaySuggestionRecommendationKind,
       ...(durationMinutes ? { durationMinutes } : {}),
@@ -236,8 +295,9 @@ export function validateTodaySuggestionDraftForProjection(
     draft.recommendation.kind === 'TRAIN' &&
     (projection.constraints ?? []).includes('TODAY_WORKOUT_COMPLETED')
   ) {
-    throw new Error(
-      'TODAY_SUGGESTION_OUTPUT_REJECTED_UNREQUESTED_EXTRA_TRAINING',
+    rejectUnsupportedRecommendation(
+      'UNREQUESTED_EXTRA_TRAINING',
+      'The workout is complete. Revise the recommendation without prescribing more training today.',
     );
   }
   if (
@@ -245,7 +305,10 @@ export function validateTodaySuggestionDraftForProjection(
     (draft.recommendation.kind === 'SYNC_DATA' ||
       ['OPEN_IMPORT', 'OPEN_PROVIDER_SETTINGS'].includes(draft.preferredIntent))
   ) {
-    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_UNNECESSARY_DATA_TASK');
+    rejectUnsupportedRecommendation(
+      'UNNECESSARY_DATA_TASK',
+      'Use the recorded activities to advise the athlete without asking them to import data or connect a provider.',
+    );
   }
   if (
     hasRecentTrainingActivity(projection) &&
@@ -253,7 +316,10 @@ export function validateTodaySuggestionDraftForProjection(
     (['CHECK_IN', 'REVIEW_ACTIVITY'].includes(draft.recommendation.kind) ||
       draft.preferredIntent === 'OPEN_ASSESSMENT')
   ) {
-    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_UNNECESSARY_CHECK_IN');
+    rejectUnsupportedRecommendation(
+      'UNNECESSARY_CHECK_IN',
+      'Give a recommendation based on recorded activities without requiring a check-in or activity review.',
+    );
   }
   if (
     ['REST_TODAY', 'TRAINED_ELSEWHERE', 'DATA_PENDING'].includes(
@@ -266,7 +332,10 @@ export function validateTodaySuggestionDraftForProjection(
         'SCHEDULE_REMINDER',
       ].includes(draft.preferredIntent))
   ) {
-    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_EXPLICIT_FEEDBACK');
+    rejectUnsupportedRecommendation(
+      'EXPLICIT_FEEDBACK',
+      'Honor the athlete’s feedback and remove training recommendations and training actions for today.',
+    );
   }
   if (
     projection.highConcern &&
@@ -274,7 +343,10 @@ export function validateTodaySuggestionDraftForProjection(
       draft.recommendation.intensity === 'HARD' ||
       draft.preferredIntent === 'CREATE_TODAY_WORKOUT')
   ) {
-    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_HIGH_CONCERN');
+    rejectUnsupportedRecommendation(
+      'HIGH_CONCERN',
+      'Account for the high-concern evidence without recommending training, hard intensity or workout creation.',
+    );
   }
   if (
     projection.todayWorkouts.some((workout) =>
@@ -282,7 +354,10 @@ export function validateTodaySuggestionDraftForProjection(
     ) &&
     draft.preferredIntent === 'CREATE_TODAY_WORKOUT'
   ) {
-    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_DUPLICATE_WORKOUT');
+    rejectUnsupportedRecommendation(
+      'DUPLICATE_WORKOUT',
+      'Use the existing scheduled workout or omit the workout action. Do not create a duplicate.',
+    );
   }
   if (
     draft.recommendation.kind === 'TRAIN' &&
@@ -295,31 +370,47 @@ export function validateTodaySuggestionDraftForProjection(
       (scheduledWorkout?.plannedDurationSeconds ?? 1_800) / 60) >
       projection.minutesUntilDayEnd
   ) {
-    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_INSUFFICIENT_TIME');
+    rejectUnsupportedRecommendation(
+      'INSUFFICIENT_TIME',
+      'Choose a recommendation that fits the remaining time today.',
+    );
   }
   for (const decision of projection.coachState?.decisions ?? []) {
-    if (!['TODAY', 'TOMORROW', 'UNKNOWN'].includes(decision.relevance))
-      continue;
+    if (!isRelevantTodaySuggestionDecision(decision)) continue;
     const handling = draft.coachDecisionHandling?.find(
       (item) => item.decisionId === decision.id,
     );
-    if (
-      decision.basisCoverage === 'UNVERIFIED' &&
-      handling?.handling === 'FOLLOW'
-    )
-      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_UNVERIFIED_BASIS');
-    const allowed =
-      decision.stateRole === 'ACTIVE_PROPOSAL'
-        ? ['FOLLOW', 'CONDITIONAL', 'DEPART']
-        : ['REJECTED_HISTORY', 'APPLIED_HISTORY'].includes(decision.stateRole)
-          ? ['HISTORY']
-          : ['IGNORE'];
-    if (
-      !handling ||
-      !allowed.includes(handling.handling) ||
-      (handling.handling === 'DEPART' && !handling.reason)
-    ) {
-      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_COACH_DECISION');
+    const active = decision.stateRole === 'ACTIVE_PROPOSAL';
+    const unverified = active && decision.basisCoverage === 'UNVERIFIED';
+    const allowed = active ? ['CONDITIONAL', 'DEPART'] : ['HISTORY'];
+    if (active && !unverified) allowed.unshift('FOLLOW');
+    const decisionId = JSON.stringify(decision.id);
+    const expected = allowed.join(' or ');
+    if (!handling) {
+      throw new CoachTaskResultValidationError(
+        'TODAY_SUGGESTION_OUTPUT_REJECTED_COACH_DECISION',
+        'COACH_DECISION_HANDLING_REQUIRED',
+        `Add a coachDecisionHandling entry for decisionId ${decisionId} with handling set to ${expected}.`,
+      );
+    }
+    if (!allowed.includes(handling.handling)) {
+      const unverifiedFollow = unverified && handling.handling === 'FOLLOW';
+      throw new CoachTaskResultValidationError(
+        unverifiedFollow
+          ? 'TODAY_SUGGESTION_OUTPUT_REJECTED_UNVERIFIED_BASIS'
+          : 'TODAY_SUGGESTION_OUTPUT_REJECTED_COACH_DECISION',
+        unverifiedFollow
+          ? 'COACH_DECISION_UNVERIFIED_FOLLOW'
+          : 'COACH_DECISION_INVALID_HANDLING',
+        `Set handling for decisionId ${decisionId} to ${expected}.`,
+      );
+    }
+    if (handling.handling === 'DEPART' && !handling.reason) {
+      throw new CoachTaskResultValidationError(
+        'TODAY_SUGGESTION_OUTPUT_REJECTED_COACH_DECISION',
+        'COACH_DECISION_DEPART_REASON_REQUIRED',
+        `Provide a fact-grounded reason for DEPART on decisionId ${decisionId}, or change handling to a supported alternative.`,
+      );
     }
   }
   if (draft.recommendation.kind !== 'TRAIN' && draft.trainingBasis) {

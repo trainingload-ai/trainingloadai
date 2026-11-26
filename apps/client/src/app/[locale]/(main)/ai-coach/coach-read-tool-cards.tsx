@@ -5,34 +5,47 @@ import {
   FitnessTrackingCard,
 } from "./fitness-assessment-card";
 import type { UIMessage } from "ai";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import {
   Activity,
-  ArrowUpRight,
   BarChart3,
   Bike,
   CalendarDays,
+  ChevronRight,
   ClipboardList,
   Footprints,
   Gauge,
-  HeartPulse,
+  CircleCheck,
+  CircleMinus,
   LayoutDashboard,
   Waves,
-  Zap,
   Dumbbell,
   StretchHorizontal,
 } from "lucide-react";
-import { useContext, useMemo, useState } from "react";
-import { useRouter } from "@/i18n/navigation";
-import type { SportType } from "@/api/activities";
+import { useContext, useId, useState } from "react";
+import { getSportDisplayName } from "@/api/sports";
+import { getActivityCards } from "@/api/v2-activities";
+import { usePlanDetail } from "@/api/usePlans";
+import { getPlanStatusLabel } from "@/components/plan/detail/plan-detail-utils";
+import { ActivityCardFooter } from "@/components/activities/activity-card-footer";
 import { ActivitySummaryCard } from "@/components/activities/activity-summary-card";
-import { ViewWorkoutDialog } from "@/components/plan/view-workout-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Pagination } from "@/components/ui/Pagination";
 import {
   WorkoutRenderer,
   type WorkoutRendererValue,
 } from "@/components/workout/WorkoutRenderer";
 import { cn } from "@/lib/utils";
 import { clockIntlOptions } from "@/lib/time-format";
+import { queryKeys } from "@/lib/query-keys";
 import { useStore } from "@/lib/store";
 import {
   COACH_READ_TOOL_CARD_NAMES,
@@ -49,10 +62,12 @@ import {
 import type { TrainingVisualizationV1 } from "@shared/training-visualization";
 import { resolveCoachActivityLoad } from "./coach-activity-load";
 import { parseCoachCompetitionEvents } from "@shared/coach-competition-events";
-import { isCoachActivitySection, readCoachActivityView, readCoachEntityView, type CoachActivitySection } from "@shared/ai-coach-schema";
-import { CoachActivityPreviewContext } from "./coach-preview-panel";
+import { isCoachActivitySection, readCoachActivityView, readCoachEntityView, type CoachActivitySection, type CoachActivityView, type CoachEntityView } from "@shared/ai-coach-schema";
+import { CoachActivityPreviewContext, CoachLocalPreviewContext } from "./coach-preview-panel";
 import { CoachHealthCard } from "./coach-health-card";
 import { CoachNavigationCard } from "./cards/coach-navigation-card";
+import { CoachPreviewCard, CoachPreviewMetrics } from "./cards/coach-preview-card";
+import { isRollingPlan } from "@/lib/rolling-plan";
 
 function asRecord(v: unknown): Record<string, unknown> | null {
   if (!v || typeof v !== "object" || Array.isArray(v)) return null;
@@ -63,33 +78,6 @@ function getSportIcon(sportType?: string) {
   if (sportType === "CYCLING") return Bike;
   if (sportType === "SWIM") return Waves;
   return Footprints;
-}
-
-function getSportLabel(sportType?: string) {
-  if (sportType === "CYCLING") return "Ride";
-  if (sportType === "SWIM") return "Swim";
-  if (sportType === "RUN") return "Run";
-  return "Other";
-}
-
-function formatActivityDuration(durationMin: unknown) {
-  if (typeof durationMin !== "number" || !Number.isFinite(durationMin)) {
-    return "--";
-  }
-  const totalSeconds = Math.round(durationMin * 60);
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
-  return h > 0
-    ? `${h}:${`${m}`.padStart(2, "0")}:${`${s}`.padStart(2, "0")}`
-    : `${m}:${`${s}`.padStart(2, "0")}`;
-}
-
-function formatActivityDistance(distanceKm: unknown) {
-  if (typeof distanceKm !== "number" || !Number.isFinite(distanceKm)) {
-    return "--";
-  }
-  return `${distanceKm.toFixed(distanceKm >= 10 ? 1 : 2)} km`;
 }
 
 function formatActivityStart(startTime: unknown, timeFormat: string) {
@@ -205,9 +193,9 @@ export function CoachReadToolCard({
     case "PmcRange":
       return <PmcRangeCard payload={input} />;
     case "TrainingVisualization":
-      return <TrainingVisualizationCard payload={input} chartRef={chartRef} />;
+      return <TrainingVisualizationCard payload={input} chartRef={chartRef} summary />;
     case "CoachHealthVisualization":
-      return <CoachHealthCard payload={input} chartRef={chartRef} />;
+      return <CoachHealthCard payload={input} chartRef={chartRef} summary />;
     case "CoachDetailView":
       return <CoachDetailLink payload={input} />;
     case "ProfileZones":
@@ -226,15 +214,39 @@ function CoachDetailLink({ payload }: { payload: unknown }) {
   const open = useContext(CoachActivityPreviewContext);
   const view = readCoachActivityView(payload) ?? readCoachEntityView(payload);
   if (!view) return <CoachInvalidStructuredCard />;
-  const title = view.kind === "plan_detail" ? view.title
-    : view.kind === "activity_detail" ? t("ActivityDetail.title")
-      : t("sidebar.dashboard");
-  const href = view.kind === "plan_detail" ? `/plans/${view.planId}`
-    : view.kind === "activity_detail" ? `/activities/${view.hashId}` : "/dashboard";
-  const icon = view.kind === "plan_detail" ? ClipboardList
-    : view.kind === "activity_detail" ? Activity : LayoutDashboard;
-  const destination = open ? { onOpen: () => open(view, title) } : { href };
-  return <CoachNavigationCard icon={icon} title={title} {...destination} />;
+  if (view.kind === "activity_detail") {
+    return <ActivitySummaryList items={[{ hashId: view.hashId, title: t("ActivityDetail.title") }]} target={view} />;
+  }
+  if (view.kind === "plan_detail") return <CoachPlanDetailCard view={view} />;
+  const title = t("sidebar.dashboard");
+  const destination = open ? { onOpen: () => open(view, title) } : { href: "/dashboard" };
+  return <CoachNavigationCard icon={LayoutDashboard} title={title} {...destination} />;
+}
+
+function CoachPlanDetailCard({ view }: { view: Extract<CoachEntityView, { kind: "plan_detail" }> }) {
+  const t = useTranslations();
+  const planText = useTranslations("V2PlanDetailPage");
+  const open = useContext(CoachActivityPreviewContext);
+  const { data: plan } = usePlanDetail(view.planId, true, { errorSurface: "inline" });
+  const title = plan?.title || view.title;
+  const dates = [plan?.startDate?.slice(0, 10), plan?.endDate?.slice(0, 10)].filter(Boolean).join(" – ");
+  const subtitle = plan ? [getPlanStatusLabel(planText, plan.status), dates].filter(Boolean).join(" · ") : undefined;
+  if (!open) return <CoachNavigationCard icon={ClipboardList} title={title} subtitle={subtitle} href={`/plans/${view.planId}`} />;
+  const count = plan?.workouts?.length ?? 0;
+  return (
+    <CoachPreviewCard icon={ClipboardList} title={title} subtitle={subtitle} onOpen={() => open(view, title)}>
+      {plan?.goal ? <p className="line-clamp-2 text-sm text-muted-foreground">{plan.goal}</p> : null}
+      {plan ? (
+        <CoachPreviewMetrics items={[
+          { label: t("V2PlanDetailPage.mobile.currentWeek"), value: isRollingPlan(plan)
+            ? plan.currentWeekIndex ?? "—"
+            : [plan.currentWeekIndex, plan.periodWeeks].filter((week) => week != null).join(" / ") || "—" },
+          { label: t("V2PlansPage.stats.completed"), value: plan.workouts?.filter(({ status }) => status === "DONE").length ?? "—" },
+          { label: t("V2PlansPage.stats.plannedSessions"), value: count },
+        ]} />
+      ) : null}
+    </CoachPreviewCard>
+  );
 }
 
 function CompetitionEventsCard({ payload }: { payload: unknown }) {
@@ -281,10 +293,7 @@ function PlanDayViewCard({ payload }: { payload: unknown }) {
   const t = useTranslations("AiCoachPage.readCards.planDay");
   const td = useTranslations("AiCoachPage.decision");
   const tw = useTranslations("WorkoutEditor.fields.sportType.options");
-  const [selectedWorkout, setSelectedWorkout] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
+  const workoutTitleId = useId();
   const o = asRecord(payload);
   const date = o?.kind === "plan_day_view" ? String(o.date ?? "") : "";
   const plan =
@@ -316,30 +325,6 @@ function PlanDayViewCard({ payload }: { payload: unknown }) {
     if (status === "MOVED") return td("statusValue.MOVED");
     return status;
   };
-  const selectedPlanWorkout = useMemo(() => {
-    if (!selectedWorkout) return null;
-    const sportType = String(selectedWorkout.sportType ?? "RUN") as SportType;
-    return {
-      id: String(selectedWorkout.id ?? ""),
-      sportType,
-      name:
-        typeof selectedWorkout.name === "string" ? selectedWorkout.name : null,
-      notes:
-        typeof selectedWorkout.notes === "string"
-          ? selectedWorkout.notes
-          : null,
-      text:
-        typeof selectedWorkout.text === "string" ? selectedWorkout.text : "",
-      weekIndex:
-        typeof selectedWorkout.weekIndex === "number"
-          ? selectedWorkout.weekIndex
-          : wk,
-      dayIndex:
-        typeof selectedWorkout.dayIndex === "number"
-          ? selectedWorkout.dayIndex
-          : dk,
-    };
-  }, [dk, selectedWorkout, wk]);
   if (!o || o.kind !== "plan_day_view") return null;
 
   return (
@@ -404,103 +389,117 @@ function PlanDayViewCard({ payload }: { payload: unknown }) {
                 summary: row.summary,
                 blocks: row.blocks,
               } as WorkoutRendererValue;
+              const titleId = `${workoutTitleId}-${idx}`;
               return (
-                <button
-                  key={String(row.id ?? idx)}
-                  type="button"
-                  onClick={() => setSelectedWorkout(row)}
-                  className={cn(
-                    "w-full min-w-0 rounded-md bg-neutral-100 p-3 text-left transition-colors hover:bg-neutral-200/70 dark:bg-muted/45 dark:hover:bg-muted/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  )}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 shrink-0 text-muted-foreground">
-                      <SportIcon className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="flex min-w-0 flex-wrap items-center gap-2">
-                            <div className="break-words text-sm font-medium">
-                              {label}
+                <Dialog key={String(row.id ?? idx)}>
+                  <DialogTrigger asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        "w-full min-w-0 rounded-md bg-neutral-100 p-3 text-left transition-colors hover:bg-neutral-200/70 dark:bg-muted/45 dark:hover:bg-muted/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 shrink-0 text-muted-foreground">
+                          <SportIcon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                                <div className="break-words text-sm font-medium">
+                                  {label}
+                                </div>
+                                {status ? (
+                                  <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-mobile-caption pc:text-[11px] font-medium text-muted-foreground">
+                                    {statusLabel(status)}
+                                  </span>
+                                ) : null}
+                              </div>
+                              <div className="mt-1 text-mobile-caption text-muted-foreground pc:text-xs">
+                                {meta}
+                              </div>
                             </div>
-                            {status ? (
-                              <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-mobile-caption pc:text-[11px] font-medium text-muted-foreground">
-                                {statusLabel(status)}
-                              </span>
-                            ) : null}
-                          </div>
-                          <div className="mt-1 text-mobile-caption text-muted-foreground pc:text-xs">
-                            {meta}
+                            <ChevronRight aria-hidden className="mt-0.5 h-4 w-4 shrink-0 opacity-60" />
                           </div>
                         </div>
-                        <ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 opacity-60" />
                       </div>
-                    </div>
-                  </div>
-                  <WorkoutRenderer
-                    workout={rendererWorkout}
-                    density="COMPACT"
-                    chartHeight={72}
-                    className="mt-3 overflow-hidden rounded-md"
-                  />
-                  {typeof row.notes === "string" &&
-                  row.notes.trim() &&
-                  row.notes !== label ? (
-                    <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                      {row.notes}
-                    </p>
-                  ) : null}
-                </button>
+                      <WorkoutRenderer
+                        workout={rendererWorkout}
+                        density="COMPACT"
+                        chartHeight={72}
+                        className="mt-3 overflow-hidden rounded-md"
+                      />
+                      {typeof row.notes === "string" &&
+                      row.notes.trim() &&
+                      row.notes !== label ? (
+                        <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                          {row.notes}
+                        </p>
+                      ) : null}
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent aria-labelledby={titleId} className="max-h-[85dvh] overflow-y-auto sm:max-w-xl">
+                    <DialogHeader>
+                      <DialogTitle id={titleId}>{label}</DialogTitle>
+                      <DialogDescription>
+                        {[meta, statusLabel(status)].filter(Boolean).join(" · ")}
+                      </DialogDescription>
+                    </DialogHeader>
+                    {typeof row.notes === "string" && row.notes.trim() && row.notes !== label ? (
+                      <p className="whitespace-pre-wrap text-sm text-muted-foreground">{row.notes}</p>
+                    ) : null}
+                    <WorkoutRenderer workout={rendererWorkout} density="DETAIL" />
+                    {rendererWorkout.text.trim() ? (
+                      <details className="min-w-0 text-sm">
+                        <summary className="cursor-pointer">{td("workoutText")}</summary>
+                        <pre className="mt-2 whitespace-pre-wrap break-words rounded-md bg-muted p-3 text-xs">{rendererWorkout.text}</pre>
+                      </details>
+                    ) : null}
+                  </DialogContent>
+                </Dialog>
               );
             })}
           </div>
         )}
       </div>
-
-      {selectedPlanWorkout ? (
-        <ViewWorkoutDialog
-          open={selectedWorkout != null}
-          onOpenChange={(open) => {
-            if (!open) setSelectedWorkout(null);
-          }}
-          planId={String(plan?.id ?? "") || undefined}
-          workoutId={selectedPlanWorkout.id || undefined}
-          weekIndex={
-            typeof selectedPlanWorkout.weekIndex === "number"
-              ? selectedPlanWorkout.weekIndex - 1
-              : undefined
-          }
-          dayIndex={
-            typeof selectedPlanWorkout.dayIndex === "number"
-              ? selectedPlanWorkout.dayIndex - 1
-              : undefined
-          }
-          notes={selectedPlanWorkout.notes}
-          text={selectedPlanWorkout.text}
-          sportType={selectedPlanWorkout.sportType}
-        />
-      ) : null}
     </>
   );
 }
 
+const RECENT_ACTIVITY_PAGE_SIZE = 10;
+
 function ActivityRecentCard({ payload }: { payload: unknown }) {
   const t = useTranslations("AiCoachPage.readCards.activityRecent");
   const tc = useTranslations("AiCoachPage.readCards");
+  const [open, setOpen] = useState(true);
+  const [page, setPage] = useState(1);
   const o = asRecord(payload);
   if (!o || o.kind !== "activity_recent") return null;
   const items = Array.isArray(o.items) ? o.items : [];
+  const totalPages = Math.ceil(items.length / RECENT_ACTIVITY_PAGE_SIZE);
+  const currentPage = Math.min(page, Math.max(1, totalPages));
+  const pageStart = (currentPage - 1) * RECENT_ACTIVITY_PAGE_SIZE;
   return (
     <CoachCard
       tone="neutral"
       icon={<Activity className="h-4 w-4" />}
       title={inlineTitle(t("title"), t("subtitle", { count: items.length }))}
-      contentClassName="bg-transparent p-0 dark:bg-transparent"
+      headerRight={open && totalPages > 1 ? (
+        <Pagination
+          variant="compact"
+          currentPage={currentPage}
+          totalItems={items.length}
+          itemsPerPage={RECENT_ACTIVITY_PAGE_SIZE}
+          onPageChange={setPage}
+        />
+      ) : null}
+      contentClassName="ml-0 bg-transparent p-0 dark:bg-transparent"
       dense
       appearance="strip"
       collapsible
-      defaultCollapsed={false}
+      open={open}
+      onOpenChange={setOpen}
       toggleAriaLabel={tc("toggleDetails")}
     >
       {items.length === 0 ? (
@@ -508,7 +507,7 @@ function ActivityRecentCard({ payload }: { payload: unknown }) {
           {t("empty")}
         </p>
       ) : (
-        <ActivitySummaryList items={items} />
+        <ActivitySummaryList items={items.slice(pageStart, pageStart + RECENT_ACTIVITY_PAGE_SIZE)} />
       )}
     </CoachCard>
   );
@@ -552,75 +551,78 @@ function ActivityDayViewCard({ payload }: { payload: unknown }) {
 }
 
 function ActivitySummaryList({
-  items, section = "overview",
-}: { items: unknown[]; section?: CoachActivitySection }) {
-  const router = useRouter();
+  items, section = "overview", target,
+}: { items: unknown[]; section?: CoachActivitySection; target?: CoachActivityView }) {
   const openPreview = useContext(CoachActivityPreviewContext);
   const tActivityCommon = useTranslations("V2ActivitiesPage.common");
   const tActivityTitle = useTranslations("ActivityTitle");
+  const tSports = useTranslations("SportCatalog");
   const { timeFormat } = useStore();
+  const activities = items.flatMap((raw) => {
+    const item = asRecord(raw);
+    if (!item) return [];
+    const activityView = target ?? readCoachActivityView({
+      kind: "activity_detail", hashId: item.hashId, section,
+    });
+    return [{ item, activityView }];
+  });
+  const hashIds = [...new Set(activities.flatMap(({ activityView }) =>
+    activityView ? [activityView.hashId] : [],
+  ))].sort().slice(0, 20);
+  const { data: cardsByHashId } = useQuery({
+    queryKey: queryKeys.activity.cards(hashIds),
+    queryFn: () => getActivityCards(hashIds),
+    enabled: hashIds.length > 0,
+    staleTime: 30_000,
+    retry: false,
+  });
 
   return (
     <div className="space-y-2">
-      {items.map((raw: unknown, idx: number) => {
-        const item = asRecord(raw);
-        if (!item) return null;
-        const sportType = String(item.sportType ?? "RUN");
-        const hashId = String(item.hashId ?? "");
-        const activityView = readCoachActivityView({ kind: "activity_detail", hashId, section });
-        const load = resolveCoachActivityLoad(item);
-        const title = getLocalizedActivityTitle(
-          { title: String(item.title ?? ""), sportType },
-          tActivityTitle,
-          getSportLabel(sportType),
+      {activities.map(({ item, activityView }, idx) => {
+        const card = activityView ? cardsByHashId?.get(activityView.hashId) : undefined;
+        const sportType = typeof item.sportType === "string" ? item.sportType : card?.sportType ?? "UNKNOWN";
+        const subSportType = card?.subSportType ?? (
+          typeof item.subSportType === "string" ? item.subSportType
+            : typeof item.sportDefinitionCode === "string" ? item.sportDefinitionCode : undefined
         );
-        const hasFooter =
-          typeof item.avgHr === "number" ||
-          typeof item.avgPower === "number" ||
-          typeof item.vo2max === "number";
+        const title = getLocalizedActivityTitle(
+          {
+            title: card?.title || String(item.title ?? ""),
+            sportType,
+            startTime: card?.startTime,
+            timezone: card?.timezone,
+          },
+          tActivityTitle,
+          tActivityCommon("untitledActivity"),
+        );
+        const destination = !activityView ? {}
+          : openPreview ? { onOpen: () => openPreview(activityView, title) }
+            : { href: `/activities/${encodeURIComponent(activityView.hashId)}` };
 
         return (
           <ActivitySummaryCard
             key={String(item.hashId ?? idx)}
             title={title}
             sportType={sportType}
-            startLabel={formatActivityStart(item.startTime, timeFormat)}
-            distanceLabel={formatActivityDistance(item.distanceKm)}
-            durationLabel={formatActivityDuration(item.durationMin)}
-            load={load}
+            subSportType={subSportType}
+            sportLabel={getSportDisplayName([], { sportType, subSportType }, tSports)}
+            startLabel={formatActivityStart(item.startTime ?? card?.startTime, timeFormat)}
+            distanceMeters={typeof item.distanceKm === "number" ? item.distanceKm * 1000 : card?.distance}
+            durationSeconds={typeof item.durationMin === "number" ? item.durationMin * 60 : card?.duration}
+            load={resolveCoachActivityLoad(item) ?? card?.load}
+            note={target ? card?.note : undefined}
             loadLabel={tActivityCommon("load")}
             mapThumbnailUrl={
-              typeof item.mapThumbnailUrl === "string"
-                ? item.mapThumbnailUrl
-                : null
+              card?.mapThumbnailUrl ??
+              (typeof item.mapThumbnailUrl === "string" ? item.mapThumbnailUrl : null)
             }
-            onOpen={activityView ? () => {
-              if (openPreview) openPreview(activityView, title);
-              else router.push(`/activities/${activityView.hashId}`);
-            } : undefined}
-            footer={
-              hasFooter ? (
-                <div className="flex flex-wrap gap-2 text-mobile-caption pc:text-xs text-muted-foreground">
-                  {typeof item.avgHr === "number" ? (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-background/70 px-2 py-1 dark:bg-background/35">
-                      <HeartPulse className="h-3.5 w-3.5" />
-                      {item.avgHr} bpm
-                    </span>
-                  ) : null}
-                  {typeof item.avgPower === "number" ? (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-background/70 px-2 py-1 dark:bg-background/35">
-                      <Zap className="h-3.5 w-3.5" />
-                      {item.avgPower} W
-                    </span>
-                  ) : null}
-                  {typeof item.vo2max === "number" ? (
-                    <span className="rounded-md bg-background/70 px-2 py-1 tabular-nums dark:bg-background/35">
-                      VO2 {item.vo2max}
-                    </span>
-                  ) : null}
-                </div>
-              ) : null
+            mapThumbnailDarkUrl={
+              card?.mapThumbnailDarkUrl ??
+              (typeof item.mapThumbnailDarkUrl === "string" ? item.mapThumbnailDarkUrl : null)
             }
+            {...destination}
+            footer={card ? <ActivityCardFooter activity={card} /> : null}
           />
         );
       })}
@@ -630,7 +632,8 @@ function ActivitySummaryList({
 
 function PmcRangeCard({ payload }: { payload: unknown }) {
   const t = useTranslations("AiCoachPage.readCards.pmc");
-  const tc = useTranslations("AiCoachPage.readCards");
+  const openPreview = useContext(CoachLocalPreviewContext);
+  const id = useId();
   const tPmc = useTranslations("PMC");
   const o = asRecord(payload);
   if (!o || o.kind !== "pmc_range") return null;
@@ -684,110 +687,70 @@ function PmcRangeCard({ payload }: { payload: unknown }) {
       fingerprint: `legacy-pmc:${String(o.from ?? "")}:${String(o.to ?? "")}`,
     },
   };
+  const summaryItems = [
+    { label: t("stats.activeDays"), value: String(summary?.activeDays ?? "—") },
+    { label: t("stats.restDays"), value: String(summary?.restDays ?? "—") },
+    { label: t("stats.totalLoad"), value: String(summary?.totalLoad ?? "—") },
+    { label: t("stats.avgDaily"), value: String(summary?.avgDailyLoad ?? "—") },
+  ];
+  const trend = chartValue.rows.some(({ values }) =>
+    [values.ATL, values.CTL, values.TSB].some((value) => value != null));
+  const subtitle = `${chartValue.provenance.from} – ${chartValue.provenance.to}`;
+  const detail = trend ? <TrainingVisualizationContent value={chartValue} /> : null;
   return (
-    <CoachCard
-      tone="info"
-      icon={<BarChart3 className="h-4 w-4" />}
-      title={inlineTitle(
-        t("title"),
-        `${String(o.from ?? "")} → ${String(o.to ?? "")}`,
-      )}
-      dense
-      appearance="strip"
-      collapsible
-      defaultCollapsed
-      toggleAriaLabel={tc("toggleDetails")}
-    >
-      <CoachCard.StatGrid
-        items={[
-          {
-            label: t("stats.activeDays"),
-            value: summary ? String(summary.activeDays ?? "—") : "—",
-          },
-          {
-            label: t("stats.restDays"),
-            value: summary ? String(summary.restDays ?? "—") : "—",
-          },
-          {
-            label: t("stats.totalLoad"),
-            value: summary ? String(summary.totalLoad ?? "—") : "—",
-          },
-          {
-            label: t("stats.avgDaily"),
-            value: summary ? String(summary.avgDailyLoad ?? "—") : "—",
-          },
-          ...(last
-            ? [
-                {
-                  label: `${tPmc("fatigue.title")} (${tPmc("abbr.fatigue")})`,
-                  value: last.ATL != null ? String(last.ATL) : "—",
-                },
-                {
-                  label: `${tPmc("fitness.title")} (${tPmc("abbr.fitness")})`,
-                  value: last.CTL != null ? String(last.CTL) : "—",
-                },
-                {
-                  label: `${tPmc("form.title")} (${tPmc("abbr.form")})`,
-                  value: last.TSB != null ? String(last.TSB) : "—",
-                },
-              ]
-            : []),
-        ]}
-      />
-      {chartValue.rows.length > 1 ? (
-        <div className="mt-3">
-          <TrainingVisualizationContent value={chartValue} />
+    <CoachPreviewCard icon={BarChart3} title={t("title")} subtitle={subtitle}
+      onOpen={trend && openPreview ? () => openPreview(id, t("title"), (
+        <div className="space-y-3">
+          <CoachPreviewMetrics items={[
+            { label: `${tPmc("fatigue.title")} (ATL)`, value: String(chartValue.summary.ATL ?? "—") },
+            { label: `${tPmc("fitness.title")} (CTL)`, value: String(chartValue.summary.CTL ?? "—") },
+            { label: `${tPmc("form.title")} (TSB)`, value: String(chartValue.summary.TSB ?? "—") },
+          ]} />
+          {detail}
         </div>
-      ) : null}
-    </CoachCard>
+      )) : undefined}>
+      <CoachPreviewMetrics items={summaryItems} />
+      {!openPreview ? detail : null}
+    </CoachPreviewCard>
   );
 }
 
 function ProfileZonesCard({ payload }: { payload: unknown }) {
   const t = useTranslations("AiCoachPage.readCards.profileZones");
-  const tc = useTranslations("AiCoachPage.readCards");
   const o = asRecord(payload);
   if (!o || o.kind !== "profile_zones") return null;
   const za = asRecord(o.zoneAvailability);
+  const status = asRecord(o.zoneStatus);
+  const available = [
+    { label: t("zonesHr"), enabled: za?.hasHeartRateZones === true || asRecord(status?.heartRate)?.configured === true },
+    { label: t("zonesPace"), enabled: za?.hasPaceZones === true || asRecord(status?.pace)?.configured === true },
+    { label: t("zonesPower"), enabled: za?.hasPowerZones === true || asRecord(status?.power)?.configured === true },
+  ];
   return (
-    <CoachCard
-      tone="neutral"
-      icon={<Gauge className="h-4 w-4" />}
-      title={inlineTitle(t("title"), String(o.timezone ?? "") || undefined)}
-      dense
-      appearance="strip"
-      collapsible
-      defaultCollapsed
-      toggleAriaLabel={tc("toggleDetails")}
+    <CoachPreviewCard
+      icon={Gauge} title={t("title")}
+      subtitle={[o.timezone, o.heartRateZoneModel]
+        .filter((value): value is string => typeof value === "string" && Boolean(value.trim()))
+        .join(" · ")}
     >
-      <CoachCard.StatGrid
-        items={[
-          {
-            label: "FTP",
-            value: o.ftp != null ? String(o.ftp) : "—",
-          },
-          {
-            label: "LTHR",
-            value: o.lthr != null ? String(o.lthr) : "—",
-          },
-          {
-            label: t("maxHr"),
-            value: o.maxHeartRate != null ? String(o.maxHeartRate) : "—",
-          },
-          {
-            label: t("zonesHr"),
-            value: za?.hasHeartRateZones ? "✓" : "—",
-          },
-          {
-            label: t("zonesPower"),
-            value: za?.hasPowerZones ? "✓" : "—",
-          },
-          {
-            label: t("zonesPace"),
-            value: za?.hasPaceZones ? "✓" : "—",
-          },
-        ]}
-      />
-    </CoachCard>
+      <CoachPreviewMetrics items={[
+        { label: "FTP", value: String(o.ftp ?? "—") },
+        { label: "LTHR", value: String(o.lthr ?? "—") },
+        { label: t("maxHr"), value: String(o.maxHeartRate ?? "—") },
+        ...(o.cp != null ? [{ label: "CP", value: String(o.cp) }] : []),
+      ]} />
+      <ul className="flex flex-wrap gap-2">
+        {available.map(({ label, enabled }) => {
+          const Icon = enabled ? CircleCheck : CircleMinus;
+          return (
+            <li key={label} className={cn("inline-flex items-center gap-1.5 rounded-control px-2 py-1 text-xs",
+              enabled ? "bg-success/10 text-success" : "bg-background/65 text-muted-foreground")}>
+              <Icon size={13} role="img" aria-label={enabled ? "✓" : "—"} />
+              {label}
+            </li>
+          );
+        })}
+      </ul>
+    </CoachPreviewCard>
   );
 }

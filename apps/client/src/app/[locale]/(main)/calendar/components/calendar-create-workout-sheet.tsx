@@ -13,20 +13,30 @@ import {
   WorkoutEditorSheet,
   type WorkoutEditorPayload,
 } from "@/components/plan/WorkoutEditorSheet";
-import { queryKeys } from "@/lib/query-keys";
-import { invalidateActivePlanAndPlanDetails } from "@/lib/query-invalidation";
+import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
 import { cn } from "@/lib/utils";
 
 type CreateScope = "inPlan" | "independent";
 
+function newCreationKey() {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return [hex.slice(0, 8), hex.slice(8, 12), hex.slice(12, 16), hex.slice(16, 20), hex.slice(20)].join("-");
+}
+
 export function CalendarCreateWorkoutSheet({
   open,
+  inline = false,
   onOpenChange,
   scheduledDate,
   activePlanId,
   defaultScope = "inPlan",
 }: {
   open: boolean;
+  inline?: boolean;
   onOpenChange: (open: boolean) => void;
   scheduledDate: string;
   activePlanId?: string | null;
@@ -35,9 +45,11 @@ export function CalendarCreateWorkoutSheet({
   const t = useTranslations("CalendarExperience.createWorkout");
   const queryClient = useQueryClient();
   const [scope, setScope] = React.useState<CreateScope>(defaultScope);
+  const creationKey = React.useRef<string | undefined>(undefined);
 
   React.useEffect(() => {
     if (!open) return;
+    creationKey.current = undefined;
     setScope(defaultScope);
   }, [defaultScope, open]);
 
@@ -49,16 +61,11 @@ export function CalendarCreateWorkoutSheet({
         }
         return createPlanWorkout(activePlanId, dto);
       }
-      return createIndependentWorkout(dto);
+      creationKey.current ??= newCreationKey();
+      return createIndependentWorkout({ ...dto, idempotencyKey: creationKey.current });
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.plans.active() }),
-        queryClient.invalidateQueries({
-          queryKey: ["scheduled-workouts"],
-        }),
-        invalidateActivePlanAndPlanDetails(queryClient),
-      ]);
+      await invalidateAfterPlanMutation(queryClient, { planId: activePlanId ?? undefined });
       toast.success(t("success"));
       onOpenChange(false);
     },
@@ -134,17 +141,10 @@ export function CalendarCreateWorkoutSheet({
   return (
     <WorkoutEditorSheet
       open={open}
+      inline={inline}
       onOpenChange={onOpenChange}
       title={t("title")}
-      resetKey={`${scheduledDate}-${scope}-${defaultScope}`}
-      initialValue={{
-        text: "work 45m",
-        notes: "",
-        sportType: "RUN",
-        sportDefinitionCode: "ROAD_RUNNING",
-        blocks: null,
-        name: "",
-      }}
+      resetKey={scheduledDate}
       headerExtra={scopeToggle}
       showNameField
       onSave={handleSave}

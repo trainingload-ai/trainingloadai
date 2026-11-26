@@ -1624,7 +1624,7 @@ export class WorkoutService {
           };
         }
 
-        const distanceMatch = token.match(/^(\d+(?:\.\d+)?)(km|m)$/i);
+        const distanceMatch = token.match(/^(\d+(?:\.\d+)?)(km|meters?|metres?|yards?|yd|m)$/i);
         if (distanceMatch) {
           const value = Number(distanceMatch[1]);
           const unit = distanceMatch[2].toLowerCase();
@@ -1632,7 +1632,7 @@ export class WorkoutService {
             duration: 0,
             durationMeta: {
               kind: 'DISTANCE',
-              value,
+              value: /^(?:yd|yards?)$/.test(unit) ? value * 0.9144 : value,
               unit: unit === 'km' ? 'KILOMETERS' : 'METERS',
             },
           };
@@ -2378,11 +2378,7 @@ export class WorkoutService {
       finalizeRepeat();
       return result;
     } catch (error) {
-      this.logger.error(
-        `[parsePlanText] 解析训练计划文本失败：${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
+      this.logger.error(`Workout DSL could not be parsed (${error instanceof Error ? error.name : 'unknown error'})`);
       throw error;
     }
   }
@@ -2433,7 +2429,7 @@ export class WorkoutService {
         if (meta.unit === 'METERS') {
           return meta.value >= 1000 && meta.value % 1000 === 0
             ? `${stripNum(meta.value / 1000)}km`
-            : `${stripNum(meta.value)}m`;
+            : `${stripNum(meta.value)}meters`;
         }
         return `${stripNum(meta.value)}km`;
       }

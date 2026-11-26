@@ -60,6 +60,16 @@ function setup() {
     CoachBranchingService.prototype,
   ) as CoachBranchingService;
   const db = {
+    planProposalPreview: {
+      findUnique: async () => ({
+        id: 'preview',
+        userId: 'user',
+        sourcePlanId: 'plan',
+        expiresAt: new Date(Date.now() + 60_000),
+        appliedAt: decision.state === 'APPLIED' ? new Date() : null,
+        discardedAt: null,
+      }),
+    },
     aiCoachSession: { findUnique: async () => session },
     aiCoachMessage: {
       findFirst: async ({ where }: { where: { role?: string } }) =>

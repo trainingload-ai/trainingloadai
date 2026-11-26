@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, ChevronRight, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
@@ -17,6 +17,7 @@ export function CoachNavigationCard({
   href,
   onOpen,
 }: CoachNavigationCardProps) {
+  const EndIcon = href ? ArrowUpRight : ChevronRight;
   const content = (
     <>
       <Icon aria-hidden />
@@ -28,7 +29,7 @@ export function CoachNavigationCard({
           </span>
         ) : null}
       </span>
-      <ArrowUpRight aria-hidden />
+      <EndIcon aria-hidden />
     </>
   );
   const className =

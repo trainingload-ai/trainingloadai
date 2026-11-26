@@ -521,6 +521,7 @@
       "workoutDialogSessionMeta": "Séance {ordinal} · {sport}",
       "workoutDialogSessionFallback": "Séance {ordinal}",
       "workoutDialogClose": "Fermer",
+      "workoutDialogBackToCalendar": "Retour au calendrier",
       "scheduleConflict": "Conflit avec vos disponibilités"
     },
     "readCards": {
@@ -577,6 +578,7 @@
         "colMin": "Faible",
         "colMax": "Haut",
         "unitPace": "(min/km)",
+        "unitPaceMi": "(min/mi)",
         "unitPace100m": "(min/100 m)",
         "unitHr": "(bpm)",
         "unitPower": "(W)",
@@ -666,6 +668,7 @@
       "showLess": "Afficher moins",
       "evidence": "Données utilisées",
       "loadDelta": "Variation de charge estimée",
+      "expectedImpact": "Impact prévu",
       "syncImpact": "Impact de synchronisation",
       "total": "Évaluées",
       "changed": "Modifiées",
@@ -4889,6 +4892,11 @@
     }
   },
   "PlanActivationDialog": {
+    "officialDescription": "Consultez et modifiez le calendrier provisoire, puis choisissez la date de début.",
+    "loadingDraft": "Chargement du calendrier provisoire…",
+    "changedDraft": "Le brouillon a été modifié ailleurs. Vérifiez le calendrier avant de commencer.",
+    "startFailed": "Impossible de démarrer le plan. Vérifiez le calendrier et réessayez.",
+    "editFailed": "Impossible d’enregistrer les modifications de la séance. Réessayez.",
     "title": "Activer le forfait",
     "description": "Choisissez la date de début réelle. Les dates d'entraînement seront calculées à partir de cette date et de chaque décalage d'entraînement.",
     "cancel": "Annuler",
@@ -6622,6 +6630,8 @@
     "adjustmentConflicts": {
       "PLAN_STATUS": "The plan can no longer be edited",
       "WORKOUT_REMOVED": "The workout was removed",
+      "WORKOUT_CHANGED": "Cette séance a été modifiée ailleurs",
+      "WORKOUT_NOT_VERIFIED": "Cette séance n’a pas pu être vérifiée lors de l’actualisation",
       "WORKOUT_STATUS": "The workout status has changed",
       "ACTIVITY_LINKED": "The workout is linked to an activity",
       "HISTORY": "The workout date has passed",
@@ -6634,11 +6644,17 @@
     "stageEdit": "Ajouter au brouillon",
     "batchSaved": "Modifications du plan enregistrées.",
     "batchFailed": "Impossible d’enregistrer les modifications. Réessayez.",
+    "adjustmentUnavailable": "Ce brouillon de modification ne peut plus être utilisé. Ton calendrier n’a pas changé. Tu peux repartir du calendrier actuel pour faire un nouvel ajustement.",
     "batchReloadTitle": "Charger le dernier calendrier ?",
     "batchConflict": "The schedule changed or the edits could not be saved. Load the latest schedule and review your changes before confirming.",
     "missedDrop": "Les séances manquées ne peuvent pas être reprogrammées.",
     "completedDrop": "Les séances terminées ne peuvent pas être reprogrammées.",
     "recovery": {
+      "unavailableTitle": "Brouillon de modification indisponible",
+      "localDraftRolledBack": "Les modifications non enregistrées ont été annulées.",
+      "localDraftWillBeRolledBack": "Les modifications non enregistrées seront également annulées.",
+      "retryDraft": "Actualiser et réessayer",
+      "refreshSchedule": "Actualiser le calendrier",
       "title": "L’aperçu du déplacement a expiré",
       "action": "Charger le calendrier à jour",
       "expired": "Chargez le calendrier à jour pour poursuivre cet ajustement dans cette conversation.",

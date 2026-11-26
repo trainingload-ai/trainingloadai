@@ -113,7 +113,7 @@ function CoachCardRoot({
     </>
   );
   const header = (
-    <header className="flex min-w-0 items-start gap-2">
+    <header className={cn("flex min-w-0 gap-2", collapsible ? "items-center" : "items-start")}>
       {collapsible ? (
         <ToolHeader
           ref={toggleRef}
@@ -133,7 +133,10 @@ function CoachCardRoot({
         </div>
       )}
       {headerRight ? (
-        <div className="flex max-w-[40%] shrink-0 flex-wrap items-center justify-end gap-1.5 py-3 pr-3 text-xs">
+        <div className={cn(
+          "ms-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5 text-xs",
+          !collapsible && "max-w-[40%] py-3 pr-3",
+        )}>
           {headerRight}
         </div>
       ) : null}

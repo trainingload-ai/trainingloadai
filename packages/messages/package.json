@@ -4,6 +4,7 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "exports": {
+    "./client-core/*.json": "./client-core/*.json",
     "./catalog": {
       "types": "./catalog.d.mts",
       "default": "./catalog.mjs"

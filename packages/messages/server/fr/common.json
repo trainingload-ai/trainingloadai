@@ -1,5 +1,8 @@
 {
   "coach_plan_quality": {
+    "WEEK_TARGET_LOAD_UNVERIFIED": "La charge hebdomadaire estimée ne peut pas être entièrement vérifiée par rapport à la plage cible. Consultez les données disponibles des séances.",
+    "POST_RECOVERY_LOAD_JUMP_REVIEW": "La charge estimée dépasse nettement celle d’avant la récupération. Vérifiez la reprise de l’entraînement.",
+    "RECOVERY_LOAD_UNVERIFIED": "Certaines estimations de charge manquent pour la semaine de récupération ou d’allègement. Vérifiez les séances et l’effort prévus.",
     "UNKNOWN_DURATION": "Certaines séances sont définies par distance ou sans durée fixe : la durée hebdomadaire totale reste inconnue.",
     "LONG_SESSION_NOT_REDUCED": "La séance la plus longue de récupération ou d’allègement n’a pas été raccourcie : vérifiez son intensité.",
     "VOLUME_JUMP_REVIEW": "Certaines hausses de durée hebdomadaire dépassent 30 % : vérifiez les entraînements récents. Ce n’est pas un seuil universel de sécurité.",
@@ -14,6 +17,7 @@
     "success": "Requête effectuée avec succès"
   },
   "coachRuntime": {
+    "planDraftSummaryFallback": "Ce brouillon de {weeks} semaines comprend {sessions} séances et n’a pas encore été enregistré. Vérifiez le calendrier puis enregistrez le plan s’il vous convient. Vous pouvez aussi m’indiquer le jour ou la séance à modifier.",
     "optionKeepPlan": "Conserver le plan",
     "optionPostponeOneDay": "Reporter d'un jour",
     "optionSkipSession": "Ignorer cette séance",

@@ -521,6 +521,7 @@
       "workoutDialogSessionMeta": "Sessão {ordinal} · {sport}",
       "workoutDialogSessionFallback": "Sessão {ordinal}",
       "workoutDialogClose": "Fechar",
+      "workoutDialogBackToCalendar": "Voltar ao calendário",
       "scheduleConflict": "Conflito com a sua disponibilidade"
     },
     "readCards": {
@@ -577,6 +578,7 @@
         "colMin": "Baixo",
         "colMax": "Alto",
         "unitPace": "(min/km)",
+        "unitPaceMi": "(min/mi)",
         "unitPace100m": "(min/100m)",
         "unitHr": "(bpm)",
         "unitPower": "(C)",
@@ -666,6 +668,7 @@
       "showLess": "Mostrar menos",
       "evidence": "Dados utilizados",
       "loadDelta": "Mudança de carga estimada",
+      "expectedImpact": "Impacto previsto",
       "syncImpact": "Impacto da sincronização",
       "total": "Avaliados",
       "changed": "Alterados",
@@ -4889,6 +4892,11 @@
     }
   },
   "PlanActivationDialog": {
+    "officialDescription": "Revise e edite o calendário do rascunho e escolha a data de início.",
+    "loadingDraft": "Carregando o calendário do rascunho…",
+    "changedDraft": "O rascunho foi alterado em outro lugar. Revise o calendário antes de começar.",
+    "startFailed": "Não foi possível iniciar o plano. Revise o calendário e tente novamente.",
+    "editFailed": "Não foi possível salvar as alterações do treino. Tente novamente.",
     "title": "Ativar plano",
     "description": "Escolha a data de início real. As datas dos treinos serão calculadas a partir desta data e de cada compensação de treino.",
     "cancel": "Cancelar",
@@ -6622,6 +6630,8 @@
     "adjustmentConflicts": {
       "PLAN_STATUS": "The plan can no longer be edited",
       "WORKOUT_REMOVED": "The workout was removed",
+      "WORKOUT_CHANGED": "Este treino foi alterado em outro lugar",
+      "WORKOUT_NOT_VERIFIED": "Não foi possível verificar este treino ao atualizar",
       "WORKOUT_STATUS": "The workout status has changed",
       "ACTIVITY_LINKED": "The workout is linked to an activity",
       "HISTORY": "The workout date has passed",
@@ -6634,11 +6644,17 @@
     "stageEdit": "Adicionar ao rascunho",
     "batchSaved": "Alterações do plano salvas.",
     "batchFailed": "Não foi possível salvar as alterações. Tente novamente.",
+    "adjustmentUnavailable": "Este rascunho de ajuste não pode mais ser usado. Seu calendário não foi alterado. Você pode iniciar um novo ajuste no calendário atual.",
     "batchReloadTitle": "Carregar o calendário mais recente?",
     "batchConflict": "The schedule changed or the edits could not be saved. Load the latest schedule and review your changes before confirming.",
     "missedDrop": "Treinos não realizados não podem ser reagendados.",
     "completedDrop": "Treinos concluídos não podem ser reagendados.",
     "recovery": {
+      "unavailableTitle": "Rascunho de ajuste indisponível",
+      "localDraftRolledBack": "As alterações não salvas foram desfeitas.",
+      "localDraftWillBeRolledBack": "As alterações não salvas também serão desfeitas.",
+      "retryDraft": "Atualizar e tentar novamente",
+      "refreshSchedule": "Atualizar calendário",
       "title": "A prévia do reagendamento expirou",
       "action": "Carregar calendário atualizado",
       "expired": "Carregue o calendário atualizado para continuar o ajuste nesta conversa.",

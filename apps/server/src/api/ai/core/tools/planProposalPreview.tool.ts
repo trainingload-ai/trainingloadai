@@ -2,10 +2,13 @@ import type {
   PlanProposalPreviewRequest,
   PlanProposalPreviewResult,
 } from '@shared/plan-proposal';
+import { UnprocessableEntityException } from '@nestjs/common';
+import { asRecord } from '../ai-common.util';
 import { isCalendarDate } from '@shared/plan-calendar';
 import {
   calendarMonthEnd,
   hasRollingWeekTargets,
+  conflictingRollingMonthTargets,
   parseRollingStartSettings,
 } from '@shared/rolling-plan';
 import {
@@ -61,7 +64,6 @@ export const planProposalPreviewTool: AiToolDef<
   searchHint:
     'adapt replace supersede plan workout prescription zone preview confirmation',
   applicableSkills: [
-    'plan-builder',
     'plan-followup',
     'plan-start',
     'plan-cycle-review',
@@ -539,6 +541,12 @@ export const planProposalPreviewTool: AiToolDef<
               'ROLLING_WEEK_TARGETS_REQUIRED',
             );
           }
+          const conflicts = conflictingRollingMonthTargets(strategy);
+          if (conflicts.length)
+            return aiToolError(
+              `The week segments in ${strategy.monthStart} cannot reach the monthly range for ${conflicts.join(', ')}. Revise the monthly and weekly goals together.`,
+              'ROLLING_MONTH_TARGET_CONFLICT',
+            );
         }
       } catch (error) {
         return aiToolError(
@@ -557,6 +565,14 @@ export const planProposalPreviewTool: AiToolDef<
     mode: output.mode,
     expiresAt: output.expiresAt,
     decisionType: output.decisionType,
+    ...(output.mode === 'START'
+      ? {
+          startDate: output.presentation.startDate,
+          firstTrainingDates: [...new Set(output.presentation.rows
+            .map((row) => row.scheduledDate)
+            .filter(isCalendarDate))].sort().slice(0, 3),
+        }
+      : {}),
     decisionPayload:
       output.mode === 'START' || output.mode === 'SCHEDULE'
         ? {
@@ -615,17 +631,33 @@ export const planProposalPreviewTool: AiToolDef<
     if (!userId || !ctx.coachBranching) {
       throw new Error('plan.proposal_preview requires a signed-in user');
     }
-    return ctx.coachBranching.createPlanProposalPreview({
-      userId,
-      request: input,
-      binding:
-        ctx.sid && (ctx.branchId || input.mode === 'SCHEDULE')
-          ? {
-              sid: ctx.sid,
-              branchId: ctx.branchId ?? '',
-              userMessageId: ctx.currentUserMessageId,
-            }
-          : undefined,
-    });
+    try {
+      return await ctx.coachBranching.createPlanProposalPreview({
+        userId,
+        request: input,
+        binding:
+          ctx.sid && (ctx.branchId || input.mode === 'SCHEDULE')
+            ? {
+                sid: ctx.sid,
+                branchId: ctx.branchId ?? '',
+                userMessageId: ctx.currentUserMessageId,
+              }
+            : undefined,
+      });
+    } catch (error) {
+      if (input.mode === 'START' && error instanceof UnprocessableEntityException) {
+        const response = asRecord(error.getResponse());
+        if (response?.code === 'PLAN_SCHEDULE_INVALID' && Array.isArray(response.issues)) {
+          const issues = response.issues.slice(0, 8).map((value) => {
+            const issue = asRecord(value);
+            return isCalendarDate(issue?.date) ? `${issue.code} on ${issue.date}` : issue?.code;
+          });
+          throw new Error(
+            `PLAN_SCHEDULE_INVALID (${response.issues.length}): ${issues.join(', ')}. Recalculate workout positions from the selected date and retry with the existing schedule rules.`,
+          );
+        }
+      }
+      throw error;
+    }
   },
 });

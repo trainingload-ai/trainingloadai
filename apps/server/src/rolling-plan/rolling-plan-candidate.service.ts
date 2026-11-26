@@ -13,6 +13,7 @@ import { addCalendarDays, isCalendarDate } from '@shared/plan-calendar';
 import {
   calendarMonthEnd,
   hasRollingWeekTargets,
+  conflictingRollingMonthTargets,
   isoWeekStart,
 } from '@shared/rolling-plan';
 import type { WorkoutDefinitionInput } from '@shared/workout-structure';
@@ -192,6 +193,7 @@ export class RollingPlanCandidateService {
               ? [
                   'Return {kind:"MONTH",strategy:{monthStart,objective,loadRange,durationMinutesRange,runningDistanceKmRange,monthOverMonthReason,weekFocus:[{weekStart,focus,loadRange,durationMinutesRange}]},reason}. Use {unit:"NORMALIZED_LOAD",min,max} or null for loadRange. Use {min,max} or null for durationMinutesRange and runningDistanceKmRange. monthStart must equal windowStart. Include every ISO week intersecting from/through once, with ranges only for that week’s days inside the requested month window.',
                   'Write the objective in the athlete’s language as one short paragraph on this window’s training focus and why it fits now. Keep individual workouts in weekFocus. Give a running distance target in kilometers only when supported by training history, pace, or distance-based sessions. Use null for unsupported targets.',
+                  'When all week ranges for a metric are known, their combined range must overlap the month range for the same days. Sum only the portions of boundary weeks that belong to this month.',
                   'If facts.previousMonthDirection exists, compare planned targets for the same activity and units using both bounds. In monthOverMonthReason, explain in one or two sentences why the goals increase, decrease, or stay at the same level, using the athlete’s recent training, recovery, or event context. If a comparable target or a reason is missing, use null rather than guessing. Never compare a partial month with a full month or substitute actual load for a planned target.',
                 ]
               : [
@@ -246,6 +248,11 @@ export class RollingPlanCandidateService {
     ) {
       throw new RollingPlanCandidateError('ROLLING_CANDIDATE_INVALID');
     }
+    const conflicts = conflictingRollingMonthTargets(parsed.data.strategy);
+    if (conflicts.length) throw new RollingPlanCandidateError(
+      'ROLLING_CANDIDATE_INVALID',
+      `The sum of the monthly week segments cannot meet the monthly target for ${conflicts.join(', ')}.`,
+    );
     return {
       ...parsed.data,
       strategy: {

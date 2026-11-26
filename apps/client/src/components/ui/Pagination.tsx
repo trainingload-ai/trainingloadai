@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 interface PaginationProps {
   currentPage: number;
@@ -10,6 +11,7 @@ interface PaginationProps {
   itemsPerPage: number;
   onPageChange: (page: number) => void;
   disabled?: boolean;
+  variant?: "default" | "compact";
 }
 
 export function Pagination({
@@ -18,8 +20,11 @@ export function Pagination({
   itemsPerPage,
   onPageChange,
   disabled = false,
+  variant = "default",
 }: PaginationProps) {
   const t = useTranslations("activities");
+  const format = useFormatter();
+  const compact = variant === "compact";
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const hasPrevious = currentPage > 1;
   const hasNext = currentPage < totalPages;
@@ -36,28 +41,44 @@ export function Pagination({
     }
   };
 
+  const pageLabel = t("pageLabel", { current: currentPage, total: totalPages });
+  const buttonClassName = compact
+    ? "aria-disabled:pointer-events-none aria-disabled:opacity-50 [@media(pointer:coarse)]:size-11"
+    : undefined;
   return (
-    <div className="flex items-center justify-end space-x-1">
-      <span className="text-sm text-muted-foreground mr-4">
-        {t("pageLabel", { current: currentPage, total: totalPages })}
-      </span>
+    <div className={cn("flex items-center justify-end", compact ? "gap-1" : "space-x-1")}>
+      {!compact && <span className="mr-4 text-sm text-muted-foreground">{pageLabel}</span>}
       <Button
-        variant="outline"
-        size="sm"
+        type="button"
+        variant={compact ? "ghost" : "outline"}
+        size={compact ? "icon-sm" : "sm"}
+        className={buttonClassName}
         onClick={handlePrevious}
-        disabled={!hasPrevious || disabled}
+        aria-label={t("prevPage")}
+        aria-disabled={compact ? !hasPrevious || disabled : undefined}
+        disabled={!compact && (!hasPrevious || disabled)}
       >
-        <ChevronLeft className="h-4 w-4 lg:hidden" />
-        <span className="hidden lg:block">{t("prevPage")}</span>
+        <ChevronLeft aria-hidden className={cn("size-4 rtl:rotate-180", !compact && "lg:hidden")} />
+        {!compact && <span className="hidden lg:block">{t("prevPage")}</span>}
       </Button>
+      {compact && (
+        <span role="status" className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
+          <span className="sr-only">{pageLabel}</span>
+          <span aria-hidden>{format.number(currentPage)} / {format.number(totalPages)}</span>
+        </span>
+      )}
       <Button
-        variant="outline"
-        size="sm"
+        type="button"
+        variant={compact ? "ghost" : "outline"}
+        size={compact ? "icon-sm" : "sm"}
+        className={buttonClassName}
         onClick={handleNext}
-        disabled={!hasNext || disabled}
+        aria-label={t("nextPage")}
+        aria-disabled={compact ? !hasNext || disabled : undefined}
+        disabled={!compact && (!hasNext || disabled)}
       >
-        <ChevronRight className="h-4 w-4 lg:hidden" />
-        <span className="hidden lg:block">{t("nextPage")}</span>
+        <ChevronRight aria-hidden className={cn("size-4 rtl:rotate-180", !compact && "lg:hidden")} />
+        {!compact && <span className="hidden lg:block">{t("nextPage")}</span>}
       </Button>
     </div>
   );

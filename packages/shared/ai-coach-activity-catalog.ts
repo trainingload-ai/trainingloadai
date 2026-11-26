@@ -62,6 +62,7 @@ export const COACH_TOOL_LABELS = {
   "plan.active": "planActive",
   "plan.recent": "planRecent",
   "plan.suitability_assess": "planSuitability",
+  "plan.stage_phase": "planDraft",
   "plan.day_view": "planDay",
   "plan.execution_context": "planExecution",
   "plan.proposal_preview": "planPreview",

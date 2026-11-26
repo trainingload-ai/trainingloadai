@@ -150,6 +150,7 @@ import {
 import type { CoachTurnInput } from './core/coach-turn-input';
 import { WorkoutService } from '../workout/workout.service';
 import { WorkoutDefinitionService } from '../workout/workout-definition.service';
+import { PlanLoadEstimatorService } from '../plan/plan-load-estimator.service';
 import {
   coachSafetyConcern,
   resolveCoachReplyLanguage,
@@ -378,6 +379,7 @@ export class AiService {
     private readonly trainingDataCoverage: TrainingDataCoverageQueryService,
     private readonly workoutService: WorkoutService,
     private readonly workoutDefinitions: WorkoutDefinitionService,
+    private readonly planLoadEstimator: PlanLoadEstimatorService,
     private readonly aiUsage: AiUsageService,
     private readonly coachRuns: CoachRunStore,
     @Inject(AI_OPERATION_LEDGER)
@@ -1229,6 +1231,15 @@ export class AiService {
     if (params.activeSkillName === ATHLETE_STATE_SKILL)
       await this.assertAthleteStateAccess(userId);
     let ambientMemory: AmbientMemoryContext | undefined;
+    // The in-flight prompt is already present verbatim in this conversation.
+    const excludeMemorySourceMessageId =
+      !background &&
+      !params.branchId &&
+      !params.caseId &&
+      !params.platformFunded &&
+      params.activeSkillName !== ATHLETE_STATE_SKILL
+        ? params.currentUserMessageId
+        : undefined;
     let coachFacts:
       | Awaited<ReturnType<CoachFactContextService['build']>>
       | undefined;
@@ -1255,6 +1266,7 @@ export class AiService {
         timezone,
         allowAi: true,
         allowWithoutConsent: params.allowWithoutConsent,
+        excludeMemorySourceMessageId,
       });
     }
     if (
@@ -1280,6 +1292,7 @@ export class AiService {
         topic,
         revision: coachFacts.revision,
         timezone: coachFacts.timezone,
+        ...(excludeMemorySourceMessageId ? { excludeMemorySourceMessageId } : {}),
       });
     }
     const safetyConcern = background ? null : coachSafetyConcern(prompt);
@@ -1517,6 +1530,7 @@ export class AiService {
     const refresh = params.planQuestionRefresh;
     const planQuestionReview = refresh?.review;
     const toolCtx = {
+      onPlanValidationRejected: params.onPlanValidationRejected,
       onActivity: async (event: CoachActivityEvent) => {
         if (event.mutation && event.status === 'running')
           mutationStarted = true;
@@ -1530,7 +1544,7 @@ export class AiService {
       fitnessConfirmation,
       fitnessTrackingReply,
       fitnessAssessmentActive: activeSkill?.name === 'fitness-assessment',
-      planSuitability: activeSkill?.name === 'plan-builder' ? {} : undefined,
+      planSuitability: {},
       rollingPlanDraft,
       activeSkillName: activeSkill?.name,
       prisma: this.prisma,
@@ -1552,6 +1566,7 @@ export class AiService {
       activitySeries: this.activitySeries,
       workoutService: this.workoutService,
       workoutDefinitions: this.workoutDefinitions,
+      planLoadEstimator: this.planLoadEstimator,
       pmc: this.pmcService,
       athleteMemory: this.athleteMemory,
       session,
@@ -1726,7 +1741,6 @@ export class AiService {
         ? runMainCoachAgent(turn, reviewEvidence)
         : streamCoachAnswer(turn);
     const answer =
-      activeSkill?.name === 'plan-builder' &&
       !background &&
       !params.branchId &&
       !params.caseId &&
@@ -1744,6 +1758,7 @@ export class AiService {
                 date: coachFacts.date,
                 timezone: coachFacts.timezone,
                 allowAi: true,
+                excludeMemorySourceMessageId,
               });
               signal.throwIfAborted();
               if (current.status === 'DISABLED') return null;

@@ -19,6 +19,14 @@ import {
 import { CoachMemoryExtractionEnqueuer } from '../../memory/coach-memory-extraction-enqueuer.service';
 import { AthleteStateInquiryService } from '../../athlete-state/athlete-state-inquiry.service';
 import { createAiSdkCoachTools } from '../ai-sdk-tool-adapter';
+import { presentCoachPlanDraftTool } from '../tools/presentCoachPlanDraft.tool';
+import { WorkoutDefinitionService } from '@/api/workout/workout-definition.service';
+import { WorkoutCodecRegistry } from '@/api/workout/workout-codec.registry';
+import { EnduranceWorkoutCodec } from '@/api/workout/codecs/endurance-workout.codec';
+import { StrengthWorkoutCodec } from '@/api/workout/codecs/strength-workout.codec';
+import { FreeformWorkoutCodec } from '@/api/workout/codecs/freeform-workout.codec';
+import { WorkoutService } from '@/api/workout/workout.service';
+import { PlanLoadEstimatorService } from '@/api/plan/plan-load-estimator.service';
 import type { AiToolContext } from '../tool.types';
 import {
   buildHistoryMessages,
@@ -79,6 +87,54 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     message: { content: [{ type: 'text' as const, text: '训练建议' }] },
     operationId: randomUUID(),
     command: { kind: 'start' as const, requestId: randomUUID() },
+  });
+  it('retains every rejected plan candidate privately and returns scoped feedback to the tool caller', async () => {
+    const handle = (await store.begin(startArgs())).handle!;
+    const workoutService = new WorkoutService({} as never);
+    const workoutDefinitions = new WorkoutDefinitionService(new WorkoutCodecRegistry(
+      new EnduranceWorkoutCodec(workoutService), new StrengthWorkoutCodec(), new FreeformWorkoutCodec(),
+    ));
+    const planLoadEstimator = new PlanLoadEstimatorService(
+      {} as never, { getComposedUserProfile: async () => ({}) } as never,
+      workoutService, {} as never, {} as never,
+    );
+    const tool = createAiSdkCoachTools({ tools: [presentCoachPlanDraftTool], ctx: {
+      session: { user: { id: 'athlete' } }, signal: new AbortController().signal,
+      workoutDefinitions, planLoadEstimator,
+      onPlanValidationRejected: (event) => store.recordPlanValidationRejection(handle, event),
+    } as AiToolContext }).present_coach_plan_draft;
+    const candidate = {
+      title: 'Test plan', periodWeeks: 3, qualityContract: { weekPhases: ['BUILD', 'RECOVERY', 'BUILD'] },
+      workouts: [
+        { weekIndex: 1, dayIndex: 1, sportType: 'RUN', text: 'work 60m', notes: 'Run easily.', plannedSessionRpe: 4 },
+        { weekIndex: 2, dayIndex: 1, sportType: 'RUN', text: 'work 40m', notes: 'Run a hard effort.', plannedSessionRpe: 7 },
+        { weekIndex: 3, dayIndex: 1, sportType: 'RUN', text: 'work 60m', notes: 'Run steadily.', plannedSessionRpe: 5 },
+      ],
+    };
+    for (const toolCallId of ['first-rejection', 'second-rejection']) {
+      const response = await tool.execute!(candidate, { toolCallId, messages: [] });
+      expect(response).toMatchObject({ code: 'PLAN_QUALITY_INVALID', feedback: [{
+        target: { scope: 'WEEK', weekIndex: 2 },
+        weeks: [
+          { weekIndex: 1, phase: 'BUILD', totalEstimatedLoad: 40 },
+          { weekIndex: 2, phase: 'RECOVERY', totalEstimatedLoad: 46.7 },
+          { weekIndex: 3, phase: 'BUILD', totalEstimatedLoad: 50 },
+        ],
+      }] });
+      expect(response).not.toHaveProperty('diagnostics');
+    }
+    const rows = await prisma.coachPlanValidationRejection.findMany({
+      where: { attemptId: handle.projector.run.attemptId }, orderBy: { toolCallId: 'asc' },
+    });
+    expect(rows.map(({ toolCallId }) => toolCallId)).toEqual(['first-rejection', 'second-rejection']);
+    expect(rows[0].payload).toMatchObject({ candidate, diagnostics: {
+      valid: false,
+      workoutLoadEstimates: expect.arrayContaining([
+        { weekIndex: 2, dayIndex: 1, sessionIndex: 1, estimatedLoad: 46.7, source: 'SESSION_RPE' },
+      ]),
+    } });
+    await prisma.aiCoachSession.deleteMany();
+    expect(await prisma.coachPlanValidationRejection.count()).toBe(0);
   });
   const question = {
     questions: [
@@ -176,6 +232,91 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
       expect((await scopedStore.begin(answerArgs(handle!))).handle).toBeDefined();
     },
   );
+
+  it.each([
+    { name: 'keeps ordinary clarification', answerable: true },
+    { name: 'keeps an already visible clarification', alreadyVisible: true, answerable: true },
+    { name: 'rejects a clarification after consent withdrawal', disabled: true, answerable: false },
+    { name: 'rejects a clarification after training data changes', trainingChanged: true, answerable: false },
+    { name: 'rejects a clarification when another chat publishes memory', otherChat: true, answerable: false },
+    {
+      name: 'rejects a stale case-bound question',
+      metadata: { source: 'athlete_state_assessment', assessmentCaseId: 'case', assessmentQuestionId: 'question' },
+      answerable: false,
+    },
+  ])('$name when facts change during the turn', async ({
+    metadata = { branchId: null }, disabled, trainingChanged, otherChat, alreadyVisible, answerable,
+  }) => {
+    const memory = new CoachMemoryExtractionEnqueuer(
+      { isEnabled: async () => true } as never,
+      { isGranted: async () => true } as never,
+    );
+    const args = startArgs();
+    const scope = { topic: 'coach-context:2026-11-20', revision: 'initial' };
+    const scopedStore = new CoachRunStore(prisma as PrismaService, memory, undefined, {
+      current: async (_userId, _timezone, excludedSource) => {
+        const publishedMemory = await prisma.aiCoachMemoryExtractionJob.count({
+          where: {
+            userId: args.userId,
+            status: 'SUCCEEDED',
+            ...(excludedSource ? { sourceMessageId: { not: excludedSource } } : {}),
+          },
+        });
+        const revision = disabled ? 'disabled'
+          : trainingChanged ? 'training-data-changed'
+            : publishedMemory ? 'memory-changed' : scope.revision;
+        return [{ ...scope, revision }];
+      },
+    });
+    const prompt = '8 周后我想跑完 10 公里，每周三次，帮我排个计划。';
+    const { handle } = await scopedStore.begin({
+      ...args,
+      prompt,
+      message: { content: [{ type: 'text', text: prompt }] },
+    });
+    const { runId } = handle!.projector.run;
+    await scopedStore.bindFactScope(args.userId, runId, {
+      ...scope,
+      ...(!('assessmentCaseId' in metadata)
+        ? { excludeMemorySourceMessageId: handle!.inputMessageId }
+        : {}),
+    });
+    if (otherChat) {
+      await scopedStore.begin({ ...startArgs(), sid: 'other-session' });
+    }
+    handle!.projector.consume({
+      type: 'assistant',
+      message: { content: [{
+        type: 'tool_use',
+        id: 'question-call',
+        name: 'AskUserQuestion',
+        input: { ...question, metadata },
+      }] },
+    });
+
+    handle!.projector.finish('awaiting_input');
+    if (alreadyVisible) await scopedStore.checkpoint(handle!, 'awaiting_input');
+    const extracted = await prisma.aiCoachMemoryExtractionJob.updateMany({
+      where: { userId: args.userId, status: 'PENDING' },
+      data: { status: 'SUCCEEDED', finishedAt: new Date() },
+    });
+    expect(extracted.count).toBe(otherChat ? 2 : 1);
+    if (!answerable) {
+      await expect(scopedStore.checkpoint(handle!, 'awaiting_input'))
+        .rejects.toThrow('facts_changed');
+      expect(await prisma.coachRun.findUniqueOrThrow({ where: { id: runId } }))
+        .toMatchObject({ status: 'cancelled', pendingInteraction: null });
+      return;
+    }
+    if (alreadyVisible) await scopedStore.reconcileCurrentFacts(args.userId);
+    else await scopedStore.checkpoint(handle!, 'awaiting_input');
+    expect(await prisma.coachRun.findUniqueOrThrow({ where: { id: runId } }))
+      .toMatchObject({
+        status: 'awaiting_input',
+        pendingInteraction: expect.objectContaining({ status: 'pending' }),
+      });
+    expect((await scopedStore.begin(answerArgs(handle!))).handle).toBeDefined();
+  });
 
   it.each(['keep', 'withdraw consent'])(
     'reconciles a published plan clarification on current facts: %s',

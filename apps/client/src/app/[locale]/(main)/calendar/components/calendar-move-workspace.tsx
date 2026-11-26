@@ -13,6 +13,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { LoaderCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -82,6 +83,7 @@ import {
 import { canMoveCalendarWorkout } from "./calendar-move-model";
 import { canDropCalendarWorkout } from "./calendar-workout-drop";
 import { CalendarMoveDatePicker } from "./calendar-move-date-picker";
+import { CalendarMoveUnavailableDialog, type CalendarMoveUnavailableReason } from "./calendar-move-unavailable-dialog";
 import { CalendarMoveWeekComparison } from "./calendar-move-week-comparison";
 
 type MoveId = { planId: string; previewId: string };
@@ -167,6 +169,7 @@ export function CalendarMoveWorkspace({
   const [moveRequest, setMoveRequest] = useState<MoveRequest | null>(null);
   const { workout, targetDate: requestedDate } = moveRequest ?? {};
   const [review, setReview] = useState<Review | null>(null);
+  const [unavailable, setUnavailable] = useState<{ reason: CalendarMoveUnavailableReason; sid?: string } | null>(null);
   const [saved, setSaved] = useState<SavedMove | null>(null);
   const [session, setSession] = useState<PlanCalendarCoachSession | null>(null);
   const [reviewInBackground, setReviewInBackground] = useState(false);
@@ -302,6 +305,7 @@ export function CalendarMoveWorkspace({
     setOpen(false);
     setClosing(false);
     setReview(null);
+    setUnavailable(null);
     setConfirmConflict(false);
     setSession(null);
     setReviewInBackground(false);
@@ -320,6 +324,24 @@ export function CalendarMoveWorkspace({
     [clearEditor, queryClient, remember],
   );
 
+  const showUnavailableMove = async (
+    current: Review,
+    reason: NonNullable<PlanCalendarMovePreview["recoveryBlockedReason"]>,
+    sid?: string,
+  ) => {
+    const id = { planId: current.planId, previewId: current.preview.previewId };
+    if (reason === "alreadyApplied") {
+      await finish(id);
+      toast.info(t("recovery.alreadyApplied"));
+      return;
+    }
+    if (savedRef.current?.previewId === id.previewId) remember(null);
+    setReview(current);
+    setUnavailable({ reason, sid });
+    setConfirmConflict(false);
+    setOpen(true);
+  };
+
   useEffect(() => {
     if (open || !session || !coachState || coachState.running) return;
     let active = true;
@@ -337,13 +359,12 @@ export function CalendarMoveWorkspace({
   }, [clearEditor, coachState, finish, open, session]);
 
   const resume = async () => {
-    if (!saved) return;
+    if (!saved || busy) return;
     invoker.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
     setBusy("preview");
-    setOpen(true);
     setError(null);
     try {
       const preview = await getCalendarMove(saved.planId, saved.previewId);
@@ -357,10 +378,19 @@ export function CalendarMoveWorkspace({
         clearEditor();
         return;
       }
+      if (preview.recoveryBlockedReason) {
+        await showUnavailableMove(
+          { planId: saved.planId, preview }, preview.recoveryBlockedReason,
+          saved.coach && hasCoach ? `calendar-move:${saved.previewId}` : undefined,
+        );
+        return;
+      }
       setReview({ planId: saved.planId, preview });
+      setOpen(true);
       if (saved.coach && hasCoach) await startCoach(saved);
     } catch {
       setError(t("previewFailed"));
+      setOpen(true);
     } finally {
       setBusy(null);
     }
@@ -397,6 +427,10 @@ export function CalendarMoveWorkspace({
     }
   };
   const requestClose = () => {
+    if (unavailable) {
+      clearEditor();
+      return;
+    }
     if (reviewInBackground || busy === "coach") return;
     if (appliedDecisionId && moveId) void finish(moveId);
     else if (busy === "confirm" || coachState?.confirming) void close(true);
@@ -456,6 +490,10 @@ export function CalendarMoveWorkspace({
         await finish(moveId);
         return;
       }
+      if (current?.recoveryBlockedReason) {
+        await showUnavailableMove({ planId: moveId.planId, preview: current }, current.recoveryBlockedReason, session?.sid);
+        return;
+      }
 
       await queryClient.invalidateQueries({ queryKey: ["scheduled-workouts"] });
       const latest = await getPlanWorkoutDetail(moveId.planId, workoutId, { suppressErrorToast: true });
@@ -464,8 +502,7 @@ export function CalendarMoveWorkspace({
         return;
       }
       if (!canDropCalendarWorkout(latest, to)) {
-        setReview({ ...review, preview: { ...review.preview, state: PlanCalendarMoveState.Invalidated } });
-        setConfirmConflict(false);
+        await showUnavailableMove(review, "scheduleChanged", session?.sid);
         return;
       }
       const preview = await previewCalendarMove(latest.planId, latest.id, {
@@ -481,8 +518,7 @@ export function CalendarMoveWorkspace({
       }
     } catch (failure) {
       if (failure instanceof ApiFetchError && failure.status === 404) {
-        setReview({ ...review, preview: { ...review.preview, state: PlanCalendarMoveState.Invalidated } });
-        setConfirmConflict(false);
+        await showUnavailableMove(review, "scheduleChanged", session?.sid);
       } else {
         setError(t("recovery.failed"));
       }
@@ -617,6 +653,7 @@ export function CalendarMoveWorkspace({
             variant="outline"
             size="sm"
             className="absolute bottom-3 right-3 z-30 shadow-sm"
+            disabled={Boolean(busy)}
             onClick={() => void resume()}
           >
             {t("resume")}
@@ -685,7 +722,15 @@ export function CalendarMoveWorkspace({
             if (!next) requestClose();
           }}
         >
-          {session && !reviewInBackground ? (
+          {unavailable && review ? (
+            <CalendarMoveUnavailableDialog
+              planId={review.planId}
+              preview={review.preview}
+              reason={unavailable.reason}
+              sid={unavailable.sid}
+              onCloseAutoFocus={restoreFocus}
+            />
+          ) : session && !reviewInBackground ? (
             <CoachConversationDialogContent onCloseAutoFocus={restoreFocus}>
               {error && !closing ? (
                 <p role="alert" className="px-4 pt-2 text-sm text-destructive">

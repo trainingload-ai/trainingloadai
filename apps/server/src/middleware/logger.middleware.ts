@@ -56,6 +56,7 @@ export class LoggerMiddleware implements NestMiddleware {
       isSensitiveBearerRoute ||
       isSensitiveOperationsRoute ||
       isPersonalIntegrationRoute ||
+      /^\/mcp\/?$/.test(requestPath) ||
       isSelfHostBootstrapRoute;
     const declaredBodyBytes = req.get('content-length') || 'unknown';
 

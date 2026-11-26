@@ -4,8 +4,10 @@ import { resolve } from "node:path";
 import type { TrainingVisualizationV1 } from "../../../packages/shared/training-visualization";
 import type { TrainingVisualizationV2 } from "../../../packages/shared/training-exploration";
 import { openCoachFixture } from "./fixtures/coach-page";
+import { explorationFixtures } from "./fixtures/exploration-fixtures";
 import {
   activity,
+  enduranceBlocks,
   runRow,
   text,
   tool,
@@ -14,7 +16,7 @@ import {
   visualTime,
 } from "./fixtures/coach-visual-states";
 
-test("puts sleep and matching navigation cards below the completed answer", async ({ page }) => {
+test("puts the health summary and preview cards below the completed answer", async ({ page }) => {
   const firstParagraph = "下面是昨晚的睡眠记录。";
   const finalParagraph = "也可以打开活动、计划和概览。";
   const activityCard = tool("CoachDetailView", {
@@ -83,7 +85,7 @@ test("puts sleep and matching navigation cards below the completed answer", asyn
       activityButton,
       log.getByRole("button", { name: "基础训练计划", exact: true }),
       log.getByRole("button", { name: "概览", exact: true }),
-      log.getByRole("button", { name: /查看日历.*基础训练计划/ }),
+      log.getByRole("button", { name: /基础训练计划.*查看日历/ }),
     ];
     const answer = log.getByText(finalParagraph, { exact: true });
     await expect(answer).toBeVisible();
@@ -94,16 +96,101 @@ test("puts sleep and matching navigation cards below the completed answer", asyn
         Boolean(before.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING),
       paragraph)).toBe(true);
     }
-    const sizes = await Promise.all(links.map((link) => link.evaluate((node) => {
-      const { width, height } = node.getBoundingClientRect();
-      return { width, height };
-    })));
-    expect(new Set(sizes.map((size) => JSON.stringify(size))).size).toBe(1);
     await paragraph.dispose();
   };
   await verifyCards();
   await page.reload();
   await verifyCards();
+});
+
+test("previews a plan day workout from its read-only coach card", async ({ page }) => {
+  const state = visualStates.find(({ id }) => id === "workout-run")!;
+  let detailReads = 0;
+  await openCoachFixture(page, [runRow(state)], { navigate: false });
+  await page.route(/\/plans\/gallery-plan\/workouts\/gallery-workout(?:\?|$)/, (route) => {
+    detailReads++;
+    return route.abort();
+  });
+  await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
+  const trigger = page.getByRole("button", { name: /有氧间歇跑/ });
+  await trigger.click();
+  const dialog = page.getByRole("dialog", { name: "有氧间歇跑" });
+  await dialog.getByText("课表", { exact: true }).click();
+  await expect(dialog.getByText(/warmup 10m/)).toBeVisible();
+  await expect(dialog.getByRole("button", { name: /编辑|跳过|推迟/ })).toHaveCount(0);
+  expect(detailReads).toBe(0);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
+});
+
+test("previews the published week with workout thumbnails on desktop and dates on mobile", async ({ page }) => {
+  const planId = "published-week-plan";
+  const title = "冬季训练计划";
+  const initialDate = "2026-12-01";
+  const workout = {
+    planId, weekIndex: 1, dayIndex: 3, sessionIndex: 1, scheduledDate: "2026-12-02",
+    sportType: "RUN", status: "PLANNED", structureKind: "ENDURANCE",
+    structure: { kind: "ENDURANCE", version: 1, blocks: enduranceBlocks },
+    summary: { kind: "ENDURANCE", durationSeconds: 2280 }, text: "work 30m pace z2",
+  };
+  await openCoachFixture(page, [runRow({
+    id: "published-week", title: "查看课表", category: "数据结果",
+    parts: [tool("PlanCalendarView", { planId, title, initialDate })],
+  })], { navigate: false });
+  await page.route(`**/plans/${planId}`, (route) => route.fulfill({
+    json: { data: { plan: { id: planId, title, status: "ACTIVE", workouts: [] } } },
+  }));
+  await page.route("**/plans/scheduled-workouts?*", (route) => {
+    const { searchParams } = new URL(route.request().url());
+    const inPlan = [
+      { ...workout, id: "second-session", name: "第二节跑课", sessionIndex: 2 },
+      { ...workout, id: "first-session", name: "耐力跑" },
+      { ...workout, id: "another-plan-workout", planId: "another-plan", name: "其他计划的课" },
+      { ...workout, id: "following-sunday", name: "周末长跑", scheduledDate: "2026-12-06" },
+      { ...workout, id: "preceding-sunday", name: "跨月轻松跑", scheduledDate: "2026-11-29" },
+    ].filter(({ scheduledDate }) => scheduledDate >= searchParams.get("start")!
+      && scheduledDate <= searchParams.get("end")!);
+    return route.fulfill({ json: { data: { inPlan, independent: [] } } });
+  });
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
+  const card = page.getByRole("log").getByRole("article").filter({ hasText: title });
+  const open = card.getByRole("button", { name: /冬季训练计划.*查看日历/ });
+  await expect(card.getByRole("listitem")).toHaveCount(7);
+  await expect(card.locator("time").first()).toHaveAttribute("datetime", "2026-11-30");
+  await expect(card.locator("time").last()).toHaveAttribute("datetime", "2026-12-06");
+  await expect(card.locator("time[aria-current]")).toHaveAttribute("datetime", initialDate);
+  await expect(card.getByText("耐力跑", { exact: true })).toBeVisible();
+  await expect(card.getByTestId("workout-mini-chart").first()).toBeVisible();
+  await expect(card.getByText("+1 个训练", { exact: true })).toBeVisible();
+  await expect(card.getByText(/· 3 个训练$/)).toBeVisible();
+  await expect(card.getByText("其他计划的课", { exact: true })).toHaveCount(0);
+  await expect(card.getByText("周末长跑", { exact: true })).toBeVisible();
+  await expect(card.getByText("跨月轻松跑", { exact: true })).toHaveCount(0);
+  await expect(card.getByRole("button")).toHaveCount(1);
+  await open.press("Enter");
+  const panel = page.getByRole("tabpanel", { name: title });
+  await expect(panel.getByText("2026年12月", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: /关闭.*预览/ }).click();
+
+  await page.evaluate(() => {
+    const key = "trainingload:calendar-week-start";
+    localStorage.setItem(key, "sunday");
+    window.dispatchEvent(new Event(key));
+  });
+  await expect(card.locator("time").first()).toHaveAttribute("datetime", "2026-11-29");
+  await expect(card.locator("time").last()).toHaveAttribute("datetime", "2026-12-05");
+  await expect(card.locator("time[aria-current]")).toHaveAttribute("datetime", initialDate);
+  await expect(card.getByText("跨月轻松跑", { exact: true })).toBeVisible();
+  await expect(card.getByText("周末长跑", { exact: true })).toHaveCount(0);
+
+  await page.setViewportSize({ width: 393, height: 852 });
+  await expect(open).toBeVisible();
+  await expect(card.getByTestId("workout-mini-chart").first()).toBeHidden();
+  await expect(card.getByRole("listitem")).toHaveCount(7);
+  await expect(card.locator("time[aria-current]")).toBeVisible();
 });
 
 test("loads health chart details on demand and preserves sources and gaps", async ({ page }) => {
@@ -130,8 +217,10 @@ test("loads health chart details on demand and preserves sources and gaps", asyn
   const garmin = { id: JSON.stringify(["GARMIN", "HRV_RMSSD_MS"]), provider: "GARMIN", hrvType: "HRV_RMSSD_MS" };
   const apple = { id: JSON.stringify(["APPLE_HEALTH", "HRV_SDNN_MS"]), provider: "APPLE_HEALTH", hrvType: "HRV_SDNN_MS" };
   let reads = 0;
+  let unavailable = true;
   await page.route(/\/messages\/gallery-message\/charts\/health-trend(?:\?|$)/, (route) => {
     reads++;
+    if (unavailable) return route.fulfill({ status: 404, json: { message: "Chart unavailable" } });
     const switched = new URL(route.request().url()).searchParams.get("hrvSource") === garmin.id;
     return route.fulfill({ json: { data: {
       ...summary,
@@ -155,12 +244,16 @@ test("loads health chart details on demand and preserves sources and gaps", asyn
   await expect(page.getByText("2/4 天有记录")).toBeVisible();
   await expect(page.getByText("没有符合范围的可用数据。")).toBeVisible();
   expect(reads).toBe(0);
-  await page.getByRole("button", { name: "查看图表", exact: true }).click();
+  await page.getByRole("button", { name: /HRV.*查看图表/ }).click();
+  const panel = page.getByRole("tabpanel", { name: "HRV" });
+  await expect(panel.getByRole("heading", { name: "加载失败", exact: true })).toBeVisible();
+  await expect(panel.getByRole("alert")).toBeVisible();
+  unavailable = false;
+  await panel.getByRole("button", { name: "重试", exact: true }).click();
   await page.getByText("查看数据", { exact: true }).click();
   await expect(page.getByText("2026-11-19", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "2026-11-20", exact: true })).toBeVisible();
   expect(reads).toBeGreaterThan(0);
-  const panel = page.getByRole("tabpanel", { name: "HRV" });
   const source = panel.getByRole("combobox", { name: "HRV 来源" });
   await source.selectOption(garmin.id);
   await expect(panel.getByText("52 ms", { exact: true }).first()).toBeVisible();
@@ -176,6 +269,28 @@ test("opens an activity in the conversation sidebar after history reload", async
   const id = message.parts.find((part) => part.data?.input?.items)?.data?.input?.items?.[0]?.hashId;
   expect(id).toBeTruthy();
   await openCoachFixture(page, [row], { navigate: false });
+  const linkedWorkout = { workoutId: "easy-run", planId: "plan-1", name: "轻松跑课次", source: "MANUAL" };
+  let linked = true;
+  await page.route("**/activities/cards?*", (route) => {
+    expect(new URL(route.request().url()).searchParams.get("hashIds")).toBe(id);
+    return route.fulfill({ json: { data: { activities: [{
+      hashId: id, activityName: "清晨轻松跑", sportType: "RUN", processingStatus: "READY",
+      activitySources: [{ sourceKind: "FILE", isPrimary: true }],
+      thirdPartyMappings: [{ id: 1, provider: "INTERVALS_ICU", syncDirection: "EXPORT" }],
+      planLinkUiVisible: true, linkedPlanWorkout: linked ? linkedWorkout : null,
+    }] } } });
+  });
+  await page.route(`**/activities/${id}/plan-workout/candidates?*`, (route) =>
+    route.fulfill({ json: { data: { candidates: [] } } }),
+  );
+  await page.route(`**/activities/${id}/plan-workout/link`, (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({ json: { data: { linkedPlanWorkout: linked ? linkedWorkout : null } } });
+    }
+    expect(route.request().method()).toBe("DELETE");
+    linked = false;
+    return route.fulfill({ json: { data: { success: true } } });
+  });
   await page.route(`**/activities/${id}`, (route) => route.request().isNavigationRequest()
     ? route.fallback()
     : route.fulfill({ json: { data: {
@@ -187,17 +302,57 @@ test("opens an activity in the conversation sidebar after history reload", async
   await page.route(`**/activities/${id}/ai-review?*`, (route) => route.fulfill({ json: { data: {
     found: true, status: "SUCCEEDED", markdown: "保持轻松配速，逐步恢复训练节奏。",
   } } }));
+  await page.route(`**/activities/${id}/timeline-segments`, (route) => route.fulfill({
+    json: { data: { revision: 0, segments: null } },
+  }));
+  await page.route("**/charts/execute/activity?*", (route) => {
+    const metric = new URL(route.request().url()).searchParams.get("metric");
+    const rows = metric === "speed" || metric === "heartRate"
+      ? [0, 30, 60].map((second) => ({
+        time: new Date(Date.parse("2026-10-09T08:00:00Z") + second * 1000).toISOString(),
+        distance: second * 3,
+        [metric]: metric === "speed" ? 3 : 130,
+      }))
+      : [];
+    return route.fulfill({ json: { data: { rows, metadata: {} } } });
+  });
   await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
-  const open = page.getByRole("button", { name: /清晨轻松跑/ }).first();
+  const card = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "清晨轻松跑", exact: true }) });
+  const open = card.getByRole("button", { name: "清晨轻松跑", exact: true });
   const metrics = page.getByTestId("activity-summary-metric");
   let desktopMetrics: string[] | undefined;
   for (const afterReload of [false, true]) {
     if (afterReload) await page.reload();
-    await open.click();
-    await expect(page.getByRole("link", { name: "查看完整活动" })).toBeVisible();
-    const title = page.getByRole("heading", { name: "测试跑步详情", exact: true });
+    await expect(card).toContainText(/跑步 .*8\.2 km · 46:36 · 负荷 42/);
+    await expect(card.getByText("143 bpm")).toHaveCount(0);
+    await expect(card.getByLabel("Intervals.icu", { exact: true })).toBeVisible();
+    const workout = card.getByRole("button", { name: afterReload ? "关联训练" : "轻松跑课次", exact: true });
+    await expect(workout).toBeVisible();
+    const arrow = open.locator(".lucide-chevron-right");
+    await expect(arrow).toBeVisible();
+    if (afterReload) {
+      await open.press("Enter");
+    } else {
+      await card.screenshot({ path: testInfo.outputPath("activity-summary-card.png") });
+      const bounds = (await arrow.boundingBox())!;
+      const cardBounds = (await card.boundingBox())!;
+      expect(bounds.y - cardBounds.y).toBeCloseTo(12, 0);
+      expect(cardBounds.x + cardBounds.width - bounds.x - bounds.width).toBeCloseTo(12, 0);
+      if ((page.viewportSize()?.width ?? 0) < 448) {
+        await page.touchscreen.tap(cardBounds.x + 24, cardBounds.y + 24);
+      } else {
+        await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+      }
+    }
+    const preview = page.getByRole("tabpanel", { name: "清晨轻松跑", exact: true });
+    const title = preview.getByRole("heading", { name: "测试跑步详情", exact: true });
     await expect(title).toBeVisible();
-    const review = page.getByText("保持轻松配速，逐步恢复训练节奏。", { exact: true });
+    await expect(preview.getByRole("link", { name: "查看完整活动" })).toHaveCount(0);
+    await expect(preview.getByRole("button", { name: /编辑运动类型|轻松跑课次|关联训练/ })).toHaveCount(0);
+    await expect(preview.getByRole("combobox")).toHaveCount(0);
+    await expect(preview).toContainText(/RPE\s*3\/10/);
+    if (!afterReload) await expect(preview.getByText("轻松跑课次", { exact: true })).toBeVisible();
+    const review = preview.getByText("保持轻松配速，逐步恢复训练节奏。", { exact: true });
     await expect(review).toBeVisible();
     await expect(page.getByRole("tab", { name: "总览", selected: true })).toBeVisible();
     await expect(metrics).toHaveCount(6);
@@ -230,16 +385,180 @@ test("opens an activity in the conversation sidebar after history reload", async
         await page.screenshot({ path: testInfo.outputPath("activity-sidebar-phone.png") });
       }
     }
+    if (!afterReload) {
+      await preview.getByRole("tab", { name: "时间线", exact: true }).click();
+      const timeline = preview.locator("[data-timeline-scroll]");
+      await expect(timeline).toBeVisible();
+      await expect(preview.getByRole("button", { name: "编辑分段", exact: true })).toHaveCount(0);
+      await expect(preview.getByRole("button", { name: "添加图表", exact: true })).toHaveCount(0);
+    }
     expect(new URL(page.url()).pathname).toBe("/zh/ai-coach");
     await page.getByRole("button", { name: /关闭.*预览/ }).click();
     await expect(open).toBeFocused();
+    if (!afterReload) {
+      await workout.click();
+      await expect(preview).toHaveCount(0);
+      await page.getByRole("menuitem", { name: "移除关联" }).click();
+      await expect(card.getByRole("button", { name: "关联训练", exact: true })).toBeVisible();
+    }
   }
   if (desktopMetrics) {
     await page.goto(`/zh/activities/${id}`);
     await expect(page.getByRole("heading", { name: "测试跑步详情", exact: true })).toBeVisible();
     await expect(metrics).toHaveText(desktopMetrics);
     await expect(page.getByText("保持轻松配速，逐步恢复训练节奏。", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: /编辑运动类型/ })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: "RPE 3" })).toBeVisible();
   }
+});
+
+test("fetches the recent activity footers together and skips a missing activity", async ({ page }) => {
+  const row = runRow(visualStates.find((state) => state.id === "activity-recent")!);
+  await openCoachFixture(page, [row], { navigate: false });
+  let requests = 0;
+  await page.route("**/activities/cards?*", (route) => {
+    requests += 1;
+    expect(new URL(route.request().url()).searchParams.get("hashIds")).toBe("activity-a,activity-b");
+    return route.fulfill({ json: { data: { activities: [{
+      hashId: "activity-a", activityName: "同步后的跑步", sportType: "RUN", processingStatus: "READY",
+      activitySources: [{ provider: "INTERVALS_ICU", isPrimary: true }],
+    }] } } });
+  });
+  await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
+  const log = page.getByRole("log");
+  const matched = log.getByRole("article").filter({ has: page.getByRole("heading", { name: "同步后的跑步" }) });
+  const missing = log.getByRole("article").filter({ has: page.getByRole("heading", { name: "室内有氧骑行" }) });
+  await expect(matched.getByLabel("Intervals.icu", { exact: true })).toBeVisible();
+  await expect(missing.getByRole("heading", { name: "室内有氧骑行" })).toBeVisible();
+  const group = log.locator('[data-coach-card="collapsible"]').filter({
+    has: page.getByRole("heading", { name: "同步后的跑步", exact: true }),
+  });
+  expect((await matched.boundingBox())?.x).toBe((await group.boundingBox())?.x);
+  await expect(group.getByRole("button", { name: "下一页" })).toHaveCount(0);
+  await expect(missing.locator("footer")).toHaveCount(0);
+  expect(requests).toBe(1);
+});
+
+for (const status of [404, 503]) {
+  test(`retries an unavailable activity detail (${status}) from the recent activities preview`, async ({ page }) => {
+    const row = runRow(visualStates.find((state) => state.id === "activity-recent")!);
+    await openCoachFixture(page, [row], { navigate: false });
+    await page.route("**/activities/cards?*", (route) =>
+      route.fulfill({ json: { data: { activities: [] } } }),
+    );
+    const errorMessage = "Activity detail fixture error";
+    let available = false;
+    await page.route(/\/activities\/activity-a(?:\?|$)/, (route) => {
+      if (route.request().isNavigationRequest()) return route.fallback();
+      return available
+        ? route.fulfill({ json: { data: {
+            hashId: "activity-a", title: "测试跑步详情", sportType: "RUN",
+            startTime: "2026-10-08T23:05:00Z", elapsedTime: 2796, distance: 8240,
+            processingStatus: "READY",
+          } } })
+        : route.fulfill({ status, json: { message: errorMessage } });
+    });
+    await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
+
+    await page.getByRole("log").getByRole("button", { name: "清晨轻松跑", exact: true }).click();
+    const preview = page.getByRole("tabpanel", { name: "清晨轻松跑", exact: true });
+    await expect(preview.getByRole("heading", { name: "加载失败", exact: true })).toBeVisible();
+    await expect(page.getByText(errorMessage, { exact: true })).toHaveCount(0);
+    const retry = preview.getByRole("button", { name: "重试", exact: true });
+    await expect(retry).toBeEnabled();
+
+    available = true;
+    await retry.click();
+    await expect(preview.getByRole("heading", { name: "测试跑步详情", exact: true })).toBeVisible();
+    await expect(retry).toHaveCount(0);
+  });
+}
+
+test("paginates recent activities through controls in the expanded card header", async ({ page }) => {
+  const activities = Array.from({ length: 13 }, (_, index) => ({
+    hashId: `page-activity-${index + 1}`,
+    title: `最近训练 ${index + 1}`,
+    sportType: "RUN",
+    durationMin: 30,
+  }));
+  const row = runRow({
+    id: "activity-pages",
+    title: "最近活动分页",
+    category: "数据结果",
+    parts: [tool("ActivityRecent", { kind: "activity_recent", items: activities })],
+  });
+  await openCoachFixture(page, [row], { navigate: false });
+  const requestedIds: string[][] = [];
+  await page.route("**/activities/cards?*", (route) => {
+    requestedIds.push(new URL(route.request().url()).searchParams.get("hashIds")!.split(","));
+    return route.fulfill({ json: { data: { activities: [] } } });
+  });
+  await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
+
+  const group = page.locator('[data-coach-card="collapsible"]').filter({ hasText: "最近活动" });
+  const header = group.locator("header");
+  const toggle = header.getByRole("button", { name: "展开或收起详情" });
+  const next = header.getByRole("button", { name: "下一页" });
+  const previous = header.getByRole("button", { name: "上一页" });
+  const pageLabel = header.getByRole("status");
+  await expect(group.getByRole("article")).toHaveCount(10);
+  await expect(group.getByRole("heading", { name: "最近训练 10", exact: true })).toBeVisible();
+  await expect(pageLabel).toContainText("第 1 页，共 2 页");
+  await expect(previous).toBeDisabled();
+  const nextBounds = (await next.boundingBox())!;
+  const headerBounds = (await header.boundingBox())!;
+  expect(nextBounds.x + nextBounds.width).toBeCloseTo(headerBounds.x + headerBounds.width, 0);
+  const hasTouch = await page.evaluate(() => matchMedia("(pointer: coarse)").matches);
+  expect(nextBounds.height).toBeGreaterThanOrEqual(hasTouch ? 44 : 24);
+
+  await next.press("Enter");
+  await expect(group.getByRole("article")).toHaveCount(3);
+  await expect(group.getByRole("heading", { name: "最近训练 11", exact: true })).toBeVisible();
+  await expect(pageLabel).toContainText("第 2 页，共 2 页");
+  await expect(next).toBeDisabled();
+  await expect(next).toBeFocused();
+  await next.press("Enter");
+  await expect(group.getByRole("article")).toHaveCount(3);
+  await expect.poll(() => requestedIds.map((ids) => ids.length)).toEqual([10, 3]);
+  expect(requestedIds[1]).toEqual(activities.slice(10).map(({ hashId }) => hashId));
+
+  await toggle.click();
+  await expect(next).toHaveCount(0);
+  await expect(group.getByRole("article")).toHaveCount(0);
+  await toggle.click();
+  await expect(pageLabel).toContainText("第 2 页，共 2 页");
+  await previous.click();
+  await expect(group.getByRole("article")).toHaveCount(10);
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+});
+
+test("the activity search card menu stays independent from the card link", async ({ page }) => {
+  await openCoachFixture(page, undefined, { navigate: false });
+  const title = "活动流测试骑行";
+  const hashId = "feed-card-ride";
+  const ride = {
+    id: hashId, hashId, title, sportType: "CYCLING", status: "READY", timezone: "Asia/Shanghai",
+    startTime: "2026-11-24T03:20:00Z", duration: 1500, distance: 9100, load: 13,
+    primaryProvider: "MANUAL", thirdPartyMappings: [], planLinkUiVisible: false,
+  };
+  await page.route("**/api/v2/activities/feed?*", (route) => route.fulfill({ json: {
+    items: [ride], externalActivityMirrors: [], nextPage: null,
+    summary: { count: 1, totalDistance: 9100, totalLoad: 13 },
+  } }));
+  await page.route(`**/api/proxy/activities/${hashId}`, (route) => route.fulfill({ json: {
+    data: { ...ride, elapsedTime: ride.duration, processingStatus: "READY" },
+  } }));
+  await page.goto("/zh/activities/search");
+  const card = page.getByRole("article").filter({ has: page.getByRole("heading", { name: title }) });
+  const link = card.getByRole("link", { name: title });
+  await expect(link).toHaveAttribute("href", `/zh/activities/${hashId}`);
+  await card.getByRole("button", { name: "打开菜单" }).click();
+  await expect(page.getByRole("menuitem", { name: "导出", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/zh\/activities\/search$/);
+  await page.keyboard.press("Escape");
+  await expect(card.getByRole("button", { name: "打开菜单" })).toBeFocused();
+  await link.press("Enter");
+  await expect(page).toHaveURL(new RegExp(`/zh/activities/${hashId}$`));
 });
 
 test("opens plan details and athlete overview in the same sidebar", async ({ page }) => {
@@ -333,19 +652,21 @@ test("drills into training statistics, PMC gaps and a measured power curve", asy
     distance: 25000, elapsedTime: 4000, processingStatus: "READY", startTime: "2026-11-21T08:00:00.000Z",
   } } }));
   await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
-  await expect(page.getByText(/40\/60.*覆盖率 67%/)).toBeVisible();
-  await page.getByText("查看数据", { exact: true }).click();
-  const pmcRows = page.getByRole("table").first().getByRole("row");
+  await page.getByRole("button", { name: /负荷状态趋势.*查看图表/ }).click();
+  const pmcPanel = page.getByRole("tabpanel", { name: "负荷状态趋势" });
+  await pmcPanel.getByText("查看数据", { exact: true }).click();
+  const pmcRows = pmcPanel.getByRole("table").first().getByRole("row");
   await expect(pmcRows.nth(1)).toContainText("0");
   await expect(pmcRows.nth(2)).toContainText("—");
   await expect(pmcRows.nth(3)).toContainText("-8");
+  await page.getByRole("button", { name: /关闭.*预览/ }).click();
   await page.getByRole("button", { name: "查看图表 · 平均心率" }).click();
   const statsPanel = page.getByRole("tabpanel", { name: "跑步训练统计" });
   await statsPanel.getByRole("button", { name: "按活动查看" }).click();
   await expect(statsPanel.getByText("清晨耐力跑")).toBeVisible();
   await expect(statsPanel.getByText("142.5 bpm")).toBeVisible();
   await page.getByRole("button", { name: /关闭.*预览/ }).click();
-  await page.getByRole("button", { name: "查看图表", exact: true }).click();
+  await page.getByRole("button", { name: /骑行功率持续曲线.*查看图表/ }).click();
   const powerPanel = page.getByRole("tabpanel", { name: "骑行功率持续曲线" });
   await powerPanel.getByText("查看数据", { exact: true }).click();
   await expect(powerPanel.getByRole("row", { name: /5:00 220/ }).getByRole("cell", { name: "220", exact: true })).toBeVisible();
@@ -1392,12 +1713,12 @@ test("metric history charts render from SSE with units, tooltips and body measur
       },
       { value, index },
     );
-    const title = page.getByText(history.title, { exact: true });
-    await expect(title).toBeVisible();
     await expect(
       page.getByRole("button", { name: "停止", exact: true }),
     ).toHaveCount(0);
-    const chart = page.locator("[data-chart]").last();
+    await expect(page.locator("[data-chart]")).toHaveCount(0);
+    await page.getByRole("button", { name: `${history.title} · 查看图表`, exact: true }).click();
+    const chart = page.getByRole("tabpanel", { name: history.title }).locator("[data-chart]");
     await chart.scrollIntoViewIfNeeded();
     await expect(chart.locator(".recharts-line-curve")).toHaveCount(1);
     // Wait for real chart animation to settle before capturing the visual.
@@ -1418,6 +1739,7 @@ test("metric history charts render from SSE with units, tooltips and body measur
         document.documentElement.classList.remove("dark"),
       );
     }
+    await page.getByRole("button", { name: /关闭.*预览/ }).click();
   }
   expect(errors).toEqual([]);
 });
@@ -1426,8 +1748,6 @@ test("exploration charts stream in order with numeric axes, tooltips, pagination
   page,
 }, testInfo) => {
   test.setTimeout(120_000);
-  const { explorationFixtures } =
-    await import("./fixtures/exploration-fixtures");
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   // Keep fixed app chrome outside tall card screenshots without changing width.
@@ -1466,11 +1786,13 @@ test("exploration charts stream in order with numeric axes, tooltips, pagination
       },
       { value, index },
     );
-    const card = page.getByTestId("training-exploration-card").last();
-    await expect(card).toBeVisible();
     await expect(
       page.getByRole("button", { name: "停止", exact: true }),
     ).toHaveCount(0);
+    await expect(page.getByTestId("exploration-plot")).toHaveCount(0);
+    await page.getByRole("button", { name: `${value.title} · 查看图表`, exact: true }).last().click();
+    const card = page.getByRole("tabpanel", { name: value.title }).getByTestId("training-exploration-card");
+    await expect(card).toBeVisible();
     const plot = card.getByTestId("exploration-plot").first();
     const svg = plot.getByRole("img");
     await svg.scrollIntoViewIfNeeded();
@@ -1562,6 +1884,7 @@ test("exploration charts stream in order with numeric axes, tooltips, pagination
         () => document.documentElement.scrollWidth <= window.innerWidth + 1,
       ),
     ).toBe(true);
+    await page.getByRole("button", { name: /关闭.*预览/ }).click();
   }
   expect(errors).toEqual([]);
 });

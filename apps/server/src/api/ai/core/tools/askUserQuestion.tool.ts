@@ -48,11 +48,18 @@ function containsEightyTwentyHeartRateClaim(
 export const askUserQuestionTool: AiToolDef<Input, Output> = buildAiTool({
   name: 'ask_user_question',
   description:
-    'Ask the user concise multiple-choice questions when you need structured preferences, clarifications, or decisions. Use 1-4 questions, each with 2-4 options. Prefer this over free-text follow-up when the answer can be expressed as discrete choices. Clarify workout-only versus long-term scope without embedding estimated 80/20 running heart-rate zones in the options. For adoption of a displayed fitness calculation, use mutation_apply_fitness_calculation, which issues a question bound to the exact proposal if confirmation is needed. Do not mix questions with other tools in the same turn if you need the user to answer first.',
+    'Collect material missing facts or choices with 1–4 questions of 2–4 options each. For a new training plan, activate plan-builder before asking so answers resume that plan. Use known evidence first, then deliver the questions as the final step and wait for the answer. Clarify workout-only versus long-term scope without embedding estimated 80/20 running heart-rate zones. For adoption of a displayed fitness calculation use mutation_apply_fitness_calculation to bind confirmation to the proposal.',
   searchHint: 'prompt the user with multiple-choice questions',
   cost: 'low',
   maxResultChars: 16_000,
   parameters: askUserQuestionToolParametersSchema,
+  checkPermissions: (ctx, { metadata }) => {
+    const planQuestion = metadata?.skill === 'plan-builder' || metadata?.source === 'plan-builder';
+    if (planQuestion && ctx.activeSkillName !== 'plan-builder' && !ctx.planQuestionReview) {
+      return aiToolError('Activate plan-builder with skill.activate, then ask the plan question from that skill.', 'ACTIVE_SKILL_REQUIRED');
+    }
+    return { ok: true };
+  },
   validateInput: async (ctx, input) => {
     if (ctx.questionResponse?.declinedAll) {
       return aiToolError(

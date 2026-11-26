@@ -2,7 +2,7 @@
 
 import { useContext, useMemo } from "react";
 import { useCoachMessage, useCoachThread } from "./coach-chat-provider";
-import { CalendarDays, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CoachAssistantToolData } from "@/lib/ai-coach-ui-parts";
 import { CoachMarkdown } from "./coach-markdown";
@@ -15,7 +15,7 @@ import { useSmoothStreamingText } from "./use-smooth-streaming-text";
 import { shouldShowTrailingCoachWaiting } from "./coach-streaming-content";
 import { useCoachThinkingEnabled } from "./coach-thinking-context";
 import { CoachV2AssistantCards } from "./coach-assistant-cards";
-import { CoachNavigationCard } from "./cards/coach-navigation-card";
+import { CoachPublishedCalendarCard } from "./coach-published-calendar-card";
 import {
   isCoachTurnErrorEchoText,
   readCoachTurnError,
@@ -204,7 +204,6 @@ function CoachAssistantMessage({
   const openPublishedCalendar = useContext(
     CoachSchedulePreviewContext,
   )?.openPublishedCalendar;
-  const tWorkspace = useTranslations("AiCoachPage.workspace");
   const isThreadRunning = useCoachThread((state) => state.isRunning);
   const isLastMessage = useCoachThread(
     (state) =>
@@ -250,10 +249,8 @@ function CoachAssistantMessage({
               <CoachV2AssistantCards key={part.id} toolsOverride={part.tools} />
             ))}
             {showCalendar ? (
-              <CoachNavigationCard
-                icon={CalendarDays}
-                title={tWorkspace("viewCalendar")}
-                subtitle={calendar.title}
+              <CoachPublishedCalendarCard
+                calendar={calendar}
                 onOpen={() => openPublishedCalendar(calendar.id)}
               />
             ) : null}

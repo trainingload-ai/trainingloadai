@@ -10,6 +10,7 @@ import {
   AdaptiveDialogHeader,
   AdaptiveDialogTitle,
 } from "@/components/ui/adaptive-dialog";
+import { DialogFooter, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -64,6 +65,7 @@ import {
   type WorkoutStructureModule,
 } from "@/components/plan/plan-workout-builder-model";
 import { buildZoneResolutionContext } from "@/components/plan/zone-target-resolution";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserZones } from "@/hooks/useUserZones";
 import {
@@ -108,6 +110,7 @@ export type WorkoutEditorInitialValue = {
 
 type WorkoutEditorSheetProps = {
   open: boolean;
+  inline?: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   mobileTitle?: string;
@@ -145,11 +148,12 @@ const DESKTOP_FOOTER_BUTTON_LAYOUT_CLASS = "hidden pc:inline-flex";
 
 export function WorkoutEditorSheet({
   open,
+  inline = false,
   onOpenChange,
   title,
   mobileTitle,
   mobileScheduleLabel,
-  mobilePlanLayout = false,
+  mobilePlanLayout: useMobilePlanLayout = false,
   readOnly = false,
   initialValue,
   resetKey,
@@ -162,6 +166,8 @@ export function WorkoutEditorSheet({
   footerActions,
   showNameField = false,
 }: WorkoutEditorSheetProps) {
+  const isMobile = useIsMobile();
+  const mobilePlanLayout = useMobilePlanLayout && !inline;
   const t = useTranslations("WorkoutEditor");
   const tSports = useTranslations("SportCatalog");
   const titleId = React.useId();
@@ -535,25 +541,18 @@ export function WorkoutEditorSheet({
     );
   };
 
-  return (
-    <AdaptiveDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      shouldScaleBackground={false}
-    >
-      <AdaptiveDialogContent
-        desktopProps={{ "aria-labelledby": titleId }}
-        mobileProps={{ "aria-labelledby": titleId }}
-        className="flex flex-col gap-0 overflow-hidden p-0"
-        mobileClassName={cn(
-          "h-[96dvh] max-h-[96dvh] rounded-t-overlay border-0",
-          mobilePlanLayout ? "bg-muted" : "bg-background",
-        )}
-        desktopClassName="h-[min(90vh,760px)] max-h-[90vh] w-[min(92vw,900px)] max-w-none sm:max-w-none"
-      >
-        <AdaptiveDialogDescription className="sr-only">
+  const inlinePanel = React.useRef<HTMLElement>(null);
+  React.useEffect(() => {
+    if (inline && open) inlinePanel.current?.focus({ preventScroll: true });
+  }, [inline, open]);
+  const Header = inline ? DialogHeader : AdaptiveDialogHeader;
+  const Footer = inline ? DialogFooter : AdaptiveDialogFooter;
+  const Title = inline ? "h2" : AdaptiveDialogTitle;
+  const content = (
+    <>
+        {!inline && <AdaptiveDialogDescription className="sr-only">
           {mobileScheduleLabel ?? title}
-        </AdaptiveDialogDescription>
+        </AdaptiveDialogDescription>}
         {mobilePlanLayout ? (
           <div className="shrink-0 px-4 pb-4 pt-2 pc:hidden">
             <AdaptiveDialogHeader className="grid min-h-11 grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-0 p-0 text-center">
@@ -598,11 +597,13 @@ export function WorkoutEditorSheet({
             mobilePlanLayout && "hidden pc:block",
           )}
         >
-          <AdaptiveDialogHeader className="space-y-0 text-left">
-            <AdaptiveDialogTitle id={titleId} className="text-base leading-snug">
-              {title}
-            </AdaptiveDialogTitle>
-          </AdaptiveDialogHeader>
+          <Header className="space-y-0 text-left">
+            {!(mobilePlanLayout && isMobile) && (
+              <Title id={inline || !isMobile ? titleId : undefined} className="text-base font-semibold leading-snug">
+                {title}
+              </Title>
+            )}
+          </Header>
           {headerExtra}
           <div className="flex flex-wrap items-center gap-3">
             {showNameField ? (
@@ -1018,7 +1019,7 @@ export function WorkoutEditorSheet({
           </div>
         ) : null}
 
-        <AdaptiveDialogFooter className={cn(
+        <Footer className={cn(
           "shrink-0 gap-2 border-t border-border/60 bg-background px-4 py-3 pc:px-4 pc:py-2.5",
           readOnly && footerActions && "flex-row flex-wrap items-center justify-between sm:justify-between",
         )}>
@@ -1030,7 +1031,7 @@ export function WorkoutEditorSheet({
             className={
               readOnly
                 ? footerActions ? "ml-auto w-auto" : "w-full pc:w-auto"
-                : DESKTOP_FOOTER_BUTTON_LAYOUT_CLASS
+                : inline ? "w-auto" : DESKTOP_FOOTER_BUTTON_LAYOUT_CLASS
             }
           >
             {t("buttons.close")}
@@ -1129,7 +1130,38 @@ export function WorkoutEditorSheet({
               </Button>
             </>
           ) : null}
-        </AdaptiveDialogFooter>
+        </Footer>
+    </>
+  );
+  if (inline) return open ? (
+    <section
+      ref={inlinePanel}
+      tabIndex={-1}
+      aria-labelledby={titleId}
+      className="flex h-full min-h-0 flex-col overflow-hidden rounded-md border bg-background"
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && !event.defaultPrevented) {
+          event.stopPropagation();
+          onOpenChange(false);
+        }
+      }}
+    >
+      {content}
+    </section>
+  ) : null;
+
+  return (
+    <AdaptiveDialog open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
+      <AdaptiveDialogContent
+        desktopProps={{ "aria-labelledby": titleId }}
+        className="flex flex-col gap-0 overflow-hidden p-0"
+        mobileClassName={cn(
+          "h-[96dvh] max-h-[96dvh] rounded-t-overlay border-0",
+          mobilePlanLayout ? "bg-muted" : "bg-background",
+        )}
+        desktopClassName="h-[min(90vh,760px)] max-h-[90vh] w-[min(92vw,900px)] max-w-none sm:max-w-none"
+      >
+        {content}
       </AdaptiveDialogContent>
     </AdaptiveDialog>
   );

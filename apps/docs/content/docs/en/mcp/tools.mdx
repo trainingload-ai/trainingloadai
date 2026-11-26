@@ -13,7 +13,7 @@ This page is generated from the server capability catalog. Do not edit it direct
 | --- | --- | --- |
 | `get_training_snapshot` | Aggregate recent load, fitness, fatigue, form, week-over-week change, and recent activities for the authorized athlete. Prefer this tool before making several narrower calls. | `training:read` `plan:read` `activity:read` |
 | `get_athlete_profile` | Read the authorized athlete's sport preferences and training thresholds. Returns no name, email, date of birth, or internal user ID. | `profile:read` |
-| `list_activities` | Search the authorized athlete's activity summaries in a bounded range. Returns no raw sensor stream or precise GPS track. | `activity:read` |
+| `list_activities` | List recent training or search by name, sport, range, or a single user-local calendar day. Use get_activity for a selected result. Returns no raw sensor stream or precise GPS track. | `activity:read` |
 | `get_activity` | Read one authorized activity by opaque hash ID. Returns summary metrics only; precise route and raw sensor samples are excluded. | `activity:read` |
 | `get_activity_zones` | Read stored heart-rate, power, and pace zone distributions for one authorized activity. Returns aggregate duration and percentage only, never sensor samples. | `activity:read` |
 | `get_activity_splits` | Read bounded lap or split summaries for one authorized activity with opaque pagination. Exact coordinates and raw sensor samples are excluded. | `activity:read` |
@@ -27,6 +27,7 @@ This page is generated from the server capability catalog. Do not edit it direct
 | `get_training_zones` | Read the athlete current resolved heart-rate, pace, and power zones, including whether each setting is custom, derived, or unavailable. | `profile:read` |
 | `get_personal_bests` | Read processed best performances for standard or custom distance/time targets within a bounded date range. No route or raw sensor data is returned. | `activity:read` |
 | `list_training_plans` | Discover authorized training plans overlapping a bounded date range. Continuous plans have null periodWeeks and endDate. generatedThrough is the latest published date, not a plan end or a guarantee of uninterrupted coverage. | `plan:read` |
+| `get_training_plan` | Open the weekly schedule and planned workouts of a specific owned plan, including drafts. Discover its planId with list_training_plans first. This tool needs only plan:read. | `plan:read` |
 | `get_plan_summary` | Read a user-owned plan summary with completion, planned-versus-actual load, weekly progress, and sport breakdown. Continuous-plan totals cover workoutWindow only, with null periodWeeks; they are not lifetime totals. The plan is never modified. | `plan:read` `activity:read` |
 | `list_planned_workouts` | List authorized planned workouts in a bounded date range with opaque pagination. | `plan:read` |
 | `get_planned_workout` | Read one authorized planned workout and its structured steps. This tool never changes the plan. | `plan:read` |
@@ -554,7 +555,7 @@ Read the authorized athlete's sport preferences and training thresholds. Returns
 
 ## `list_activities`
 
-Search the authorized athlete's activity summaries in a bounded range. Returns no raw sensor stream or precise GPS track.
+List recent training or search by name, sport, range, or a single user-local calendar day. Use get_activity for a selected result. Returns no raw sensor stream or precise GPS track.
 
 - **Required scopes:** `activity:read`
 - **Annotations:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
@@ -588,6 +589,17 @@ Search the authorized athlete's activity summaries in a bounded range. Returns n
       "type": "string",
       "minLength": 1,
       "maxLength": 120
+    },
+    "day": {
+      "description": "A single local calendar day. Use instead of from/to for requests such as yesterday or November 20.",
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "timezone": {
+      "description": "Time zone explicitly given by the user for day. Otherwise use their Trainingload.ai setting.",
+      "type": "string",
+      "maxLength": 80
     },
     "from": {
       "type": "string",
@@ -714,6 +726,14 @@ Search the authorized athlete's activity summaries in a bounded range. Returns n
         "string",
         "null"
       ]
+    },
+    "day": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "timezone": {
+      "type": "string"
     }
   },
   "required": [
@@ -3118,6 +3138,241 @@ Discover authorized training plans overlapping a bounded date range. Continuous 
     "range",
     "items",
     "nextCursor"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `get_training_plan`
+
+Open the weekly schedule and planned workouts of a specific owned plan, including drafts. Discover its planId with list_training_plans first. This tool needs only plan:read.
+
+- **Required scopes:** `plan:read`
+- **Annotations:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
+- **Output budget:** 131072 bytes
+
+<details>
+<summary>Input JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "planId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "week": {
+      "description": "1-based plan week. Omit to open the current week, or week 1 for a draft.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5200
+    }
+  },
+  "required": [
+    "planId"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+<details>
+<summary>Output JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "plan": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "DRAFT",
+            "SCHEDULED",
+            "ACTIVE",
+            "PAUSED",
+            "COMPLETED",
+            "CANCELLED",
+            "SUPERSEDED"
+          ]
+        },
+        "planningMode": {
+          "type": "string",
+          "enum": [
+            "FIXED",
+            "ROLLING"
+          ]
+        },
+        "periodWeeks": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "status",
+        "planningMode",
+        "periodWeeks"
+      ],
+      "additionalProperties": false
+    },
+    "week": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "startDate": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "endDate": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "hasNextWeek": {
+      "type": "boolean"
+    },
+    "workouts": {
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "scheduledDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sportType": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "structureKind": {
+            "type": "string"
+          },
+          "plannedDurationMinutes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "weekday": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          },
+          "sessionIndex": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "text": {
+            "type": "string"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "scheduledDate",
+          "sportType",
+          "name",
+          "status",
+          "structureKind",
+          "plannedDurationMinutes",
+          "weekday",
+          "sessionIndex",
+          "text",
+          "notes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truncated": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "plan",
+    "week",
+    "startDate",
+    "endDate",
+    "timezone",
+    "hasNextWeek",
+    "workouts",
+    "truncated"
   ],
   "additionalProperties": false
 }

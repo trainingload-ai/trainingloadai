@@ -61,6 +61,10 @@ export const CoachChartPreviewContext = createContext<
   ((view: CoachChartView, title: string) => void) | null
 >(null);
 
+export const CoachLocalPreviewContext = createContext<
+  ((id: string, title: string, content: ReactNode) => void) | null
+>(null);
+
 export function CoachConversationDialogContent({
   children,
   onCloseAutoFocus,

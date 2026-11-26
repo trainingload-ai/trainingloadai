@@ -15,7 +15,7 @@ import { WorkoutPlanChart } from "@/components/workout/WorkoutPlanChart";
 import { WorkoutRenderer } from "@/components/workout/WorkoutRenderer";
 import type { SportType } from "@/api/activities";
 import { useQueryClient } from "@tanstack/react-query";
-import { updatePlanWorkout } from "@/api/plans";
+import { updateIndependentWorkout, updatePlanWorkout } from "@/api/plans";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
 import { WorkoutEditorSheet } from "./WorkoutEditorSheet";
 import { usePlanWorkoutDetail } from "@/api/usePlans";
@@ -141,7 +141,7 @@ export const ViewWorkoutDialog: React.FC<ViewWorkoutDialogProps> = ({
     <WorkoutDetailActions
       {...commands}
       pending={commands.pending || isLoading}
-      onEdit={detail?.capabilities?.edit && planId ? () => setEditWorkout(detail) : undefined}
+      onEdit={detail?.capabilities?.edit ? () => setEditWorkout(detail) : undefined}
       onMove={
         onMoveWorkout &&
         detail?.status === "PLANNED" &&
@@ -156,7 +156,7 @@ export const ViewWorkoutDialog: React.FC<ViewWorkoutDialogProps> = ({
     />
   );
 
-  if (editWorkout && planId) {
+  if (editWorkout) {
     return (
       <WorkoutEditorSheet
         open={open}
@@ -172,12 +172,18 @@ export const ViewWorkoutDialog: React.FC<ViewWorkoutDialogProps> = ({
           blocks: editWorkout.structure.kind === "ENDURANCE" ? editWorkout.structure.blocks as ParsedPlan : null,
         }}
         onSave={async (payload) => {
-          const saved = await updatePlanWorkout(planId, editWorkout.id, {
-            expectedRevision: editWorkout.revision,
-            weekIndex: editWorkout.weekIndex, dayIndex: editWorkout.dayIndex, sessionIndex: editWorkout.sessionIndex,
+          const fields = {
             sportType: payload.sportType, sportDefinitionCode: payload.sportDefinitionCode,
             definition: payload.definition, name: payload.name, notes: payload.notes,
-          });
+          };
+          const saved = planId
+            ? await updatePlanWorkout(planId, editWorkout.id, {
+                ...fields, expectedRevision: editWorkout.revision,
+                weekIndex: editWorkout.weekIndex, dayIndex: editWorkout.dayIndex, sessionIndex: editWorkout.sessionIndex,
+              })
+            : editWorkout.scheduledDate && editWorkout.revision && await updateIndependentWorkout(editWorkout.id, {
+                ...fields, expectedRevision: editWorkout.revision, scheduledDate: editWorkout.scheduledDate,
+              });
           if (!saved) throw new Error(tEditor("errors.saveFailed"));
           await invalidateAfterPlanMutation(queryClient, { planId });
         }}

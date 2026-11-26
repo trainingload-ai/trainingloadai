@@ -418,6 +418,204 @@ test("coalesces narrow calendar moves across months using either side of the com
   await expect(marker(from, "before")).toHaveCount(0);
 });
 
+test("creates and edits workouts in the conversation pane before saving one draft", async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await openCalendar(page, true);
+  const sid = "coach-workout-editor";
+  const title = "持续跑步课表";
+  const answer = "我们可以调整这周的安排。";
+  await openPublishedCalendarThread(page, sid, title, answer);
+  await page.route("**/plans/scheduled-workouts*", (route) =>
+    route.fulfill({ json: { data: { inPlan: [workout], independent: [] } } }));
+  await page.route("**/workout/parse-definition", (route) => route.fulfill({ json: { data: { definition: {
+    kind: "ENDURANCE", version: 1, text: workout.text, structure: enduranceStructure, summary: workout.summary, warnings: [],
+  } } } }));
+  const submissions: PlanCalendarEditsInput[] = [];
+  await mockCalendarAdjustment(page, (input) => submissions.push(input), () => {});
+  await page.goto(`/zh/ai-coach?sid=${sid}`);
+  await page.getByRole("button", { name: /查看日历/ }).click();
+  const panel = page.getByRole("tabpanel");
+  const calendar = panel.locator("[data-calendar-proposal]");
+  await calendar.getByRole("button", { name: workout.name, exact: true }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "编辑训练" }).click();
+  const editor = panel.getByRole("region", { name: workout.name });
+  await expect(editor).toBeVisible();
+  await expect(page.getByText(answer, { exact: true })).toBeVisible();
+  await editor.getByRole("textbox").first().fill("修改后的训练");
+  await editor.getByRole("button", { name: "加入草稿" }).click();
+  await expect(editor).toHaveCount(0);
+  await calendar.locator(`[data-calendar-date="${to}"]`).filter({ visible: true }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "添加训练" }).click();
+  const create = panel.getByRole("region", { name: "创建训练" });
+  await create.getByRole("textbox").first().fill("新建的训练");
+  await create.getByRole("tab", { name: "规则输入" }).click();
+  await create.getByRole("button", { name: "加入草稿" }).click();
+  await expect(create).toHaveCount(0);
+  expect(submissions).toEqual([]);
+  await calendar.getByRole("button", { name: "核对计划变更" }).click();
+  await expect.poll(() => submissions[0]?.edits).toMatchObject([
+    { kind: "UPDATE", workoutId, expectedRevision: workout.revision, workout: { name: "修改后的训练" } },
+    { kind: "ADD", targetDate: to, workout: { name: "新建的训练" } },
+  ]);
+});
+
+test("creates and edits an independent workout without leaving the conversation", async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await openCalendar(page, true);
+  const sid = "independent-workout-editor";
+  const answer = "这节训练可以独立安排。";
+  await openCoachFixture(page, [{ id: "answer", role: "assistant", content: answer, createdAt }], {
+    navigate: false, sessions: [{ id: sid, title: "计划外训练", updatedAt: createdAt, pinnedAt: null }],
+  });
+  let independent: Record<string, unknown>[] = [];
+  const requests: Array<{ idempotencyKey: string }> = [];
+  await page.route("**/plans/scheduled-workouts*", (route) =>
+    route.fulfill({ json: { data: { inPlan: [], independent } } }));
+  await page.route("**/workout/parse-definition", (route) => route.fulfill({ json: { data: { definition: {
+    kind: "ENDURANCE", version: 1, text: workout.text, structure: enduranceStructure, summary: workout.summary, warnings: [],
+  } } } }));
+  const independentId = "standalone-workout";
+  await page.route("**/plans/workouts/independent", (route) => {
+    const input = route.request().postDataJSON();
+    requests.push(input);
+    if (requests.length === 1) return route.fulfill({ status: 503, json: { message: "Temporary failure" } });
+    independent = [{ ...workout, id: independentId, planId: null, name: input.name, scheduledDate: input.scheduledDate,
+      capabilities: { ...workout.capabilities, edit: true } }];
+    return route.fulfill({ json: { data: { workout: independent[0] } } });
+  });
+  const edits: unknown[] = [];
+  await page.route(`**/plans/workouts/independent/${independentId}`, (route) => {
+    const input = route.request().postDataJSON();
+    edits.push(input);
+    if (edits.length === 2) {
+      independent = [{ ...independent[0], name: "另一窗口更新的独立课", revision: workout.revision + 2 }];
+      return route.fulfill({ status: 409, json: { message: "Independent workout changed" } });
+    }
+    independent = [{ ...independent[0], name: input.name, scheduledDate: input.scheduledDate, revision: workout.revision + 1 }];
+    return route.fulfill({ json: { data: { workout: independent[0] } } });
+  });
+  await page.goto(`/zh/ai-coach?sid=${sid}`);
+  await page.getByRole("button", { name: "计划外", exact: true }).click();
+  // HTTP self-host origins do not expose crypto.randomUUID.
+  expect(await page.evaluate(() => {
+    Reflect.deleteProperty(Crypto.prototype, "randomUUID");
+    return "randomUUID" in crypto;
+  })).toBe(false);
+  const pane = page.getByRole("region", { name: "计划外", exact: true });
+  await pane.getByRole("button", { name: "创建训练" }).click();
+  const create = pane.getByRole("region", { name: "创建训练" });
+  await expect(page.getByText(answer)).toBeVisible();
+  await create.getByRole("textbox").first().fill("独立课");
+  await create.getByRole("tab", { name: "规则输入" }).click();
+  const save = create.getByRole("button", { name: "创建", exact: true });
+  await save.click();
+  await expect.poll(() => requests.length).toBe(1);
+  await expect(create.getByRole("alert")).toBeVisible();
+  await expect(create.getByRole("textbox").first()).toHaveValue("独立课");
+  await save.click();
+  await expect(create).toHaveCount(0);
+  expect(requests[0].idempotencyKey).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  expect(requests[1].idempotencyKey).toBe(requests[0].idempotencyKey);
+  await expect(pane.getByText("独立课", { exact: true })).toBeVisible();
+  const openEditor = pane.getByRole("button", { name: "编辑训练" });
+  const editor = pane.getByRole("region", { name: "编辑训练" });
+  const name = editor.getByRole("textbox", { name: "训练名称（可选）" });
+  const saveEdit = editor.getByRole("button", { name: "保存训练" });
+  await openEditor.click();
+  await name.fill("取消的修改");
+  await editor.getByRole("button", { name: "关闭", exact: true }).click();
+  await expect(pane.getByText("独立课", { exact: true })).toBeVisible();
+  expect(edits).toHaveLength(0);
+
+  await openEditor.click();
+  await name.fill("已编辑的独立课");
+  await editor.getByLabel(/^排期日期/).fill(to);
+  await expect(name).toHaveValue("已编辑的独立课");
+  await saveEdit.click();
+  await expect(pane.getByText("已编辑的独立课", { exact: true })).toBeVisible();
+  expect(edits[0]).toMatchObject({ name: "已编辑的独立课", scheduledDate: to, expectedRevision: workout.revision });
+
+  await openEditor.click();
+  await name.fill("另一窗口会抢先保存");
+  await saveEdit.click();
+  await pane.getByRole("button", { name: "刷新课表" }).click();
+  await expect(pane.getByText("另一窗口更新的独立课", { exact: true })).toBeVisible();
+  expect(edits).toHaveLength(2);
+});
+
+test("resumes a coach-generated independent workout after refreshing and confirms the saved version", async ({ page }) => {
+  test.setTimeout(90_000);
+  const sid = "independent-coach-draft";
+  const id = "independent-draft-1";
+  const messages = [{
+    id: "reply", role: "assistant", content: "有一份训练草稿。", createdAt,
+    message: {
+      kind: "ui_message", version: 2, role: "assistant", providerReplay: false,
+      parts: [{ type: "data-coach-tool", id: "workout-draft", data: {
+        toolCallId: "workout-draft", name: "PresentIndependentWorkoutDraft", input: { draftId: id },
+      } }],
+    },
+  }] as const;
+  const definition = { kind: "ENDURANCE", version: 1, source: "STRUCTURE", structure: enduranceStructure };
+  let draft = {
+    id, revision: 1, state: "READY", workoutId: null as string | null,
+    workout: { name: "教练生成的轻松跑", scheduledDate: from, sportType: "RUN", text: workout.text, definition },
+  };
+  const mutations: unknown[] = [];
+  async function openDraftWindow(tab: Page, width: number) {
+    await tab.setViewportSize({ width, height: 900 });
+    await openCalendar(tab, true);
+    await openCoachFixture(tab, [...messages], { navigate: false, sessions: [
+      { id: sid, title: "计划外训练草稿", updatedAt: createdAt, pinnedAt: null },
+    ] });
+    await tab.route("**/workout/parse-definition", (route) =>
+      route.fulfill({ json: { data: { definition: {
+        ...definition, text: workout.text, summary: workout.summary, warnings: [],
+      } } } }));
+    await tab.route(`**/plans/workouts/independent-drafts/${id}`, (route) => {
+      if (route.request().method() === "PUT") {
+        const input = route.request().postDataJSON();
+        mutations.push(input);
+        if (input.action === "CONFIRM" && draft.state === "APPLIED" && input.expectedRevision + 1 === draft.revision) {
+          return route.fulfill({ json: { data: draft } });
+        }
+        if (input.expectedRevision !== draft.revision) return route.fulfill({ status: 409 });
+        draft = input.action === "SAVE"
+          ? { ...draft, workout: { ...draft.workout, ...input.workout }, revision: draft.revision + 1 }
+          : { ...draft, state: "APPLIED", workoutId: "confirmed-workout", revision: draft.revision + 1 };
+      }
+      return route.fulfill({ json: { data: draft } });
+    });
+    await tab.goto(`/zh/ai-coach?sid=${sid}`);
+    const resume = tab.getByRole("button", { name: "继续编辑", exact: true });
+    await resume.click();
+    const pane = tab.getByRole("region", { name: "计划外", exact: true });
+    await pane.getByRole("button", { name: "编辑训练" }).click();
+    return { resume, pane, editor: pane.getByRole("region", { name: "编辑训练" }) };
+  }
+  const secondPage = await page.context().newPage();
+  const first = await openDraftWindow(page, 1600);
+  const second = await openDraftWindow(secondPage, 390);
+  await first.editor.getByRole("textbox", { name: "训练名称（可选）" }).fill("保存后的轻松跑");
+  await first.editor.getByRole("button", { name: "保存草稿" }).click();
+  await expect(first.pane.getByRole("heading", { name: "保存后的轻松跑" })).toBeVisible();
+  expect(mutations).toHaveLength(1);
+  await second.editor.getByRole("textbox", { name: "训练名称（可选）" }).fill("旧窗口的编辑");
+  await second.editor.getByRole("button", { name: "保存草稿" }).click();
+  await second.pane.getByRole("button", { name: "刷新重试" }).click();
+  await expect(second.pane.getByRole("heading", { name: "保存后的轻松跑" })).toBeVisible();
+
+  await page.reload();
+  await first.resume.click();
+  await expect(first.pane.getByRole("heading", { name: "保存后的轻松跑" })).toBeVisible();
+  const create = (pane: typeof first.pane) => pane.getByRole("button", { name: "创建", exact: true });
+  await Promise.all([create(first.pane).click(), create(second.pane).click()]);
+  await expect(first.pane.getByRole("status").filter({ hasText: "已生效" })).toBeVisible();
+  await expect(second.pane.getByRole("status").filter({ hasText: "已生效" })).toBeVisible();
+  expect(mutations.slice(2)).toEqual(Array.from({ length: 2 }, () => ({ action: "CONFIRM", expectedRevision: 2 })));
+  expect(draft.revision).toBe(3);
+});
+
 test("stages several calendar edits in the conversation and saves them together", async ({ page }) => {
   test.setTimeout(60_000);
   const sid = "published-calendar-fixture";
@@ -613,60 +811,212 @@ test("stages several calendar edits in the conversation and saves them together"
   expect(await page.evaluate(() => window.coachStreamFixture.requests)).toBe(0);
 });
 
-test("asks before reloading a conflicted conversation calendar", async ({ page }) => {
-  const sid = "calendar-edit-conflict";
-  const title = "训练课表";
-  const answer = "这是你的训练课表。";
-  let revision = workout.revision;
-  let failReload = false;
-  await page.clock.setFixedTime(new Date(createdAt));
-  await openCoachFixture(page, [{
-    id: "reply", role: "assistant", content: answer, createdAt,
-    message: {
-      kind: "ui_message", version: 2, role: "assistant", providerReplay: false,
-      parts: [
-        { type: "data-coach-tool", id: "calendar", data: {
-          toolCallId: "calendar", name: "PlanCalendarView", input: { planId, title, initialDate: from },
-        } },
-        { type: "text", text: answer },
-      ],
-    },
-  }], { navigate: false, sessions: [{ id: sid, title, updatedAt: createdAt, pinnedAt: null }] });
-  await page.route("**/plans/scheduled-workouts*", (route) => failReload
-    ? route.fulfill({ status: 503, json: { message: "Unavailable" } })
-    : route.fulfill({ json: { data: {
-        inPlan: [{ ...workout, revision, name: revision === workout.revision ? workout.name : "更新后的课" }],
-        independent: [],
-      } } }));
-  await page.route(`**/plans/${planId}/calendar-adjustments/*`, (route) => {
-    revision = workout.revision + 1;
-    return route.fulfill({ status: 409, json: { message: "Schedule changed" } });
+for (const rollback of [false, true]) {
+  test(rollback
+    ? "rolls back the entire unsaved batch when one workout became immutable"
+    : "explains a calendar conflict in the conversation pane and retries the staged edit", async ({ page }) => {
+    const sid = "calendar-edit-conflict";
+    const title = "训练课表";
+    const answer = "这是你的训练课表。";
+    const companion = { ...workout, id: "companion-edit", name: "草稿里的第二节训练" };
+    let revision = workout.revision;
+    let failReload = false;
+    await page.clock.setFixedTime(new Date(createdAt));
+    await openCoachFixture(page, [{
+      id: "reply", role: "assistant", content: answer, createdAt,
+      message: {
+        kind: "ui_message", version: 2, role: "assistant", providerReplay: false,
+        parts: [
+          { type: "data-coach-tool", id: "calendar", data: {
+            toolCallId: "calendar", name: "PlanCalendarView", input: { planId, title, initialDate: from },
+          } },
+          { type: "text", text: answer },
+        ],
+      },
+    }], { navigate: false, sessions: [{ id: sid, title, updatedAt: createdAt, pinnedAt: null }] });
+    await page.route("**/plans/scheduled-workouts*", (route) => failReload
+      ? route.fulfill({ status: 503, json: { message: "Unavailable" } })
+      : route.fulfill({ json: { data: {
+          inPlan: [
+            { ...workout, revision, name: revision === workout.revision ? workout.name : "更新后的课",
+              status: rollback && revision !== workout.revision ? "DONE" : "PLANNED" },
+            ...(rollback ? [companion] : []),
+          ],
+          independent: [],
+        } } }));
+    await page.route(`**/plans/${planId}/calendar-adjustments/*`, (route) => {
+      revision = workout.revision + 1;
+      return route.fulfill({ status: 409, json: { message: "Schedule changed" } });
+    });
+    await page.goto(`/zh/ai-coach?sid=${sid}`);
+    await page.getByRole("button", { name: /查看日历/ }).click();
+    const calendar = page.locator("[data-calendar-proposal]");
+    await calendar.getByRole("button", { name: workout.name, exact: true })
+      .dragTo(calendar.locator(`[data-calendar-date="${to}"]`).filter({ visible: true }));
+    if (rollback) {
+      await calendar.getByRole("button", { name: companion.name, exact: true })
+        .dragTo(calendar.locator(`[data-calendar-date="${coachingDate}"]`).filter({ visible: true }));
+    }
+    const confirm = calendar.getByRole("button", { name: "核对计划变更" });
+    await confirm.click();
+    const overlay = calendar.getByRole("region", { name: "课表已变化" });
+    await expect(overlay).toBeVisible();
+    await expect(page.getByRole("alertdialog")).toHaveCount(0);
+    await expect(overlay.getByText(/课表已变化或当前安排无法保存/)).toBeVisible();
+    failReload = true;
+    const reload = overlay.getByRole("button", { name: "刷新重试", exact: true });
+    await expect(reload).toBeFocused();
+    await reload.click();
+    await expect(overlay.getByText("无法加载最新课表，请重试。")).toBeVisible();
+    failReload = false;
+    await reload.click();
+    await expect(overlay).toHaveCount(0);
+    if (rollback) {
+      await expect(page.getByRole("status").filter({ hasText: "本次未保存的调课已整批撤回" }))
+        .toContainText("更新后的课 · 训练状态已变化");
+      await expect(calendar.locator('[data-calendar-change="after"]')).toHaveCount(0);
+      await expect(confirm).toHaveCount(0);
+    } else {
+      await expect(calendar.locator('[data-calendar-change="after"]')).toContainText("更新后的课");
+      await expect(confirm).toBeEnabled();
+    }
   });
-  await page.goto(`/zh/ai-coach?sid=${sid}`);
-  await page.getByRole("button", { name: /查看日历/ }).click();
-  const calendar = page.locator("[data-calendar-proposal]");
-  await calendar.getByRole("button", { name: workout.name, exact: true })
-    .dragTo(calendar.locator(`[data-calendar-date="${to}"]`).filter({ visible: true }));
-  const confirm = calendar.getByRole("button", { name: "核对计划变更" });
-  await confirm.click();
-  const dialog = page.getByRole("alertdialog", { name: "加载最新课表？" });
+}
+
+test("opens the coach dialog for an unrecoverable move and refreshes only when requested", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.addInitScript(({ planId, previewId }) => {
+    localStorage.setItem("trainingload:calendar-move:fixture-user", JSON.stringify({ planId, previewId, coach: true }));
+  }, { planId, previewId });
+  await openCalendar(page, true);
+  await page.route(`**/ai/coach/sessions/${encodeURIComponent(`calendar-move:${previewId}`)}/messages*`, (route) =>
+    route.fulfill({ json: { data: [{ id: "old-request", content: "上次想把这节课改到周二", role: "user", createdAt }] } }));
+  const writes: string[] = [];
+  await page.route(`**/plans/${planId}/calendar-moves/${previewId}*`, (route) => {
+    if (route.request().method() !== "GET") writes.push(route.request().method());
+    return route.fulfill({ json: { data: { ...move, state: "EXPIRED", recoveryBlockedReason: "datesPassed" } } });
+  });
+  const resume = page.getByRole("button", { name: "继续上次调课" });
+  await resume.click();
+  const dialog = page.getByRole("dialog", { name: "对话" });
+  await expect(dialog.getByText("上次想把这节课改到周二")).toBeVisible();
+  await expect(dialog).toHaveCSS("opacity", "1");
+  const calendar = dialog.locator("[data-calendar-proposal]");
+  await expect(calendar.getByText("原日期或目标日期已经过去，无法继续这次调课。")).toBeVisible();
+  const refresh = calendar.getByRole("button", { name: "刷新课表" });
+  await expect(refresh).toBeEnabled();
+  await expect(calendar.locator(":scope > [inert]")).toHaveCount(1);
+  await page.setViewportSize({ width: 390, height: 820 });
+  await expect(refresh).toBeInViewport();
+  let refreshes = 0;
+  await page.route("**/plans/scheduled-workouts*", (route) => {
+    refreshes += 1;
+    return refreshes === 1
+      ? route.fulfill({ status: 503, json: { message: "Temporary load error" } })
+      : route.fulfill({ json: { data: { inPlan: [{ ...workout, name: "刷新后的周末轻松跑" }], independent: [] } } });
+  });
+  expect(refreshes).toBe(0);
+  await refresh.click();
+  await expect(calendar.getByText("无法加载最新课表，请重试。")).toBeVisible();
+  await refresh.click();
+  await expect(refresh).toHaveCount(0);
+  await expect(calendar.getByRole("button", { name: /刷新后的周末轻松跑/ }).first()).toBeVisible();
   await expect(dialog).toBeVisible();
-  await expect(dialog).toHaveCSS("backdrop-filter", "none");
-  const returnToEdit = dialog.getByRole("button", { name: "继续编辑" });
-  await expect(returnToEdit).toBeFocused();
-  await returnToEdit.click();
-  await expect(calendar.locator('[data-calendar-change="after"]')).toBeVisible();
-  await expect(confirm).toBeFocused();
-  await confirm.click();
-  failReload = true;
-  const reload = dialog.getByRole("button", { name: "加载最新课表", exact: true });
-  await reload.click();
-  await expect(dialog.getByText("无法加载最新课表，请重试。")).toBeVisible();
-  failReload = false;
-  await reload.click();
+  await expect(resume).toHaveCount(0);
+  await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
-  await expect(calendar.locator('[data-calendar-change="after"]')).toContainText("更新后的课");
-  await expect(confirm).toBeEnabled();
+  await expect(page.getByRole("button", { name: "今天", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("trainingload:calendar-move:fixture-user"))).toBeNull();
+  expect(await page.evaluate(() => window.coachStreamFixture.requests)).toBe(0);
+  expect(writes).toEqual([]);
+});
+
+test("reports the last invalid operation after confirmation conflicts and shows the current schedule", async ({ page }) => {
+  await openCalendar(page, true);
+  const draft: CalendarAdjustment = {
+    id: previewId, planId, versionId: previewId, currentVersionId: previewId,
+    state: "READY", isVersioned: true, expiresAt: move.expiresAt,
+    presentation: move.presentation, conflicts: [], operationKeys: [workoutId], receipt: null,
+  };
+  let current = draft;
+  let confirms = 0;
+  await page.route("**/plans/active", (route) => route.fulfill({ json: { data: { plan: {
+    id: planId, title: "持续跑步课表", status: "ACTIVE",
+    startDate: "2026-11-16", endDate: "2026-12-31",
+    currentWeekIndex: 1, currentDayIndex: 5, periodWeeks: 7, workouts: [],
+  } } } }));
+  await page.route(`**/plans/${planId}/calendar-adjustments`, (route) => route.fulfill({ json: { data: [current] } }));
+  await page.route(`**/plans/${planId}/calendar-adjustments/${previewId}`, (route) => route.fulfill({ json: { data: current } }));
+  await page.route(`**/plans/${planId}/calendar-adjustments/${previewId}/versions/${previewId}/confirm`, (route) => {
+    confirms += 1;
+    current = { ...draft, state: "INVALIDATED", conflicts: [{ key: workoutId, reason: "HISTORY" }], recoverableOperationKeys: [] };
+    return route.fulfill({ status: 422, json: { message: "The calendar adjustment needs to be refreshed" } });
+  });
+  await page.reload();
+  await page.getByRole("button", { name: today, exact: true }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "调整课表", exact: true }).click();
+  const editor = page.getByRole("dialog", { name: "调整课表" });
+  await editor.getByRole("button", { name: /待确认/ }).click();
+  await editor.getByRole("button", { name: "确认计划变更" }).click();
+  await expect(editor.getByText("周末轻松跑 · 训练日期已过")).toBeVisible();
+  await expect(editor.getByText("这份调课草稿已失效，未改动正式课表。你可以按当前课表重新调整。")).toBeVisible();
+  await expect(page.getByRole("alertdialog")).toHaveCount(0);
+  const refresh = editor.getByRole("button", { name: "刷新课表", exact: true });
+  await expect(refresh).toBeEnabled();
+  await refresh.click();
+  await expect(refresh).toHaveCount(0);
+  await expect(editor.locator('[data-calendar-change="after"]')).toHaveCount(0);
+  await editor.getByRole("button", { name: "新建调整" }).click();
+  await expect(editor.getByText("周末轻松跑 · 训练日期已过")).toHaveCount(0);
+  expect(confirms).toBe(1);
+});
+
+test("refreshes the eligible part of a mixed draft and waits for confirmation", async ({ page }) => {
+  const otherId = "eligible-workout";
+  await openCalendar(page, true, from, undefined, { id: otherId, scheduledDate: to, name: "可恢复的训练" });
+  await page.route("**/plans/active", (route) => route.fulfill({ json: { data: { plan: {
+    id: planId, title: "持续跑步课表", status: "ACTIVE",
+    startDate: "2026-11-16", endDate: "2026-12-31", currentWeekIndex: 1, currentDayIndex: 5,
+    periodWeeks: 7, workouts: [],
+  } } } }));
+  let draft: CalendarAdjustment = {
+    id: previewId, planId, versionId: previewId, currentVersionId: previewId,
+    state: "INVALIDATED", isVersioned: true, expiresAt: move.expiresAt,
+    presentation: { ...move.presentation, rows: [...move.presentation.rows, {
+      ...move.presentation.rows[0], workoutId: otherId, name: "可恢复的训练", scheduledDate: coachingDate,
+    }] },
+    conflicts: [{ key: workoutId, reason: "ACTIVITY_LINKED" }],
+    operationKeys: [workoutId, otherId], recoverableOperationKeys: [otherId], receipt: null,
+  };
+  await page.route(`**/plans/${planId}/calendar-adjustments`, (route) => route.fulfill({ json: { data: [draft] } }));
+  await page.route(`**/plans/${planId}/calendar-adjustments/${previewId}`, (route) => route.fulfill({ json: { data: draft } }));
+  let rebaseRequests = 0;
+  await page.route(`**/plans/${planId}/calendar-adjustments/${previewId}/rebase`, (route) => {
+    const input = route.request().postDataJSON();
+    expect(input).toMatchObject({ baseVersionId: previewId, operationKeys: [otherId] });
+    rebaseRequests += 1;
+    draft = { ...draft, versionId: input.versionId, currentVersionId: input.versionId, state: "READY", conflicts: [],
+      presentation: { ...draft.presentation, rows: draft.presentation.rows.filter(({ workoutId }) => workoutId === otherId) },
+      operationKeys: [otherId], recoverableOperationKeys: undefined };
+    return route.fulfill({ json: { data: draft } });
+  });
+  await page.reload();
+  await page.getByRole("button", { name: today, exact: true }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "调整课表", exact: true }).click();
+  const editor = page.getByRole("dialog", { name: "调整课表" });
+  await editor.getByRole("button", { name: /已失效/ }).click();
+  const overlay = editor.getByRole("region", { name: "已失效" });
+  await expect(overlay.getByText("周末轻松跑 · 训练已关联活动")).toBeVisible();
+  const refresh = overlay.getByRole("button", { name: "刷新重试" });
+  const candidate = overlay.getByRole("checkbox", { name: "可恢复的训练" });
+  await candidate.uncheck();
+  await expect(refresh).toBeDisabled();
+  expect(rebaseRequests).toBe(0);
+  await candidate.check();
+  await refresh.click();
+  await expect(overlay).toHaveCount(0);
+  await expect(editor.getByRole("button", { name: "确认计划变更" })).toBeEnabled();
+  expect(rebaseRequests).toBe(1);
 });
 
 test("saves a batch draft from the main calendar and resumes it from the same calendar", async ({ page }) => {
@@ -768,6 +1118,7 @@ test("prevents dragging missed or completed workouts", async ({
 
 test("previews and confirms a refreshed move in the original conversation without another coach turn", async ({ page }) => {
   await page.setViewportSize({ width: 1800, height: 1000 });
+  await page.clock.setFixedTime(new Date(createdAt));
   const sid = `calendar-move:${previewId}`;
   const runId = "expired-move-run";
   const attemptId = "expired-move-attempt";
@@ -807,7 +1158,7 @@ test("previews and confirms a refreshed move in the original conversation withou
     planId,
     requiresCoachConfirmation: true,
     confirmationId: "18b8a1d4-a436-497e-8cd0-9f92e2671f7a",
-    expiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
+    expiresAt: "2026-11-20T10:30:00+08:00",
     presentation: {
       ...move.presentation,
       rows: [
@@ -1262,10 +1613,16 @@ test("saves a Sunday start and uses it in both calendar grids", async ({
   ).toHaveAccessibleName("2026年11月1日 星期日");
 });
 
-test("aligns the home cards and clamps the advice to three lines", async ({
+test("shows weekly load above today's training and clamps the advice to three lines", async ({
   page,
 }) => {
   await openCalendar(page, false);
+  const summary = "今天的训练建议包含足够长的说明，用来检查首页只保留三行摘要。".repeat(12);
+  await page.route("**/api/proxy/ai/today-suggestion", (route) =>
+    route.fulfill({
+      json: { data: { summary, tags: [], source: "generated" } },
+    }),
+  );
   await page.route(/\/api\/v2\/home(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
@@ -1275,16 +1632,10 @@ test("aligns the home cards and clamps the advice to three lines", async ({
           planningMode: "ROLLING",
           generatedThrough: "2026-12-06",
           todayWorkouts: [],
-          currentWeekWorkouts: [],
+          currentWeekWorkouts: [workout],
         },
-        aiTodaySuggestion: {
-          summary:
-            "今天的训练建议包含足够长的说明，用来检查首页只保留三行摘要。".repeat(
-              12,
-            ),
-          tags: [],
-          source: "generated",
-        },
+        todayDate: today,
+        aiTodaySuggestion: { summary, tags: [], source: "generated" },
         weather: { status: "unavailable" },
       },
     }),
@@ -1292,16 +1643,20 @@ test("aligns the home cards and clamps the advice to three lines", async ({
   await page.goto("/zh");
 
   const execution = page.getByRole("heading", { name: "今日训练", exact: true });
-  const state = page.getByRole("heading", { name: "当前状态", exact: true });
+  const load = page.getByRole("heading", { name: "本周负荷", exact: true });
+  const chart = page.getByRole("img", { name: "本周实际负荷与计划负荷" });
   await expect(execution).toBeVisible();
-  await expect(state).toBeVisible();
-  const executionHeader = (await execution.boundingBox())!;
-  const stateHeader = (await state.boundingBox())!;
-  expect(Math.abs(executionHeader.y - stateHeader.y)).toBeLessThanOrEqual(1);
+  await expect(load).toBeVisible();
+  await expect(page.getByText("本周训练负荷", { exact: true })).toBeVisible();
+  await expect(page.getByText("周训练次数", { exact: true })).toBeVisible();
+  await expect(chart).toBeVisible();
+  const chartBox = (await chart.boundingBox())!;
+  expect(chartBox.y + chartBox.height).toBeLessThan((await execution.boundingBox())!.y);
 
   const advice = page.getByTestId("today-advice");
   const plan = page.getByRole("link", { name: /持续跑步测试/ });
   await expect(plan).toBeVisible();
+  await expect(advice.locator("p")).toHaveText(summary);
   await expect(advice.locator("p")).toHaveCSS("-webkit-line-clamp", "3");
   const adviceBox = (await advice.boundingBox())!;
   const planBox = (await plan.boundingBox())!;
@@ -2135,18 +2490,23 @@ test("edits and confirms a coach calendar proposal without a second coach turn",
     isVersioned: false, state: "READY", expiresAt: move.expiresAt, conflicts: [],
     operationKeys: [workoutId], presentation: move.presentation, receipt: null,
   });
-  await cardOn(page, from).dragTo(page.locator(`[data-calendar-date="${to}"]`));
-  await page.getByRole("button", { name: "确认调整" }).click();
+  await cardOn(page, from).click();
+  await page.getByRole("button", { name: "更多操作" }).click();
+  await page.getByRole("menuitem", { name: "移动课程" }).click();
+  const moveDialog = page.getByRole("dialog", { name: "调整训练日期" });
+  await moveDialog.getByRole("grid").first().getByRole("button", { name: /2026年11月24日/ }).click();
+  await moveDialog.getByRole("button", { name: "确认调整" }).click();
   await expect.poll(() => page.evaluate(() => window.coachStreamFixture.requests)).toBe(1);
   await sendScheduleDraft(page, fixture);
 
   const proposal = page.getByRole("dialog", { name: "对话", exact: true });
   const calendar = proposal.locator("[data-calendar-proposal]");
   await calendar.locator(`[data-calendar-date="${to}"] [data-calendar-workout="${workoutId}"]`).click();
-  const editor = page.getByRole("dialog").filter({ has: page.getByRole("heading", { name: workout.name, exact: true }) });
-  await editor.locator('[data-slot="dialog-footer"]').getByRole("button", { name: "更多操作" }).click();
+  const details = page.getByRole("dialog", { name: workout.name, exact: true });
+  await details.locator('[data-slot="dialog-footer"]').getByRole("button", { name: "更多操作" }).click();
   await page.getByRole("menuitem", { name: "编辑训练" }).click();
-  await editor.getByRole("textbox").first().fill("更新轻松跑");
+  const editor = calendar.getByRole("region", { name: workout.name, exact: true });
+  await editor.getByRole("textbox", { name: "训练名称（可选）" }).fill("更新轻松跑");
   await editor.getByRole("button", { name: "加入草稿" }).click();
   await expect(editor).toHaveCount(0);
   await calendar.getByRole("button", { name: "保存草稿" }).click();

@@ -1,3 +1,6 @@
+import type { CoachPlanDraftData } from '@shared/ai-coach-schema';
+import type { AiToolContext } from './tool.types';
+
 type DeliveryStep = {
   toolResults?: Array<{ toolName?: string; output?: unknown }>;
 };
@@ -29,6 +32,24 @@ export function coachStepBudgetReached(
     steps.length >= maxSteps &&
     !(steps.length === maxSteps && needsCoachDeliverySummary(steps))
   );
+}
+
+export function describeDeliveredFixedPlan(
+  ctx: Pick<AiToolContext, 'i18n' | 'lang'>,
+  draft: CoachPlanDraftData,
+): string {
+  if (
+    draft.planningMode === 'ROLLING' ||
+    !Number.isInteger(draft.periodWeeks) ||
+    draft.periodWeeks < 1 ||
+    !draft.workouts?.length
+  ) {
+    return '';
+  }
+  return ctx.i18n.t('common.coachRuntime.planDraftSummaryFallback', {
+    lang: ctx.lang,
+    args: { weeks: draft.periodWeeks, sessions: draft.workouts.length },
+  });
 }
 
 export const COACH_DELIVERY_SUMMARY_INSTRUCTION = `

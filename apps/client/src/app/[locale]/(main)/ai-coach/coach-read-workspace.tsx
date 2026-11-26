@@ -9,6 +9,7 @@ import type { CoachActivityPreviewView } from "./coach-activity-preview";
 import {
   CoachActivityPreviewContext,
   CoachChartPreviewContext,
+  CoachLocalPreviewContext,
   type CoachChartView,
 } from "./coach-preview-panel";
 
@@ -23,7 +24,8 @@ const PlanDetail = dynamic(() =>
 );
 const AthleteOverview = dynamic(() => import("../dashboard/components/Overview/Overview"));
 
-type ReadView = CoachActivityPreviewView | CoachEntityView | ({ kind: "chart" } & CoachChartView);
+type ReadView = CoachActivityPreviewView | CoachEntityView | ({ kind: "chart" } & CoachChartView)
+  | { kind: "local"; content: ReactNode };
 type ReadTab = { view: ReadView; label: string };
 
 export function useCoachReadTabs(
@@ -60,6 +62,8 @@ export function useCoachReadTabs(
         })} />;
       case "chart":
         return sid ? <ChartPreview sid={sid} view={view} /> : null;
+      case "local":
+        return <div className="min-w-0 p-3">{view.content}</div>;
       case "plan_detail":
         return <PlanDetail embedded open plan={{ id: view.planId }} onOpenChange={(open) => {
           if (!open) close();
@@ -80,6 +84,9 @@ export function useCoachReadTabs(
     openChart(view: CoachChartView, label: string) {
       open(`chart:${view.messageId}:${view.deliveryId}`, { view: { ...view, kind: "chart" }, label });
     },
+    openLocal(id: string, label: string, content: ReactNode) {
+      open(`local:${id}`, { view: { kind: "local", content }, label });
+    },
     tabs: workspace.openedIds.flatMap((id) => {
       const tab = entries[id];
       return tab ? [{ id, label: tab.label, lazy: true, content: content(id, tab) }] : [];
@@ -88,14 +95,16 @@ export function useCoachReadTabs(
 }
 
 export function CoachReadViewProvider({ read, children }: {
-  read: Pick<ReturnType<typeof useCoachReadTabs>, "openEntity" | "openChart">;
+  read: Pick<ReturnType<typeof useCoachReadTabs>, "openEntity" | "openChart" | "openLocal">;
   children: ReactNode;
 }) {
   return (
-    <CoachChartPreviewContext.Provider value={read.openChart}>
-      <CoachActivityPreviewContext.Provider value={read.openEntity}>
-        {children}
-      </CoachActivityPreviewContext.Provider>
-    </CoachChartPreviewContext.Provider>
+    <CoachLocalPreviewContext.Provider value={read.openLocal}>
+      <CoachChartPreviewContext.Provider value={read.openChart}>
+        <CoachActivityPreviewContext.Provider value={read.openEntity}>
+          {children}
+        </CoachActivityPreviewContext.Provider>
+      </CoachChartPreviewContext.Provider>
+    </CoachLocalPreviewContext.Provider>
   );
 }

@@ -44,6 +44,8 @@ export const queryKeys = {
 
   activity: {
     detail: (hashId: string) => ["activity", hashId] as const,
+    cards: (hashIds?: readonly string[]) =>
+      hashIds ? ["activities", "cards", hashIds] as const : ["activities", "cards"] as const,
     strength: (hashId: string) => ["activity-strength", hashId] as const,
     /** 历史 digest 流（useAiAnalysis） */
     aiDigest: (activityId: string, locale: string, useCache: boolean) =>
@@ -54,8 +56,8 @@ export const queryKeys = {
       ["activity", activityId, "timeline-track"] as const,
     timelineSegments: (activityId: string) =>
       ["activity", activityId, "timeline-segments"] as const,
-    planLink: (activityId: string) =>
-      ["activity-plan-link", activityId] as const,
+    planLink: (activityId?: string) =>
+      activityId ? ["activity-plan-link", activityId] as const : ["activity-plan-link"] as const,
     stats: (year?: number) => ["activity-stats", year] as const,
     /** 月历等活动列表（参数化） */
     monthly: (

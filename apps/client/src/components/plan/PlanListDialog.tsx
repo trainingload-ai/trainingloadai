@@ -1,5 +1,7 @@
 "use client";
 
+import { isOfficialPlanDraft } from "@shared/plan-calendar";
+
 import { isRollingPlan } from "@/lib/rolling-plan";
 import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 
@@ -78,6 +80,7 @@ export const PlanListDialog: React.FC<PlanListDialogProps> = ({
   const [activatePlanId, setActivatePlanId] = useState<string | null>(null);
   const [returnToListOnClose, setReturnToListOnClose] = useState(false);
 
+  const planToStart = plans.find((plan) => plan.id === activatePlanId);
   const hasActivePlan = plans.some((p) => p.status === "ACTIVE");
 
   return (
@@ -256,6 +259,7 @@ export const PlanListDialog: React.FC<PlanListDialogProps> = ({
       <PlanStartConversationDialog
         open={activateOpen}
         planId={activatePlanId}
+        officialTitle={isOfficialPlanDraft(planToStart) ? planToStart?.title : undefined}
         onOpenChange={(nextOpen) => {
           setActivateOpen(nextOpen);
           if (!nextOpen) setActivatePlanId(null);

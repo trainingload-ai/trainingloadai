@@ -1,5 +1,6 @@
 import {
   parsePlanQualityContract,
+  planDailyMinuteLimit,
   type PlanQualityContract,
 } from "./plan-quality";
 
@@ -66,6 +67,32 @@ export const scheduleConstraintsSchema = {
   },
 };
 
+export function isOfficialPlanDraft(plan?: {
+  status?: string;
+  sourceType?: string;
+  planningMode?: string;
+  generationMetadata?: Record<string, unknown> | null;
+} | null): boolean {
+  return plan?.status === "DRAFT" && plan.sourceType === "TEMPLATE" &&
+    plan.planningMode !== "ROLLING" && Boolean(plan.generationMetadata?.planTemplate);
+}
+
+export type OfficialPlanStart<Plan> = {
+  plan: Plan;
+  startDate: string;
+  earliestStartDate: string;
+  calendarTimeZone: string;
+  targetRaceDate?: string;
+  revision: string;
+};
+
+export function officialPlanTargetRaceDate(metadata: unknown): string | undefined {
+  const raceDate = (metadata as {
+    planTemplate?: { targetRace?: { raceDate?: unknown } };
+  } | null)?.planTemplate?.targetRace?.raceDate;
+  return isCalendarDate(raceDate) ? raceDate : undefined;
+}
+
 export function isCalendarDate(value: unknown): value is string {
   return (
     typeof value === "string" &&
@@ -86,6 +113,21 @@ export function addCalendarDays(date: string, days: number): string {
   const value = new Date(`${date}T00:00:00Z`);
   value.setUTCDate(value.getUTCDate() + days);
   return value.toISOString().slice(0, 10);
+}
+
+export function draftWorkoutPosition(
+  startDate: string,
+  date: string,
+  workoutsOnDate: ReadonlyArray<{ sessionIndex?: number | null }>,
+) {
+  const dayOffset =
+    (Date.parse(`${date}T00:00:00Z`) -
+      Date.parse(`${startDate}T00:00:00Z`)) / 86_400_000;
+  return {
+    weekIndex: Math.floor(dayOffset / 7) + 1,
+    dayIndex: dayOffset % 7 + 1,
+    sessionIndex: Math.max(0, ...workoutsOnDate.map((workout) => workout.sessionIndex ?? 1)) + 1,
+  };
 }
 
 export function calendarIsoWeekday(date: string): number {
@@ -160,6 +202,8 @@ export type ScheduleConflict = {
   date: string;
   workoutIndex: number;
 };
+
+export type CalendarIsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export function scheduleDateConflict(
   date: string,
   constraints?: ScheduleConstraints,
@@ -187,6 +231,7 @@ export function projectPlanCalendar<
   calendarTimeZone: string;
   workouts: T[];
   constraints?: ScheduleConstraints;
+  firstDayOfWeek?: CalendarIsoWeekday;
 }) {
   if (
     !Number.isInteger(input.periodWeeks) ||
@@ -223,21 +268,22 @@ export function projectPlanCalendar<
     };
   });
   const weeks = [];
+  const firstDayOfWeek = input.firstDayOfWeek ?? 1;
   for (
-    let monday = addCalendarDays(
+    let weekStart = addCalendarDays(
       input.startDate,
-      1 - calendarIsoWeekday(input.startDate),
+      -((calendarIsoWeekday(input.startDate) - firstDayOfWeek + 7) % 7),
     );
-    monday <= endDate;
-    monday = addCalendarDays(monday, 7)
+    weekStart <= endDate;
+    weekStart = addCalendarDays(weekStart, 7)
   ) {
     weeks.push({
-      startDate: monday,
+      startDate: weekStart,
       days: Array.from({ length: 7 }, (_, index) => {
-        const date = addCalendarDays(monday, index);
+        const date = addCalendarDays(weekStart, index);
         return {
           date,
-          isoWeekday: index + 1,
+          isoWeekday: ((firstDayOfWeek + index - 1) % 7) + 1,
           inPlan: date >= input.startDate && date <= endDate,
           workouts: workouts.filter((w) => w.date === date),
           conflicts: conflicts.filter((c) => c.date === date),
@@ -436,7 +482,7 @@ export type ScheduleRulePeriod = {
   allowedDays: number[] | null;
   availability: Pick<
     PlanQualityContract,
-    "maxDailyMinutes" | "maxTrainingDaysPerWeek"
+    "maxDailyMinutes" | "maxMinutesByIsoWeekday" | "maxTrainingDaysPerWeek"
   >;
 };
 
@@ -479,6 +525,9 @@ export function scheduleRulePeriods(
       scheduleConstraints: rules.constraints ?? null,
       allowedDays: rules.qualityContract?.allowedDays ?? null,
       availability: {
+        ...(rules.qualityContract?.maxMinutesByIsoWeekday
+          ? { maxMinutesByIsoWeekday: rules.qualityContract.maxMinutesByIsoWeekday }
+          : {}),
         ...(rules.qualityContract?.maxDailyMinutes !== undefined
           ? { maxDailyMinutes: rules.qualityContract.maxDailyMinutes }
           : {}),
@@ -561,10 +610,11 @@ export function assessPlanSchedule(input: {
     const daily = input.workouts.filter(
       (w) => !["MOVED", "SKIPPED"].includes(w.status) && dateOf(w) === date,
     );
+    const limit = planDailyMinuteLimit(contract, calendarIsoWeekday(date));
     if (
-      contract?.maxDailyMinutes &&
+      limit !== undefined &&
       daily.reduce((sum, w) => sum + (w.durationSeconds ?? 0), 0) >
-        contract.maxDailyMinutes * 60
+        limit * 60
     )
       issues.push({ code: "DAILY_TIME_BUDGET", date });
   }

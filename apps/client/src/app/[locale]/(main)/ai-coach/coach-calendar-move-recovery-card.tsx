@@ -15,6 +15,7 @@ import {
   type CoachTurnErrorData,
 } from "@shared/coach-turn-error";
 import {
+  calendarAdjustmentRecoveryKeys,
   CalendarAdjustmentState,
   PlanCalendarMoveState,
   type PlanCalendarMovePreview,
@@ -26,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { CoachScheduleAdjustmentCard } from "./cards/CoachScheduleAdjustmentCard";
 import { CoachScheduleComparison } from "./cards/coach-schedule-comparison";
 import { CoachTranscriptMetaRow } from "./coach-transcript-meta-row";
-import { CalendarAdjustmentControls } from "../calendar/components/calendar-adjustment-controls";
+import { CalendarAdjustmentControls, CalendarAdjustmentUnavailableNotice } from "../calendar/components/calendar-adjustment-controls";
 import { useCalendarAdjustment } from "../calendar/components/use-calendar-adjustments";
 import { CoachSchedulePreviewContext } from "./coach-preview-panel";
 
@@ -158,16 +159,19 @@ export function CoachCalendarMoveRecoveryCard({
   };
 
   if (adjustment && (adjustment.isVersioned || ["STALE", "EXPIRED", "INVALIDATED"].includes(adjustment.state))) {
+    const openSchedule = schedule?.openAdjustment ? () => schedule.openAdjustment?.(adjustment.id) : undefined;
+    if (calendarAdjustmentRecoveryKeys(adjustment)?.length === 0)
+      return <CalendarAdjustmentUnavailableNotice adjustment={adjustment} onViewSchedule={openSchedule} />;
     return (
       <section aria-label={t("recovery.previewTitle")}>
         <CoachScheduleAdjustmentCard
           state={adjustment.state}
           toggleRef={previewToggle}
           planTitle={adjustment.presentation.title}
-          footer={<CalendarAdjustmentControls adjustment={adjustment} disabled={disabled || editing} />}
+          footer={<CalendarAdjustmentControls adjustment={adjustment} disabled={disabled || editing} onOpenRecovery={openSchedule} />}
         >
           <CoachScheduleComparison proposal={adjustment.presentation}
-            onOpenPreview={schedule?.openAdjustment ? () => schedule.openAdjustment?.(adjustment.id) : undefined}
+            onOpenPreview={openSchedule}
           />
         </CoachScheduleAdjustmentCard>
       </section>
@@ -244,7 +248,7 @@ export function CoachCalendarMoveRecoveryCard({
   }
 
   const closed =
-    blocked ?? (current?.state === PlanCalendarMoveState.Applied
+    blocked ?? current?.recoveryBlockedReason ?? (current?.state === PlanCalendarMoveState.Applied
         ? "alreadyApplied"
         : current?.state === PlanCalendarMoveState.Cancelled
           ? "discarded"

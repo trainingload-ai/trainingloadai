@@ -1,5 +1,7 @@
 "use client";
 
+import { isOfficialPlanDraft } from "@shared/plan-calendar";
+
 import { isRollingPlan, generatedPlanThrough } from "@/lib/rolling-plan";
 
 import dayjs from "dayjs";
@@ -189,7 +191,7 @@ export default function V2PlanDetailPage() {
   const { mutateAsync: cancelAsync, isPending: cancelling } =
     useCancelActivation();
   const { mutateAsync: deleteAsync, isPending: deleting } = useDeletePlan();
-  const managedProvider = useManagedPlanProviderActions(plan, t);
+  const managedProvider = useManagedPlanProviderActions(plan ?? undefined, t);
   const queryClient = useQueryClient();
   const [selectedWorkout, setSelectedWorkout] = useState<DerivedWorkout | null>(
     null,
@@ -409,6 +411,7 @@ export default function V2PlanDetailPage() {
       <PlanStartConversationDialog
         open={activateOpen}
         planId={plan.id}
+        officialTitle={isOfficialPlanDraft(plan) ? plan?.title : undefined}
         onOpenChange={setActivateOpen}
       />
       <AlertDialog

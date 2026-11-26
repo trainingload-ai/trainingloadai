@@ -129,6 +129,7 @@ export async function openCoachFixture(
     const url = new URL(route.request().url());
     const path = url.pathname.replace(/^\/api\/proxy/, "");
     const json = (body: unknown) => route.fulfill({ json: body });
+    if (path === "/activities/cards") return json({ data: { activities: [] } });
     if (path === "/api/runtime/capabilities") return json(runtimeCapabilities);
     if (path === "/api/access/features") return json({
       schemaVersion: 1,

@@ -7,7 +7,7 @@ import { HealthDataRepository } from '@/health-data/persistence/health-data.repo
 import { UserQueryService } from '@/api/user/user-query.service';
 import { CompetitionQueryService } from '@/api/competition/application/competition-query.service';
 import { UserAnalysisConfigService } from '@/api/user/user-analysis-config.service';
-import { Injectable, NotFoundException, Optional, UnprocessableEntityException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, Optional, UnprocessableEntityException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { PlanWorkoutInputDto } from '../dto/create-plan.dto';
@@ -53,14 +53,16 @@ import {
 import {
   assessPlanSchedule,
   addCalendarDays,
+  calendarIsoWeekday,
   isCalendarDate,
+  officialPlanTargetRaceDate,
   parseScheduleConstraints,
   transitionScheduleMetadata,
   scheduleRulePeriods,
 } from '@shared/plan-calendar';
 import {
-  assessPlanQuality,
   assessRollingPlanQuality,
+  parsePlanAssessment,
   parsePlanQualityContract,
 } from '@shared/plan-quality';
 import { normalizePlanRow, normalizePlanWorkoutRow } from './plan-row.mapper';
@@ -781,6 +783,127 @@ export class PlanStartService {
     }
   }
 
+  private async officialStartContext(userId: string, planId: string, tx: PlanDb) {
+    const source = await this.source(userId, planId, tx, true);
+    const template = source.sourceType === 'TEMPLATE' && source.planningMode === 'FIXED'
+      ? await tx.planTemplatePreview.findUnique({
+          where: { createdPlanId: planId },
+          select: { userId: true, consumedAt: true, normalizedInput: true },
+        })
+      : null;
+    if (!template?.consumedAt || template.userId !== userId)
+      fail('An official template draft is required');
+
+    const metadata = source.generationMetadata as Record<string, unknown> | null;
+    const constraints = this.constraints(metadata?.scheduleConstraints);
+    const calendarTimeZone = constraints?.calendarTimeZone ??
+      (await this.users.getPreferredTimezone(userId, tx)) ?? 'UTC';
+    const earliestStartDate = this.earliestStartDate(calendarTimeZone);
+    const preview = template.normalizedInput as { startDate?: unknown; requestedStartDate?: unknown } | null;
+    const targetRaceDate = officialPlanTargetRaceDate(metadata);
+    const fixedStartDate = targetRaceDate && source.periodWeeks
+      ? addCalendarDays(targetRaceDate, 1 - source.periodWeeks * 7)
+      : undefined;
+    const suggestedDate = metadata?.officialDraftStartDate ?? preview?.startDate ?? preview?.requestedStartDate;
+    const startDate = source.startDate?.toISOString().slice(0, 10) ??
+      fixedStartDate ?? (isCalendarDate(suggestedDate) && suggestedDate >= earliestStartDate ? suggestedDate : earliestStartDate);
+    const plan = normalizePlanRow(source, {
+      workoutService: this.workout,
+      workoutDefinitionService: this.definitions,
+      workoutPersistence: this.persistence,
+    })!;
+    const revision = hash({ source: this.fingerprint(source), calendarTimeZone });
+    return { source, plan, startDate, earliestStartDate, calendarTimeZone, targetRaceDate, constraints, revision };
+  }
+
+  async officialDraft(userId: string, planId: string) {
+    return this.calendarTransaction(userId, async (tx) => {
+      const { plan, startDate, earliestStartDate, calendarTimeZone, targetRaceDate, revision } =
+        await this.officialStartContext(userId, planId, tx);
+      return { plan, startDate, earliestStartDate, calendarTimeZone, targetRaceDate, revision };
+    });
+  }
+
+  async saveOfficialStartDate(userId: string, planId: string, startDate: string, revision: string) {
+    if (!isCalendarDate(startDate))
+      throw new UnprocessableEntityException('Invalid calendar start date');
+    return this.calendarTransaction(userId, async (tx) => {
+      const current = await this.officialStartContext(userId, planId, tx);
+      if (current.source.status !== 'DRAFT' || current.revision !== revision)
+        throw new ConflictException('The draft changed. Review the latest calendar.');
+      if (current.targetRaceDate && current.startDate !== startDate)
+        fail('The plan start date is fixed by its target race');
+      this.assertFutureStart(startDate, current.calendarTimeZone);
+      if (current.startDate === startDate) return { startDate, revision };
+      const metadata = current.source.generationMetadata;
+      await tx.plan.update({
+        where: { id: planId },
+        data: {
+          generationMetadata: {
+            ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata : {}),
+            officialDraftStartDate: startDate,
+          } as Prisma.InputJsonObject,
+        },
+      });
+      const updated = await this.officialStartContext(userId, planId, tx);
+      return { startDate: updated.startDate, revision: updated.revision };
+    });
+  }
+
+  async startOfficialDraft(userId: string, planId: string, startDate: string, revision: string) {
+    if (!isCalendarDate(startDate))
+      throw new UnprocessableEntityException('Invalid calendar start date');
+    const result = await this.calendarTransaction(userId, async (tx) => {
+      const { source, plan, calendarTimeZone, constraints, targetRaceDate, startDate: suggestedStart, revision: currentRevision } =
+        await this.officialStartContext(userId, planId, tx);
+      if (source.status === 'ACTIVE') {
+        if (source.startDate?.toISOString().slice(0, 10) !== startDate)
+          fail('An active plan cannot change its start date');
+        return { plan, started: false };
+      }
+      if (revision !== currentRevision)
+        throw new ConflictException({ code: 'PLAN_START_REASSESSMENT_REQUIRED', message: 'The draft changed. Review the latest calendar before starting.' });
+      if (targetRaceDate && (suggestedStart !== startDate || !source.workouts.some(
+        (workout) => workout.dayOffset === source.periodWeeks! * 7 - 1,
+      ))) fail('The plan calendar must match its target race');
+      this.assertFutureStart(startDate, calendarTimeZone);
+      let qualityContract;
+      try {
+        qualityContract = parsePlanQualityContract(
+          (source.generationMetadata as Record<string, unknown> | null)?.qualityContract,
+        );
+      } catch {
+        throw new UnprocessableEntityException('Invalid plan quality contract');
+      }
+      const workouts = (plan.workouts ?? []).map((workout) => ({
+        ...workout, durationSeconds: workout.summary.durationSeconds,
+      }));
+      const quality = await this.loads.assessPlanQualityForViewer(
+        userId, source.periodWeeks!, workouts,
+        qualityContract && { ...qualityContract, startDate }, tx,
+      );
+      if (!quality.valid)
+        throw new UnprocessableEntityException({ code: 'PLAN_QUALITY_INVALID', data: { issues: quality.issues } });
+
+      const schedule = assessPlanSchedule({
+        workouts,
+        changedWorkoutIds: workouts.map((workout) => workout.id), startDate,
+        periodWeeks: source.periodWeeks, constraints, qualityContract, projectDates: true,
+      });
+      if (!schedule.valid)
+        throw new UnprocessableEntityException({ code: 'PLAN_SCHEDULE_INVALID', data: { issues: schedule.issues } });
+
+      const activated = await this.plans.activatePlan(
+        userId, planId, startDate, { source: 'manual', action: 'official_template_start' },
+        { tx, validatedStartPreview: true, calendarTimeZone },
+      );
+      await this.invalidate(userId, planId, tx);
+      return { ...activated, started: true };
+    });
+    if (result.started) await this.plans.notifyWorkoutChanges(userId, planId);
+    return { plan: result.plan };
+  }
+
   async conversation(userId: string, planId: string, selectedDate?: string) {
     if (selectedDate !== undefined && !isCalendarDate(selectedDate))
       throw new UnprocessableEntityException('Invalid calendar start date');
@@ -817,8 +940,13 @@ export class PlanStartService {
             'UTC';
 
           const earliestStartDate = this.earliestStartDate(calendarTimeZone);
+          const draftAnchor = source.sourceType === 'AI' && source.status === 'DRAFT'
+            ? (source.generationMetadata as { qualityContract?: { startDate?: unknown } } | null)?.qualityContract?.startDate
+            : undefined;
+          const suggestedDate = typeof draftAnchor === 'string' && isCalendarDate(draftAnchor)
+            ? draftAnchor : earliestStartDate;
           const savedDate =
-            selectedDate ?? prior?.planStartDate ?? earliestStartDate;
+            selectedDate ?? prior?.planStartDate ?? suggestedDate;
           const startDate =
             source.status === 'DRAFT' &&
             selectedDate === undefined &&
@@ -1008,6 +1136,7 @@ export class PlanStartService {
         calendarVersion: head ? (head.calendarVersion ?? 0) + 1 : 0,
       },
     });
+    if (head?.decisionId) await this.expirePreviews([head], tx);
   }
 
   private async requireCurrentCalendarAdjustment(
@@ -1087,7 +1216,7 @@ export class PlanStartService {
   }
 
   private async calendarAdjustmentEligibility(
-    userId: string, planId: string, edits: CalendarEdit[], tx: PlanDb,
+    userId: string, planId: string, edits: CalendarEdit[], presentation: PlanProposalPresentation, tx: PlanDb,
   ) {
     const plan = await tx.plan.findFirst({
       where: { id: planId, userId },
@@ -1116,6 +1245,7 @@ export class PlanStartService {
       },
     });
     const byId = new Map(workouts.map((workout) => [workout.id, workout]));
+    const originalDates = new Map(presentation.rows.map((row) => [row.workoutId, row.beforeScheduledDate]));
     const conflicts: CalendarAdjustment['conflicts'] = [];
     const eligible: CalendarEdit[] = [];
     for (const edit of edits) {
@@ -1137,6 +1267,11 @@ export class PlanStartService {
         (end && target > end) || (replacement && target >= replacement)
       )) {
         conflicts.push({ key: calendarEditKey(edit), reason: 'TARGET_DATE' });
+      } else if (row && row.revision !== edit.expectedRevision && (
+        edit.kind === 'DELETE' || edit.workout ||
+        (originalDates.get(row.id) !== ymd(row.scheduledDate) && target !== ymd(row.scheduledDate))
+      )) {
+        conflicts.push({ key: calendarEditKey(edit), reason: 'WORKOUT_CHANGED' });
       } else {
         eligible.push(row ? { ...edit, expectedRevision: row.revision } : edit);
       }
@@ -1154,14 +1289,16 @@ export class PlanStartService {
     const edits = this.proposalEdits(proposal);
     let state: CalendarAdjustment['state'] = CalendarAdjustmentState.Ready;
     let conflicts: CalendarAdjustment['conflicts'] = [];
+    let eligible: CalendarEdit[] = [];
     if (row.appliedAt) state = CalendarAdjustmentState.Applied;
     else if (row.discardedAt || proposal.calendarMoveCancelled ||
       (head.id === row.id && head.decision?.state === 'REJECTED'))
       state = CalendarAdjustmentState.Discarded;
     else if (row.id !== head.id) state = CalendarAdjustmentState.Superseded;
     else {
-      const eligibility = await this.calendarAdjustmentEligibility(row.userId, row.sourcePlanId, edits, tx);
+      const eligibility = await this.calendarAdjustmentEligibility(row.userId, row.sourcePlanId, edits, proposal.presentation, tx);
       conflicts = eligibility.conflicts;
+      eligible = eligibility.eligible;
       const range = proposal.request.mode === 'SCHEDULE' ? proposal.request.range : undefined;
       if (proposal.calendarMoveInvalidated || conflicts.length ||
         (!edits.length && !proposal.request.scheduleConstraints)) {
@@ -1185,12 +1322,16 @@ export class PlanStartService {
         }
       }
     }
+    const needsRecovery = state === CalendarAdjustmentState.Stale || state === CalendarAdjustmentState.Expired ||
+      state === CalendarAdjustmentState.Invalidated;
+    const canRebase = !proposal.request.scheduleConstraints && !proposal.request.qualityContractTransition;
     return {
       id, planId: row.sourcePlanId, versionId: row.id, currentVersionId: head.id, state,
       decisionId: head.decisionId,
       expiresAt: row.expiresAt.toISOString(), presentation: proposal.presentation,
       isVersioned: Boolean(row.calendarAdjustmentId && (row.calendarVersion || row.discardedAt || row.calendarReceipt)),
       conflicts, operationKeys: edits.map(calendarEditKey),
+      ...(needsRecovery && { recoverableOperationKeys: canRebase ? eligible.map(calendarEditKey) : [] }),
       receipt: row.calendarReceipt as CalendarAdjustmentReceipt | null,
     };
   }
@@ -1268,7 +1409,7 @@ export class PlanStartService {
         const baseline = this.proposalEdits(proposal);
         const selected = input.operationKeys ? new Set(input.operationKeys) : null;
         edits = selected ? baseline.filter((edit) => selected.has(calendarEditKey(edit))) : baseline;
-        const eligibility = await this.calendarAdjustmentEligibility(userId, planId, edits, tx);
+        const eligibility = await this.calendarAdjustmentEligibility(userId, planId, edits, proposal.presentation, tx);
         if (!edits.length || (selected && selected.size !== edits.length) || eligibility.conflicts.length)
           fail('Select only operations that are still available');
         edits = eligibility.eligible;
@@ -1281,9 +1422,26 @@ export class PlanStartService {
           data: { calendarAdjustmentId: id, calendarVersion: 0 },
         });
       }
+      const calendarVersion = (head?.calendarVersion ?? 0) + 1;
+      if (!edits.length) {
+        if (!head || !proposal) fail('A calendar revision must include a change');
+        const row = await tx.planProposalPreview.create({ data: {
+          id: input.versionId,
+          userId, sourcePlanId: planId, mode: head.mode,
+          request: head.request as Prisma.InputJsonValue,
+          sourceSnapshot: head.sourceSnapshot as Prisma.InputJsonValue,
+          proposal: json({ ...proposal, calendarAdjustmentEdits: [], calendarAdjustmentMutationHash: mutationHash }) as unknown as Prisma.InputJsonValue,
+          presentation: head.presentation as Prisma.InputJsonValue,
+          expiresAt: head.expiresAt, calendarAdjustmentId: id, calendarVersion,
+          discardedAt: new Date(),
+        } });
+        if (head.decisionId) await this.expirePreviews([head], tx);
+        return this.calendarAdjustmentView(id, row, row, tx);
+      }
       const version = await this.preparePreview(userId, {
-        planId, adjustment: { id, versionId: input.versionId, number: (head?.calendarVersion ?? 0) + 1, edits, mutationHash },
+        planId, adjustment: { id, versionId: input.versionId, number: calendarVersion, edits, mutationHash },
       }, undefined, undefined, tx);
+      if (head?.decisionId) await this.expirePreviews([head], tx);
       const row = await tx.planProposalPreview.findUniqueOrThrow({ where: { id: version.previewId } });
       return this.calendarAdjustmentView(id, row, row, tx);
     });
@@ -1356,7 +1514,11 @@ export class PlanStartService {
 
   private async calendarEditRequest(
     userId: string,
-    { planId, edits }: { planId: string; edits: Array<CalendarEdit & { plannedSessionRpe?: number }> },
+    { planId, edits, omitUnchanged = false }: {
+      planId: string;
+      edits: Array<CalendarEdit & { plannedSessionRpe?: number }>;
+      omitUnchanged?: boolean;
+    },
     tx: PlanDb,
   ): Promise<PlanSchedulePreviewRequest> {
     const [plan, workouts] = await Promise.all([
@@ -1375,6 +1537,7 @@ export class PlanStartService {
     const byId = new Map(workouts.map((workout) => [workout.id, workout]));
     const nextPosition = new Map<number, number>();
     const dates: string[] = [];
+    const restoredDates: string[] = [];
     const changes: PlanSchedulePreviewRequest['changes'] = [];
     const additions: PlanSchedulePreviewRequest['additions'] = [];
     const deletions: PlanSchedulePreviewRequest['deletions'] = [];
@@ -1383,14 +1546,13 @@ export class PlanStartService {
       const originalDate = prior?.scheduledDate?.toISOString().slice(0, 10);
       if (edit.kind !== 'ADD' && (!originalDate || !edit.expectedRevision || prior?.revision !== edit.expectedRevision))
         fail('Workout revision changed; refresh the calendar');
-      if (originalDate) dates.push(originalDate);
       if (edit.kind === 'DELETE') {
+        dates.push(originalDate!);
         deletions.push({ sourceWorkoutId: prior!.id, expectedRevision: prior!.revision });
         continue;
       }
       const date = edit.targetDate!;
       if (!isCalendarDate(date) || date < startDate) fail('Candidate target is outside the plan');
-      dates.push(date);
       const offset = (Date.parse(date) - Date.parse(startDate)) / 86400000;
       let sessionIndex = prior?.sessionIndex ?? 1;
       if (date !== originalDate) {
@@ -1421,12 +1583,25 @@ export class PlanStartService {
           ? edit.workout.definition as PlanStartWorkoutDraft['definition']
           : { kind: stored!.structureKind, version: 1, source: 'STRUCTURE', structure: stored!.structure },
       };
+      if (omitUnchanged && stored && date === originalDate &&
+        workout.sportType === stored.sportType &&
+        (workout.sportDefinitionCode ?? null) === (stored.sportDefinitionCode ?? null) &&
+        (workout.name ?? null) === (stored.name ?? null) &&
+        (workout.notes ?? null) === (stored.notes ?? null) &&
+        (workout.plannedSessionRpe ?? null) === (stored.plannedSessionRpe ?? null) &&
+        workoutStructureKey(this.definitions.resolve(workout.definition!).structure, this.workout) ===
+          workoutStructureKey(stored.structure, this.workout)) {
+        restoredDates.push(date);
+        continue;
+      }
+      if (originalDate) dates.push(originalDate);
+      dates.push(date);
       if (prior) changes.push({ sourceWorkoutId: prior.id, expectedRevision: prior.revision, workout });
       else additions.push({ candidateKey: edit.candidateKey!, workout });
     }
-    dates.sort();
+    const bounds = (dates.length ? dates : restoredDates).sort();
     return {
-      mode: 'SCHEDULE', planId, range: { from: dates[0], to: dates[dates.length - 1] },
+      mode: 'SCHEDULE', planId, range: { from: bounds[0], to: bounds[bounds.length - 1] },
       rationale: 'Calendar edits', evidenceRefs: [], changes, additions, deletions,
       preserveUnmentioned: true,
     };
@@ -1453,6 +1628,7 @@ export class PlanStartService {
       fail('A newer coach preview is available');
 
     const edits = this.mergeCalendarEdits(this.proposalEdits(proposal), revision.edits);
+    if (!edits.length) fail('A calendar revision must include a change');
     const next = await this.calendarEditRequest(userId, { planId, edits }, tx);
     const anchor = edits.find((edit) => calendarEditKey(edit) === proposal.calendarMove!.workoutId);
     return {
@@ -1494,14 +1670,16 @@ export class PlanStartService {
     const edits = new Map(baseline.map((edit) => [calendarEditKey(edit), edit]));
     const touched = new Set<string>();
     for (const edit of delta) {
-      const key = calendarEditKey(edit);
+      const candidate = edit.kind !== 'ADD' && edit.expectedRevision === 0;
+      const key = candidate ? `candidate:${edit.workoutId!.replace(/^candidate:/, '')}` : calendarEditKey(edit);
       if (touched.has(key)) fail('A calendar revision must edit each workout at most once');
       touched.add(key);
       const current = edits.get(key);
       if (edit.kind === 'ADD') {
         if (current) fail('New workout candidate keys must be unique');
         edits.set(key, edit);
-      } else if (edit.expectedRevision === 0 && current?.kind === 'ADD') {
+      } else if (candidate) {
+        if (current?.kind !== 'ADD') fail('The proposed workout is no longer available');
         if (edit.kind === 'DELETE') edits.delete(key);
         else edits.set(key, { ...current, targetDate: edit.targetDate, workout: edit.workout ?? current.workout });
       } else {
@@ -1513,7 +1691,6 @@ export class PlanStartService {
         });
       }
     }
-    if (!edits.size) fail('A calendar revision must include a change');
     if (edits.size > 200) fail('A calendar adjustment can contain up to 200 changes');
     return [...edits.values()];
   }
@@ -1560,25 +1737,40 @@ export class PlanStartService {
           userId, planId, previewId, tx,
         );
         const state = calendarMoveState(preview, proposal);
-        if (
-          (state !== PlanCalendarMoveState.Pending && state !== PlanCalendarMoveState.Expired) ||
-          !(await this.calendarMoveHasProtectedWorkouts(userId, preview, proposal, tx))
-        ) {
+        if (state === PlanCalendarMoveState.Applied || state === PlanCalendarMoveState.Cancelled)
           return this.calendarMoveView(preview, proposal, impact);
+
+        let current = proposal;
+        if ((state === PlanCalendarMoveState.Pending || state === PlanCalendarMoveState.Expired) &&
+          await this.calendarMoveHasProtectedWorkouts(userId, preview, proposal, tx)) {
+          const invalidated: CanonicalStartProposal = { ...proposal, calendarMoveInvalidated: true };
+          await this.expireCalendarCoachPreviews(userId, planId, CALENDAR_MOVE_SESSION_PREFIX + previewId, tx);
+          await tx.planProposalPreview.update({
+            where: { id: previewId },
+            data: { proposal: json(invalidated) as unknown as Prisma.InputJsonValue },
+          });
+          current = invalidated;
         }
 
-        const invalidated: CanonicalStartProposal = {
-          ...proposal,
-          calendarMoveInvalidated: true,
-        };
-        await this.expireCalendarCoachPreviews(
-          userId, planId, CALENDAR_MOVE_SESSION_PREFIX + previewId, tx,
-        );
-        await tx.planProposalPreview.update({
-          where: { id: previewId },
-          data: { proposal: json(invalidated) as unknown as Prisma.InputJsonValue },
-        });
-        return this.calendarMoveView(preview, invalidated, impact);
+        const today = this.earliestStartDate(proposal.calendarTimeZone);
+        const datePassed = proposal.calendarMoveManuallyRevised && proposal.request.mode === 'SCHEDULE'
+          ? proposal.request.range.from < today
+          : impact.from < today || impact.to < today;
+        let recoveryBlockedReason: PlanCalendarMovePreview['recoveryBlockedReason'];
+        if (datePassed || current.calendarMoveInvalidated) {
+          const draft = await this.latestCalendarMoveDraft(userId, planId, CALENDAR_MOVE_SESSION_PREFIX + previewId, tx,
+            proposal.calendarMoveConfirmationId ? preview.updatedAt : undefined);
+          const adjustmentId = draft?.calendarAdjustmentId ?? draft?.decisionId ?? preview.calendarAdjustmentId ??
+            (proposal.calendarMoveRefreshedForCoach ? previewId : undefined);
+          const head = adjustmentId ? await this.calendarAdjustmentHead(userId, planId, adjustmentId, tx) : null;
+          const adjustment = head && adjustmentId && await this.calendarAdjustmentView(adjustmentId, head, head, tx);
+          if (adjustment && adjustment.state === CalendarAdjustmentState.Applied)
+            recoveryBlockedReason = 'alreadyApplied';
+          else if (!adjustment || (adjustment.state !== CalendarAdjustmentState.Ready && !adjustment.recoverableOperationKeys?.length))
+            recoveryBlockedReason = datePassed ? 'datesPassed' : 'scheduleChanged';
+        }
+
+        return this.calendarMoveView(preview, current, impact, recoveryBlockedReason);
       }, { isolationLevel: 'Serializable' }),
     );
   }
@@ -1618,6 +1810,7 @@ export class PlanStartService {
     preview: { id: string; sourcePlanId: string; expiresAt: Date; appliedAt: Date | null },
     proposal: CanonicalStartProposal,
     impact: PlanCalendarMovePreview['impact'],
+    recoveryBlockedReason?: PlanCalendarMovePreview['recoveryBlockedReason'],
   ): PlanCalendarMovePreview {
     return {
       previewId: preview.id,
@@ -1627,6 +1820,7 @@ export class PlanStartService {
       impact,
       presentation: proposal.presentation,
       receipt: proposal.calendarMoveReceipt ?? null,
+      ...(recoveryBlockedReason && { recoveryBlockedReason }),
       ...(proposal.calendarMoveRefreshedForCoach
         ? { requiresCoachConfirmation: true }
         : {}),
@@ -1791,7 +1985,7 @@ export class PlanStartService {
         ...(after ? { createdAt: { gt: after } } : {}),
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-      select: { proposal: true, decision: { select: { state: true } } },
+      select: { proposal: true, calendarAdjustmentId: true, decisionId: true, decision: { select: { state: true } } },
     });
   }
 
@@ -2187,7 +2381,11 @@ export class PlanStartService {
           const resolved = restoration.kind === 'expired' ? restoration : input;
           const { request: proposedRequest, calendarMove } =
             revised ?? ('adjustment' in resolved
-              ? { request: await this.calendarEditRequest(userId, { planId: resolved.planId, edits: resolved.adjustment.edits }, tx), calendarMove: null }
+              ? { request: await this.calendarEditRequest(userId, {
+                  planId: resolved.planId,
+                  edits: resolved.adjustment.edits,
+                  omitUnchanged: !resolved.adjustment.validateOnly,
+                }, tx), calendarMove: null }
               : 'mode' in resolved
               ? { request: resolved, calendarMove: null }
               : 'targetDate' in resolved
@@ -2224,7 +2422,7 @@ export class PlanStartService {
           const authoredRequest = refreshedRequest.mode === 'SCHEDULE'
             ? await this.amendCalendarRequest(userId, refreshedRequest, tx)
             : refreshedRequest;
-          const request = calendarCoach
+          let request = calendarCoach
             ? await this.bindCalendarCoachRequest(
                 userId,
                 calendarCoach,
@@ -2399,7 +2597,7 @@ export class PlanStartService {
             });
           }
           for (const deletion of request.deletions) cover(deletion);
-          const preserved = [...(request.preserved ?? [])];
+          let preserved = [...(request.preserved ?? [])];
           if (request.preserveUnmentioned)
             for (const w of source.workouts)
               if (
@@ -2410,28 +2608,57 @@ export class PlanStartService {
                   sourceWorkoutId: w.id,
                   expectedRevision: w.revision,
                 });
+          const draftMetadata = source.generationMetadata as Record<string, unknown> | null;
+          const fixedDays = this.constraints(draftMetadata?.scheduleConstraints);
+          const shouldAlign =
+            request.mode === 'START' &&
+            source.planningMode === 'FIXED' &&
+            source.sourceType === 'AI' &&
+            fixedDays &&
+            fixedDays.fixedRestWeekdays.length > 0 &&
+            fixedDays.effectiveFrom <= startDate &&
+            (!fixedDays.effectiveUntil ||
+              fixedDays.effectiveUntil >= addCalendarDays(startDate, source.periodWeeks * 7 - 1)) &&
+            !request.scheduleConstraints &&
+            !request.qualityContractTransition &&
+            request.preserveUnmentioned === true &&
+            !request.preserved?.length &&
+            !request.changes.length &&
+            !request.additions.length &&
+            !request.deletions.length;
+          const draftAnchor = shouldAlign
+            ? parsePlanQualityContract(draftMetadata?.qualityContract)?.startDate
+            : undefined;
+          // Keep each prescription on its original weekday, including weekday-specific time limits.
+          const dayShift = draftAnchor
+            ? calendarIsoWeekday(draftAnchor) - calendarIsoWeekday(startDate)
+            : 0;
+          const dateChanges: PlanStartPreviewRequest['changes'] = [];
           for (const item of preserved) {
             cover(item, !schedule);
             const w = normalizedById.get(item.sourceWorkoutId)!;
-            candidate.push({
-              sourceWorkoutId: item.sourceWorkoutId,
-              workout: {
-                weekIndex: w.weekIndex,
-                dayIndex: w.dayIndex,
-                sessionIndex: w.sessionIndex,
-                sportType: w.sportType,
-                plannedSessionRpe: w.plannedSessionRpe ?? undefined,
-                sportDefinitionCode: w.sportDefinitionCode,
-                name: w.name ?? undefined,
-                notes: w.notes ?? undefined,
-                definition: {
-                  kind: w.structureKind,
-                  version: 1,
-                  source: 'STRUCTURE',
-                  structure: w.structure,
-                },
+            const workout: PlanStartWorkoutDraft = {
+              weekIndex: w.weekIndex,
+              dayIndex: (w.dayIndex + dayShift + 6) % 7 + 1,
+              sessionIndex: w.sessionIndex,
+              sportType: w.sportType,
+              plannedSessionRpe: w.plannedSessionRpe ?? undefined,
+              sportDefinitionCode: w.sportDefinitionCode,
+              name: w.name ?? undefined,
+              notes: w.notes ?? undefined,
+              definition: {
+                kind: w.structureKind,
+                version: 1,
+                source: 'STRUCTURE',
+                structure: w.structure,
               },
-            });
+            };
+            candidate.push({ sourceWorkoutId: item.sourceWorkoutId, workout });
+            if (dayShift) dateChanges.push({ ...item, workout });
+          }
+          if (dateChanges.length) {
+            request = { ...request, changes: dateChanges };
+            preserved = [];
           }
           if (covered.size !== source.workouts.length)
             fail('The candidate must cover every source workout');
@@ -2634,20 +2861,21 @@ export class PlanStartService {
           const quality =
             source.planningMode === 'ROLLING'
               ? assessRollingPlanQuality(qualityInput, contract)
-              : assessPlanQuality(
+              : await this.loads.assessPlanQualityForViewer(
+                  userId,
                   source.periodWeeks,
-                  display.map((w) => ({
-                    ...w,
-                    durationSeconds: w.summary?.durationSeconds,
-                  })),
+                  qualityInput,
                   schedule && contract
                     ? {
                         ...contract,
                         allowedDays: undefined,
                         maxDailyMinutes: undefined,
+                        maxMinutesByIsoWeekday: undefined,
                         maxTrainingDaysPerWeek: undefined,
                       }
-                    : contract,
+                    : contract && { ...contract, startDate },
+                  tx,
+                  parsePlanAssessment(candidateMetadata.planAssessment, candidateWeeks),
                 );
           if (!quality.valid)
             throw new UnprocessableEntityException({
@@ -2831,12 +3059,16 @@ export class PlanStartService {
                   sourceRevision: item.sourceWorkoutId ? byId.get(item.sourceWorkoutId)?.revision : undefined,
                   candidateKey: item.candidateKey,
                   beforeScheduledDate: item.sourceWorkoutId
-                    ? byId.get(item.sourceWorkoutId)?.scheduledDate?.toISOString().slice(0, 10)
+                    ? byId.get(item.sourceWorkoutId)?.scheduledDate?.toISOString().slice(0, 10) ??
+                      (dayShift && draftAnchor && before
+                        ? addCalendarDays(draftAnchor, (before.weekIndex - 1) * 7 + before.dayIndex - 1)
+                        : undefined)
                     : undefined,
                   name: w.name ?? w.sportType,
                   ...(before && before.name !== w.name
                     ? { beforeName: before.name ?? before.sportType }
                     : {}),
+                  beforeSportType: before?.sportType,
                   sportType: w.sportType,
                   scheduledDate: date.toISOString().slice(0, 10),
                   disposition:
@@ -2917,6 +3149,16 @@ export class PlanStartService {
             }));
           }
           const readRange = adjustment && range ? calendarAdjustmentReadRange(range) : undefined;
+          const adjustmentKeys = adjustment && request.mode === 'SCHEDULE'
+            ? new Set([
+                ...request.changes.map(({ sourceWorkoutId }) => sourceWorkoutId),
+                ...request.deletions.map(({ sourceWorkoutId }) => sourceWorkoutId),
+                ...request.additions.map(({ candidateKey }) => `candidate:${candidateKey}`),
+              ])
+            : undefined;
+          if (automation) {
+            await this.assertAutomationJob(automation.jobId, automation.claimToken, tx);
+          }
           const proposal: CanonicalStartProposal = {
             mode: request.mode,
             planId: source.id,
@@ -2932,7 +3174,7 @@ export class PlanStartService {
               ? { calendarMove }
               : adjustment
                 ? {
-                    calendarAdjustmentEdits: adjustment.edits,
+                    calendarAdjustmentEdits: adjustment.edits.filter((edit) => adjustmentKeys!.has(calendarEditKey(edit))),
                     calendarAdjustmentMutationHash: adjustment.mutationHash,
                     calendarEditHash: hash(adjustment.edits),
                     calendarAdjustmentReadRange: readRange!,
@@ -2945,13 +3187,6 @@ export class PlanStartService {
                     automationMonthStrategyIds:
                       await this.rolling.weekDependencies(
                         source.id,
-                        (
-                          await this.assertAutomationJob(
-                            automation!.jobId,
-                            automation!.claimToken,
-                            tx,
-                          )
-                        ).policyId,
                         isoWeekStart(
                           (request as PlanSchedulePreviewRequest).range.from,
                         ),
@@ -3044,6 +3279,7 @@ export class PlanStartService {
                     id: adjustment.versionId,
                     calendarAdjustmentId: adjustment.id,
                     calendarVersion: adjustment.number,
+                    ...(proposal.calendarAdjustmentEdits?.length === 0 ? { discardedAt: new Date() } : {}),
                   } : {}),
                 },
               });
@@ -3205,7 +3441,6 @@ export class PlanStartService {
             fail('Automated schedule must cover the actual remaining ISO week');
           const dependencies = await this.rolling.weekDependencies(
             job.planId,
-            job.policyId,
             weekStart,
             tx,
             range.from,
@@ -3500,7 +3735,10 @@ export class PlanStartService {
       input.workouts?.length ||
       input.deletedWorkoutIds?.length
     )
-      await this.plans.updatePlan(args.userId, source.id, input, meta, { tx });
+      await this.plans.updatePlan(args.userId, source.id, input, meta, {
+        tx,
+        ...(!schedule ? { validatedStartDate: proposal.startDate } : {}),
+      });
     if (!schedule)
       await this.plans.activatePlan(
         args.userId,

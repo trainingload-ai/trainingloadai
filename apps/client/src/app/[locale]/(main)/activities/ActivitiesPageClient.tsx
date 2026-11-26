@@ -208,13 +208,6 @@ export function ActivitiesPageClient({
     () => buildActivityStatsPreviewDays(statsPreviewData?.rows),
     [statsPreviewData?.rows],
   );
-  const handleOpenActivity = React.useCallback(
-    (hashId: string) => {
-      if (!hashId) return;
-      router.push(`/activities/${hashId}`);
-    },
-    [router],
-  );
   const handleDeletedActivity = React.useCallback(
     (hashId: string) => {
       setItems((prev) =>
@@ -520,7 +513,6 @@ export function ActivitiesPageClient({
                               previewOnly={isDevActivityFeedFixture(
                                 item.activity,
                               )}
-                              onOpen={handleOpenActivity}
                               onDeleted={handleDeletedActivity}
                               onPlanLinkChange={handlePlanLinkChange}
                             />
@@ -562,7 +554,6 @@ export function ActivitiesPageClient({
                                 previewOnly={isDevActivityFeedFixture(
                                   item.activity,
                                 )}
-                                onOpen={handleOpenActivity}
                                 onDeleted={handleDeletedActivity}
                                 onPlanLinkChange={handlePlanLinkChange}
                               />

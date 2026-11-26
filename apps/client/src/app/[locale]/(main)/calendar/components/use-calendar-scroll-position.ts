@@ -3,10 +3,10 @@
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 
-export function useCalendarScrollPosition(initialDate: () => Dayjs) {
+export function useCalendarScrollPosition(initialDate: () => Dayjs, initialAnchor?: Dayjs) {
   const [currentMonth, setCurrentMonth] = useState(initialDate);
   const [visibleMonth, setVisibleMonth] = useState(() => currentMonth.format("YYYY-MM"));
-  const [scrollAnchor, setScrollAnchor] = useState<Dayjs | null>(null);
+  const [scrollAnchor, setScrollAnchor] = useState<Dayjs | null>(initialAnchor ?? null);
   const displayedMonth = useMemo(() => dayjs(`${visibleMonth}-01`), [visibleMonth]);
   const resetScrollAnchor = useCallback((month?: Dayjs) => {
     setScrollAnchor(null);

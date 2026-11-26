@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef, type ComponentProps, type ReactNode } from "react";
+import { useRef, useState, type ComponentProps, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import { CalendarEditor } from "../calendar/components/calendar-editor";
 import { calendarToday } from "../calendar/components/calendar-move-model";
 import { CoachPlanDraftCalendarPreview } from "./coach-plan-draft-calendar-preview";
@@ -24,6 +26,8 @@ import {
 import { useCoachCalendarMovePreview } from "./coach-calendar-move-recovery-card";
 
 import { CoachReadViewProvider, useCoachReadTabs } from "./coach-read-workspace";
+import { CoachIndependentWorkoutPanel } from "./coach-independent-workout-panel";
+import { CoachIndependentWorkoutDraftContext, CoachIndependentWorkoutDraftPanel } from "./coach-independent-workout-draft";
 
 export function CoachDraftCalendar({
   artifact,
@@ -54,6 +58,7 @@ export function CoachEditableCalendar({
   return (
     <CalendarEditor
       {...editor}
+      inlineWorkoutEditor
       planId={artifact.planId}
       instanceId={artifact.id}
       initialDate={initialDate}
@@ -70,6 +75,9 @@ export function CoachConversationWorkspace({
   children: ReactNode;
   sid: string;
 }) {
+  const t = useTranslations("CalendarExperience.createWorkout");
+  const [independentOpen, setIndependentOpen] = useState(false);
+  const [independentDraftId, setIndependentDraftId] = useState<string>();
   const artifacts = useCoachCalendarArtifacts();
   const { data: move } = useCoachCalendarMovePreview(sid);
   const adjustment = calendarAdjustmentArtifact(move);
@@ -78,14 +86,27 @@ export function CoachConversationWorkspace({
   const read = useCoachReadTabs(sid, workspace);
   const activeCalendarKey = workspace.active ? calendarArtifactKey(workspace.active) : undefined;
   const activeKey = read.activeId ?? activeCalendarKey;
+  const openCalendar = (kind: "schedule-calendar" | "calendar-adjustment" | "published-calendar" | "plan-draft-calendar", id: string) => {
+    setIndependentOpen(false);
+    workspace.openFromCard(kind, id);
+  };
+  const openIndependent = (draftId?: string) => {
+    setIndependentDraftId(draftId);
+    setIndependentOpen(true);
+    workspace.setMobileView("preview");
+  };
+  const closeIndependent = () => {
+    setIndependentOpen(false);
+    workspace.setMobileView("conversation");
+  };
 
   return (
     <CoachReadViewProvider read={read}>
     <CoachSchedulePreviewContext.Provider
       value={{
-        open: (id) => workspace.openFromCard("schedule-calendar", id),
-        openAdjustment: (id) => workspace.openFromCard("calendar-adjustment", id),
-        openPublishedCalendar: (id) => workspace.openFromCard("published-calendar", id),
+        open: (id) => openCalendar("schedule-calendar", id),
+        openAdjustment: (id) => openCalendar("calendar-adjustment", id),
+        openPublishedCalendar: (id) => openCalendar("published-calendar", id),
         editingAdjustmentId: adjustment && workspace.drafts[adjustment.id] ? adjustment.id : undefined,
         isEditingAdjustment: workspace.isEditingAdjustment,
         cancelledDecisionId: null,
@@ -93,16 +114,26 @@ export function CoachConversationWorkspace({
       }}
     >
       <CoachPlanDraftPreviewContext.Provider
-        value={(id) => workspace.openFromCard("plan-draft-calendar", id)}
+        value={(id) => openCalendar("plan-draft-calendar", id)}
       >
+        <CoachIndependentWorkoutDraftContext.Provider value={openIndependent}>
         <CoachConversationLayout
-          conversation={children}
+          conversation={(
+            <>
+              <div className="flex shrink-0 justify-end border-b px-3 py-1">
+                <Button type="button" size="sm" variant="ghost" onClick={() => openIndependent()}>{t("scopeIndependent")}</Button>
+              </div>
+              {children}
+            </>
+          )}
           conversationRef={workspace.conversationRef}
           mobileView={workspace.mobileView}
           onMobileViewChange={workspace.setMobileView}
-          previewLabel={read.activeLabel}
+          previewLabel={independentOpen ? t("scopeIndependent") : read.activeLabel}
           preview={
-            workspace.visible && activeKey ? (
+            independentOpen ? (independentDraftId
+              ? <CoachIndependentWorkoutDraftPanel key={independentDraftId} id={independentDraftId} onClose={closeIndependent} />
+              : <CoachIndependentWorkoutPanel onClose={closeIndependent} />) : workspace.visible && activeKey ? (
               <CoachPreviewPanel
                 onClose={() => !read.activeId && closeEditor.current ? closeEditor.current() : read.close()}
                 onTabClose={workspace.closeTab}
@@ -136,6 +167,7 @@ export function CoachConversationWorkspace({
             ) : null
           }
         />
+        </CoachIndependentWorkoutDraftContext.Provider>
       </CoachPlanDraftPreviewContext.Provider>
     </CoachSchedulePreviewContext.Provider>
     </CoachReadViewProvider>

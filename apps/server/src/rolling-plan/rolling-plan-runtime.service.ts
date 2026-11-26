@@ -22,6 +22,8 @@ import type {
   RollingPlanCandidate,
 } from './rolling-plan-candidate.types';
 
+const DISCOVERY_INTERVAL_MS = 60 * 60_000;
+
 /** Runs independently of app visits and review notification preferences. */
 @Injectable()
 export class RollingPlanRuntimeService
@@ -31,6 +33,7 @@ export class RollingPlanRuntimeService
   private cron?: CronJob;
   private unsubscribe?: () => void;
   private running = false;
+  private lastDiscoveryHour?: number;
   constructor(
     private readonly queue: RollingPlanAutomationService,
     private readonly candidates: RollingPlanCandidateService,
@@ -95,7 +98,11 @@ export class RollingPlanRuntimeService
     this.running = true;
     try {
       await this.deliverCommittedResults();
-      await this.queue.discover(now);
+      const hour = Math.floor(now.getTime() / DISCOVERY_INTERVAL_MS);
+      if (this.lastDiscoveryHour !== hour) {
+        await this.queue.discover(now);
+        this.lastDiscoveryHour = hour;
+      }
       for (let index = 0; index < 8; index++) {
         if (!this.capabilities.isEnabled('ai')) break;
         const job = await this.queue.claim();
@@ -217,8 +224,11 @@ export class RollingPlanRuntimeService
               changed = (applied as { changed?: boolean })?.changed !== false;
             }
           }
-          if (changed) await this.deliverCommittedResults();
-          await this.queue.discover(now);
+          if (changed) {
+            await this.deliverCommittedResults();
+            // A publication can unlock a dependent window for this plan.
+            await this.queue.discover(now, job.planId);
+          }
         } catch (error) {
           const state = await this.queue.fail(
             job,

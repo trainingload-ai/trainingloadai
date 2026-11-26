@@ -1,5 +1,8 @@
 {
   "coach_plan_quality": {
+    "WEEK_TARGET_LOAD_UNVERIFIED": "Die Trainingsbelastung der Woche lässt sich noch nicht mit dem Zielbereich abgleichen. Prüfe die verfügbaren Angaben zur Einheit.",
+    "POST_RECOVERY_LOAD_JUMP_REVIEW": "Die geschätzte Belastung liegt deutlich über der Woche vor der Erholung. Prüfe den Wiedereinstieg.",
+    "RECOVERY_LOAD_UNVERIFIED": "Für die Regenerations- oder Taperwoche fehlen Belastungsschätzungen. Prüfe die geplanten Einheiten und die Intensität.",
     "UNKNOWN_DURATION": "Einige Einheiten haben Distanzvorgaben oder offene Dauer; die gesamte Wochenzeit ist daher unbekannt.",
     "LONG_SESSION_NOT_REDUCED": "Die längste Regenerations-/Taper-Einheit wurde nicht verkürzt. Intensität und Erholung prüfen.",
     "VOLUME_JUMP_REVIEW": "Einige Wochen steigen um mehr als 30 % in der Dauer. Mit dem bisherigen Training abgleichen; dies ist keine allgemeine Sicherheitsgrenze.",
@@ -14,6 +17,7 @@
     "success": "Anfrage erfolgreich"
   },
   "coachRuntime": {
+    "planDraftSummaryFallback": "Dieser Entwurf für {weeks} Wochen umfasst {sessions} Trainingseinheiten und wurde noch nicht gespeichert. Prüfe den Zeitplan und wähle „Plan speichern“, wenn er passt. Du kannst mir auch sagen, welchen Tag oder welche Einheit du ändern möchtest.",
     "optionKeepPlan": "Plan beibehalten",
     "optionPostponeOneDay": "Um einen Tag verschieben",
     "optionSkipSession": "Diese Einheit überspringen",

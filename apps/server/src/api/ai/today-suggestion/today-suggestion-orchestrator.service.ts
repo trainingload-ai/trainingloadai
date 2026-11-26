@@ -14,6 +14,7 @@ import type {
 } from '@shared/ai-today-suggestion-contract';
 import { isTodaySuggestionWorkout } from '@shared/ai-today-suggestion-contract';
 import { stableJson } from '../core/ai-common.util';
+import { isCoachModelTimeoutError } from '../core/tool-loop-agent.runtime';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TodaySuggestionAgentService } from './today-suggestion-agent.service';
@@ -960,7 +961,7 @@ export class TodaySuggestionOrchestratorService {
     error: unknown,
     aborted: boolean,
   ): TodaySuggestionDeliveryReason {
-    if (aborted) return 'UPSTREAM_TIMEOUT';
+    if (aborted || isCoachModelTimeoutError(error)) return 'UPSTREAM_TIMEOUT';
     const message = error instanceof Error ? error.message : String(error);
     if (
       message.includes('OUTPUT_REJECTED') ||

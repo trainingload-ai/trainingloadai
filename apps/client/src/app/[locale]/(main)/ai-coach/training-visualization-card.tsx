@@ -7,7 +7,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useFormatter, useTranslations } from "next-intl";
 import { useContext, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CoachActivityPreviewContext, CoachChartPreviewContext, type CoachChartView } from "./coach-preview-panel";
+import { CoachActivityPreviewContext, CoachChartPreviewContext, CoachLocalPreviewContext, type CoachChartView } from "./coach-preview-panel";
 import { readCoachActivityView } from "@shared/ai-coach-schema";
 import { Link } from "@/i18n/navigation";
 import {
@@ -37,6 +37,7 @@ import { getMetricColor, getMetricColorRule } from "@/lib/chart-data-utils";
 import { CoachCard } from "./cards/CoachCard";
 import { isTrainingVisualizationV2 } from "@shared/training-exploration";
 import { TrainingExplorationCard } from "./training-exploration-card";
+import { CoachPreviewCard, CoachPreviewMetrics } from "./cards/coach-preview-card";
 
 const TRAINING_MEASURE_METRIC_KEYS: Record<
   Exclude<
@@ -149,6 +150,13 @@ function formatValue(value: unknown, unit: string, swimmingPace = false) {
   }`;
 }
 
+function trainingMeasureLabel(
+  measure: TrainingAnalysisMeasure,
+  t: ReturnType<typeof useTranslations<"AiCoachPage.trainingVisualization">>,
+) {
+  return measure === "ATL" || measure === "CTL" || measure === "TSB" ? measure : t(`measures.${measure}`);
+}
+
 export function TrainingVisualizationContent({
   value,
   onOpenMeasure,
@@ -162,43 +170,9 @@ export function TrainingVisualizationContent({
   const reduceMotion = useReducedMotion();
   const animateCharts = !reduceMotion && process.env.NODE_ENV !== "test";
   const areaGradientPrefix = `training-area-${useId().replace(/:/g, "")}`;
-  const measureLabel = (measure: TrainingAnalysisMeasure) => {
-    switch (measure) {
-      case "ACTIVITY_COUNT":
-        return t("measures.ACTIVITY_COUNT");
-      case "DURATION_MIN":
-        return t("measures.DURATION_MIN");
-      case "DISTANCE_KM":
-        return t("measures.DISTANCE_KM");
-      case "AVG_SPEED_KMH":
-        return t("measures.AVG_SPEED_KMH");
-      case "AVG_HEART_RATE":
-        return t("measures.AVG_HEART_RATE");
-      case "AVG_POWER":
-        return t("measures.AVG_POWER");
-      case "DAILY_LOAD":
-        return t("measures.DAILY_LOAD");
-      case "ATL":
-        return "ATL";
-      case "CTL":
-        return "CTL";
-      case "TSB":
-        return "TSB";
-      case "RUNNING_LOAD":
-        return t("measures.RUNNING_LOAD");
-      case "CYCLING_LOAD":
-        return t("measures.CYCLING_LOAD");
-      case "SWIMMING_LOAD":
-        return t("measures.SWIMMING_LOAD");
-      case "OTHER_LOAD":
-        return t("measures.OTHER_LOAD");
-      default:
-        return t(`measures.${measure}`);
-    }
-  };
   const series = value.series.map((item) => ({
     ...item,
-    label: item.label || measureLabel(item.key),
+    label: item.label || trainingMeasureLabel(item.key, t),
   }));
   const config = Object.fromEntries(
     series.map((item) => [
@@ -779,12 +753,54 @@ function TrainingVisualizationCoverageNote({
 export function TrainingVisualizationCard({
   payload,
   chartRef,
+  summary = false,
 }: {
   payload: unknown;
   chartRef?: Pick<CoachChartView, "messageId" | "deliveryId">;
+  summary?: boolean;
 }) {
   const t = useTranslations("AiCoachPage.trainingVisualization");
   const openChart = useContext(CoachChartPreviewContext);
+  const openLocal = useContext(CoachLocalPreviewContext);
+  const id = useId();
+  if (summary && openLocal) {
+    const v2 = isTrainingVisualizationV2(payload) ? payload : null;
+    const v1 = isTrainingVisualizationV1(payload) ? payload : null;
+    const value = v2 ?? v1;
+    if (!value) return null;
+    const range = v2?.provenance.query ?? v1?.provenance;
+    const dated = range && "from" in range && range.from && range.to ? `${range.from} – ${range.to}` : undefined;
+    const metrics = v2?.highlights?.slice(0, 4).map(({ label, value, unit }) => ({
+      label, value: formatValue(value, unit ?? ""),
+    })) ?? v1?.series.filter(({ key }) => v1.summary[key] != null).slice(0, 4).map(({ key, label, unit }) => ({
+      label: label || trainingMeasureLabel(key, t), value: formatValue(v1.summary[key], unit),
+    })) ?? [];
+    const requiresFetch = value.detail && chartRef && openChart;
+    const hasData = v2 ? v2.panels.length > 0 || metrics.length > 0 : Boolean(v1?.rows.length || metrics.length);
+    return (
+      <CoachPreviewCard icon={BarChart3} title={value.title}
+        subtitle={[v1?.observationDate ?? dated ?? value.subtitle, v1?.provenance.metricSource
+          ? t(`sources.${v1.provenance.metricSource}`) : undefined].filter(Boolean).join(" · ")}
+        actionLabel={t("openChart")}
+        onOpen={requiresFetch
+          ? () => openChart({ ...chartRef, fingerprint: value.provenance.fingerprint }, value.title)
+          : hasData ? () => openLocal(id, value.title, <TrainingVisualizationCard payload={value} />) : undefined}
+        actions={requiresFetch && v1?.view === "METRIC_STRIP" ? (
+          <div className="flex flex-wrap gap-1">
+            {v1.series.filter(({ key }) => v1.summary[key] != null).slice(0, 4).map(({ key, label }) => (
+              <Button key={key} size="sm" variant="ghost" onClick={() => openChart({
+                ...chartRef, fingerprint: value.provenance.fingerprint, measure: key,
+              }, value.title)}>{t("openChart")} · {label || trainingMeasureLabel(key, t)}</Button>
+            ))}
+          </div>
+        ) : undefined}>
+        <CoachPreviewMetrics items={metrics} />
+        {!hasData ? <p role="status" className="text-xs text-muted-foreground">{t("exploration.notes.NO_DATA")}</p> : null}
+        {v2 && !metrics.length && v2.provenance.matchedCount > 0
+          ? <p className="text-xs text-muted-foreground">{t("exploration.records")}: {v2.provenance.matchedCount} · {t("exploration.missing")}: {v2.provenance.missingCount}</p> : null}
+      </CoachPreviewCard>
+    );
+  }
   if (isTrainingVisualizationV2(payload) && payload.highlights) {
     const { from, to } = payload.provenance.query;
     return (

@@ -9,6 +9,7 @@ import {
 import type { ActiveCoachSkill } from './skill.types';
 import {
   isAiToolEnabled,
+  matchesAiToolSkill,
   toolMatchesName,
   type AiToolContext,
   type AiToolDef,
@@ -39,6 +40,8 @@ import { profileCurrentTool } from './tools/profileCurrent.tool';
 import { athleteStateAnswerTool } from './tools/athleteStateAnswer.tool';
 import { askUserQuestionTool } from './tools/askUserQuestion.tool';
 import { presentCoachPlanDraftTool } from './tools/presentCoachPlanDraft.tool';
+import { planStagePhaseTool } from './tools/planStagePhase.tool';
+import { presentIndependentWorkoutDraftTool } from './tools/presentIndependentWorkoutDraft.tool';
 import { planActiveTool } from './tools/planActive.tool';
 import { planByIdTool } from './tools/planById.tool';
 import { planRecentTool } from './tools/planRecent.tool';
@@ -114,24 +117,19 @@ const CORE_ALWAYS_ON_TOOL_NAMES = [
 const BRANCH_ALWAYS_ON_TOOL_NAMES = [
   'coach_decision_draft',
   'coach_decision_apply',
+  'present_independent_workout_draft',
   'review.explain',
 ];
-
-function toolAppliesToSkill(
-  tool: AiToolDef,
-  activeSkill?: ActiveCoachSkill | null,
-): boolean {
-  if (!activeSkill || !tool.applicableSkills?.length) return true;
-  return tool.applicableSkills.some(
-    (skillName) => skillName.toLowerCase() === activeSkill.name.toLowerCase(),
-  );
-}
 
 export function scopeToolsByActiveSkill(
   tools: AiToolDef[],
   activeSkill?: ActiveCoachSkill | null,
 ): AiToolDef[] {
-  if (!activeSkill) return tools;
+  const available = tools.filter(
+    (tool) =>
+      !tool.requiresActiveSkill || matchesAiToolSkill(tool, activeSkill?.name),
+  );
+  if (!activeSkill) return available;
 
   const suggestedTools = activeSkill.suggestedTools ?? [];
   const alwaysOnNames = [
@@ -139,21 +137,19 @@ export function scopeToolsByActiveSkill(
     ...BRANCH_ALWAYS_ON_TOOL_NAMES,
   ];
 
-  const scoped = tools.filter((tool) => {
+  const scoped = available.filter((tool) => {
     if (alwaysOnNames.some((name) => toolMatchesName(tool, name))) {
       return true;
     }
 
-    const applies = toolAppliesToSkill(tool, activeSkill);
-    if (!applies) return false;
+    if (!matchesAiToolSkill(tool, activeSkill.name)) return false;
 
     if (tool.applicableSkills?.length) return true;
 
     return suggestedTools.some((name) => toolMatchesName(tool, name));
   });
 
-  // 防御性兜底：如果 skill 配置异常导致筛空，则回退到原集合。
-  return scoped.length > 0 ? scoped : tools;
+  return scoped.length > 0 ? scoped : available;
 }
 
 /** Static catalog: inspecting names must not execute permission checks or tools. */
@@ -167,6 +163,8 @@ export const COACH_TOOL_DEFINITIONS: readonly AiToolDef[] = [
   fitnessApplyTool,
   fitnessTrackTool,
   presentCoachPlanDraftTool,
+  planStagePhaseTool,
+  presentIndependentWorkoutDraftTool,
   planSuitabilityAssessTool,
   presentPlanWorkoutAdjustmentDraftTool,
   coachDecisionDraftTool,

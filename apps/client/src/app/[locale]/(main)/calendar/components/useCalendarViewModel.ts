@@ -96,6 +96,8 @@ function buildRangeStats(args: {
 export function useCalendarSchedule(
   currentMonth: Dayjs,
   requestedRange?: { start: Dayjs; end: Dayjs } | null,
+  meta?: { errorSurface: "inline" },
+  enabled = true,
 ) {
   const locale = useLocale();
   const weekStartsOn = useCalendarWeekStartsOn();
@@ -123,13 +125,15 @@ export function useCalendarSchedule(
     workoutsByDate: activePlanWorkoutsByDate,
     range,
     active,
-  } = useActivePlan(true);
+  } = useActivePlan(enabled);
   const activePlanId = active?.plan?.id ?? null;
-  const { data: scheduledWorkouts } = useQuery({
+  const scheduleQuery = useQuery({
     queryKey: queryKeys.plans.scheduled(fetchStart, fetchEnd),
     queryFn: () => getScheduledWorkouts(fetchStart!, fetchEnd!),
-    enabled: Boolean(fetchStart && fetchEnd),
+    enabled: enabled && Boolean(fetchStart && fetchEnd),
+    meta,
   });
+  const scheduledWorkouts = scheduleQuery.data;
   const { workoutsByDate, independentWorkoutsByDate } = React.useMemo(() => {
     const all: Record<string, CalendarWorkout[]> = {};
     const independent: Record<string, PlanWorkout[]> = {};
@@ -184,6 +188,7 @@ export function useCalendarSchedule(
     weekStartsOn,
     fetchStart,
     fetchEnd,
+    scheduleQuery,
     active,
     activePlanId,
     range,

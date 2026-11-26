@@ -440,7 +440,7 @@ const activityItems = [
     startTime: "2026-10-08T23:05:00Z",
     distanceKm: 8.24,
     durationMin: 46.6,
-    trainingLoad: 42,
+    load: 42,
     avgHr: 143,
   },
   {
@@ -450,7 +450,7 @@ const activityItems = [
     startTime: "2026-10-07T11:15:00Z",
     distanceKm: 31.8,
     durationMin: 65.3,
-    trainingLoad: 58,
+    load: 58,
     avgHr: 136,
     avgPower: 168,
   },

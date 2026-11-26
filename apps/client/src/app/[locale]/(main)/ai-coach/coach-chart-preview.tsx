@@ -9,7 +9,7 @@ import { isCoachHealthVisualization } from "@shared/ai-coach-schema";
 import { formatHealthHrvLabel } from "@shared/health-overview";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
-import { classifyApiError } from "@/lib/api-error";
+import { LoadErrorState } from "@/components/ui/load-error-state";
 import { TrainingVisualizationCard } from "./training-visualization-card";
 import { CoachHealthCard } from "./coach-health-card";
 import type { CoachChartView } from "./coach-preview-panel";
@@ -47,6 +47,7 @@ function ChartResult({ sid, view }: { sid: string; view: CoachChartView }) {
     queryKey: ["coach-chart", sid, messageId, deliveryId, date],
     queryFn: ({ signal }) => readChart(signal),
     retry: 1,
+    meta: { errorSurface: "inline" },
   });
   const alternateSelected = Boolean(hrvSource || metricSource || byActivity);
   const alternate = useQuery({
@@ -54,6 +55,7 @@ function ChartResult({ sid, view }: { sid: string; view: CoachChartView }) {
     queryFn: ({ signal }) => readChart(signal, { hrvSource, metricSource, byActivity }),
     enabled: alternateSelected,
     retry: 1,
+    meta: { errorSurface: "inline" },
   });
   const chart = alternateSelected ? alternate : original;
   const originalHealth = isCoachHealthVisualization(original.data) ? original.data : undefined;
@@ -89,14 +91,17 @@ function ChartResult({ sid, view }: { sid: string; view: CoachChartView }) {
       {sources.map((source) => <option key={source.id} value={source.id}>{formatHealthHrvLabel(source)}</option>)}
     </select>
   ) : null;
-  const unavailable = chart.isError && ["authentication", "not-found", "permission"].includes(classifyApiError(chart.error));
-  if (chart.isPending || chart.isError || !chart.data) return <div className="space-y-2 p-3 text-sm">
-    {sourceSelect}
-    {metricSourceSelect}
-    {grouping}
-    <p role="status">{t(chart.isPending ? "ActivityDetail.loading" : unavailable ? "Overview.noData" : "ActivityTimeline.error")}</p>
-    {chart.isError && !unavailable ? <Button size="sm" variant="outline" onClick={() => void chart.refetch()}>{t("ActivityTimeline.retry")}</Button> : null}
-  </div>;
+  if (chart.isPending || chart.isError) return (
+    <div className="space-y-2">
+      {sourceSelect}
+      {metricSourceSelect}
+      {grouping}
+      {chart.isError ? <LoadErrorState retrying={chart.isFetching}
+        onRetry={() => void chart.refetch({ cancelRefetch: false })} /> : (
+        <p className="p-3 text-sm text-muted-foreground">{t("ActivityDetail.loading")}</p>
+      )}
+    </div>
+  );
   const payload = chart.data;
   const refreshedFingerprint = isCoachHealthVisualization(payload) ? payload.fingerprint : payload.provenance.fingerprint;
   const observedAt = payload.observedAt ? new Date(payload.observedAt) : null;

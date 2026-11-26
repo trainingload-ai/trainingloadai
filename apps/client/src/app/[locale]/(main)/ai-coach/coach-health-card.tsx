@@ -1,18 +1,20 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useId, useState } from "react";
 import { Activity } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import {
   isCoachHealthVisualization,
   type CoachHealthVisualization,
 } from "@shared/ai-coach-schema";
-import { formatHealthHrvLabel, getComparableHealthIntraday } from "@shared/health-overview";
+import { formatHealthHrvLabel, formatHealthProviderLabel, getComparableHealthIntraday } from "@shared/health-overview";
 import { useHealthIntraday } from "@/api/health-data";
+import { LoadErrorState } from "@/components/ui/load-error-state";
 import { Button } from "@/components/ui/button";
 import { HealthMetricMiniChart } from "@/components/health/HealthMetricMiniChart";
 import { CoachCard } from "./cards/CoachCard";
-import { CoachChartPreviewContext, type CoachChartView } from "./coach-preview-panel";
+import { CoachChartPreviewContext, CoachLocalPreviewContext, type CoachChartView } from "./coach-preview-panel";
+import { CoachPreviewCard } from "./cards/coach-preview-card";
 
 function HealthChart({ result }: { result: CoachHealthVisualization & { chart: NonNullable<CoachHealthVisualization["chart"]> } }) {
   const locale = useLocale();
@@ -22,9 +24,13 @@ function HealthChart({ result }: { result: CoachHealthVisualization & { chart: N
     result.scope.from === result.scope.to ? result.scope.to
       : result.knownDays === 1 ? result.date : null,
   );
-  const detailAvailable = result.scope.metric !== "sleepHeartRate";
-  const intraday = useHealthIntraday(chart.key as "sleep" | "hrv" | "restingHeartRate",
+  const intradayKey = chart.key === "sleep" || chart.key === "hrv" || chart.key === "restingHeartRate"
+    ? chart.key : null;
+  const detailAvailable = Boolean(intradayKey && result.scope.metric !== "sleepHeartRate" &&
+    (chart.key !== "sleep" || chart.sleepValueKind !== "timeInBed"));
+  const intraday = useHealthIntraday(intradayKey ?? "sleep",
     Boolean(day && detailAvailable), day ?? chart.latestDate, chart.hrvType);
+  const detailFailed = Boolean(day && detailAvailable && intraday.isError);
   const comparison = day ? getComparableHealthIntraday(chart, intraday.data, day) : undefined;
   const samples = comparison?.current.filter((point) =>
     point.provider === chart.provider && !point.summaryOnly) ?? [];
@@ -37,6 +43,8 @@ function HealthChart({ result }: { result: CoachHealthVisualization & { chart: N
           {t("showData")} · {result.scope.from} – {result.scope.to}
         </Button>
       ) : null}
+      {detailFailed ? <LoadErrorState compact retrying={intraday.isFetching}
+        onRetry={() => void intraday.refetch({ cancelRefetch: false })} /> : (
       <div className="h-52 min-w-0">
         <HealthMetricMiniChart
           card={chart}
@@ -46,15 +54,12 @@ function HealthChart({ result }: { result: CoachHealthVisualization & { chart: N
           previousPoints={day ? [] : result.comparison?.points ?? []}
           baseline={result.baseline}
           intraday={timeline}
+          sleepByDay
         />
-      </div>
-      {day && intraday.isFetching ? (
+      </div>)}
+      {day && detailAvailable && intraday.isFetching && !detailFailed ? (
         <p role="status" className="text-xs text-muted-foreground">{t("loadingDetails")}</p>
-      ) : day && intraday.isError ? (
-        <Button size="sm" variant="outline" onClick={() => void intraday.refetch()}>
-          {t("retryDetails")}
-        </Button>
-      ) : day && !timeline ? (
+      ) : day && detailAvailable && !detailFailed && !timeline ? (
         <p role="status" className="text-xs text-muted-foreground">{t("dailySummaryOnly")}</p>
       ) : null}
       <details>
@@ -76,20 +81,23 @@ function HealthChart({ result }: { result: CoachHealthVisualization & { chart: N
   );
 }
 
-export function CoachHealthCard({ payload, chartRef }: {
+export function CoachHealthCard({ payload, chartRef, summary = false }: {
   payload: unknown;
   chartRef?: Pick<CoachChartView, "messageId" | "deliveryId">;
+  summary?: boolean;
 }) {
   const t = useTranslations("AiCoachPage.trainingVisualization");
   const format = useFormatter();
   const openChart = useContext(CoachChartPreviewContext);
+  const openLocal = useContext(CoachLocalPreviewContext);
+  const id = useId();
   if (!isCoachHealthVisualization(payload)) return null;
   const { scope, date, value, recent, chart } = payload;
   const title = scope.metric === "hrv" ? "HRV"
     : t(`health.${scope.metric === "sleep" && scope.sleepValueKind === "timeInBed" ? "timeInBed" : scope.metric}`);
   const source = scope.hrvType
     ? formatHealthHrvLabel({ hrvType: scope.hrvType, provider: scope.provider ?? null })
-    : scope.provider;
+    : formatHealthProviderLabel(scope.provider);
   const unit = scope.metric === "hrv" ? "ms" : scope.metric === "sleep" ? "min" : "bpm";
   const formatValue = (input: number) => `${format.number(scope.metric === "sleep" ? input / 60 : input, { maximumFractionDigits: 1 })} ${unit}`;
   const open = (selectedDate?: string) => {
@@ -99,9 +107,15 @@ export function CoachHealthCard({ payload, chartRef }: {
   };
   const days = (Date.parse(scope.to) - Date.parse(scope.from)) / 86_400_000 + 1;
   const range = days === 1 ? scope.from : `${scope.from} – ${scope.to}`;
-  return (
-    <CoachCard tone="neutral" dense icon={<Activity className="size-4" />}
-      title={title} subtitle={[range, source].filter(Boolean).join(" · ")}>
+  const subtitle = [range, source].filter(Boolean).join(" · ");
+  const compact = summary && Boolean(openLocal);
+  const hasAction = value !== null && Boolean(chart ? openLocal : chartRef && openChart);
+  const recentAction = recent && !chart && chartRef && openChart ? (
+    <Button variant="ghost" size="sm" className="h-auto min-h-8 whitespace-normal text-start" onClick={() => open(recent.date)}>
+      {t("recentHealth", { date: recent.date })} · {formatValue(recent.value)}
+    </Button>
+  ) : null;
+  const content = (
       <div className="space-y-2">
         {value !== null ? (
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -130,16 +144,25 @@ export function CoachHealthCard({ payload, chartRef }: {
               })}</span>}
           </div>
         ) : null}
-        {chart ? <HealthChart result={{ ...payload, chart }} /> : null}
-        {value !== null && !chart && chartRef && openChart ? (
+        {chart && !compact ? <HealthChart result={{ ...payload, chart }} /> : null}
+        {!compact && value !== null && !chart && chartRef && openChart ? (
           <Button variant="secondary" size="sm" onClick={() => open()}>{t("openChart")}</Button>
         ) : null}
-        {recent && !chart && chartRef && openChart ? (
-          <Button variant="ghost" size="sm" onClick={() => open(recent.date)}>
-            {t("recentHealth", { date: recent.date })} · {formatValue(recent.value)}
-          </Button>
-        ) : null}
+        {!compact ? recentAction : null}
       </div>
+  );
+  return compact ? (
+    <CoachPreviewCard icon={Activity} title={title} subtitle={subtitle} actionLabel={t("openChart")}
+      onOpen={hasAction ? () => {
+        if (chart) openLocal?.(id, title, <CoachHealthCard payload={payload} />);
+        else open();
+      } : undefined}
+      actions={recentAction}>
+      {content}
+    </CoachPreviewCard>
+  ) : (
+    <CoachCard tone="neutral" dense icon={<Activity className="size-4" />} title={title} subtitle={subtitle}>
+      {content}
     </CoachCard>
   );
 }

@@ -83,9 +83,10 @@ export class RollingPlanAutomationService {
   }
 
   /** Scan the current/following ISO window, never backfill a past pause gap. */
-  async discover(now = new Date()) {
+  async discover(now = new Date(), planId?: string) {
     const policies = await this.prisma.planAutomationPolicy.findMany({
       where: {
+        ...(planId ? { planId } : {}),
         revokedAt: null,
         plan: { planningMode: 'ROLLING', status: 'ACTIVE' },
       },
@@ -150,15 +151,17 @@ export class RollingPlanAutomationService {
               ) &&
               lastTrainingDayFinished(workouts, week, weekEnd, today);
             const through = nextWeekDue ? addCalendarDays(weekEnd, 7) : weekEnd;
-            const months = new Set([from.slice(0, 7), through.slice(0, 7)]);
+            const months = new Set([from.slice(0, 7)]);
+            const nextMonthStart = addCalendarDays(monthEnd, 1);
             if (
               lastTrainingDayFinished(workouts, monthStart, monthEnd, today) &&
-              published.some((generation) =>
-                ymd(generation.generatedFrom) <= monthEnd &&
-                ymd(generation.generatedThrough) >= monthEnd,
-              )
+              (through >= nextMonthStart ||
+                published.some((generation) =>
+                  ymd(generation.generatedFrom) <= monthEnd &&
+                  ymd(generation.generatedThrough) >= monthEnd,
+                ))
             ) {
-              months.add(addCalendarDays(monthEnd, 1).slice(0, 7));
+              months.add(nextMonthStart.slice(0, 7));
             }
             await tx.rollingPlanJob.updateMany({
               where: {
@@ -189,7 +192,6 @@ export class RollingPlanAutomationService {
               const currentMonth = await tx.rollingMonthStrategy.findFirst({
                 where: {
                   planId: plan.id,
-                  policyId: policy.id,
                   monthStart: date(start),
                   supersededAt: null,
                   appliedAt: { not: null },
@@ -241,29 +243,16 @@ export class RollingPlanAutomationService {
                   ymd(g.generatedFrom) <= first &&
                   ymd(g.generatedThrough) >= end,
               );
-              if (coverage?.policyId === policy.id) {
+              if (coverage) {
                 completedWindows.push({
                   kind: { in: ['WEEK', 'ADJUST'] },
                   windowStart: date(start),
                 });
                 continue;
               }
-              if (
-                coverage && await tx.rollingPlanJob.findFirst({
-                  where: {
-                    planId: plan.id,
-                    policyId: policy.id,
-                    kind: 'ADJUST',
-                    windowStart: date(start),
-                    state: 'APPLIED',
-                  },
-                  select: { id: true },
-                })
-              ) continue;
               const deps = await tx.rollingMonthStrategy.findMany({
                 where: {
                   planId: plan.id,
-                  policyId: policy.id,
                   supersededAt: null,
                   appliedAt: { not: null },
                   monthStart: { lte: date(end) },
@@ -283,7 +272,7 @@ export class RollingPlanAutomationService {
                   {
                     planId: plan.id,
                     policyId: policy.id,
-                    kind: coverage ? 'ADJUST' : 'WEEK',
+                    kind: 'WEEK',
                     windowStart: date(start),
                     inputRevision,
                   },
@@ -489,7 +478,8 @@ export class RollingPlanAutomationService {
           where: {
             id: { in: input.monthStrategyIds ?? [] },
             supersededAt: null,
-            policyId: job.policyId,
+            planId: job.planId,
+            appliedAt: { not: null },
           },
         });
         if (months.length !== (input.monthStrategyIds ?? []).length)
@@ -550,7 +540,8 @@ export class RollingPlanAutomationService {
           where: {
             id: { in: receipt.input.monthStrategyIds ?? [] },
             supersededAt: null,
-            policyId: job.policyId,
+            planId: job.planId,
+            appliedAt: { not: null },
           },
         });
         if (count !== (receipt.input.monthStrategyIds ?? []).length)
@@ -631,18 +622,10 @@ export class RollingPlanAutomationService {
               appliedAt: { not: null },
             },
           });
-          if (
-            previous?.policyId === job.policyId &&
-            hash(previous.strategy) === hash(strategy)
-          )
+          if (previous) {
             monthId = previous.id;
-          else {
+          } else {
             changed = true;
-            if (previous)
-              await tx.rollingMonthStrategy.update({
-                where: { id: previous.id },
-                data: { supersededAt: new Date() },
-              });
             const latest = await tx.rollingMonthStrategy.aggregate({
               where: { planId: job.planId, monthStart: job.windowStart },
               _max: { revision: true },
@@ -661,25 +644,6 @@ export class RollingPlanAutomationService {
               },
             });
             monthId = month.id;
-            if (previous)
-              await tx.rollingPlanJob.updateMany({
-                where: {
-                  planId: job.planId,
-                  policyId: job.policyId,
-                  kind: { in: ['WEEK', 'ADJUST'] },
-                  state: { in: ['PENDING', 'RUNNING', 'RETRY'] },
-                  windowStart: {
-                    gte: date(isoWeekStart(strategy.monthStart)),
-                    lte: date(calendarMonthEnd(strategy.monthStart)),
-                  },
-                },
-                data: {
-                  state: 'CANCELLED',
-                  claimToken: null,
-                  leaseUntil: null,
-                  lastError: 'ROLLING_MONTH_DEPENDENCY_CHANGED',
-                },
-              });
           }
         }
         await this.authorized(jobId, token, tx);
@@ -794,6 +758,12 @@ export class RollingPlanAutomationService {
         },
         '2000-01-01',
       );
+      if (
+        enabled === (latest.revokedAt === null) &&
+        (!enabled || hash(policySettings) === hash(latest.settings))
+      ) {
+        return { enabled, revision: latest.revision };
+      }
       await tx.rollingPlanJob.updateMany({
         where: { planId, state: { in: ['PENDING', 'RUNNING', 'RETRY'] } },
         data: {

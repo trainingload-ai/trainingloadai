@@ -521,6 +521,7 @@
       "workoutDialogSessionMeta": "Sitzung {ordinal} · {sport}",
       "workoutDialogSessionFallback": "Sitzung {ordinal}",
       "workoutDialogClose": "Schließen",
+      "workoutDialogBackToCalendar": "Zurück zum Kalender",
       "scheduleConflict": "Konflikt mit deiner Verfügbarkeit"
     },
     "readCards": {
@@ -577,6 +578,7 @@
         "colMin": "Niedrig",
         "colMax": "Hoch",
         "unitPace": "(min/km)",
+        "unitPaceMi": "(min/mi)",
         "unitPace100m": "(Min./100m)",
         "unitHr": "(Schläge pro Minute)",
         "unitPower": "(W)",
@@ -666,6 +668,7 @@
       "showLess": "Weniger anzeigen",
       "evidence": "Verwendete Daten",
       "loadDelta": "Geschätzte Belastungsänderung",
+      "expectedImpact": "Voraussichtliche Auswirkungen",
       "syncImpact": "Auswirkung auf Gerätesynchronisierung",
       "total": "Bewertet",
       "changed": "Geändert",
@@ -4889,6 +4892,11 @@
     }
   },
   "PlanActivationDialog": {
+    "officialDescription": "Prüfe und bearbeite den Entwurf und wähle das Startdatum.",
+    "loadingDraft": "Trainingsentwurf wird geladen…",
+    "changedDraft": "Der Entwurf wurde an anderer Stelle geändert. Prüfe den Zeitplan vor dem Start.",
+    "startFailed": "Der Plan konnte nicht gestartet werden. Prüfe den Zeitplan und versuche es erneut.",
+    "editFailed": "Die Trainingsänderungen konnten nicht gespeichert werden. Versuche es erneut.",
     "title": "Plan aktivieren",
     "description": "Wählen Sie das tatsächliche Startdatum. Die Trainingstermine werden aus diesem Datum und jedem Trainingsversatz berechnet.",
     "cancel": "Abbrechen",
@@ -6622,6 +6630,8 @@
     "adjustmentConflicts": {
       "PLAN_STATUS": "The plan can no longer be edited",
       "WORKOUT_REMOVED": "The workout was removed",
+      "WORKOUT_CHANGED": "Dieses Training wurde an anderer Stelle geändert",
+      "WORKOUT_NOT_VERIFIED": "Dieses Training konnte beim Aktualisieren nicht geprüft werden",
       "WORKOUT_STATUS": "The workout status has changed",
       "ACTIVITY_LINKED": "The workout is linked to an activity",
       "HISTORY": "The workout date has passed",
@@ -6634,11 +6644,17 @@
     "stageEdit": "Zum Entwurf hinzufügen",
     "batchSaved": "Planänderungen gespeichert.",
     "batchFailed": "Die Änderungen konnten nicht gespeichert werden. Versuche es erneut.",
+    "adjustmentUnavailable": "Dieser Entwurf ist nicht mehr verwendbar. Dein Trainingsplan wurde nicht geändert. Du kannst mit dem aktuellen Plan eine neue Anpassung starten.",
     "batchReloadTitle": "Aktuellen Zeitplan laden?",
     "batchConflict": "The schedule changed or the edits could not be saved. Load the latest schedule and review your changes before confirming.",
     "missedDrop": "Verpasste Trainingseinheiten können nicht verschoben werden.",
     "completedDrop": "Abgeschlossene Trainingseinheiten können nicht verschoben werden.",
     "recovery": {
+      "unavailableTitle": "Entwurf nicht mehr verfügbar",
+      "localDraftRolledBack": "Die ungespeicherten Änderungen wurden zurückgenommen.",
+      "localDraftWillBeRolledBack": "Die ungespeicherten Änderungen werden ebenfalls zurückgenommen.",
+      "retryDraft": "Aktualisieren und erneut versuchen",
+      "refreshSchedule": "Trainingsplan aktualisieren",
       "title": "Vorschau der Verschiebung abgelaufen",
       "action": "Aktuellen Trainingsplan laden",
       "expired": "Lade den aktuellen Trainingsplan, um die Anpassung in diesem Chat fortzusetzen.",

@@ -1,5 +1,7 @@
 "use client";
 
+import { isOfficialPlanDraft } from "@shared/plan-calendar";
+
 import { isRollingPlan, isPlanDateNotGenerated } from "@/lib/rolling-plan";
 import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
@@ -62,6 +64,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { LoadErrorState } from "@/components/ui/load-error-state";
 import { cn } from "@/lib/utils";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
 
@@ -424,7 +427,7 @@ export function MobilePlanDetailSheet({
   const publicDemo = usePublicDemo();
   const plansT = useTranslations("V2PlansPage");
   const navigationT = useTranslations("MobileApp.planNavigation");
-  const detail = usePlanDetail(plan?.id, open && Boolean(plan));
+  const detail = usePlanDetail(plan?.id, open && Boolean(plan), { errorSurface: "inline" });
   const activate = useActivatePlan();
   const pause = usePausePlan();
   const complete = useCompletePlan();
@@ -529,10 +532,9 @@ export function MobilePlanDetailSheet({
           <p className="py-12 text-center text-sm text-muted-foreground">
             {navigationT("loading")}
           </p>
-        ) : detail.error ? (
-          <p className="py-12 text-center text-sm text-destructive">
-            {navigationT("failed")}
-          </p>
+        ) : detail.isError ? (
+          <LoadErrorState retrying={detail.isFetching}
+            onRetry={() => void detail.refetch({ cancelRefetch: false })} />
         ) : detail.data ? (
           <div className="space-y-4">
             <MobilePlanDetailContent
@@ -559,6 +561,7 @@ export function MobilePlanDetailSheet({
       <PlanStartConversationDialog
         open={startOpen}
         planId={plan?.id ?? null}
+        officialTitle={isOfficialPlanDraft(detail.data) ? detail.data?.title : undefined}
         onOpenChange={setStartOpen}
       />
       {embedded ? (

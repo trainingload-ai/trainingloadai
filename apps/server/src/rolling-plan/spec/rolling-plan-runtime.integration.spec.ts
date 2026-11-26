@@ -1,5 +1,6 @@
 import { PlanRepository } from '../../api/plan/persistence/plan.repository';
 import { fork, type ChildProcess } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
 import { planStartFixture } from '../../api/plan/spec/plan-start.fixture';
@@ -261,6 +262,65 @@ describe('continuous plan runtime / PostgreSQL', () => {
     await queue.discover(new Date('2099-11-21T16:00:00Z'));
     expect(await nextWeek()).toBe(1);
   });
+
+  it.each([true, false])(
+    'opens next month once after its last scheduled day (last workout completed: %s)',
+    async (completed) => {
+      const { planId, policy } = await active();
+      await publishWeek(planId, policy.id, '2099-11-23', '2099-11-29');
+      await publishWeek(planId, policy.id, '2099-11-30', '2099-12-06');
+      await prisma.plan.update({
+        where: { id: planId },
+        data: { activationTimezone: 'Asia/Shanghai' },
+      });
+      const workout = await prisma.planWorkout.create({
+        data: {
+          userId: 'user',
+          planId,
+          dayOffset: 12,
+          scheduledDate: new Date('2099-11-30'),
+          sportType: 'RUN',
+          text: 'Easy 20m',
+        },
+      });
+      const queue = automation();
+      const nextMonth = () => prisma.rollingPlanJob.count({
+        where: { planId, kind: 'MONTH', windowStart: new Date('2099-12-01') },
+      });
+      await queue.discover(new Date('2099-11-27T09:00:00Z'));
+      expect(await nextMonth()).toBe(0);
+      if (completed) {
+        await prisma.planWorkout.update({
+          where: { id: workout.id },
+          data: { status: 'DONE' },
+        });
+      }
+      await queue.discover(new Date('2099-11-30T15:55:00Z'));
+      expect(await nextMonth()).toBe(completed ? 1 : 0);
+      await queue.discover(new Date('2099-11-30T16:00:00Z'));
+      expect(await nextMonth()).toBe(1);
+    },
+  );
+
+  it('reuses published calendar windows after saving or revising automation settings', async () => {
+    const { planId, policy } = await active();
+    const queue = automation();
+    await publishWeek(planId, policy.id, '2099-11-16', '2099-11-22');
+    await expect(queue.configure('user', planId, true, policy.settings))
+      .resolves.toEqual({ enabled: true, revision: 1 });
+    await expect(queue.configure('user', planId, true, {
+      ...(policy.settings as Record<string, unknown>),
+      goal: 'Easy endurance',
+    })).resolves.toEqual({ enabled: true, revision: 2 });
+    expect(await queue.discover(now)).toBe(0);
+    expect(await queue.discover(new Date('2099-11-23T09:00:00Z'))).toBe(1);
+    const job = (await queue.claim())!;
+    expect(job).toMatchObject({ kind: 'WEEK', windowStart: new Date('2099-11-23') });
+    expect((await queue.prepare(job.id, job.claimToken!)).input).toMatchObject({
+      monthStrategies: [expect.objectContaining({ policyId: policy.id })],
+    });
+  });
+
   it.each(['calendar-create', 'calendar-attach'])(
     'preserves a manually scheduled %s workout against automatic deletion',
     async (path) => {
@@ -381,7 +441,7 @@ describe('continuous plan runtime / PostgreSQL', () => {
     ).toMatchObject({ name: 'Committed prescription', status: 'IN_PROGRESS' });
   });
 
-  it('applies a single cross-month week and monthly direction without recalculating on new activity evidence', async () => {
+  it('reuses published week and month results across calendar draft expiry and activity evidence changes', async () => {
     const { planId, policy } = await active();
     await publishWeek(planId, policy.id, '2099-11-23', '2099-11-29');
     Object.defineProperty(f.starts, 'automationAccess', {
@@ -425,8 +485,10 @@ describe('continuous plan runtime / PostgreSQL', () => {
         sessionRpe: 5,
       },
     });
+    const queue = automation();
+    const discover = jest.spyOn(queue, 'discover');
     const runtime = new RollingPlanRuntimeService(
-      automation(),
+      queue,
       {
         propose: async (input: any) => {
           calls++;
@@ -494,7 +556,13 @@ describe('continuous plan runtime / PostgreSQL', () => {
       { isEnabled: () => true, require: () => undefined } as never,
       { ensureNotification: async () => undefined } as never,
     );
-    await runtime.tick(new Date('2099-11-27T09:00:00Z'));
+    const firstTick = new Date('2099-11-27T09:00:00Z');
+    await runtime.tick(firstTick);
+    expect(discover.mock.calls).toEqual([
+      [firstTick],
+      [firstTick, planId],
+      [firstTick, planId],
+    ]);
     expect(proposedInputs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -534,10 +602,28 @@ describe('continuous plan runtime / PostgreSQL', () => {
     });
     expect(cross!.monthStrategies).toHaveLength(2);
     const firstCalls = calls;
+    const draftId = randomUUID();
+    const workout = await prisma.planWorkout.findFirstOrThrow({
+      where: { planId, generationId: cross!.id },
+    });
+    await expect(f.starts.saveCalendarAdjustment('user', planId, draftId, {
+      versionId: draftId,
+      edits: [{
+        kind: 'UPDATE', workoutId: workout.id, expectedRevision: workout.revision,
+        targetDate: '2099-12-02',
+      }],
+    })).resolves.toMatchObject({ state: 'READY' });
     await runtime.tick(new Date('2099-11-27T10:00:00Z'));
     expect(calls).toBe(firstCalls);
+    await prisma.planProposalPreview.update({
+      where: { id: draftId }, data: { expiresAt: new Date(0) },
+    });
+    await expect(f.starts.getCalendarAdjustment('user', planId, draftId))
+      .resolves.toMatchObject({ state: 'EXPIRED' });
     await runtime.tick(new Date('2099-11-28T10:00:00Z'));
     expect(calls).toBe(firstCalls);
+    await expect(prisma.planWorkout.findUniqueOrThrow({ where: { id: workout.id } }))
+      .resolves.toEqual(workout);
     await prisma.activity.update({
       where: { hashId: 'rolling-recent-run' },
       data: { timerTime: 2000 },

@@ -17,6 +17,10 @@ export class UpdatePlanWorkoutDto {
   @Min(0)
   expectedRevision?: number;
 
+  @IsOptional()
+  @IsIn(['DRAFT'])
+  expectedPlanStatus?: 'DRAFT';
+
   @IsInt()
   @Min(1)
   @Max(520)

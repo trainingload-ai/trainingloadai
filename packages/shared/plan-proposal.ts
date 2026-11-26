@@ -91,6 +91,7 @@ export type PlanCalendarMovePreview = {
   state: PlanCalendarMoveState;
   requiresCoachConfirmation?: true;
   confirmationId?: string;
+  recoveryBlockedReason?: "datesPassed" | "scheduleChanged" | "alreadyApplied";
   impact: PlanCalendarMoveImpact;
   presentation: PlanProposalPresentation;
   receipt: PlanCalendarMoveReceipt | null;
@@ -225,6 +226,7 @@ export type PlanProposalPresentationRow = {
   candidateKey?: string;
   beforeName?: string;
   beforeScheduledDate?: string;
+  beforeSportType?: string;
   protectedReason?: string;
   changeKind?: "CHANGED" | "ADDED" | "DELETED" | "PRESERVED";
   workoutId?: string;
@@ -237,6 +239,38 @@ export type PlanProposalPresentationRow = {
   after: string;
   rationale: string;
 };
+
+export function planProposalComparisonKind(
+  row: Pick<PlanProposalPresentationRow, "changeKind" | "disposition" | "scheduledDate">,
+  mode: PlanProposalMode,
+  effectiveFrom?: string,
+) {
+  if (row.changeKind) return row.changeKind;
+  if (mode === "SUPERSEDE") {
+    if (row.disposition === "APPLY") return "ADDED";
+    if (effectiveFrom && row.scheduledDate && row.scheduledDate >= effectiveFrom)
+      return "REPLACED";
+  }
+  return row.disposition === "PRESERVE" ? "PRESERVED" : "CHANGED";
+}
+
+export function planProposalComparisonMetadata(
+  row: PlanProposalPresentationRow,
+  mode: PlanProposalMode,
+  kind: ReturnType<typeof planProposalComparisonKind>,
+  initialDate?: string,
+) {
+  const hasUnknownOriginal = kind === "CHANGED" && (mode === "START" || mode === "SCHEDULE");
+  const beforeDate = row.beforeScheduledDate || initialDate || (hasUnknownOriginal ? undefined : row.scheduledDate);
+  const beforeSportType = row.beforeSportType || (hasUnknownOriginal ? undefined : row.sportType);
+  return {
+    beforeDate,
+    beforeSportType,
+    dateChanged: kind === "CHANGED" && Boolean(beforeDate && row.scheduledDate && beforeDate !== row.scheduledDate),
+    sportChanged: kind === "CHANGED" && Boolean(beforeSportType && row.sportType && beforeSportType !== row.sportType),
+    yearChanged: Boolean(beforeDate && row.scheduledDate && beforeDate.slice(0, 4) !== row.scheduledDate.slice(0, 4)),
+  };
+}
 
 export type RelatedCalendarConflict = {
   code: string;
@@ -339,5 +373,15 @@ export type CalendarAdjustment = {
   presentation: PlanProposalPresentation;
   conflicts: Array<{ key: string; reason: string }>;
   operationKeys: string[];
+  recoverableOperationKeys?: string[];
   receipt: CalendarAdjustmentReceipt | null;
 };
+
+export function calendarAdjustmentRecoveryKeys(adjustment: CalendarAdjustment) {
+  const { state, recoverableOperationKeys, operationKeys, conflicts } = adjustment;
+  if (state !== CalendarAdjustmentState.Stale && state !== CalendarAdjustmentState.Expired &&
+    state !== CalendarAdjustmentState.Invalidated) return null;
+  if (recoverableOperationKeys) return recoverableOperationKeys;
+  const blocked = new Set(conflicts.map(({ key }) => key));
+  return operationKeys.filter((key) => !blocked.has(key));
+}

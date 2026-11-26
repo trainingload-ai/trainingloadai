@@ -21,7 +21,10 @@ import {
 } from '@/importing';
 import { ImportingJobService } from '@/importing/importing-job.service';
 import { createActivityInputReplayJob } from '@/analyze/activity-recompute-job.writer';
-import { FileSourceAdapter } from '@/importing/source-adapters/file-source.adapter';
+import {
+  FileSourceAdapter,
+  selectPrimaryFileActivity,
+} from '@/importing/source-adapters/file-source.adapter';
 import { ActivityReadService } from './activity-read.service';
 import { ActivityAnalyzeMode, ActivityService } from './activity.service';
 
@@ -150,18 +153,6 @@ function normalizeSessionRpe(raw: number | null | undefined) {
     });
   }
   return value;
-}
-
-function pickPrimaryPayload(payloads: CanonicalActivityPayload[]) {
-  return payloads.reduce((best, payload) => {
-    const bestScore =
-      (best.summary.timerTime ?? best.summary.elapsedTime ?? 0) * 1000 +
-      (best.summary.distance ?? 0);
-    const nextScore =
-      (payload.summary.timerTime ?? payload.summary.elapsedTime ?? 0) * 1000 +
-      (payload.summary.distance ?? 0);
-    return nextScore > bestScore ? payload : best;
-  }, payloads[0]!);
 }
 
 function routeCoordinatesFromPayload(
@@ -344,7 +335,7 @@ export class ActivityImportDraftService {
       });
     }
 
-    const payload = pickPrimaryPayload(normalized.payloads);
+    const payload = selectPrimaryFileActivity(normalized.payloads);
     payload.summary.subSportType =
       await this.materializer.resolveSportDefinitionCode(payload, null);
     const draftId = stableId('draft');

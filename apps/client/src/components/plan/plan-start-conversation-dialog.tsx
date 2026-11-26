@@ -33,6 +33,8 @@ import { savedPlanToCoachDraft } from "@/lib/coach-plan-start";
 import { parseScheduleConstraints } from "@shared/plan-calendar";
 import { getRestoredStartDecisionApply } from "@/app/[locale]/(main)/ai-coach/coach-plan-decision-state";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
+import { OfficialPlanStartCalendar } from "./official-plan-start-calendar";
+import { cn } from "@/lib/utils";
 
 function PlanCoachDialogBody({ planId }: { planId: string }) {
   const t = useTranslations("PlanStartConversation");
@@ -301,13 +303,16 @@ function PlanCoachDialogBody({ planId }: { planId: string }) {
 export function PlanStartConversationDialog({
   open,
   planId,
+  officialTitle,
   onOpenChange,
 }: {
   open: boolean;
   planId: string | null;
+  officialTitle?: string;
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("PlanStartConversation");
+  const activation = useTranslations("PlanActivationDialog");
   const titleId = useId();
   const invoker = useRef<HTMLElement | null>(null);
   return (
@@ -318,18 +323,27 @@ export function PlanStartConversationDialog({
           if (document.activeElement instanceof HTMLElement)
             invoker.current = document.activeElement;
         }}
-        className="flex h-[min(840px,94dvh)] w-full pc:w-[calc(100%-2rem)] pc:max-w-4xl flex-col gap-3 overflow-hidden p-0"
+        className={cn(
+          "flex h-[min(840px,94dvh)] w-full flex-col gap-3 overflow-hidden p-0 pc:w-[calc(100%-2rem)]",
+          officialTitle ? "pc:max-w-6xl" : "pc:max-w-4xl",
+        )}
         onCloseAutoFocus={(event) => {
           event.preventDefault();
           invoker.current?.focus();
         }}
       >
         <DialogHeader className="shrink-0 px-4 pt-4 pr-10">
-          <DialogTitle id={titleId}>{t("title")}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
+          <DialogTitle id={titleId}>{officialTitle ?? t("title")}</DialogTitle>
+          <DialogDescription className={officialTitle ? "sr-only" : undefined}>
+            {officialTitle ? activation("officialDescription") : t("description")}
+          </DialogDescription>
         </DialogHeader>
         {open && planId ? (
-          <PlanCoachDialogBody key={planId} planId={planId} />
+          officialTitle ? (
+            <OfficialPlanStartCalendar key={planId} planId={planId} close={() => onOpenChange(false)} />
+          ) : (
+            <PlanCoachDialogBody key={planId} planId={planId} />
+          )
         ) : null}
       </DialogContent>
     </Dialog>

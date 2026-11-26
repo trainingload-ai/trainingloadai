@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { MockLanguageModelV3, convertArrayToReadableStream } from 'ai/test';
-import { streamCoachAnswer } from '../tool-loop-agent.runtime';
+import { emitToolStepMessages, streamCoachAnswer } from '../tool-loop-agent.runtime';
 import { createAiSdkCoachTools } from '../ai-sdk-tool-adapter';
 import type { AiToolContext, AiToolDef } from '../tool.types';
 import type { CoachQueryYield } from '../coach-query-yield';
@@ -9,10 +9,19 @@ import { readUIMessageStream } from 'ai';
 import type { CoachUiChunk, CoachUiMessage } from '../coach-ui-message-stream';
 import { buildHistoryMessages } from '../coach-history-messages';
 import { askUserQuestionTool } from '../tools/askUserQuestion.tool';
-import { planSuitabilityQuestionReviewTool } from '../tools/planSuitabilityAssess.tool';
+import { planSuitabilityAssessTool, planSuitabilityQuestionReviewTool } from '../tools/planSuitabilityAssess.tool';
+import { presentCoachPlanDraftTool } from '../tools/presentCoachPlanDraft.tool';
+import { planStagePhaseTool } from '../tools/planStagePhase.tool';
+import { skillActivateTool } from '../tools/skillActivate.tool';
 import { getCoachSkillByName } from '../skill.registry';
 import { presentTrainingVisualizationTool } from '../tools/presentTrainingVisualization.tool';
 import { sanitizeStoredCoachMessageForClient } from '../coach-history-messages';
+import { WorkoutDefinitionService } from '@/api/workout/workout-definition.service';
+import { WorkoutCodecRegistry } from '@/api/workout/workout-codec.registry';
+import { EnduranceWorkoutCodec } from '@/api/workout/codecs/endurance-workout.codec';
+import { StrengthWorkoutCodec } from '@/api/workout/codecs/strength-workout.codec';
+import { FreeformWorkoutCodec } from '@/api/workout/codecs/freeform-workout.codec';
+import { WorkoutService } from '@/api/workout/workout.service';
 
 let model: MockLanguageModelV3;
 type StreamChunk =
@@ -70,6 +79,7 @@ function setupModel(
   callCount = 1,
   toolName = 'present_coach_plan_draft',
   publicPrelude?: string,
+  finalAnswer = finalText,
 ) {
   const responses: Awaited<ReturnType<MockLanguageModelV3['doStream']>>[] = [
     {
@@ -123,7 +133,7 @@ function setupModel(
               {
                 type: 'text-delta',
                 id: 'summary',
-                delta: mode === 'empty' ? '' : finalText,
+                delta: mode === 'empty' ? '' : finalAnswer,
               },
               { type: 'text-end', id: 'summary' },
               {
@@ -141,7 +151,247 @@ function setupModel(
   });
 }
 
+function longPlanContext() {
+  const context = ctx();
+  context.planSuitability = { latest: {
+    assessmentId: 'long-assessment', status: 'READY', skillName: 'plan-builder',
+    constraints: { periodWeeks: 12, maxDailyMinutes: 45, maxTrainingDaysPerWeek: 1,
+      requiredSports: ['RUN'], strengthPreference: 'EXCLUDE' },
+    phases: [{ name: 'Base', startWeek: 1, endWeek: 12, purpose: 'Build endurance' }],
+    weekTargets: Array.from({ length: 12 }, (_, index) => ({
+      weekIndex: index + 1, focus: 'Aerobic work', phase: 'BASE' as const,
+      durationMinutes: { min: 25, max: 35 }, trainingDays: { min: 1, max: 1 },
+    })),
+  } };
+  return context;
+}
+
 describe('real AI SDK delivery loop', () => {
+  it('reassesses a staged plan from the original conversation when the primary model is rate limited', async () => {
+    const context = ctx();
+    context.planSuitability = {};
+    context.workoutDefinitions = new WorkoutDefinitionService(new WorkoutCodecRegistry(
+      new EnduranceWorkoutCodec(new WorkoutService({} as never)), new StrengthWorkoutCodec(), new FreeformWorkoutCodec(),
+    ));
+    context.coachTools = {
+      currentTime: async () => ({ user: { date: '2026-11-30' } }),
+      competitionImpactResolve: async () => ({}),
+    } as unknown as AiToolContext['coachTools'];
+    const weekTargets = Array.from({ length: 12 }, (_, i) => ({
+      weekIndex: i + 1, phase: 'BASE', focus: 'Aerobic base',
+      trainingDays: { min: 1, max: 1 }, durationMinutes: { min: 25, max: 35 },
+    }));
+    const assessment = {
+      status: 'READY', goalSummary: 'Build aerobic endurance',
+      constraints: { intent: 'FITNESS_BUILD', periodWeeks: 12, maxTrainingDaysPerWeek: 1, maxDailyMinutes: 45,
+        fixedTrainingWeekdays: null, requiredSports: ['RUN'], strengthPreference: 'EXCLUDE' },
+      evidence: [{ source: 'USER_REPORTED_BASELINE', summary: 'Runs once a week' }],
+      blueprint: { designSummary: 'Easy aerobic runs', sports: ['RUN'], weeklyTrainingDays: { min: 1, max: 1 },
+        longestPlannedSessionMinutes: 30, weekTargets,
+        phases: [{ name: 'Base', purpose: 'Build endurance', startWeek: 1, endWeek: 12 }] },
+    };
+    const phaseIds: string[] = [];
+    let limited = false;
+    model = new MockLanguageModelV3({
+      doStream: async ({ prompt, tools }) => {
+        const result = prompt.filter((message) => message.role === 'tool').at(-1)?.content.at(-1);
+        const output = result?.output.type === 'text' ? JSON.parse(result.output.value) : undefined;
+        const parts: StreamChunk[] = [{ type: 'stream-start', warnings: [] }];
+        const call = (toolName: string, input: object) => parts.push({
+          type: 'tool-call', toolCallId: `call-${model.doStreamCalls.length}`, toolName, input: JSON.stringify(input),
+        });
+        if (!limited && output?.completedThroughWeek === 4) {
+          limited = true;
+          parts.push({ type: 'error', error: Object.assign(new Error('rate limited'), { status: 429 }) });
+          return { stream: convertArrayToReadableStream(parts) };
+        }
+        if (!tools?.length) {
+          parts.push({ type: 'text-start', id: 'a' }, { type: 'text-delta', id: 'a', delta: finalText }, { type: 'text-end', id: 'a' });
+        } else if (!output) {
+          expect(tools.map(({ name }) => name)).toContain('plan_suitability_assess');
+          call('plan_suitability_assess', assessment);
+        } else if (output.next) {
+          const { startWeek, endWeek } = output.next;
+          if (startWeek === 1) phaseIds.push(output.assessmentId);
+          call('plan_stage_phase', {
+            assessmentId: output.assessmentId, startWeek, endWeek, ...(startWeek === 1 ? { startDate: '2026-11-30' } : {}),
+            workouts: [{ weekIndexes: output.next.weekTargets.map((w: { weekIndex: number }) => w.weekIndex),
+              dayIndex: 1, sportType: 'RUN', structureKind: 'ENDURANCE', text: 'work 30m', notes: 'Run easily for 30 minutes.' }],
+          });
+        } else {
+          expect(output.kind).toBe('plan_phase_staged');
+          call('present_coach_plan_draft', { assessmentId: output.assessmentId, title: 'Aerobic base' });
+        }
+        parts.push({ type: 'finish', finishReason: { unified: tools?.length ? 'tool-calls' : 'stop', raw: undefined }, usage });
+        return { stream: convertArrayToReadableStream(parts) };
+      },
+    });
+    const env = jest.replaceProperty(process, 'env', { ...process.env, OPENROUTER_DEFAULT_FALLBACK_MODELS: 'test-fallback' });
+    try {
+      const events: CoachQueryYield[] = [];
+      for await (const event of streamCoachAnswer({
+        ctx: context, activeSkill: getCoachSkillByName('plan-builder'),
+        tools: [planSuitabilityAssessTool, planStagePhaseTool, presentCoachPlanDraftTool],
+        messages: [{ role: 'user', content: '安排十二周跑步训练，每周一次。' }],
+      })) events.push(event);
+      expect(limited).toBe(true);
+      expect(new Set(phaseIds).size).toBe(2);
+      expect(context.planSuitability.stagedPhases).toMatchObject({ assessmentId: phaseIds[1], completedThroughWeek: 12 });
+      expect(events.at(-1)).toMatchObject({ type: 'result', is_error: false, model: 'test-fallback' });
+    } finally {
+      env.restore();
+    }
+  });
+  it('emits one assembled card when the provider repeats the final tool call', async () => {
+    const context = longPlanContext();
+    context.planSuitability!.stagedPhases = {
+      assessmentId: 'long-assessment', completedThroughWeek: 12, completedWindows: 3,
+      draft: { ...draft, periodWeeks: 12 }, templates: [],
+    };
+    setupModel('text', 2);
+    const cards = [];
+    for await (const event of streamCoachAnswer({
+      ctx: context, activeSkill: getCoachSkillByName('plan-builder'),
+      tools: [tool(async () => ({ ...draft, periodWeeks: 12 })), planStagePhaseTool],
+      messages: [{ role: 'user', content: '给我十二周的训练计划' }],
+    })) {
+      if (event.type === 'assistant') cards.push(...event.message.content.filter(
+        (block) => block.type === 'tool_use' && block.name === 'PresentCoachPlanDraft',
+      ));
+    }
+    expect(cards).toHaveLength(1);
+    expect(model.doStreamCalls[0].tools).toMatchObject([{
+      name: 'present_coach_plan_draft', inputSchema: {
+        additionalProperties: false, required: ['assessmentId', 'title'],
+      },
+    }]);
+    const finalSchema = model.doStreamCalls[0].tools?.[0].inputSchema as { properties: Record<string, unknown> };
+    expect(Object.keys(finalSchema.properties).sort()).toEqual(['assessmentId', 'description', 'title']);
+  });
+
+  it('withholds a final answer if the model stops before delivering the assembled plan', async () => {
+    const context = longPlanContext();
+    model = new MockLanguageModelV3({
+      doStream: async () => ({ stream: convertArrayToReadableStream<StreamChunk>([
+        { type: 'stream-start', warnings: [] },
+        { type: 'text-start', id: 'answer' },
+        { type: 'text-delta', id: 'answer', delta: '你的十二周草案已经准备好了。' },
+        { type: 'text-end', id: 'answer' },
+        { type: 'finish', finishReason: { unified: 'stop', raw: 'stop' }, usage },
+      ]) }),
+    });
+    const events: CoachQueryYield[] = [];
+    for await (const event of streamCoachAnswer({
+      ctx: context, activeSkill: getCoachSkillByName('plan-builder'),
+      tools: [planStagePhaseTool, presentCoachPlanDraftTool],
+      messages: [{ role: 'user', content: '给我十二周的训练计划' }],
+    })) events.push(event);
+    expect(model.doStreamCalls[0].tools?.map(({ name }) => name)).toEqual(['plan_stage_phase']);
+    expect(events.at(-1)).toMatchObject({ type: 'result', is_error: true });
+    expect(events.filter((event) => event.type === 'stream_event')).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ event: expect.objectContaining({ type: 'text_delta' }) })]),
+    );
+  });
+
+  it('exposes plan_suitability_assess as a reassess escape hatch after a phase window is rejected', async () => {
+    const context = longPlanContext();
+    context.planSuitability!.rejectedPhase = {
+      assessmentId: 'long-assessment',
+      startWeek: 1,
+      endWeek: 4,
+      startDate: '2026-11-30',
+      templates: [],
+      workouts: [],
+    };
+    model = new MockLanguageModelV3({
+      doStream: async () => ({ stream: convertArrayToReadableStream<StreamChunk>([
+        { type: 'stream-start', warnings: [] },
+        { type: 'text-start', id: 'answer' },
+        { type: 'text-delta', id: 'answer', delta: 'stop' },
+        { type: 'text-end', id: 'answer' },
+        { type: 'finish', finishReason: { unified: 'stop', raw: 'stop' }, usage },
+      ]) }),
+    });
+    for await (const _event of streamCoachAnswer({
+      ctx: context, activeSkill: getCoachSkillByName('plan-builder'),
+      tools: [planSuitabilityAssessTool, planStagePhaseTool, presentCoachPlanDraftTool],
+      messages: [{ role: 'user', content: '给我十二周的训练计划' }],
+    })) {
+      // consume stream
+    }
+    expect(model.doStreamCalls[0].tools?.map(({ name }) => name).sort()).toEqual([
+      'plan_stage_phase',
+      'plan_suitability_assess',
+    ]);
+    expect(model.doStreamCalls[0].toolChoice).toEqual({ type: 'required' });
+  });
+
+  it('loads plan-builder before exposing the new-plan workflow in ordinary chat', async () => {
+    const context = { ...ctx(), planSuitability: {} } as AiToolContext;
+    const present = {
+      ...tool(async () => draft),
+      applicableSkills: presentCoachPlanDraftTool.applicableSkills,
+      requiresActiveSkill: presentCoachPlanDraftTool.requiresActiveSkill,
+    };
+    const calls = [
+      { toolName: 'skill_activate', input: { name: 'plan-builder' } },
+      { toolName: 'plan_suitability_assess', input: {
+        status: 'READY', goalSummary: 'Build a consistent running habit',
+        constraints: {
+          intent: 'FITNESS_BUILD', periodWeeks: 1, maxTrainingDaysPerWeek: 2,
+          maxDailyMinutes: 30, fixedTrainingWeekdays: null,
+          requiredSports: ['RUN'], strengthPreference: 'EXCLUDE',
+        },
+        evidence: [{ source: 'USER_REPORTED_BASELINE', summary: 'Runs twice per week' }],
+        blueprint: {
+          designSummary: 'Easy running', sports: ['RUN'],
+          weeklyTrainingDays: { min: 2, max: 2 }, longestPlannedSessionMinutes: 25,
+          phases: [{ name: 'Base', startWeek: 1, endWeek: 1, purpose: 'Build consistency' }],
+        },
+      } },
+      { toolName: 'present_coach_plan_draft', input: { title: draft.title } },
+    ];
+    let step = 0;
+    model = new MockLanguageModelV3({
+      doStream: async () => {
+        const current = calls[step++];
+        return { stream: convertArrayToReadableStream<StreamChunk>([
+          { type: 'stream-start', warnings: [] },
+          ...(current ? [{
+            type: 'tool-call' as const, toolCallId: `plan-${step}`,
+            toolName: current.toolName, input: JSON.stringify(current.input),
+          }] : [
+            { type: 'text-start' as const, id: 'answer' },
+            { type: 'text-delta' as const, id: 'answer', delta: finalText },
+            { type: 'text-end' as const, id: 'answer' },
+          ]),
+          { type: 'finish', finishReason: { unified: current ? 'tool-calls' : 'stop', raw: undefined }, usage },
+        ]) };
+      },
+    });
+
+    const events: CoachQueryYield[] = [];
+    for await (const event of streamCoachAnswer({
+      ctx: context, tools: [skillActivateTool, planSuitabilityAssessTool, present],
+      messages: [{ role: 'user', content: '帮我做一份跑步计划' }],
+    })) events.push(event);
+
+    const [routing, planning] = model.doStreamCalls;
+    expect(routing.tools?.map((item) => item.name)).toEqual(['skill_activate']);
+    expect(JSON.stringify(routing.prompt)).not.toContain('# Plan draft payload contract');
+    expect(planning.tools?.map((item) => item.name)).toEqual(expect.arrayContaining([
+      'plan_suitability_assess', 'present_coach_plan_draft',
+    ]));
+    expect(JSON.stringify(planning.prompt)).toContain('# Active skill: plan-builder');
+    expect(JSON.stringify(planning.prompt)).toContain('# Plan draft payload contract');
+    expect(context.planSuitability?.latest).toMatchObject({ status: 'READY', skillName: 'plan-builder' });
+    expect(events).toEqual(expect.arrayContaining([expect.objectContaining({
+      type: 'assistant', message: expect.objectContaining({ content: expect.arrayContaining([
+        expect.objectContaining({ type: 'tool_use', name: 'PresentCoachPlanDraft' }),
+      ]) }),
+    })]));
+  });
+
   it.each(['exhausted', 'abandoned'] as const)(
     'does not report a chart as completed when repair is %s',
     async (mode) => {
@@ -437,6 +687,134 @@ describe('real AI SDK delivery loop', () => {
       result: finalText,
     });
   });
+  it('completes a delivered plan with safe text when the final explanation names an internal tool', async () => {
+    setupModel(
+      'text',
+      1,
+      'present_coach_plan_draft',
+      undefined,
+      '训练草案由 present_coach_plan_draft 生成。',
+    );
+    const execute = jest.fn<AiToolDef['execute']>(async () => ({
+      ...draft,
+      periodWeeks: 8,
+      workouts: Array.from({ length: 24 }, (_, index) => ({
+        weekIndex: Math.floor(index / 3) + 1,
+        dayIndex: [1, 3, 5][index % 3],
+        sportType: 'RUN',
+        text: 'work 25m',
+      })),
+    }));
+    const events: CoachQueryYield[] = [];
+    for await (const event of streamCoachAnswer({
+      ctx: {
+        ...ctx(),
+        i18n: {
+          t: (
+            _key: string,
+            options: { args: { weeks: number; sessions: number } },
+          ) =>
+            `${options.args.weeks} 周共 ${options.args.sessions} 次训练，确认课表后请保存计划。`,
+        } as unknown as AiToolContext['i18n'],
+      },
+      tools: [tool(execute)],
+      messages: [{ role: 'user', content: '请给我完整的八周训练计划草案' }],
+    })) {
+      events.push(event);
+    }
+
+    expect(events.at(-1)).toMatchObject({
+      type: 'result',
+      subtype: 'success',
+      is_error: false,
+      result: '8 周共 24 次训练，确认课表后请保存计划。',
+    });
+    const card = events.findIndex((event) => event.type === 'assistant');
+    const answer = events.findIndex(
+      (event) =>
+        event.type === 'stream_event' && event.event.type === 'text_delta',
+    );
+    expect(card).toBeGreaterThanOrEqual(0);
+    expect(answer).toBeGreaterThan(card);
+    expect(JSON.stringify(events[answer])).not.toContain('present_coach_plan_draft');
+    expect(JSON.stringify(events.at(-1))).not.toContain('present_coach_plan_draft');
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+  it('delivers fixed calendar constraints in the draft card used to save the plan', async () => {
+    setupModel();
+    const scheduleConstraints = {
+      version: 1,
+      revision: 1,
+      calendarTimeZone: 'Asia/Shanghai',
+      effectiveFrom: '2026-11-25',
+      fixedRestWeekdays: [2, 4, 5, 7],
+      unavailableDates: [],
+      availableDateOverrides: [],
+      confirmation: { source: 'USER', reference: 'confirmed-brief' },
+    };
+    const events: CoachQueryYield[] = [];
+    for await (const event of streamCoachAnswer({
+      ctx: ctx(),
+      tools: [tool(async () => ({ ...draft, scheduleConstraints }))],
+      messages: [{ role: 'user', content: '每周周一、周三、周六训练' }],
+    })) {
+      events.push(event);
+    }
+    expect(events.find(({ type }) => type === 'assistant')).toMatchObject({
+      message: {
+        content: [{ name: 'PresentCoachPlanDraft', input: { scheduleConstraints } }],
+      },
+    });
+  });
+  it.each([
+    ['no accepted draft', false, '训练草案由 present_coach_plan_draft 生成。'],
+    [
+      'internal context was also exposed',
+      true,
+      '草案由 present_coach_plan_draft 生成。内部字段为 planId。',
+    ],
+    [
+      'an unverified save was also claimed',
+      true,
+      '草案由 present_coach_plan_draft 生成。已保存训练计划。',
+    ],
+  ])(
+    'keeps the unsafe-output failure when %s',
+    async (_scenario, accepted, finalAnswer) => {
+      setupModel('text', 1, 'present_coach_plan_draft', undefined, finalAnswer);
+      const prompt = '请给我完整的训练计划草案并保存训练计划';
+      const events: CoachQueryYield[] = [];
+      for await (const event of streamCoachAnswer({
+        ctx: { ...ctx(), currentUserPrompt: prompt },
+        tools: [
+          tool(async () =>
+            accepted
+              ? {
+                  ...draft,
+                  workouts: [
+                    { weekIndex: 1, dayIndex: 1, sportType: 'RUN', text: 'work 25m' },
+                  ],
+                }
+              : { error: 'draft rejected' },
+          ),
+        ],
+        messages: [{ role: 'user', content: prompt }],
+      })) {
+        events.push(event);
+      }
+      expect(events.at(-1)).toMatchObject({
+        type: 'result',
+        is_error: true,
+        error_code: 'unsafe_ai_output_blocked',
+      });
+      expect(
+        events.some(
+          (event) =>
+            event.type === 'stream_event' && event.event.type === 'text_delta',
+        ),
+      ).toBe(false);
+    },
+  );
   it.each(['empty', 'error'] as const)(
     'preserves delivery and refuses silent success/provider replay when the summary is %s',
     async (mode) => {
@@ -474,6 +852,19 @@ describe('real AI SDK delivery loop', () => {
     );
     expect(execute).not.toHaveBeenCalled();
     expect(result).toMatchObject({ stage: 'delivery' });
+  });
+  it('omits rejected plan candidates and repair feedback from compatibility events', async () => {
+    const name = 'present_coach_plan_draft';
+    const input = { title: 'PRIVATE_CANDIDATE' };
+    const events = await emitToolStepMessages({
+      ctx: ctx(), tools: [tool(async () => draft)],
+      calls: [{ id: 'rejected', name, input }],
+      results: [{ id: 'rejected', name, input, ok: false, output: {
+        code: 'PLAN_QUALITY_INVALID', error: 'PRIVATE_RULE_DETAILS',
+      } }],
+    });
+    expect(JSON.stringify(events)).not.toContain('PRIVATE_');
+    expect(JSON.stringify(events)).toContain('PLAN_QUALITY_INVALID');
   });
   it('does not deduplicate equal read results from different calls in the real loop', async () => {
     setupModel('text', 2, 'activity_recent');

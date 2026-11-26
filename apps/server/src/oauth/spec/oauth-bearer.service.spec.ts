@@ -168,6 +168,30 @@ describe('OAuthBearerService', () => {
     });
   });
 
+  it('uses internal signing keys without changing the public issuer or audience', async () => {
+    const { prisma, service } = createService();
+    verifyBearerTokenMock.mockResolvedValueOnce({
+      sub: 'user-1',
+      aud: 'https://api.example.test/mcp',
+      scope: 'plan:draft',
+    } as never);
+    prisma.t_user.findUnique.mockResolvedValueOnce({ id: 'user-1' });
+
+    await expect(
+      service.verifyRequestDetailed(request(), 'Bearer token', {
+        resourcePath: '/mcp',
+        jwksUrl: 'http://127.0.0.1:48888/auth/jwks',
+      }),
+    ).resolves.toMatchObject({ ok: true });
+    expect(verifyBearerTokenMock).toHaveBeenLastCalledWith('token', {
+      jwksUrl: 'http://127.0.0.1:48888/auth/jwks',
+      verifyOptions: {
+        issuer: 'https://api.example.test/auth',
+        audience: 'https://api.example.test/mcp',
+      },
+    });
+  });
+
   it('builds an MCP insufficient-scope challenge', () => {
     const { service } = createService();
 

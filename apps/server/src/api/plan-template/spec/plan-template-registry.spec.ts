@@ -3,6 +3,7 @@ import type { I18nService } from 'nestjs-i18n';
 import {
   RUN_PLAN_TEMPLATES,
   buildPlanTemplateDraft,
+  getPlanTemplateCopy,
   getPlanTemplateVariant,
   getRunPlanTemplate,
   validateRunPlanTemplates,
@@ -28,6 +29,21 @@ function workoutDefinitions() {
 }
 
 describe('official running plan template registry', () => {
+  it('uses the selected first-5K variant duration in templates and drafts', () => {
+    const template = getRunPlanTemplate('first-5k')!;
+    for (const variant of template.variants) {
+      const copy = getPlanTemplateCopy(template, variant, 'zh');
+      expect(copy.description).toContain(`共 ${variant.periodWeeks} 周`);
+    }
+    const variant = getPlanTemplateVariant(template, '12-week')!;
+    const draft = buildPlanTemplateDraft({
+      template, variant, locale: 'zh', preferredWeekdays: [2, 4, 7],
+      requestedStartDate: '2026-11-30',
+    });
+    expect(draft.description).toContain('共 12 周');
+    expect(draft.workouts).toHaveLength(36);
+  });
+
   it('preserves incumbent hashes and freezes the 12-template matrix', () => {
     expect(RUN_PLAN_TEMPLATES).toHaveLength(12);
     expect(

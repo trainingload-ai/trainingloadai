@@ -521,6 +521,7 @@
       "workoutDialogSessionMeta": "{ordinal}번째 세션 · {sport}",
       "workoutDialogSessionFallback": "{ordinal}번째 세션",
       "workoutDialogClose": "닫다",
+      "workoutDialogBackToCalendar": "캘린더로 돌아가기",
       "scheduleConflict": "훈련 가능 일정과 충돌합니다"
     },
     "readCards": {
@@ -577,6 +578,7 @@
         "colMin": "낮은",
         "colMax": "높은",
         "unitPace": "(분/km)",
+        "unitPaceMi": "(분/mi)",
         "unitPace100m": "(분/100m)",
         "unitHr": "(bpm)",
         "unitPower": "(W)",
@@ -666,6 +668,7 @@
       "showLess": "접기",
       "evidence": "사용한 데이터",
       "loadDelta": "예상 부하 변화",
+      "expectedImpact": "예상 영향",
       "syncImpact": "기기 동기화 영향",
       "total": "평가",
       "changed": "변경",
@@ -4888,6 +4891,11 @@
     }
   },
   "PlanActivationDialog": {
+    "officialDescription": "초안 일정을 검토하고 수정한 다음 시작일을 선택하세요.",
+    "loadingDraft": "초안 일정 불러오는 중…",
+    "changedDraft": "다른 곳에서 초안이 변경되었습니다. 시작하기 전에 일정을 확인하세요.",
+    "startFailed": "계획을 시작하지 못했습니다. 일정을 확인한 후 다시 시도하세요.",
+    "editFailed": "운동 변경 사항을 저장하지 못했습니다. 다시 시도하세요.",
     "title": "계획 활성화",
     "description": "실제 시작일을 선택하세요. 운동 날짜는 이 날짜와 각 운동 오프셋을 기준으로 계산됩니다.",
     "cancel": "취소",
@@ -6621,6 +6629,8 @@
     "adjustmentConflicts": {
       "PLAN_STATUS": "The plan can no longer be edited",
       "WORKOUT_REMOVED": "The workout was removed",
+      "WORKOUT_CHANGED": "이 운동이 다른 곳에서 변경되었습니다",
+      "WORKOUT_NOT_VERIFIED": "새로 고치는 동안 이 운동을 확인할 수 없었습니다",
       "WORKOUT_STATUS": "The workout status has changed",
       "ACTIVITY_LINKED": "The workout is linked to an activity",
       "HISTORY": "The workout date has passed",
@@ -6633,11 +6643,17 @@
     "stageEdit": "초안에 추가",
     "batchSaved": "계획 변경사항을 저장했습니다.",
     "batchFailed": "변경사항을 저장할 수 없습니다. 다시 시도하세요.",
+    "adjustmentUnavailable": "이 일정 조정 초안은 더 이상 사용할 수 없습니다. 확정된 일정은 변경되지 않았습니다. 현재 일정에서 새 조정을 시작할 수 있습니다.",
     "batchReloadTitle": "최신 일정을 불러올까요?",
     "batchConflict": "The schedule changed or the edits could not be saved. Load the latest schedule and review your changes before confirming.",
     "missedDrop": "놓친 운동은 일정을 변경할 수 없습니다.",
     "completedDrop": "완료한 운동은 일정을 변경할 수 없습니다.",
     "recovery": {
+      "unavailableTitle": "일정 조정 초안을 사용할 수 없습니다",
+      "localDraftRolledBack": "저장하지 않은 변경 사항을 모두 되돌렸습니다.",
+      "localDraftWillBeRolledBack": "저장하지 않은 변경 사항도 되돌립니다.",
+      "retryDraft": "새로 고침 후 다시 시도",
+      "refreshSchedule": "일정 새로 고침",
       "title": "일정 변경 미리보기가 만료되었습니다",
       "action": "최신 일정 불러오기",
       "expired": "최신 일정을 불러오면 이 대화에서 조정을 계속할 수 있습니다.",

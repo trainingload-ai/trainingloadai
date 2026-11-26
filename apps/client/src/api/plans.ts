@@ -282,6 +282,7 @@ export type CreatePlanDto = {
     definition?: WorkoutDefinitionInput;
     notes?: string;
     name?: string;
+    plannedSessionRpe?: number;
     sportType: PlanSportType;
     sportDefinitionCode?: string | null;
     blocks?: unknown[] | string | Record<string, unknown> | null;
@@ -311,6 +312,7 @@ export type UpdatePlanDto = {
 
 export type UpdatePlanWorkoutDto = {
   expectedRevision?: number;
+  expectedPlanStatus?: "DRAFT";
   weekIndex: number;
   dayIndex: number;
   sessionIndex?: number;
@@ -842,12 +844,46 @@ export function discardCalendarAdjustment(planId: string, id: string, versionId:
   );
 }
 
-export async function createIndependentWorkout(dto: CreateScheduledWorkoutDto) {
+export async function createIndependentWorkout(dto: CreateScheduledWorkoutDto & { idempotencyKey?: string }) {
   const data = (await apiFetch("/plans/workouts/independent", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dto),
   })) as WorkoutResult | undefined;
+  return data?.workout;
+}
+
+export type IndependentWorkoutDraft = {
+  id: string;
+  revision: number;
+  state: "READY" | "APPLIED" | "DISCARDED" | "EXPIRED";
+  workoutId: string | null;
+  workout: CreateScheduledWorkoutDto;
+};
+
+export async function fetchIndependentWorkoutDraft(id: string, input?: {
+  action: "SAVE" | "CONFIRM" | "DISCARD";
+  expectedRevision: number;
+  workout?: CreateScheduledWorkoutDto;
+}) {
+  const draft = await apiFetch<IndependentWorkoutDraft>(`/plans/workouts/independent-drafts/${encodeURIComponent(id)}`, {
+    method: input ? "PUT" : "GET",
+    body: input && JSON.stringify(input),
+    suppressErrorToast: true,
+  });
+  if (draft?.id !== id) throw new Error("Workout draft is unavailable");
+  return draft;
+}
+
+export async function updateIndependentWorkout(
+  workoutId: string,
+  dto: CreateScheduledWorkoutDto & { expectedRevision: number },
+) {
+  const data = await apiFetch<WorkoutResult>(`/plans/workouts/independent/${encodeURIComponent(workoutId)}`, {
+    method: "PUT",
+    body: JSON.stringify(dto),
+    suppressErrorToast: true,
+  });
   return data?.workout;
 }
 
@@ -884,6 +920,30 @@ export async function attachWorkoutToPlan(planId: string, workoutId: string) {
     },
   )) as WorkoutResult | undefined;
   return data?.workout;
+}
+
+export async function getOfficialPlanStart(planId: string) {
+  const result = await apiFetch(`/plans/${encodeURIComponent(planId)}/official-start`, { suppressErrorToast: true });
+  if (!result) throw new Error("OFFICIAL_DRAFT_UNAVAILABLE");
+  return result as import("@shared/plan-calendar").OfficialPlanStart<TrainingPlanDetail>;
+}
+
+export async function startOfficialPlanDraft(planId: string, startDate: string, revision: string) {
+  const result = (await apiFetch(`/plans/${encodeURIComponent(planId)}/official-start`, {
+    method: "POST",
+    body: JSON.stringify({ startDate, revision }),
+    suppressErrorToast: true,
+  })) as PlanResult | undefined;
+  if (!result?.plan) throw new Error("OFFICIAL_DRAFT_UNAVAILABLE");
+  return result.plan;
+}
+
+export async function saveOfficialPlanStartDate(planId: string, startDate: string, revision: string) {
+  return (await apiFetch(`/plans/${encodeURIComponent(planId)}/official-start`, {
+    method: "PATCH",
+    body: JSON.stringify({ startDate, revision }),
+    suppressErrorToast: true,
+  })) as { startDate: string; revision: string };
 }
 
 export type PlanStartConversation = {
