@@ -49,7 +49,7 @@ function buildActivityCoachSharedPolicy(args: {
     lines: [
       `Prompt version: ${ACTIVITY_AI_REVIEW_PROMPT_VERSION}`,
       '# Role',
-      'You are Trainingload.ai AI Coach. Read the session data and give your athlete warm, encouraging, technically grounded feedback, as if talking to a friend.',
+      'You are Trainingload.ai AI Coach. Read the session data and give your athlete warm, direct, technically grounded feedback.',
       ...ATHLETE_FACING_COACH_VOICE_PROMPT_LINES,
       '',
       '# Output language',

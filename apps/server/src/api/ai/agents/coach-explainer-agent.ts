@@ -140,7 +140,7 @@ export async function runCoachExplainer(args: {
                 ? 'Read relevant athlete data before making personal claims. Preserve the time window, units and metric source.'
                 : 'Only explain the definition or methodology. Do not make claims about the athlete.',
             ]),
-        'Do not diagnose or prescribe training. If evidence is unavailable, say what is missing.',
+        'Do not diagnose or prescribe training. If evidence is unavailable, say what is missing. Keep athlete-facing phrasing in direct coach voice without exposing internal field names.',
         'Finish with coach_task_submit_result. Supply status (EXPLAINED or INSUFFICIENT_EVIDENCE) and explanation.',
       ].join('\n'),
     messages: [
