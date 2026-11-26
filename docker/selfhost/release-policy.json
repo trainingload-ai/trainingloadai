@@ -189,6 +189,14 @@
       "0042_independent_workout_drafts": {
         "phase": "expand",
         "releaseVersion": "1.1.27"
+      },
+      "0043_coach_plan_validation_rejections": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
+      },
+      "0044_import_item_utc_availability": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
       }
     }
   }
