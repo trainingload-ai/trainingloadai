@@ -3046,6 +3046,47 @@ export class PlanWriteSupport {
       }
       const nextPeriodWeeks = dto.periodWeeks ?? existing.periodWeeks;
       const nextStartDate = existing.startDate ?? null;
+      if (
+        existing.planningMode !== 'ROLLING' &&
+        dto.periodWeeks != null &&
+        nextPeriodWeeks != null &&
+        dto.periodWeeks !== existing.periodWeeks
+      ) {
+        const deletedSet = new Set(dto.deletedWorkoutIds ?? []);
+        const updatedWeekById = new Map(
+          (dto.workouts ?? []).flatMap((w) =>
+            w.id ? [[w.id, w.weekIndex] as const] : [],
+          ),
+        );
+        const existingWorkouts = await this.workouts.findMany(
+          {
+            where: { planId },
+            select: { id: true, dayOffset: true },
+          },
+          tx,
+        );
+        const outOfBoundsExisting = existingWorkouts.some((w) => {
+          if (deletedSet.has(w.id)) return false;
+          const existingWeek = Math.floor(w.dayOffset / 7) + 1;
+          const nextWeek = updatedWeekById.get(w.id) ?? existingWeek;
+          return nextWeek > nextPeriodWeeks;
+        });
+        const outOfBoundsIncoming = (dto.workouts ?? []).some(
+          (w) => w.weekIndex > nextPeriodWeeks,
+        );
+        if (outOfBoundsExisting || outOfBoundsIncoming) {
+          throw new UnprocessableEntityException(
+            'Cannot reduce periodWeeks below scheduled workout weeks',
+          );
+        }
+      }
+      const nextEndDate =
+        existing.planningMode !== 'ROLLING' &&
+        dto.periodWeeks != null &&
+        nextPeriodWeeks != null &&
+        nextStartDate
+          ? this.addDays(nextStartDate, nextPeriodWeeks * 7 - 1)
+          : undefined;
 
       await this.plans.update(
         {
@@ -3058,6 +3099,7 @@ export class PlanWriteSupport {
                 : undefined,
             goal: dto.goal !== undefined ? dto.goal?.trim() || null : undefined,
             periodWeeks: nextPeriodWeeks,
+            ...(nextEndDate !== undefined ? { endDate: nextEndDate } : {}),
             ...(nextMetadata
               ? { generationMetadata: nextMetadata as Prisma.InputJsonValue }
               : {}),

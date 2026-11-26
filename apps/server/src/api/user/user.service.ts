@@ -1895,12 +1895,9 @@ export class UserService {
     },
     tx?: PrismaTx,
   ): Promise<UserZoneSetting> {
-    const profile = await this.getComposedUserProfile(
-      userId,
-      sportType,
-      undefined,
-      tx,
-    );
+    const profile = userProfile
+      ? undefined
+      : await this.getComposedUserProfile(userId, sportType, undefined, tx);
     const saved = await this.users.zoneSettings(tx).findUnique({
       where: {
         userId_sportType_zoneType: {
@@ -2003,12 +2000,9 @@ export class UserService {
     },
     tx?: PrismaTx,
   ): Promise<UserZoneSetting> {
-    const profile = await this.getComposedUserProfile(
-      userId,
-      sportType,
-      undefined,
-      tx,
-    );
+    const profile = userProfile
+      ? undefined
+      : await this.getComposedUserProfile(userId, sportType, undefined, tx);
     const saved = await this.users.zoneSettings(tx).findUnique({
       where: {
         userId_sportType_zoneType: {
@@ -3568,7 +3562,7 @@ export class UserService {
           String(m.value).trim() !== '',
       )
       .map((m) => {
-        const rawValue = String(m.value);
+        const rawValue = String(m.value).trim();
         const value =
           type === BodyMetricType.GENDER ? rawValue.toUpperCase() : rawValue;
         return {
@@ -3577,6 +3571,43 @@ export class UserService {
         };
       })
       .filter((m) => Number.isFinite(m.effectiveDate.getTime()));
+
+    for (const entry of normalized) {
+      if (type === BodyMetricType.WEIGHT) {
+        const num = Number(entry.value);
+        if (!Number.isFinite(num) || num < 20 || num > 300) {
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Invalid body weight (must be between 20 and 300 kg)',
+          });
+        }
+      } else if (type === BodyMetricType.HEIGHT) {
+        const num = Number(entry.value);
+        if (!Number.isFinite(num) || num < 50 || num > 260) {
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Invalid body height (must be between 50 and 260 cm)',
+          });
+        }
+      } else if (type === BodyMetricType.TIMEZONE) {
+        try {
+          new Intl.DateTimeFormat(undefined, { timeZone: entry.value });
+        } catch {
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Invalid IANA timezone',
+          });
+        }
+      } else if (type === BodyMetricType.BIRTHDAY) {
+        const parsed = dayjs(entry.value);
+        if (!parsed.isValid() || parsed.isAfter(dayjs(), 'day')) {
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Invalid birth date',
+          });
+        }
+      }
+    }
 
     const existing = await this.users.bodyMetrics().findMany({
       where: { userId, type },

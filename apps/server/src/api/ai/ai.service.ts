@@ -1995,6 +1995,14 @@ export class AiService {
     | { kind: 'PLATFORM_LANGUAGE_REPAIR' }
     | { kind: 'USER_GENERATE' }
   > {
+    const enabled =
+      await this.activityAiReviewService.isActivityReviewEnabled(userId);
+    if (!enabled) {
+      throw new BusinessException({
+        code: BUSINESS_ERROR_CODE.COMMON,
+        message: 'ACTIVITY_REVIEW_DISABLED',
+      });
+    }
     if (!useCache) return { kind: 'USER_GENERATE' };
     if (!allowWithoutConsent) {
       await this.aiDataConsent.assertGranted(userId);
@@ -2170,7 +2178,10 @@ export class AiService {
         throw error;
       }
       if (generated.outcome !== 'SUCCEEDED') {
-        throw new Error(generated.code || 'ACTIVITY_ANALYSIS_SKIPPED');
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: generated.code || 'ACTIVITY_ANALYSIS_SKIPPED',
+        });
       }
       return {
         content: generated.markdown,

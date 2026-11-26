@@ -630,4 +630,39 @@ describe('UserService estimated fitness metric tracks', () => {
       expect.any(Function),
     );
   });
+
+  it('does not leak current profile thresholds when resolving historical power zones with an explicit snapshot', async () => {
+    const { service, prisma } = createService();
+    Object.assign(prisma, {
+      userZoneSetting: { findUnique: jest.fn(async () => null) },
+    });
+    const composedSpy = jest
+      .spyOn(service, 'getComposedUserProfile')
+      .mockResolvedValue({ ftp: 300, powerZoneModel: 'FRIEL' } as never);
+
+    const resolved = await service.getPowerZoneSettingResolved(
+      'user-1',
+      SportType.CYCLING,
+      { powerZoneModel: 'FRIEL' },
+    );
+
+    expect(composedSpy).not.toHaveBeenCalled();
+    expect(resolved.zones).toEqual([]);
+  });
+
+  it('rejects out-of-range body weight and invalid IANA timezones in replaceUserBodyMetrics', async () => {
+    const { service } = createService();
+
+    await expect(
+      service.replaceUserBodyMetrics('user-1', 'WEIGHT', [
+        { effectiveDate: '2026-11-26', value: '-5' },
+      ]),
+    ).rejects.toThrow('Invalid body weight');
+
+    await expect(
+      service.replaceUserBodyMetrics('user-1', 'TIMEZONE', [
+        { effectiveDate: '2026-11-26', value: 'Not/A_Real_Zone' },
+      ]),
+    ).rejects.toThrow('Invalid IANA timezone');
+  });
 });
