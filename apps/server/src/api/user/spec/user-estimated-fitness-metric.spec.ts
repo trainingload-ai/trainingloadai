@@ -599,4 +599,35 @@ describe('UserService estimated fitness metric tracks', () => {
       }),
     });
   });
+
+  it('observes AthleteState fitness facts when replacing manual fitness metrics', async () => {
+    const { service, prisma } = createService();
+    const observe = jest.fn(
+      async (_userId: unknown, _tx: unknown, write: () => Promise<unknown>) =>
+        write(),
+    );
+    (
+      service as unknown as { stateFitness: { observe: typeof observe } }
+    ).stateFitness = { observe };
+    const deleteMany = jest.fn(async () => ({ count: 0 }));
+    const upsert = jest.fn(async () => ({
+      id: 'm1',
+      recordedAt: new Date('2026-11-26T00:00:00.000Z'),
+    }));
+    Object.assign(prisma.userFitnessMetric, { deleteMany, upsert });
+
+    await service.replaceManualFitnessMetricsForDialog({
+      userId: 'user-1',
+      type: UserFitnessMetricType.FTP,
+      sportType: SportType.CYCLING,
+      metrics: [{ effectiveDate: '2026-11-26', value: '275' }],
+      tx: prisma as never,
+    });
+
+    expect(observe).toHaveBeenCalledWith(
+      'user-1',
+      prisma,
+      expect.any(Function),
+    );
+  });
 });

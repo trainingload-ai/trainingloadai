@@ -932,6 +932,22 @@ export class PlanStartService {
             tx,
             Boolean(applied),
           );
+          if (source.status === 'DRAFT' && !applied) {
+            const competing = await this.storage.findPlan(tx, {
+              where: {
+                userId,
+                status: { in: ['ACTIVE', 'PAUSED'] },
+                id: { not: planId },
+              },
+              select: { id: true },
+            });
+            if (competing) {
+              throw new BusinessException({
+                code: BUSINESS_ERROR_CODE.COMMON,
+                message: 'Another active plan already exists',
+              });
+            }
+          }
           if (
             source.status !== 'DRAFT' &&
             selectedDate &&
@@ -2504,7 +2520,23 @@ export class PlanStartService {
             (schedule ? source.activationTimezone : undefined) ??
             (await this.users.getPreferredTimezone(userId, tx)) ??
             'UTC';
-          if (!schedule) this.assertFutureStart(startDate, calendarTimeZone);
+          if (!schedule) {
+            const competing = await this.storage.findPlan(tx, {
+              where: {
+                userId,
+                status: { in: ['ACTIVE', 'PAUSED'] },
+                id: { not: request.planId },
+              },
+              select: { id: true },
+            });
+            if (competing) {
+              throw new BusinessException({
+                code: BUSINESS_ERROR_CODE.COMMON,
+                message: 'Another active plan already exists',
+              });
+            }
+            this.assertFutureStart(startDate, calendarTimeZone);
+          }
           const today = this.earliestStartDate(calendarTimeZone);
           const range = schedule
             ? (request as PlanSchedulePreviewRequest).range

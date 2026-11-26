@@ -968,6 +968,10 @@ export class ActivityService {
           processingUpdatedAt: new Date(),
         } as Prisma.ActivityUpdateInput,
       });
+      // Invalidate cached AI reviews whose evidence predates this RPE edit.
+      await tx.activityAiReview?.deleteMany({
+        where: { activityId: activityWithLoadContext.id, userId },
+      });
       await createActivityInputReplayJob(tx, {
         userId,
         effectiveFrom: activityWithLoadContext.startTime,
@@ -3067,6 +3071,9 @@ export class ActivityService {
             },
           });
           if (updated.count > 0) {
+            await tx.activityAiReview?.deleteMany({
+              where: { activityId: ownedActivity.id, userId },
+            });
             const fact = await tx.activity.findUniqueOrThrow({
               where: { id: ownedActivity.id },
               select: { startTime: true },

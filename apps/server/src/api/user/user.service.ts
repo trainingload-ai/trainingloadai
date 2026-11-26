@@ -2717,33 +2717,40 @@ export class UserService {
         type: { in: args.changes.map((c) => c.metric) },
       },
     });
-    for (const c of args.changes) {
-      const data = {
-        value: c.value,
-        changeSource: ChangeSource.USER_MANUAL,
-        originExternalId: args.calculationId,
-        originPayload: args.provenance,
-      };
-      await this.users.fitnessMetrics(tx).upsert({
-        where: {
-          userId_type_source_sport_recordedAt: {
+    const runWrite = async () => {
+      for (const c of args.changes) {
+        const data = {
+          value: c.value,
+          changeSource: ChangeSource.USER_MANUAL,
+          originExternalId: args.calculationId,
+          originPayload: args.provenance,
+        };
+        await this.users.fitnessMetrics(tx).upsert({
+          where: {
+            userId_type_source_sport_recordedAt: {
+              userId,
+              sport,
+              type: c.metric,
+              source: 'MANUAL',
+              recordedAt,
+            },
+          },
+          create: {
             userId,
             sport,
             type: c.metric,
             source: 'MANUAL',
             recordedAt,
+            ...data,
           },
-        },
-        create: {
-          userId,
-          sport,
-          type: c.metric,
-          source: 'MANUAL',
-          recordedAt,
-          ...data,
-        },
-        update: data,
-      });
+          update: data,
+        });
+      }
+    };
+    if (this.stateFitness) {
+      await this.stateFitness.observe(userId, tx, runWrite);
+    } else {
+      await runWrite();
     }
     // A global reference can become the fallback in several sports. Validate
     // only scopes that actually inherit it, preserving sport-specific overrides.
@@ -2921,8 +2928,12 @@ export class UserService {
         }),
       );
     };
-    if (options.tx) await write(options.tx);
-    else await this.prisma.$transaction(write);
+    const runObservedWrite = async (tx: Prisma.TransactionClient) =>
+      this.stateFitness
+        ? this.stateFitness.observe(options.userId, tx, () => write(tx))
+        : write(tx);
+    if (options.tx) await runObservedWrite(options.tx);
+    else await this.prisma.$transaction(runObservedWrite);
 
     const metricType = options.type;
     const oldByTime = new Map<
