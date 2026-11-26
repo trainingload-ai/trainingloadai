@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { ClientMessages } from "@/components/ClientMessages";
 import { JsonLd } from "@/components/JsonLd";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { ProductBrowserWindow } from "@/components/ProductBrowserChrome";
@@ -210,9 +211,9 @@ function FeatureDemoPreview({
     >
       <HomeDemoLightbox
         label={label}
-        expanded={<HomeChatPreview lang={lang} variant="expanded" />}
+        expanded={<HomeChatPreview variant="expanded" />}
       >
-        <HomeChatPreview lang={lang} />
+        <HomeChatPreview />
       </HomeDemoLightbox>
     </ProductBrowserWindow>
   );
@@ -306,21 +307,6 @@ export default async function FeaturesPage({
     (item) => !coreFeatureIcons.has(item.iconKey),
   );
   const expandDemoLabel = ui.expandDemoLabel ?? "Expand demo";
-  const mcpCopy =
-    lang === "zh"
-      ? {
-          eyebrow: "TrainingLoad MCP",
-          title: "让你的 AI 读取训练，也让每个结论可验证。",
-          text: "24 个只读训练工具，加上原生 Resources 与 Prompts，覆盖当前状态、周期比较、活动细节、计划执行、比赛与同步诊断。",
-          cta: "查看 MCP",
-        }
-      : {
-          eyebrow: "TrainingLoad MCP",
-          title:
-            "Let your AI read training—and make every conclusion verifiable.",
-          text: "24 read-only training tools plus native resources and prompts for current state, period comparison, activity detail, plan execution, competitions, and sync diagnostics.",
-          cta: "Explore MCP",
-        };
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -348,7 +334,7 @@ export default async function FeaturesPage({
     ],
   };
 
-  return (
+  const content = (
     <div className="client-demo-radius overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <JsonLd id="features-structured-data" data={jsonLd} />
 
@@ -362,9 +348,11 @@ export default async function FeaturesPage({
             <h1
               className="mx-auto mt-5 max-w-5xl text-balance text-[2rem] font-black leading-[1.08] tracking-normal md:text-6xl lg:text-7xl"
               style={
-                lang === "en"
-                  ? undefined
-                  : { overflowWrap: "anywhere", wordBreak: "break-all" }
+                lang === "zh" || lang === "zh-hant" || lang === "ja"
+                  ? { overflowWrap: "anywhere", wordBreak: "break-all" }
+                  : lang === "en"
+                    ? undefined
+                    : { overflowWrap: "break-word" }
               }
             >
               {ui.headline}
@@ -423,20 +411,20 @@ export default async function FeaturesPage({
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="max-w-3xl">
             <div className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-              {mcpCopy.eyebrow}
+              {t("mcpShowcase.eyebrow")}
             </div>
             <h2 className="mt-3 text-3xl font-black tracking-tight md:text-4xl">
-              {mcpCopy.title}
+              {t("mcpShowcase.title")}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-neutral-400">
-              {mcpCopy.text}
+              {t("mcpShowcase.text")}
             </p>
           </div>
           <Link
             href={`${prefix}/features/mcp`}
             className="inline-flex h-11 items-center gap-2 rounded-compact bg-emerald-400 px-5 text-sm font-semibold text-neutral-950 hover:bg-emerald-300"
           >
-            {mcpCopy.cta}
+            {t("mcpShowcase.cta")}
             <ArrowRight className="size-4" />
           </Link>
         </div>
@@ -639,5 +627,20 @@ export default async function FeaturesPage({
         </div>
       </section>
     </div>
+  );
+
+  return (
+    <ClientMessages
+      locale={lang}
+      namespaces={[
+        "home.demo.calendar",
+        "home.demo.coach",
+        "home.demo.dashboard",
+        "home.demo.metric",
+        "home.demo.plan",
+      ]}
+    >
+      {content}
+    </ClientMessages>
   );
 }

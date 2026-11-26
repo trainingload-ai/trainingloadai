@@ -7,7 +7,11 @@ import { RaceAppPromo } from "./promo";
 import { RaceEducation, RaceSources } from "./education";
 import { readRaceTimeShare } from "./share-inputs";
 import styles from "./race-time-predictor.module.css";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { TrackedLink } from "@/components/TrackedLink";
 import {
   breadcrumbSchema,
@@ -58,6 +62,7 @@ export async function generateMetadata({
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/race-time-predictor"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, "/race-time-predictor"),

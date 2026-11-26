@@ -1,25 +1,14 @@
+import "@/i18n/mock-server-translations";
 import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { createCouchTo5kPlan, type RunningPlan } from "./running-plan-pages";
+import { getRunningPlan } from "./running-plan-pages";
 import { getRunningPlanSchedule } from "./running-plan-schedules";
 
-function localizedPlan(locale: string) {
-  const path = new URL(
-    `../../../../packages/messages/docs/${locale}.json`,
-    import.meta.url,
-  );
-  const messages = JSON.parse(readFileSync(path, "utf8"));
-  return createCouchTo5kPlan(
-    messages.runningPlanPages.plans["couch-to-5k-training-plan"] as RunningPlan,
-    locale,
-  );
-}
-
 describe("Couch to 5K SEO page", () => {
-  it("owns the free nine-week search intent and product boundary", () => {
-    const plan = localizedPlan("en");
+  it("owns the free nine-week search intent and product boundary", async () => {
+    const plan = await getRunningPlan("couch-to-5k-training-plan", "en");
     expect(plan).toMatchObject({
       metaTitle: "Free Couch to 5K Training Plan: 9-Week Schedule",
       title:
@@ -58,8 +47,8 @@ describe("Couch to 5K SEO page", () => {
     ["it", "Piano Couch to 5K gratis"],
     ["ko", "무료 Couch to 5K 훈련 계획"],
     ["pt-BR", "Plano Couch to 5K grátis"],
-  ])("uses localized page copy for %s", (locale, title) => {
-    const plan = localizedPlan(locale);
+  ])("uses localized page copy for %s", async (locale, title) => {
+    const plan = await getRunningPlan("couch-to-5k-training-plan", locale);
     expect(plan.title).toContain(title);
     expect(plan.metaTitle).toMatch(/Couch(?:-| )to(?:-| )5K/);
     expect(plan.keywords).toContain("couch to 5k");

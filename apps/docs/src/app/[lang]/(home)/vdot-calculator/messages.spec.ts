@@ -1,11 +1,28 @@
 import { describe, expect, it } from "vitest";
 import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
-import en from "../../../../../../../packages/messages/docs/en.json";
-import ja from "../../../../../../../packages/messages/docs/ja.json";
-import zhHant from "../../../../../../../packages/messages/docs/zh-hant.json";
-import zh from "../../../../../../../packages/messages/docs/zh.json";
+import en from "@trainingloadai/messages/docs/en.json";
+import ja from "@trainingloadai/messages/docs/ja.json";
+import zhHant from "@trainingloadai/messages/docs/zh-hant.json";
+import zh from "@trainingloadai/messages/docs/zh.json";
+import de from "@trainingloadai/messages/docs/de.json";
+import es from "@trainingloadai/messages/docs/es.json";
+import fr from "@trainingloadai/messages/docs/fr.json";
+import itMsg from "@trainingloadai/messages/docs/it.json";
+import ko from "@trainingloadai/messages/docs/ko.json";
+import ptBR from "@trainingloadai/messages/docs/pt-BR.json";
 
-const messages = { en, ja, zh, "zh-hant": zhHant } as const;
+const messages = {
+  en,
+  de,
+  fr,
+  es,
+  "pt-BR": ptBR,
+  it: itMsg,
+  ko,
+  ja,
+  zh,
+  "zh-hant": zhHant,
+} as const;
 
 const LOCKED_TITLE = "VDOT Calculator | Jack Daniels Paces & Race Times";
 const LOCKED_H1 = "VDOT Calculator";
@@ -48,9 +65,9 @@ describe("VDOT calculator messages", () => {
       expect(copy.client.scorecard.share.length).toBeGreaterThan(0);
       expect(copy.client.scorecard).not.toHaveProperty("viewPlan");
       expect(copy.page.onThisPage.length).toBeGreaterThan(0);
-      // Formulas stay verbatim; only the surrounding explanation is localized.
-      expect(copy.page.method.formula).toContain("0.182258v");
-      expect(copy.page.method.formula).toContain("0.2989558e^(−0.1932605t)");
+      // Formulas stay verbatim (allowing locale decimal comma); only surrounding explanation is localized.
+      expect(copy.page.method.formula).toMatch(/0[.,]182258v/);
+      expect(copy.page.method.formula).toMatch(/0[.,]2989558e\^\(−0[.,]1932605t\)/);
       if (lang !== "en") {
         expect(copy.page.method.formula).not.toContain("where v is speed");
         expect(copy.page.method.formula).not.toContain("Pace ranges use");

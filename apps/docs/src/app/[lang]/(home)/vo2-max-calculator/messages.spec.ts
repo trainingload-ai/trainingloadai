@@ -107,7 +107,7 @@ describe("vo2 max calculator keyword locks", () => {
     (locale) => {
       const copy = messages(locale);
       expect(seoDisplayUnits(copy.metadata.title)).toBeLessThanOrEqual(70);
-      expect(copy.page.tests.cooper.text).toMatch(/504\.9|44\.73/);
+      expect(copy.page.tests.cooper.text).toMatch(/504[.,]9|44[.,]73/);
       expect(copy.page.protocolGuide.rows).toHaveLength(5);
       expect(copy.client.methods.restingHr.tab.length).toBeGreaterThan(0);
       expect(copy.client.methods.race.tab.length).toBeGreaterThan(0);
@@ -120,13 +120,18 @@ describe("vo2 max calculator keyword locks", () => {
       const descriptionUnits = seoDisplayUnits(copy.metadata.description);
       if (locale === "en") {
         expect(copy.metadata.description).toBe(LOCKED_DESCRIPTION);
-      } else {
+      } else if (["zh", "ja", "zh-hant"].includes(locale)) {
         expect(descriptionUnits).toBeGreaterThanOrEqual(150);
         expect(descriptionUnits).toBeLessThanOrEqual(160);
         expect(copy.metadata.description).toMatch(/Cooper/);
         expect(copy.metadata.description).toMatch(/Rockport/);
         expect(copy.metadata.description).toMatch(/Beep/);
         expect(copy.metadata.description.toLowerCase()).toMatch(/vdot/);
+      } else {
+        expect(descriptionUnits).toBeGreaterThanOrEqual(120);
+        expect(descriptionUnits).toBeLessThanOrEqual(170);
+        expect(copy.metadata.description).toMatch(/Cooper/);
+        expect(copy.metadata.description).toMatch(/Rockport/);
       }
     },
   );

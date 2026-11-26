@@ -1,3 +1,4 @@
+import "@/i18n/mock-server-translations";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -9,7 +10,7 @@ import {
 import { WorkoutStructurePreview } from "./WorkoutStructurePreview";
 
 describe("WorkoutStructurePreview", () => {
-  it("renders parsed ENDURANCE IR as a localized chart instead of translated DSL", () => {
+  it("renders parsed ENDURANCE IR as a localized chart instead of translated DSL", async () => {
     const workout = getPlanTemplateVariant(
       getRunPlanTemplate("improve-10k")!,
     )!.workouts.find((item) => item.sourceDsl.includes("repeat"))!;
@@ -18,10 +19,10 @@ describe("WorkoutStructurePreview", () => {
     }
 
     const html = renderToStaticMarkup(
-      <WorkoutStructurePreview
-        structure={workout.definition.structure}
-        lang="zh"
-      />,
+      await WorkoutStructurePreview({
+        structure: workout.definition.structure,
+        lang: "zh",
+      }),
     );
 
     expect(html).toContain("训练结构图");
@@ -33,6 +34,16 @@ describe("WorkoutStructurePreview", () => {
     expect(html).not.toMatch(/warmup|work|recovery|cooldown/i);
     expect(workout.sourceDsl).toMatch(
       /warmup.*repeat.*work.*recovery.*cooldown/s,
+    );
+
+    const frenchHtml = renderToStaticMarkup(
+      await WorkoutStructurePreview({
+        structure: workout.definition.structure,
+        lang: "fr",
+      }),
+    );
+    expect(frenchHtml).toContain(
+      'aria-label="Graphique de structure de séance"',
     );
   });
 });

@@ -1,4 +1,671 @@
 {
+  "danielsRunningFormula": {
+    "content": {
+      "metadataTitle": "ダニエルズのランニング・フォーミュラ：VDOT と E/M/T/I/R 完全ガイド | Trainingload.ai",
+      "metadataDescription": "公開資料に基づくダニエルズのトレーニング原則、VDOT、E/M/T/I/R の運動強度、そして責任ある非公式アレンジ計画に必要な要素を解説します。",
+      "eyebrow": "ランニングメソッドガイド",
+      "title": "ダニエルズのランニング・フォーミュラ：VDOT から実行できる練習計画へ",
+      "subtitle": "VDOT の意味と E/M/T/I/R それぞれの役割を理解し、願望の目標走力ではなく現在の走力から構造化されたトレーニング計画を組み立てましょう。",
+      "directAnswer": "ジャック・ダニエルズは、ランナーが現在発揮できる走力を VDOT で表す実績ベースの手法を体系化しました。練習を Easy・Marathon・Threshold・Interval・Repetition の 5 強度に分け、各セッションに明確な適応目的を与えます。",
+      "primaryCta": "現在の VDOT を計算する",
+      "secondaryCta": "トレーニングツールを見る",
+      "toc": "このページの内容",
+      "tocItems": [
+        [
+          "what",
+          "メソッドの概要"
+        ],
+        [
+          "vdot",
+          "VDOT とは"
+        ],
+        [
+          "paces",
+          "E/M/T/I/R ペース"
+        ],
+        [
+          "periodization",
+          "計画の組み立て方"
+        ],
+        [
+          "mistakes",
+          "よくある誤り"
+        ],
+        [
+          "faq",
+          "よくある質問"
+        ]
+      ],
+      "whatTitle": "ダニエルズのランニング・フォーミュラとは？",
+      "whatParagraphs": [
+        "単なるペース換算表ではなく、現在の走力アンカー、目的別の練習強度、負荷上限、回復、そしてレース特異的な期分け（ピリオダイゼーション）を組み合わせた体系です。",
+        "『Daniels' Running Formula』第 4 版では、トレーニング原則、VDOT、各強度区分、シーズン計画、中距離からマラソン以上までの種目別応用が網羅されています。"
+      ],
+      "lawsTitle": "このメソッドが優れている理由",
+      "lawsText": "同じレースタイムでも、有酸素パワー・ランニングエコノミー・フォーム・耐性の組み合わせはランナーごとに異なります。だからこそ、計画は実証済みの現在走力から出発し、すべてのポイント練習に明確な目的を持たせる必要があります。",
+      "vdotTitle": "VDOT は練習の基準値であり、実験室の VO₂max ではない",
+      "vdotParagraphs": [
+        "VDOT は酸素摂取能力と関係しますが、実験室の VO₂max 実測値や時計の推定値と直接置き換えられるものではありません。ランニングエコノミーも含め、現在のレースパフォーマンスへ変換できる実力を表します。",
+        "練習ペースは現在の VDOT に従うべきです。目標タイムは計画の方向づけには役立ちますが、実力が追いつく前に設定ペースを無理に引き上げる根拠にはなりません。"
+      ],
+      "paceTitle": "5 つの基本トレーニング強度",
+      "paceIntro": "各アルファベットは練習の意図を表します。5 種類を均等に行うわけではなく、週の走行距離の大半はイージーに保ち、ポイント練習は厳選して組み込みます。",
+      "intensities": [
+        {
+          "key": "E",
+          "name": "Easy（イージー）",
+          "purpose": "有酸素能力の土台づくり、耐久性、回復、多くのロング走の基盤。",
+          "feel": "会話ができ、無理なくコントロールできる体感。",
+          "mistake": "すべてのイージーランを中強度ペースまで上げてしまうこと。"
+        },
+        {
+          "key": "M",
+          "name": "Marathon（マラソンペース）",
+          "purpose": "レース特異的なリズムの習得、補給練習、心理的な慣れ。",
+          "feel": "安定して制御できるが、時間とともに疲労が蓄積する。",
+          "mistake": "日常の有酸素ジョグの標準ペースとして使ってしまうこと。"
+        },
+        {
+          "key": "T",
+          "name": "Threshold（乳酸閾値）",
+          "purpose": "持続できるスピードと、乳酸の処理・耐性能力を高める。",
+          "feel": "きついが心地よい（Comfortably hard）。短いフレーズ程度しか話せない。",
+          "mistake": "反復可能な強度を守らず、練習をレースのように追い込むこと。"
+        },
+        {
+          "key": "I",
+          "name": "Interval（インターバル）",
+          "purpose": "最大有酸素パワー付近での有効な滞在時間を積み上げる。",
+          "feel": "かなりハードだが制御可能。通常は数分間の反復で行う。",
+          "mistake": "各本の序盤から全力スプリントで突っ込んでしまうこと。"
+        },
+        {
+          "key": "R",
+          "name": "Repetition（レペティション）",
+          "purpose": "ランニングエコノミー、協調性、スピード、リラックスした高速走の改善。",
+          "feel": "速く滑らかで、本数間に十分な完全回復を取る。",
+          "mistake": "レストを削りすぎて持久力テストにしてしまうこと。"
+        }
+      ],
+      "periodizationTitle": "5 つの強度をどのようにトレーニング計画へ組むか",
+      "periodizationText": "計画は通常、有酸素の継続性づくりからエコノミーとポイント練習へ進み、その後レース特異性を高めてテーパリングへ移行します。具体的な配分は VDOT だけでなく、目標距離、計画期間、現在の走行距離、練習可能日、回復力によって決まります。",
+      "goalRows": [
+        [
+          "5K",
+          "E の土台、R でエコノミー、I で有酸素パワー、T で持続力を補強"
+        ],
+        [
+          "10K",
+          "E の土台、T で持久力、I で長めのインターバル"
+        ],
+        [
+          "ハーフマラソン",
+          "E とロング走を中心に、T と制御されたレース特異的練習"
+        ],
+        [
+          "マラソン",
+          "E とロング走、M 特異走、T、補給練習とテーパリング"
+        ]
+      ],
+      "mistakesTitle": "アレンジ計画で防ぐべき 6 つの誤り",
+      "mistakes": [
+        "現在の VDOT ではなく目標 VDOT で練習すること。",
+        "現在の週間走行距離を聞かずに VDOT だけで走行量を決めること。",
+        "高強度の日を 2 日連続で配置すること。",
+        "同じ週に走行距離と強度の両方を急激に増やすこと。",
+        "抜けた練習を取り戻そうとしてポイント練習を詰め込むこと。",
+        "暑さ・坂・標高・疲労で負担が変わっているのに設定ペースに固執すること。"
+      ],
+      "generatorTitle": "VDOT だけでは完全な計画にならない",
+      "generatorText": "VDOT は強度の基準になりますが、責任ある計画には直近の走行距離、ロング走耐性、練習可能日、回復、目標距離、そして追跡可能なメソッド仕様が必要です。Trainingload.ai は現在、ダニエルズ公認またはダニエルズ準拠のトレーニングプランを公開していません。",
+      "generatorCta": "現在の VDOT を計算する",
+      "sourcesTitle": "出典および関係性の明示",
+      "sourcesText": "Jack Daniels、『Daniels' Running Formula』、および VDOT の名称は、公開されている原則の説明と出典明示のみを目的として言及しています。Trainingload.ai は Jack Daniels、V.O2、または関連団体と提携・後援・認定・推奨の関係にありません。本ガイドは教育資料であり、トレーニング計画ではありません。",
+      "faqTitle": "よくある質問",
+      "faq": [
+        [
+          "VDOT は VO₂max と同じですか？",
+          "いいえ。VDOT はレース実績に基づくトレーニング指標です。実験室の VO₂max やスマートウォッチの推定値は関連する指標ですが、そのまま互換できる入力値ではありません。"
+        ],
+        [
+          "現在の VDOT と目標の VDOT のどちらで練習すべきですか？",
+          "現在の VDOT を使ってください。目標タイムは計画の方向性を決める材料にはなりますが、今日の練習ペースを無理に速める根拠にはなりません。"
+        ],
+        [
+          "VDOT はどれくらいの頻度で更新すべきですか？",
+          "代表的なレースや管理されたタイムトライアルの後に更新し、日々の通常ランごとに変えないでください。完了済みのワークアウト処方はそのまま保持します。"
+        ],
+        [
+          "これは公式のダニエルズ・プランですか？",
+          "いいえ。本ページは教育ガイドであり、Trainingload.ai は現在ダニエルズ公認またはダニエルズ準拠のトレーニングプランを公開していません。"
+        ]
+      ],
+      "safety": "本ガイドは教育目的であり医療助言ではありません。胸痛、めまい・失神、異常な息切れ、または持続・悪化する痛みがある場合は直ちに運動を中止し、専門の医療機関へご相談ください。"
+    }
+  },
+  "rpeScale": {
+    "content": {
+      "metadataTitle": "RPEとは？ランニングの1〜10運動強度表 | Trainingload.ai",
+      "metadataDescription": "ランニングのRPE 1〜10表とトークテストを使い、イージーラン、テンポ走、インターバル、5Kトレーニングの強度を理解します。",
+      "keywords": [
+        "RPEとは",
+        "RPE ランニング",
+        "RPE スケール",
+        "自覚的運動強度",
+        "RPE 3-4",
+        "トークテスト"
+      ],
+      "shortTitle": "RPE運動強度表",
+      "eyebrow": "トレーニング強度ガイド",
+      "title": "RPEとは？ランニングの運動強度を1〜10で理解する",
+      "subtitle": "RPE 3〜4、5〜6、7〜9の体感、トークテストによる確認方法、そして信頼できる計画が必ずしもペース目標を必要としない理由を解説します。",
+      "directAnswer": "RPEは自覚的運動強度を示す評価です。Trainingload.aiでは1〜10を使用し、1はほぼ負荷なし、10は短時間しか維持できない最大努力です。固定ペースではなく、身体にかかる内的な強度を表します。",
+      "effortFirstLabel": "まず体感、次にペース。",
+      "primaryCta": "RPE表を見る",
+      "secondaryCta": "5Kプランを選ぶ",
+      "toc": "このページの内容",
+      "tocItems": [
+        [
+          "what-is-rpe",
+          "RPEとは"
+        ],
+        [
+          "rpe-scale",
+          "RPE 1〜10表"
+        ],
+        [
+          "5k-plans",
+          "5KプランでのRPE"
+        ],
+        [
+          "rpe-vs-pace-heart-rate",
+          "RPE・ペース・心拍数"
+        ],
+        [
+          "ai-coach",
+          "AIコーチとRPE"
+        ],
+        [
+          "rpe-meanings",
+          "3種類のRPE"
+        ],
+        [
+          "faq",
+          "よくある質問"
+        ]
+      ],
+      "definitionTitle": "RPEとは？",
+      "definitionParagraphs": [
+        "RPEは主観的な強度指標です。速さや心拍数だけでなく、呼吸、筋肉の負担、全身の努力感を合わせて運動のきつさを判断します。",
+        "Borgの原尺度には6〜20がありますが、持久系トレーニングでは0または1〜10も広く使われます。Trainingload.aiのプランは1〜10に統一しています。",
+        "暑さ、坂、風、疲労、睡眠、路面によって同じペースの負担は変わります。データが少ない場合はRPEを中心にし、信頼できる基準があればペースや心拍数と組み合わせます。"
+      ],
+      "scaleTitle": "ランニングRPE 1〜10表",
+      "scaleIntro": "呼吸、会話、コントロール感、反復可能性を合わせて判断します。",
+      "scaleHeaders": [
+        "RPE",
+        "強度",
+        "体感",
+        "トークテスト",
+        "代表的な練習"
+      ],
+      "scaleRows": [
+        {
+          "id": "rpe-1-2",
+          "range": "1–2",
+          "label": "非常に軽い",
+          "feel": "負担がほとんどなくリラックス",
+          "talkTest": "普通に会話できる",
+          "training": "歩行、ウォームアップ、回復"
+        },
+        {
+          "id": "rpe-3-4",
+          "range": "3–4",
+          "label": "イージー",
+          "feel": "快適でコントロール可能",
+          "talkTest": "文章で話せる",
+          "training": "イージー、回復、ラン＆ウォーク"
+        },
+        {
+          "id": "rpe-5-6",
+          "range": "5–6",
+          "label": "ステディ",
+          "feel": "集中が必要だが持続可能",
+          "talkTest": "短い文章で話せる",
+          "training": "ステディ走、抑えたロング走"
+        },
+        {
+          "id": "rpe-7-8",
+          "range": "7–8",
+          "label": "ハード",
+          "feel": "高い集中が必要だが計画通り反復可能",
+          "talkTest": "短いフレーズか数語",
+          "training": "テンポ、長めのインターバル、5K強度"
+        },
+        {
+          "id": "rpe-9",
+          "range": "9",
+          "label": "非常にハード",
+          "feel": "最大に近く短時間のみ",
+          "talkTest": "一、二語",
+          "training": "短いインターバル、レース終盤"
+        },
+        {
+          "id": "rpe-10",
+          "range": "10",
+          "label": "最大努力",
+          "feel": "全力で、十分な回復なしに反復不能",
+          "talkTest": "話せない",
+          "training": "短いスプリント、ラストスパート"
+        }
+      ],
+      "scaleCaution": "これは実践的な目安であり、正確な生理学的換算ではありません。RPEを固定ペース、心拍率、乳酸値、ゾーンへ一対一で変換することはできません。",
+      "plansTitle": "公式5KプランでのRPEの使い方",
+      "plansIntro": "初心者は強度判断をシンプルにし、信頼できる基準があるランナーだけが段階的に質の高い練習を追加します。",
+      "plans": [
+        {
+          "title": "初めての5K",
+          "range": "主にRPE 3–4",
+          "description": "会話できるラン＆ウォークから走る区間を延ばします。架空の目標ペースは設定しません。",
+          "href": "/couch-to-5k-training-plan"
+        },
+        {
+          "title": "5K完走",
+          "range": "RPE 3–6",
+          "description": "イージーとロングはRPE 3〜4、ステディはRPE 5〜6です。",
+          "href": "/5k-training-plan"
+        },
+        {
+          "title": "5K向上",
+          "range": "RPE 3–9",
+          "description": "イージー日は軽く、テンポ、インターバル、5K特異的練習はRPE 6〜9まで上げます。",
+          "href": "/5k-training-plan/intermediate"
+        }
+      ],
+      "compareTitle": "RPE・ペース・心拍数の使い分け",
+      "compareIntro": "3つは異なる問いに答えます。計画は、常に1つを優先するのではなく、信頼できる最小限の指標を選びます。",
+      "comparisons": [
+        {
+          "title": "RPE",
+          "strength": "機器不要で、暑さ、坂、疲労、睡眠をすぐ反映します。",
+          "limitation": "練習と一貫した尺度の定義が必要です。"
+        },
+        {
+          "title": "ペース",
+          "strength": "信頼できる直近記録があれば具体的で確認しやすい指標です。",
+          "limitation": "地形、天候、標高、GPS誤差で負担が変わります。"
+        },
+        {
+          "title": "心拍数",
+          "strength": "心血管系の内的反応と有酸素傾向を確認できます。",
+          "limitation": "短いインターバルでは遅れ、センサーや暑さ、脱水、ストレスにも影響されます。"
+        }
+      ],
+      "compareConclusion": "信頼できる記録があれば質の高い練習をペースで導き、RPEで当日の負担を確認します。基準がなければ、架空のペースよりRPEとトークテストが安全です。",
+      "coachTitle": "Trainingload.aiのAIコーチはRPEをどう使うか",
+      "coachParagraphs": [
+        "公式テンプレートは候補生成、構造検証、レビュー、固定化を経ています。閲覧・作成時にモデルがWorkoutを書き換えることはなく、RPEと日程は安定しています。",
+        "AIカスタムプランは許可されたランニング基準を使用します。信頼できる直近5K記録がなければRPEを主軸とし、基準があれば質の高い区間にペース目標を加えつつRPEで現実性を確認します。"
+      ],
+      "coachSteps": [
+        {
+          "title": "基準を読む",
+          "description": "走歴、連続走能力、利用可能日、信頼できる直近記録を使います。"
+        },
+        {
+          "title": "強度の軸を選ぶ",
+          "description": "証拠が少なければRPE、十分ならペースやVDOTを追加します。"
+        },
+        {
+          "title": "実行可能に保つ",
+          "description": "各ステップに目的、体感、回復、前提を明記します。"
+        }
+      ],
+      "meaningsTitle": "混同してはいけない3種類のRPE",
+      "meaningsIntro": "持久系プラン、トレーニング負荷、筋力トレーニングでは同じ略語でも問いが異なります。",
+      "meanings": [
+        {
+          "title": "WorkoutステップRPE",
+          "description": "現在のランニング区間がどれだけきついべきか。5KカレンダーのRPE 3〜4はこれです。"
+        },
+        {
+          "title": "Session RPE",
+          "description": "完了したセッション全体の難度。時間と組み合わせて内的負荷を推定します。",
+          "href": "/training-load"
+        },
+        {
+          "title": "筋力セットRPE",
+          "description": "失敗まであと何回できたかに近い概念。ランニング区間へ直接当てはめません。",
+          "href": "/docs/planning/strength-workout-dsl"
+        }
+      ],
+      "calibrateTitle": "最初の2〜3週間でRPEを調整する",
+      "calibrateIntro": "同じ尺度を継続して使うことで判断は安定します。",
+      "calibrateSteps": [
+        "時計を見る前に強度を言葉にし、会話できる程度を確認します。",
+        "インターバルでは回復区間ではなく運動区間を評価します。",
+        "終了後は最もきつい瞬間ではなく、セッション全体のRPEを別に記録します。",
+        "数週間、似たコースと条件で比較します。"
+      ],
+      "mistakesTitle": "よくあるRPEの誤り",
+      "mistakes": [
+        "イージーという名前だけでRPE 1〜2と評価する。",
+        "時計のペースを優先してイージー日をRPE 6まで上げる。",
+        "RPEを心拍数やペースの正確な換算表として使う。",
+        "脚の不快感だけ、または呼吸だけで評価する。",
+        "筋力トレーニングのRPE/RIRをランニング全体へ当てはめる。",
+        "RPE 10を日常の目標にする。"
+      ],
+      "faqTitle": "よくある質問",
+      "faq": [
+        [
+          "RPEとは何の略ですか？",
+          "Rating of Perceived Exertion、つまり自覚的運動強度です。呼吸、筋肉の負担、全体の努力感から運動のきつさを評価します。"
+        ],
+        [
+          "ランニングのRPE 3〜4はどんな感覚ですか？",
+          "楽でコントロールでき、文章で会話できます。呼吸は安静時より増えますが苦しくなく、予定より長く続けられる感覚です。"
+        ],
+        [
+          "イージーランは何RPEですか？",
+          "このプランでは多くのイージー・回復ランがRPE 3〜4です。暑さ、坂、疲労でペースは変わっても、目的の体感は変えません。"
+        ],
+        [
+          "5Kレースは何RPEですか？",
+          "多くのランナーはコントロールされたハードから終盤の非常にハードへ進み、概ねRPE 7〜9です。完走目的の初心者は低めで構いません。"
+        ],
+        [
+          "心拍計なしでRPEだけで練習できますか？",
+          "できます。RPEとトークテストで有効な強度を設定できます。心拍数は追加の信号ですが、判断を置き換えるものではありません。"
+        ],
+        [
+          "同じペースなのにRPEが違うのはなぜですか？",
+          "暑さ、風、坂、睡眠、水分、ストレス、体調、蓄積疲労が同じペースの負担を変えるためです。"
+        ],
+        [
+          "RPEを心拍ゾーンやペースへ換算できますか？",
+          "普遍的な正確換算はありません。能力、環境、運動種目、測定方法で関係が変わります。"
+        ],
+        [
+          "ランニングRPEと筋力トレーニングのRPE/RIRはどう違いますか？",
+          "ランニングでは区間やセッションの主観強度、筋力では失敗まで残る反復回数と結びつくことが多く、同じ数値でも意味は同一ではありません。"
+        ],
+        [
+          "いつ減速または中止すべきですか？",
+          "予定した会話・体感を守れなければ減速します。胸痛、失神、異常な息切れ、持続・悪化する痛みがあれば中止し医療専門家へ相談してください。"
+        ],
+        [
+          "RPEを学ぶのにどれくらいかかりますか？",
+          "多くのランナーは似た練習を2〜3週間評価すると安定します。同じ尺度とタイミングを使ってください。"
+        ]
+      ],
+      "sourcesTitle": "出典と適用範囲",
+      "sourceNote": "本ガイドは自覚的運動強度の研究と公的な強度ガイドを、Trainingload.aiの1〜10表現へ翻訳しています。",
+      "safety": "本ページは教育目的であり医療助言ではありません。胸痛、失神、異常な息切れ、持続・悪化する痛みがある場合は運動を中止し、専門家へ相談してください。",
+      "relatedTitle": "RPEをプランで使う",
+      "related": [
+        [
+          "初めての5K",
+          "/couch-to-5k-training-plan",
+          "RPE 3〜4の会話できるラン＆ウォークから開始します。"
+        ],
+        [
+          "5K完走",
+          "/5k-training-plan",
+          "イージーとステディで5K完走へ進みます。"
+        ],
+        [
+          "5K向上",
+          "/5k-training-plan/intermediate",
+          "RPEとテンポ、インターバル、VDOTを組み合わせます。"
+        ],
+        [
+          "VDOT計算",
+          "/vdot-calculator",
+          "信頼できる記録がある場合にペース目標を追加します。"
+        ],
+        [
+          "トレーニング負荷",
+          "/training-load",
+          "Session RPEとの違いを理解します。"
+        ]
+      ],
+      "homeLabel": "ホーム",
+      "scheduleGuideLabel": "RPEが分からない場合は、1〜10の運動強度ガイドを確認してください。",
+      "intensityLinkLabel": "RPE運動強度ガイドを開く"
+    }
+  },
+  "lactateCurveCalculator": {
+    "copy": {
+      "title": "乳酸カーブ計算ツール",
+      "description": "自転車・ランニングの段階負荷テストで得られた血中乳酸データを分析。閾値算出法を比較し、強度ゾーンとレポートを作成します。",
+      "badge": "段階負荷テスト",
+      "privacy": "無料・登録不要。データはこのタブ内だけで処理されます。再読み込みする前に必要な結果を出力してください。",
+      "inputTitle": "テストデータ",
+      "resultTitle": "分析結果",
+      "empty": "各ステージのデータを入力するか、サンプルで分析の流れを確認してください。",
+      "stale": "入力が変更されました。結果の利用・出力前に、もう一度分析してください。",
+      "sample": "説明用サンプルです。あなたの測定データではありません。",
+      "cycling": "自転車",
+      "running": "ランニング",
+      "intensity": "強度",
+      "lactate": "乳酸",
+      "heartRate": "心拍数",
+      "stage": "ステージ",
+      "rest": "安静時のサンプルは強度を 0 に設定",
+      "example": "サンプルを読み込む",
+      "clear": "データを消去",
+      "add": "ステージを追加",
+      "remove": "ステージを削除",
+      "analyze": "データを分析",
+      "calculating": "分析中…",
+      "paste": "表を貼り付ける",
+      "import": "CSV を読み込む",
+      "template": "CSV テンプレート",
+      "confirmImport": "この列を使用",
+      "cancel": "キャンセル",
+      "mapping": "列と単位を確認",
+      "noColumn": "記録なし",
+      "sort": "強度順に並べ替える",
+      "overwrite": "現在のステージデータを置き換えますか？",
+      "resetSport": "種目を変更すると現在のデータが消去されます。続行しますか？",
+      "pasteHelp": "カンマまたはタブ区切りの行を貼り付けます。小数点は「.」を使用してください。置き換える前に列の対応を確認します。",
+      "inputHelp": "運動ステージは 4〜30 段階（推奨 6〜10）。乳酸の単位は mmol/L、心拍数は任意です。必須セルはすべて入力してください。安静時のサンプルを強度 0 で追加できます。",
+      "method": "算出方法",
+      "threshold": "閾値",
+      "selected": "グラフに表示する方法",
+      "unavailable": "算出できません",
+      "partial": "一部の方法では閾値を算出できませんでした。算出できた結果を表示します。",
+      "noResult": "有効な閾値が見つかりませんでした。入力と方法の説明を確認してください。測定範囲の外側には外挿しません。",
+      "lt1": "第1乳酸閾値 LT1",
+      "lt2": "第2乳酸閾値 LT2",
+      "zones": "3つの強度ゾーン",
+      "zoneNames": [
+        "LT1 未満",
+        "LT1〜LT2",
+        "LT2 より上"
+      ],
+      "methodHelp": "選ぶ方法によって境界が変わります。乳酸閾値は推定の強度指標であり、FTP と同一ではありません。",
+      "export": "結果 CSV を出力",
+      "print": "レポートを印刷",
+      "report": "乳酸テストレポート",
+      "source": "計算の参照元",
+      "copied": "コピーしました",
+      "copy": "結果をコピー",
+      "quality": "データの確認事項",
+      "methodsTitle": "算出法と適用条件",
+      "instructionsTitle": "入力条件と分析手順",
+      "instructions": [
+        "各ステージの終了時に強度と実測した血中乳酸を記録します。心拍数も記録する場合は同じステージに対応させます。",
+        "種目と記録時の単位を選び、手入力・貼り付け・CSV 読み込みでデータを入力します。",
+        "カーブと注意点を確認し、方法を比較して結果を出力します。再テストではできるだけ同じ手順を使ってください。"
+      ],
+      "faqTitle": "乳酸テスト分析のよくある質問",
+      "faq": [
+        {
+          "question": "Garmin の記録だけで使えますか？",
+          "answer": "このツールには各ステージで実測した乳酸値が必要です。レース結果やフィールドテストから推定したい場合は、別の乳酸閾値計算ツールをご利用ください。"
+        },
+        {
+          "question": "方法によって数値が違うのはなぜですか？",
+          "answer": "固定濃度、ベースラインからの増加、カーブの形状は異なる特徴を示します。最初の上昇を探す方法と、高い強度の境界を推定する方法があります。数値の一致だけで生理学的な正確さは証明できません。"
+        },
+        {
+          "question": "LT1 と LT2 は診断や練習メニューですか？",
+          "answer": "算出方法に依存する強度の参考値です。ステージ時間、採血方法、日々の変動が解釈に影響します。方法とテスト手順を結果と一緒に保存し、必要に応じて経験のあるコーチに相談してください。"
+        },
+        {
+          "question": "データはどこに保存されますか？",
+          "answer": "計算、CSV 解析、レポート生成はブラウザー内で行います。入力はアップロードされず、URL にも含まれません。再読み込みすると消えるため、必要な記録は出力してください。"
+        }
+      ],
+      "alternative": "実測した乳酸データがありませんか？",
+      "alternativeBody": "乳酸閾値計算ツールでは、レースやフィールドテストから練習強度の参考値を推定できます。",
+      "related": "関連ツール",
+      "cta": "トレーニング負荷と回復傾向を継続して確認",
+      "ctaBody": "日々のトレーニング記録、強度分布、コンディションの推移を合わせて確認し、トレーニング周期の計画と次回のテストに役立てます。",
+      "protocol": "テスト情報（任意）",
+      "stageMinutes": "1ステージの時間（分）",
+      "sampleSite": "採血部位",
+      "notRecorded": "記録なし",
+      "earlobe": "耳たぶ",
+      "fingertip": "指先",
+      "other": "その他",
+      "incomplete": "最後のステージを完了していない",
+      "excluded": "最後のステージを分析から除外",
+      "runtimeError": "分析を実行できませんでした。入力は保持されています。もう一度お試しください。",
+      "exportError": "出力を準備できませんでした。もう一度お試しください。",
+      "recordingError": "ファイル、行、数値、列の対応を確認してください。CSV は 256 KiB、100 行、16 列までです。",
+      "methodDescriptions": {
+        "obla_2": "3次近似カーブが最後に 2 mmol/L を上向きに通過する強度。固定濃度は全員の第1閾値を表すものではありません。",
+        "obla_4": "3次近似カーブが最後に 4 mmol/L を上向きに通過する強度。この値を一律に LT2 とみなすことはできません。",
+        "bsln_05": "ベースラインに 0.5 mmol/L を加えた値に達する強度。安静時サンプルがなければ最初の運動ステージを基準にします。",
+        "bsln_10": "ベースラインに 1.0 mmol/L を加えた値に達する強度。1つの基準サンプルが結果に影響します。",
+        "log_log": "強度と乳酸を対数変換し、分割ステージを共有する2本の直線を当てはめます。残差が最小の分割の交点を求めます。5段階以上が必要です。",
+        "dmax": "運動ステージの3次近似カーブと、その両端を結ぶ直線との下向き距離が最大になる点。",
+        "moddmax": "隣り合う乳酸値が初めて 0.4 mmol/L 以上上昇する直前のステージから、最後の実測点まで直線を引きます。",
+        "log_poly_moddmax": "Log-log の強度に対応する3次カーブ上の点から、最後の実測乳酸点まで直線を引きます。有効な Log-log の結果が必要です。"
+      },
+      "reasons": {
+        "invalid_value": "該当行を確認してください。乳酸と任意の心拍数は有限の正数です。強度 0 は安静時のみ使用します。",
+        "too_few_stages": "運動ステージが4段階以上必要です。Log-log は5段階以上必要です。",
+        "too_many_stages": "運動ステージは30段階までです。",
+        "duplicate_intensity": "同じ強度が複数あります。重複するステージを確認してください。",
+        "unsorted_stages": "強度を昇順にしてください。分析前に並べ替えを確認できます。",
+        "fit_degenerate": "このデータから安定した3次カーブを求められません。",
+        "target_not_reached": "測定範囲内でカーブが目標濃度を上向きに通過していません。",
+        "loglog_unavailable": "運動ステージの範囲内に有効な Log-log の交点がありません。",
+        "no_lactate_rise": "隣接するステージで 0.4 mmol/L 以上の上昇がありません。",
+        "no_distance": "カーブが基準線の下側に位置する有効な距離点がありません。",
+        "no_resting_sample": "安静時サンプルがないため、最初の運動ステージを基準に使用します。",
+        "few_stages": "ステージが少ないため、1つのサンプルが結果を大きく変える可能性があります。",
+        "early_dip": "前半で乳酸値が低下しています。採血やウォームアップの状況を確認してください。",
+        "final_not_rising": "最終ステージで乳酸が上昇していません。予定した強度に達したか確認してください。",
+        "uneven_steps": "強度の増分が一定ではありません。テスト手順と合わせて解釈してください。",
+        "threshold_at_edge": "推定値が測定範囲の端にあります。",
+        "negative_fit": "近似カーブに負の値があります。近似とサンプルを確認してください。",
+        "invalid_pair": "有効な方法を選び、LT1 が LT2 より低いことを確認してください。"
+      }
+    },
+    "methodContext": {
+      "originLabel": "研究上の出典",
+      "interpretationLabel": "適用条件と限界",
+      "referencesTitle": "参考文献と実装の根拠",
+      "introduction": "各手法は同じテストの異なる特徴を捉えます。手法名だけで個人の LT1、LT2、最大乳酸定常状態（MLSS）が確定するわけではなく、ステージ時間、採血方法、研究対象者を考慮する必要があります。",
+      "implementation": "計算結果は以下の固定バージョンの lactater と照合しています。参照ソフトウェアとの一致は、独立した生理学的妥当性の検証を意味しません。",
+      "methods": {
+        "obla_2": {
+          "origin": "乳酸濃度を固定する手法の一つです。{jamnick}は自転車の漸増負荷テストで、2 mmol/L を含む複数の固定濃度を比較しました。",
+          "interpretation": "一定の濃度における比較点として使えますが、個人の第一乳酸閾値と同一視はできません。再テストでは同じプロトコルを用いて比較します。"
+        },
+        "obla_4": {
+          "origin": "4 mmol/L の基準は {kindermann}が論じ、{heck}が検討した、古くからの固定濃度基準です。",
+          "interpretation": "慣例的な濃度基準であり、すべての人の LT2 や実測 MLSS ではありません。個人の乳酸値とテスト設計により、推定値は境界の上下にずれます。"
+        },
+        "bsln_05": {
+          "origin": "ベースラインに一定量を加える手法です。{jamnick}が比較し、この手法群の背景として {berg}と {zoladz}を引用しています。",
+          "interpretation": "ベースラインのサンプルと測定変動に敏感です。本ツールは安静時値があればそれを、なければ最初の運動ステージを使用し、前半の平均値は用いません。"
+        },
+        "bsln_10": {
+          "origin": "+0.5 と同じ手法群で、増加量が異なります。{jamnick}は +0.5、+1.0、+1.5 mmol/L を別の基準として比較しました。",
+          "interpretation": "+1.0 は +0.5 とは異なる基準であり、増加量が大きいだけで第二の生理学的閾値とはいえません。ベースラインの定義を変えると結果も変わります。"
+        },
+        "log_log": {
+          "origin": "{beaver}は乳酸と酸素摂取量の関係を両対数軸で分析しました。{bishop}などの自転車研究ではパワーが用いられ、本ツールではテスト強度を使用します。",
+          "interpretation": "運動ステージが5段階以上あり、2本の直線の交点が測定範囲内にある必要があります。強度を横軸にする実装は、元の酸素摂取量テストの再現とは異なります。"
+        },
+        "dmax": {
+          "origin": "{cheng}が Dmax を提案しました。近似カーブと、その両端を結ぶ直線との最大距離を求めます。",
+          "interpretation": "測定範囲と近似に依存します。本ツールでは基準線の両端を3次近似カーブ上に置くため、最初や最後のステージを変えると推定値も変わり得ます。"
+        },
+        "moddmax": {
+          "origin": "{bishop}は前半の平坦な部分の影響を減らすため、Dmax の基準線の始点を変更しました。{heuberger}は 0.4 mmol/L 以上の上昇を基準としています。",
+          "interpretation": "本ツールはちょうど 0.4 mmol/L の上昇も含め、始点と終点の実測乳酸を使います。{jamnick}の記述は >0.4 であり、ここでは Heuberger の等号を含む基準を採用しています。"
+        },
+        "log_poly_moddmax": {
+          "origin": "{jamnick}が提案した組み合わせです。Log-log で始点の強度を決め、3次近似カーブに修正 Dmax を適用します。",
+          "interpretation": "同研究で MLSS に最も近かったのは、訓練を積んだ男性サイクリスト17人の4分ステージでした。あらゆるランニング・自転車プロトコルでの妥当性を示すものではなく、有効な Log-log の結果も必要です。"
+        }
+      }
+    },
+    "presentation": {
+      "engineVersion": "計算エンジンのバージョン",
+      "tooltipStage": "ステージ",
+      "tooltipMeasured": "実測乳酸",
+      "tooltipFitted": "近似乳酸",
+      "tooltipResidual": "残差",
+      "tooltipZone": "強度領域",
+      "hoverHint": "サンプルをホバー・タップ・キーボードで選択して確認",
+      "ctaAction": "無料アカウントを作成",
+      "ctaExplore": "トレーニング負荷の機能を見る",
+      "ctaNote": "このツールのテストデータはアカウントに自動保存されません。",
+      "ctaImageAlt": "Trainingload.ai のトレーニング負荷とコンディション推移の画面例",
+      "ctaImageCaption": "Trainingload.ai · トレーニング負荷の表示例",
+      "ctaBenefitLoad": "負荷の推移",
+      "ctaBenefitZones": "強度分布の分析",
+      "ctaBenefitPlan": "トレーニング周期の計画",
+      "workflowInput": "テストを入力",
+      "workflowReport": "分析レポート",
+      "editData": "テストデータを編集",
+      "readCurve": "乳酸–運動強度曲線",
+      "readCurveBody": "運動ステージのサンプルに対する3次多項式近似。ステージにカーソルを合わせるか選択すると、実測乳酸、近似値、心拍数を確認できます。",
+      "thresholdBasis": "閾値の判定方法",
+      "inputGuide": "運動 4〜30 段階 · 乳酸 mmol/L · 心拍数は任意",
+      "returnReport": "レポートに戻る",
+      "overview": "テスト概要",
+      "stages": "運動ステージ",
+      "peak": "最終テスト強度",
+      "fit": "3次曲線近似",
+      "curve": "乳酸カーブ",
+      "samples": "実測サンプル",
+      "fitted": "近似カーブ",
+      "anchor": "基準線",
+      "distance": "最大距離",
+      "compareTitle": "閾値算出法の比較",
+      "compareBody": "同一テストの推定値を運動強度軸で比較します。方法を選択すると、算出根拠と適用条件を確認できます。",
+      "sharedScale": "共通の強度軸",
+      "earlyGroup": "ベースラインと変曲点",
+      "dmaxGroup": "Dmax 系の方法",
+      "fixedGroup": "固定乳酸濃度",
+      "notInterval": "点は各方法の推定値であり、信頼区間ではありません。",
+      "zonesBody": "選択した LT1・LT2 の方法が境界を決めます。色の帯は3つの強度領域を示します。",
+      "lowDomain": "LT1 未満",
+      "middleDomain": "LT1〜LT2",
+      "highDomain": "LT2 より上",
+      "qualityFitTitle": "近似の診断",
+      "qualityFitBody": "残差 = 実測乳酸 − 近似乳酸。よく当てはまることだけでは、生理学的な正確さは確認できません。",
+      "rmse": "二乗平均平方根誤差",
+      "maxResidual": "最大絶対残差",
+      "residuals": "ステージ別の残差",
+      "logAxes": "Log-log 表示 · 両軸とも対数目盛",
+      "noHr": "心拍数の記録なし",
+      "preview": "分析例",
+      "previewBody": "段階負荷テストの LT1・LT2、強度領域、心拍応答を表示します。",
+      "previewCaption": "デモデータ · 個人の測定結果ではありません",
+      "moreDetails": "方法の説明",
+      "available": "方法が算出可能"
+    }
+  },
   "conversionQuality": {
     "reference": "参照番号",
     "noGpsTitle": "このファイルは GPS 軌跡に変換できません",
@@ -510,7 +1177,11 @@
     "page": {
       "title": "サイクリングパワーゾーン計算機",
       "subtitle": "FTPを入力すると、Coggan式のサイクリングパワーゾーンをワットで確認できます。プランに合わせてFriel、Vance、Stryd、CPにも切り替えられます。",
-      "proof": ["登録不要", "すぐに計算", "印刷・共有可能"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有可能"
+      ],
       "howTo": {
         "title": "パワーゾーンの使い方",
         "description": "使っているワットを入力し、ゾーンモデルを選んで、次のセッションのスコアカードにします。",
@@ -792,7 +1463,10 @@
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
         "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
-        "benefits": ["運動中のリアルタイムデータ", "トレーニング後の分析"],
+        "benefits": [
+          "運動中のリアルタイムデータ",
+          "トレーニング後の分析"
+        ],
         "cta": "AI コーチを見る",
         "phoneAlt": "Trainingload.ai の iPhone 運動記録画面"
       },
@@ -966,7 +1640,11 @@
     "page": {
       "title": "クリティカルパワー計算機",
       "subtitle": "パワー記録の入力、またはライドファイルのアップロードで、CP、W′、パワーウェイトレシオを推定。次のトレーニングに役立てましょう。",
-      "proof": ["登録不要", "すぐに計算", "印刷・共有"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有"
+      ],
       "howTo": {
         "title": "クリティカルパワー計算機の使い方",
         "steps": {
@@ -1295,15 +1973,16 @@
       "applicationCategory": "HealthApplication",
       "description": "レースやフィールドテストからLT1、LT2、LTHR、閾値ペースまたはパワーを推定し、心拍・パワーゾーンを確認できます。無料で、結果の印刷と共有にも対応します。",
       "featureList": [
-        "直近の5km、10km、ハーフ、マラソン、または任意距離から閾値ペースを推定",
-        "20分テストの LTHR を LT2 として表示",
-        "20分 / 8分 / 60分テストの閾値パワーを LT2 として表示",
-        "距離と時間の閾値努力から閾値ペースを LT2 として表示",
-        "心拍・パワー・ペースの LT1 帯",
-        "心拍ゾーンとパワーゾーンへの引き継ぎ",
-        "結果をコピー",
-        "代表的なレースタイムから LT2 ペースとスプリットを示す表",
-        "計算結果で埋まる閾値練習の例"
+        "最近の5K、10K、ハーフマラソン、マラソン、または任意の距離の記録から閾値ペースを算出",
+        "20分間のタイムトライアル・走力テストからLTHRを算出し、LT2として表示",
+        "20分・8分・60分のフィールドテストから閾値パワーを算出し、LT2として表示",
+        "距離とタイムの記録から閾値ペースを算出し、LT2として表示",
+        "心拍数・パワー・ペースごとのLT1レンジを表示",
+        "心拍ゾーンおよびパワーゾーン計算ツールへそのまま引き継ぎ",
+        "計算結果のコピー機能",
+        "代表的なレースタイムからLT2ペースおよびラップの目安を引ける参照表",
+        "算出結果をもとに自動入力される閾値ワークアウト例",
+        "共有可能な結果カード"
       ],
       "breadcrumb": {
         "home": "ホーム",
@@ -2098,7 +2777,10 @@
         {
           "question": "最大心拍数やゾーン2はどこで計算できますか？",
           "answer": "最大心拍数の計算式は最大心拍数計算機で確認できます。ゾーン2だけを知りたい場合は、ゾーン2心拍数計算機を使ってください。\n\nそこで最大心拍数を推定してから、このページで全ゾーンを計算できます。\n\nこのページでは選択したモデルの全ゾーンを表示します。前述の2つの計算機とは用途が異なります。",
-          "links": ["maxHr", "zone2"]
+          "links": [
+            "maxHr",
+            "zone2"
+          ]
         }
       ],
       "ui": {
@@ -2123,7 +2805,11 @@
         },
         "onThisPage": "このページの内容"
       },
-      "proof": ["登録不要", "すぐに計算", "印刷・共有"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有"
+      ],
       "links": {
         "estimateHrmax": "最大心拍を推定",
         "zone2": "ゾーン2だけを計算"
@@ -2661,6 +3347,73 @@
     }
   },
   "features": {
+    "mcp": {
+      "content": {
+        "title": "AI があなたのトレーニングを読み解く。その根拠もすべて見える。",
+        "description": "読み取り専用・OAuth 保護の MCP サーバー経由で、TrainingLoad を普段お使いの AI クライアントに接続。実際のトレーニングの疑問を投げかけ、すべてのツール呼び出しを確認し、返却データで結論を検証できます。",
+        "eyebrow": "TrainingLoad MCP",
+        "connect": "MCP を接続",
+        "docs": "ドキュメントを読む",
+        "supported": "対応クライアント",
+        "contractEyebrow": "生の API ではなく、設計されたプロダクト体験",
+        "contractTitle": "24 の境界付きツール、3 つのリソース、3 つの再利用可能なプロンプト。",
+        "contractText": "サーバーはまず集約スナップショットを優先して返し、質問に本当に必要なときだけ詳細なデータへ掘り下げます。すべてのリストに期間上限・件数制限・opaque cursor を備えています。",
+        "groups": [
+          [
+            "現在の状態",
+            "スナップショット、レディネス指標、トレーニング負荷の時系列"
+          ],
+          [
+            "成長・推移",
+            "期間比較、種目別内訳、アクティビティ統計、継続性、フィットネス推移、ゾーン、自己ベスト"
+          ],
+          [
+            "計画と実行",
+            "アクティビティのゾーン・スプリット、計画サマリー、達成率、レース詳細"
+          ],
+          [
+            "連携状態",
+            "同期レディネスと任意のヘルスコンテキスト"
+          ]
+        ],
+        "workflowEyebrow": "接続から根拠の確認まで",
+        "workflowTitle": "URL を 1 つ追加し、許可するデータを選ぶだけ。あとは普通に質問。",
+        "workflowText": "クライアントはサーバーから OAuth 設定とツール一覧を自動検出します。TrainingLoad がサーバー側で認可とデータ境界を守りながら、会話の中で全回答の根拠を検証できます。",
+        "workflow": [
+          [
+            "01",
+            "サーバーを追加",
+            "対応クライアントすべてで同じリモート URL を利用できます。"
+          ],
+          [
+            "02",
+            "権限を確認",
+            "読み取りスコープを承認。ヘルスデータ権限は常に分離されています。"
+          ],
+          [
+            "03",
+            "具体的な質問をする",
+            "クライアントが回答に必要な最小限のツール経路を選択します。"
+          ],
+          [
+            "04",
+            "結論を検証する",
+            "呼び出し履歴、対象期間、返却された事実、欠損データを確認できます。"
+          ]
+        ],
+        "recipes": "ネイティブプロンプト・リソース・ツール経路を見る",
+        "safetyTitle": "設計段階からのプライバシー保護",
+        "safetyText": "OAuth スコープはツール一覧取得時と実行時の両方で検証されます。返却データには直接的な個人識別情報、生センサーストリーム、精密な GPS ルート、認証情報、完全な FIT データは一切含まれません。",
+        "safety": [
+          "すべて読み取り専用ツール。隠し書き込み経路なし",
+          "現在のアスリート本人のみに限定。opaque ID はユーザー単位でスコープ分離",
+          "信頼できないメモはサニタイズされ、決して指示として解釈されない",
+          "スキーマ検証、出力上限、タイムアウト、レート制限、監査ログ、トレースを標準実装"
+        ],
+        "finalTitle": "一度接続すれば、いつもの AI クライアントからすぐ質問。",
+        "finalText": "同じエンドポイントが対応するすべての MCP クライアントで使えます。ヘルスデータの共有は任意であり、アカウント設定から接続全体とあわせていつでも取り消せます。"
+      }
+    },
     "metadata": {
       "title": "Trainingload.ai の機能 | 計画、負荷、AI コーチ",
       "description": "Trainingload.ai のトレーニング分析フローをご覧ください。適応型トレーニング計画、カレンダー、実績、PMC と effective VO2max シグナル、AI コーチレビュー、確認後に反映する調整を扱います。",
@@ -2688,6 +3441,12 @@
       }
     },
     "page": {
+      "mcpShowcase": {
+        "eyebrow": "TrainingLoad MCP",
+        "title": "AI にトレーニングを読み込ませ、すべての結論を検証可能に。",
+        "text": "24 の読み取り専用トレーニングツールとネイティブのリソース・プロンプトで、現在の状態、期間比較、アクティビティ詳細、計画の実行状況、レース、同期診断を網羅します。",
+        "cta": "MCP を見る"
+      },
       "hero": {
         "title": "トレーニングを軌道に乗せ続ける主要ページ",
         "subtitle": "今日の内容から始め、計画を確認し、カレンダーを見て、負荷を理解し、次のワークアウトに変更が必要なときは AI コーチレビューを使います。"
@@ -2718,7 +3477,12 @@
         "trust": {
           "title": "計画に反映する前に変更を確認",
           "description": "AI はワークアウト変更案を作成できますが、計画が更新されるのはあなたが確認して承認した後です。",
-          "cards": ["変更前後", "内容チェック", "あなたが確認", "計画履歴"],
+          "cards": [
+            "変更前後",
+            "内容チェック",
+            "あなたが確認",
+            "計画履歴"
+          ],
           "preview": "ワークアウト調整プレビュー"
         }
       },
@@ -2751,7 +3515,12 @@
         "hero": "機能ページのメインビジュアル",
         "placeholderSubtitle": "計画し、実行し、負荷を振り返り、必要な時に AI で調整します"
       },
-      "stats": ["計画", "実行", "負荷", "AI レビュー"],
+      "stats": [
+        "計画",
+        "実行",
+        "負荷",
+        "AI レビュー"
+      ],
       "intentPages": [
         {
           "title": "トレーニング分析ページ",
@@ -2790,7 +3559,11 @@
           "href": "APP:/plan",
           "icon": "LayoutList",
           "summary": "実際に続けられる計画を作成、保存、有効化、調整します。",
-          "bullets": ["サイクル目標", "週構成", "実行できるワークアウト"],
+          "bullets": [
+            "サイクル目標",
+            "週構成",
+            "実行できるワークアウト"
+          ],
           "cta": "トレーニング負荷ベースの週次計画を作成する"
         },
         {
@@ -2798,7 +3571,11 @@
           "href": "APP:/calendar",
           "icon": "CalendarDays",
           "summary": "予定と実際のワークアウトを並べ、抜け、密度の高い週、回復の隙間を見つけます。",
-          "bullets": ["計画と実績", "週のリズム", "回復の隙間"],
+          "bullets": [
+            "計画と実績",
+            "週のリズム",
+            "回復の隙間"
+          ],
           "cta": "計画と実績のトレーニング負荷を比較する"
         },
         {
@@ -2806,7 +3583,11 @@
           "href": "/training-load",
           "icon": "BarChart3",
           "summary": "CTL、ATL、TSB を使い、トレーニングストレスを進歩の根拠に変えます。",
-          "bullets": ["フィットネス傾向", "最近の疲労", "フォームと新鮮さ"],
+          "bullets": [
+            "フィットネス傾向",
+            "最近の疲労",
+            "フォームと新鮮さ"
+          ],
           "cta": "計画の中でトレーニング負荷を管理する"
         },
         {
@@ -2814,7 +3595,11 @@
           "href": "/ai-training-plan",
           "icon": "Bot",
           "summary": "AI が計画、実際のワークアウト、負荷、準備状態を読み、何を変えるべきか説明します。",
-          "bullets": ["日次レビュー", "週次レビュー", "根拠の説明"],
+          "bullets": [
+            "日次レビュー",
+            "週次レビュー",
+            "根拠の説明"
+          ],
           "cta": "AI でトレーニング負荷を調整する"
         },
         {
@@ -2822,7 +3607,11 @@
           "href": "/ai-training-plan",
           "icon": "ClipboardCheck",
           "summary": "調整は変更前後の草案として表示され、検証後、確認してから反映されます。",
-          "bullets": ["変更前後", "項目検証", "ユーザー確認"],
+          "bullets": [
+            "変更前後",
+            "項目検証",
+            "ユーザー確認"
+          ],
           "cta": "AI レビュー後に負荷調整案を確認する"
         }
       ],
@@ -2914,23 +3703,23 @@
       "channels": [
         {
           "title": "製品サポート",
-          "description": "プラン、カレンダー、概要、Chat 分析など、日常的な利用に関する質問。",
-          "subject": "Trainingload.ai product support"
+          "description": "トレーニングプラン、カレンダー、概要、チャット分析、日常的な操作ワークフローに関するご質問。",
+          "subject": "Trainingload.ai 製品サポート"
         },
         {
-          "title": "データと同期",
-          "description": "Strava、Polar、Intervals.icu 同期、ファイルアップロード、アクティビティ解析、指標の異常。",
-          "subject": "Trainingload.ai data and platform sync"
+          "title": "データとプラットフォーム同期",
+          "description": "Strava、Polar、Intervals.icu の同期、ファイルアップロード、アクティビティ解析、トレーニング指標の異常に関するお問い合わせ。",
+          "subject": "Trainingload.ai データとプラットフォーム同期"
         },
         {
           "title": "メンバーシップと請求",
-          "description": "PLUS、トライアル、サブスクリプション、請求書、支払いに関する質問。",
-          "subject": "Trainingload.ai membership and billing"
+          "description": "PLUSメンバーシップ、トライアル利用、サブスクリプション、請求書、お支払いに関するご質問。",
+          "subject": "Trainingload.ai メンバーシップと請求"
         },
         {
           "title": "フィードバックと提携",
-          "description": "機能要望、コーチングチームでの利用、コンテンツ提携、その他の協業アイデア。",
-          "subject": "Trainingload.ai feedback and partnerships"
+          "description": "機能のご要望、コーチングチームでの導入、コンテンツ提携、その他の協業のご相談。",
+          "subject": "Trainingload.ai フィードバックと提携"
         }
       ],
       "detailsTitle": "早く確認するために送ってほしい情報",
@@ -2975,8 +3764,8 @@
   },
   "privacy": {
     "metadata": {
-      "title": "Privacy Policy | Trainingload.ai",
-      "description": "How Trainingload.ai collects, uses, shares, retains, and protects account, training, health, location, and AI data.",
+      "title": "プライバシーポリシー | Trainingload.ai",
+      "description": "Trainingload.ai がアカウント、トレーニング、健康、位置情報、およびAI関連データをどのように収集・利用・共有・保持・保護するかを説明します。",
       "keywords": [
         "privacy policy",
         "health and fitness data",
@@ -2984,180 +3773,180 @@
         "Trainingload.ai"
       ],
       "openGraph": {
-        "title": "Privacy Policy | Trainingload.ai",
-        "description": "Understand what data Trainingload.ai uses and the choices you have."
+        "title": "プライバシーポリシー | Trainingload.ai",
+        "description": "Trainingload.ai が利用するデータの内容と、ご自身で管理できる選択肢を確認できます。"
       }
     },
     "page": {
       "title": "Privacy Policy",
-      "lastUpdated": "Last updated: {date}",
+      "lastUpdated": "最終更新日: {date}",
       "overview": {
         "title": "Privacy at a glance",
-        "body": "Trainingload.ai helps you understand training load, review completed workouts, and manage training plans. Some features need health, fitness, or location data. We treat that information as sensitive and design the Service around data minimization, clear choices, and user control.",
+        "body": "Trainingload.ai は、トレーニング負荷の把握、完了ワークアウトの振り返り、トレーニングプランの管理を支援するサービスです。一部の機能では健康・フィットネスデータや位置情報が必要になります。当社はこれらの情報を機微な情報として取り扱い、データ最小化、明確な選択肢、ユーザーによるコントロールを前提に本サービスを設計しています。",
         "items": [
-          "We do not sell personal data and do not use health, fitness, location, or AI conversation data for third-party advertising.",
-          "Connecting fitness platforms, syncing HealthKit, using precise location, and enabling AI features are optional and controlled separately.",
-          "You can export eligible data, disconnect providers, withdraw AI permission, delete Coach conversations and activities, or delete your account."
+          "当社は個人データを販売せず、健康・フィットネス・位置情報・AI会話データを第三者広告に利用しません。",
+          "フィットネスプラットフォーム連携、HealthKit 同期、正確な位置情報の利用、AI機能の有効化はいずれも任意であり、個別に制御できます。",
+          "対象データのエクスポート、連携サービスの解除、AI利用許可の撤回、AIコーチとの会話やアクティビティの削除、アカウントの削除が可能です。"
         ]
       },
       "sections": {
         "scope": {
-          "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "title": "1. 運営者情報および本ポリシーの適用範囲",
+          "body": "Trainingload.ai は、本サービスを入手したアプリストアまたは配信チャネル上に表示される開発者（以下「Trainingload.ai」「当社」）によって運営されています。本ポリシーは、当社のモバイルアプリ、ウェブサイト、ウェブアプリ、API、サポート、および関連サービスに適用されます。「個人データ」とは、特定の個人を識別できる情報、または合理的に個人と紐付け可能な情報を指します。本ポリシーは、ユーザーが任意で連携する外部サービスのプライバシーポリシーに代わるものではありません。"
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
-          "body": "The data we collect depends on the features you choose to use. It may include:",
+          "body": "当社が収集するデータは、ご利用になる機能に応じて異なり、以下が含まれる場合があります。",
           "items": [
-            "Account and profile data: name, email address, profile image, language, time zone, account identifiers, sign-in provider identifiers, and a securely hashed password when password sign-in is used.",
-            "Training and activity data: workout type, date and time, duration, distance, route and GPS coordinates, elevation, pace, speed, heart rate, power, cadence, calories, laps, training load, performance estimates, perceived exertion, and imported or generated workout files.",
-            "Health, wellness, and body data: data you enter or authorize from HealthKit or connected services, such as body mass, resting heart rate, heart-rate variability where available, sleep, steps, active energy, recovery trends, VO2max, thresholds, zones, goals, competitions, and plan history.",
-            "Content and communications: Coach prompts, voice transcripts you choose to submit, AI responses, reviews and plans, notes, support messages, feedback, and files you upload.",
-            "Connection and transaction data: connected-provider account IDs, authorization tokens, granted scopes, sync settings and status, product and subscription status, purchase and transaction identifiers, and billing support records. We do not receive or store your full payment-card number.",
-            "Device, location, and usage data: IP address, device and browser type, operating system, app version, language, time zone, cookie or local-storage identifiers, screens and features used, access times, crash and diagnostic metadata, and precise location when you permit route recording."
+            "アカウントおよびプロフィールデータ：氏名、メールアドレス、プロフィール画像、言語、タイムゾーン、アカウント識別子、サインインプロバイダー識別子、およびパスワード認証利用時の安全にハッシュ化されたパスワード。",
+            "トレーニングおよびアクティビティデータ：ワークアウト種別、日時、時間、距離、ルートおよびGPS座標、標高、ペース、速度、心拍数、パワー、ケイデンス、消費カロリー、ラップ、トレーニング負荷、パフォーマンス推定値、主観的運動強度（RPE）、インポートまたは生成されたワークアウトファイル。",
+            "健康・ウェルネス・身体データ：ユーザーが入力、または HealthKit や連携サービスから許可した体重、安静時心拍数、利用可能な場合の心拍変動（HRV）、睡眠、歩数、アクティブエネルギー、回復トレンド、VO₂max、閾値、ゾーン、目標、大会予定、プラン履歴。",
+            "コンテンツおよびコミュニケーション：AIコーチへのプロンプト、送信を選択した音声書き起こし、AIの応答、レビューおよびプラン、メモ、サポートへの連絡内容、フィードバック、アップロードしたファイル。",
+            "連携および取引データ：連携プロバイダーのアカウントID、認証トークン、許可されたスコープ、同期設定およびステータス、商品・サブスクリプション状態、購入・取引識別子、請求サポート記録。当社はクレジットカード番号の全文を受領・保存しません。",
+            "デバイス・位置情報・利用状況データ：IPアドレス、デバイスおよびブラウザ種別、OS、アプリバージョン、言語、タイムゾーン、Cookieまたはローカルストレージ識別子、利用画面・機能、アクセス日時、クラッシュおよび診断メタデータ、ならびにルート記録を許可した場合の正確な位置情報。"
           ]
         },
         "sources": {
-          "title": "3. Where data comes from",
-          "body": "We collect personal data from the following sources:",
+          "title": "3. データの取得元",
+          "body": "当社は以下の取得元から個人データを収集します。",
           "items": [
-            "Directly from you when you create an account, complete your profile, upload a file, record a workout, write or dictate a Coach message, configure a plan, make a purchase, or contact support.",
-            "From your device when you grant access to HealthKit, location, microphone, speech recognition, or other operating-system capabilities. Apple Speech Recognition may process microphone audio to produce a transcript; Trainingload.ai sends the transcript only after you choose to submit it and does not store the raw Coach recording.",
-            "From services you connect, including Apple, Google, GitHub, Garmin, COROS, Intervals.icu, Strava, Polar, Wahoo, and Suunto, according to the permissions and sync directions you select.",
-            "Automatically through essential service logs and, when enabled, privacy-limited analytics and diagnostics."
+            "ユーザーご本人から直接：アカウント作成、プロフィール入力、ファイルアップロード、ワークアウト記録、AIコーチへのメッセージ入力・音声入力、プラン設定、購入手続き、サポートへの問い合わせ時。",
+            "お使いのデバイスから：HealthKit、位置情報、マイク、音声認識、その他のOS機能へのアクセスを許可した場合。Apple Speech Recognition は文字起こし生成のためにマイク音声を処理することがありますが、Trainingload.ai はユーザーが送信を選択した後のテキストのみを送信し、AIコーチ向けの生音声録音は保存しません。",
+            "連携サービスから：ユーザーが選択した権限と同期方向に基づき、Apple、Google、GitHub、Garmin、COROS、Intervals.icu、Strava、Polar、Wahoo、Suunto などの外部サービスから取得します。",
+            "自動収集：サービス運営に必須のログ、および有効化されている場合のプライバシー制限付き分析・診断データを通じて取得します。"
           ]
         },
         "howWeUse": {
           "title": "4. How we use data",
-          "body": "We use personal data only for the purposes described below:",
+          "body": "当社は、以下に定める目的の範囲内でのみ個人データを利用します。",
           "items": [
-            "Create and secure your account, authenticate you, remember settings, and provide support.",
-            "Import, record, store, export, and synchronize workouts and health data at your direction.",
-            "Calculate training load, zones, trends, performance estimates, recovery context, and plan-versus-completed comparisons.",
-            "Provide training plans, Coach conversations, activity reviews, and user-confirmed plan adjustments.",
-            "Process subscriptions and purchases, restore entitlements, send service messages, and maintain transaction records.",
-            "Detect abuse, investigate errors, protect the Service, and improve reliability and product quality using minimized, aggregated, or de-identified data where practical."
+            "アカウントの作成と保護、本人認証、設定の保持、およびサポートの提供。",
+            "ユーザーの指示に基づくワークアウトおよび健康データのインポート、記録、保存、エクスポート、同期。",
+            "トレーニング負荷、ゾーン、トレンド、パフォーマンス推定、回復文脈、および計画対実績比較の算出。",
+            "トレーニングプラン、AIコーチとの会話、アクティビティレビュー、およびユーザー確認を伴うプラン調整の提供。",
+            "サブスクリプションおよび購入の処理、利用権限の復元、サービス通知の送信、および取引記録の維持。",
+            "不正利用の検知、エラー調査、本サービスの保護、ならびに可能な範囲で最小化・集計・非識別化したデータを用いた信頼性および製品品質の改善。"
           ]
         },
         "connectedServices": {
-          "title": "5. HealthKit, location, and connected services",
-          "body": "These integrations are optional. We request access when you choose the related feature and use the data only within the scope described to you.",
+          "title": "5. HealthKit、位置情報、および連携サービス",
+          "body": "これらの連携機能は任意です。関連機能を選択された際にアクセス許可を求め、ご説明した範囲内でのみデータを利用します。",
           "items": [
-            "HealthKit: the iOS app may request read access to workouts and workout routes, heart rate, resting heart rate, active energy, steps, walking/running and cycling distance, running speed, and running stride length. Authorized samples and derived summaries may sync to your Trainingload.ai account so they are available across your devices.",
-            "Precise location: the mobile app uses location to record outdoor routes, measure distance, and perform pre-start checks. For activity weather, we may send Apple WeatherKit the activity's approximate midpoint coordinate and time rather than the complete route.",
-            "Fitness platforms: depending on the provider and your settings, we may import or export activities, planned workouts, wellness summaries, sport settings, and the identifiers needed to maintain synchronization.",
-            "Authentication and connection credentials are used to sign you in or perform the synchronization you requested. We request the minimum practical scopes and do not use imported fitness data for advertising profiles.",
-            "You may revoke device permission in system settings or disconnect a provider in Trainingload.ai. This stops new collection or synchronization from that source, but does not automatically delete data already imported into your account."
+            "HealthKit：iOSアプリは、ワークアウトおよびワークアウトルート、心拍数、安静時心拍数、アクティブエネルギー、歩数、ウォーキング・ランニング・サイクリングの距離、ランニング速度、ランニングストライド長の読み取り権限を求める場合があります。許可されたサンプルと集計サマリーは、複数デバイスで利用できるよう Trainingload.ai アカウントに同期されることがあります。",
+            "正確な位置情報：モバイルアプリは屋外ルートの記録、距離計測、開始前チェックのために位置情報を使用します。アクティビティの気象情報取得にあたっては、完全なルートではなく、アクティビティのおおよその中間座標と時刻のみを Apple WeatherKit に送信する場合があります。",
+            "フィットネスプラットフォーム：連携先と設定に応じ、アクティビティ、予定ワークアウト、ウェルネスサマリー、スポーツ設定、および同期維持に必要な識別子をインポートまたはエクスポートする場合があります。",
+            "認証・連携資格情報は、サインインまたはご要望の同期処理のために使用します。当社は実務上最小限のスコープのみを要求し、インポートしたフィットネスデータを広告プロファイルには使用しません。",
+            "端末のシステム設定から権限を取り消すか、Trainingload.ai 内で連携プロバイダーを解除できます。これにより該当ソースからの新規収集・同期は停止されますが、すでにアカウントへインポート済みのデータは自動削除されません。"
           ],
-          "note": "HealthKit data is used for health and fitness functionality and is not used for advertising, data brokerage, or sale. Trainingload.ai is not a healthcare provider, and the Service is not a medical device."
+          "note": "HealthKit データは健康およびフィットネス機能の提供にのみ使用され、広告、データブローカーへの提供、または販売には一切使用されません。Trainingload.ai は医療機関ではなく、本サービスは医療機器ではありません。"
         },
         "ai": {
-          "title": "6. AI Coach and third-party AI",
-          "body": "AI features are optional. Before any AI request is sent, the app presents a separate disclosure and asks for your explicit permission.",
+          "title": "6. AIコーチと第三者AI",
+          "body": "AI機能は任意です。AIリクエストが送信される前に、アプリ上で独立した説明を表示し、明示的な許可を求めます。",
           "items": [
-            "Recipient: AI requests are sent to DeepSeek, operated by Hangzhou DeepSeek Artificial Intelligence Co., Ltd. DeepSeek states that data it receives may be processed and stored in mainland China.",
-            "Data sent: your submitted prompt or speech transcript and only the training context relevant to the requested feature. This may include sport, duration, distance and elevation derived from a route, aggregate heart-rate and zone data, pace, power, cadence, load, recovery trends, goals, plans, and relevant profile settings.",
-            "Data not attached by Trainingload.ai: your name, email address, account ID, complete GPS track, and raw HealthKit samples. Your own prompt can still contain identifying or sensitive information, so do not include information that is unnecessary for the request.",
-            "Purpose and provider use: data is sent to generate the Coach reply, plan, adjustment, or review you request. DeepSeek's current public terms state that, after secure encryption and strict irreversible de-identification, it may use inputs and outputs to a minimal extent to provide, maintain, operate, develop, or improve its services. We do not claim that DeepSeek provides zero retention or zero training.",
-            "Storage: Trainingload.ai stores submitted prompts, transcripts, generated replies, plans, and reviews in your account to provide the feature and history. Coach conversations remain until you delete the conversation or account; reviews and plans remain with the related record until that record or account is deleted, subject to legal retention requirements.",
-            "Control: you may decline AI and continue using non-AI features. You can withdraw permission in Mobile Me > Privacy & AI or Web Account Settings > Privacy & AI; this blocks new AI requests and automated reviews but does not delete existing results. A provider or material disclosure change requires permission again.",
-            "Safeguards and limits: requests use encrypted transport, direct account identifiers are removed from generated training context, and AI content is not copied to a separate AI observability provider. AI output can be inaccurate and is for informational and training-support purposes, not diagnosis or medical advice."
+            "送信先：AIリクエストは、Hangzhou DeepSeek Artificial Intelligence Co., Ltd. が運営する DeepSeek に送信されます。DeepSeek は、受領したデータが中国本土で処理・保存される場合があることを明記しています。",
+            "送信されるデータ：ユーザーが送信したプロンプトまたは音声書き起こしと、リクエストされた機能に関連するトレーニング文脈のみ。これには種目、時間、ルートから算出された距離・標高、集計された心拍・ゾーンデータ、ペース、パワー、ケイデンス、負荷、回復トレンド、目標、プラン、関連プロフィール設定が含まれる場合があります。",
+            "Trainingload.ai が自動添付しないデータ：氏名、メールアドレス、アカウントID、完全なGPSトラック、生の HealthKit サンプル。ただし、ユーザー自身のプロンプト入力に個人特定情報や機微情報が含まれる可能性があるため、リクエストに不要な情報は入力しないでください。",
+            "利用目的とプロバイダー側の取り扱い：データは、ご希望のAIコーチの返信、プラン作成、調整案、またはレビューを生成するために送信されます。DeepSeek の現行公開規約では、安全な暗号化と厳格かつ不可逆的な非識別化を施したうえで、サービスの提供・維持・運用・開発・改善のために最小限の範囲で入出力を利用する場合があると規定されています。当社は、DeepSeek がデータ保持ゼロまたは学習利用ゼロであることを主張しません。",
+            "保存：Trainingload.ai は、機能提供と履歴表示のため、送信されたプロンプト、書き起こし、生成された応答、プラン、レビューをあなたのアカウント内に保存します。AIコーチの会話は会話またはアカウントを削除するまで保持され、レビューやプランは法的保存義務に従い、関連レコードまたはアカウントが削除されるまで保持されます。",
+            "コントロール：AI機能を拒否しても、AI以外の機能を引き続き利用できます。許可の撤回は、モバイル版の「マイページ > プライバシーとAI」またはウェブ版の「アカウント設定 > プライバシーとAI」から行えます。撤回すると新規のAIリクエストと自動レビューはブロックされますが、既存の結果は削除されません。AIプロバイダーや重要な開示事項に変更がある場合は、改めて許可を求めます。",
+            "保護措置と限界：リクエストは暗号化通信で送信され、生成されるトレーニング文脈から直接的なアカウント識別子は除去されます。また、AIコンテンツを別のAI可観測性プロバイダーへ複製することはありません。AIの出力は不正確な場合があり、情報提供およびトレーニング支援を目的としたもので、医療診断や医学的助言ではありません。"
           ],
-          "note": "For a provider-side deletion request concerning an AI request, contact support@trainingload.ai. We will assess and route applicable requests according to the provider's process and applicable law."
+          "note": "AIリクエストに関するプロバイダー側のデータ削除をご希望の場合は、support@trainingload.ai までご連絡ください。プロバイダーの手続きおよび適用法に従い、対象となる要請を評価・取り次ぎます。"
         },
         "sharing": {
-          "title": "7. When we share data",
-          "body": "We share personal data only as needed for the Service, when you direct us to, or when law requires it. Recipients may include:",
+          "title": "7. データを共有する場合",
+          "body": "当社は、本サービスの提供に必要な場合、ユーザーご本人の指示がある場合、または法令上必要な場合に限り個人データを共有します。共有先には以下が含まれることがあります。",
           "items": [
-            "Infrastructure and storage providers, including Cloudflare R2 when configured, and database, cache, hosting, content-delivery, and security providers that operate the Service.",
-            "Authentication and connected-service providers, including Apple, Google, GitHub, Garmin, COROS, Intervals.icu, Strava, Polar, Wahoo, and Suunto, when you sign in, connect, import, export, or disconnect.",
-            "Billing providers, including Apple and RevenueCat for App Store purchases and supported web billing providers such as Creem or Waffo. They receive account, product, subscription, and transaction information needed to process and reconcile purchases.",
-            "Analytics and reliability providers, including PostHog, Google Analytics, and Sentry when enabled. We configure these services to limit collection and do not intentionally send workout content, precise routes, HealthKit samples, or AI prompts and responses as analytics events.",
-            "Apple WeatherKit for activity weather context, Apple Speech Recognition for optional dictation, email delivery providers for account and support messages, and DeepSeek for AI requests after permission.",
-            "Professional advisers, authorities, or other parties when reasonably necessary to comply with law, protect rights and safety, investigate abuse, resolve disputes, or complete a merger, financing, acquisition, or sale of assets subject to appropriate protections."
+            "インフラおよびストレージ事業者：構成に応じた Cloudflare R2、ならびに本サービスを運用するデータベース、キャッシュ、ホスティング、コンテンツ配信、セキュリティ事業者。",
+            "認証および連携サービス事業者：サインイン、連携、インポート、エクスポート、連携解除の際に利用する Apple、Google、GitHub、Garmin、COROS、Intervals.icu、Strava、Polar、Wahoo、Suunto。",
+            "決済・請求事業者：App Store 購入のための Apple および RevenueCat、ならびに Creem や Waffo などの対応ウェブ決済事業者。購入処理と照合に必要なアカウント・商品・サブスクリプション・取引情報を受領します。",
+            "分析および信頼性向上事業者：有効化されている場合の PostHog、Google Analytics、Sentry。当社は収集範囲を制限するよう設定しており、ワークアウト内容、正確なルート、HealthKit サンプル、AIプロンプトおよび応答を意図的に分析イベントとして送信することはありません。",
+            "その他の機能プロバイダー：アクティビティ気象文脈のための Apple WeatherKit、任意の音声入力のための Apple Speech Recognition、アカウント・サポート通知のためのメール配信事業者、許可後のAIリクエスト処理のための DeepSeek。",
+            "専門アドバイザー・公的機関・その他の第三者：法令遵守、権利・安全の保護、不正調査、紛争解決、または適切な保護措置を講じたうえでの合併・資金調達・買収・資産譲渡の遂行に合理的に必要な場合。"
           ],
-          "note": "We do not sell personal data. We do not share health, fitness, location, or AI conversation data with data brokers or unrelated third parties for their advertising. We require and confirm that processors receiving user data provide the same or equivalent protection described in this Policy and required by applicable law; if that protection cannot be maintained, we will stop the affected transfer."
+          "note": "当社は個人データを販売しません。また、健康・フィットネス・位置情報・AI会話データをデータブローカーや無関係な第三者の広告目的で共有しません。当社はユーザーデータを受領する処理委託先に対し、本ポリシーおよび適用法と同等以上の保護水準を求め確認しており、その保護を維持できない場合は該当するデータ移転を停止します。"
         },
         "analytics": {
-          "title": "8. Cookies, analytics, and diagnostics",
-          "body": "Our website and apps use local storage, cookies, and limited analytics or diagnostics to operate and understand the Service.",
+          "title": "8. Cookie、分析、および診断",
+          "body": "当社のウェブサイトおよびアプリでは、本サービスの運用と利用状況の把握のため、ローカルストレージ、Cookie、および限定的な分析・診断機能を使用しています。",
           "items": [
-            "Essential storage keeps you signed in, remembers settings, protects sessions, and supports requested functionality.",
-            "PostHog and Google Analytics may receive events such as page or screen views, feature interactions, app version, platform, locale, time zone, and an account or device identifier when enabled.",
-            "Mobile analytics disables session replay and automatic remote feature collection, disables IP-based geolocation in PostHog, and filters property names associated with prompts, messages, precise coordinates, health metrics, activity IDs, and similar sensitive content.",
-            "Sentry may receive crash, request, device, network, and user or session metadata needed to diagnose failures on affected web properties. AI prompt and response content is not intentionally included.",
-            "You can use browser, device, and available in-product controls to limit non-essential storage or analytics. Where applicable law requires opt-in consent, non-essential technologies should be activated only after that consent."
+            "必須ストレージは、ログイン状態の維持、設定の記憶、セッションの保護、および要求された機能の動作を支えます。",
+            "有効化されている場合、PostHog および Google Analytics は、ページまたは画面の閲覧、機能操作、アプリバージョン、プラットフォーム、ロケール、タイムゾーン、アカウントまたはデバイス識別子などのイベントを受領することがあります。",
+            "モバイル分析では、セッションリプレイおよび自動リモート機能収集を無効化し、PostHog におけるIPベースの位置推定を無効化したうえで、プロンプト、メッセージ、正確な座標、健康指標、アクティビティIDなどの機微情報に関連するプロパティ名をフィルタリングしています。",
+            "Sentry は、対象ウェブサイトの障害診断に必要なクラッシュ情報、リクエスト、デバイス、ネットワーク、ユーザーまたはセッションのメタデータを受領する場合があります。AIプロンプトや応答内容は意図的に含めません。",
+            "ブラウザ、デバイス、および製品内の設定を用いて、必須ではないストレージや分析を制限できます。適用法上オプトイン同意が必要な場合は、同意を得た後にのみ必須外の技術を有効化します。"
           ]
         },
         "retention": {
-          "title": "9. How long we keep data",
-          "body": "We keep personal data only as long as reasonably necessary for the purpose collected, taking account of the data's nature, sensitivity, legal requirements, and whether the purpose can be achieved another way.",
+          "title": "9. データの保持期間",
+          "body": "当社は、データの性質、機微性、法的要件、および他の手段で目的を達成できるかを考慮し、収集目的の達成に合理的に必要な期間のみ個人データを保持します。",
           "items": [
-            "Account, profile, training, HealthKit, location, plan, and imported data generally remain while your account is active or until you delete the relevant item.",
-            "Coach conversations remain until you delete the conversation or account. Withdrawing AI permission stops new transfers but does not automatically erase existing conversations, plans, or reviews.",
-            "Temporary local processing copies used during cloud-object-storage uploads are scheduled for deletion after 24 hours; retained source files and derived records otherwise follow the related activity or account.",
-            "An in-app account deletion request blocks account access immediately. Automated deletion normally completes within 24 hours and may take up to 7 days. Connected credentials are revoked or cleared, stored files are deleted, and account-linked database records are purged.",
-            "We may retain limited transaction, fraud-prevention, security, dispute, or legal records for the period required by law or reasonably necessary to establish or defend legal claims. Where practical, these records are separated from the deleted account and pseudonymized or de-identified."
+            "アカウント、プロフィール、トレーニング、HealthKit、位置情報、プラン、インポートデータは、原則としてアカウントが有効な間、またはユーザーが該当項目を削除するまで保持されます。",
+            "AIコーチの会話は、会話またはアカウントを削除するまで保持されます。AI利用許可を撤回すると新規転送は停止されますが、既存の会話・プラン・レビューは自動削除されません。",
+            "クラウドオブジェクトストレージへのアップロード時に使用される一時的なローカル処理コピーは24時間後に削除されるようスケジュールされています。保持された元ファイルおよび派生レコードは、関連するアクティビティまたはアカウントの保持期間に従います。",
+            "アプリ内でのアカウント削除リクエストを行うと、アカウントへのアクセスは直ちに遮断されます。自動削除処理は通常24時間以内に完了し、最大7日かかる場合があります。連携資格情報は失効または消去され、保存ファイルは削除され、アカウントに紐づくデータベースレコードは完全に消去されます。",
+            "法令で義務付けられている期間、または法的請求の確立・行使・防御に合理的に必要な期間に限り、取引・不正防止・セキュリティ・紛争・法務に関する限定的な記録を保持する場合があります。これらの記録は、実務上可能な限り削除済みアカウントから分離し、仮名化または非識別化します。"
           ]
         },
         "security": {
-          "title": "10. How we protect data",
-          "body": "We use technical and organizational measures designed to protect personal data. No system can guarantee absolute security.",
+          "title": "10. データの保護方法",
+          "body": "当社は、個人データを保護するための技術的および組織的措置を講じています。ただし、いかなるシステムも絶対的な安全性を保証することはできません。",
           "items": [
-            "Encrypted transport for network requests and restricted access to production systems.",
-            "Data minimization, permission scoping, deletion workflows, and separation of public and private storage.",
-            "Secure password hashing and protection of authentication and integration credentials appropriate to their use.",
-            "Monitoring, rate limits, audit records, and incident investigation procedures intended to detect abuse and operational failures."
+            "ネットワーク通信の暗号化および本番システムへのアクセス制限。",
+            "データ最小化、権限スコープの限定、削除ワークフローの整備、および公開ストレージと非公開ストレージの分離。",
+            "安全なパスワードハッシュ化、ならびに用途に応じた認証・連携資格情報の保護。",
+            "不正利用や運用障害を検知するための監視、レート制限、監査ログ、およびインシデント調査手順の運用。"
           ]
         },
         "transfers": {
-          "title": "11. International processing and transfers",
-          "body": "Trainingload.ai is offered globally, and we and our providers may process data outside your country. Privacy laws in those locations may differ from those where you live.",
+          "title": "11. 国際的なデータ処理および越境移転",
+          "body": "Trainingload.ai はグローバルに提供されており、当社および委託先プロバイダーがお住まいの国・地域外でデータを処理する場合があります。移転先の国・地域におけるプライバシー法令は、お住まいの地域と異なることがあります。",
           "items": [
-            "Depending on deployment and provider settings, infrastructure, analytics, diagnostics, billing, and connected-service data may be processed in the United States and other countries where those providers operate.",
-            "DeepSeek states that AI request data may be processed and stored in mainland China. This location is disclosed again before you enable AI.",
-            "Where applicable law requires it, we use recognized safeguards for international transfers, such as contractual protections, data minimization, encryption, and transfer assessments, and honor applicable rights regarding those transfers."
+            "構成やプロバイダー設定に応じ、インフラ、分析、診断、決済、連携サービスのデータは、米国および各プロバイダーが事業を展開するその他の国・地域で処理される場合があります。",
+            "DeepSeek は、AIリクエストデータが中国本土で処理・保存される場合があることを明記しています。この処理地域については、AI機能を有効化する前にも再度明示されます。",
+            "適用法で求められる場合、当社は契約上の保護条項、データ最小化、暗号化、移転影響評価など認められた保護措置を講じたうえで越境移転を行い、関連する権利行使に対応します。"
           ]
         },
         "legalBasis": {
-          "title": "12. Legal bases for processing",
-          "body": "Where laws such as the GDPR or UK GDPR apply, our legal bases depend on the feature and purpose:",
+          "title": "12. 処理の法的根拠",
+          "body": "GDPR や UK GDPR などの法令が適用される地域では、当社のデータ処理の法的根拠は機能と目的に応じて以下のとおりです。",
           "items": [
-            "Contract: to create your account and deliver the training, synchronization, support, and billing functions you request.",
-            "Consent: for optional permissions and processing such as connected-provider access, HealthKit, precise location, microphone and speech recognition, third-party AI sharing, and non-essential analytics where required.",
-            "Legitimate interests: to secure, debug, and improve the Service, prevent abuse, and understand minimized usage patterns, after balancing those interests against your rights.",
-            "Legal obligation and legal claims: to comply with tax, accounting, consumer-protection, law-enforcement, and other valid legal requirements or to establish, exercise, or defend claims."
+            "契約の履行：アカウントの作成、およびご希望のトレーニング管理、同期、サポート、決済機能の提供のため。",
+            "同意：連携プロバイダーへのアクセス、HealthKit、正確な位置情報、マイク・音声認識、第三者AIへの共有、および同意が必要な必須外分析などの任意機能のため。",
+            "正当な利益：ユーザーの権利とのバランスを考慮したうえでの、本サービスのセキュリティ確保、デバッグ、改善、不正防止、および最小化された利用傾向の把握のため。",
+            "法的義務および法的請求：税務、会計、消費者保護、法執行機関からの適法な要請への対応、または法的請求の確立・行使・防御のため。"
           ]
         },
         "rights": {
-          "title": "13. Your choices and privacy rights",
-          "body": "Depending on where you live, you may have some or all of the following rights. We may need to verify your identity before completing a request.",
+          "title": "13. お客様の選択とプライバシー権",
+          "body": "お住まいの地域に応じて、以下の権利の一部または全部が認められる場合があります。ご請求の履行にあたり、本人確認をお願いすることがあります。",
           "items": [
-            "Access personal data we hold about you and obtain information about how it is used and shared.",
-            "Correct inaccurate account or profile data.",
-            "Export eligible account and activity data in a portable format.",
-            "Delete an activity, Coach conversation, connected service, or your account, subject to limited legal exceptions.",
-            "Withdraw consent, object to or restrict certain processing, and opt out of sale, targeted advertising, or qualifying profiling. We do not sell personal data or use it for decisions with legal or similarly significant effects.",
-            "Complain to your local data-protection authority. You will not be discriminated against for exercising a privacy right."
+            "当社が保有するご自身の個人データへのアクセス、およびその利用・共有方法に関する情報の取得。",
+            "不正確なアカウントまたはプロフィールデータの訂正。",
+            "対象となるアカウントおよびアクティビティデータのポータブルな形式でのエクスポート。",
+            "法令上の限定的な例外を除き、アクティビティ、AIコーチの会話、連携サービス、またはアカウントの削除。",
+            "同意の撤回、特定の処理に対する異議申立てまたは制限、ならびに販売・ターゲティング広告・対象プロファイリングのオプトアウト。なお当社は個人データの販売や、法的またはこれに準ずる重大な影響を及ぼす自動意思決定を行いません。",
+            "お住まいの地域のデータ保護監督機関への苦情申立て。プライバシー権を行使したことを理由に不利益な扱いを受けることはありません。"
           ]
         },
         "children": {
-          "title": "14. Children's privacy",
-          "body": "The Service is not directed to children under 13 or a higher minimum age required by local law, and we do not knowingly collect their personal data without valid authorization. If you believe a child has provided data improperly, contact us and we will investigate and delete it where appropriate."
+          "title": "14. 子どものプライバシー",
+          "body": "本サービスは13歳未満の子ども、または居住地域の法令で定められたより高い最低年齢未満の子どもを対象としておらず、有効な許可なく意図的にその個人データを収集することはありません。子どもが不適切にデータを提供したと思われる場合は当社までご連絡ください。調査のうえ適切に削除します。"
         },
         "updates": {
-          "title": "15. Changes to this policy",
-          "body": "We may update this Policy when our product, providers, or legal obligations change. We will update the date above and provide additional notice or request renewed permission when a change is material and applicable law or platform rules require it."
+          "title": "15. 本ポリシーの変更",
+          "body": "当社は、製品、提携プロバイダー、または法的義務の変更に伴い本ポリシーを更新する場合があります。更新時には上記の最終更新日を変更し、重要な変更であって適用法やプラットフォーム規則で求められる場合には、追加の通知または再度の同意取得を行います。"
         },
         "notices": {
-          "title": "16. Third-party notices",
-          "body": "The providers below control their own services and publish separate privacy notices. Their policies apply when you interact directly with them. Our responsibility for processors acting on our instructions remains subject to applicable law and our agreements."
+          "title": "16. 第三者プロバイダーのプライバシー通知",
+          "body": "以下のプロバイダーはそれぞれのサービスを独自に管理し、個別のプライバシー通知を公開しています。これらと直接やり取りされる場合は各社のポリシーが適用されます。当社の指示に従ってデータ処理を行う委託先に対する当社の責任は、適用法および契約条件に従います。"
         },
         "contact": {
           "title": "17. Contact us",
-          "bodyPrefix": "For privacy questions, rights requests, or complaints, contact",
+          "bodyPrefix": "プライバシーに関するご質問、権利行使のご請求、または苦情については、",
           "email": "support@trainingload.ai",
-          "bodySuffix": ". Please include your account email and the request type, but do not send passwords, authentication tokens, raw health files, or other unnecessary sensitive information by email."
+          "bodySuffix": " までご連絡ください。アカウントのメールアドレスとご要望の種類を明記のうえ、パスワード、認証トークン、生の健康データファイル、その他不要な機微情報はメールに記載しないでください。"
         }
       }
     }
@@ -3166,7 +3955,11 @@
     "metadata": {
       "title": "利用規約 | Trainingload.ai",
       "description": "Trainingload.ai の利用に適用される規約。",
-      "keywords": ["利用規約", "サービス利用規約", "Trainingload.ai"],
+      "keywords": [
+        "利用規約",
+        "サービス利用規約",
+        "Trainingload.ai"
+      ],
       "openGraph": {
         "title": "利用規約 | Trainingload.ai",
         "description": "Trainingload.ai 利用に関する規約をご確認ください。"
@@ -3322,7 +4115,11 @@
     "page": {
       "title": "FTP計算機",
       "subtitle": "テストのパワーを入力するか、ライドをアップロード。FTP、パワーウェイトレシオ、トレーニングゾーンを確認できます。",
-      "proof": ["登録不要", "すぐに計算", "印刷・共有可能"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有可能"
+      ],
       "howTo": {
         "title": "FTP計算機の使い方",
         "steps": {
@@ -4071,7 +4868,11 @@
         "related": "関連する最大心拍数・トレーニングツール",
         "allTools": "すべてのツール"
       },
-      "proof": ["登録不要", "すぐ結果", "印刷または共有"],
+      "proof": [
+        "登録不要",
+        "すぐ結果",
+        "印刷または共有"
+      ],
       "scorecard": {
         "summaryTitle": "HRMAX スコアカード",
         "eyebrow": "推奨最大心拍数",
@@ -4202,6 +5003,762 @@
     "visualSubtitle": "計画、カレンダー、負荷、アクティビティフィードバック、AI レビューをひとつの流れに"
   },
   "home": {
+    "demo": {
+      "calendar": {
+        "overview": {
+          "title": "Current plan",
+          "cycle": "Marathon Base Block",
+          "weekLabel": "Week 5 / 12",
+          "targetLoadLabel": "Target",
+          "targetLoadValue": "420",
+          "completedLabel": "Completed",
+          "completedValue": "248",
+          "driftLabel": "Vs last week",
+          "driftValue": "+17",
+          "syncLabel": "Synced"
+        },
+        "monthModeLabel": "Month overview",
+        "weekModeLabel": "Week focus",
+        "today": "今日",
+        "addButton": "追加",
+        "calendarSubscriptionButton": "購読",
+        "viewDay": "View day",
+        "selectedDateLabel": "選択日",
+        "loadLabel": "負荷",
+        "activityTab": "活動",
+        "trainingTab": "トレーニング",
+        "planCycleLabel": "トレーニングブロック",
+        "planWorkoutCount": "{count} 件の予定",
+        "noPlannedTraining": "予定トレーニングなし",
+        "noActivities": "完了した活動なし",
+        "summaryScope": {
+          "plan": "計画",
+          "month": "月"
+        },
+        "planProgressTitle": "計画進捗",
+        "monthOverview": "月間概要",
+        "comparisonLabelPlan": "前ブロック比",
+        "comparisonLabelMonth": "前月比",
+        "delta": {
+          "up": "増加",
+          "down": "減少",
+          "flat": "横ばい"
+        },
+        "summary": {
+          "count": "回数",
+          "tss": "TSS",
+          "distance": "距離",
+          "duration": "時間"
+        },
+        "workoutMeta": {
+          "duration": "Duration",
+          "steps": "Steps",
+          "repeats": "Repeat",
+          "parsed": "Parsed DSL"
+        },
+        "sportLabels": {
+          "RUN": "ラン",
+          "CYCLING": "ライド",
+          "SWIM": "スイム"
+        },
+        "workoutNames": {
+          "easyRun": "イージーラン 45 min",
+          "tempoRun": "ステディラン 35 min",
+          "strength": "筋力アクティベーション 20 min",
+          "longRun": "ロングラン 90 min",
+          "recoveryRide": "リカバリーライド 50 min",
+          "swim": "テクニックスイム 1.6 km"
+        },
+        "workoutNotes": {
+          "easyRun": "Z2 有酸素ボリューム",
+          "tempoRun": "安定した有酸素コントロール",
+          "strength": "モビリティと起動",
+          "longRun": "長時間の持久力",
+          "recoveryRide": "低強度スピン",
+          "swim": "フォーム重視"
+        },
+        "activityNames": {
+          "easyRun": "イージーラン",
+          "tempoRun": "ステディ有酸素ラン",
+          "longRun": "ロングラン",
+          "ride": "リカバリーライド"
+        },
+        "distanceUnit": "km",
+        "minuteUnit": "分"
+      },
+      "dashboard": {
+        "aboutMetric": "Learn more about {title}",
+        "overview": {
+          "title": "概要",
+          "recent30Days": "直近 30 日"
+        },
+        "sportFilter": "全種目",
+        "editLabel": "編集",
+        "stats": {
+          "vo2Max": {
+            "title": "VO2max",
+            "detail": "非常に良い",
+            "details": "VO2 Max estimates your aerobic ceiling. In Training Load it is tracked as a trend rather than a single-day spike."
+          },
+          "atl": {
+            "title": "疲労",
+            "detail": "高め",
+            "details": "ATL reflects short-term fatigue from recent training. Rising ATL usually means you have stacked several hard sessions close together."
+          },
+          "ctl": {
+            "title": "体力",
+            "detail": "安定",
+            "details": "CTL is a longer-term fitness signal built from sustained training load. It rises slowly with consistent work and falls when you back off."
+          },
+          "tsb": {
+            "title": "コンディション",
+            "detail": "トレーニング可",
+            "details": "TSB compares fitness and fatigue. Negative values suggest you are carrying more fatigue than freshness."
+          }
+        },
+        "charts": {
+          "weekPressure": "トレーニングストレス",
+          "ctl": "体力",
+          "atl": "疲労",
+          "tsb": "コンディション"
+        }
+      },
+      "plan": {
+        "weekStrip": {
+          "title": "ブロック進捗",
+          "stateCurrent": "今週"
+        },
+        "weekLoad": {
+          "title": "今週の負荷",
+          "currentWeek": "{week} 週",
+          "plannedSessions": "予定セッション"
+        },
+        "workout": {
+          "title": "今週のセッション",
+          "loadBadge": "計画負荷",
+          "linked": "リンク済み · {activity}",
+          "notLinked": "未リンク",
+          "session": "セッション {index}"
+        },
+        "actions": {
+          "postpone": "延期",
+          "skip": "スキップ",
+          "delete": "削除",
+          "deleteDisabledTip": "削除は利用できません"
+        },
+        "today": {
+          "title": "今日の練習",
+          "viewTodayPlan": "今日を開く",
+          "postponeToday": "今日を延期"
+        },
+        "goal": {
+          "title": "週目標",
+          "weekSessions": "セッション",
+          "completed": "完了",
+          "progressTo": "進捗",
+          "dayNumber": "{day} 日目"
+        },
+        "example": {
+          "header": {
+            "cycleLabel": "現在のブロック",
+            "title": "マラソン基礎期",
+            "weekStatus": "第 5 / 12 週 · ACTIVE",
+            "totalSessions": "36 セッション",
+            "remainingLabel": "残り",
+            "remainingWeeks": "7 週",
+            "createPlan": "計画を作成"
+          },
+          "weekdayLabels": [
+            "M",
+            "T",
+            "W",
+            "T",
+            "F",
+            "S",
+            "S"
+          ],
+          "workouts": [
+            {
+              "dayLabel": "Mon",
+              "title": "イージー 45 min",
+              "detail": "RUN · Z2 45 min",
+              "statusLabel": "完了",
+              "linkedActivity": "Sun easy run"
+            },
+            {
+              "dayLabel": "Wed",
+              "title": "ステディ 35 min",
+              "detail": "RUN · steady aerobic",
+              "statusLabel": "今日"
+            },
+            {
+              "dayLabel": "Sat",
+              "title": "ロング 90 min",
+              "detail": "RUN · long endurance",
+              "statusLabel": "予定"
+            }
+          ],
+          "coach": {
+            "title": "コーチメモ",
+            "summary": "木曜のクオリティは維持。週末ロングはコンディションに合わせて調整。"
+          }
+        }
+      },
+      "coach": {
+        "review": "AI レビュー",
+        "history": "履歴",
+        "newChat": "新しい相談",
+        "today": "今日",
+        "yesterday": "昨日",
+        "past": "以前",
+        "composerHint": "Shift + Enter で改行",
+        "thinking": "思考中",
+        "send": "送信",
+        "questions": {
+          "title": "確認事項",
+          "answeredBadge": "回答済み",
+          "submit": "送信",
+          "answeredCount": "{answered} / {total}"
+        },
+        "readCards": {
+          "toggleDetails": "詳細を表示"
+        },
+        "workoutAdjustment": {
+          "before": "変更前",
+          "after": "調整案",
+          "apply": "変更を確認",
+          "changes": "変更内容",
+          "position": "第 {week} 週 · {day} 日目"
+        },
+        "planDraft": {
+          "weekColumn": "週",
+          "weekdays": [
+            "月",
+            "火",
+            "水",
+            "木",
+            "金",
+            "土",
+            "日"
+          ],
+          "weekLabel": "{week} 週",
+          "restLabel": "休",
+          "summary": "{weeks} 週 · {sessions} セッション",
+          "createPlan": "計画を作成"
+        },
+        "sessions": [
+          {
+            "id": "adjust",
+            "title": "マラソン基礎期の調整",
+            "bucket": "today",
+            "composer": "続けて質問：金曜に回復していたら、強度を戻せますか？",
+            "messages": [
+              {
+                "id": "adjust-u1",
+                "role": "user",
+                "text": "今週は少し疲れています。木曜のテンポ走は調整すべきですか？"
+              },
+              {
+                "id": "adjust-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "練習の目的は残しつつ、木曜のテンポ走を短めのステディ走に変えるのがおすすめです。ブロックの流れを止めず、土曜のロング走に向けた回復も確保できます。"
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "現在の計画",
+                        "subtitle": "第 5 週 · 木"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "直近の練習",
+                        "subtitle": "過去 7 日 · 4 セッション"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "トレーニング負荷",
+                        "subtitle": "2026-05-24 → 2026-06-30",
+                        "stats": [
+                          {
+                            "label": "アクティブ日",
+                            "value": "18"
+                          },
+                          {
+                            "label": "休息日",
+                            "value": "12"
+                          },
+                          {
+                            "label": "総負荷",
+                            "value": "842"
+                          },
+                          {
+                            "label": "日平均",
+                            "value": "47"
+                          },
+                          {
+                            "label": "TSB",
+                            "value": "-4"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "planAdjustment",
+                    "data": {
+                      "planId": "demo-plan",
+                      "workoutId": "demo-workout-thu",
+                      "title": "木曜の練習調整",
+                      "reason": "今週は疲労が高めです。木曜の負荷を下げつつ、有酸素リズムは維持します。",
+                      "before": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "テンポ走",
+                        "text": "work 3x10m pace Z4"
+                      },
+                      "after": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "ステディ走",
+                        "text": "work 35m pace Z2"
+                      },
+                      "changes": [
+                        {
+                          "field": "text",
+                          "before": "work 3x10m pace Z4",
+                          "after": "work 35m pace Z2"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "create",
+            "title": "12 週ハーフ計画",
+            "bucket": "yesterday",
+            "composer": "第 8 週にもう 1 本クオリティを入れられますか？",
+            "messages": [
+              {
+                "id": "create-u1",
+                "role": "user",
+                "text": "12 週間のハーフマラソン計画を作ってください。現在は週 4 走です。"
+              },
+              {
+                "id": "create-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "question",
+                    "data": {
+                      "questions": [
+                        {
+                          "id": "goal",
+                          "header": "レース目標",
+                          "question": "主なレース目標はどれですか？",
+                          "options": [
+                            {
+                              "value": "sub-2",
+                              "label": "ハーフ Sub-2:00",
+                              "description": "週 1 本のクオリティを保ちながら段階的に積み上げます。"
+                            },
+                            {
+                              "value": "finish",
+                              "label": "安定完走",
+                              "description": "保守的な走量と回復間隔。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "reply": {
+                      "kind": "coach_question_reply",
+                      "repliesToAssistantMessageId": "create-a1",
+                      "answers": {
+                        "goal": "sub-2"
+                      },
+                      "notes": {
+                        "goal": ""
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "create-u2",
+                "role": "user",
+                "text": "目標：ハーフ Sub-2:00 · 週 4 走 · 12 週"
+              },
+              {
+                "id": "create-a2",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "現在の走量に合わせた草案です。有酸素基盤を作り、その後しきい値サポートとレース向けロング走を入れます。"
+                  },
+                  {
+                    "type": "planDraft",
+                    "data": {
+                      "title": "ハーフマラソン · 12 週",
+                      "description": "前半は有酸素中心、最後の 4 週でしきい値とレース向けロング走を強化します。",
+                      "periodWeeks": 4,
+                      "workouts": [
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 45m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Steady 35m",
+                          "name": "Steady run"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Long 80m",
+                          "name": "Long run"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 40m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 3x8m",
+                          "name": "Tempo run"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 35m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Long 95m",
+                          "name": "Long run"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 45m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Progression 50m",
+                          "name": "Progression run"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Long 105m",
+                          "name": "Long run"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 7,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Recovery 30m",
+                          "name": "Recovery run"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 40m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 2x12m",
+                          "name": "Tempo run"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Steady 40m",
+                          "name": "Steady run"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Long 120m",
+                          "name": "Long run"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "long-run",
+            "title": "週末ロング走の補填",
+            "bucket": "past",
+            "composer": "脚がまだ重いなら、火曜のインターバルは延期すべきですか？",
+            "messages": [
+              {
+                "id": "long-u1",
+                "role": "user",
+                "text": "土曜のロング走を出張で逃しました。今週はどう補填すべきですか？"
+              },
+              {
+                "id": "long-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "逃したロング走をそのまま今週に全部載せるのは避けましょう。週後半に有酸素 1 本をずらし、睡眠と TSB が安定している場合だけ火曜のクオリティを残します。"
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "今週の計画",
+                        "subtitle": "第 6 週 · 土曜欠走"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "欠走",
+                        "subtitle": "土曜ロング · 未実施"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "回復トレンド",
+                        "subtitle": "過去 14 日",
+                        "stats": [
+                          {
+                            "label": "TSB",
+                            "value": "-6"
+                          },
+                          {
+                            "label": "平均睡眠",
+                            "value": "6.8h"
+                          },
+                          {
+                            "label": "休息日",
+                            "value": "2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "metric": {
+        "sportLabels": {
+          "all": "全種目",
+          "RUN": "ラン",
+          "CYCLING": "バイク",
+          "SWIM": "スイム"
+        },
+        "timeLabels": {
+          "thisYear": "今年",
+          "last30": "過去 30 日",
+          "last90": "過去 90 日"
+        },
+        "pmc": {
+          "calculate": "再計算",
+          "calculating": "計算中...",
+          "combinedTitle": "PMC 総合分析",
+          "fitnessChart": "フィットネス推移",
+          "fatigueChart": "疲労推移",
+          "formChart": "コンディション推移",
+          "noData": "データがありません",
+          "abbr": {
+            "fitness": "CTL",
+            "fatigue": "ATL",
+            "form": "TSB"
+          },
+          "fitness": {
+            "title": "長期トレーニング負荷 (CTL)"
+          },
+          "fatigue": {
+            "title": "短期トレーニング負荷 (ATL)"
+          },
+          "form": {
+            "title": "トレーニングストレスバランス (TSB)"
+          },
+          "load": {
+            "title": "トレーニング負荷"
+          },
+          "zoneHelp": {
+            "ariaLabel": "コンディションゾーンの説明",
+            "title": "コンディションゾーンの説明",
+            "danger": "深いマイナス領域（赤）：TSB < -30。ATL が CTL を大きく上回っています。",
+            "optimal": "負荷構築ゾーン（緑）：-30 ≤ TSB < -10。",
+            "neutral": "ニュートラルゾーン（灰）：-10 ≤ TSB < +5。",
+            "fresh": "フレッシュゾーン（青）：+5 ≤ TSB < +15。",
+            "peak": "ピークゾーン（紫）：+15 ≤ TSB < +25。",
+            "transition": "移行期ゾーン（橙）：TSB ≥ +25。"
+          },
+          "acmpHelp": {
+            "title": "ACWR (ATL/CTL) の説明",
+            "formula": "ACWR = ATL / CTL。",
+            "sweet": "目安レンジ（緑）：0.8–1.3（参考値）。",
+            "danger": "要確認レンジ（赤）：≥ 1.5。直近の負荷とデータを確認してください。",
+            "advice": "ACWR は練習の質や回復状態とあわせて判断の参考に使ってください。"
+          }
+        },
+        "power": {
+          "tabs": {
+            "curve": "カーブ",
+            "maximum": "最大値",
+            "zones": "ゾーン",
+            "profile": "プロファイル"
+          },
+          "zonesTitle": "パワーゾーン分布",
+          "maximumTitle": "最大パワー履歴",
+          "profileTitle": "パワープロファイル",
+          "chartTitle": "パワー持続時間カーブ",
+          "noData": "パワーデータがありません",
+          "ftp": "FTP",
+          "cp": "CP",
+          "table": {
+            "fiveSeconds": "5秒",
+            "thirtySeconds": "30秒",
+            "oneMinute": "1分",
+            "threeMinutes": "3分",
+            "fiveMinutes": "5分",
+            "twentyMinutes": "20分",
+            "sixtyMinutes": "60分",
+            "twoHours": "2時間",
+            "threeHours": "3時間"
+          },
+          "profile": {
+            "male": "男性",
+            "female": "女性",
+            "riderType": "ライダータイプ",
+            "levels": [
+              "ワールドクラス",
+              "傑出",
+              "優秀",
+              "非常に良い",
+              "良い",
+              "中級",
+              "標準",
+              "初級",
+              "未トレーニング"
+            ],
+            "durations": {
+              "5s": "5秒",
+              "1m": "1分",
+              "5m": "5分",
+              "FTP": "FTP"
+            }
+          },
+          "maximum": {
+            "bucketDay": "日",
+            "bucketWeek": "週",
+            "bucketMonth": "月"
+          }
+        },
+        "pace": {
+          "tabs": {
+            "curve": "カーブ",
+            "zones": "ゾーン"
+          },
+          "chartTitle": "ペースカーブ",
+          "zonesTitle": "ペースゾーン分布",
+          "noData": "ペースデータがありません",
+          "cs": "CS",
+          "table": {
+            "segment": "距離",
+            "pace": "ペース",
+            "time": "タイム"
+          },
+          "distances": {
+            "400m": "400m",
+            "800m": "800m",
+            "1500m": "1500m",
+            "1mi": "1マイル",
+            "3k": "3km",
+            "5k": "5km",
+            "10k": "10km",
+            "20k": "20km",
+            "marathon": "42.2km"
+          }
+        },
+        "heartRate": {
+          "tabs": {
+            "curve": "カーブ",
+            "zones": "ゾーン"
+          },
+          "chartTitle": "心拍持続時間カーブ",
+          "zonesTitle": "心拍ゾーン分布",
+          "noData": "心拍データがありません",
+          "maxHr": "最大心拍",
+          "lthr": "LTHR（乳酸閾値心拍）",
+          "table": {
+            "fiveSeconds": "5秒",
+            "thirtySeconds": "30秒",
+            "oneMinute": "1分",
+            "threeMinutes": "3分",
+            "fiveMinutes": "5分",
+            "tenMinutes": "10分",
+            "twentyMinutes": "20分",
+            "sixtyMinutes": "60分",
+            "twoHours": "2時間",
+            "threeHours": "3時間",
+            "sixHours": "6時間"
+          }
+        }
+      }
+    },
     "metadata": {
       "title": "ラン・バイク向けアプリ：負荷管理とAIコーチ｜Trainingload.ai",
       "description": "Trainingload.ai はラン・バイクの計画、実績、負荷、回復を一元管理します。公式ランニングプラン12種は登録なしで閲覧でき、メンバーはAIコーチの調整案を受け取れます。",
@@ -4223,7 +5780,10 @@
       "title": "トレーニングプランを、今の自分に合わせる",
       "subtitle": "Trainingload.ai は、トレーニングプラン、実際のワークアウト、トレーニング負荷、回復をひとつにまとめるランニング・サイクリングトレーニングアプリです。計画と実績のずれが見え、根拠に基づいて調整できます。メンバーはさらに、これらの情報に基づく個別の調整案をAIコーチから受け取れます。",
       "cta": "アカウントを作成",
-      "titleLines": ["トレーニングプランを", "今の自分に合わせる"],
+      "titleLines": [
+        "トレーニングプランを",
+        "今の自分に合わせる"
+      ],
       "links": {
         "docs": "トレーニング負荷を学ぶ",
         "trainingLoad": "計画の中で負荷を管理する",
@@ -4526,7 +6086,12 @@
         "label": "対応プラットフォーム",
         "more": "など"
       },
-      "sportWords": ["ランニング", "サイクリング", "スイミング", "トライアスロン"],
+      "sportWords": [
+        "ランニング",
+        "サイクリング",
+        "スイミング",
+        "トライアスロン"
+      ],
       "iphoneSupport": "iPhone に対応",
       "appStoreCta": "App Store からダウンロード"
     },
@@ -4747,27 +6312,43 @@
           "name": "AIコーチ",
           "title": "調整が必要なとき、AIコーチに相談",
           "description": "プラン、実際のワークアウト、トレーニング負荷に基づく調整案を確認できます。",
-          "points": ["現在のプラン", "実際の達成状況", "調整案"],
+          "points": [
+            "現在のプラン",
+            "実際の達成状況",
+            "調整案"
+          ],
           "cta": "AIコーチを見る"
         },
         {
           "name": "トレーニングカレンダー",
           "title": "計画と実績を並べて確認",
           "description": "予定したワークアウトと完了したアクティビティを同じタイムラインに表示。日程変更、スキップ、追加分も明確です。",
-          "points": ["予定ワークアウト", "完了した活動", "移動またはスキップ"]
+          "points": [
+            "予定ワークアウト",
+            "完了した活動",
+            "移動またはスキップ"
+          ]
         },
         {
           "name": "トレーニングプラン",
           "title": "トレーニングサイクル全体を把握",
           "description": "現在の段階、週間目標、今後のワークアウトが見えるため、今日やることとその理由がわかります。",
-          "points": ["現在の段階", "週間目標", "今後のワークアウト"],
+          "points": [
+            "現在の段階",
+            "週間目標",
+            "今後のワークアウト"
+          ],
           "cta": "トレーニングプランを見る"
         },
         {
           "name": "トレーニング分析",
           "title": "負荷と回復を判断",
           "description": "体力、疲労、コンディション、トレンドから、トレーニングが予定どおり進んでいるかを判断できます。",
-          "points": ["体力と疲労", "今週の負荷", "長期トレンド"],
+          "points": [
+            "体力と疲労",
+            "今週の負荷",
+            "長期トレンド"
+          ],
           "cta": "トレーニング負荷を見る"
         }
       ]
@@ -4925,7 +6506,11 @@
       "kicker": "有酸素能力",
       "title": "VO2max 計算機",
       "subtitle": "ランニングやウォーキング、心拍数の記録から有酸素能力を推定して、今の走力を確かめてみましょう。",
-      "proof": ["登録不要", "その場で結果を確認", "印刷・共有できる"],
+      "proof": [
+        "登録不要",
+        "その場で結果を確認",
+        "印刷・共有できる"
+      ],
       "jumpLinks": {
         "calculator": "計算機",
         "scorecard": "計算結果",
@@ -5385,7 +6970,14 @@
         },
         "help": "年齢と性別は参考区分に使います。Rockportでは両方、シャトルランでは年齢も計算に使います。"
       },
-      "ageBands": ["30歳未満", "30–39", "40–49", "50–59", "60–69", "70+"],
+      "ageBands": [
+        "30歳未満",
+        "30–39",
+        "40–49",
+        "50–59",
+        "60–69",
+        "70+"
+      ],
       "safety": {
         "maximal": "強い運動になります。胸の痛み、めまい、いつもと違う息切れがあれば中止してください。",
         "submax": "全力で運動する必要がない方法です。"
@@ -5763,7 +7355,11 @@
         "button": "無料で始める"
       },
       "kicker": "ランニング",
-      "proof": ["登録不要", "すぐに計算", "印刷・共有"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有"
+      ],
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
         "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
@@ -6141,6 +7737,7 @@
     }
   },
   "commonLinks": {
+    "demoOverviewBack": "ホームに戻る",
     "home": "ホーム",
     "tools": "ツール",
     "allTools": "すべてのツール",
@@ -6251,13 +7848,22 @@
       "sourcesTitle": "参照概念"
     },
     "loop": [
-      ["計画", "サイクル目標、週構成、今日のワークアウトを定義します。"],
+      [
+        "計画",
+        "サイクル目標、週構成、今日のワークアウトを定義します。"
+      ],
       [
         "実行",
         "実際のアクティビティを同期または取り込み、何が起きたか記録します。"
       ],
-      ["負荷", "CTL、ATL、TSB、最近の負荷からストレスを判断します。"],
-      ["調整", "AI が根拠のある変更案を作成し、あなたが確認します。"]
+      [
+        "負荷",
+        "CTL、ATL、TSB、最近の負荷からストレスを判断します。"
+      ],
+      [
+        "調整",
+        "AI が根拠のある変更案を作成し、あなたが確認します。"
+      ]
     ],
     "cards": [
       [
@@ -6386,8 +7992,14 @@
         "ワークアウトを実行",
         "今日何を練るかを確認し、実際のアクティビティを計画へ戻します。"
       ],
-      ["AI でレビュー", "予定、実績、負荷、準備状態を比較します。"],
-      ["変更を確認", "保存済み計画へ反映する前に調整案をプレビューします。"]
+      [
+        "AI でレビュー",
+        "予定、実績、負荷、準備状態を比較します。"
+      ],
+      [
+        "変更を確認",
+        "保存済み計画へ反映する前に調整案をプレビューします。"
+      ]
     ],
     "cards": [
       [
@@ -6532,12 +8144,18 @@
         "ブロック意図を設定",
         "現フェーズ目標と週構成を明確にしてからセッションを変更します。"
       ],
-      ["実行を追跡", "実績を計画へ戻し、完了品質とズレを記録します。"],
+      [
+        "実行を追跡",
+        "実績を計画へ戻し、完了品質とズレを記録します。"
+      ],
       [
         "負荷ドリフトを確認",
         "量や強度を変える前に ATL/TSB 圧力と effective VO2max 反応を確認します。"
       ],
-      ["調整を確定", "理由とトレードオフが明確な場合のみ草案を適用します。"]
+      [
+        "調整を確定",
+        "理由とトレードオフが明確な場合のみ草案を適用します。"
+      ]
     ],
     "checks": [
       [
@@ -6618,12 +8236,18 @@
         "ブロック意図を設定",
         "現フェーズ目標と週構成を明確にしてからセッションを変更します。"
       ],
-      ["実行を追跡", "実績を計画へ戻し、完了品質とズレを記録します。"],
+      [
+        "実行を追跡",
+        "実績を計画へ戻し、完了品質とズレを記録します。"
+      ],
       [
         "負荷ドリフトを確認",
         "量や強度を変える前に ATL/TSB 圧力と effective VO2max 反応を確認します。"
       ],
-      ["調整を確定", "理由とトレードオフが明確な場合のみ草案を適用します。"]
+      [
+        "調整を確定",
+        "理由とトレードオフが明確な場合のみ草案を適用します。"
+      ]
     ],
     "checks": [
       [
@@ -6955,7 +8579,9 @@
       "methodologyEyebrow": "解釈方法",
       "methodologyTitle": "PMC を過剰に読みすぎないために",
       "methodologyText": "Trainingload.ai は PMC を判断補助として扱います。CTL は長期負荷、ATL は短期圧力、TSB は新鮮さの推定です。強度や量を変える前に、練習品質、回復、元の計画と合わせて確認します。",
-      "sourcesTitle": "参照概念"
+      "sourcesTitle": "参照概念",
+      "faqTitle": "PMCフィットネスチャート よくある質問",
+      "faqSubtitle": "パフォーマンス管理チャート（PMC）、CTL、ATL、TSB、ACWR に関するよくある疑問にわかりやすくお答えします。"
     },
     "blocks": [
       [
@@ -6977,41 +8603,181 @@
     ],
     "faq": [
       [
-        "フィットネスチャートとPMCは同じですか？",
-        "持久系トレーニングではほぼ同義です。一般的なfitness-fatigue-formチャートはCTL・ATL・TSBで構成されるPMCです。"
+        "フィットネスチャートとPMCは同じものですか？",
+        "持久系トレーニングの実務では同じものとして扱われます。一般的な「フィットネス / 疲労 / コンディション」チャートは、CTL・ATL・TSB から構成されるパフォーマンス管理チャート（PMC）のことです。"
       ],
       [
         "毎週CTLを上げ続けるべきですか？",
-        "いいえ。実行品質を伴わないCTL上昇はリスクを増やします。目標は「上げ続けること」ではなく持続可能な適応です。"
+        "いいえ。CTL が上がっていても、ポイント練習の質や回復状態が悪化し続けているなら、現在の積み上げ方は機能していない可能性があります。目的は CTL を止めずに上げ続けることではなく、持続可能な成長です。"
       ],
       [
-        "ATLが高くても練習感覚が良いときは？",
-        "急な削減は避け、次の重要セッションと回復指標で確認してから大きな変更を入れてください。"
+        "ATLが高いのに練習の感触が良い場合はどうすればよいですか？",
+        "経過観察を続けつつ、反射的な大幅減量は避けましょう。大きく計画を変える前に、次のポイント練習の質と回復指標で状態を確認してください。"
+      ],
+      [
+        "TSBがマイナスだとコンディションが悪いという意味ですか？",
+        "必ずしもそうとは限りません。強化期には ATL が CTL を上回ることが多いため、TSB がマイナスになるのは一般的です。負荷を下げる前に、マイナスが続いている期間、ポイント練習の質、主観的な疲労感をあわせて確認してください。"
+      ],
+      [
+        "誰にでも当てはまる安全なACWRの範囲はありますか？",
+        "ありません。ACWR が示すのは、長期の基準値に対して直近のモデル負荷が高いかどうかだけです。単独でケガを予測したり、コーチや医療専門家の判断に代わったりすることはできません。"
+      ],
+      [
+        "PMCの曲線が急に跳ね上がったのはなぜですか？",
+        "重複したアクティビティ、閾値設定の変更、負荷ソースの切り替え、あるいは通常より極端に高い負荷のワークアウトがないか確認してください。データ側の変化で CTL・ATL・ACWR が同時に大きく動くことがあります。"
+      ],
+      [
+        "記録が抜けたワークアウトはPMCに影響しますか？",
+        "はい。PMC はシステムに記録された負荷しか計算できません。ワークアウトが欠けていると ATL と CTL は過小評価され、後から追加するとそれ以降の日付の数値も再計算されます。"
+      ],
+      [
+        "PMCはどのくらいの頻度で確認すべきですか？",
+        "常に張り付いて見る必要はありません。週次の振り返り、リカバリー週、レース前のテーパリング、または計画と実績に明らかなズレが出たタイミングで確認するのが効果的です。"
       ]
     ],
     "answerBlocks": [
       [
-        "PMCフィットネスチャートとは？",
-        "PMCフィットネスチャートは、長期的なフィットネス、短期的な疲労、現在のフォームを比較する Performance Management Chart です。通常は CTL、ATL、TSB を組み合わせ、負荷を増やすか、維持するか、回復するかの判断に使います。"
+        "PMCフィットネスチャートとは何ですか？",
+        "PMCフィットネスチャートとは、長期的なフィットネス、短期的な疲労、現在のコンディションを比較するためのパフォーマンス管理チャート（PMC）です。通常は CTL・ATL・TSB を組み合わせて表示し、練習の質が落ちる前に「負荷を上げる・計画を維持する・回復を入れる」を判断する手がかりにします。"
       ],
       [
-        "PMCのCTLは何を示しますか？",
-        "CTL は chronic training load の略で、長期的なトレーニング負荷の方向を示します。CTL の上昇は積み上げの兆候ですが、追い続けるものではありません。重要なのは、CTL 上昇と練習品質・回復が両立しているかです。"
+        "PMCチャート上のCTLは何を示しますか？",
+        "CTL（慢性トレーニング負荷）は、長期的なトレーニングストレスの推移を示します。CTL の上昇はフィットネス構築の目安になり得ますが、闇雲に追うべき数値ではありません。重要なのは、ワークアウトの質と回復を保ったまま CTL が伸びているかどうかです。"
       ],
       [
-        "PMCのATLは何を示しますか？",
-        "ATL は acute training load の略で、最近のトレーニングストレスと疲労圧を示します。高い ATL はビルド期では普通ですが、重要ワークアウトの質低下、回復悪化、予定以上の負荷上昇がある場合は注意が必要です。"
+        "PMCチャート上のATLは何を示しますか？",
+        "ATL（急性トレーニング負荷）は、直近のトレーニングストレスと疲労の圧力を反映します。強化期に ATL が高くなること自体は問題ありませんが、ポイント練習の質が落ちたり、回復指標が低下したり、計画以上のペースで負荷が上がったりしたときは警戒サインになります。"
       ],
       [
-        "PMCのTSBは何を示しますか？",
-        "TSB は training stress balance の略で、慢性負荷と急性負荷の差からフォームや新鮮さを推定します。トレーニング期の低い TSB は普通ですが、重要セッション前に低い状態が続くなら、負荷維持や回復追加を検討します。"
+        "PMCチャート上のTSBは何を示しますか？",
+        "TSB（トレーニングストレスバランス）は、慢性負荷と急性負荷の差からコンディションやフレッシュさを推定する指標です。強化ブロック中に TSB が低めまたはマイナスになるのは自然ですが、重要セッションの前に低下が長引く場合は、負荷の据え置きや回復日の追加を検討する材料になります。"
+      ],
+      [
+        "PMCチャート上のACWRは何を示しますか？",
+        "ACWR は急性・慢性負荷比（Acute:Chronic Workload Ratio）です。Trainingload.ai では現在の ATL を現在の CTL で割って算出します。長期ベースラインに対する直近負荷の急変を検知するのに役立ちますが、ケガのリスク、回復度、レース準備状態を単独で予測するものではありません。"
       ]
     ],
     "sources": [
       "Performance Management Chart：CTL、ATL、TSB のモデル概念。",
       "持久系トレーニング実践：練習品質と回復でチャート信号を検証する。",
       "Trainingload.ai のプロダクト手法：まず保守的に1つ調整し、次の重要セッションで確認する。"
-    ]
+    ],
+    "guide": {
+      "ui": {
+        "metricsEyebrow": "主要指標ガイド",
+        "metricsTitle": "CTL・ATL・TSB・ACWRの意味と読み方",
+        "metricsSubtitle": "4つの指標はいずれも同じ日次トレーニング負荷の時系列から算出されますが、答える問いの時間軸が異なります。組み合わせる前に、それぞれの計算式と限界を押さえておきましょう。",
+        "formulaLabel": "現在の Trainingload.ai 計算式",
+        "interpretationLabel": "読み取りのポイント",
+        "cautionLabel": "誤解しやすい点",
+        "docsAction": "詳細な指標ドキュメントを読む",
+        "patternsEyebrow": "複合的な解釈",
+        "patternsTitle": "PMCフィットネスチャートを一つのシステムとして読む方法",
+        "patternsSubtitle": "単一の数値だけでトレーニングを決めることはほとんどありません。確度の高い判断は、曲線のパターンを捉え、元のアクティビティにさかのぼり、計画の目的と本人の体感で裏付けることで生まれます。",
+        "scenarioHeader": "シナリオ",
+        "signalsHeader": "チャートのパターン",
+        "meaningHeader": "確認できること",
+        "actionHeader": "次のアクション",
+        "advantagesEyebrow": "Trainingload.ai が選ばれる理由",
+        "advantagesTitle": "ただのPMCグラフではない：意思決定ループに組み込まれた負荷シグナル",
+        "advantagesSubtitle": "実用的な PMC ツールは、数値の根拠、対象となったワークアウト、計画との整合性、そして次に調整すべき点（あるいは維持すべき理由）までつなげて見せる必要があります。",
+        "freeBadge": "Freeプランに含まれます",
+        "previewLabel": "PMCデスクトップデモを拡大表示",
+        "previewHint": "クリックしてPMC全体を見る"
+      },
+      "metrics": [
+        {
+          "key": "ctl",
+          "acronym": "CTL",
+          "name": "慢性トレーニング負荷",
+          "summary": "CTL は日次トレーニング負荷の緩やかな指数加重移動平均（EWMA）です。Trainingload.ai では42日間の平滑化期間を採用しており、数週間単位での負荷の方向性（積み上げ中・維持・低下）を把握するのに適しています。画面上では「フィットネス」と表記されることも多いですが、実際に測っているのはモデル化された負荷履歴であり、身体への定着量や他アスリートと比較できる絶対的な体力スコアではありません。",
+          "formula": "decayCTL = exp(-1 / 42)\nCTLtoday = CTLyesterday × decayCTL\n           + 日次負荷 × (1 − decayCTL)",
+          "interpretation": "現在のトレーニングブロックと照らし合わせ、CTL の向きと傾きを読み取ります。ポイント練習の質を保ったまま緩やかに上昇していれば、意図どおりに負荷が蓄積しているサインです。急激な跳ね上がりがある場合は、異常値のアクティビティ、閾値変更、重複データ、負荷ソースの切り替えを確認してください。万人に共通する理想の CTL 値はありません。",
+          "caution": "CTL の上昇は適応の成功を証明するものではなく、高ければ良いわけでもありません。同じ CTL でも、種目構成・強度配分・データソースによって意味合いは大きく異なります。"
+        },
+        {
+          "key": "atl",
+          "acronym": "ATL",
+          "name": "急性トレーニング負荷",
+          "summary": "ATL は同じ日次負荷シリーズに対する反応の速い指数加重移動平均です。Trainingload.ai では7日間の平滑化期間を使っており、直近のセッションに敏感に反応するため、短期的なトレーニング圧力がいつ増減したかを特定できます。画面上では「疲労」と呼ばれることが多いものの、睡眠・痛み・体調不良・主観的疲労を直接測るものではなく、生理学的な診断ではなく疲労の文脈を示す指標です。",
+          "formula": "decayATL = exp(-1 / 7)\nATLtoday = ATLyesterday × decayATL\n           + 日次負荷 × (1 − decayATL)",
+          "interpretation": "ATL が急に上昇したら、直近7〜14日間のロング走・ロングライド、ポイント練習、レース、予定外のアクティビティを確認し、計画どおりの増加かどうかを見極めます。リカバリー週には通常、ATL は CTL より速く低下します。重要なのは、ATL の変動と同時に実行品質の低下、主観的不調、痛みの兆候が出ていないかを確認することです。",
+          "caution": "ATL が高いからといって直ちに危険なわけではなく、ATL が低いからといって十分に回復しているとも限りません。測っているのは実測の疲労ではなく直近の負荷です。"
+        },
+        {
+          "key": "tsb",
+          "acronym": "TSB",
+          "name": "トレーニングストレスバランス",
+          "summary": "TSB は現在の CTL と ATL の差分であり、長期の負荷トレンドに対して直近負荷がどの位置にあるかを表します。マイナスは ATL が CTL を上回っている状態（強化期によく見られる）、プラスは ATL が CTL を下回っている状態（回復期やテーパリング期によく見られる）です。一般に「コンディション」や「フレッシュさ」と表記されますが、本質は2つの負荷モデルの数学的な差です。",
+          "formula": "TSBtoday = CTLtoday − ATLtoday",
+          "interpretation": "TSB はタイミングを測る文脈として活用します。テーパリング期には ATL が先に下がって TSB が上昇し、強化期には ATL が先に上がって TSB がマイナスになります。ポイント練習やレース前には、一律のプラス・マイナス基準を当てはめるのではなく、本人の過去履歴、計画の目的、実行品質、主観的コンディションと照合してください。",
+          "caution": "TSB がプラスでもピーク状態とは限らず、マイナスでもオーバートレーニングとは限りません。固定の「最適レンジ」を異なるアスリートや負荷モデルにそのまま当てはめることはできません。"
+        },
+        {
+          "key": "acwr",
+          "acronym": "ACWR",
+          "name": "急性・慢性負荷比",
+          "summary": "ACWR（A:C Ratio とも表記）は、直近の負荷を長期の負荷ベースラインと比較する比率です。Trainingload.ai では現在の ATL を現在の CTL で割って計算しており、一般的な「7日合計 ÷ 28日平均」の実装とは異なります。比率の上昇が示すのは、長期基準に比べて直近のモデル負荷が高いという事実だけであり、急増やデータ異常を見つける手がかりとして使います。",
+          "formula": "ACWRtoday = ATLtoday / CTLtoday\nCTLtoday = 0 の場合は 0",
+          "interpretation": "比率を見る前に、必ず ATL と CTL の絶対値を確認してください。ACWR が上がる背景には、計画的な過負荷、単発の異常アクティビティ、長期休養後の分母（CTL）の小ささ、閾値変更、重複インポートなどが考えられます。データに問題がないことを確認したうえで、種目特有の衝撃負荷、痛み、体調不良、睡眠、練習の質を総合して調整を判断します。",
+          "caution": "ACWR はケガの予測指標ではなく、すべてのアスリートに共通する「安全なスイートスポット」も存在しません。表示レンジは確認を促す目安であり、医学的判断やトレーニング可否の保証ではありません。"
+        }
+      ],
+      "patterns": [
+        [
+          "計画どおりの負荷構築",
+          "CTL が緩やかに上昇し、ATL は周期的に CTL を上回る。TSB は適度なマイナス、ACWR は最近の傾向付近で推移する。",
+          "目立った急加速シグナルはなく、負荷が順調に積み上がっている。",
+          "ポイント練習の質、主観的な調子、回復が安定していれば計画を維持します。グラフの見栄えだけのために負荷を足す必要はありません。"
+        ],
+        [
+          "直近負荷の急加速",
+          "ATL が急上昇し、CTL の追従が追いつかない。TSB が急落し、同時に ACWR も跳ね上がる。",
+          "直近のモデル負荷が長期ベースラインを明確に上回っているが、原因と身体の反応はまだ検証が必要。",
+          "元になったワークアウトをたどり、重複や閾値変更を除外します。ポイント練習の質も落ちている場合は、強度・時間・配置のうち1変数だけを調整してください。"
+        ],
+        [
+          "リカバリー週・テーパリング",
+          "ATL が CTL より速く低下し、TSB は上昇、ACWR は低下。CTL は概ね維持または緩やかに下降する。",
+          "直近の負荷が抜けてモデル上のフレッシュさは高まっているが、ピーク仕上がりの証明ではない。",
+          "比較可能なポイント練習、主観的フィードバック、本番レースの要求水準で仕上がりを確認します。CTL がわずかに下がったからといって焦って負荷を足さないでください。"
+        ],
+        [
+          "休養・練習抜け・データ欠損",
+          "ATL と CTL がともに低下し、TSB がプラスに転じることもある。ACWR は低水準、または CTL の分母が小さいために歪む。",
+          "モデル上は負荷減少として映るが、計画休養・記録漏れ・ケガ・スケジュール中断の区別はつかない。",
+          "まずアクティビティの網羅性と負荷ソースを確認してください。プラスの TSB を好調の証拠とみなさないよう注意が必要です。"
+        ],
+        [
+          "チャートと体感の不一致",
+          "PMC 上は正常に見えるのに、ペースやパワーの実行品質、睡眠、痛み、主観的疲労が悪化し続けている。",
+          "負荷モデルが重要な文脈を捉えきれておらず、グラフだけを根拠にさらなる負荷をかけることはできない。",
+          "この不一致を調査シグナルとして受け止め、調整は保守的に行います。痛み・体調不良・異常な症状がある場合は健康と専門家の助言を優先してください。"
+        ]
+      ],
+      "advantages": [
+        [
+          "主要なPMCチャートとトレンド分析が無料",
+          "Freeプランには PMC、CTL–ATL–TSB チャート、指標ハブ、詳細ダッシュボードが含まれます。課金前にご自身のトレーニング履歴で実際のワークフローを検証できます。"
+        ],
+        [
+          "計算式・閾値・負荷ソースをすべて公開",
+          "Trainingload.ai は7日 ATL、42日 CTL、TSB、ACWR の計算式を明示しています。アクティビティ負荷は、あなたの閾値とソース優先順位に従い、パワー・心拍数・ペース・セッション RPE から算出されます。"
+        ],
+        [
+          "曲線の変化を計画と実績ワークアウトへ逆引き",
+          "グラフを孤立した滑らかな線として終わらせません。PMC の変化を計画セッション、完了実績、未実施ワークアウト、元アクティビティと結び付けて原因を確認できます。"
+        ],
+        [
+          "負荷だけでなくパフォーマンス応答と比較",
+          "PMC が表すのは加えた圧力です。Effective VO₂max、閾値トレンド、ワークアウトの質、主観シグナルと並べて見ることで、狙いどおりの適応が起きているか検証でき、CTL だけを追う罠を防げます。"
+        ],
+        [
+          "AIが変更案を下書きし、最終承認はあなたが行う",
+          "負荷と実行データの根拠から調整が必要と判断されるとき、AIコーチが現在のプラン内で保守的な修正案を作成します。理由・具体的な変更内容・検証ポイントを確認してから適用できます。"
+        ]
+      ]
+    }
   },
   "powerCurvePage": {
     "metadata": {
@@ -7037,7 +8803,10 @@
       "toolsAction": "トレーニングツールを開く",
       "productAction": "Trainingload.aiを開く",
       "ctaTitle": "形を見るだけで終わらせない。",
-      "ctaText": "Power Curveをゾーン、閾値、週間負荷に接続して実行可能な調整にします。"
+      "ctaText": "Power Curveをゾーン、閾値、週間負荷に接続して実行可能な調整にします。",
+      "updatedLabel": "最終更新",
+      "lastUpdated": "2026年5月23日",
+      "lastUpdatedDate": "2026-05-23"
     },
     "blocks": [
       [
@@ -7229,7 +8998,10 @@
         "適用前に小さく検証",
         "新閾値は1〜2週間の実行反応を見てから固定します。"
       ],
-      ["週次レビューで更新判断", "完遂率と疲労反応をもとに更新可否を決めます。"]
+      [
+        "週次レビューで更新判断",
+        "完遂率と疲労反応をもとに更新可否を決めます。"
+      ]
     ],
     "faq": [
       [
@@ -7281,7 +9053,10 @@
         "負荷との整合を見る",
         "負荷増加期に一時低下しても、数週で回復するかを確認します。"
       ],
-      ["閾値との関係を確認", "CP/FTP/LTHR更新と同方向かを見ます。"],
+      [
+        "閾値との関係を確認",
+        "CP/FTP/LTHR更新と同方向かを見ます。"
+      ],
       [
         "過負荷サインを早期検知",
         "低下トレンドが続く場合は強度配分を見直します。"
@@ -7292,7 +9067,10 @@
         "実測VO2maxと同じですか？",
         "同一ではありません。トレーニングデータから推定した実用指標です。"
       ],
-      ["毎日見る必要がありますか？", "日次より週次の確認が有効です。"],
+      [
+        "毎日見る必要がありますか？",
+        "日次より週次の確認が有効です。"
+      ],
       [
         "下がったらすぐ負荷を落とすべき？",
         "即断せず、他指標と次の重要セッション結果を確認してください。"
@@ -7338,7 +9116,10 @@
         "疲労状態と合わせる",
         "高疲労下での更新は価値が高いが、回復計画も必要です。"
       ],
-      ["次ブロックに反映", "更新帯域と未更新帯域で刺激配分を決めます。"]
+      [
+        "次ブロックに反映",
+        "更新帯域と未更新帯域で刺激配分を決めます。"
+      ]
     ],
     "faq": [
       [
@@ -7382,10 +9163,22 @@
       "ctaText": "Fitness/Fatigue/Formを使って、過負荷を避けつつ適応を積み上げます。"
     },
     "blocks": [
-      ["Fitnessは土台の推移", "長期適応の積み上がりを把握します。"],
-      ["Fatigueは短期圧力", "短期疲労の高まりを早期に検知します。"],
-      ["Formは実行可否の目安", "重要セッションの品質を守れるかを判断します。"],
-      ["週の中で再配分する", "必要なら強度・時間・休養日を再配置します。"]
+      [
+        "Fitnessは土台の推移",
+        "長期適応の積み上がりを把握します。"
+      ],
+      [
+        "Fatigueは短期圧力",
+        "短期疲労の高まりを早期に検知します。"
+      ],
+      [
+        "Formは実行可否の目安",
+        "重要セッションの品質を守れるかを判断します。"
+      ],
+      [
+        "週の中で再配分する",
+        "必要なら強度・時間・休養日を再配置します。"
+      ]
     ],
     "faq": [
       [
@@ -7403,6 +9196,530 @@
     ]
   },
   "runningPlanPages": {
+    "derived": {
+      "fiveKChooserLabels": {
+        "options": [
+          "ゼロから始める",
+          "20〜30分走れる",
+          "レース経験あり"
+        ],
+        "current": "現在のプラン"
+      },
+      "raceDistanceChoosers": {
+        "10k": {
+          "title": "自分に合う10kmプランを選ぶ",
+          "subtitle": "難しさではなく、現在の走力と目標に合うメニューから始めます。",
+          "options": [
+            {
+              "label": "完走",
+              "title": "初めての10km",
+              "description": "10週間・週3回で、閾値走やインターバルは必須ではありません。"
+            },
+            {
+              "label": "向上",
+              "title": "10kmを速く走る",
+              "description": "余裕を持って完走できてから、再現できる質の練習を加えます。"
+            },
+            {
+              "label": "目標",
+              "title": "目標タイムに向ける",
+              "description": "最近の記録とレース日から具体的な目標を設定します。"
+            }
+          ]
+        },
+        "half-marathon": {
+          "title": "自分に合うハーフマラソンプランを選ぶ",
+          "subtitle": "現在のロング走の土台と、完走か記録かという目標に合わせます。",
+          "options": [
+            {
+              "label": "完走",
+              "title": "初めてのハーフ",
+              "description": "14週間・週4回でロング走を段階的に伸ばします。"
+            },
+            {
+              "label": "向上",
+              "title": "ハーフの記録を伸ばす",
+              "description": "距離に慣れてから、無理なく続けられる質の練習を加えます。"
+            },
+            {
+              "label": "目標",
+              "title": "目標タイムに向ける",
+              "description": "最近のレース結果から具体的なレース目標を作ります。"
+            }
+          ]
+        },
+        "marathon": {
+          "title": "自分に合うフルマラソンプランを選ぶ",
+          "subtitle": "ロング走の土台とレース目標から、完走・向上・目標タイムを選びます。",
+          "options": [
+            {
+              "label": "完走",
+              "title": "初めてのフルマラソン",
+              "description": "18週間・週4回で、3週間のテーパリングを守ります。"
+            },
+            {
+              "label": "向上",
+              "title": "マラソン記録を伸ばす",
+              "description": "マラソン練習を継続できてから、管理された質の練習を加えます。"
+            },
+            {
+              "label": "目標",
+              "title": "目標タイムに向ける",
+              "description": "現在の走力とレース日から具体的な結果を目指します。"
+            }
+          ]
+        }
+      },
+      "fiveK": {
+        "weeks": "8週間",
+        "level": "初心者〜中級者",
+        "weeklyVolume": "週4回",
+        "metaTitle": "無料8週間5Kトレーニングプラン：初心者向け",
+        "metaDescription": "20〜30分走れる人向けの無料8週間5Kプラン。週4回、イージー走、ステディ走、ロング走、短いテーパーを含みます。",
+        "keywords": [
+          "5Kトレーニングプラン",
+          "5k training plan",
+          "5Kランニングプラン",
+          "5K練習メニュー",
+          "8週間5Kプラン"
+        ],
+        "eyebrow": "8週間5Kランニングプラン",
+        "title": "初心者向け無料8週間5Kトレーニングプラン。",
+        "subtitle": "この5Kプランは、すでに20〜30分のイージーランを続けられ、明確なレーススケジュールを求めるランナー向けです。会話できるラン、週1回の質の高いセッション、ロングラン、回復、短いテーパーを組み合わせます。",
+        "primaryCta": "5Kプランを個別化",
+        "secondaryCta": "すべてのプランを見る",
+        "promise": "完全なスケジュールは以下で無料公開しています。走れる曜日、最近の練習、ペース、回復状態に汎用カレンダーが合わない場合は個別化してください。",
+        "planChooser": {
+          "title": "自分に合う5Kプランを選ぶ",
+          "subtitle": "今の走力に合う開始地点を選びます。3つのプランは開始条件とトレーニング負荷が異なります。",
+          "options": [
+            {
+              "label": "ゼロから始める",
+              "title": "Couch to 5K",
+              "description": "20分の連続イージーランがまだ難しい場合は、ラン・ウォークから始めます。",
+              "href": "/couch-to-5k-training-plan"
+            },
+            {
+              "label": "現在のプラン",
+              "title": "5Kを完走する",
+              "description": "20〜30分のイージーランができ、週4回走れる場合は、この8週間プランを選びます。",
+              "href": null
+            },
+            {
+              "label": "レース経験あり",
+              "title": "5Kを速く走る",
+              "description": "最近の5K記録があり、インターバルとテンポ走を取り入れたい場合は中級プランを選びます。",
+              "href": "/5k-training-plan/intermediate"
+            }
+          ]
+        },
+        "trustItems": [
+          "全スケジュール無料",
+          "8週間",
+          "週4回",
+          "20〜30分の連続走が目安"
+        ],
+        "forTitle": "この5Kプランが適している人",
+        "forItems": [
+          "ラン・ウォークではなく、20〜30分のイージーランを続けられる。",
+          "すべてのランを追い込まずに、初5K完走または最近の記録更新を目指したい。",
+          "質のセッションと長めのイージーランを含む週4日のランを確保できる。",
+          "走り方を変える痛み、病気、けがを現在抱えていない。"
+        ],
+        "previewTitle": "8週間5Kプランの進み方",
+        "previewSubtitle": "繰り返せるイージーランから5K特有のトレーニングへ進み、レース前に疲労を減らします。完全な日別予定は以下にあります。",
+        "previewRows": [
+          [
+            "1〜2週",
+            "リズムを作る",
+            "大半をイージーに保ち、リラックスした流しや短い坂を加えます。"
+          ],
+          [
+            "3〜6週",
+            "5Kの力を伸ばす",
+            "制御したインターバルとテンポを交互に行い、ロングランを少しずつ伸ばします。"
+          ],
+          [
+            "7〜8週",
+            "テーパーとレース",
+            "走行量を減らし、少しだけスピードを保ってフレッシュに5Kへ臨みます。"
+          ]
+        ],
+        "contentTitle": "実用的な5Kプランに必要なこと",
+        "contentSubtitle": "イージーな走行量と質の高い練習を分け、各セッションに目的を持たせ、毎週繰り返せるだけの回復を残します。",
+        "contentSections": [
+          [
+            "イージーな走行量",
+            "イージーランは毎日をテストにせず、継続性を作ります。",
+            [
+              "会話できる強度にする",
+              "暑さや坂ではペースを落とす",
+              "回復日を守る"
+            ]
+          ],
+          [
+            "週1回の質の高い練習",
+            "インターバル、坂、テンポで5K向けのスピードを伸ばしますが、週全体を支配させません。",
+            [
+              "余裕を残して反復する",
+              "フォームが崩れる前に止める",
+              "休んだイージーランを高強度で埋めない"
+            ]
+          ],
+          [
+            "ロングランとテーパー",
+            "適度なロングランで持久力を支え、最終週はリズムを残しながら疲労を減らします。",
+            [
+              "ロングランはイージーに",
+              "レース前に走行量を減らす",
+              "直前の体力テストを避ける"
+            ]
+          ]
+        ],
+        "conversionTitle": "無料の5Kスケジュールを自分のカレンダーへ",
+        "conversionText": "レース日、走れる曜日、現在のペース、最近の練習を選びます。Trainingload.aiは制約に合わせて下書きを作成し、その後の変更もカレンダーへ反映する前に確認できます。",
+        "aiTitle": "Trainingload.aiが5Kプランを個別化する方法",
+        "aiSubtitle": "公開スケジュールは何をするかを示します。個別化では曜日、ペースの基準、完了した練習から次に積み上げるか、維持するか、回復するかを決めます。",
+        "aiSignals": [
+          [
+            "計画と実績",
+            "ペースだけで判断せず、予定した練習と実際に完了した内容を比較します。"
+          ],
+          [
+            "トレーニング負荷",
+            "走行量や高強度を増やす前に、最近の負荷と回復を確認します。"
+          ],
+          [
+            "確認できる変更",
+            "AIが変更案を作り、本人またはコーチが確認してからカレンダーを更新します。"
+          ]
+        ],
+        "relatedTitle": "次のランニングプラン",
+        "relatedLinks": [
+          [
+            "ゼロから始めるなら Couch to 5K",
+            "/couch-to-5k-training-plan",
+            "20分の連続イージーランが難しい場合はラン・ウォークから始めます。"
+          ],
+          [
+            "5Kから10Kへ",
+            "/10k-training-plan",
+            "完全な10Kスケジュールで持久力と閾値能力を伸ばします。"
+          ],
+          [
+            "VDOTでトレーニングペースを確認",
+            "/vdot-calculator",
+            "最近の記録を、制御されたトレーニングペースの参考にします。"
+          ]
+        ],
+        "faq": [
+          [
+            "5Kに向けて何週間トレーニングすべきですか？",
+            "このスケジュールは8週間です。基礎体力が少ない場合は長めに取り、継続して走っている場合も負荷を確認してから途中参加を判断してください。"
+          ],
+          [
+            "週に何日走りますか？",
+            "週4日のランを使います。イージー日はイージーに保ち、質の高い練習の間に休養または筋力トレーニング日を残します。"
+          ],
+          [
+            "初心者向けの5Kプランですか？",
+            "はい。ただし20〜30分のイージーランを続けられる初心者向けです。まったく走っていない場合は別のCouch to 5Kプランを使ってください。"
+          ],
+          [
+            "練習を休んだらどうしますか？",
+            "そのまま飛ばすか、回復を守れる場合だけ移動します。質の高い練習を連続させたり、休んだ距離を週末に詰め込んだりしないでください。"
+          ],
+          [
+            "AIがプランを自動変更しますか？",
+            "Trainingload.aiは完了した練習と負荷から変更案を作れますが、カレンダーを更新する前に確認が必要です。"
+          ]
+        ]
+      },
+      "finishFiveKDetails": {
+        "previewTitle": "8週間の完走プランの進み方",
+        "previewSubtitle": "週4回の再現できる練習で連続走の持久力を伸ばし、適切に回復しながら最後の5Kへテーパーします。",
+        "previewRows": [
+          [
+            "1〜3週目",
+            "土台作り",
+            "ロング走を25分から35分へ伸ばします。"
+          ],
+          [
+            "4週目",
+            "適応",
+            "ロング走を短くし、すべての練習をコントロールします。"
+          ],
+          [
+            "5〜6週目",
+            "再構築",
+            "会話できる40分、45分のロング走へ進みます。"
+          ],
+          [
+            "7〜8週目",
+            "テーパーと完走",
+            "疲労を減らし、序盤を抑えて5Kを完走します。"
+          ]
+        ],
+        "contentTitle": "週4回の各ランの目的",
+        "contentSubtitle": "イージー走、ステディ走、ロング走の役割を分け、各練習の目的を明確にします。",
+        "contentSections": [
+          [
+            "2回のイージー走",
+            "継続性を積みながら回復の余力を守ります。",
+            [
+              "会話できる強度",
+              "暑さや坂では落とす",
+              "欠けた練習を詰め込まない"
+            ]
+          ],
+          [
+            "1回のステディ走",
+            "RPE 5のコントロールした走りで、レースにせずリズムを磨きます。",
+            [
+              "再現できる強度",
+              "良いフォームで終える",
+              "根拠が弱ければRPEを使う"
+            ]
+          ],
+          [
+            "1回のロング走",
+            "2つの構築ブロックの間に回復週を置き、最後にテーパーします。",
+            [
+              "会話できる呼吸",
+              "4・7週目に負荷を下げる",
+              "最後の5Kは序盤を抑える"
+            ]
+          ]
+        ]
+      },
+      "fiveKHubRelatedLink": [
+        "5Kプランのメインページを見る",
+        "/5k-training-plan",
+        "ラン・ウォーク、完走、中級の3つの5Kプランを比較します。"
+      ],
+      "productLoopRelatedLinks": [
+        [
+          "AIコーチで負荷に合わせて計画を調整",
+          "/ai-training-plan",
+          "完了した練習と負荷から確認可能な変更案を作り、固定カレンダーのままにしません。"
+        ],
+        [
+          "VDOTでトレーニングペースを確認",
+          "/vdot-calculator",
+          "最近の記録を、制御されたトレーニングペースの参考にします。"
+        ],
+        [
+          "タイムと距離からランニングペースを計算",
+          "/running-pace-calculator",
+          "ペース、タイム、距離を換算し、5Kからマラソンまでの等分割表を作ります。"
+        ],
+        [
+          "最近の記録からレースタイムを予測する",
+          "/race-time-predictor",
+          "直近のレースまたは既知ペースから 5K・10K・ハーフ・マラソンの完走タイムを予測します。"
+        ],
+        [
+          "計画内でトレーニング負荷を管理する",
+          "/training-load",
+          "走行量や強度を増やす前に、CTL、ATL、TSBを確認します。"
+        ]
+      ],
+      "intermediateLink": [
+        "中級者向け5Kトレーニングプラン",
+        "/5k-training-plan/intermediate",
+        "最近の5K記録があるなら、インターバルとテンポ走を加えます。"
+      ],
+      "intermediateFiveK": {
+        "heroSubtitle": "週2回のイージー有酸素走、1回のコントロールした質の高い練習、1回のロング走で5Kの走力を伸ばします。奇数週は再現できるインターバル、偶数週はコントロールしたテンポ走を行い、質の高い練習とロング走の間にはイージー日を置きます。4週目に負荷を下げ、5〜6週目に再構築、7週目にテーパーし、8週目に5Kを走ります。",
+        "previewRows": [
+          [
+            "1〜3週目",
+            "5K能力を構築",
+            "インターバルとテンポを交互に行い、ロング走を50分まで伸ばします。"
+          ],
+          [
+            "4週目",
+            "回復",
+            "質の高い練習とロング走を短くし、負荷に適応します。"
+          ],
+          [
+            "5〜6週目",
+            "再構築",
+            "6×2分インターバルと20分テンポ走へ進みます。"
+          ],
+          [
+            "7〜8週目",
+            "テーパーと5K",
+            "短い刺激を残し、総量を下げて5Kを走ります。"
+          ]
+        ],
+        "contentTitle": "中級5Kでスピードを再現できる力に変える方法",
+        "contentSubtitle": "主な質練習は週1回だけにし、ほかの走行で刺激を吸収します。毎回をタイムトライアルにはしません。",
+        "contentSections": [
+          [
+            "イージーランで質練習を守る",
+            "大半を会話できる強度に保ち、重要な練習で正しいリズムとフォームを再現します。",
+            [
+              "楽な日のペースを追わない",
+              "質練習の間に回復を入れる",
+              "疲労が増えたら先に量を減らす"
+            ]
+          ],
+          [
+            "インターバルで5Kペースを反復する",
+            "短い反復で5Kに近い強度の時間を積み、どの反復も全力疾走にはしません。",
+            [
+              "最近の記録かRPEで設定",
+              "各反復をそろえる",
+              "フォームが崩れたら追加しない"
+            ]
+          ],
+          [
+            "テンポとロング走で持久力を作る",
+            "テンポ走で持続可能な強度を高め、ロング走で有酸素時間を延ばします。",
+            [
+              "テンポはコントロール",
+              "ロング走は楽に",
+              "4週目と7〜8週目は減量"
+            ]
+          ]
+        ],
+        "level": "中級",
+        "metaTitle": "中級者向け5Kトレーニングプラン：無料8週間",
+        "metaDescription": "週4日走れる中級者向けの無料8週間5Kプラン。インターバル、テンポ、ロング走、テーパーを含み、記録がなければRPEを使います。",
+        "keywords": [
+          "中級者 5K トレーニングプラン",
+          "5K インターバル",
+          "5K テンポ走",
+          "VDOT 5K"
+        ],
+        "eyebrow": "8週間中級5Kプラン",
+        "forTitle": "この中級5Kプランの対象",
+        "forItems": [
+          "週4日安定して走れます。",
+          "最近の5K記録、または十分な走力の土台があります。",
+          "質の高い練習の間に回復日を残せます。",
+          "走姿が変わる痛みやケガはありません。"
+        ],
+        "standardFinishLink": [
+          "先に標準の5K完走プランを使う",
+          "/5k-training-plan",
+          "週4日がまだ安定しないなら、先に再現できる土台を作ります。"
+        ],
+        "faq": [
+          [
+            "中級者向けの5Kプランですか？",
+            "はい。すでに週4日走れて、インターバルとテンポで5Kを速くしたい人向けです。初完走用ではありません。"
+          ],
+          [
+            "初心者向け5Kプランとの違いは？",
+            "初心者ページは20〜30分走れる人の完走用です。このページは土台が安定した後に質の高い練習を加えます。週4日がまだ難しい場合は、先に5K完走プランを使ってください。"
+          ],
+          [
+            "週に質の高い練習は何回ですか？",
+            "メインの質練習は1回で、イージー走とロング走を組み合わせます。高強度を2日連続させないでください。"
+          ],
+          [
+            "このプランで25分切りを狙えますか？",
+            "現在の記録が25分に近ければ、スピード向上の枠組みとして使えます。最近の5K記録で強度を設定してください。差が大きい場合は、まず1サイクル終えて再テストします。"
+          ],
+          [
+            "AIがこの中級プランを自動変更しますか？",
+            "Trainingload.aiは完了した練習とトレーニング負荷から変更案を作れますが、カレンダーは確認後にだけ更新されます。"
+          ]
+        ]
+      },
+      "templateMetaDescription": "20〜30分走れる人向けの無料8週間5Kプラン。週4回、イージー走、ステディ走、ロング走、短いテーパーを含みます。"
+    },
+    "sectionKickers": {
+      "startHere": "ここから始める",
+      "trainingMethod": "トレーニング方法"
+    },
+    "heroHeadings": {
+      "couch-to-5k-training-plan": [
+        "無料9週間",
+        "Couch to 5Kプラン",
+        "ウォーキングから、初めての5K完走へ"
+      ],
+      "5k-training-plan": [
+        "無料8週間",
+        "5Kトレーニングプラン",
+        "レース当日まで着実に"
+      ],
+      "5k-training-plan-intermediate": [
+        "無料8週間",
+        "中級者向け5Kプラン",
+        "インターバルとテンポで速く"
+      ],
+      "10k-training-plan": [
+        "無料10週間",
+        "10km練習メニュー",
+        "5Kの先へ、着実に完走"
+      ],
+      "half-marathon-training-plan": [
+        "無料14週間",
+        "ハーフマラソン練習",
+        "初めての21.1km完走へ"
+      ],
+      "marathon-training-plan": [
+        "無料18週間",
+        "フルマラソン練習",
+        "初めての42.2km完走へ"
+      ]
+    },
+    "productPreview": {
+      "webAlt": "TrainingLoad.ai Web版のトレーニングプラン詳細画面",
+      "mobileAlt": "TrainingLoad.ai iOS版の今日のトレーニング画面",
+      "webCalendarAlt": "完了済みと予定のワークアウトが入ったTrainingLoad.ai Web版カレンダー",
+      "mobileCalendarAlt": "トレーニングデータが入ったTrainingLoad.ai iOS版カレンダー"
+    },
+    "officialTemplate": {
+      "labels": {
+        "official": "公式トレーニングプラン",
+        "improve": "記録向上",
+        "target": "目標タイム対策",
+        "weeks": "期間",
+        "runsPerWeek": "週のラン回数",
+        "level": "プラン種別",
+        "schedule": "週ごとの全トレーニング",
+        "scheduleText": "各週を開き、セッション内容・構成・強度を確認してからカレンダーに追加できます。",
+        "example": "強度の例",
+        "exampleText": "下記のペースは VDOT 40 の例で、あなた個人のペースではありません。ログイン後は信頼できる現在の走力データを使用し、目標プランには条件を満たす目標レースも必要です。",
+        "cta": "自分のプランを作る",
+        "back": "距離別ガイドに戻る",
+        "currentPlan": "現在のプラン",
+        "workoutCount": "セッション",
+        "finalTitle": "完全なプランをカレンダーへ",
+        "finalText": "公開メニューで構成を確認し、現在の走力と走れる曜日を使って個人向けプレビューを作成します。"
+      },
+      "seoTitles": {
+        "improve-10k": "10km中級者向け練習メニュー｜8週間で記録向上",
+        "target-10k": "10km目標タイム練習メニュー｜40分・45分・50分切り",
+        "improve-half-marathon": "ハーフマラソン中級者向け練習メニュー｜12週間",
+        "target-half-marathon": "ハーフマラソン目標タイム練習｜14週間で2時間切りを目指す",
+        "improve-marathon": "フルマラソン中級者向け練習メニュー｜18週間",
+        "target-marathon": "フルマラソン目標タイム練習｜サブ3・サブ4の18週間"
+      },
+      "pageHeadings": {
+        "improve-10k": "10km中級者向け練習メニュー",
+        "target-10k": "10km目標タイム練習メニュー",
+        "improve-half-marathon": "ハーフマラソン中級者向け練習メニュー",
+        "target-half-marathon": "ハーフマラソン目標タイム練習メニュー",
+        "improve-marathon": "フルマラソン中級者向け練習メニュー",
+        "target-marathon": "フルマラソン目標タイム練習メニュー"
+      }
+    },
+    "workoutStructure": {
+      "chartAriaLabel": "ワークアウト構成図",
+      "stepLabels": {
+        "WARMUP": "ウォームアップ",
+        "WORK": "メイン",
+        "RECOVERY": "リカバリー",
+        "REST": "休息",
+        "COOLDOWN": "クールダウン",
+        "OTHER": "ステップ"
+      }
+    },
     "collection": {
       "metaTitle": "無料ランニングトレーニングプラン：5Kからマラソンまで",
       "metaDescription": "5K、10K、ハーフマラソン、マラソン向けの公式無料ランニングプラン12種類を比較。全スケジュールを確認し、無料でカレンダーに追加できます。",
@@ -8357,17 +10674,26 @@
           [
             "このページで無料実行",
             "全週・全ワークアウトを掲載し、アカウントやAppなしで始められます。",
-            ["1週目から開始", "9週間をすべて確認"]
+            [
+              "1週目から開始",
+              "9週間をすべて確認"
+            ]
           ],
           [
             "無料でカレンダーへ",
             "開始日と曜日を選び、完了を記録し、自分で移動・編集できます。",
-            ["同じ公式ワークアウト", "日程はいつでも手動で調整可能"]
+            [
+              "同じ公式ワークアウト",
+              "日程はいつでも手動で調整可能"
+            ]
           ],
           [
             "AIコーチで変化に対応",
             "AIコーチは予定と実績、負荷、回復を比較し、根拠のある調整案を生成します。",
-            ["継続的な自動確認", "承認後のみ変更"]
+            [
+              "継続的な自動確認",
+              "承認後のみ変更"
+            ]
           ]
         ],
         "conversionTitle": "同じ無料公式プランをカレンダーへ",
@@ -8392,7 +10718,12 @@
         "finalTitle": "無料プランを今日から始める",
         "finalText": "このページの1週目から始めるか、同じ公式プランを無料でカレンダーに追加して次の練習を始められます。",
         "collectionCta": "無料Couch to 5Kプランを見る",
-        "trustItems": ["完全無料メニュー", "9週間", "週3回", "目標ペースなし"],
+        "trustItems": [
+          "完全無料メニュー",
+          "9週間",
+          "週3回",
+          "目標ペースなし"
+        ],
         "routePath": "/couch-to-5k-training-plan",
         "templateSlug": "first-5k"
       }
@@ -10122,7 +12453,11 @@
       "visual": {
         "title": "ローカルFIT検査",
         "file": "activity.fit",
-        "checks": ["Header", "CRC", "メッセージ"],
+        "checks": [
+          "Header",
+          "CRC",
+          "メッセージ"
+        ],
         "status": "端末内のみ・通信なし"
       },
       "upload": {
@@ -10463,7 +12798,11 @@
         },
         "onThisPage": "このページの内容"
       },
-      "proof": ["登録不要", "すぐに結果", "印刷または共有"],
+      "proof": [
+        "登録不要",
+        "すぐに結果",
+        "印刷または共有"
+      ],
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
         "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
@@ -10948,7 +13287,11 @@
           "answer": "マニュアルワークアウトエディタのガイドが、書き出したセッションを Trainingload の計画日に置く手順を示します。\n\n例: DSL をコピーし、ガイドを開いて、置きたい日の Rules モードに貼ります。\n\n保存するかどうかは、アプリで自分で決めます。"
         }
       ],
-      "proof": ["登録不要", "すぐに結果", "印刷または共有"],
+      "proof": [
+        "登録不要",
+        "すぐに結果",
+        "印刷または共有"
+      ],
       "promo": {
         "kicker": "アプリ内",
         "title": "一回の練習から、一週間の計画へ。",
@@ -11347,7 +13690,11 @@
     "page": {
       "title": "トレーニング負荷計算機",
       "subtitle": "日々のトレーニング負荷から、フィットネス・疲労・フォームの変化を確認。次の1週間の計画に役立てましょう。",
-      "proof": ["登録不要", "入力すると即計算", "印刷・共有に対応"],
+      "proof": [
+        "登録不要",
+        "入力すると即計算",
+        "印刷・共有に対応"
+      ],
       "formula": "CTL_今日 = CTL_昨日 + (TSS − CTL_昨日) / 42\nATL_今日 = ATL_昨日 + (TSS − ATL_昨日) / 7\nTSB_今日 = CTL_今日 − ATL_今日",
       "teachingNote": "7–14 日の表は、何か月分の同期データに代わりません。更新の見え方を確認してから、製品のチャートを開いてください。",
       "howTo": {
@@ -11603,7 +13950,11 @@
     "page": {
       "title": "レースタイム予測",
       "subtitle": "最近のレース記録を入力するか、ランニングファイルから区間を選んで、5km・10km・ハーフ・フルマラソンの換算タイムとペースを確認できます。",
-      "proof": ["登録不要", "入力するとすぐに計算", "印刷・共有に対応"],
+      "proof": [
+        "登録不要",
+        "入力するとすぐに計算",
+        "印刷・共有に対応"
+      ],
       "howTo": {
         "title": "レースタイムの予測方法",
         "steps": {
@@ -12534,7 +14885,10 @@
             "ATL上昇でスイムが薄い",
             "技術量を守る。全スイムを切る前に週中のバイク強度を削る。"
           ],
-          ["週の書き直しが必要", "AIコーチが理由付きで草案する。確認はあなた。"]
+          [
+            "週の書き直しが必要",
+            "AIコーチが理由付きで草案する。確認はあなた。"
+          ]
         ],
         "relatedTitle": "オリンピックプランを完成させるツールとハブ",
         "relatedLinks": [
@@ -12997,7 +15351,11 @@
     "page": {
       "title": "ゾーン2心拍数計算機",
       "subtitle": "年齢、最大心拍数、Karvonen HRR、LTHRから有酸素ゾーン2の範囲を計算し、実際の感覚と照らし合わせます。",
-      "proof": ["登録不要", "すぐに結果を表示", "印刷または共有"],
+      "proof": [
+        "登録不要",
+        "すぐに結果を表示",
+        "印刷または共有"
+      ],
       "howTo": {
         "title": "ゾーン2心拍数の計算方法",
         "steps": {
@@ -13608,7 +15966,10 @@
       "heroProduct": {
         "title": "毎回の練習を記録し、進歩を知る。",
         "body": "iPhone で記録し、Trainingload.ai でペース・心拍数・トレーニング負荷から練習を振り返りましょう。",
-        "benefits": ["練習中のリアルタイムデータ", "練習後の分析と振り返り"],
+        "benefits": [
+          "練習中のリアルタイムデータ",
+          "練習後の分析と振り返り"
+        ],
         "cta": "AI コーチを見る",
         "phoneAlt": "iPhoneのTrainingload.aiトレーニング記録画面"
       },
@@ -13756,5 +16117,47 @@
     "health": "健康データ {count} 件",
     "network": "ファイル処理サービスに接続できません。もう一度お試しください。",
     "failed": "ファイルを読み取れませんでした（{status}）。"
+  },
+  "planShare": {
+    "badge": "取り込めるプラン",
+    "notActivated": "スケジュールのスナップショット（カレンダー未適用）",
+    "takeCta": "このプランを取り込む",
+    "takeHint": "下書きとしてインポートされます。現在のプランはそのまま維持されます。",
+    "disclaimer": "これはスケジュールのスナップショットであり、あなたの現在のフィットネスに合わせた個別コーチングではありません。開始前に内容を確認してください。",
+    "statWeeks": "週数",
+    "statDaysPerWeek": "日 / 週",
+    "statWorkouts": "ワークアウト数",
+    "overviewTitle": "概要",
+    "weekBreakdownTitle": "週ごとのプラン",
+    "weekTitle": "第{week}週",
+    "sessionsCount": "{count}セッション",
+    "emptyDay": "予定されたワークアウトはありません",
+    "loadTitle": "推定負荷",
+    "loadHint": "あなたの閾値ではなく、ワークアウト構造から算出した一般的な推定値です。インポート後に再計算されます。",
+    "loadBadge": "負荷 {value}",
+    "loadGenericTip": "一般的な推定負荷 {value}。インポート後、あなたの閾値に基づいて再計算されます。",
+    "dialogTitle": "ワークアウト詳細",
+    "dialogTitleWithWeek": "第{week}週 · {day}",
+    "notesLabel": "メモ",
+    "chartLabel": "ワークアウト",
+    "errorTitle": "この共有リンクを開けませんでした",
+    "errorText": "リンクが無効か、プレビューが一時的に利用できない可能性があります。",
+    "goneTitle": "この共有リンクは取り消されました",
+    "goneText": "作成者がこのリンクの共有を停止しました。すでにインポート済みの場合、あなたの下書きはそのまま残ります。",
+    "weekday": {
+      "1": "月",
+      "2": "火",
+      "3": "水",
+      "4": "木",
+      "5": "金",
+      "6": "土",
+      "7": "日"
+    },
+    "sport": {
+      "RUN": "ラン",
+      "CYCLING": "バイク",
+      "SWIM": "スイム",
+      "STRETCHING": "モビリティ"
+    }
   }
 }

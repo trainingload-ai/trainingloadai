@@ -10,6 +10,7 @@ import {
   absoluteAlternatesForPath,
   absoluteLocalizedUrl,
   withLocalePath,
+  robotsForPublicPath,
 } from "@/lib/locale-url";
 import { getLactateCopy } from "@/lib/lactate-curve-copy";
 import { lactateExample } from "@/lib/lactate-recording";
@@ -63,12 +64,13 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const c = getLactateCopy(lang);
+  const c = await getLactateCopy(lang);
   const url = absoluteLocalizedUrl(siteUrl(), lang, PATH);
   const title = `${c.title} | LT1, LT2 & Dmax`;
   return {
     title,
     description: c.description,
+    robots: robotsForPublicPath(lang, "/lactate-curve-calculator"),
     alternates: {
       canonical: url,
       languages: absoluteAlternatesForPath(siteUrl(), PATH),
@@ -95,8 +97,8 @@ export default async function LactateCurveCalculatorPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const c = getLactateCopy(lang);
-  const context = getLactateMethodContext(lang);
+  const c = await getLactateCopy(lang);
+  const context = await getLactateMethodContext(lang);
   const url = absoluteLocalizedUrl(siteUrl(), lang, PATH);
   const schema = schemaGraph([
     webPageSchema({

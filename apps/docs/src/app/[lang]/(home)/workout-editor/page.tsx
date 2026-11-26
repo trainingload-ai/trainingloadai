@@ -4,8 +4,11 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
-import { isSeoIndexedLanguage } from "@/lib/i18n";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { TrackedLink } from "@/components/TrackedLink";
 import {
   breadcrumbSchema,
@@ -81,12 +84,12 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
   });
-  const isIndexedLocale = isSeoIndexedLanguage(lang);
 
   return {
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/workout-editor"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, "/workout-editor"),
@@ -101,17 +104,6 @@ export async function generateMetadata({
       description: seo.description,
       type: "website",
       url: pageUrl,
-    },
-    robots: {
-      index: isIndexedLocale,
-      follow: true,
-      googleBot: {
-        index: isIndexedLocale,
-        follow: true,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-        "max-video-preview": -1,
-      },
     },
   };
 }

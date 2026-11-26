@@ -7,10 +7,10 @@ import {
   ToolPageMain,
   ToolSection,
 } from "@/components/ToolPageLayout";
+import { isSeoIndexedLanguage } from "@/lib/i18n";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 import {
   getRpeScaleContent,
-  isRpeScaleContentLocale,
   RPE_SCALE_PATH,
 } from "@/lib/rpe-scale-content";
 import {
@@ -55,7 +55,7 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const copy = getRpeScaleContent(lang);
+  const copy = await getRpeScaleContent(lang);
   const siteUrl = getSiteUrl();
   const pageUrl = `${siteUrl}${localePrefix(lang)}${RPE_SCALE_PATH}`;
 
@@ -67,7 +67,7 @@ export async function generateMetadata({
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, RPE_SCALE_PATH),
     },
-    robots: isRpeScaleContentLocale(lang)
+    robots: isSeoIndexedLanguage(lang)
       ? { index: true, follow: true }
       : { index: false, follow: true },
     openGraph: {
@@ -92,7 +92,7 @@ export default async function RpeScalePage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const copy = getRpeScaleContent(lang);
+  const copy = await getRpeScaleContent(lang);
   const prefix = localePrefix(lang);
   const siteUrl = getSiteUrl();
   const pageUrl = `${siteUrl}${prefix}${RPE_SCALE_PATH}`;

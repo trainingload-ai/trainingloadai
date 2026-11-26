@@ -32,7 +32,7 @@ export type DashboardDemoPayload = {
 };
 
 export type DashboardDemoCopy = {
-  aboutMetric: string;
+  aboutMetric: (title: string) => string;
   overview: {
     title: string;
     recent30Days: string;

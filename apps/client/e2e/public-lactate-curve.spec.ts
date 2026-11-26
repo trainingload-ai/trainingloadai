@@ -366,7 +366,7 @@ test("inspects the full example chart with pointer, touch and keyboard without s
   });
 });
 
-test("renders each indexed language and the measured-data metadata", async ({
+test("renders the reference translations and the measured-data metadata", async ({
   page,
 }) => {
   for (const [prefix, title] of [

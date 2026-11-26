@@ -8,7 +8,11 @@ import { optimizeSeoText } from "@/lib/seo-metadata";
 import { CriticalPowerCalculatorClient } from "./client";
 import { CpAppPromo, CpFooterCta } from "./promo";
 import styles from "./critical-power-calculator.module.css";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { TrackedLink } from "@/components/TrackedLink";
 import {
   breadcrumbSchema,
@@ -149,6 +153,7 @@ export async function generateMetadata({
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/critical-power-calculator"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(

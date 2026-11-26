@@ -7,7 +7,11 @@ import {
   type ConverterDirection,
   type ConverterDirectionCopy,
 } from "@/lib/converter-directions";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import {
   breadcrumbSchema,
   faqPageSchema,
@@ -60,6 +64,7 @@ export async function generateConverterDirectionMetadata(
     title: seo.title,
     description: seo.description,
     keywords: direction.keywords,
+    robots: robotsForPublicPath(lang, `/${direction.slug}`),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, `/${direction.slug}`),

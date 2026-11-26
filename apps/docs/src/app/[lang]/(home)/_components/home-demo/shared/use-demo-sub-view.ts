@@ -1,24 +1,22 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { useHomeDemoLightboxBack } from "../../HomeDemoLightbox";
-import { metricDemoCopy } from "../../metric-demo/copy";
-import { resolveDemoCopy } from "@/lib/demo-i18n";
 import type { MetricDemoView } from "../../metric-demo/types";
 
 export type DemoSubView = "main" | "day" | MetricDemoView;
 
 export function useDemoSubView({
-  lang,
   interactive,
 }: {
-  lang: string;
   interactive: boolean;
 }) {
   const [view, setView] = useState<DemoSubView>("main");
   const setLightboxBack = useHomeDemoLightboxBack();
-  const metricCopy = resolveDemoCopy(metricDemoCopy, lang);
+  const tCommon = useTranslations("commonLinks");
+  const backLabel = tCommon("demoOverviewBack");
 
   useEffect(() => {
     if (!interactive || view === "main" || !setLightboxBack) {
@@ -26,12 +24,12 @@ export function useDemoSubView({
     }
 
     setLightboxBack({
-      ariaLabel: metricCopy.back,
+      ariaLabel: backLabel,
       onClick: () => setView("main"),
     });
 
     return () => setLightboxBack(null);
-  }, [interactive, view, metricCopy.back, setLightboxBack]);
+  }, [interactive, view, backLabel, setLightboxBack]);
 
   return {
     view,

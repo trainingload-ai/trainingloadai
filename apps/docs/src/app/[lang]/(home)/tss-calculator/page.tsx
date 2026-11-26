@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { optimizeSeoText } from "@/lib/seo-metadata";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { CalculatorPromo } from "@/components/calculators/app-promo";
 import { ToolProductPreview } from "@/components/calculators/tool-product-preview";
 import layout from "@/components/calculators/tool-page.module.css";
@@ -103,6 +107,7 @@ export async function generateMetadata({
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/tss-calculator"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, "/tss-calculator"),

@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Bike, Footprints, Gauge, Waves } from "lucide-react";
 import { optimizeSeoText } from "@/lib/seo-metadata";
-import { isSeoIndexedLanguage } from "@/lib/i18n";
-import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import {
+  absoluteAlternatesForPath,
+  localePrefix,
+  robotsForPublicPath,
+} from "@/lib/locale-url";
 import { CalculatorPromo } from "@/components/calculators/app-promo";
 import { ToolProductPreview } from "@/components/calculators/tool-product-preview";
 import layout from "@/components/calculators/tool-page.module.css";
@@ -56,12 +59,12 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
   });
-  const indexed = isSeoIndexedLanguage(lang);
 
   return {
     title: seo.title,
     description: seo.description,
     keywords,
+    robots: robotsForPublicPath(lang, "/brick-workout"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, PATH),
@@ -77,7 +80,6 @@ export async function generateMetadata({
       type: "website",
       url: pageUrl,
     },
-    robots: indexed ? undefined : { index: false, follow: true },
   };
 }
 

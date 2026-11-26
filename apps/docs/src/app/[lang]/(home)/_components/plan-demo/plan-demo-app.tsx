@@ -2,8 +2,6 @@
 
 import { useMemo, useState } from "react";
 
-import { resolveDemoCopy } from "@/lib/demo-i18n";
-
 import { useDemoSubView } from "../home-demo/shared/use-demo-sub-view";
 import {
   buildHomeDaySourceCopy,
@@ -11,7 +9,7 @@ import {
 } from "../home-day-demo/copy";
 import { HomeDayDemoApp } from "../home-day-demo/home-day-demo-app";
 
-import { planDemoCopy } from "./copy";
+import { usePlanDemoCopy } from "./copy";
 import {
   PlanDemoCoachAdvice,
   PlanDemoHeader,
@@ -30,8 +28,8 @@ export function PlanDemoApp({
   lang: string;
   interactive?: boolean;
 }) {
-  const copy = resolveDemoCopy(planDemoCopy, lang);
-  const { view, openDay, goMain } = useDemoSubView({ lang, interactive });
+  const copy = usePlanDemoCopy();
+  const { view, openDay, goMain } = useDemoSubView({ interactive });
   const [selectedWeek, setSelectedWeek] = useState(copy.payload.selectedWeek);
   const [dayDateKey, setDayDateKey] = useState(HOME_DEMO_ISO_DATE);
   const sourceCopy = useMemo(() => buildHomeDaySourceCopy(lang), [lang]);

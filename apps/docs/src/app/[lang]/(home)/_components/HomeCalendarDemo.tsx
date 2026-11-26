@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 import dayjs, { type Dayjs } from "dayjs";
 import {
@@ -23,7 +24,14 @@ import { buildHomeDaySourceCopy } from "./home-day-demo/copy";
 import { HomeDayDemoApp } from "./home-day-demo/home-day-demo-app";
 
 import "dayjs/locale/zh-cn";
+import "dayjs/locale/zh-tw";
 import "dayjs/locale/ja";
+import "dayjs/locale/ko";
+import "dayjs/locale/de";
+import "dayjs/locale/fr";
+import "dayjs/locale/es";
+import "dayjs/locale/it";
+import "dayjs/locale/pt-br";
 
 type DemoSport = "RUN" | "CYCLING" | "SWIM";
 
@@ -199,355 +207,62 @@ type CalendarDemoCopy = {
   minuteUnit: string;
 };
 
-const copyByLang: Record<"en" | "zh" | "zh-hant" | "ja", CalendarDemoCopy> = {
-  en: {
-    overview: {
-      title: "Current plan",
-      cycle: "Marathon Base Block",
-      weekLabel: "Week 5 / 12",
-      targetLoadLabel: "Target",
-      targetLoadValue: "420",
-      completedLabel: "Completed",
-      completedValue: "248",
-      driftLabel: "Vs last week",
-      driftValue: "+17",
-      syncLabel: "Synced",
-    },
-    monthModeLabel: "Month overview",
-    weekModeLabel: "Week focus",
-    today: "Today",
-    addButton: "Add",
-    calendarSubscriptionButton: "Subscribe",
-    viewDay: "View day",
-    selectedDateLabel: "Selected date",
-    loadLabel: "Load",
-    activityTab: "Activity",
-    trainingTab: "Training",
-    planCycleLabel: "Training block",
-    planWorkoutCount: (count) =>
-      count === 1 ? "1 planned session" : `${count} planned sessions`,
-    noPlannedTraining: "No planned training",
-    noActivities: "No completed activity",
-    summaryScope: {
-      plan: "Plan",
-      month: "Month",
-    },
-    planProgressTitle: "Plan progress",
-    monthOverview: "Month overview",
-    comparisonLabelPlan: "vs previous block",
-    comparisonLabelMonth: "vs last month",
-    delta: {
-      up: "up",
-      down: "down",
-      flat: "flat",
-    },
-    summary: {
-      count: "Sessions",
-      tss: "TSS",
-      distance: "Distance",
-      duration: "Duration",
-    },
-    workoutMeta: {
-      duration: "Duration",
-      steps: "Steps",
-      repeats: "Repeat",
-      parsed: "Parsed DSL",
-    },
-    sportLabels: {
-      RUN: "Run",
-      CYCLING: "Ride",
-      SWIM: "Swim",
-    },
-    workoutNames: {
-      easyRun: "Easy run 45 min",
-      tempoRun: "Steady run 35 min",
-      strength: "Strength activation 20 min",
-      longRun: "Long run 90 min",
-      recoveryRide: "Recovery ride 50 min",
-      swim: "Technique swim 1.6 km",
-    },
-    workoutNotes: {
-      easyRun: "Z2 aerobic volume",
-      tempoRun: "Steady aerobic control",
-      strength: "Mobility and activation",
-      longRun: "Long endurance",
-      recoveryRide: "Low-intensity spin",
-      swim: "Technique focus",
-    },
-    activityNames: {
-      easyRun: "Easy run",
-      tempoRun: "Steady aerobic run",
-      longRun: "Long run",
-      ride: "Recovery ride",
-    },
-    distanceUnit: "km",
-    minuteUnit: "min",
-  },
-  zh: {
-    overview: {
-      title: "当前计划",
-      cycle: "马拉松基础周期",
-      weekLabel: "第 5 / 12 周",
-      targetLoadLabel: "目标",
-      targetLoadValue: "420",
-      completedLabel: "已完成",
-      completedValue: "248",
-      driftLabel: "较上周",
-      driftValue: "+17",
-      syncLabel: "已同步",
-    },
-    monthModeLabel: "月历概览",
-    weekModeLabel: "本周聚焦",
-    today: "今天",
-    addButton: "添加",
-    calendarSubscriptionButton: "订阅",
-    viewDay: "查看当天",
-    selectedDateLabel: "选中日期",
-    loadLabel: "负荷",
-    activityTab: "活动",
-    trainingTab: "训练",
-    planCycleLabel: "训练周期",
-    planWorkoutCount: (count) => `${count} 个计划训练`,
-    noPlannedTraining: "暂无计划训练",
-    noActivities: "暂无已完成活动",
-    summaryScope: {
-      plan: "计划",
-      month: "月份",
-    },
-    planProgressTitle: "计划进度",
-    monthOverview: "本月概览",
-    comparisonLabelPlan: "较前一周期",
-    comparisonLabelMonth: "较上月",
-    delta: {
-      up: "上升",
-      down: "下降",
-      flat: "持平",
-    },
-    summary: {
-      count: "训练次数",
-      tss: "TSS",
-      distance: "距离",
-      duration: "时长",
-    },
-    workoutMeta: {
-      duration: "时长",
-      steps: "步骤",
-      repeats: "重复",
-      parsed: "已解析 DSL",
-    },
-    sportLabels: {
-      RUN: "跑步",
-      CYCLING: "骑行",
-      SWIM: "游泳",
-    },
-    workoutNames: {
-      easyRun: "轻松跑 45 min",
-      tempoRun: "稳态跑 35 min",
-      strength: "力量激活 20 min",
-      longRun: "长距离跑 90 min",
-      recoveryRide: "恢复骑 50 min",
-      swim: "技术游 1.6 km",
-    },
-    workoutNotes: {
-      easyRun: "Z2 有氧容量",
-      tempoRun: "稳态有氧控制",
-      strength: "灵活性与激活",
-      longRun: "长距离耐力",
-      recoveryRide: "低强度转腿",
-      swim: "技术动作",
-    },
-    activityNames: {
-      easyRun: "轻松跑",
-      tempoRun: "稳态有氧跑",
-      longRun: "长距离跑",
-      ride: "恢复骑",
-    },
-    distanceUnit: "km",
-    minuteUnit: "分钟",
-  },
-  "zh-hant": {
-    overview: {
-      title: "目前計畫",
-      cycle: "馬拉松基礎週期",
-      weekLabel: "第 5 / 12 週",
-      targetLoadLabel: "目標",
-      targetLoadValue: "420",
-      completedLabel: "已完成",
-      completedValue: "248",
-      driftLabel: "較上週",
-      driftValue: "+17",
-      syncLabel: "已同步",
-    },
-    monthModeLabel: "月曆概覽",
-    weekModeLabel: "本週聚焦",
-    today: "今天",
-    addButton: "新增",
-    calendarSubscriptionButton: "訂閱",
-    viewDay: "查看當天",
-    selectedDateLabel: "選中日期",
-    loadLabel: "負荷",
-    activityTab: "活動",
-    trainingTab: "訓練",
-    planCycleLabel: "訓練週期",
-    planWorkoutCount: (count) => `${count} 個計畫訓練`,
-    noPlannedTraining: "暫無計畫訓練",
-    noActivities: "暫無已完成活動",
-    summaryScope: {
-      plan: "計畫",
-      month: "月份",
-    },
-    planProgressTitle: "計畫進度",
-    monthOverview: "本月概覽",
-    comparisonLabelPlan: "較前一週期",
-    comparisonLabelMonth: "較上月",
-    delta: {
-      up: "上升",
-      down: "下降",
-      flat: "持平",
-    },
-    summary: {
-      count: "訓練次數",
-      tss: "TSS",
-      distance: "距離",
-      duration: "時長",
-    },
-    workoutMeta: {
-      duration: "時長",
-      steps: "步驟",
-      repeats: "重複",
-      parsed: "已解析 DSL",
-    },
-    sportLabels: {
-      RUN: "跑步",
-      CYCLING: "騎行",
-      SWIM: "游泳",
-    },
-    workoutNames: {
-      easyRun: "輕鬆跑 45 min",
-      tempoRun: "穩態跑 35 min",
-      strength: "力量啟動 20 min",
-      longRun: "長距離跑 90 min",
-      recoveryRide: "恢復騎 50 min",
-      swim: "技術游 1.6 km",
-    },
-    workoutNotes: {
-      easyRun: "Z2 有氧容量",
-      tempoRun: "穩態有氧控制",
-      strength: "靈活性與啟動",
-      longRun: "長距離耐力",
-      recoveryRide: "低強度轉腿",
-      swim: "技術動作",
-    },
-    activityNames: {
-      easyRun: "輕鬆跑",
-      tempoRun: "穩態有氧跑",
-      longRun: "長距離跑",
-      ride: "恢復騎",
-    },
-    distanceUnit: "km",
-    minuteUnit: "分鐘",
-  },
-  ja: {
-    overview: {
-      title: "Current plan",
-      cycle: "Marathon Base Block",
-      weekLabel: "Week 5 / 12",
-      targetLoadLabel: "Target",
-      targetLoadValue: "420",
-      completedLabel: "Completed",
-      completedValue: "248",
-      driftLabel: "Vs last week",
-      driftValue: "+17",
-      syncLabel: "Synced",
-    },
-    monthModeLabel: "Month overview",
-    weekModeLabel: "Week focus",
-    today: "今日",
-    addButton: "追加",
-    calendarSubscriptionButton: "購読",
-    viewDay: "View day",
-    selectedDateLabel: "選択日",
-    loadLabel: "負荷",
-    activityTab: "活動",
-    trainingTab: "トレーニング",
-    planCycleLabel: "トレーニングブロック",
-    planWorkoutCount: (count) => `${count} 件の予定`,
-    noPlannedTraining: "予定トレーニングなし",
-    noActivities: "完了した活動なし",
-    summaryScope: {
-      plan: "計画",
-      month: "月",
-    },
-    planProgressTitle: "計画進捗",
-    monthOverview: "月間概要",
-    comparisonLabelPlan: "前ブロック比",
-    comparisonLabelMonth: "前月比",
-    delta: {
-      up: "増加",
-      down: "減少",
-      flat: "横ばい",
-    },
-    summary: {
-      count: "回数",
-      tss: "TSS",
-      distance: "距離",
-      duration: "時間",
-    },
-    workoutMeta: {
-      duration: "Duration",
-      steps: "Steps",
-      repeats: "Repeat",
-      parsed: "Parsed DSL",
-    },
-    sportLabels: {
-      RUN: "ラン",
-      CYCLING: "ライド",
-      SWIM: "スイム",
-    },
-    workoutNames: {
-      easyRun: "イージーラン 45 min",
-      tempoRun: "ステディラン 35 min",
-      strength: "筋力アクティベーション 20 min",
-      longRun: "ロングラン 90 min",
-      recoveryRide: "リカバリーライド 50 min",
-      swim: "テクニックスイム 1.6 km",
-    },
-    workoutNotes: {
-      easyRun: "Z2 有酸素ボリューム",
-      tempoRun: "安定した有酸素コントロール",
-      strength: "モビリティと起動",
-      longRun: "長時間の持久力",
-      recoveryRide: "低強度スピン",
-      swim: "フォーム重視",
-    },
-    activityNames: {
-      easyRun: "イージーラン",
-      tempoRun: "ステディ有酸素ラン",
-      longRun: "ロングラン",
-      ride: "リカバリーライド",
-    },
-    distanceUnit: "km",
-    minuteUnit: "分",
-  },
+type CalendarDemoLocale =
+  | "en"
+  | "zh"
+  | "zh-hant"
+  | "ja"
+  | "ko"
+  | "de"
+  | "fr"
+  | "es"
+  | "it"
+  | "pt-BR";
+
+const INTL_LOCALE_BY_LANG: Record<CalendarDemoLocale, string> = {
+  en: "en",
+  zh: "zh-CN",
+  "zh-hant": "zh-Hant",
+  ja: "ja",
+  ko: "ko",
+  de: "de",
+  fr: "fr",
+  es: "es",
+  it: "it",
+  "pt-BR": "pt-BR",
 };
 
-function getCopy(lang: string): CalendarDemoCopy {
-  if (lang === "zh-hant") return copyByLang["zh-hant"];
-  if (lang === "ja") return copyByLang.ja;
-  if (lang.startsWith("zh")) return copyByLang.zh;
-  return copyByLang.en;
+const DAYJS_LOCALE_BY_LANG: Record<CalendarDemoLocale, string> = {
+  en: "en",
+  zh: "zh-cn",
+  "zh-hant": "zh-tw",
+  ja: "ja",
+  ko: "ko",
+  de: "de",
+  fr: "fr",
+  es: "es",
+  it: "it",
+  "pt-BR": "pt-br",
+};
+
+function resolveLocale(lang: string): CalendarDemoLocale {
+  if (lang in INTL_LOCALE_BY_LANG) return lang as CalendarDemoLocale;
+  const lower = lang.toLowerCase();
+  if (lower === "zh-hant" || lower === "zh-tw" || lower === "zh-hk") {
+    return "zh-hant";
+  }
+  if (lower.startsWith("zh")) return "zh";
+  if (lower.startsWith("pt")) return "pt-BR";
+  if (lower in INTL_LOCALE_BY_LANG) return lower as CalendarDemoLocale;
+  return "en";
 }
 
 function getIntlLocale(lang: string) {
-  if (lang === "zh-hant") return "zh-Hant";
-  if (lang === "pt-BR") return "pt-BR";
-  return lang || "en";
+  return INTL_LOCALE_BY_LANG[resolveLocale(lang)];
 }
 
 function getDayjsLocale(lang: string) {
-  if (lang.startsWith("zh")) return "zh-cn";
-  if (lang === "ja") return "ja";
-  return "en";
+  return DAYJS_LOCALE_BY_LANG[resolveLocale(lang)];
 }
 
 function parseClockToSeconds(token: string) {
@@ -757,9 +472,7 @@ function createDemoPlanWorkout(args: Omit<DemoPlanWorkout, "blocks">) {
   } satisfies DemoPlanWorkout;
 }
 
-function buildCalendarDemoPayload(lang: string): CalendarDemoPayload {
-  const copy = getCopy(lang);
-
+function buildCalendarDemoPayload(copy: CalendarDemoCopy): CalendarDemoPayload {
   return {
     month: "2026-06-01",
     today: "2026-06-17",
@@ -959,10 +672,6 @@ function buildCalendarDemoPayload(lang: string): CalendarDemoPayload {
   };
 }
 
-async function fetchCalendarDemoPayload(lang: string) {
-  return buildCalendarDemoPayload(lang);
-}
-
 function generateCalendarWeeks(month: Dayjs, lang: string): Dayjs[][] {
   const dayjsLocale = getDayjsLocale(lang);
   const firstOfMonth = month.locale(dayjsLocale).startOf("month");
@@ -1037,7 +746,11 @@ function buildRangeStats(args: {
   return result;
 }
 
-function useCalendarDemoViewModel(payload: CalendarDemoPayload, lang: string) {
+function useCalendarDemoViewModel(
+  payload: CalendarDemoPayload,
+  lang: string,
+  copy: CalendarDemoCopy,
+) {
   const [currentMonth, setCurrentMonth] = React.useState(() =>
     dayjs(payload.month).startOf("month"),
   );
@@ -1116,8 +829,8 @@ function useCalendarDemoViewModel(payload: CalendarDemoPayload, lang: string) {
       defaultKey: "plan" as const,
       plan: {
         key: "plan" as const,
-        title: getCopy(lang).planProgressTitle,
-        comparisonLabel: getCopy(lang).comparisonLabelPlan,
+        title: copy.planProgressTitle,
+        comparisonLabel: copy.comparisonLabelPlan,
         stats: buildRangeStats({
           start: range.startOfWeek,
           end: planProgressEnd,
@@ -1133,8 +846,8 @@ function useCalendarDemoViewModel(payload: CalendarDemoPayload, lang: string) {
       },
       month: {
         key: "month" as const,
-        title: getCopy(lang).monthOverview,
-        comparisonLabel: getCopy(lang).comparisonLabelMonth,
+        title: copy.monthOverview,
+        comparisonLabel: copy.comparisonLabelMonth,
         stats: buildRangeStats({
           start: monthStart,
           end: monthEnd,
@@ -1149,7 +862,7 @@ function useCalendarDemoViewModel(payload: CalendarDemoPayload, lang: string) {
         }),
       },
     };
-  }, [activitiesByDate, currentMonth, lang, planProgressEnd, range, tssByDate]);
+  }, [activitiesByDate, currentMonth, copy, planProgressEnd, range, tssByDate]);
 
   return {
     currentMonth,
@@ -1902,14 +1615,46 @@ export function HomeCalendarDemo({
   lang: string;
   variant?: "preview" | "expanded";
 }) {
-  const [payload, setPayload] = React.useState<CalendarDemoPayload>(() =>
-    buildCalendarDemoPayload(lang),
+  const t = useTranslations("home.demo.calendar");
+  const copy = React.useMemo<CalendarDemoCopy>(
+    () => ({
+      overview: t.raw("overview") as CalendarDemoCopy["overview"],
+      monthModeLabel: t("monthModeLabel"),
+      weekModeLabel: t("weekModeLabel"),
+      today: t("today"),
+      addButton: t("addButton"),
+      calendarSubscriptionButton: t("calendarSubscriptionButton"),
+      viewDay: t("viewDay"),
+      selectedDateLabel: t("selectedDateLabel"),
+      loadLabel: t("loadLabel"),
+      activityTab: t("activityTab"),
+      trainingTab: t("trainingTab"),
+      planCycleLabel: t("planCycleLabel"),
+      planWorkoutCount: (count) => t("planWorkoutCount", { count }),
+      noPlannedTraining: t("noPlannedTraining"),
+      noActivities: t("noActivities"),
+      summaryScope: t.raw("summaryScope") as CalendarDemoCopy["summaryScope"],
+      planProgressTitle: t("planProgressTitle"),
+      monthOverview: t("monthOverview"),
+      comparisonLabelPlan: t("comparisonLabelPlan"),
+      comparisonLabelMonth: t("comparisonLabelMonth"),
+      delta: t.raw("delta") as CalendarDemoCopy["delta"],
+      summary: t.raw("summary") as CalendarDemoCopy["summary"],
+      workoutMeta: t.raw("workoutMeta") as CalendarDemoCopy["workoutMeta"],
+      sportLabels: t.raw("sportLabels") as CalendarDemoCopy["sportLabels"],
+      workoutNames: t.raw("workoutNames") as CalendarDemoCopy["workoutNames"],
+      workoutNotes: t.raw("workoutNotes") as CalendarDemoCopy["workoutNotes"],
+      activityNames: t.raw("activityNames") as CalendarDemoCopy["activityNames"],
+      distanceUnit: t("distanceUnit"),
+      minuteUnit: t("minuteUnit"),
+    }),
+    [t],
   );
+  const payload = React.useMemo(() => buildCalendarDemoPayload(copy), [copy]);
   const displayMode = "month" as const;
   const [navigationDirection, setNavigationDirection] = React.useState<1 | -1>(
     1,
   );
-  const copy = React.useMemo(() => getCopy(lang), [lang]);
   const todayDate = React.useMemo(() => dayjs(payload.today), [payload.today]);
   const {
     currentMonth,
@@ -1926,24 +1671,12 @@ export function HomeCalendarDemo({
     tssByDate,
     range,
     summaryScopes,
-  } = useCalendarDemoViewModel(payload, lang);
+  } = useCalendarDemoViewModel(payload, lang, copy);
   const daySheetKey = React.useMemo(
     () =>
       `${selectedDate.format("YYYY-MM-DD")}|${selectedPlanWorkouts.map((w) => w.id).join(",")}|${summaryScopes.defaultKey}`,
     [selectedDate, selectedPlanWorkouts, summaryScopes.defaultKey],
   );
-
-  React.useEffect(() => {
-    let ignore = false;
-
-    void fetchCalendarDemoPayload(lang).then((data) => {
-      if (!ignore) setPayload(data);
-    });
-
-    return () => {
-      ignore = true;
-    };
-  }, [lang]);
 
   const applySelectedDate = React.useCallback(
     (nextDate: Dayjs) => {
@@ -1990,7 +1723,6 @@ export function HomeCalendarDemo({
   }, [currentMonth, lang]);
   const isExpanded = variant === "expanded";
   const { view, openDay, goMain } = useDemoSubView({
-    lang,
     interactive: isExpanded,
   });
   const [dayDateKey, setDayDateKey] = React.useState(() =>

@@ -1,0 +1,434 @@
+{
+  "labels": {
+    "eyebrow": "Trova il tuo prossimo passo",
+    "faq": "Domande prima di iniziare",
+    "goal": "Soglia del tempo finale",
+    "perKm": "Media / km",
+    "perMile": "Media / miglio",
+    "paceNote": "Passi medi di gara arrotondati, non target per la corsa lenta o le ripetute. Per chiudere sotto un certo tempo, la tua media reale deve essere più veloce della soglia esatta. Contano anche il percorso, il meteo e la distanza effettivamente corsa.",
+    "paceTool": "Calcola i parziali di gara",
+    "vdotTool": "Verifica i passi di allenamento da un risultato recente",
+    "viewSchedule": "Visualizza la tabella gratuita",
+    "addPlan": "Aggiungi gratis il piano 10K",
+    "startFoundation": "Inizia gratis il piano corsa–camminata",
+    "showFoundation": "Apri la tabella corsa–camminata di 9 settimane",
+    "foundationSchedule": "Fase 1 · Costruisci la corsa continua",
+    "tenKSchedule": "Fase 2 · La tabella 10K di 10 settimane",
+    "stageNote": "Aggiungi le fasi al calendario separatamente. Inizia la fase 10K quando la sua prima settimana ti sembra gestibile; ripeti o prolunga la fase di base secondo necessità.",
+    "freeNote": "La tabella completa è consultabile gratuitamente. Aggiungi gratis il piano ufficiale al tuo calendario e inizia ad allenarti.",
+    "screenshotNote": "Web e iPhone · schermate del prodotto con dati di allenamento di esempio",
+    "relatedTitle": "Scegli il punto di partenza giusto",
+    "hub5K": "Tutti i piani di allenamento 5K",
+    "hub10K": "Tutti i piani di allenamento 10K",
+    "bridge5K": "Da 5K a 10K",
+    "couch10K": "Da zero a 10K",
+    "sources": "Informazioni su questa progressione",
+    "sourceNote": "Queste sono tabelle di Trainingload.ai. Le linee guida NHS spiegano l'approccio corsa–camminata e la possibilità di dedicare più di nove settimane; Polar sottolinea l'importanza di una base di corsa facile prima di un blocco sui 10K. Nessuna delle due fonti approva ufficialmente questo piano."
+  },
+  "guides": {
+    "couch-to-5k-training-plan": {
+      "title": "Cosa viene dopo «Da zero a 5K»?",
+      "intro": "Completare il programma è un punto di partenza, non una scadenza per correre subito più a lungo. Trenta minuti di corsa non equivalgono automaticamente a 5K.",
+      "items": [
+        {
+          "title": "Rendi ripetibile il tuo primo 5K",
+          "text": "Continua a consolidare corse continue e confortevoli prima di aggiungere distanza o velocità. La sezione 5K ti aiuta a scegliere tra il primo traguardo e un blocco di miglioramento.",
+          "href": "/5k-training-plan",
+          "link": "Scegli un piano 5K"
+        },
+        {
+          "title": "Avvicinati ai 10K per fasi",
+          "text": "Usa il percorso «Da zero a 10K» per vedere insieme la fase di base, la verifica di preparazione e il successivo blocco di 10 settimane.",
+          "href": "/couch-to-10k-training-plan",
+          "link": "Vedi la progressione da zero a 10K"
+        }
+      ],
+      "faq": []
+    },
+    "5k-training-plan": {
+      "title": "Dopo il tuo primo 5K: più veloce o più lontano?",
+      "intro": "Scegli un solo prossimo obiettivo così che l'allenamento abbia una direzione chiara. Non serve aumentare distanza e intensità contemporaneamente.",
+      "items": [
+        {
+          "title": "Corri un 5K più veloce",
+          "text": "Il piano intermedio di 8 settimane introduce ripetute controllate e lavori di tempo run per runner con una base ripetibile e un risultato recente.",
+          "href": "/5k-training-plan/intermediate",
+          "link": "Vedi il piano 5K intermedio"
+        },
+        {
+          "title": "Passa da 5K a 10K",
+          "text": "Mantieni tre uscite a settimana e allunga gradualmente il lungo. Verifica il carico della prima settimana prima di iniziare il piano di 10 settimane.",
+          "href": "/5k-to-10k-training-plan",
+          "link": "Vedi il piano da 5K a 10K"
+        }
+      ],
+      "faq": []
+    },
+    "5k-training-plan-intermediate": {
+      "title": "Stai preparando un 5K sub-25 o sub-20?",
+      "intro": "Un 5K sub-25 richiede una media più veloce di 5:00/km; un sub-20 più veloce di 4:00/km. Sono soglie di ritmo gara, non il passo per ogni allenamento.",
+      "items": [
+        {
+          "title": "Parti dalla forma attuale",
+          "text": "Usa un risultato recente in gara per stimare i passi di allenamento. La stessa struttura di otto settimane non garantisce nessuno dei due tempi: contano il punto di partenza e la capacità di recupero.",
+          "href": "/vdot-calculator",
+          "link": "Stima i passi di allenamento"
+        },
+        {
+          "title": "Rendi esplicito il passo gara",
+          "text": "Controlla i parziali al chilometro separatamente rispetto a corsa facile, tempo run e ripetute. Se il carico attuale non è ripetibile, torna al piano per il primo traguardo prima di inserire sedute più veloci.",
+          "href": "/5k-training-plan",
+          "link": "Confronta i punti di partenza 5K"
+        }
+      ],
+      "faq": []
+    },
+    "10k-training-plan": {
+      "title": "Quale piano di allenamento 10K si adatta al tuo punto di partenza?",
+      "intro": "Questa tabella per principianti dura 10 settimane con tre uscite a settimana. Un calendario più breve o un obiettivo più veloce richiedono una base di partenza diversa.",
+      "items": [
+        {
+          "title": "Corri già 5K con facilità",
+          "text": "Scopri come la prima settimana, la progressione del lungo da 45 a 65 minuti e i giorni di recupero costruiscono il ponte verso i 10K.",
+          "href": "/5k-to-10k-training-plan",
+          "link": "Progressione da 5K a 10K"
+        },
+        {
+          "title": "Parti dalla camminata",
+          "text": "Costruisci prima la corsa continua, poi verifica di essere pronto per il blocco 10K. Il percorso «Da zero a 10K» unisce entrambe le fasi senza una scadenza fissa.",
+          "href": "/couch-to-10k-training-plan",
+          "link": "Progressione da zero a 10K"
+        },
+        {
+          "title": "Cerchi un piano intermedio di 8 settimane",
+          "text": "Scegli il blocco dedicato al miglioramento se hai già una base di corsa costante. È una tabella separata, non questo piano per principianti accorciato di due settimane.",
+          "href": "/10k-training-plan/improve",
+          "link": "Piano 10K intermedio di 8 settimane"
+        }
+      ],
+      "faq": []
+    },
+    "half-marathon-training-plan": {
+      "title": "Prima mezza maratona, preparazione di 12 settimane o obiettivo sub-2 ore?",
+      "intro": "Il piano principianti di 14 settimane punta a tagliare il traguardo. Scegli un blocco diverso se hai già la resistenza e vuoi migliorare il tuo tempo.",
+      "items": [
+        {
+          "title": "Piano intermedio mezza maratona di 12 settimane",
+          "text": "Pensato per runner già strutturati, il blocco di miglioramento aggiunge lavori più specifici. Confronta la sua prima settimana con il tuo allenamento recente prima di sceglierlo.",
+          "href": "/half-marathon-training-plan/improve",
+          "link": "Vedi il piano di 12 settimane"
+        },
+        {
+          "title": "Mezza maratona sotto le 2 ore",
+          "text": "Una mezza maratona in due ore corrisponde a una media di circa 5:41/km. La pagina sul tempo obiettivo spiega questo passo, i requisiti di preparazione e la tabella dedicata di 14 settimane.",
+          "href": "/half-marathon-training-plan/target",
+          "link": "Esplora l'obiettivo sub-2 ore"
+        }
+      ],
+      "faq": []
+    },
+    "marathon-training-plan": {
+      "title": "Scegli la tua preparazione maratona di 18 settimane",
+      "intro": "Diciotto settimane indicano la durata, non la difficoltà. Una prima maratona, un primato personale e un tempo specifico richiedono preparazioni diverse.",
+      "items": [
+        {
+          "title": "Migliora una maratona precedente",
+          "text": "Scegli il blocco intermedio quando hai già una base di corsa costante e lunghi consolidati. Verifica il carico settimanale effettivo prima di iniziare.",
+          "href": "/marathon-training-plan/improve",
+          "link": "Piano maratona intermedio di 18 settimane"
+        },
+        {
+          "title": "Punta al sub-4 o al sub-3",
+          "text": "Quattro ore corrispondono a una media di circa 5:41/km; tre ore a circa 4:16/km. Un calcolo del passo da solo non basta a confermare che sei pronto per uno dei due obiettivi.",
+          "href": "/marathon-training-plan/target",
+          "link": "Confronta i tempi obiettivo in maratona"
+        }
+      ],
+      "faq": []
+    },
+    "improve-10k": {
+      "title": "Piano 10K intermedio di 8 settimane: è il passo giusto?",
+      "intro": "Questo è un blocco di miglioramento per chi ha già una routine di corsa consolidata. Confronta la settimana 1 con il tuo allenamento recente, inclusi gli allenamenti di qualità e il tempo per il recupero.",
+      "items": [
+        {
+          "title": "Se il tuo obiettivo è ancora il primo 10K",
+          "text": "Scegli il piano principianti di 10 settimane e tre uscite a settimana quando la priorità è estendere la corsa continua in modo confortevole.",
+          "href": "/10k-training-plan",
+          "link": "Vedi il piano 10K per principianti"
+        },
+        {
+          "title": "Se hai in mente un tempo finale",
+          "text": "Usa la pagina degli obiettivi per confrontare le medie gara sub-40, sub-45 e sub-50 e valutarle rispetto a un tuo risultato recente.",
+          "href": "/10k-training-plan/target",
+          "link": "Esplora i tempi obiettivo 10K"
+        }
+      ],
+      "faq": [
+        [
+          "Posso usare questo piano di 8 settimane se sono un principiante assoluto?",
+          "No. Otto settimane è la durata di questo blocco intermedio, non una scorciatoia partendo da zero. Inizia dalla tabella di base o da quella per principianti se la settimana 1 supera la tua routine attuale."
+        ],
+        [
+          "Devo seguire il passo di esempio indicato nella tabella?",
+          "L'esempio pubblico usa VDOT 40 solo a scopo illustrativo e non è la tua prescrizione. Usa un risultato recente per ricavare i passi di allenamento e mantieni le corse facili a un ritmo da conversazione."
+        ]
+      ]
+    },
+    "target-10k": {
+      "title": "10K sub-40, sub-45 o sub-50: trasforma l'obiettivo in un passo",
+      "intro": "Il blocco obiettivo di 10 settimane è una struttura condivisa, non tre piani separati a risultato garantito. Confronta il passo gara richiesto con le tue prestazioni recenti prima di scegliere l'obiettivo.",
+      "items": [
+        {
+          "title": "Basati su una gara recente",
+          "text": "Un 5K o un 10K recente aiuta a valutare il divario. Usalo per stimare i tuoi passi di allenamento attuali invece di forzare ogni uscita sul passo medio dell'obiettivo.",
+          "href": "/vdot-calculator",
+          "link": "Verifica i passi di allenamento attuali"
+        },
+        {
+          "title": "Tieni separati primo traguardo e obiettivi cronometrici",
+          "text": "Se la corsa continua confortevole è ancora in costruzione, inizia dal piano per principianti. Potrai passare a un blocco orientato al tempo quando quel carico sarà ripetibile.",
+          "href": "/10k-training-plan",
+          "link": "Confronta i piani 10K"
+        }
+      ],
+      "faq": [
+        [
+          "Quale passo serve per un 10K sub-50?",
+          "Più veloce di 5:00 al chilometro di media. Il sub-45 richiede una media più veloce di 4:30/km e il sub-40 più veloce di 4:00/km. Sono medie gara, non obiettivi per la corsa facile."
+        ],
+        [
+          "Questo piano garantisce un risultato sub-40 o sub-50?",
+          "No. La tabella di dieci settimane non può garantire un tempo finale. Prestazioni recenti, continuità, recupero e condizioni di gara influiscono tutte sul risultato."
+        ]
+      ]
+    },
+    "improve-half-marathon": {
+      "title": "Come usare un piano intermedio di mezza maratona di 12 settimane",
+      "intro": "Inizia questo blocco con una routine di corsa già consolidata. Le dodici settimane servono a sviluppare la condizione di gara, non a costruire tutta la resistenza da zero.",
+      "items": [
+        {
+          "title": "Controlla la prima settimana",
+          "text": "Valuta insieme il lungo e gli allenamenti di qualità. Se rappresentano un salto troppo grande rispetto alle tue ultime settimane, concediti più tempo di base.",
+          "href": "/half-marathon-training-plan",
+          "link": "Confronta con il piano principianti di 14 settimane"
+        },
+        {
+          "title": "Scegli un obiettivo cronometrico realistico",
+          "text": "Se stai valutando il sub-2 ore, confronta quel passo gara con un risultato recente e con la tua tenuta nei lunghi prima di passare al blocco obiettivo.",
+          "href": "/half-marathon-training-plan/target",
+          "link": "Vedi il piano obiettivo mezza maratona"
+        }
+      ],
+      "faq": [
+        [
+          "Posso accorciare il piano per principianti a dodici settimane?",
+          "Questa è una tabella intermedia distinta. Togliere settimane al piano principianti di quattordici settimane elimina parte della progressione e non lo trasforma in questo piano."
+        ],
+        [
+          "I miei lunghi devono essere corsi al passo obiettivo della mezza maratona?",
+          "Non come regola generale. Segui lo sforzo e la struttura di ogni seduta: il passo obiettivo non sostituisce la corsa facile."
+        ]
+      ]
+    },
+    "target-half-marathon": {
+      "title": "Una mezza maratona sub-2 ore inizia da un passo realistico",
+      "intro": "Due ore su 21,0975 km corrispondono a una media di circa 5:41/km o 9:09/miglio. Questo blocco di 14 settimane orientato al tempo aiuta a organizzare la preparazione, ma l'obiettivo deve restare in linea con la tua forma attuale.",
+      "items": [
+        {
+          "title": "Verifica sia velocità che resistenza",
+          "text": "Un 5K o un 10K recente offre un riferimento utile, ma una previsione non dimostra che tu possa sostenere quello sforzo per 21,1 km. Valuta anche i lunghi e il recupero.",
+          "href": "/race-time-predictor",
+          "link": "Confronta un risultato recente"
+        },
+        {
+          "title": "Scegli il piano per il primo traguardo se serve",
+          "text": "Se il carico del piano obiettivo rappresenta un salto eccessivo, il piano per principianti mantiene l'attenzione sulla costruzione della resistenza per completare la tua prima mezza maratona.",
+          "href": "/half-marathon-training-plan",
+          "link": "Vedi tutti i piani mezza maratona"
+        }
+      ],
+      "faq": [
+        [
+          "5:41/km basta per una mezza maratona sub-2 ore?",
+          "È un riferimento arrotondato. La soglia esatta delle due ore è circa 5:41,27/km: la tua media deve essere più veloce di quel valore e la distanza effettivamente percorsa può superare i 21,0975 km."
+        ],
+        [
+          "Devo correre ogni allenamento al passo sub-2 ore?",
+          "No. Corsa facile, lunghi e allenamenti di qualità hanno scopi diversi. Segui lo sforzo indicato per ciascuna seduta anziché usare il passo gara ovunque."
+        ]
+      ]
+    },
+    "improve-marathon": {
+      "title": "Un piano maratona intermedio di 18 settimane richiede una base esistente",
+      "intro": "Il calendario ti dà il tempo per costruire volume, provare l'integrazione in gara e fare lo scarico. Non sostituisce la continuità necessaria per affrontare la settimana 1.",
+      "items": [
+        {
+          "title": "Controlla l'intera settimana, non solo il lungo",
+          "text": "Confronta la prima settimana con le tue settimane recenti e lascia spazio al recupero. Le sedute saltate non vanno accumulate sulla settimana successiva.",
+          "href": "/marathon-training-plan",
+          "link": "Confronta i punti di partenza maratona"
+        },
+        {
+          "title": "Distingui il miglioramento da una promessa di tempo",
+          "text": "Usa il piano obiettivo quando hai un traguardo cronometrico supportato da risultati recenti. Sub-4 e sub-3 richiedono passi gara profondamente diversi.",
+          "href": "/marathon-training-plan/target",
+          "link": "Esplora i tempi obiettivo in maratona"
+        }
+      ],
+      "faq": [
+        [
+          "Un piano maratona di 18 settimane è adatto ai principianti?",
+          "Esiste un piano separato di diciotto settimane per completare la prima maratona. Questa versione intermedia presuppone una routine di corsa consolidata: confronta il carico iniziale reale invece di scegliere solo in base alla durata."
+        ],
+        [
+          "Devo aggiungere altri lunghi per migliorare più in fretta?",
+          "Segui la progressione pianificata e i giorni di recupero. Aggiungere un altro lungo aumenta il carico senza garantire un risultato migliore, soprattutto se fai già fatica a recuperare."
+        ]
+      ]
+    },
+    "target-marathon": {
+      "title": "Maratona sub-4 o sub-3: scegli l'obiettivo prima del passo",
+      "intro": "Quattro ore corrispondono a una media di circa 5:41/km; tre ore a circa 4:16/km. Questa struttura di 18 settimane orientata al tempo va allineata alla tua condizione attuale, alla resistenza e al recupero.",
+      "items": [
+        {
+          "title": "Guarda oltre il tempo previsto",
+          "text": "Una mezza maratona recente è un dato utile, ma un calcolatore non può valutare l'integrazione, la tenuta muscolare o come recuperi dopo i lunghi.",
+          "href": "/race-time-predictor",
+          "link": "Confronta le prestazioni in gara"
+        },
+        {
+          "title": "Mantieni i passi di allenamento legati al livello attuale",
+          "text": "Non usare la media desiderata per la maratona in ogni corsa facile. Le indicazioni sui passi devono derivare dai risultati recenti e dallo scopo di ogni seduta.",
+          "href": "/vdot-calculator",
+          "link": "Stima i passi di allenamento attuali"
+        }
+      ],
+      "faq": [
+        [
+          "Quale passo corrisponde a una maratona sub-4 o sub-3?",
+          "Sui 42,195 km, la soglia esatta delle quattro ore è circa 5:41,27/km e quella delle tre ore circa 4:15,95/km. Per scendere sotto questi tempi serve una media più veloce; la tabella arrotonda i valori per leggibilità."
+        ],
+        [
+          "La stessa tabella garantisce sia il sub-3 che il sub-4?",
+          "No. È una struttura di allenamento orientata a un tempo obiettivo. Carico e intensità appropriati dipendono dal livello attuale e nessun tempo finale è garantito. Usa il piano per il primo traguardo se questo blocco supera la tua base."
+        ]
+      ]
+    }
+  },
+  "bridges": {
+    "5k-to-10k-training-plan": {
+      "metaTitle": "Piano di allenamento da 5K a 10K | Tabella gratuita 10 settimane, 3 giorni",
+      "metaDescription": "Passa da un 5K confortevole al tuo primo 10K con un piano gratuito di 10 settimane: tre uscite a settimana, verifica di preparazione, allenamenti completi e accesso al calendario.",
+      "eyebrow": "5K → 10K · piano di allenamento gratuito",
+      "heading": ["Piano di allenamento", "da 5K a 10K."],
+      "intro": "Corri già 5K con facilità? Costruisci i 10K in dieci settimane con tre uscite a settimana, giorni di recupero e una progressione graduale del lungo.",
+      "facts": [
+        ["Durata", "10 settimane"],
+        ["Frequenza", "3 uscite / settimana"],
+        ["Punto di partenza", "5K confortevoli"],
+        ["Obiettivo", "Completare il primo 10K"]
+      ],
+      "readinessTitle": "Prima di aumentare la distanza",
+      "readiness": [
+        "Riesci a ripetere un 5K facile o circa 30–40 minuti di corsa continua; un singolo 5K tirato al massimo non rappresenta la stessa base.",
+        "La prima settimana include due corse facili e un lungo da 45 minuti. Verifica che sia gestibile rispetto al tuo allenamento recente.",
+        "Puoi inserire giorni di recupero tra le uscite. Se la stanchezza si accumula o un dolore modifica la tua falcata, non aumentare il carico."
+      ],
+      "stages": [
+        {
+          "title": "Mantieni la regolarità",
+          "text": "Inizia con tre giorni di corsa ben distanziati. Tieni facili le sedute più brevi mentre prendi confidenza con il carico iniziale."
+        },
+        {
+          "title": "Allunga il lungo",
+          "text": "I lunghi progrediscono da 45 minuti fino a un picco di 65 minuti nella settimana 7. Le settimane 4, 6 e 8 prevedono lavori a ritmo costante controllato, non ripetute massimali."
+        },
+        {
+          "title": "Arriva pronto ai 10K",
+          "text": "Riduci il carico prima della settimana di gara e parti con prudenza nei 10K finali. Brevi pause di camminata sono ammesse: l'obiettivo è completare la distanza."
+        }
+      ],
+      "faq": [
+        [
+          "Quanto tempo serve per passare da 5K a 10K?",
+          "Questo blocco dura dieci settimane per chi ha già una base di corsa facile. Potresti aver bisogno di settimane di base aggiuntive o di ripetere qualche settimana: aver concluso un singolo 5K non garantisce di essere pronto per una data fissa."
+        ],
+        [
+          "Posso preparare un 10K correndo tre giorni a settimana?",
+          "Questa tabella ufficiale prevede tre uscite settimanali, in genere separate da giorni di riposo. La maggior parte delle sedute è facile o lunga; nelle settimane 4, 6 e 8 sono inseriti brevi lavori a ritmo costante."
+        ],
+        [
+          "Posso completare il passaggio in sei o otto settimane?",
+          "Non tagliare settimane di recupero o costruzione per incastrare una data. Il piano separato di miglioramento 10K di otto settimane è pensato per runner già esperti e non è una versione ridotta di questa progressione per il primo traguardo."
+        ],
+        [
+          "Devo correre tutti i 10K prima del giorno della gara?",
+          "Non in questo piano. Il lungo massimo è impostato su 65 minuti e si basa sullo sforzo: la distanza coperta dipende dal tuo passo. La seduta finale è di 10K."
+        ],
+        [
+          "In cosa si differenzia dalla pagina 10K per principianti?",
+          "Usa gli stessi allenamenti ufficiali del piano finish-10k. Questa pagina spiega il passaggio partendo da una base 5K esistente; la sezione 10K confronta le opzioni principiante, intermedio e tempo obiettivo."
+        ]
+      ]
+    },
+    "couch-to-10k-training-plan": {
+      "metaTitle": "Piano di allenamento da zero a 10K | Progressione gratuita per principianti",
+      "metaDescription": "Inizia alternando camminata e corsa, costruisci la corsa continua e poi progredisci fino ai 10K. Due tabelle gratuite, tre uscite a settimana e una verifica chiara di preparazione.",
+      "eyebrow": "Da zero a 10K · parti dalla camminata",
+      "heading": ["Da zero a 10K.", "Parti dalla camminata."],
+      "intro": "Costruisci prima l'abitudine alla corsa con nove settimane di allenamento corsa–camminata. Quando la corsa continua diventa confortevole, passa al piano 10K di dieci settimane.",
+      "facts": [
+        ["Base", "Piano corsa–camminata 9 settimane"],
+        ["Fase successiva", "Piano 10K 10 settimane"],
+        ["Frequenza", "3 uscite / settimana"],
+        ["Passaggio", "Quando sei pronto"]
+      ],
+      "readinessTitle": "Il passaggio tra i due piani è decisivo",
+      "readiness": [
+        "Concludi la fase corsa–camminata con una corsa continua confortevole. Trenta minuti non corrispondono automaticamente a 5K: la distanza dipende dal passo.",
+        "Prima di avviare il blocco 10K, consolida un 5K facile ripetibile o circa 30–40 minuti di corsa e verifica il lungo iniziale da 45 minuti.",
+        "Concediti settimane extra di base o ripeti le settimane quando serve. Nove più dieci descrive le due tabelle, non un risultato garantito da zero a 10K in 19 settimane."
+      ],
+      "stages": [
+        {
+          "title": "01 / Costruisci l'abitudine · 9 settimane",
+          "text": "Alterna brevi tratti di corsa facile e camminata, mantieni tre sedute a settimana e arriva gradualmente a 30 minuti di corsa continua."
+        },
+        {
+          "title": "02 / Consolida · al tuo ritmo",
+          "text": "Mantieni la corsa confortevole e ripetibile. Valuta il recupero e il carico della prima settimana del piano successivo prima di allungare il lungo."
+        },
+        {
+          "title": "03 / Costruisci i 10K · 10 settimane",
+          "text": "Usa il blocco ufficiale per il primo 10K quando sei pronto. Mantiene tre uscite a settimana, allunga progressivamente il lungo e include uno scarico prima dei 10K finali."
+        }
+      ],
+      "faq": [
+        [
+          "Quante settimane richiede il percorso «Da zero a 10K»?",
+          "Questo percorso combina una tabella di base di nove settimane seguita da una tabella 10K di dieci settimane, con eventuali settimane extra di consolidamento o ripetizione. Non è una promessa fissa di diciannove settimane."
+        ],
+        [
+          "Posso iniziare il piano 10K di dieci settimane senza esperienza di corsa?",
+          "No. La sua prima settimana presuppone una base di corsa facile. Parti dalla fase corsa–camminata se inizi dalla camminata."
+        ],
+        [
+          "C'è un piano NHS Couch to 10K su questa pagina?",
+          "No. Queste sono tabelle di Trainingload.ai. NHS Couch to 5K è un programma separato; la fonte NHS citata in basso spiega l'approccio corsa–camminata e non costituisce un'approvazione di questa progressione verso i 10K."
+        ],
+        [
+          "Cosa faccio se completo «Da zero a 5K» ma non corro cinque chilometri?",
+          "È del tutto possibile: trenta minuti di corsa coprono distanze diverse a seconda del passo. Consolida una corsa continua confortevole prima di usare la verifica di preparazione per i 10K."
+        ],
+        [
+          "Posso aggiungere l'intera progressione al mio calendario?",
+          "Aggiungi prima il piano di base di nove settimane, poi aggiungi il piano 10K di dieci settimane quando sei pronto. Sono due modelli ufficiali separati, quindi scegli tu la data del passaggio."
+        ],
+        [
+          "E se corro già 5K con facilità?",
+          "Usa il percorso da 5K a 10K e controlla il carico della prima settimana. Non serve ripetere la base corsa–camminata solo per seguire questa progressione."
+        ]
+      ]
+    }
+  }
+}

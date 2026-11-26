@@ -1,4 +1,673 @@
 {
+  "danielsRunningFormula": {
+    "content": {
+      "metadataTitle": "丹尼尔斯经典跑步训练法：VDOT 与 E/M/T/I/R 完整指南 | Trainingload.ai",
+      "metadataDescription": "了解公开资料中的 Daniels 训练原则、VDOT、E/M/T/I/R 强度，以及负责任的非官方适配计划还需要哪些输入。",
+      "eyebrow": "跑步训练方法指南",
+      "title": "丹尼尔斯经典跑步训练法：从 VDOT 到一份能执行的训练计划",
+      "subtitle": "理解 VDOT、E/M/T/I/R 各自解决什么问题，并把当前跑力——而不是愿望中的目标跑力——转化为结构化计划。",
+      "directAnswer": "Jack Daniels 系统化提出了一套基于跑步表现的训练方法：用 VDOT 表示跑者当前能够兑现的能力，再把训练分为轻松、马拉松、阈值、间歇和重复跑，让不同 Workout 服务于不同适应目标。",
+      "primaryCta": "计算我的当前 VDOT",
+      "secondaryCta": "查看训练工具",
+      "toc": "本文内容",
+      "tocItems": [
+        [
+          "what",
+          "训练法是什么"
+        ],
+        [
+          "vdot",
+          "VDOT 是什么"
+        ],
+        [
+          "paces",
+          "E/M/T/I/R 配速"
+        ],
+        [
+          "periodization",
+          "如何组成计划"
+        ],
+        [
+          "mistakes",
+          "常见错误"
+        ],
+        [
+          "faq",
+          "常见问题"
+        ]
+      ],
+      "whatTitle": "什么是丹尼尔斯经典跑步训练法？",
+      "whatParagraphs": [
+        "它不只是一张配速表，而是把当前跑力、具有明确目的的训练强度、训练量上限、恢复和比赛专项周期组合在一起。",
+        "《Daniels' Running Formula》第四版涵盖训练原则、VDOT、训练强度、赛季规划，以及从中距离到马拉松等项目的应用。"
+      ],
+      "lawsTitle": "这套方法最有价值的思想",
+      "lawsText": "不同跑者可能依靠最大摄氧能力、跑步经济性、动作与耐受性的不同组合跑出相近成绩。因此计划应从已经表现出来的当前能力出发，并让每次质量训练都有清楚目的。",
+      "vdotTitle": "VDOT 是训练锚点，不是实验室 VO₂max",
+      "vdotParagraphs": [
+        "VDOT 与氧利用能力有关，但不能直接等同于实验室最大摄氧量或手表估算值。它反映跑者当前能在比赛中兑现的综合能力，也间接包含跑步经济性的影响。",
+        "训练配速应按照当前 VDOT。目标成绩可以决定计划方向，但不应在能力尚未达到时强行抬高训练配速。"
+      ],
+      "paceTitle": "五种核心训练强度",
+      "paceIntro": "这些字母表达 Workout 的训练意图，并不代表五种强度应该平均出现；绝大多数跑量仍应保持轻松，质量训练只在必要时使用。",
+      "intensities": [
+        {
+          "key": "E",
+          "name": "Easy｜轻松跑",
+          "purpose": "建立有氧能力、耐久性和恢复，也是多数长跑的基础。",
+          "feel": "可以交谈，呼吸受控。",
+          "mistake": "把每次轻松跑都跑成中等强度。"
+        },
+        {
+          "key": "M",
+          "name": "Marathon｜马拉松配速",
+          "purpose": "熟悉专项节奏、练习补给并建立比赛信心。",
+          "feel": "稳定可控，但持续时间越长疲劳越明显。",
+          "mistake": "把 M 配速当成日常有氧跑默认配速。"
+        },
+        {
+          "key": "T",
+          "name": "Threshold｜乳酸阈值",
+          "purpose": "提高可持续速度以及处理乳酸的能力。",
+          "feel": "舒服地难受，只能说短句。",
+          "mistake": "把训练跑成比赛，导致后半程失控。"
+        },
+        {
+          "key": "I",
+          "name": "Interval｜间歇跑",
+          "purpose": "累计接近最大有氧功率的有效训练时间。",
+          "feel": "很难但可控制，单组通常持续数分钟。",
+          "mistake": "每组一开始就冲刺。"
+        },
+        {
+          "key": "R",
+          "name": "Repetition｜重复跑",
+          "purpose": "改善跑步经济性、协调、速度和快速跑时的放松程度。",
+          "feel": "快速、流畅，组间恢复充分。",
+          "mistake": "缩短恢复，把动作训练做成耐力测试。"
+        }
+      ],
+      "periodizationTitle": "这些强度如何组成一份训练计划",
+      "periodizationText": "计划通常先建立稳定有氧基础，再发展跑步经济性与质量能力，之后接近目标赛事的专项需求，最后减量。具体组合取决于目标距离、周期、当前跑量、可训练日和恢复，而不只取决于 VDOT。",
+      "goalRows": [
+        [
+          "5K",
+          "E 打底，R 改善经济性，I 提升有氧功率，T 提供持续能力"
+        ],
+        [
+          "10K",
+          "E 打底，T 提升耐力，I 使用较长间歇"
+        ],
+        [
+          "半程马拉松",
+          "E 与长跑为主，结合 T 和受控专项训练"
+        ],
+        [
+          "马拉松",
+          "E 与长跑、M 专项、T、补给练习和减量"
+        ]
+      ],
+      "mistakesTitle": "方法适配计划需要避免的六个错误",
+      "mistakes": [
+        "按照目标 VDOT，而不是当前 VDOT 训练。",
+        "只凭 VDOT 决定跑量，不询问当前周跑量。",
+        "连续安排两个高强度训练日。",
+        "同一周同时激进增加跑量和强度。",
+        "漏训后通过堆叠质量课补课。",
+        "天气炎热、爬坡、海拔或疲劳明显变化时仍死守配速。"
+      ],
+      "generatorTitle": "VDOT 本身不是一份完整计划",
+      "generatorText": "VDOT 可以锚定强度，但负责任的计划还需要近期跑量、长跑耐受、可训练日、恢复、目标距离和可追溯的方法规则。Trainingload.ai 当前不发布 Daniels 命名或 Daniels 方法适配计划。",
+      "generatorCta": "计算我的当前 VDOT",
+      "sourcesTitle": "资料来源与关系声明",
+      "sourcesText": "Jack Daniels、《Daniels' Running Formula》和 VDOT 仅用于说明公开资料中的训练原则与资料来源。Trainingload.ai 与 Jack Daniels、V.O2 及相关机构不存在隶属、赞助、认证或背书关系。本页是训练教育指南，不是训练计划。",
+      "faqTitle": "常见问题",
+      "faq": [
+        [
+          "VDOT 等于最大摄氧量吗？",
+          "不等于。VDOT 是基于跑步表现的训练数值；实验室 VO₂max 和手表估算值虽然相关，但不能直接互换。"
+        ],
+        [
+          "应该按照当前 VDOT 还是目标 VDOT 训练？",
+          "按照当前 VDOT。目标成绩可以决定计划方向，但不能直接让今天的训练配速变快。"
+        ],
+        [
+          "多久更新一次 VDOT？",
+          "在有代表性的比赛或可控测试后更新，不要因为每一次普通跑步而变化；已经完成的 Workout 处方保持不变。"
+        ],
+        [
+          "这是官方 Daniels 计划吗？",
+          "不是。本页是训练教育指南，Trainingload.ai 当前不发布 Daniels 命名或 Daniels 方法适配计划。"
+        ]
+      ],
+      "safety": "本文为训练教育内容，不构成医疗建议。出现胸痛、晕厥、异常呼吸困难或持续加重的疼痛时，应停止训练并寻求合格专业帮助。"
+    }
+  },
+  "rpeScale": {
+    "content": {
+      "metadataTitle": "RPE 是什么？跑步 1–10 主观强度表 | Trainingload.ai",
+      "metadataDescription": "了解跑步 RPE 1–10 强度表、谈话测试，以及轻松跑、节奏跑、间歇和 5K 训练应该使用什么 RPE，并比较 RPE、配速与心率。",
+      "keywords": [
+        "RPE 是什么",
+        "RPE 强度",
+        "RPE 量表",
+        "跑步 RPE",
+        "RPE 3-4",
+        "主观用力程度",
+        "谈话测试",
+        "RPE 和心率"
+      ],
+      "shortTitle": "RPE 主观强度表",
+      "eyebrow": "训练强度指南",
+      "title": "RPE 是什么？看懂跑步 1–10 主观强度",
+      "subtitle": "弄清 RPE 3–4、5–6 和 7–9 应该是什么体感，学会用谈话测试校验强度，也理解为什么一份可靠计划不一定总要给出配速。",
+      "directAnswer": "RPE 是主观用力程度评分，用来描述运动感觉有多吃力。Trainingload.ai 使用实用的 1–10 分量表：1 代表几乎没有负荷，10 代表只能短时间维持的最大努力。它描述的是身体内部负荷，不是固定配速。",
+      "effortFirstLabel": "先判断体感，再参考配速。",
+      "primaryCta": "查看 RPE 强度表",
+      "secondaryCta": "选择 5K 计划",
+      "toc": "本文内容",
+      "tocItems": [
+        [
+          "what-is-rpe",
+          "RPE 是什么"
+        ],
+        [
+          "rpe-scale",
+          "RPE 1–10 强度表"
+        ],
+        [
+          "5k-plans",
+          "5K 计划如何使用 RPE"
+        ],
+        [
+          "rpe-vs-pace-heart-rate",
+          "RPE、配速与心率"
+        ],
+        [
+          "ai-coach",
+          "智能教练如何使用 RPE"
+        ],
+        [
+          "rpe-meanings",
+          "三种 RPE 的区别"
+        ],
+        [
+          "faq",
+          "常见问题"
+        ]
+      ],
+      "definitionTitle": "什么是 RPE？",
+      "definitionParagraphs": [
+        "RPE 是一种主观强度指标。它不只问你跑了多快、心率是多少，而是综合呼吸、肌肉负担和全身体感，判断这段运动对你来说有多难。",
+        "传统 Borg 量表常见 6–20 分版本，耐力训练也常使用更容易理解的 0 或 1–10 分版本。Trainingload.ai 计划统一使用 1–10 分，因此计划里的 RPE 4 不是 6–20 量表中的 4。",
+        "炎热、爬坡、逆风、疲劳、睡眠和陌生路线都会改变同一配速的实际代价。基线不足时可以单独使用 RPE；有可靠数据时，也可以把它与配速和心率结合。"
+      ],
+      "scaleTitle": "跑步 RPE 1–10 强度表",
+      "scaleIntro": "同时观察呼吸、说话能力、控制感和能否重复完成。只看其中一个信号容易误判。",
+      "scaleHeaders": [
+        "RPE",
+        "强度",
+        "身体感觉",
+        "谈话测试",
+        "典型训练"
+      ],
+      "scaleRows": [
+        {
+          "id": "rpe-1-2",
+          "range": "1–2",
+          "label": "非常轻松",
+          "feel": "几乎没有压力，动作放松",
+          "talkTest": "可以正常交谈",
+          "training": "步行、热身、恢复"
+        },
+        {
+          "id": "rpe-3-4",
+          "range": "3–4",
+          "label": "轻松",
+          "feel": "舒适、稳定、可控制",
+          "talkTest": "可以说完整句子",
+          "training": "轻松跑、恢复跑、跑走交替"
+        },
+        {
+          "id": "rpe-5-6",
+          "range": "5–6",
+          "label": "稳态",
+          "feel": "需要专注，但可以持续",
+          "talkTest": "可以说短句",
+          "training": "稳态跑、受控长跑"
+        },
+        {
+          "id": "rpe-7-8",
+          "range": "7–8",
+          "label": "较难",
+          "feel": "需要高度专注，仍能按计划重复",
+          "talkTest": "只能说短语或几个词",
+          "training": "节奏跑、较长间歇、5K 强度"
+        },
+        {
+          "id": "rpe-9",
+          "range": "9",
+          "label": "非常难",
+          "feel": "接近最大，只能短时间维持",
+          "talkTest": "只能说一两个词",
+          "training": "短间歇、比赛后段"
+        },
+        {
+          "id": "rpe-10",
+          "range": "10",
+          "label": "最大努力",
+          "feel": "全力输出，充分恢复前无法重复",
+          "talkTest": "无法说话",
+          "training": "短冲刺、终点冲刺"
+        }
+      ],
+      "scaleCaution": "这些是便于执行的体感线索，不是精确生理换算。RPE 不能对所有人一一对应到固定配速、最大心率百分比、乳酸值或训练区间。",
+      "plansTitle": "三个官方 5K 计划如何使用 RPE",
+      "plansIntro": "同一个数字在计划中有明确任务。入门者减少强度决策，具备可靠基线后才逐步加入质量训练。",
+      "plans": [
+        {
+          "title": "零基础第一个 5K",
+          "range": "以 RPE 3–4 为主",
+          "description": "跑走训练保持可以交谈，再逐步延长跑步段；不需要编造目标配速。",
+          "href": "/couch-to-5k-training-plan"
+        },
+        {
+          "title": "稳定完成 5K",
+          "range": "RPE 3–6",
+          "description": "轻松跑和长跑保持 RPE 3–4，受控稳态训练提高到 RPE 5–6。",
+          "href": "/5k-training-plan"
+        },
+        {
+          "title": "提升 5K 表现",
+          "range": "RPE 3–9",
+          "description": "轻松日继续轻松，节奏、间歇和 5K 专项训练达到 RPE 6–9，质量日之间保留恢复。",
+          "href": "/5k-training-plan/intermediate"
+        }
+      ],
+      "compareTitle": "RPE、配速和心率应该看哪个？",
+      "compareIntro": "三个指标回答的问题不同。可靠计划会选择最少但可信的指标，而不是假设其中一个永远最好。",
+      "comparisons": [
+        {
+          "title": "RPE",
+          "strength": "不需要设备，并能立即反映炎热、坡度、疲劳和睡眠。",
+          "limitation": "需要练习，并始终使用相同量表定义。"
+        },
+        {
+          "title": "配速",
+          "strength": "近期成绩提供可靠锚点时，目标具体并且容易核对。",
+          "limitation": "地形、天气、海拔和 GPS 误差都会改变同一配速的代价。"
+        },
+        {
+          "title": "心率",
+          "strength": "可以观察心血管内部反应，适合复盘有氧趋势。",
+          "limitation": "短间歇中存在延迟，也会受设备、炎热、补水和压力影响。"
+        }
+      ],
+      "compareConclusion": "有可靠近期成绩时，可以用配速指导质量课，用 RPE 检查当天代价是否合理；没有锚点时，RPE 和谈话测试比编造配速更稳妥。",
+      "coachTitle": "Trainingload.ai 的智能教练如何使用 RPE",
+      "coachParagraphs": [
+        "官方模板先由模型生成候选，再经过结构校验、审核和冻结。用户打开或创建官方模板时，模型不会重新改写 Workout，页面中的 RPE 和日程是稳定版本。",
+        "智能教练定制计划可以读取用户授权的运动基线。没有可靠近期 5K 成绩或配速锚点时，RPE 是主要强度语言；基线可靠时，质量训练可以增加配速目标，同时保留 RPE 校验当天真实状态。"
+      ],
+      "coachSteps": [
+        {
+          "title": "读取运动基线",
+          "description": "使用已有跑步历史、连续跑能力、可训练日和可靠近期成绩。"
+        },
+        {
+          "title": "选择强度锚点",
+          "description": "证据稀疏时使用 RPE；数据足够时才加入配速或 VDOT。"
+        },
+        {
+          "title": "保持训练可执行",
+          "description": "每个步骤都保留训练目的、体感提示、恢复要求和用户能理解的假设。"
+        }
+      ],
+      "meaningsTitle": "不要混淆三种 RPE",
+      "meaningsIntro": "这个缩写会出现在耐力计划、训练负荷和力量训练中，但它们回答的问题不同。",
+      "meanings": [
+        {
+          "title": "Workout 步骤 RPE",
+          "description": "当前跑步训练段应该有多难。5K 日历里的 RPE 3–4 指的就是这个。"
+        },
+        {
+          "title": "Session RPE",
+          "description": "整次训练完成后的总体难度，可以结合时长估算内部训练负荷。",
+          "href": "/training-load"
+        },
+        {
+          "title": "力量训练 Set RPE",
+          "description": "一组动作距离力竭有多近，常结合剩余重复次数解释，不能直接套用到跑步间歇。",
+          "href": "/docs/planning/strength-workout-dsl"
+        }
+      ],
+      "calibrateTitle": "用前两到三周校准自己的 RPE",
+      "calibrateIntro": "持续练习后，RPE 才会越来越有价值；不需要先掌握复杂运动生理。",
+      "calibrateSteps": [
+        "看手表前先说出体感等级，再检查自己能否达到对应谈话程度。",
+        "间歇训练评价工作段，不要用组间轻松恢复的感觉代替。",
+        "训练结束后单独记录整节 Session RPE，不要直接复制最难的一刻。",
+        "连续数周比较相似路线；条件相近时同样配速感觉更轻松，就是有价值的进步证据。"
+      ],
+      "mistakesTitle": "常见 RPE 错误",
+      "mistakes": [
+        "因为名称叫轻松跑，就把所有轻松跑都评为 RPE 1–2。",
+        "因为手表配速看起来太慢，让轻松日逐渐跑到 RPE 6。",
+        "把 RPE 当作心率、配速或功率的精确换算表。",
+        "只评价腿部酸痛而忽略呼吸和全身负担，或者反过来。",
+        "把力量训练中的 RPE/RIR 定义直接用于整次跑步。",
+        "把 RPE 10 当作日常目标，而不是极短最大努力。"
+      ],
+      "faqTitle": "常见问题",
+      "faq": [
+        [
+          "RPE 是什么意思？",
+          "RPE 是 Rating of Perceived Exertion，即主观用力程度评分。它综合呼吸、肌肉负担和整体努力感，表示运动对你来说有多难，而不是某个设备的单项读数。"
+        ],
+        [
+          "跑步 RPE 3–4 是什么感觉？",
+          "应该感觉轻松、稳定、可控制。你可以说完整句子，呼吸比静息明显但不紧张，并且感觉还能继续跑得比计划时间更久。"
+        ],
+        [
+          "轻松跑应该保持多少 RPE？",
+          "这些计划中的轻松跑和恢复跑多数保持 RPE 3–4。炎热、爬坡、疲劳和跑步经验会改变实际配速，但轻松体感不应改变。"
+        ],
+        [
+          "5K 比赛通常是多少 RPE？",
+          "合理配速的 5K 通常会从较难但可控逐步提高到终点附近的非常难，许多跑者约为 RPE 7–9。只求完赛的初学者可以有意保持更低强度。"
+        ],
+        [
+          "没有心率表，可以只用 RPE 训练吗？",
+          "可以。RPE 配合谈话测试足以指导有效训练。心率表能增加一个观察信号，但不能代替判断，也不会让 RPE 失去作用。"
+        ],
+        [
+          "为什么同样配速每天的 RPE 不一样？",
+          "炎热、风、坡度、睡眠、补水、压力、身体不适和累积疲劳都会改变同一配速的代价，这种敏感性正是计划使用 RPE 的原因之一。"
+        ],
+        [
+          "RPE 能直接换算成心率区间或配速吗？",
+          "不能精确换算。它们彼此相关，但个人能力、环境、运动类型和测量方法都会改变这种关系。"
+        ],
+        [
+          "跑步 RPE 和力量训练的 RPE/RIR 有什么区别？",
+          "跑步 RPE 描述一段或整次运动的主观强度；力量训练 RPE 常与距离力竭还剩多少次重复有关，因此同一个数字并不代表完全相同的执行含义。"
+        ],
+        [
+          "什么时候应该减速或停止训练？",
+          "无法满足计划的谈话测试或体感提示时应先减速。出现胸痛、晕厥、异常呼吸困难，或持续、加重的疼痛时应停止并寻求专业医疗帮助。"
+        ],
+        [
+          "初学者多久能学会判断 RPE？",
+          "多数跑者在连续两到三周评价相似训练后会更加稳定。关键是使用相同量表、相同问题和相近记录时机。"
+        ]
+      ],
+      "sourcesTitle": "资料来源与适用范围",
+      "sourceNote": "本指南以主观用力程度研究和公开运动强度指南为依据，再转化为 Trainingload.ai 计划使用的 1–10 分训练语言。",
+      "safety": "本页是训练教育内容，不构成医疗建议。出现胸痛、晕厥、异常呼吸困难，或持续、加重的疼痛时，请停止训练并寻求专业医疗帮助。",
+      "relatedTitle": "把 RPE 强度表用到计划中",
+      "related": [
+        [
+          "零基础第一个 5K",
+          "/couch-to-5k-training-plan",
+          "从 RPE 3–4、能够交谈的跑走训练开始。"
+        ],
+        [
+          "稳定完成 5K",
+          "/5k-training-plan",
+          "用轻松和稳态强度逐步建立完整 5K 能力。"
+        ],
+        [
+          "提升 5K 表现",
+          "/5k-training-plan/intermediate",
+          "把 RPE 与节奏、间歇和可选 VDOT 配速结合。"
+        ],
+        [
+          "VDOT 计算器",
+          "/vdot-calculator",
+          "有可靠表现锚点时，再增加配速目标。"
+        ],
+        [
+          "训练负荷",
+          "/training-load",
+          "理解 Session RPE 与 Workout 步骤 RPE 的区别。"
+        ]
+      ],
+      "homeLabel": "首页",
+      "scheduleGuideLabel": "不熟悉 RPE？先看 RPE 1–10 主观强度表。",
+      "intensityLinkLabel": "打开 RPE 主观强度指南"
+    }
+  },
+  "lactateCurveCalculator": {
+    "copy": {
+      "title": "乳酸曲线分析工具",
+      "description": "分析骑行或跑步阶梯负荷测试的实测血乳酸数据，比较阈值判定方法，生成强度分区与测试报告。",
+      "badge": "阶梯负荷测试",
+      "privacy": "免费，无需注册。测试数据仅保留在当前浏览器标签页，刷新前请按需导出。",
+      "inputTitle": "测试数据",
+      "resultTitle": "分析结果",
+      "empty": "输入各阶段数据，或加载示例了解分析过程。",
+      "stale": "输入已修改，请重新分析后再使用或导出结果。",
+      "sample": "教学示例，并非你的测试数据",
+      "cycling": "骑行",
+      "running": "跑步",
+      "intensity": "强度",
+      "lactate": "乳酸",
+      "heartRate": "心率",
+      "stage": "阶段",
+      "rest": "静息样本的强度填 0",
+      "example": "加载示例",
+      "clear": "清空数据",
+      "add": "添加阶段",
+      "remove": "移除阶段",
+      "analyze": "分析数据",
+      "calculating": "正在分析…",
+      "paste": "粘贴表格",
+      "import": "导入 CSV",
+      "template": "下载 CSV 模板",
+      "confirmImport": "确认使用这些列",
+      "cancel": "取消",
+      "mapping": "确认列和单位",
+      "noColumn": "未记录",
+      "sort": "按强度排序阶段",
+      "overwrite": "替换当前阶段数据？",
+      "resetSport": "切换运动会清空当前数据，是否继续？",
+      "pasteHelp": "粘贴逗号或制表符分隔的数据，小数点使用“.”。替换数据前请确认列映射。",
+      "inputHelp": "输入 4–30 个运动阶段，建议 6–10 个。乳酸单位为 mmol/L，心率可留空。每行必填数据需完整；可另加一行强度为 0 的静息样本。",
+      "method": "方法",
+      "threshold": "阈值",
+      "selected": "图中显示的方法",
+      "unavailable": "不可用",
+      "partial": "部分方法未找到阈值，以下保留可用结果。",
+      "noResult": "未找到可用阈值。请检查阶段数据和方法说明；不会向测试范围外推测结果。",
+      "lt1": "第一乳酸阈值 LT1",
+      "lt2": "第二乳酸阈值 LT2",
+      "zones": "三个强度区间",
+      "zoneNames": [
+        "低于 LT1",
+        "LT1 至 LT2",
+        "高于 LT2"
+      ],
+      "methodHelp": "方法选择会改变分界。乳酸阈值是估计的强度参考，不能直接当作 FTP。",
+      "export": "下载结果 CSV",
+      "print": "打印报告",
+      "report": "乳酸测试报告",
+      "source": "计算参考",
+      "copied": "已复制",
+      "copy": "复制结果",
+      "quality": "数据质量提示",
+      "methodsTitle": "计算方法与适用条件",
+      "instructionsTitle": "数据要求与使用流程",
+      "instructions": [
+        "在每档结束时记录运动强度和实测血乳酸。可选心率应与对应阶段一致。",
+        "选择运动和记录时使用的单位，再手动录入、粘贴或导入数据。",
+        "检查曲线和提示，比较不同方法后导出。复测时尽量使用一致的测试方案。"
+      ],
+      "faqTitle": "乳酸测试分析常见问题",
+      "faq": [
+        {
+          "question": "只有 Garmin 活动数据，没有采血结果，能用吗？",
+          "answer": "这里需要每档实测乳酸。如果希望根据比赛成绩或场地测试估算训练参考，请使用另一个乳酸阈值计算器。"
+        },
+        {
+          "question": "为什么不同方法算出的数值不同？",
+          "answer": "固定浓度、基线增量和曲线几何研究的是不同特征。有些方法寻找第一处上升，有些估计较高强度的分界；数值接近也不能证明生理上准确。"
+        },
+        {
+          "question": "LT1、LT2 是诊断或训练处方吗？",
+          "answer": "它们是依赖计算方法的强度参考。每档时长、采样方式和跨日波动都会影响解读。请同时保存方法和测试方案，需要时由有经验的教练协助应用。"
+        },
+        {
+          "question": "测试数据会被保存在哪里？",
+          "answer": "计算、CSV 解析和报告生成都在本地完成，输入不会上传或写进网址。刷新后数据清空，需要留档时请下载报告。"
+        }
+      ],
+      "alternative": "没有实测乳酸数据？",
+      "alternativeBody": "可用乳酸阈值计算器，根据比赛或场地测试估算训练强度参考。",
+      "related": "相关工具",
+      "cta": "持续追踪训练负荷与恢复趋势",
+      "ctaBody": "结合日常训练记录、强度分布与状态趋势，安排训练周期，并为下一次测试提供对照。",
+      "protocol": "可选测试信息",
+      "stageMinutes": "每档时长（分钟）",
+      "sampleSite": "采血位置",
+      "notRecorded": "未记录",
+      "earlobe": "耳垂",
+      "fingertip": "指尖",
+      "other": "其他",
+      "incomplete": "最后一档未完成",
+      "excluded": "从分析中排除最后一档",
+      "runtimeError": "分析暂时无法运行，输入仍然保留，请重试。",
+      "exportError": "未能准备好导出内容，请重试。",
+      "recordingError": "请检查文件、行、数值和列映射。CSV 限制为 256 KiB、100 行文本、16 列。",
+      "methodDescriptions": {
+        "obla_2": "三次拟合曲线最后一次向上穿过 2 mmol/L 时的强度。固定浓度并不一定是每个人的第一阈值。",
+        "obla_4": "三次拟合曲线最后一次向上穿过 4 mmol/L 时的强度，不能统一当作每个人的 LT2。",
+        "bsln_05": "拟合曲线达到基线加 0.5 mmol/L 时的强度。基线优先取静息样本，否则取首个运动阶段。",
+        "bsln_10": "拟合曲线达到基线加 1.0 mmol/L 时的强度，单个基线样本可能影响结果。",
+        "log_log": "对强度和乳酸取对数后，拟合共享分割阶段的两条直线，选残差最小的分割并求交点，至少需要五档。",
+        "dmax": "三次曲线位于其首末拟合点连线下方、距离最大的位置，只拟合运动阶段。",
+        "moddmax": "从首次相邻乳酸上升至少 0.4 mmol/L 之前的阶段，到末档观测点作连线，再求曲线的最大距离。",
+        "log_poly_moddmax": "连线起于 Log-log 强度在三次曲线上的位置，止于最后一个实测乳酸点，因此需要有效的 Log-log 结果。"
+      },
+      "reasons": {
+        "invalid_value": "请检查对应行。乳酸和可选心率需为有限正数，只有静息样本的强度可以为 0。",
+        "too_few_stages": "至少需要四个运动阶段；Log-log 需要五个。",
+        "too_many_stages": "最多支持 30 个运动阶段。",
+        "duplicate_intensity": "每个强度只能出现一次，请检查重复阶段。",
+        "unsorted_stages": "阶段强度需递增，请先确认排序。",
+        "fit_degenerate": "这些阶段无法确定稳定的三次拟合曲线。",
+        "target_not_reached": "曲线未在测试范围内向上穿过此目标浓度。",
+        "loglog_unavailable": "未在运动阶段范围内找到有效的 Log-log 交点。",
+        "no_lactate_rise": "未找到相邻阶段至少上升 0.4 mmol/L 的位置。",
+        "no_distance": "未找到曲线位于参考连线下方的有效距离点。",
+        "no_resting_sample": "没有静息样本，基线增量方法使用首个运动阶段。",
+        "few_stages": "阶段较少，单个样本可能明显影响拟合。",
+        "early_dip": "前几档乳酸有所下降，请结合样本和热身情况检查。",
+        "final_not_rising": "末档乳酸未继续上升，请检查测试是否达到预定强度。",
+        "uneven_steps": "阶段强度增幅不一致，请连同测试方案解读。",
+        "threshold_at_edge": "这个估计值位于实测范围的边缘。",
+        "negative_fit": "拟合曲线出现负值，请检查拟合及样本。",
+        "invalid_pair": "请选用有效的方法，并确保 LT1 低于 LT2 后再使用区间。"
+      }
+    },
+    "methodContext": {
+      "originLabel": "方法来源",
+      "interpretationLabel": "适用与局限",
+      "referencesTitle": "参考文献与实现依据",
+      "introduction": "这些方法识别的是同一次测试中的不同特征。方法名称本身不能确立个人的 LT1、LT2 或最大乳酸稳态（MLSS）；每档时长、采血方式和研究人群都会影响解读。",
+      "implementation": "本工具使用下列固定版本的 lactater 核对计算结果。与参考软件一致，不等于经过独立的生理效度验证。",
+      "methods": {
+        "obla_2": {
+          "origin": "属于固定乳酸浓度法。{jamnick} 在骑行阶梯负荷测试中，将 2 mmol/L 纳入多种固定浓度判据的比较。",
+          "interpretation": "可作为统一浓度下的比较点，但不能直接认定为个人第一乳酸阈值。复测比较应保持测试方案一致。"
+        },
+        "obla_4": {
+          "origin": "4 mmol/L 判据在 {kindermann} 的研究中已有讨论，{heck} 进一步论证了这一经典固定浓度标准。",
+          "interpretation": "它是约定的浓度标准，并非所有人的 LT2 或实测 MLSS。个体乳酸水平和测试方案不同，估计值可能位于相应边界的两侧。"
+        },
+        "bsln_05": {
+          "origin": "属于基线加固定增量的方法。{jamnick} 比较了这一方法族，并引用 {berg} 及 {zoladz} 作为早期研究背景。",
+          "interpretation": "对基线样本和测量波动较敏感。本工具优先使用静息乳酸，否则采用首个运动阶段；不取前几档的平均值。"
+        },
+        "bsln_10": {
+          "origin": "与 +0.5 属于同一方法族，只是增量更大。{jamnick} 将 +0.5、+1.0、+1.5 mmol/L 作为不同判据分别比较。",
+          "interpretation": "+1.0 是另一项判据，不能仅因增量更大就视为第二生理阈值。基线的定义改变，结果也会改变。"
+        },
+        "log_log": {
+          "origin": "{beaver} 最初在双对数坐标中分析乳酸与摄氧量的关系。{bishop} 等后续骑行研究使用功率；本工具使用测试强度。",
+          "interpretation": "至少需要 5 个运动阶段，且两段拟合的交点须位于实测范围内。以强度为横轴，并不等同于复现原始摄氧量测试方案。"
+        },
+        "dmax": {
+          "origin": "{cheng} 提出 Dmax：在拟合曲线与其首尾端点连线之间，寻找最大距离对应的位置。",
+          "interpretation": "结果依赖测试覆盖范围和拟合。本工具将参考线的两个端点放在三次拟合曲线上；改变起始或末档，估计值可能移动。"
+        },
+        "moddmax": {
+          "origin": "{bishop} 修改了 Dmax 参考线的起点，以减少前段平缓样本的影响。{heuberger} 进一步描述了“至少上升 0.4 mmol/L”的判据。",
+          "interpretation": "本工具计入恰好上升 0.4 mmol/L 的情况，并使用实测起点、终点乳酸。{jamnick} 写作 >0.4；这里采用 Heuberger 的包含等号规则。"
+        },
+        "log_poly_moddmax": {
+          "origin": "{jamnick} 提出这一组合变体：先由 Log-log 确定起始强度，再对三次拟合曲线计算修正 Dmax。",
+          "interpretation": "该研究在 17 名受过训练的男性骑行者、每档 4 分钟的方案中得到最接近 MLSS 的估计，不能据此推广到所有跑步或骑行方案。计算须先获得有效的 Log-log 结果。"
+        }
+      }
+    },
+    "presentation": {
+      "engineVersion": "计算引擎版本",
+      "tooltipStage": "阶段",
+      "tooltipMeasured": "实测乳酸",
+      "tooltipFitted": "拟合乳酸",
+      "tooltipResidual": "残差",
+      "tooltipZone": "强度区域",
+      "hoverHint": "悬停、点选或键盘聚焦样本，查看阶段数据",
+      "ctaAction": "创建免费账号",
+      "ctaExplore": "查看训练负荷功能",
+      "ctaNote": "本工具的测试数据不会自动保存到账号。",
+      "ctaImageAlt": "Trainingload.ai 训练负荷与体能状态趋势分析界面",
+      "ctaImageCaption": "Trainingload.ai · 训练负荷分析示例",
+      "ctaBenefitLoad": "训练负荷趋势",
+      "ctaBenefitZones": "强度分布分析",
+      "ctaBenefitPlan": "周期训练计划",
+      "workflowInput": "录入测试",
+      "workflowReport": "分析报告",
+      "editData": "编辑测试数据",
+      "readCurve": "乳酸–强度曲线",
+      "readCurveBody": "基于运动阶段样本的三次多项式拟合。悬停或点选阶段，查看实测乳酸、拟合值与心率。",
+      "thresholdBasis": "阈值判定方法",
+      "inputGuide": "4–30 个运动阶段 · 乳酸 mmol/L · 心率选填",
+      "returnReport": "返回报告",
+      "overview": "测试概览",
+      "stages": "个运动阶段",
+      "peak": "最后测试强度",
+      "fit": "三次曲线拟合",
+      "curve": "乳酸曲线",
+      "samples": "实测样本",
+      "fitted": "拟合曲线",
+      "anchor": "参考连线",
+      "distance": "最大距离",
+      "compareTitle": "阈值方法比较",
+      "compareBody": "各方法采用相同测试数据，估计值按运动强度对齐。选择方法可查看计算依据与适用条件。",
+      "sharedScale": "共用强度轴",
+      "earlyGroup": "基线与转折",
+      "dmaxGroup": "Dmax 曲线形态",
+      "fixedGroup": "固定乳酸浓度",
+      "notInterval": "圆点表示不同方法的估计值，不代表置信区间。",
+      "zonesBody": "边界由你选择的 LT1、LT2 方法决定，色带对应三个强度区域。",
+      "lowDomain": "低于 LT1",
+      "middleDomain": "LT1 至 LT2",
+      "highDomain": "高于 LT2",
+      "qualityFitTitle": "拟合诊断",
+      "qualityFitBody": "残差 = 实测乳酸 − 拟合乳酸。拟合贴近样本，并不能证明阈值在生理上准确。",
+      "rmse": "均方根误差",
+      "maxResidual": "最大绝对残差",
+      "residuals": "逐阶段残差",
+      "logAxes": "Log-log 视图 · 两条坐标轴均为对数刻度",
+      "noHr": "未记录心率样本",
+      "preview": "示例分析",
+      "previewBody": "完整呈现阶梯负荷测试的 LT1、LT2、强度分区与心率响应。",
+      "previewCaption": "演示数据 · 非个人测试结果",
+      "moreDetails": "方法说明",
+      "available": "种方法可用"
+    }
+  },
   "conversionQuality": {
     "reference": "参考编号",
     "noGpsTitle": "该文件无法转换为 GPS 轨迹",
@@ -516,7 +1185,11 @@
     "page": {
       "title": "骑行功率区间计算器",
       "subtitle": "输入 FTP，计算 Coggan 骑行功率区间和对应瓦数。训练计划使用其他标准时，也可切换 Friel、Vance、Stryd 或 CP。",
-      "proof": ["无需注册", "即填即算", "可打印、分享"],
+      "proof": [
+        "无需注册",
+        "即填即算",
+        "可打印、分享"
+      ],
       "howTo": {
         "title": "怎么使用这些功率区间",
         "description": "填入你正在使用的瓦特，选择区间模型，用成绩单安排下一次训练。",
@@ -798,7 +1471,10 @@
       "heroProduct": {
         "title": "记录每次训练，读懂每次表现。",
         "body": "用 iPhone 记录活动，在 Trainingload.ai 中结合心率、配速、功率与负荷回看训练。",
-        "benefits": ["训练中的实时数据", "训练后的分析与复盘"],
+        "benefits": [
+          "训练中的实时数据",
+          "训练后的分析与复盘"
+        ],
         "cta": "了解智能教练",
         "phoneAlt": "Trainingload.ai iPhone 实时训练记录页面"
       },
@@ -972,7 +1648,11 @@
     "page": {
       "title": "临界功率计算器",
       "subtitle": "输入功率记录，或上传骑行文件，估算临界功率（CP）、W′ 和功体比，为下一次训练和功率分配提供参考。",
-      "proof": ["无需注册", "即时计算", "打印或分享"],
+      "proof": [
+        "无需注册",
+        "即时计算",
+        "打印或分享"
+      ],
       "howTo": {
         "title": "如何使用临界功率计算器",
         "steps": {
@@ -1227,7 +1907,10 @@
       "heroProduct": {
         "title": "记录骑行，了解你的功率。",
         "body": "用 iPhone 记录训练，在 Trainingload.ai 中结合功率数据、训练负荷与恢复情况，安排下一次骑行。",
-        "benefits": ["实时查看训练数据", "骑行结束后复盘表现"],
+        "benefits": [
+          "实时查看训练数据",
+          "骑行结束后复盘表现"
+        ],
         "cta": "了解智能教练",
         "phoneAlt": "iPhone 上的 Trainingload.ai 实时训练记录页面"
       },
@@ -1306,7 +1989,8 @@
         "跳转到心率区间和功率区间",
         "复制结果",
         "用常见完赛成绩对照 LT2 配速和分段的参考表",
-        "用你的结果填入的阈值示例课"
+        "用你的结果填入的阈值示例课",
+        "可分享的结果卡片"
       ],
       "breadcrumb": {
         "home": "首页",
@@ -1593,11 +2277,18 @@
         "physiology": "阅读乳酸阈值的定义",
         "paceZones": "阅读跑步配速区间"
       },
-      "proof": ["无需注册", "支持活动文件", "可打印、分享成绩单"],
+      "proof": [
+        "无需注册",
+        "支持活动文件",
+        "可打印、分享成绩单"
+      ],
       "heroProduct": {
         "title": "记录每次训练，读懂每次进步。",
         "body": "用 iPhone 记录活动，在 Trainingload.ai 中结合心率、配速、功率和训练负荷，回看这次表现。",
-        "benefits": ["训练中的实时数据", "训练后的分析与复盘"],
+        "benefits": [
+          "训练中的实时数据",
+          "训练后的分析与复盘"
+        ],
         "cta": "了解智能教练",
         "phoneAlt": "iPhone 上 Trainingload.ai 的实时训练记录"
       },
@@ -2094,7 +2785,10 @@
         {
           "question": "最大心率和 Zone 2 要去哪里算？",
           "answer": "最大心率公式在最大心率计算器。只看 Zone 2 的范围在 Zone 2 计算器。\n\n可以先在那里估计最大心率，再带回这里看完整的表。\n\n本页给出所选模型的全部分区，不代替那两个工具。",
-          "links": ["maxHr", "zone2"]
+          "links": [
+            "maxHr",
+            "zone2"
+          ]
         }
       ],
       "ui": {
@@ -2119,7 +2813,11 @@
         },
         "onThisPage": "本页内容"
       },
-      "proof": ["无需注册", "即时计算", "打印或分享"],
+      "proof": [
+        "无需注册",
+        "即时计算",
+        "打印或分享"
+      ],
       "links": {
         "estimateHrmax": "估算最大心率",
         "zone2": "只计算二区"
@@ -2659,6 +3357,73 @@
     }
   },
   "features": {
+    "mcp": {
+      "content": {
+        "title": "让你的 AI 读懂训练，也让你看清它是怎么得出结论的。",
+        "description": "通过只读、OAuth 保护的 MCP 服务，把 TrainingLoad 连接到你的 AI 客户端。提出真实训练问题，查看每一次工具调用，再用返回数据验证结论。",
+        "eyebrow": "TrainingLoad MCP",
+        "connect": "配置 MCP",
+        "docs": "查看文档",
+        "supported": "支持客户端",
+        "contractEyebrow": "不是裸 API，而是完整产品能力",
+        "contractTitle": "24 个有边界的工具，3 个 Resources，3 个可复用 Prompts。",
+        "contractText": "服务优先返回聚合快照，只有问题确实需要时才调用更细的工具。所有列表都有限定时间窗、limit 和 opaque cursor。",
+        "groups": [
+          [
+            "当前状态",
+            "训练快照、readiness 指标与负荷时间序列"
+          ],
+          [
+            "进展变化",
+            "周期比较、项目拆分、活动统计、一致性、体能趋势、区间与最佳成绩"
+          ],
+          [
+            "计划执行",
+            "活动 zones/splits、计划总结、完成率与比赛详情"
+          ],
+          [
+            "连接状态",
+            "同步 readiness 与可选健康背景"
+          ]
+        ],
+        "workflowEyebrow": "从连接到证据",
+        "workflowTitle": "添加一个地址，确认数据权限，然后像平常一样提问。",
+        "workflowText": "客户端从服务发现 OAuth 和工具。TrainingLoad 在服务端守住授权和数据边界，同时让每个答案都能在对话中核验。",
+        "workflow": [
+          [
+            "01",
+            "添加服务",
+            "所有支持的客户端都使用同一个远程地址。"
+          ],
+          [
+            "02",
+            "确认授权",
+            "批准只读 scopes；健康权限始终单独选择。"
+          ],
+          [
+            "03",
+            "提出真实问题",
+            "客户端选择能回答问题的最小工具组合。"
+          ],
+          [
+            "04",
+            "核验答案",
+            "查看调用、日期范围、返回事实与缺失数据。"
+          ]
+        ],
+        "recipes": "查看原生 Prompts、Resources 与工具路径",
+        "safetyTitle": "从设计上保护隐私",
+        "safetyText": "OAuth scope 在工具列出时检查一次，执行时再次做权威校验。结果不包含直接身份字段、原始传感器流、精确路线、凭证或完整 FIT 数据。",
+        "safety": [
+          "全部只读，没有隐藏写入路径",
+          "仅当前运动员，opaque ID 绑定用户",
+          "清理不可信备注，绝不把它当作指令",
+          "Schema 校验、输出预算、超时、限流、审计与 tracing"
+        ],
+        "finalTitle": "连接一次，就在你已经使用的客户端里提问。",
+        "finalText": "同一个端点适用于所有支持的 MCP 客户端。健康数据始终可选，也可以和整条连接一起从账号中撤销。"
+      }
+    },
     "metadata": {
       "title": "Trainingload.ai 功能 | 计划、负荷与智能教练",
       "description": "了解 Trainingload.ai 如何把自适应训练计划、日历、完成情况、PMC、有效 VO2max 和智能教练复盘连在一起。",
@@ -2686,6 +3451,12 @@
       }
     },
     "page": {
+      "mcpShowcase": {
+        "eyebrow": "TrainingLoad MCP",
+        "title": "让你的 AI 读取训练，也让每个结论可验证。",
+        "text": "24 个只读训练工具，加上原生 Resources 与 Prompts，覆盖当前状态、周期比较、活动细节、计划执行、比赛与同步诊断。",
+        "cta": "查看 MCP"
+      },
       "hero": {
         "title": "让训练持续在正轨上的核心页面",
         "subtitle": "从今天开始，看计划、查日历、理解负荷，并在下一次训练可能需要变化时使用智能教练复盘。"
@@ -2694,19 +3465,34 @@
         "insights": {
           "title": "今日概览与当前计划",
           "description": "每天先看真正重要的事：今天练什么，计划进行到哪里，最近训练反馈说明了什么。",
-          "bullets": ["今日概览", "当前计划页", "今日训练内容", "近期反馈"],
+          "bullets": [
+            "今日概览",
+            "当前计划页",
+            "今日训练内容",
+            "近期反馈"
+          ],
           "preview": "首页与计划预览"
         },
         "context": {
           "title": "日历、负荷与智能教练复盘",
           "description": "通过日历、训练负荷和智能教练复盘，理解已经发生了什么，以及下一步可能需要调整什么。",
-          "bullets": ["计划日历", "训练负荷信号", "智能教练复盘", "调整依据"],
+          "bullets": [
+            "计划日历",
+            "训练负荷信号",
+            "智能教练复盘",
+            "调整依据"
+          ],
           "preview": "日历与复盘预览"
         },
         "trust": {
           "title": "计划被改动前，先预览变化",
           "description": "智能教练可以生成训练调整草稿，但只有在你查看并确认后，计划才会真正更新。",
-          "cards": ["调整前后", "内容检查", "你来确认", "计划历史"],
+          "cards": [
+            "调整前后",
+            "内容检查",
+            "你来确认",
+            "计划历史"
+          ],
           "preview": "训练调整预览"
         }
       },
@@ -2739,7 +3525,12 @@
         "hero": "功能页主图",
         "placeholderSubtitle": "制定计划、执行训练、复盘负荷，并在需要时用智能教练辅助调整"
       },
-      "stats": ["计划", "执行", "负荷", "智能教练复盘"],
+      "stats": [
+        "计划",
+        "执行",
+        "负荷",
+        "智能教练复盘"
+      ],
       "intentPages": [
         {
           "title": "训练分析页面",
@@ -2766,7 +3557,11 @@
           "href": "APP:/",
           "icon": "Home",
           "summary": "一打开就知道今天练什么，最近练得怎么样，计划有没有跟上。",
-          "bullets": ["今日该练什么", "当前计划进度", "近期训练反馈"],
+          "bullets": [
+            "今日该练什么",
+            "当前计划进度",
+            "近期训练反馈"
+          ],
           "cta": "查看今天的训练负荷上下文"
         },
         {
@@ -2774,7 +3569,11 @@
           "href": "APP:/plan",
           "icon": "LayoutList",
           "summary": "不是做一张漂亮表格，而是生成一份每天真的能照着练的计划。",
-          "bullets": ["周期目标", "周结构", "每日训练"],
+          "bullets": [
+            "周期目标",
+            "周结构",
+            "每日训练"
+          ],
           "cta": "制定基于训练负荷的周计划"
         },
         {
@@ -2782,7 +3581,11 @@
           "href": "APP:/calendar",
           "icon": "CalendarDays",
           "summary": "计划和实际完成放在一起看，哪天漏了、哪周堆多了，一眼就清楚。",
-          "bullets": ["计划与实际对照", "周节奏", "恢复空档"],
+          "bullets": [
+            "计划与实际对照",
+            "周节奏",
+            "恢复空档"
+          ],
           "cta": "对比计划与完成的训练负荷"
         },
         {
@@ -2790,7 +3593,11 @@
           "href": "/training-load",
           "icon": "BarChart3",
           "summary": "用 CTL、ATL、TSB 看训练压力：现在能不能加，该不该先缓一缓。",
-          "bullets": ["长期体能", "近期疲劳", "状态与新鲜度"],
+          "bullets": [
+            "长期体能",
+            "近期疲劳",
+            "状态与新鲜度"
+          ],
           "cta": "在计划中管理训练负荷"
         },
         {
@@ -2798,7 +3605,11 @@
           "href": "/ai-training-plan",
           "icon": "Bot",
           "summary": "智能教练先看你原计划怎么练、实际练成什么样，再说下一步怎么改。",
-          "bullets": ["日复盘", "周复盘", "解释依据"],
+          "bullets": [
+            "日复盘",
+            "周复盘",
+            "解释依据"
+          ],
           "cta": "用智能教练调整训练负荷"
         },
         {
@@ -2806,7 +3617,11 @@
           "href": "/ai-training-plan",
           "icon": "ClipboardCheck",
           "summary": "智能教练可以提调整，但不会偷偷改你的计划。看清楚、确认了，才生效。",
-          "bullets": ["前后对比", "内容校验", "你来确认"],
+          "bullets": [
+            "前后对比",
+            "内容校验",
+            "你来确认"
+          ],
           "cta": "确认智能教练给出的负荷调整草案"
         }
       ],
@@ -3150,7 +3965,11 @@
     "metadata": {
       "title": "条款与条件 | Trainingload.ai",
       "description": "使用 Trainingload.ai 前请阅读相关条款与条件。",
-      "keywords": ["条款与条件", "服务条款", "Trainingload.ai"],
+      "keywords": [
+        "条款与条件",
+        "服务条款",
+        "Trainingload.ai"
+      ],
       "openGraph": {
         "title": "条款与条件 | Trainingload.ai",
         "description": "查看使用 Trainingload.ai 的相关条款与条件。"
@@ -3306,7 +4125,11 @@
     "page": {
       "title": "FTP 计算器",
       "subtitle": "输入测试功率或上传骑行记录，查看 FTP、功体比和训练区间。",
-      "proof": ["无需注册", "即填即算", "可打印、分享"],
+      "proof": [
+        "无需注册",
+        "即填即算",
+        "可打印、分享"
+      ],
       "howTo": {
         "title": "如何使用 FTP 计算器",
         "steps": {
@@ -3744,7 +4567,10 @@
       "heroProduct": {
         "title": "记录训练，看懂自己的 FTP",
         "body": "用 iPhone 记录训练，结束后分析功率数据、估算 FTP，为下一次训练提供参考。",
-        "benefits": ["运动数据，实时掌握", "有效功率，支持 FTP 估算"],
+        "benefits": [
+          "运动数据，实时掌握",
+          "有效功率，支持 FTP 估算"
+        ],
         "cta": "了解智能教练",
         "phoneAlt": "Trainingload.ai iPhone 实时训练记录页面"
       },
@@ -4052,7 +4878,11 @@
         "related": "相关的最大心率与训练工具",
         "allTools": "全部工具"
       },
-      "proof": ["无需注册", "即时结果", "打印或分享"],
+      "proof": [
+        "无需注册",
+        "即时结果",
+        "打印或分享"
+      ],
       "scorecard": {
         "summaryTitle": "最大心率成绩卡",
         "eyebrow": "推荐最大心率",
@@ -4183,6 +5013,762 @@
     "visualSubtitle": "计划、日历、负荷、活动反馈和智能教练复盘放在一个训练闭环里"
   },
   "home": {
+    "demo": {
+      "calendar": {
+        "overview": {
+          "title": "当前计划",
+          "cycle": "马拉松基础周期",
+          "weekLabel": "第 5 / 12 周",
+          "targetLoadLabel": "目标",
+          "targetLoadValue": "420",
+          "completedLabel": "已完成",
+          "completedValue": "248",
+          "driftLabel": "较上周",
+          "driftValue": "+17",
+          "syncLabel": "已同步"
+        },
+        "monthModeLabel": "月历概览",
+        "weekModeLabel": "本周聚焦",
+        "today": "今天",
+        "addButton": "添加",
+        "calendarSubscriptionButton": "订阅",
+        "viewDay": "查看当天",
+        "selectedDateLabel": "选中日期",
+        "loadLabel": "负荷",
+        "activityTab": "活动",
+        "trainingTab": "训练",
+        "planCycleLabel": "训练周期",
+        "planWorkoutCount": "{count} 个计划训练",
+        "noPlannedTraining": "暂无计划训练",
+        "noActivities": "暂无已完成活动",
+        "summaryScope": {
+          "plan": "计划",
+          "month": "月份"
+        },
+        "planProgressTitle": "计划进度",
+        "monthOverview": "本月概览",
+        "comparisonLabelPlan": "较前一周期",
+        "comparisonLabelMonth": "较上月",
+        "delta": {
+          "up": "上升",
+          "down": "下降",
+          "flat": "持平"
+        },
+        "summary": {
+          "count": "训练次数",
+          "tss": "TSS",
+          "distance": "距离",
+          "duration": "时长"
+        },
+        "workoutMeta": {
+          "duration": "时长",
+          "steps": "步骤",
+          "repeats": "重复",
+          "parsed": "已解析 DSL"
+        },
+        "sportLabels": {
+          "RUN": "跑步",
+          "CYCLING": "骑行",
+          "SWIM": "游泳"
+        },
+        "workoutNames": {
+          "easyRun": "轻松跑 45 min",
+          "tempoRun": "稳态跑 35 min",
+          "strength": "力量激活 20 min",
+          "longRun": "长距离跑 90 min",
+          "recoveryRide": "恢复骑 50 min",
+          "swim": "技术游 1.6 km"
+        },
+        "workoutNotes": {
+          "easyRun": "Z2 有氧容量",
+          "tempoRun": "稳态有氧控制",
+          "strength": "灵活性与激活",
+          "longRun": "长距离耐力",
+          "recoveryRide": "低强度转腿",
+          "swim": "技术动作"
+        },
+        "activityNames": {
+          "easyRun": "轻松跑",
+          "tempoRun": "稳态有氧跑",
+          "longRun": "长距离跑",
+          "ride": "恢复骑"
+        },
+        "distanceUnit": "km",
+        "minuteUnit": "分钟"
+      },
+      "dashboard": {
+        "aboutMetric": "了解 {title}",
+        "overview": {
+          "title": "概览",
+          "recent30Days": "最近 30 天"
+        },
+        "sportFilter": "全部项目",
+        "editLabel": "编辑",
+        "stats": {
+          "vo2Max": {
+            "title": "最大摄氧量",
+            "detail": "极好",
+            "details": "最大摄氧量反映有氧能力上限，更适合看趋势而不是单日波动。"
+          },
+          "atl": {
+            "title": "疲劳",
+            "detail": "偏高",
+            "details": "ATL 反映近期训练带来的短期疲劳，连续高强度训练后通常会上升。"
+          },
+          "ctl": {
+            "title": "体能",
+            "detail": "稳定",
+            "details": "CTL 反映长期体能积累，需要持续训练才会缓慢上升，停训后会逐渐下降。"
+          },
+          "tsb": {
+            "title": "状态",
+            "detail": "可训练",
+            "details": "TSB 对比体能与疲劳，负值通常表示当前疲劳高于新鲜度。"
+          }
+        },
+        "charts": {
+          "weekPressure": "训练压力",
+          "ctl": "体能",
+          "atl": "疲劳",
+          "tsb": "状态"
+        }
+      },
+      "plan": {
+        "weekStrip": {
+          "title": "周期进度",
+          "stateCurrent": "本周"
+        },
+        "weekLoad": {
+          "title": "本周负荷",
+          "currentWeek": "第 {week} 周",
+          "plannedSessions": "计划训练"
+        },
+        "workout": {
+          "title": "本周训练",
+          "loadBadge": "计划负荷",
+          "linked": "已关联 · {activity}",
+          "notLinked": "未关联活动",
+          "session": "第 {index} 课"
+        },
+        "actions": {
+          "postpone": "推迟",
+          "skip": "跳过",
+          "delete": "删除",
+          "deleteDisabledTip": "暂不支持删除"
+        },
+        "today": {
+          "title": "今日训练",
+          "viewTodayPlan": "进入今日",
+          "postponeToday": "延迟今日训练"
+        },
+        "goal": {
+          "title": "周目标",
+          "weekSessions": "训练次数",
+          "completed": "已完成",
+          "progressTo": "进度",
+          "dayNumber": "第 {day} 天"
+        },
+        "example": {
+          "header": {
+            "cycleLabel": "当前周期",
+            "title": "马拉松基础周期",
+            "weekStatus": "第 5 / 12 周 · ACTIVE",
+            "totalSessions": "36 次训练",
+            "remainingLabel": "剩余",
+            "remainingWeeks": "7 周",
+            "createPlan": "创建计划"
+          },
+          "weekdayLabels": [
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六",
+            "日"
+          ],
+          "workouts": [
+            {
+              "dayLabel": "周一",
+              "title": "轻松跑 45 min",
+              "detail": "RUN · Z2 45 min",
+              "statusLabel": "已完成",
+              "linkedActivity": "周日轻松跑"
+            },
+            {
+              "dayLabel": "周三",
+              "title": "稳态跑 35 min",
+              "detail": "RUN · steady aerobic",
+              "statusLabel": "今天"
+            },
+            {
+              "dayLabel": "周六",
+              "title": "长距离跑 90 min",
+              "detail": "RUN · long endurance",
+              "statusLabel": "计划中"
+            }
+          ],
+          "coach": {
+            "title": "教练建议",
+            "summary": "保留周四质量训练，周末长距离按状态微调。"
+          }
+        }
+      },
+      "coach": {
+        "review": "智能教练复盘",
+        "history": "历史对话",
+        "newChat": "新对话",
+        "today": "今天",
+        "yesterday": "昨天",
+        "past": "更早",
+        "composerHint": "Shift + Enter 换行",
+        "thinking": "思考",
+        "send": "发送",
+        "questions": {
+          "title": "补充信息",
+          "answeredBadge": "已回答",
+          "submit": "发送",
+          "answeredCount": "{answered} / {total}"
+        },
+        "readCards": {
+          "toggleDetails": "展开详情"
+        },
+        "workoutAdjustment": {
+          "before": "调整前",
+          "after": "调整后",
+          "apply": "确认调整",
+          "changes": "变更项",
+          "position": "第 {week} 周 · 周{weekday}"
+        },
+        "planDraft": {
+          "weekColumn": "周",
+          "weekdays": [
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六",
+            "日"
+          ],
+          "weekLabel": "第 {week} 周",
+          "restLabel": "休息",
+          "summary": "{weeks} 周 · {sessions} 次训练",
+          "createPlan": "创建计划"
+        },
+        "sessions": [
+          {
+            "id": "adjust",
+            "title": "马拉松基础周期调整",
+            "bucket": "today",
+            "composer": "继续问：如果周五恢复很好，可以把强度加回来吗？",
+            "messages": [
+              {
+                "id": "adjust-u1",
+                "role": "user",
+                "text": "这周有点累，周四的节奏跑要不要调整？"
+              },
+              {
+                "id": "adjust-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "建议保留训练目标，但把周四节奏跑改成较短的稳态跑。这样不打断周期，也能给周六长距离留出恢复空间。"
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "当前计划",
+                        "subtitle": "第 5 周 · 周四"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "最近训练",
+                        "subtitle": "近 7 天 · 4 次"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "训练负荷",
+                        "subtitle": "2026-05-24 → 2026-06-30",
+                        "stats": [
+                          {
+                            "label": "活跃天",
+                            "value": "18"
+                          },
+                          {
+                            "label": "休息天",
+                            "value": "12"
+                          },
+                          {
+                            "label": "总负荷",
+                            "value": "842"
+                          },
+                          {
+                            "label": "日均",
+                            "value": "47"
+                          },
+                          {
+                            "label": "TSB",
+                            "value": "-4"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "planAdjustment",
+                    "data": {
+                      "planId": "demo-plan",
+                      "workoutId": "demo-workout-thu",
+                      "title": "周四训练调整",
+                      "reason": "本周疲劳偏高，降低周四刺激，同时保留有氧节奏。",
+                      "before": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "节奏跑",
+                        "text": "work 3x10m pace Z4"
+                      },
+                      "after": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "稳态跑",
+                        "text": "work 35m pace Z2"
+                      },
+                      "changes": [
+                        {
+                          "field": "text",
+                          "before": "work 3x10m pace Z4",
+                          "after": "work 35m pace Z2"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "create",
+            "title": "12 周半马计划",
+            "bucket": "yesterday",
+            "composer": "第 8 周能不能再加一次质量课？",
+            "messages": [
+              {
+                "id": "create-u1",
+                "role": "user",
+                "text": "帮我做一个 12 周半马计划，目前每周跑 4 次。"
+              },
+              {
+                "id": "create-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "question",
+                    "data": {
+                      "questions": [
+                        {
+                          "id": "goal",
+                          "header": "比赛目标",
+                          "question": "你的主要比赛目标是什么？",
+                          "options": [
+                            {
+                              "value": "sub-2",
+                              "label": "半马 Sub-2:00",
+                              "description": "均衡推进，每周保留 1 次质量课。"
+                            },
+                            {
+                              "value": "finish",
+                              "label": "稳健完赛",
+                              "description": "保守跑量，额外恢复间隔。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "reply": {
+                      "kind": "coach_question_reply",
+                      "repliesToAssistantMessageId": "create-a1",
+                      "answers": {
+                        "goal": "sub-2"
+                      },
+                      "notes": {
+                        "goal": ""
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "create-u2",
+                "role": "user",
+                "text": "目标：半马 Sub-2:00 · 每周 4 跑 · 12 周"
+              },
+              {
+                "id": "create-a2",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "这是按你当前跑量生成的草案：先打有氧基础，再逐步加入阈值支持和赛前长距离。"
+                  },
+                  {
+                    "type": "planDraft",
+                    "data": {
+                      "title": "半马周期 · 12 周",
+                      "description": "前段以有氧为主，后 4 周加入阈值支持和比赛型长距离。",
+                      "periodWeeks": 4,
+                      "workouts": [
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 45m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "稳态跑 35m",
+                          "name": "稳态跑"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "长距离 80m",
+                          "name": "长距离"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 40m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "节奏跑 3x8m",
+                          "name": "节奏跑"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 35m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "长距离 95m",
+                          "name": "长距离"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 45m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "递进跑 50m",
+                          "name": "递进跑"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "长距离 105m",
+                          "name": "长距离"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 7,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "恢复跑 30m",
+                          "name": "恢复跑"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 40m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "节奏跑 2x12m",
+                          "name": "节奏跑"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "稳态跑 40m",
+                          "name": "稳态跑"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "长距离 120m",
+                          "name": "长距离"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "long-run",
+            "title": "周末长跑补训",
+            "bucket": "past",
+            "composer": "如果腿还是沉，周二间歇要不要顺延？",
+            "messages": [
+              {
+                "id": "long-u1",
+                "role": "user",
+                "text": "周六长距离因为出差错过了，这周应该怎么补？"
+              },
+              {
+                "id": "long-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "不建议把完整的长距离直接叠加到本周计划上。可以把一次有氧课挪到本周后半段，周二质量课只有在睡眠和 TSB 都稳定时再保留。"
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "本周计划",
+                        "subtitle": "第 6 周 · 周六漏训"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "漏训记录",
+                        "subtitle": "周六长距离 · 未执行"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "恢复趋势",
+                        "subtitle": "近 14 天",
+                        "stats": [
+                          {
+                            "label": "TSB",
+                            "value": "-6"
+                          },
+                          {
+                            "label": "平均睡眠",
+                            "value": "6.8h"
+                          },
+                          {
+                            "label": "休息天",
+                            "value": "2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "metric": {
+        "sportLabels": {
+          "all": "全部项目",
+          "RUN": "跑步",
+          "CYCLING": "骑行",
+          "SWIM": "游泳"
+        },
+        "timeLabels": {
+          "thisYear": "今年",
+          "last30": "最近 30 天",
+          "last90": "最近 90 天"
+        },
+        "pmc": {
+          "calculate": "重新计算",
+          "calculating": "计算中...",
+          "combinedTitle": "PMC 综合分析",
+          "fitnessChart": "体能曲线",
+          "fatigueChart": "疲劳曲线",
+          "formChart": "状态曲线",
+          "noData": "暂无数据",
+          "abbr": {
+            "fitness": "CTL",
+            "fatigue": "ATL",
+            "form": "TSB"
+          },
+          "fitness": {
+            "title": "长期训练负荷 (CTL)"
+          },
+          "fatigue": {
+            "title": "短期训练负荷 (ATL)"
+          },
+          "form": {
+            "title": "训练压力平衡 (TSB)"
+          },
+          "load": {
+            "title": "训练负荷"
+          },
+          "zoneHelp": {
+            "ariaLabel": "状态分区说明",
+            "title": "状态分区说明",
+            "danger": "深度负值区（红）：TSB < -30，表示 ATL 明显高于 CTL。",
+            "optimal": "负荷构建区（绿）：-30 ≤ TSB < -10。",
+            "neutral": "中性区（灰）：-10 ≤ TSB < +5。",
+            "fresh": "新鲜区（蓝）：+5 ≤ TSB < +15。",
+            "peak": "巅峰区（紫）：+15 ≤ TSB < +25。",
+            "transition": "过渡期（橙）：TSB ≥ +25。"
+          },
+          "acmpHelp": {
+            "title": "ACWR (ATL/CTL) 说明",
+            "formula": "ACWR = ATL / CTL。",
+            "sweet": "参考区间（绿）：0.8–1.3，仅供对照。",
+            "danger": "复查区间（红）：≥ 1.5，需要检查近期负荷和数据。",
+            "advice": "把 ACWR 与训练质量、恢复状态结合起来判断。"
+          }
+        },
+        "power": {
+          "tabs": {
+            "curve": "曲线",
+            "maximum": "最大值",
+            "zones": "区间",
+            "profile": "档案"
+          },
+          "zonesTitle": "功率区间分布",
+          "maximumTitle": "最大功率历史",
+          "profileTitle": "功率档案",
+          "chartTitle": "功率时长曲线",
+          "noData": "暂无功率数据",
+          "ftp": "FTP",
+          "cp": "CP",
+          "table": {
+            "fiveSeconds": "5秒",
+            "thirtySeconds": "30秒",
+            "oneMinute": "1分钟",
+            "threeMinutes": "3分钟",
+            "fiveMinutes": "5分钟",
+            "twentyMinutes": "20分钟",
+            "sixtyMinutes": "60分钟",
+            "twoHours": "2小时",
+            "threeHours": "3小时"
+          },
+          "profile": {
+            "male": "男性",
+            "female": "女性",
+            "riderType": "骑手类型",
+            "levels": [
+              "世界级",
+              "卓越",
+              "优秀",
+              "很好",
+              "良好",
+              "中等",
+              "一般",
+              "新手",
+              "未训练"
+            ],
+            "durations": {
+              "5s": "5秒",
+              "1m": "1分钟",
+              "5m": "5分钟",
+              "FTP": "FTP"
+            }
+          },
+          "maximum": {
+            "bucketDay": "日",
+            "bucketWeek": "周",
+            "bucketMonth": "月"
+          }
+        },
+        "pace": {
+          "tabs": {
+            "curve": "曲线",
+            "zones": "区间"
+          },
+          "chartTitle": "配速曲线",
+          "zonesTitle": "配速区间分布",
+          "noData": "暂无配速数据",
+          "cs": "CS",
+          "table": {
+            "segment": "距离",
+            "pace": "配速",
+            "time": "用时"
+          },
+          "distances": {
+            "400m": "400米",
+            "800m": "800米",
+            "1500m": "1500米",
+            "1mi": "1英里",
+            "3k": "3公里",
+            "5k": "5公里",
+            "10k": "10公里",
+            "20k": "20公里",
+            "marathon": "42.2公里"
+          }
+        },
+        "heartRate": {
+          "tabs": {
+            "curve": "曲线",
+            "zones": "区间"
+          },
+          "chartTitle": "心率时长曲线",
+          "zonesTitle": "心率区间分布",
+          "noData": "暂无心率数据",
+          "maxHr": "最大心率",
+          "lthr": "乳酸阈心率",
+          "table": {
+            "fiveSeconds": "5秒",
+            "thirtySeconds": "30秒",
+            "oneMinute": "1分钟",
+            "threeMinutes": "3分钟",
+            "fiveMinutes": "5分钟",
+            "tenMinutes": "10分钟",
+            "twentyMinutes": "20分钟",
+            "sixtyMinutes": "60分钟",
+            "twoHours": "2小时",
+            "threeHours": "3小时",
+            "sixHours": "6小时"
+          }
+        }
+      }
+    },
     "metadata": {
       "title": "跑步与骑行训练应用：训练负荷与智能教练｜Trainingload.ai",
       "description": "Trainingload.ai 是一款跑步与骑行训练应用，整合实际训练、训练负荷与恢复状态。无需注册即可查看官方发布的免费跑步训练计划；会员可用智能教练获得调整建议。",
@@ -4204,7 +5790,10 @@
       "title": "让训练计划跟上你的真实状态",
       "subtitle": "Trainingload.ai 是一款跑步与骑行训练应用，将训练计划、实际训练、训练负荷与恢复状态放在一起，帮助你看清偏差，并有依据地调整。会员还可通过智能教练获得基于这些信息的个性化调整建议。",
       "cta": "创建账户",
-      "titleLines": ["让训练计划跟上", "你的真实状态"],
+      "titleLines": [
+        "让训练计划跟上",
+        "你的真实状态"
+      ],
       "links": {
         "docs": "学习训练负荷方法",
         "trainingLoad": "在计划中管理训练负荷",
@@ -4507,7 +6096,12 @@
         "label": "兼容平台",
         "more": "等平台…"
       },
-      "sportWords": ["跑步", "骑行", "游泳", "铁三"],
+      "sportWords": [
+        "跑步",
+        "骑行",
+        "游泳",
+        "铁三"
+      ],
       "iphoneSupport": "支持 iPhone",
       "appStoreCta": "在 App Store 下载"
     },
@@ -4728,27 +6322,43 @@
           "name": "智能教练",
           "title": "需要调整时，再问智能教练",
           "description": "根据计划、实际训练和训练负荷，查看有依据的调整建议。",
-          "points": ["当前计划", "实际完成", "调整建议"],
+          "points": [
+            "当前计划",
+            "实际完成",
+            "调整建议"
+          ],
           "cta": "了解智能教练"
         },
         {
           "name": "训练日历",
           "title": "对照计划与实际完成",
           "description": "把计划训练与已完成活动放在同一条时间线，改期、跳过和补训都更清楚。",
-          "points": ["计划训练", "已完成活动", "移动或跳过"]
+          "points": [
+            "计划训练",
+            "已完成活动",
+            "移动或跳过"
+          ]
         },
         {
           "name": "训练计划",
           "title": "看清整个训练周期",
           "description": "当前阶段、每周目标和后续课程一直可见，知道今天练什么，也知道为什么这样练。",
-          "points": ["当前阶段", "每周目标", "后续课程"],
+          "points": [
+            "当前阶段",
+            "每周目标",
+            "后续课程"
+          ],
           "cta": "查看训练计划"
         },
         {
           "name": "训练分析",
           "title": "判断负荷与恢复状态",
           "description": "用体能、疲劳、状态和趋势图表，判断训练是否按预期推进。",
-          "points": ["体能与疲劳", "本周负荷", "长期趋势"],
+          "points": [
+            "体能与疲劳",
+            "本周负荷",
+            "长期趋势"
+          ],
           "cta": "了解训练负荷"
         }
       ]
@@ -4906,7 +6516,11 @@
       "kicker": "有氧能力",
       "title": "VO2max 计算器",
       "subtitle": "输入跑步、步行或心率记录，估算你的有氧能力，了解当前水平。",
-      "proof": ["无需注册", "立即出结果", "可打印或分享"],
+      "proof": [
+        "无需注册",
+        "立即出结果",
+        "可打印或分享"
+      ],
       "jumpLinks": {
         "calculator": "计算器",
         "scorecard": "成绩单",
@@ -5366,7 +6980,14 @@
         },
         "help": "年龄和性别用于对照分级，也会参与 Rockport 计算；Beep 计算还会用到年龄。"
       },
-      "ageBands": ["30 岁以下", "30–39", "40–49", "50–59", "60–69", "70+"],
+      "ageBands": [
+        "30 岁以下",
+        "30–39",
+        "40–49",
+        "50–59",
+        "60–69",
+        "70+"
+      ],
       "safety": {
         "maximal": "这是大强度。出现胸痛、头晕或异常气喘应停止。",
         "submax": "这个选项不需要力竭。"
@@ -5744,7 +7365,11 @@
         "button": "免费开始"
       },
       "kicker": "跑步",
-      "proof": ["无需注册", "即时计算", "打印或分享"],
+      "proof": [
+        "无需注册",
+        "即时计算",
+        "打印或分享"
+      ],
       "heroProduct": {
         "title": "记录每次训练，读懂每次表现。",
         "body": "用 iPhone 记录活动，在 Trainingload.ai 中结合心率、配速、功率与负荷回看训练。",
@@ -6122,6 +7747,7 @@
     }
   },
   "commonLinks": {
+    "demoOverviewBack": "返回首页",
     "home": "首页",
     "tools": "工具",
     "allTools": "全部工具",
@@ -6236,10 +7862,22 @@
       "sourcesTitle": "判断依据"
     },
     "loop": [
-      ["计划", "先明确本周想获得什么刺激，以及哪几堂课最重要。"],
-      ["执行", "记录实际做了什么：时长、强度、完成质量和计划外训练。"],
-      ["负荷", "比较长期积累、近期压力和当前状态，找出偏离计划的地方。"],
-      ["调整", "把判断落到下一堂课：推进、维持、降强度、移动或恢复。"]
+      [
+        "计划",
+        "先明确本周想获得什么刺激，以及哪几堂课最重要。"
+      ],
+      [
+        "执行",
+        "记录实际做了什么：时长、强度、完成质量和计划外训练。"
+      ],
+      [
+        "负荷",
+        "比较长期积累、近期压力和当前状态，找出偏离计划的地方。"
+      ],
+      [
+        "调整",
+        "把判断落到下一堂课：推进、维持、降强度、移动或恢复。"
+      ]
     ],
     "cards": [
       [
@@ -6361,15 +7999,36 @@
       "faqProductAction": "在产品内确认训练调整"
     },
     "workflow": [
-      ["生成计划", "根据目标、时间、经验和限制，先搭出一份能练的草案。"],
-      ["执行训练", "每天知道该练什么，并把实际完成情况同步或导入回来。"],
-      ["智能教练复盘", "对比原计划、实际完成、负荷和状态，解释哪里偏了。"],
-      ["确认调整", "预览训练调整草案，确认后再应用到计划。"]
+      [
+        "生成计划",
+        "根据目标、时间、经验和限制，先搭出一份能练的草案。"
+      ],
+      [
+        "执行训练",
+        "每天知道该练什么，并把实际完成情况同步或导入回来。"
+      ],
+      [
+        "智能教练复盘",
+        "对比原计划、实际完成、负荷和状态，解释哪里偏了。"
+      ],
+      [
+        "确认调整",
+        "预览训练调整草案，确认后再应用到计划。"
+      ]
     ],
     "cards": [
-      ["计划上下文", "智能教练先读取当前计划、今日训练、明日训练和本周安排。"],
-      ["实际完成情况", "同步或导入的训练记录会成为判断完成质量和偏差的依据。"],
-      ["训练负荷信号", "CTL、ATL、TSB 和近期负荷帮助判断是否该恢复或调整。"],
+      [
+        "计划上下文",
+        "智能教练先读取当前计划、今日训练、明日训练和本周安排。"
+      ],
+      [
+        "实际完成情况",
+        "同步或导入的训练记录会成为判断完成质量和偏差的依据。"
+      ],
+      [
+        "训练负荷信号",
+        "CTL、ATL、TSB 和近期负荷帮助判断是否该恢复或调整。"
+      ],
       [
         "训练调整草案",
         "智能教练输出的是可预览、可校验、确认后才应用的单次训练调整。"
@@ -6426,12 +8085,18 @@
       "ctaText": "把计划、完成情况、训练负荷与调整理由放进同一条复盘链路。"
     },
     "pillars": [
-      ["先看计划与实际", "先对比计划安排和真实完成，再解释任何负荷指标。"],
+      [
+        "先看计划与实际",
+        "先对比计划安排和真实完成，再解释任何负荷指标。"
+      ],
       [
         "负荷与表现响应一起看",
         "把 CTL/ATL/TSB 与 有效 VO₂max、近期表现一起解读，避免单指标判断。"
       ],
-      ["优先单次小调整", "先做可验证的小改动，再在下一次关键课验证响应。"],
+      [
+        "优先单次小调整",
+        "先做可验证的小改动，再在下一次关键课验证响应。"
+      ],
       [
         "保留判断记录",
         "让每次调整都可解释、可追溯，方便教练和自训运动员持续优化。"
@@ -6490,10 +8155,22 @@
       "ctaText": "用智能教练整理证据，再结合疲劳、目标和时间线做最终确认。"
     },
     "steps": [
-      ["先定本阶段目标", "先明确当前训练阶段目标与周结构，再改具体课表。"],
-      ["追踪执行质量", "把真实完成带回计划，标记关键课完成度和偏差。"],
-      ["复盘负荷偏移", "调整前先检查 ATL/TSB 压力和 有效 VO₂max 变化。"],
-      ["确认训练调整", "只有在理由和取舍清晰时，才把草案应用到计划。"]
+      [
+        "先定本阶段目标",
+        "先明确当前训练阶段目标与周结构，再改具体课表。"
+      ],
+      [
+        "追踪执行质量",
+        "把真实完成带回计划，标记关键课完成度和偏差。"
+      ],
+      [
+        "复盘负荷偏移",
+        "调整前先检查 ATL/TSB 压力和 有效 VO₂max 变化。"
+      ],
+      [
+        "确认训练调整",
+        "只有在理由和取舍清晰时，才把草案应用到计划。"
+      ]
     ],
     "checks": [
       [
@@ -6504,8 +8181,14 @@
         "尊重恢复窗口",
         "当压力上升过快时，先保频率、降强度，不要继续叠加负荷。"
       ],
-      ["保护马拉松关键课质量", "通过削减周边疲劳，确保长距离和马配课质量。"],
-      ["保留调整解释", "每次调整都应包含前后变化和原因，方便后续复盘。"]
+      [
+        "保护马拉松关键课质量",
+        "通过削减周边疲劳，确保长距离和马配课质量。"
+      ],
+      [
+        "保留调整解释",
+        "每次调整都应包含前后变化和原因，方便后续复盘。"
+      ]
     ],
     "faq": [
       [
@@ -6564,10 +8247,22 @@
       "ctaText": "用智能教练整理证据，再结合疲劳、目标和时间线做最终确认。"
     },
     "steps": [
-      ["先定本阶段目标", "先明确当前训练阶段目标与周结构，再改具体课表。"],
-      ["追踪执行质量", "把真实完成带回计划，标记关键课完成度和偏差。"],
-      ["复盘负荷偏移", "调整前先检查 ATL/TSB 压力和 有效 VO₂max 变化。"],
-      ["确认训练调整", "只有在理由和取舍清晰时，才把草案应用到计划。"]
+      [
+        "先定本阶段目标",
+        "先明确当前训练阶段目标与周结构，再改具体课表。"
+      ],
+      [
+        "追踪执行质量",
+        "把真实完成带回计划，标记关键课完成度和偏差。"
+      ],
+      [
+        "复盘负荷偏移",
+        "调整前先检查 ATL/TSB 压力和 有效 VO₂max 变化。"
+      ],
+      [
+        "确认训练调整",
+        "只有在理由和取舍清晰时，才把草案应用到计划。"
+      ]
     ],
     "checks": [
       [
@@ -6582,7 +8277,10 @@
         "保护半马关键课质量",
         "通过削减周边疲劳，确保每周长跑和周中质量课不被拖垮。"
       ],
-      ["保留调整解释", "每次调整都应包含前后变化和原因，方便后续复盘。"]
+      [
+        "保留调整解释",
+        "每次调整都应包含前后变化和原因，方便后续复盘。"
+      ]
     ],
     "faq": [
       [
@@ -7123,7 +8821,10 @@
       "toolsAction": "打开训练工具",
       "productAction": "打开 Trainingload.ai",
       "ctaTitle": "别只看一条曲线，要看下一步怎么练。",
-      "ctaText": "比较曲线形状、CP/FTP 变化和训练完成质量，少靠猜，多靠趋势调整强度。"
+      "ctaText": "比较曲线形状、CP/FTP 变化和训练完成质量，少靠猜，多靠趋势调整强度。",
+      "updatedLabel": "最后更新",
+      "lastUpdated": "2026 年 5 月 23 日",
+      "lastUpdatedDate": "2026-05-23"
     },
     "blocks": [
       [
@@ -7280,7 +8981,13 @@
     "metadata": {
       "title": "估算 CP、FTP、LTHR：把阈值用到训练区间里",
       "description": "用文件和模型一起估算 CP、FTP、LTHR，再把结果用到区间、课表和训练负荷调整中。",
-      "keywords": ["CP 估算", "FTP 估算", "LTHR 估算", "阈值估算", "训练区间"]
+      "keywords": [
+        "CP 估算",
+        "FTP 估算",
+        "LTHR 估算",
+        "阈值估算",
+        "训练区间"
+      ]
     },
     "ui": {
       "eyebrow": "CP / FTP / LTHR 估算",
@@ -7305,8 +9012,14 @@
         "多种估算方式互相校验",
         "文件估算和模型估算方向接近时，再考虑调整区间。"
       ],
-      ["先小幅校准", "阈值调整先保守一点，再用关键训练质量和主观感受验证。"],
-      ["阶段切换时再复查", "进入强化期或比赛专项期前，重新看一次阈值会更稳。"]
+      [
+        "先小幅校准",
+        "阈值调整先保守一点，再用关键训练质量和主观感受验证。"
+      ],
+      [
+        "阶段切换时再复查",
+        "进入强化期或比赛专项期前，重新看一次阈值会更稳。"
+      ]
     ],
     "faq": [
       [
@@ -7412,7 +9125,10 @@
         "按时间段分开看",
         "短时间、中时间、长时间代表的能力不同，不要用一个 PB 概括全部状态。"
       ],
-      ["看能不能重复出现", "一次爆发很爽，但训练更关心能力是否能稳定复现。"],
+      [
+        "看能不能重复出现",
+        "一次爆发很爽，但训练更关心能力是否能稳定复现。"
+      ],
       [
         "和训练块目标对齐",
         "如果这个阶段练的是耐力，却只看到短冲刺进步，就要重新看训练刺激是否对齐。"
@@ -7431,7 +9147,10 @@
         "为什么最佳表现变好了，比赛配速却没变好？",
         "峰值能力和比赛耐力不是一回事。配速策略、疲劳抵抗和专项训练都会影响比赛表现。"
       ],
-      ["多久复盘一次？", "每周看趋势，训练块结束时再做一次更完整的复盘。"]
+      [
+        "多久复盘一次？",
+        "每周看趋势，训练块结束时再做一次更完整的复盘。"
+      ]
     ]
   },
   "fitnessFatigueFormPage": {
@@ -7494,6 +9213,530 @@
     ]
   },
   "runningPlanPages": {
+    "derived": {
+      "fiveKChooserLabels": {
+        "options": [
+          "从零开始",
+          "能连续跑 20–30 分钟",
+          "已有比赛基础"
+        ],
+        "current": "当前计划"
+      },
+      "raceDistanceChoosers": {
+        "10k": {
+          "title": "选择适合你的 10 公里计划",
+          "subtitle": "先看当前跑步基础和目标，不要直接选择看起来最难的课表。",
+          "options": [
+            {
+              "label": "完赛",
+              "title": "首次完成 10 公里",
+              "description": "10 周、每周三跑，不要求阈值或间歇训练。"
+            },
+            {
+              "label": "进阶",
+              "title": "提高 10 公里成绩",
+              "description": "已经能轻松完赛后，再加入可重复的质量训练。"
+            },
+            {
+              "label": "目标",
+              "title": "按目标成绩备赛",
+              "description": "根据近期成绩和比赛日期，安排更具体的训练。"
+            }
+          ]
+        },
+        "half-marathon": {
+          "title": "选择适合你的半马计划",
+          "subtitle": "根据当前长跑基础，选择首次完赛、进阶提高或目标成绩。",
+          "options": [
+            {
+              "label": "完赛",
+              "title": "首次完成半马",
+              "description": "14 周、每周四跑，逐步延长长跑时间。"
+            },
+            {
+              "label": "进阶",
+              "title": "提高半马成绩",
+              "description": "熟悉半马距离后，再加入稳定可控的质量训练。"
+            },
+            {
+              "label": "目标",
+              "title": "按目标成绩备赛",
+              "description": "用近期比赛成绩和目标赛事制定专项安排。"
+            }
+          ]
+        },
+        "marathon": {
+          "title": "选择适合你的马拉松计划",
+          "subtitle": "当前长跑基础和比赛目标，决定你该先完赛、进阶还是冲击成绩。",
+          "options": [
+            {
+              "label": "完赛",
+              "title": "完成首场马拉松",
+              "description": "18 周、每周四跑，并保留完整的三周减量。"
+            },
+            {
+              "label": "进阶",
+              "title": "提高马拉松成绩",
+              "description": "已经稳定完成马拉松训练后，再增加可控质量课。"
+            },
+            {
+              "label": "目标",
+              "title": "按目标成绩备赛",
+              "description": "结合当前能力和比赛日期，准备更明确的目标。"
+            }
+          ]
+        }
+      },
+      "fiveK": {
+        "weeks": "8 周",
+        "level": "新手到进阶",
+        "weeklyVolume": "每周 4 次跑步",
+        "metaTitle": "免费 8 周 5 公里训练计划：新手完赛安排",
+        "metaDescription": "给已能连续跑 20–30 分钟的跑者：免费 8 周 5 公里训练计划，每周 4 跑，含轻松跑、受控稳定跑、长跑和赛前减量。",
+        "keywords": [
+          "5 公里训练计划",
+          "5k training plan",
+          "5 公里跑步计划",
+          "5 公里训练安排",
+          "8 周 5 公里计划"
+        ],
+        "eyebrow": "8 周 5 公里跑步计划",
+        "title": "免费 8 周 5 公里训练计划：面向新手完赛。",
+        "subtitle": "这份 5 公里计划适合已经能轻松连续跑 20-30 分钟、希望有明确备赛安排的跑者。计划结合可对话强度的轻松跑、每周一次可控质量课、一次长距离、恢复和赛前短减量。",
+        "primaryCta": "个性化我的 5 公里计划",
+        "secondaryCta": "浏览全部计划",
+        "promise": "下方完整训练安排免费公开。当可训练日期、近期训练、配速或恢复情况让通用日历不再合适时，再进行个性化。",
+        "planChooser": {
+          "title": "选择适合你的 5 公里计划",
+          "subtitle": "按照你现在能完成的跑步能力选择起点。三种计划的起步要求和训练负荷不同。",
+          "options": [
+            {
+              "label": "从零开始",
+              "title": "Couch to 5K",
+              "description": "如果连续轻松跑 20 分钟仍不舒服，先从跑走交替计划开始。",
+              "href": "/couch-to-5k-training-plan"
+            },
+            {
+              "label": "当前计划",
+              "title": "完成一次 5 公里",
+              "description": "如果你已经能轻松连续跑 20–30 分钟，并能每周安排四次跑步，选择这份 8 周计划。",
+              "href": null
+            },
+            {
+              "label": "已有比赛基础",
+              "title": "提高 5 公里成绩",
+              "description": "如果已有近期 5 公里成绩，并希望系统加入间歇和节奏跑，选择进阶计划。",
+              "href": "/5k-training-plan/intermediate"
+            }
+          ]
+        },
+        "trustItems": [
+          "完整课表免费",
+          "8 周",
+          "每周 4 跑",
+          "需连续跑 20–30 分钟"
+        ],
+        "forTitle": "这份 5 公里训练计划适合谁",
+        "forItems": [
+          "你已经能轻松连续跑 20-30 分钟，不再需要跑走交替入门。",
+          "你希望稳妥完成第一次 5 公里，或提升近期 5 公里成绩，而不是每次都跑到很累。",
+          "你每周可以保留 4 个跑步日，包括一次质量课和一次较长轻松跑。",
+          "你目前没有会改变跑姿的疼痛、疾病或伤病。"
+        ],
+        "previewTitle": "8 周 5 公里计划如何推进",
+        "previewSubtitle": "计划从可重复的轻松跑逐步进入 5 公里专项训练，再在比赛前降低疲劳。下方提供完整逐日安排。",
+        "previewRows": [
+          [
+            "第 1-2 周",
+            "建立节奏",
+            "保持大部分训练轻松，加入放松加速跑或短上坡。"
+          ],
+          [
+            "第 3-6 周",
+            "构建 5 公里能力",
+            "交替进行可控间歇和节奏跑，长距离逐步增加。"
+          ],
+          [
+            "第 7-8 周",
+            "减量与比赛",
+            "降低总量、保留少量速度，让身体清爽地进入比赛。"
+          ]
+        ],
+        "contentTitle": "一份实用 5 公里计划需要什么",
+        "contentSubtitle": "训练安排应把轻松跑量与质量课分开，让每次训练都有目的，并留下足够恢复来稳定重复。",
+        "contentSections": [
+          [
+            "轻松跑量",
+            "轻松跑建立一致性，不把每一天都变成测试。",
+            [
+              "保持能对话的强度",
+              "炎热和上坡时主动降速",
+              "保留恢复日"
+            ]
+          ],
+          [
+            "每周一次质量课",
+            "间歇、上坡或节奏跑发展 5 公里专项速度，但不主导整周。",
+            [
+              "可控地完成重复跑",
+              "动作开始变形前停止",
+              "不要用强度补偿错过的轻松跑"
+            ]
+          ],
+          [
+            "长距离与减量",
+            "适度长距离支持耐力；最后一周降低疲劳同时保留节奏。",
+            [
+              "长距离保持轻松",
+              "比赛前降低总量",
+              "避免临时测试体能"
+            ]
+          ]
+        ],
+        "conversionTitle": "把免费 5 公里安排放进你的日历",
+        "conversionText": "选择比赛日期、可训练日、当前配速和近期训练。Trainingload.ai 可以围绕这些限制生成草案，并让后续变化在进入日历前保持可审阅。",
+        "aiTitle": "Trainingload.ai 如何个性化 5 公里计划",
+        "aiSubtitle": "公开计划回答练什么；个性化决定训练放在哪一天、使用什么配速锚点，以及完成训练后该构建、维持还是恢复。",
+        "aiSignals": [
+          [
+            "计划与实际",
+            "比较计划 workout 与真实完成情况，而不是只看配速。"
+          ],
+          [
+            "训练负荷",
+            "增加跑量或加入更多强度前，先查看近期负荷和恢复。"
+          ],
+          [
+            "确认后调整",
+            "智能教练生成调整草案；你或教练确认后才更新日历。"
+          ]
+        ],
+        "relatedTitle": "继续选择跑步计划",
+        "relatedLinks": [
+          [
+            "从零开始？使用 Couch to 5K",
+            "/couch-to-5k-training-plan",
+            "如果连续轻松跑 20 分钟仍不舒适，先使用跑走交替计划。"
+          ],
+          [
+            "从 5 公里进阶到 10 公里",
+            "/10k-training-plan",
+            "通过完整 10 公里计划延长耐力并发展阈值能力。"
+          ],
+          [
+            "使用 VDOT 参考训练配速",
+            "/vdot-calculator",
+            "用近期表现作为可控训练配速的一个参考。"
+          ]
+        ],
+        "faq": [
+          [
+            "5 公里应该训练多久？",
+            "本计划为 8 周。基础较少的跑者可能需要更久；已经稳定训练的跑者也应先核对负荷再决定是否从中段开始。"
+          ],
+          [
+            "每周应该跑几天？",
+            "计划使用每周 4 个跑步日。轻松日必须轻松，并在质量课之间保留休息或力量训练日。"
+          ],
+          [
+            "这是新手 5 公里计划吗？",
+            "是，但适合已经能轻松连续跑 20-30 分钟的新手。完全没有跑步基础的人应使用独立 Couch to 5K 计划。"
+          ],
+          [
+            "错过训练怎么办？",
+            "可以跳过，或只在仍能保护恢复时移动。不要连续堆叠两次质量课，也不要把漏掉的跑量塞进周末。"
+          ],
+          [
+            "智能教练会自动改计划吗？",
+            "Trainingload.ai 可以根据完成训练和负荷背景生成调整草案，但更新日历前仍需确认。"
+          ]
+        ]
+      },
+      "finishFiveKDetails": {
+        "previewTitle": "8 周完赛计划如何进阶",
+        "previewSubtitle": "每周四次可重复训练逐步建立连续跑耐力，在正确时间恢复，并减量进入最终 5K。",
+        "previewRows": [
+          [
+            "第 1–3 周",
+            "建立基础",
+            "长跑从 25 分钟逐步增加到 35 分钟。"
+          ],
+          [
+            "第 4 周",
+            "吸收训练",
+            "降低长跑时长，所有训练保持受控。"
+          ],
+          [
+            "第 5–6 周",
+            "再次构建",
+            "依次完成 40 和 45 分钟可对话长跑。"
+          ],
+          [
+            "第 7–8 周",
+            "减量与完赛",
+            "先降低疲劳，再控制开局完成 5K。"
+          ]
+        ],
+        "contentTitle": "每周四次跑步分别解决什么",
+        "contentSubtitle": "计划把轻松跑量、受控稳定跑和长跑分开，让每次训练只承担清晰目的。",
+        "contentSections": [
+          [
+            "两次轻松跑",
+            "轻松跑和恢复跑在积累连续性的同时保留精力。",
+            [
+              "保持可对话",
+              "炎热和坡路主动降速",
+              "不要堆叠错过的训练"
+            ]
+          ],
+          [
+            "一次稳定跑",
+            "受控的 RPE 5 训练改善节奏感，但不把训练跑成比赛。",
+            [
+              "强度应可重复",
+              "保持良好跑姿结束",
+              "配速证据不足时使用 RPE"
+            ]
+          ],
+          [
+            "一次长跑",
+            "长跑分两轮递增，中间安排恢复周，最后安排减量。",
+            [
+              "保持可对话呼吸",
+              "第 4 和第 7 周降低负荷",
+              "最终 5K 主动控制开局"
+            ]
+          ]
+        ]
+      },
+      "fiveKHubRelatedLink": [
+        "查看 5 公里训练计划主页",
+        "/5k-training-plan",
+        "比较从零跑走、完赛与进阶提速三种 5 公里计划。"
+      ],
+      "productLoopRelatedLinks": [
+        [
+          "用 AI 教练按训练负荷调整计划",
+          "/ai-training-plan",
+          "根据完成训练和负荷生成可确认的调整草案，而不是沿用固定日历。"
+        ],
+        [
+          "用 VDOT 计算训练配速",
+          "/vdot-calculator",
+          "用近期成绩建立可验证的配速锚点。"
+        ],
+        [
+          "用时间和距离计算跑步配速",
+          "/running-pace-calculator",
+          "换算配速、用时和距离，或生成 5 公里到马拉松的均匀分段表。"
+        ],
+        [
+          "用近期成绩预测完赛时间",
+          "/race-time-predictor",
+          "从一场近期比赛或已知配速预测 5 公里、10 公里、半马和全马完赛时间。"
+        ],
+        [
+          "在计划里管理训练负荷",
+          "/training-load",
+          "在增加跑量或强度前，先查看 CTL、ATL 和 TSB。"
+        ]
+      ],
+      "intermediateLink": [
+        "进阶 5K 训练计划",
+        "/5k-training-plan/intermediate",
+        "已有近期 5K 成绩时，加入更明确的间歇和节奏训练。"
+      ],
+      "intermediateFiveK": {
+        "heroSubtitle": "每周用两次轻松有氧跑、一次受控质量课和一次长跑提升 5K 表现。单数周安排可重复间歇，双数周安排受控节奏跑，并用轻松日隔开质量课和长跑。第 4 周降低负荷，第 5–6 周重新构建，第 7 周减量，第 8 周完成 5K。",
+        "previewRows": [
+          [
+            "第 1–3 周",
+            "建立专项能力",
+            "间歇与节奏跑交替，长跑增加至 50 分钟。"
+          ],
+          [
+            "第 4 周",
+            "恢复",
+            "缩短质量课和长跑，吸收前三周负荷。"
+          ],
+          [
+            "第 5–6 周",
+            "重新构建",
+            "间歇增加至 6×2 分钟，节奏跑增加至 20 分钟。"
+          ],
+          [
+            "第 7–8 周",
+            "减量与 5K",
+            "保留短质量刺激，降低总量后完成 5K。"
+          ]
+        ],
+        "contentTitle": "进阶 5K 如何把速度练成可重复的能力",
+        "contentSubtitle": "每周只安排一堂主要质量课，其他跑量用来吸收刺激，避免把每次训练都跑成测试。",
+        "contentSections": [
+          [
+            "轻松跑保护质量课",
+            "大部分跑量保持可对话强度，让你能在关键训练中完成正确的节奏与动作。",
+            [
+              "不追逐轻松跑配速",
+              "质量课之间保留恢复",
+              "疲劳上升时先减量"
+            ]
+          ],
+          [
+            "间歇让 5K 配速可重复",
+            "用短组数累积接近 5K 强度的时间，不把任何一组做成冲刺。",
+            [
+              "以近期成绩或 RPE 定强度",
+              "每组保持一致",
+              "动作走样就停止增加"
+            ]
+          ],
+          [
+            "节奏跑与长跑建立耐力",
+            "节奏跑提高可持续强度，长跑延长有氧时间，两者共同支撑比赛后半段。",
+            [
+              "节奏跑保持受控",
+              "长跑维持轻松",
+              "第 4、7–8 周主动减量"
+            ]
+          ]
+        ],
+        "level": "进阶",
+        "metaTitle": "进阶 5 公里训练计划：免费 8 周提速安排",
+        "metaDescription": "给已能稳定每周跑 4 天的跑者：免费 8 周进阶 5K 计划，含间歇、节奏跑、长跑和减量。有成绩用 VDOT，没有则用 RPE。",
+        "keywords": [
+          "进阶 5K 训练计划",
+          "5k training plan intermediate",
+          "5 公里提速计划",
+          "VDOT 5K"
+        ],
+        "eyebrow": "8 周进阶 5 公里计划",
+        "forTitle": "这份进阶 5K 计划适合谁",
+        "forItems": [
+          "你能稳定完成每周 4 次跑步。",
+          "你有近期 5K 成绩或足够训练基线。",
+          "你能在质量课之间保留恢复日。",
+          "你目前没有影响跑姿的疼痛或伤病。"
+        ],
+        "standardFinishLink": [
+          "先使用标准 5K 完赛计划",
+          "/5k-training-plan",
+          "如果尚未稳定训练 4 天，先建立可重复的基础。"
+        ],
+        "faq": [
+          [
+            "这是进阶 5 公里训练计划吗？",
+            "是。给已经能稳定每周跑 4 天、想用间歇和节奏跑提高 5K 的人，不是第一次完赛课表。"
+          ],
+          [
+            "和免费新手 5K 计划有什么不同？",
+            "新手页从连续跑 20–30 分钟开始完赛。这页在基础稳定后加入更明确的质量课。还不能稳定跑 4 天时，先用 5K 完赛计划。"
+          ],
+          [
+            "每周有几次质量课？",
+            "一次主要质量课，再加轻松跑量和长跑。不要连续两天高强度。"
+          ],
+          [
+            "这份计划能帮我跑进 25 分钟吗？",
+            "如果你目前成绩已接近 25 分钟，它可以作为提速框架；请用近期 5K 成绩设置强度。若差距较大，先完成一轮并重新测试，不要直接套用过快配速。"
+          ],
+          [
+            "智能教练会自动改这份进阶计划吗？",
+            "Trainingload.ai 可以根据完成训练和训练负荷生成调整草案，但日历只有在你确认后才会更新。"
+          ]
+        ]
+      },
+      "templateMetaDescription": "给已能连续跑 20–30 分钟的跑者：免费 8 周 5 公里训练计划，每周 4 跑，含轻松跑、受控稳定跑、长跑和赛前减量。"
+    },
+    "sectionKickers": {
+      "startHere": "从这里开始",
+      "trainingMethod": "训练方法"
+    },
+    "heroHeadings": {
+      "couch-to-5k-training-plan": [
+        "免费 9 周",
+        "Couch to 5K 训练计划",
+        "从走路开始，完成 5 公里"
+      ],
+      "5k-training-plan": [
+        "免费 8 周",
+        "5 公里训练计划",
+        "稳步完成首个 5K"
+      ],
+      "5k-training-plan-intermediate": [
+        "免费 8 周",
+        "进阶 5 公里训练计划",
+        "用间歇与节奏跑提速"
+      ],
+      "10k-training-plan": [
+        "免费 10 周",
+        "10 公里训练计划",
+        "从 5K 稳步跑向 10K"
+      ],
+      "half-marathon-training-plan": [
+        "免费 14 周",
+        "半马训练计划",
+        "为首个 21.1 公里打好基础"
+      ],
+      "marathon-training-plan": [
+        "免费 18 周",
+        "马拉松训练计划",
+        "完成你的首场全马"
+      ]
+    },
+    "productPreview": {
+      "webAlt": "TrainingLoad.ai Web 端训练计划详情页",
+      "mobileAlt": "TrainingLoad.ai iOS 端今日训练页",
+      "webCalendarAlt": "TrainingLoad.ai Web 端含已完成与计划训练的训练日历",
+      "mobileCalendarAlt": "TrainingLoad.ai iOS 端含训练数据的日历页面"
+    },
+    "officialTemplate": {
+      "labels": {
+        "official": "官方训练计划",
+        "improve": "进阶提高",
+        "target": "目标成绩备赛",
+        "weeks": "周期",
+        "runsPerWeek": "每周跑步",
+        "level": "计划类型",
+        "schedule": "完整逐周训练安排",
+        "scheduleText": "展开每一周，查看训练内容、结构和强度说明；确认适合自己后，再加入日历。",
+        "example": "示例强度",
+        "exampleText": "下方配速使用 VDOT 40 示例，不是你的个人训练配速。登录后会使用可靠的当前能力数据；目标成绩计划还需要符合条件的目标赛事。",
+        "cta": "生成我的计划",
+        "back": "返回该距离训练主页",
+        "currentPlan": "当前计划",
+        "workoutCount": "次训练",
+        "finalTitle": "把完整计划加入训练日历",
+        "finalText": "先通过公开课表确认结构，再结合当前能力和可训练日期生成个人预览。"
+      },
+      "seoTitles": {
+        "improve-10k": "10公里进阶训练计划：8周提高成绩课表",
+        "target-10k": "10公里目标成绩训练计划：跑进40、45或50分钟",
+        "improve-half-marathon": "半马进阶训练计划：12周提高成绩课表",
+        "target-half-marathon": "半马目标成绩训练计划：14周备战半马破二",
+        "improve-marathon": "马拉松进阶训练计划：18周提高成绩课表",
+        "target-marathon": "马拉松目标成绩训练计划：18周备战破三与破四"
+      },
+      "pageHeadings": {
+        "improve-10k": "10公里进阶训练计划",
+        "target-10k": "10公里目标成绩训练计划",
+        "improve-half-marathon": "半马进阶训练计划",
+        "target-half-marathon": "半马目标成绩训练计划",
+        "improve-marathon": "马拉松进阶训练计划",
+        "target-marathon": "马拉松目标成绩训练计划"
+      }
+    },
+    "workoutStructure": {
+      "chartAriaLabel": "训练结构图",
+      "stepLabels": {
+        "WARMUP": "热身",
+        "WORK": "主训练",
+        "RECOVERY": "恢复",
+        "REST": "休息",
+        "COOLDOWN": "放松",
+        "OTHER": "训练"
+      }
+    },
     "collection": {
       "metaTitle": "免费跑步训练计划：5 公里、10 公里、半马与全马",
       "metaDescription": "比较 12 套免费官方跑步训练计划，覆盖 5 公里、10 公里、半程马拉松和马拉松。完整课表可直接跟练，也可免费加入日历。",
@@ -7605,7 +9848,11 @@
         "previewTitle": "5 公里计划大致长什么样",
         "previewSubtitle": "下面只是结构预览。进入产品后，计划会根据你的当前能力、可训练日期和已有运动记录生成。",
         "previewRows": [
-          ["第 1-2 周", "跑走结合", "短时间轻松跑走交替，跑步日之间保留恢复。"],
+          [
+            "第 1-2 周",
+            "跑走结合",
+            "短时间轻松跑走交替，跑步日之间保留恢复。"
+          ],
           [
             "第 3-5 周",
             "连续轻松跑",
@@ -7624,7 +9871,10 @@
             "缺课了",
             "优先保住习惯，把训练顺延或简化，而不是把漏掉的课硬塞回本周。"
           ],
-          ["负荷涨得太快", "先稳定跑量、降低强度，避免小酸痛变成长期中断。"],
+          [
+            "负荷涨得太快",
+            "先稳定跑量、降低强度，避免小酸痛变成长期中断。"
+          ],
           [
             "比赛周紧张",
             "最后一周保持简单，让你带着新鲜感去完成第一个 5 公里。"
@@ -7728,7 +9978,11 @@
         "previewTitle": "10 周10公里课表如何推进",
         "previewSubtitle": "官方完赛课表共 10 周、每周三跑。轻松跑和长跑占绝大多数；三次受控稳定跑只练习节奏，不进入阈值。",
         "previewRows": [
-          ["第 1–3 周", "建立规律", "每周三跑，长跑从 45 分钟增加到 50 分钟。"],
+          [
+            "第 1–3 周",
+            "建立规律",
+            "每周三跑，长跑从 45 分钟增加到 50 分钟。"
+          ],
           [
             "第 4–7 周",
             "构建耐力",
@@ -7752,7 +10006,10 @@
             "错过长跑",
             "可以跳过，或只在仍能保护恢复时改期。不要把下一周轻松安排改成补课周。"
           ],
-          ["稳定跑前已经很累", "先保住长跑，再缩短或取消周中稳定跑。"],
+          [
+            "稳定跑前已经很累",
+            "先保住长跑，再缩短或取消周中稳定跑。"
+          ],
           [
             "需要重排整周",
             "到智能训练计划页查看按负荷生成的草案。日历只有在你确认后才会更新。"
@@ -7803,12 +10060,20 @@
           [
             "三次受控稳定跑",
             "第 4、6、8 周用 20 分钟 RPE 5–6 练习稳定节奏，仍能说出短句。这不是阈值训练。",
-            ["仍能说出短句", "不跑到喘不过气", "不要改成间歇课"]
+            [
+              "仍能说出短句",
+              "不跑到喘不过气",
+              "不要改成间歇课"
+            ]
           ],
           [
             "最长距离 65 分钟",
             "长跑第 7 周到 65 分钟，随后两周降低。需要时可短暂步行。",
-            ["全程保持可对话", "需要时可短暂步行", "漏掉长跑后不要连续补两次"]
+            [
+              "全程保持可对话",
+              "需要时可短暂步行",
+              "漏掉长跑后不要连续补两次"
+            ]
           ]
         ],
         "conversionTitle": "把这份免费 10 周课表加入日历",
@@ -7855,7 +10120,11 @@
             "/free-ai-workout-review",
             "上传一次完成的跑步，获得可核对的复盘。无需账号。"
           ],
-          ["跑者训练负荷", "/training-load", "用负荷信号判断该加量还是恢复。"]
+          [
+            "跑者训练负荷",
+            "/training-load",
+            "用负荷信号判断该加量还是恢复。"
+          ]
         ],
         "trustItems": [
           "完整课表免费",
@@ -7946,7 +10215,10 @@
             "错过长跑",
             "可以跳过，或只在仍能保护恢复时改期。不要把下一周轻松安排改成补课周。"
           ],
-          ["稳定跑前已经很累", "先保住长跑，再缩短或取消周中对比课。"],
+          [
+            "稳定跑前已经很累",
+            "先保住长跑，再缩短或取消周中对比课。"
+          ],
           [
             "需要重排整周",
             "到智能半马训练计划页查看按负荷生成的草案。日历只有在你确认后才会更新。"
@@ -8147,7 +10419,10 @@
             "错过长跑",
             "可以跳过，或只在仍能保护恢复时改期。不要把下一周轻松安排改成补课周。"
           ],
-          ["稳定跑前已经很累", "先保住长跑，再缩短或取消周中对比课。"],
+          [
+            "稳定跑前已经很累",
+            "先保住长跑，再缩短或取消周中对比课。"
+          ],
           [
             "需要重排整周",
             "到智能马拉松训练计划页查看按负荷生成的草案。日历只有在你确认后才会更新。"
@@ -8326,10 +10601,26 @@
         "previewTitle": "9 周 Couch to 5K 计划如何推进",
         "previewSubtitle": "从短时间的跑走交替开始，逐步延长跑步时间，最后以可控强度完成 5 公里。可以打开任意一周，也可以直接从第 1 周开始。",
         "previewRows": [
-          ["第 1–3 周", "建立习惯", "每周三次短跑走训练，跑段保持轻松可控。"],
-          ["第 4–6 周", "延长跑段", "逐步增加连续跑时间，同时保留恢复日。"],
-          ["第 7–8 周", "准备连续跑", "练习更长的持续跑，但不引入配速目标。"],
-          ["第 9 周", "完成 5 公里", "以可控强度完成距离，需要时可以短暂步行。"]
+          [
+            "第 1–3 周",
+            "建立习惯",
+            "每周三次短跑走训练，跑段保持轻松可控。"
+          ],
+          [
+            "第 4–6 周",
+            "延长跑段",
+            "逐步增加连续跑时间，同时保留恢复日。"
+          ],
+          [
+            "第 7–8 周",
+            "准备连续跑",
+            "练习更长的持续跑，但不引入配速目标。"
+          ],
+          [
+            "第 9 周",
+            "完成 5 公里",
+            "以可控强度完成距离，需要时可以短暂步行。"
+          ]
         ],
         "aiTitle": "现实打乱 Couch to 5K 计划时怎么办？",
         "aiSubtitle": "例如你计划本周练三次，错过了周三训练，周六的主观强度又明显偏高。智能教练可以对照计划和实际完成情况，检查近期负荷与恢复，建议重复本周或移动下一次训练；只有你确认后才会修改日历。",
@@ -8342,7 +10633,10 @@
             "负荷与恢复背景",
             "结合近期负荷、恢复信号、漏训和反馈解释为什么建议调整。"
           ],
-          ["由你决定", "智能教练自动生成建议；只有接受后才会更新训练日历。"]
+          [
+            "由你决定",
+            "智能教练自动生成建议；只有接受后才会更新训练日历。"
+          ]
         ],
         "faq": [
           [
@@ -8396,17 +10690,26 @@
           [
             "直接在这里免费跟练",
             "下方提供全部周次和训练，无需账户或 App 即可开始。",
-            ["从第 1 周开始", "完整查看 9 周课表"]
+            [
+              "从第 1 周开始",
+              "完整查看 9 周课表"
+            ]
           ],
           [
             "免费加入日历",
             "选择开始日期和训练日，记录完成情况，并手动移动或修改自己的计划。",
-            ["与网页相同的官方训练", "训练日期可随时手动调整"]
+            [
+              "与网页相同的官方训练",
+              "训练日期可随时手动调整"
+            ]
           ],
           [
             "让智能教练应对变化",
             "智能教练对照计划与实际训练、负荷和恢复，生成有依据的调整建议。",
-            ["持续自动监测", "确认后才修改日历"]
+            [
+              "持续自动监测",
+              "确认后才修改日历"
+            ]
           ]
         ],
         "conversionTitle": "免费将官方计划加入日历",
@@ -8431,7 +10734,12 @@
         "finalTitle": "今天开始免费计划",
         "finalText": "直接从本页第 1 周开始，或免费将同一份官方计划加入日历，让下一次训练出现在日历中。",
         "collectionCta": "查看免费 Couch to 5K 计划",
-        "trustItems": ["完整免费课表", "9 周", "每周 3 跑", "不设配速目标"],
+        "trustItems": [
+          "完整免费课表",
+          "9 周",
+          "每周 3 跑",
+          "不设配速目标"
+        ],
         "routePath": "/couch-to-5k-training-plan",
         "templateSlug": "first-5k"
       }
@@ -9408,7 +11716,10 @@
             "一次只改一个主要变量",
             "大多数调整都应避免同时改变跑量、强度和频率。"
           ],
-          ["不替代医疗建议", "疼痛、伤病症状、疾病和医疗限制仍需要专业判断。"]
+          [
+            "不替代医疗建议",
+            "疼痛、伤病症状、疾病和医疗限制仍需要专业判断。"
+          ]
         ],
         "useCases": [
           [
@@ -9430,7 +11741,10 @@
         ],
         "workflowTitle": "跑步智能教练如何工作",
         "workflow": [
-          ["从计划开始", "先有包含目标、周结构、关键课和限制条件的跑步计划。"],
+          [
+            "从计划开始",
+            "先有包含目标、周结构、关键课和限制条件的跑步计划。"
+          ],
           [
             "导入完成跑步",
             "同步或上传训练，让智能教练对比计划和实际完成情况。"
@@ -9439,7 +11753,10 @@
             "复盘负荷和反应",
             "改训练量或强度前，先看训练负荷、配速、心率和 有效 VO₂max。"
           ],
-          ["确认调整", "预览课表变更，确认后才更新保存的训练计划。"]
+          [
+            "确认调整",
+            "预览课表变更，确认后才更新保存的训练计划。"
+          ]
         ],
         "relatedTitle": "相关跑步教练页面",
         "relatedLinks": [
@@ -9458,7 +11775,11 @@
             "/5k-training-plan",
             "生成更短距离的跑步计划并配合智能教练复盘。"
           ],
-          ["VDOT 计算器", "/vdot-calculator", "根据比赛成绩估算跑步配速。"]
+          [
+            "VDOT 计算器",
+            "/vdot-calculator",
+            "根据比赛成绩估算跑步配速。"
+          ]
         ],
         "faqTitle": "跑步智能教练常见问题",
         "faqSubtitle": "面向想用智能教练管理训练负荷、备赛计划和课表调整的跑者。",
@@ -9611,7 +11932,10 @@
             "保护关键课",
             "如果降低填充强度能保护最重要的一课，智能教练应该明确建议。"
           ],
-          ["保留确认步骤", "基于功率的调整应在更新计划前显示原因和变更字段。"]
+          [
+            "保留确认步骤",
+            "基于功率的调整应在更新计划前显示原因和变更字段。"
+          ]
         ],
         "useCases": [
           [
@@ -9633,7 +11957,10 @@
         ],
         "workflowTitle": "骑行智能教练如何工作",
         "workflow": [
-          ["从目标开始", "把 FTP、CP、功率区间和训练块目标附着在计划上。"],
+          [
+            "从目标开始",
+            "把 FTP、CP、功率区间和训练块目标附着在计划上。"
+          ],
           [
             "导入完成骑行",
             "同步或上传骑行，让智能教练对比功率、时长和实际执行。"
@@ -9642,17 +11969,28 @@
             "复盘负荷和功率反应",
             "调整前先看 CTL、ATL、TSB、骑行波动和近期功率趋势。"
           ],
-          ["确认调整", "预览课表变更，确认后才更新保存的训练计划。"]
+          [
+            "确认调整",
+            "预览课表变更，确认后才更新保存的训练计划。"
+          ]
         ],
         "relatedTitle": "相关骑行教练页面",
         "relatedLinks": [
-          ["FTP 计算器", "/ftp-calculator", "根据活动文件估算 FTP。"],
+          [
+            "FTP 计算器",
+            "/ftp-calculator",
+            "根据活动文件估算 FTP。"
+          ],
           [
             "功率区间计算器",
             "/power-zones-calculator",
             "生成骑行功率训练区间。"
           ],
-          ["功率曲线", "/features/power-curve", "查看功率-时间表现。"]
+          [
+            "功率曲线",
+            "/features/power-curve",
+            "查看功率-时间表现。"
+          ]
         ],
         "faqTitle": "骑行智能教练常见问题",
         "faqSubtitle": "面向想用智能教练管理 FTP 训练、训练负荷和骑行调整的骑行者。",
@@ -10173,7 +12511,11 @@
       "visual": {
         "title": "本地 FIT 检查",
         "file": "activity.fit",
-        "checks": ["Header", "CRC", "消息"],
+        "checks": [
+          "Header",
+          "CRC",
+          "消息"
+        ],
         "status": "完全本地 · 不联网"
       },
       "upload": {
@@ -10514,7 +12856,11 @@
         },
         "onThisPage": "本页内容"
       },
-      "proof": ["无需注册", "即时结果", "打印或分享"],
+      "proof": [
+        "无需注册",
+        "即时结果",
+        "打印或分享"
+      ],
       "heroProduct": {
         "title": "记录每次训练，读懂每次表现。",
         "body": "用 iPhone 记录活动，在 Trainingload.ai 中结合心率、配速、功率与负荷回看训练。",
@@ -10999,7 +13345,11 @@
           "answer": "手动训练编辑器指南说明如何把导出的训练放到 Trainingload 计划的某一天。\n\n例如：复制 DSL，打开指南，在你想要的那一天用 Rules 模式粘贴。\n\n是否保存由你在应用里决定。"
         }
       ],
-      "proof": ["无需注册", "即时结果", "打印或分享"],
+      "proof": [
+        "无需注册",
+        "即时结果",
+        "打印或分享"
+      ],
       "promo": {
         "kicker": "应用内",
         "title": "编好一节课，安排好下一周。",
@@ -11398,7 +13748,11 @@
     "page": {
       "title": "训练负荷计算器",
       "subtitle": "填入每日训练负荷，看看体能、疲劳和状态如何变化，为下一周的训练找到参考。",
-      "proof": ["无需注册", "即填即算", "可打印、分享成绩单"],
+      "proof": [
+        "无需注册",
+        "即填即算",
+        "可打印、分享成绩单"
+      ],
       "formula": "CTL_今天 = CTL_昨天 + (TSS − CTL_昨天) / 42\nATL_今天 = ATL_昨天 + (TSS − ATL_昨天) / 7\nTSB_今天 = CTL_今天 − ATL_今天",
       "teachingNote": "7–14 天的表代替不了几个月的同步负荷。用它看清一次更新，再打开产品里的图表。",
       "howTo": {
@@ -11654,7 +14008,11 @@
     "page": {
       "title": "完赛时间预测",
       "subtitle": "输入近期比赛成绩，或从跑步文件中选取记录，查看 5 公里、10 公里、半马和全马的等效完赛时间及配速。",
-      "proof": ["无需注册", "即填即算", "可打印、分享成绩单"],
+      "proof": [
+        "无需注册",
+        "即填即算",
+        "可打印、分享成绩单"
+      ],
       "howTo": {
         "title": "如何预测完赛时间",
         "steps": {
@@ -12163,8 +14521,14 @@
             "计划外团骑",
             "把冲刺当成真实 TSS。下一堂 VO2 课应挪走或缩短，而不是再叠强度。"
           ],
-          ["长骑前 ATL 升高", "先保住长骑，再砍周中甜区。"],
-          ["需要重写一周", "骑行智能教练会给出带理由的草案，由你确认。"]
+          [
+            "长骑前 ATL 升高",
+            "先保住长骑，再砍周中甜区。"
+          ],
+          [
+            "需要重写一周",
+            "骑行智能教练会给出带理由的草案，由你确认。"
+          ]
         ],
         "relatedTitle": "把计划做完整的工具和产品页",
         "relatedLinks": [
@@ -12360,9 +14724,18 @@
         "aiTitle": "为什么 70.3 PDF 在一项透支时会失效",
         "aiSubtitle": "静态半程铁人训练计划看不见 90 公里配速骑已经花掉周日的跑。Trainingload 的闭环是：计划 → 完成 → 负荷 → 智能草案 → 你确认。",
         "aiSignals": [
-          ["长骑超支", "缩短或放轻松下一次跑。不要在疲劳腿上补砖。"],
-          ["游泳量陡增", "密集游泳仍增加疲劳。TSB 已低时先按住骑行强度。"],
-          ["需要重写", "用智能训练计划复盘。只有你确认后日历才更新。"]
+          [
+            "长骑超支",
+            "缩短或放轻松下一次跑。不要在疲劳腿上补砖。"
+          ],
+          [
+            "游泳量陡增",
+            "密集游泳仍增加疲劳。TSB 已低时先按住骑行强度。"
+          ],
+          [
+            "需要重写",
+            "用智能训练计划复盘。只有你确认后日历才更新。"
+          ]
         ],
         "relatedTitle": "支撑半程铁人训练计划的页面",
         "relatedLinks": [
@@ -12563,12 +14936,18 @@
         "aiTitle": "为什么这比静态奥运距离 PDF 更好",
         "aiSubtitle": "PDF 版奥运距离铁人三项训练计划看不见昨天集团骑的标准化功率，也看不见一次沉重砖块。Trainingload 把计划、完成课、训练负荷和需确认的 AI 草稿放在同一循环。",
         "aiSignals": [
-          ["周六沉重砖块", "把骑+跑当成一块压力。先缩短周日质量课。"],
+          [
+            "周六沉重砖块",
+            "把骑+跑当成一块压力。先缩短周日质量课。"
+          ],
           [
             "ATL 升高且游泳偏薄",
             "保住技术量；先削周中骑强度，再砍掉所有游泳。"
           ],
-          ["需要重写这一周", "AI 教练带着理由起草改动。你来确认。"]
+          [
+            "需要重写这一周",
+            "AI 教练带着理由起草改动。你来确认。"
+          ]
         ],
         "relatedTitle": "补齐奥运距离计划的工具与枢纽",
         "relatedLinks": [
@@ -12773,7 +15152,10 @@
             "多了一节俱乐部或公开水域",
             "当成真实负荷。移动或缩短下一次 CSS，而不是加倍强度。"
           ],
-          ["需要重写这一周", "AI 教练起草修改并给出理由。你来确认。"]
+          [
+            "需要重写这一周",
+            "AI 教练起草修改并给出理由。你来确认。"
+          ]
         ],
         "relatedTitle": "把计划补全的工具和产品页",
         "relatedLinks": [
@@ -13028,7 +15410,11 @@
     "page": {
       "title": "二区心率计算器",
       "subtitle": "根据年龄、最大心率、Karvonen 心率储备或 LTHR，算出一个有氧二区 bpm 范围，再结合实际体感判断。",
-      "proof": ["无需注册", "即时结果", "打印或分享"],
+      "proof": [
+        "无需注册",
+        "即时结果",
+        "打印或分享"
+      ],
       "howTo": {
         "title": "如何得到二区心率",
         "steps": {
@@ -13374,7 +15760,11 @@
     "page": {
       "title": "临界泳速计算器",
       "subtitle": "输入两组游泳距离与用时，估算临界泳速，找到适合自己的训练配速。",
-      "proof": ["无需注册", "支持游泳文件", "可打印、分享成绩单"],
+      "proof": [
+        "无需注册",
+        "支持游泳文件",
+        "可打印、分享成绩单"
+      ],
       "howTo": {
         "title": "如何估算 CSS",
         "steps": {
@@ -13635,7 +16025,10 @@
       "heroProduct": {
         "title": "记录每次训练，读懂每次进步。",
         "body": "用 iPhone 记录活动，在 Trainingload.ai 中结合配速、心率与训练负荷，回看这次表现。",
-        "benefits": ["训练中的实时数据", "训练后的分析与复盘"],
+        "benefits": [
+          "训练中的实时数据",
+          "训练后的分析与复盘"
+        ],
         "cta": "了解智能教练",
         "phoneAlt": "iPhone 上的 Trainingload.ai 实时训练记录页面"
       },

@@ -17,6 +17,7 @@ import {
   absoluteAlternatesForPath,
   absoluteLocalizedUrl,
   localePrefix,
+  robotsForPublicPath,
 } from "@/lib/locale-url";
 import {
   itemListSchema,
@@ -139,6 +140,7 @@ export async function generateMetadata({
       description: seo.description,
       images: [homeTwitterImage(twitterImageUrl)],
     },
+    robots: robotsForPublicPath(lang, "/"),
     alternates: {
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, "/"),

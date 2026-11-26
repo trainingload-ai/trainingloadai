@@ -29,7 +29,7 @@ describe("sitemap", () => {
     expect(source).toContain('"/rpe-scale": "2026-08-28"');
     expect(source).toContain("const deduped = new Map");
     expect(source).toContain("isIndexableSitemapUrl");
-    expect(source).toContain("for (const lang of SEO_INDEXED_LANGUAGES)");
+    expect(source).toContain("for (const lang of seoIndexedLanguagesForPath(pathname))");
     expect(source).not.toContain(
       "Couch to 5K is the first landing page with complete copy in every locale",
     );
