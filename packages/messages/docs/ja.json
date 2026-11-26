@@ -63,7 +63,9 @@
     },
     "history": {
       "heading": "リリースノート",
-      "description": "macOS 個人版の最近の更新です。抜粋は原文の言語で表示されます。",
+      "description": "クラウドサービスと macOS 個人版の最新情報を確認できます。",
+      "cloudTitle": "クラウドサービス",
+      "cloudEmpty": "クラウドサービスの更新情報はまだありません。",
       "empty": "公開リリースはまだありません。"
     },
     "macos": {

@@ -7,7 +7,7 @@ type MarkdownNode = {
   children?: MarkdownNode[];
 };
 
-function plainText(node: MarkdownNode): string {
+export function plainText(node: MarkdownNode): string {
   if (node.type === "text" || node.type === "inlineCode")
     return node.value ?? "";
   return node.children?.map(plainText).join("") ?? "";

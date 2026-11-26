@@ -34,6 +34,7 @@ const TASK_OUTPUT_KEYS: Partial<
   lthrObservation: ['lthrObservation'],
   peakPace: ['peakPace'],
   estimatedPowerMetrics: ['estimatedPowerMetrics'],
+  derivedMetrics: ['derivedMetrics'],
   vo2Max: ['vo2max'],
 };
 

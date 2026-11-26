@@ -53,12 +53,16 @@ describe('LthrObservationTask', () => {
       algorithmVersion: 2,
     });
 
-    await task.post(result);
-    expect(persistence.saveActivityLthrObservation).toHaveBeenCalledWith({
-      activity: result.inputs.activity,
-      userId: 'user-1',
-      observation: result.outputs.lthrObservation,
-    });
+    const tx = {} as NonNullable<MetricsContext['persistenceTx']>;
+    await task.post({ ...result, persistenceTx: tx });
+    expect(persistence.saveActivityLthrObservation).toHaveBeenCalledWith(
+      {
+        activity: result.inputs.activity,
+        userId: 'user-1',
+        observation: result.outputs.lthrObservation,
+      },
+      tx,
+    );
   });
 
   it('ignores unsupported sports', async () => {
@@ -75,6 +79,7 @@ describe('LthrObservationTask', () => {
       expect.objectContaining({
         observation: undefined,
       }),
+      undefined,
     );
   });
 

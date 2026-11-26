@@ -70,7 +70,9 @@
     },
     "history": {
       "heading": "Release notes",
-      "description": "See recent updates for the macOS Personal edition. Excerpts use the original release language.",
+      "description": "See what’s new in the Trainingload.ai cloud service and macOS Personal.",
+      "cloudTitle": "Cloud service",
+      "cloudEmpty": "No cloud updates have been posted yet.",
       "empty": "No public releases yet."
     },
     "macos": {

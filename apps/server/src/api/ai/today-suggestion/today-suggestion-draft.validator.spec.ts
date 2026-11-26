@@ -7,7 +7,7 @@ import type { TodaySuggestionConstraintProjection } from './today-suggestion.typ
 describe('validateTodaySuggestionDraft', () => {
   const valid = {
     headline: 'Easy run today',
-    summary: 'Keep the session conversational and stop if pain appears.',
+    summary: 'An easy session fits the time available. Keep the session conversational and stop if pain appears.',
     recommendation: {
       kind: 'TRAIN',
       durationMinutes: 30,
@@ -19,6 +19,10 @@ describe('validateTodaySuggestionDraft', () => {
     preferredIntent: 'CREATE_TODAY_WORKOUT',
     secondaryIntents: ['ASK_COACH', 'SCHEDULE_REMINDER'],
     tags: ['Easy', '30 min'],
+    trainingBasis: {
+      kind: 'ADDITIONAL',
+      reason: 'An easy session fits the time available.',
+    },
   };
   const projection = {
     highConcern: false,
@@ -31,6 +35,44 @@ describe('validateTodaySuggestionDraft', () => {
       valid,
     );
   });
+
+  it('requires a training basis even when no workouts are scheduled today', () => {
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        { ...valid, trainingBasis: undefined },
+        projection,
+      ),
+    ).toThrow('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
+  });
+
+  it('includes the reason for an optional session in the athlete-facing summary', () => {
+    const reason = 'Recent sessions have been easy and the athlete has time.';
+    expect(
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          summary: `If you want to train today, keep the extra run easy. ${reason}`,
+          trainingBasis: { kind: 'ADDITIONAL', reason },
+        },
+        projection,
+      ),
+    ).toMatchObject({
+      recommendation: { kind: 'TRAIN' },
+      trainingBasis: { kind: 'ADDITIONAL', reason },
+    });
+  });
+
+  it.each([' ', {}])(
+    'requires a non-empty text reason for an optional session (%j)',
+    (reason) => {
+      expect(() =>
+        validateTodaySuggestionDraftForProjection(
+          { ...valid, trainingBasis: { kind: 'ADDITIONAL', reason } },
+          projection,
+        ),
+      ).toThrow(expect.objectContaining({ code: 'TRAINING_BASIS_REASON_REQUIRED' }));
+    },
+  );
 
   it('requires explicit handling of an unapplied or rejected coach decision', () => {
     const withDecision = {
@@ -251,6 +293,7 @@ describe('validateTodaySuggestionDraft', () => {
         {
           ...valid,
           summary: 'The moved endurance ride is still scheduled for tonight.',
+          trainingBasis: undefined,
           preferredIntent: null,
         },
         movedProjection,
@@ -342,7 +385,11 @@ describe('validateTodaySuggestionDraft', () => {
   it('requires the chosen course identity when more than one course remains today', () => {
     expect(() =>
       validateTodaySuggestionDraftForProjection(
-        { ...valid, preferredIntent: 'OPEN_TODAY_WORKOUT' },
+        {
+          ...valid,
+          preferredIntent: 'OPEN_TODAY_WORKOUT',
+          trainingBasis: undefined,
+        },
         {
           ...movedProjection,
           todayWorkouts: ['first', 'second'].map((id) => ({
@@ -420,6 +467,7 @@ describe('validateTodaySuggestionDraft', () => {
           ...valid,
           headline: "Review today's training",
           recommendation: { kind: 'RECOVER' },
+          trainingBasis: undefined,
           preferredIntent: 'OPEN_ACTIVITY_REVIEW',
           secondaryIntents: ['ASK_COACH'],
         },

@@ -203,6 +203,10 @@ export type MetricsContext = {
     paceInternals?: PaceComputationCache;
   };
   outputs: {
+    derivedMetrics?: {
+      effectiveDistance: number;
+      avgLeftRightBalance: number | null;
+    };
     vo2max?: {
       vo2maxVdotByRace?: number | null;
       vo2maxVdotByHr?: number | null;

@@ -67,6 +67,12 @@ describe('TodaySuggestionAgentService', () => {
       'Evening training is valid',
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
+      'Every TRAIN recommendation requires trainingBasis',
+    );
+    expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
+      'copy that exact sentence into reason',
+    );
+    expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
       'use todayExecution and individual statuses',
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(

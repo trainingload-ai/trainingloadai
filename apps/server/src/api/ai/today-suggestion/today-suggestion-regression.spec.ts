@@ -15,7 +15,11 @@ import { TodaySuggestionDeliveryPolicy } from './today-suggestion-delivery-polic
 import { TodaySuggestionEngagementService } from './today-suggestion-engagement.service';
 import { TodayGenerationLeaseLost } from './today-suggestion-generation.service';
 import { validateTodaySuggestionDraftForProjection } from './today-suggestion-draft.validator';
-import type { TodaySuggestionDraft } from './today-suggestion.types';
+import {
+  todaySuggestionScheduledWorkout,
+  type TodaySuggestionConstraintProjection,
+  type TodaySuggestionDraft,
+} from './today-suggestion.types';
 
 let coachModel: LanguageModel;
 jest.mock('../core/coach-upstream.adapter', () => ({
@@ -27,7 +31,7 @@ jest.mock('../core/coach-upstream.adapter', () => ({
   getCoachBaseUrlForLog: () => 'test',
 }));
 
-function harness() {
+function harness(draftOverrides: Partial<TodaySuggestionDraft> = {}) {
   let row: any = null;
   let state: any = null;
   const stateTable = {
@@ -132,26 +136,66 @@ function harness() {
     { findMany: jest.fn(async () => independent) } as never,
   );
   const agent = {
-    run: jest.fn(async ({ projection }) => ({
-      draft: validateTodaySuggestionDraftForProjection(
-        {
-          headline: 'Keep today easy',
-          summary: 'A short easy session fits the recorded training load.',
-          recommendation: { kind: 'TRAIN', intensity: 'EASY' },
-          confidence: 'MEDIUM',
-          evidenceCodes: ['RECENT_ACTIVITY'],
-          preferredIntent: null,
-          secondaryIntents: [],
-          tags: [],
-        } satisfies TodaySuggestionDraft,
+    run: jest.fn(
+      async ({
         projection,
-      ),
-      runId: 'run',
-      provider: 'test',
-      model: 'test',
+      }: {
+        projection: TodaySuggestionConstraintProjection;
+      }) => {
+        const scheduled = todaySuggestionScheduledWorkout(projection, {});
+        return {
+          draft: validateTodaySuggestionDraftForProjection(
+            {
+              headline: 'Keep today easy',
+              summary: scheduled
+                ? 'A short easy session fits the recorded training load.'
+                : 'Recent sessions have been easy and an optional extra run fits the time available.',
+              recommendation: { kind: 'TRAIN', intensity: 'EASY' },
+              confidence: 'MEDIUM',
+              evidenceCodes: ['RECENT_ACTIVITY'],
+              preferredIntent: scheduled
+                ? 'OPEN_TODAY_WORKOUT'
+                : 'CREATE_TODAY_WORKOUT',
+              secondaryIntents: [],
+              tags: [],
+              trainingBasis: scheduled
+                ? { kind: 'SCHEDULED', workoutId: scheduled.id }
+                : {
+                    kind: 'ADDITIONAL',
+                    reason:
+                      'Recent sessions have been easy and an optional extra run fits the time available.',
+                  },
+              ...draftOverrides,
+            } satisfies TodaySuggestionDraft,
+            projection,
+          ),
+          runId: 'run',
+          provider: 'test',
+          model: 'test',
+        };
+      },
+    ),
+  };
+  const workoutGenerator = {
+    generate: jest.fn(async () => ({
+      runId: 'workout-run',
+      workout: {
+        sportType: 'RUN',
+        name: 'Short easy run',
+        notes: 'Keep an easy, conversational effort.',
+        structureKind: 'ENDURANCE',
+        dslVersion: 1,
+        text: 'warmup 5m\nwork 20m\ncooldown 5m',
+        structure: { kind: 'ENDURANCE', version: 1, blocks: [] },
+        summary: {
+          kind: 'ENDURANCE',
+          durationSeconds: 1800,
+          stepCount: 3,
+          hardSession: false,
+        },
+      },
     })),
   };
-  const workoutGenerator = { generate: jest.fn() };
   const service = new TodaySuggestionOrchestratorService(
     prisma as never,
     projector,
@@ -251,6 +295,14 @@ function attachCoachRuntime(
 
 describe('activity-first today suggestion regressions', () => {
   const args = { userId: 'athlete', locale: 'zh', allowAi: true };
+  const previousSecret = process.env.SELF_HOST_AUTH_SECRET;
+  beforeAll(() => {
+    process.env.SELF_HOST_AUTH_SECRET = 'today-suggestion-test-signing-secret';
+  });
+  afterAll(() => {
+    if (previousSecret === undefined) delete process.env.SELF_HOST_AUTH_SECRET;
+    else process.env.SELF_HOST_AUTH_SECRET = previousSecret;
+  });
   beforeEach(() =>
     jest.useFakeTimers().setSystemTime(new Date('2026-11-11T10:00:00Z')),
   );
@@ -438,7 +490,9 @@ describe('activity-first today suggestion regressions', () => {
   });
 
   it('rejects an ungrounded moved-course recommendation through projection, generation and cached delivery', async () => {
-    const { service, execution, agent } = harness();
+    const { service, execution, agent } = harness({
+      trainingBasis: undefined,
+    });
     execution.day.plannedWorkouts.push({
       id: 'moved-course',
       status: 'MOVED',
@@ -465,7 +519,7 @@ describe('activity-first today suggestion regressions', () => {
     });
     expect(result.delivery.reasonCode).toBe('OUTPUT_REJECTED');
     expect(result.recommendation.kind).toBe('RECOVER');
-    expect(result.summary).not.toContain('A short easy session');
+    expect(result.summary).not.toContain('keep the extra run easy');
     expect((await service.get(args)).recommendation.kind).toBe('RECOVER');
     expect(agent.run).toHaveBeenCalledTimes(1);
   });
@@ -853,32 +907,7 @@ describe('activity-first today suggestion regressions', () => {
   });
 
   it('falls back as a whole when an additional-training preview cannot be generated', async () => {
-    const { service, agent, workoutGenerator } = harness();
-    const reason =
-      'An optional additional ride fits the recent easy load and time available.';
-    agent.run.mockImplementationOnce(async ({ projection }) => ({
-      draft: validateTodaySuggestionDraftForProjection(
-        {
-          headline: 'An optional extra ride',
-          summary: reason,
-          recommendation: {
-            kind: 'TRAIN',
-            durationMinutes: 30,
-            intensity: 'EASY',
-          },
-          confidence: 'MEDIUM',
-          evidenceCodes: ['RECENT_ACTIVITY'],
-          preferredIntent: 'CREATE_TODAY_WORKOUT',
-          secondaryIntents: [],
-          tags: [],
-          trainingBasis: { kind: 'ADDITIONAL', reason },
-        },
-        projection,
-      ),
-      runId: 'extra-run',
-      provider: 'test',
-      model: 'test',
-    }));
+    const { service, workoutGenerator } = harness();
     workoutGenerator.generate.mockRejectedValueOnce(
       new Error('generator unavailable'),
     );
@@ -886,7 +915,7 @@ describe('activity-first today suggestion regressions', () => {
     expect(result.delivery.reasonCode).toBe('OUTPUT_REJECTED');
     expect(result.recommendation.kind).toBe('RECOVER');
     expect(result.primaryIntent?.type).not.toBe('CREATE_TODAY_WORKOUT');
-    expect(result.summary).not.toBe(reason);
+    expect(result.summary).not.toContain('keep the extra run easy');
   });
 
   it('keeps fallback grounded in the actual morning session without inventing a plan', async () => {
@@ -974,7 +1003,7 @@ describe('activity-first today suggestion regressions', () => {
     const result = await service.get(args);
     expect(result.delivery.state).toBe('GENERATED');
     expect(result.recommendation.kind).toBe('TRAIN');
-    expect(result.primaryIntent).toBeNull();
+    expect(result.primaryIntent?.type).toBe('CREATE_TODAY_WORKOUT');
     const projection = agent.run.mock.calls[0][0].projection;
     expect(projection.activePlan).toBeNull();
     expect(projection.coverageDiagnosis).toBeNull();

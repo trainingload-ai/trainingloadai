@@ -145,7 +145,7 @@ function trainingBasis(value: unknown): TodaySuggestionDraft['trainingBasis'] {
     return {
       kind: 'ADDITIONAL',
       reason: requiredText(
-        basis.reason,
+        typeof basis.reason === 'string' ? basis.reason : undefined,
         240,
         'TRAINING_BASIS_REASON_REQUIRED',
         'trainingBasis.reason',
@@ -267,13 +267,7 @@ export function validateTodaySuggestionDraftForProjection(
   const scheduledWorkout = todaySuggestionScheduledWorkout(projection, draft);
   if (draft.recommendation.kind === 'TRAIN') {
     const basis = draft.trainingBasis;
-    const moved = projection.todayWorkouts.some(
-      (workout) => workout.status === 'MOVED',
-    );
-    const remaining = projection.todayWorkouts.filter((workout) =>
-      ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
-    );
-    if ((moved || remaining.length > 1) && !basis) {
+    if (!basis) {
       rejectTrainingBasis('TRAINING_BASIS_REQUIRED');
     }
     if (basis?.kind === 'SCHEDULED' && !scheduledWorkout) {

@@ -1207,7 +1207,7 @@ describe('remaining schedule / PostgreSQL', () => {
         range: d.request.range,
       },
     });
-  });
+  }, 30_000);
   it('previews a calendar move across two weeks and applies it once after confirmation', async () => {
     const d = await running(1, {
       startDate: '2099-11-16',

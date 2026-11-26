@@ -86,7 +86,7 @@ export async function HomeOpenSourceSection({
                 {t("homeTitle")}
               </h3>
               <Link
-                href={withLocalePath(lang, "/releases")}
+                href={withLocalePath(lang, "/releases#macos")}
                 className="inline-flex min-h-9 items-center gap-2 rounded-control text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {t("history.heading")}

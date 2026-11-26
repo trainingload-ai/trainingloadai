@@ -82,6 +82,7 @@ export class ActivityPerformanceTTWriterService {
         });
       }
     } catch (e) {
+      if (tx) throw e;
       this.logger.error(
         `[replaceTT] 替换 TT 成绩失败：${e instanceof Error ? e.message : String(e)}`,
       );

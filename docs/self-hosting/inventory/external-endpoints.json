@@ -776,7 +776,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 240
+          "line": 241
         }
       ],
       "capability": "telemetry",
@@ -790,7 +790,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 262
+          "line": 263
         }
       ],
       "capability": "telemetry",
@@ -2637,7 +2637,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 263
+          "line": 264
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2873,7 +2873,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 229
+          "line": 230
         }
       ],
       "capability": "web-asset-or-tooling",
