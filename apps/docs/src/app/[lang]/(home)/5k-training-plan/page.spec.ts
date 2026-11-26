@@ -3,19 +3,8 @@ import { describe, expect, it } from "vitest";
 
 describe("5K training plan experience", () => {
   const page = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
-  const experience = readFileSync(
-    new URL("./_components/FiveKPlanExperience.tsx", import.meta.url),
-    "utf8",
-  );
-  const sharedExperience = readFileSync(
-    new URL(
-      "../../../../components/DistancePlanExperience.tsx",
-      import.meta.url,
-    ),
-    "utf8",
-  );
   const component = readFileSync(
-    new URL("./_components/FiveKTrainingPlanPage.tsx", import.meta.url),
+    new URL("../../../../components/DistancePlanExperience.tsx", import.meta.url),
     "utf8",
   );
   const productPreview = readFileSync(
@@ -27,11 +16,19 @@ describe("5K training plan experience", () => {
     "utf8",
   );
 
+  const systemPreview = readFileSync(
+    new URL("./_components/FiveKSystemPreview.tsx", import.meta.url),
+    "utf8",
+  );
+  const previewAssets = readFileSync(
+    new URL("./_components/plan-preview-assets.ts", import.meta.url),
+    "utf8",
+  );
+
   it("connects the public schedule to the real product system", () => {
-    expect(page).toContain("FiveKPlanExperience");
-    expect(experience).toContain("DistancePlanExperience");
-    expect(sharedExperience).toContain('tHome.raw("pageModules")');
-    expect(sharedExperience).toContain('tHome.raw("planSpotlight")');
+    expect(page).toContain("DistancePlanExperience");
+    expect(component).toContain('tHome.raw("pageModules.modules")');
+    expect(component).toContain('tHome("planSpotlight.freeTitle")');
     expect(component).toContain("<FiveKProductPreview");
     expect(component).toContain("<FiveKSystemShowcase");
     expect(systemShowcase).toContain('role="tablist"');
@@ -40,38 +37,35 @@ describe("5K training plan experience", () => {
     expect(component).toContain("<RunningPlanSchedule");
     expect(component).toContain("overviewAfter=");
     expect(productPreview).toContain('from "next/image"');
-    expect(productPreview).toContain("function previewLocale");
-    expect(productPreview).toContain('surface = "web-plan"');
-    expect(productPreview).toContain('surface = "mobile-plan"');
-    expect(productPreview).toContain(
-      'planPreviewAsset("web-calendar-dark", locale, planSlug)',
+    expect(previewAssets).toContain("function previewLocale");
+    expect(systemPreview).toContain(
+      'previewAsset("web-calendar-dark", lang, planSlug)',
     );
-    expect(productPreview).toContain(
-      'planPreviewAsset("web-plan-dark", locale, planSlug)',
+    expect(systemPreview).toContain(
+      'previewAsset("web-plan-dark", lang, planSlug)',
     );
-    expect(productPreview).toContain(
-      'previewAsset("mobile-analysis-dark", locale)',
+    expect(systemPreview).toContain(
+      'previewAsset("mobile-analysis-dark", lang)',
     );
-    expect(productPreview).toContain(
-      'previewAsset("mobile-calendar-dark", locale)',
+    expect(systemPreview).toContain(
+      'previewAsset("mobile-calendar-dark", lang)',
     );
-    expect(productPreview).toContain('previewAsset("web-coach-dark", locale)');
-    expect(productPreview).toContain(
-      'previewAsset("mobile-coach-dark", locale)',
+    expect(systemPreview).toContain('previewAsset("web-coach-dark", lang)');
+    expect(systemPreview).toContain(
+      'previewAsset("mobile-coach-dark", lang)',
     );
     expect(productPreview).toContain("styles.themeLightImage");
     expect(productPreview).toContain("styles.themeDarkImage");
-    expect(productPreview).toContain("${surface}-v2-${locale}.png");
-    expect(productPreview).toContain("usesPlanDetail");
+    expect(previewAssets).toContain("${surface}-v2-${locale}.png");
     expect(productPreview).toContain(
       'surface={showPlan ? "web-plan" : "web-calendar"}',
     );
-    expect(component).toContain("<FiveKWorkflowPreview");
+    expect(component).toContain('variant="workflow"');
   });
 
   it("keeps registration benefits and structured search data in the flow", () => {
-    expect(sharedExperience).toContain("newUserGiftValues");
-    expect(sharedExperience).toContain("formatNewUserGiftCredits");
+    expect(component).toContain("newUserGiftValues");
+    expect(component).toContain("formatNewUserGiftCredits");
     expect(component).toContain("howToSchema");
     expect(component).toContain('"@type": "FAQPage"');
     expect(component).toContain("breadcrumbSchema");

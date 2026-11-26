@@ -1,21 +1,16 @@
+import { getTranslations } from "next-intl/server";
 import {
   getRunPlanTemplate,
   normalizePlanTemplateLocale,
 } from "@shared/plan-templates";
+import { isSeoIndexedLanguage } from "./i18n";
 import {
   HALF_MARATHON_PLAN_FACTS,
-  isHalfMarathonIndexedLocale,
-} from "./half-marathon-training-plan-copy";
-import {
   MARATHON_PLAN_FACTS,
-  isMarathonIndexedLocale,
-} from "./marathon-training-plan-copy";
-import {
   TEN_K_PLAN_FACTS,
-  isTenKIndexedLocale,
-} from "./ten-k-training-plan-copy";
+} from "./running-plan-facts";
 
-export const runningPlanSlugs = [
+const runningPlanSlugs = [
   "couch-to-5k-training-plan",
   "5k-training-plan",
   "5k-training-plan-intermediate",
@@ -91,9 +86,9 @@ export type RunningPlan = {
   howToTotalTime?: string;
 };
 
-export function createCouchTo5kPlan(
+function createCouchTo5kPlan(
   localizedPlan: RunningPlan,
-  messages: RunningPlanCopy,
+  messages: PlanMessages,
 ): RunningPlan {
   const loopLinks = messages.productLoopRelatedLinks.filter(
     ([, href]) => href !== "/vdot-calculator",
@@ -114,20 +109,41 @@ export function createCouchTo5kPlan(
   };
 }
 
-type FiveKChooserVariant = "couch" | "finish" | "intermediate";
-type RaceDistance = "10k" | "half-marathon" | "marathon";
+type FiveKChooserVariant = "couch" | "intermediate";
+const racePlans = {
+  "10k-training-plan": {
+    distance: "10k",
+    templateSlug: "finish-10k",
+    duration: TEN_K_PLAN_FACTS.howToTotalTime,
+  },
+  "half-marathon-training-plan": {
+    distance: "half-marathon",
+    templateSlug: "finish-half-marathon",
+    duration: HALF_MARATHON_PLAN_FACTS.howToTotalTime,
+  },
+  "marathon-training-plan": {
+    distance: "marathon",
+    templateSlug: "finish-marathon",
+    duration: MARATHON_PLAN_FACTS.howToTotalTime,
+  },
+} as const;
 
-export type RunningPlanCopy = {
+type RacePlanSlug = keyof typeof racePlans;
+type RaceDistance = (typeof racePlans)[RacePlanSlug]["distance"];
+
+type PlanMessages = {
   fiveKChooserLabels: { current: string; options: string[] };
-  raceDistanceChooserCopy: Record<
+  raceDistanceChoosers: Record<
     RaceDistance,
     Omit<NonNullable<RunningPlan["planChooser"]>, "options"> & {
-      options: Array<Omit<NonNullable<RunningPlan["planChooser"]>["options"][number], "href">>;
+      options: Array<
+        Omit<NonNullable<RunningPlan["planChooser"]>["options"][number], "href">
+      >;
     }
   >;
   fiveKHubRelatedLink: [string, string, string];
   productLoopRelatedLinks: Array<[string, string, string]>;
-  fiveKCopy: Partial<RunningPlan> & Pick<Required<RunningPlan>, "planChooser">;
+  fiveK: Partial<RunningPlan> & Pick<Required<RunningPlan>, "planChooser">;
   finishFiveKDetails: Pick<
     RunningPlan,
     | "previewTitle"
@@ -139,21 +155,21 @@ export type RunningPlanCopy = {
   >;
   templateMetaDescription: string;
   intermediateLink: [string, string, string];
-  intermediateFiveK: IntermediateFiveKLocaleCopy;
+  intermediateFiveK: IntermediateFiveKMessages;
 };
 
 function createFiveKPlanChooser(
-  messages: RunningPlanCopy,
+  messages: PlanMessages,
   current: FiveKChooserVariant,
 ): NonNullable<RunningPlan["planChooser"]> {
-  const source = messages.fiveKCopy.planChooser;
+  const source = messages.fiveK.planChooser;
   const labels = messages.fiveKChooserLabels;
   const routes = [
     "/couch-to-5k-training-plan",
     "/5k-training-plan",
     "/5k-training-plan/intermediate",
   ] as const;
-  const currentIndex = { couch: 0, finish: 1, intermediate: 2 }[current];
+  const currentIndex = { couch: 0, intermediate: 2 }[current];
 
   return {
     ...source,
@@ -161,29 +177,6 @@ function createFiveKPlanChooser(
       ...option,
       label: index === currentIndex ? labels.current : labels.options[index],
       href: index === currentIndex ? null : routes[index],
-    })),
-  };
-}
-
-function createRaceDistancePlanChooser(
-  messages: RunningPlanCopy,
-  distance: RaceDistance,
-): NonNullable<RunningPlan["planChooser"]> {
-  const copy = messages.raceDistanceChooserCopy[distance];
-  const basePath =
-    distance === "10k"
-      ? "/10k-training-plan"
-      : distance === "half-marathon"
-        ? "/half-marathon-training-plan"
-        : "/marathon-training-plan";
-  const hrefs = [null, `${basePath}/improve`, `${basePath}/target`] as const;
-
-  return {
-    title: copy.title,
-    subtitle: copy.subtitle,
-    options: copy.options.map((option, index) => ({
-      ...option,
-      href: hrefs[index] ?? null,
     })),
   };
 }
@@ -202,12 +195,12 @@ function mergeRelatedLinks(
   return merged;
 }
 
-export function createFiveKTrainingPlan(
+function createFiveKTrainingPlan(
   basePlan: RunningPlan,
   lang: string,
-  messages: RunningPlanCopy,
+  messages: PlanMessages,
 ): RunningPlan {
-  const copy = messages.fiveKCopy;
+  const copy = messages.fiveK;
   const templateLocale = normalizePlanTemplateLocale(lang);
   const localized = getRunPlanTemplate("finish-5k")!.copy[templateLocale];
   const existingRelatedLinks = copy.relatedLinks ?? basePlan.relatedLinks ?? [];
@@ -234,7 +227,7 @@ export function createFiveKTrainingPlan(
   };
 }
 
-type IntermediateFiveKLocaleCopy = {
+type IntermediateFiveKMessages = {
   title?: string;
   promise?: string;
   heroSubtitle: string;
@@ -253,13 +246,13 @@ type IntermediateFiveKLocaleCopy = {
   faq: RunningPlan["faq"];
 };
 
-export function createIntermediateFiveKPlan(
+function createIntermediateFiveKPlan(
   basePlan: RunningPlan,
   lang: string,
-  messages: RunningPlanCopy,
+  messages: PlanMessages,
 ): RunningPlan {
   const finish = createFiveKTrainingPlan(basePlan, lang, messages);
-  const sourceCopy = messages.fiveKCopy;
+  const sourceCopy = messages.fiveK;
   const localized =
     getRunPlanTemplate("improve-5k")!.copy[normalizePlanTemplateLocale(lang)];
   const copy = messages.intermediateFiveK;
@@ -293,19 +286,31 @@ export function createIntermediateFiveKPlan(
   };
 }
 
-export function createHalfMarathonTrainingPlan(
+function createRacePlan(
   basePlan: RunningPlan,
-  lang: string,
-  messages: RunningPlanCopy,
+  slug: RacePlanSlug,
+  locale: string,
+  messages: PlanMessages,
 ): RunningPlan {
+  const { distance, templateSlug, duration } = racePlans[slug];
+  const routePath = `/${slug}`;
+  const chooser = messages.raceDistanceChoosers[distance];
+  const hrefs = [null, `${routePath}/improve`, `${routePath}/target`];
+
   return {
     ...basePlan,
-    slug: "half-marathon-training-plan",
-    routePath: "/half-marathon-training-plan",
-    templateSlug: "finish-half-marathon",
-    planChooser: createRaceDistancePlanChooser(messages, "half-marathon"),
-    howToTotalTime: isHalfMarathonIndexedLocale(lang)
-      ? HALF_MARATHON_PLAN_FACTS.howToTotalTime
+    slug,
+    routePath,
+    templateSlug,
+    planChooser: {
+      ...chooser,
+      options: chooser.options.map((option, index) => ({
+        ...option,
+        href: hrefs[index] ?? null,
+      })),
+    },
+    howToTotalTime: isSeoIndexedLanguage(locale)
+      ? duration
       : basePlan.howToTotalTime,
     relatedLinks: mergeRelatedLinks(
       basePlan.relatedLinks,
@@ -314,89 +319,29 @@ export function createHalfMarathonTrainingPlan(
   };
 }
 
-export function createMarathonTrainingPlan(
-  basePlan: RunningPlan,
-  lang: string,
-  messages: RunningPlanCopy,
-): RunningPlan {
-  return {
-    ...basePlan,
-    slug: "marathon-training-plan",
-    routePath: "/marathon-training-plan",
-    templateSlug: "finish-marathon",
-    planChooser: createRaceDistancePlanChooser(messages, "marathon"),
-    howToTotalTime: isMarathonIndexedLocale(lang)
-      ? MARATHON_PLAN_FACTS.howToTotalTime
-      : basePlan.howToTotalTime,
-    relatedLinks: mergeRelatedLinks(
-      basePlan.relatedLinks,
-      messages.productLoopRelatedLinks,
-    ),
-  };
-}
+export async function getRunningPlan(
+  slug: RunningPlanSlug,
+  locale: string,
+): Promise<RunningPlan> {
+  const t = await getTranslations({ locale, namespace: "runningPlanPages" });
+  const baseSlug =
+    slug === "5k-training-plan-intermediate" ? "5k-training-plan" : slug;
+  const basePlan = t.raw(`plans.${baseSlug}`) as RunningPlan;
+  const messages = t.raw("derived") as PlanMessages;
 
-export function createTenKTrainingPlan(
-  basePlan: RunningPlan,
-  lang: string,
-  messages: RunningPlanCopy,
-): RunningPlan {
-  return {
-    ...basePlan,
-    slug: "10k-training-plan",
-    routePath: "/10k-training-plan",
-    templateSlug: "finish-10k",
-    planChooser: createRaceDistancePlanChooser(messages, "10k"),
-    howToTotalTime: isTenKIndexedLocale(lang)
-      ? TEN_K_PLAN_FACTS.howToTotalTime
-      : basePlan.howToTotalTime,
-    relatedLinks: mergeRelatedLinks(
-      basePlan.relatedLinks,
-      messages.productLoopRelatedLinks,
-    ),
-  };
+  switch (slug) {
+    case "couch-to-5k-training-plan":
+      return createCouchTo5kPlan(basePlan, messages);
+    case "5k-training-plan":
+      return createFiveKTrainingPlan(basePlan, locale, messages);
+    case "5k-training-plan-intermediate":
+      return createIntermediateFiveKPlan(basePlan, locale, messages);
+    case "10k-training-plan":
+    case "half-marathon-training-plan":
+    case "marathon-training-plan":
+      return createRacePlan(basePlan, slug, locale, messages);
+  }
 }
-
-export function createDistanceTrainingPlan(
-  basePlan: RunningPlan,
-  lang: string,
-  messages: RunningPlanCopy,
-): RunningPlan {
-  if (basePlan.slug === "5k-training-plan") {
-    return createFiveKTrainingPlan(basePlan, lang, messages);
-  }
-  if (basePlan.slug === "10k-training-plan") {
-    return createTenKTrainingPlan(basePlan, lang, messages);
-  }
-  if (basePlan.slug === "half-marathon-training-plan") {
-    return createHalfMarathonTrainingPlan(basePlan, lang, messages);
-  }
-  if (basePlan.slug === "marathon-training-plan") {
-    return createMarathonTrainingPlan(basePlan, lang, messages);
-  }
-  return {
-    ...basePlan,
-    relatedLinks: mergeRelatedLinks(
-      basePlan.relatedLinks,
-      messages.productLoopRelatedLinks,
-    ),
-    routePath: `/${basePlan.slug}`,
-  };
-}
-
-export type RunningPlanPageLabels = {
-  home: string;
-  plans: string;
-  runningPlan: string;
-  timeline: string;
-  level: string;
-  volume: string;
-  faqTitleSuffix: string;
-  faqSubtitle: string;
-  finalTitle: string;
-  finalText: string;
-  viewFullSchedule: string;
-  addToCalendar: string;
-};
 
 export type PlanCollectionCopy = {
   metaTitle: string;

@@ -1,12 +1,13 @@
+import "@/i18n/mock-server-translations";
 import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
 import {
-  createDistanceTrainingPlan,
+  getRunningPlan,
   type RunningPlan,
 } from "@/lib/running-plan-pages";
-import { TEN_K_PLAN_FACTS } from "@/lib/ten-k-training-plan-copy";
+import { TEN_K_PLAN_FACTS } from "@/lib/running-plan-facts";
 import { optimizeSeoText, seoDisplayUnits } from "@/lib/seo-metadata";
 import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 
@@ -17,21 +18,8 @@ const PRIMARY = {
   "zh-hant": "10公里訓練課表",
 } as const;
 
-function messages(locale: string) {
-  return JSON.parse(
-    readFileSync(
-      new URL(`../../../../../../../packages/messages/docs/${locale}.json`, import.meta.url),
-      "utf8",
-    ),
-  );
-}
-
 function plan(locale: string) {
-  return createDistanceTrainingPlan(
-    messages(locale).runningPlanPages.plans["10k-training-plan"] as RunningPlan,
-    locale,
-    messages(locale).runningPlanPages.derived,
-  );
+  return getRunningPlan("10k-training-plan", locale);
 }
 
 function blob(value: RunningPlan) {
@@ -39,8 +27,8 @@ function blob(value: RunningPlan) {
 }
 
 describe("10K training plan keyword locks", () => {
-  it("leads English metadata with the head term while keeping 10-week beginner/free", () => {
-    const copy = plan("en");
+  it("leads English metadata with the head term while keeping 10-week beginner/free", async () => {
+    const copy = await plan("en");
     expect(copy.metaTitle).toBe(
       "10K Training Plan | Free 10-Week Beginner Schedule",
     );
@@ -58,8 +46,8 @@ describe("10K training plan keyword locks", () => {
     expect(blob(copy).toLowerCase()).toMatch(/runs per week|three runs/);
   });
 
-  it("locks Simplified Chinese to 10公里训练计划 without calques", () => {
-    const copy = plan("zh");
+  it("locks Simplified Chinese to 10公里训练计划 without calques", async () => {
+    const copy = await plan("zh");
     expect(copy.metaTitle.startsWith("10公里训练计划")).toBe(true);
     expect(copy.metaTitle).toMatch(/免费.?10\s*周/);
     expect(copy.metaTitle).toContain("新手完赛");
@@ -72,8 +60,8 @@ describe("10K training plan keyword locks", () => {
     );
   });
 
-  it("locks Japanese to 練習メニュー instead of a plan-only H1", () => {
-    const copy = plan("ja");
+  it("locks Japanese to 練習メニュー instead of a plan-only H1", async () => {
+    const copy = await plan("ja");
     expect(copy.metaTitle).toContain("10km");
     expect(copy.metaTitle).toContain("練習メニュー");
     expect(copy.metaTitle).toContain("初心者");
@@ -91,8 +79,8 @@ describe("10K training plan keyword locks", () => {
     ).toMatch(/週何回|最長|閾値|完走/);
   });
 
-  it("locks Traditional Chinese to 課表／計畫 and keeps HK 計劃 in FAQ", () => {
-    const copy = plan("zh-hant");
+  it("locks Traditional Chinese to 課表／計畫 and keeps HK 計劃 in FAQ", async () => {
+    const copy = await plan("zh-hant");
     expect(copy.metaTitle).toMatch(/10公里訓練課表/);
     expect(copy.metaTitle).toContain("免費10週");
     expect(copy.metaTitle).toContain("新手完賽");
@@ -109,8 +97,8 @@ describe("10K training plan keyword locks", () => {
 
   it.each(SEO_INDEXED_LANGUAGES)(
     "keeps %s metadata in snippet range after optimizeSeoText",
-    (locale) => {
-      const copy = plan(locale);
+    async (locale) => {
+      const copy = await plan(locale);
       const seo = optimizeSeoText({
         locale,
         context: "plan",
@@ -129,8 +117,8 @@ describe("10K training plan keyword locks", () => {
     },
   );
 
-  it("uses official 10-week finish facts and does not invent threshold sessions", () => {
-    const copy = plan("en");
+  it("uses official 10-week finish facts and does not invent threshold sessions", async () => {
+    const copy = await plan("en");
     expect(copy.weeks).toContain(String(TEN_K_PLAN_FACTS.weeks));
     expect(copy.weeklyVolume).toContain(String(TEN_K_PLAN_FACTS.runsPerWeek));
     expect(blob(copy)).toContain(String(TEN_K_PLAN_FACTS.peakLongRunMinutes));
@@ -141,9 +129,9 @@ describe("10K training plan keyword locks", () => {
     );
   });
 
-  it("cross-links improve/target, 5K, half, pace calculator, workout editor, and generic AI plan", () => {
+  it("cross-links improve/target, 5K, half, pace calculator, workout editor, and generic AI plan", async () => {
     for (const locale of SEO_INDEXED_LANGUAGES) {
-      const hrefs = plan(locale).relatedLinks?.map((link) => link[1]) ?? [];
+      const hrefs = (await plan(locale)).relatedLinks?.map((link) => link[1]) ?? [];
       expect(hrefs).toEqual(
         expect.arrayContaining([
           "/10k-training-plan/improve",
@@ -163,9 +151,9 @@ describe("10K training plan keyword locks", () => {
     }
   });
 
-  it("keeps AI modifiers off this URL's primary metadata", () => {
+  it("keeps AI modifiers off this URL's primary metadata", async () => {
     for (const locale of SEO_INDEXED_LANGUAGES) {
-      const copy = plan(locale);
+      const copy = await plan(locale);
       expect(copy.metaTitle).not.toMatch(/AI 10k training plan/i);
       expect(copy.keywords.join(" ")).not.toMatch(
         /AI 10k training plan|智能10公里训练计划|AI 10kmトレーニング計画|AI 10公里訓練計畫/,
@@ -173,18 +161,17 @@ describe("10K training plan keyword locks", () => {
     }
   });
 
-  it("renders HowTo JSON-LD from the same how-to steps as the page", () => {
+  it("renders HowTo JSON-LD from the localized plan", () => {
     const source = readFileSync(
       new URL("./page.tsx", import.meta.url),
       "utf8",
     );
     const component = readFileSync(
-      new URL("../../../../components/RunningPlanPage.tsx", import.meta.url),
+      new URL("../../../../components/DistancePlanExperience.tsx", import.meta.url),
       "utf8",
     );
-    expect(source).toContain("createDistanceTrainingPlan");
+    expect(source).toContain("getRunningPlan");
     expect(component).toContain("howToSchema");
-    expect(component).toContain('id="how-to"');
     expect(component).toContain("plan.howToSteps");
     expect(component).toContain("plan.faq");
   });

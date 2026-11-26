@@ -1,5 +1,4 @@
-import frenchMessages from "@trainingloadai/messages/docs/fr.json";
-import simplifiedChineseMessages from "@trainingloadai/messages/docs/zh.json";
+import "@/i18n/mock-server-translations";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -11,7 +10,7 @@ import {
 import { WorkoutStructurePreview } from "./WorkoutStructurePreview";
 
 describe("WorkoutStructurePreview", () => {
-  it("renders parsed ENDURANCE IR as a localized chart instead of translated DSL", () => {
+  it("renders parsed ENDURANCE IR as a localized chart instead of translated DSL", async () => {
     const workout = getPlanTemplateVariant(
       getRunPlanTemplate("improve-10k")!,
     )!.workouts.find((item) => item.sourceDsl.includes("repeat"))!;
@@ -20,10 +19,10 @@ describe("WorkoutStructurePreview", () => {
     }
 
     const html = renderToStaticMarkup(
-      <WorkoutStructurePreview
-        structure={workout.definition.structure}
-        copy={simplifiedChineseMessages.runningPlanPages.workoutStructure}
-      />,
+      await WorkoutStructurePreview({
+        structure: workout.definition.structure,
+        lang: "zh",
+      }),
     );
 
     expect(html).toContain("训练结构图");
@@ -38,10 +37,10 @@ describe("WorkoutStructurePreview", () => {
     );
 
     const frenchHtml = renderToStaticMarkup(
-      <WorkoutStructurePreview
-        structure={workout.definition.structure}
-        copy={frenchMessages.runningPlanPages.workoutStructure}
-      />,
+      await WorkoutStructurePreview({
+        structure: workout.definition.structure,
+        lang: "fr",
+      }),
     );
     expect(frenchHtml).toContain(
       'aria-label="Graphique de structure de séance"',

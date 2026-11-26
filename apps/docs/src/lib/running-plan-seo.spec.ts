@@ -1,12 +1,11 @@
+import "@/i18n/mock-server-translations";
 import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
 import {
-  createDistanceTrainingPlan,
-  createIntermediateFiveKPlan,
+  getRunningPlan,
   type PlanCollectionCopy,
-  type RunningPlan,
 } from "./running-plan-pages";
 
 const distanceSlugs = [
@@ -24,17 +23,9 @@ function messages(locale: string) {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
-function distancePlan(slug: (typeof distanceSlugs)[number], locale = "en") {
-  return createDistanceTrainingPlan(
-    messages(locale).runningPlanPages.plans[slug] as RunningPlan,
-    locale,
-    messages(locale).runningPlanPages.derived,
-  );
-}
-
 describe("running plan SEO ownership", () => {
-  it("assigns one distinct English search intent to every distance page", () => {
-    const plans = distanceSlugs.map((slug) => distancePlan(slug));
+  it("assigns one distinct English search intent to every distance page", async () => {
+    const plans = await Promise.all(distanceSlugs.map((slug) => getRunningPlan(slug, "en")));
 
     expect(plans.map((plan) => plan.metaTitle)).toEqual([
       "Free 8-Week 5K Training Plan for Beginners",
@@ -54,9 +45,9 @@ describe("running plan SEO ownership", () => {
 
   it.each(["en", "zh", "zh-hant", "ja"])(
     "publishes free-plan proof and complete schedules for %s",
-    (locale) => {
+    async (locale) => {
       for (const slug of distanceSlugs) {
-        const plan = distancePlan(slug, locale);
+        const plan = await getRunningPlan(slug, locale);
         expect(plan.trustItems).toHaveLength(4);
         expect(plan.routePath).toBe(`/${slug}`);
         expect(plan.metaTitle).not.toContain("Trainingload.ai");
@@ -76,11 +67,11 @@ describe("running plan SEO ownership", () => {
     expect(`${copy.title} ${copy.subtitle}`).not.toMatch(/log in/i);
   });
 
-  it("keeps one primary intent per URL and links the product loop", () => {
-    const half = distancePlan("half-marathon-training-plan");
-    const fiveK = distancePlan("5k-training-plan");
-    const tenK = distancePlan("10k-training-plan");
-    const marathon = distancePlan("marathon-training-plan");
+  it("keeps one primary intent per URL and links the product loop", async () => {
+    const half = await getRunningPlan("half-marathon-training-plan", "en");
+    const fiveK = await getRunningPlan("5k-training-plan", "en");
+    const tenK = await getRunningPlan("10k-training-plan", "en");
+    const marathon = await getRunningPlan("marathon-training-plan", "en");
     const loopHrefs = [
       "/ai-training-plan",
       "/vdot-calculator",
@@ -144,12 +135,8 @@ describe("running plan SEO ownership", () => {
     );
   });
 
-  it("keeps intermediate 5K ownership off the beginner hub", () => {
-    const improve = createIntermediateFiveKPlan(
-      messages("en").runningPlanPages.plans["5k-training-plan"] as RunningPlan,
-      "en",
-      messages("en").runningPlanPages.derived,
-    );
+  it("keeps intermediate 5K ownership off the beginner hub", async () => {
+    const improve = await getRunningPlan("5k-training-plan-intermediate", "en");
 
     expect(improve.metaTitle).toBe(
       "Intermediate 5K Training Plan: Free 8-Week Schedule",
@@ -199,28 +186,15 @@ describe("running plan SEO ownership", () => {
       "utf8",
     );
 
-    expect(couchRoute).toContain("<FiveKPlanExperience");
-    expect(intermediateRoute).toContain("<FiveKPlanExperience");
+    expect(couchRoute).toContain("<DistancePlanExperience");
+    expect(intermediateRoute).toContain("<DistancePlanExperience");
     expect(couchRoute).not.toContain("<RunningPlanPage");
     expect(intermediateRoute).not.toContain("<RunningPlanPage");
   });
 
-  it("keeps race-distance SEO copy in next-intl messages, not TS overlays", () => {
-    const overlays = [
-      "./half-marathon-training-plan-copy.ts",
-      "./marathon-training-plan-copy.ts",
-      "./ten-k-training-plan-copy.ts",
-      "./running-plan-pages.ts",
-    ];
-    for (const file of overlays) {
-      const source = readFileSync(new URL(file, import.meta.url), "utf8");
-      expect(source).not.toMatch(
-        /halfMarathonPlanCopy|marathonPlanCopy|tenKPlanCopy/,
-      );
-      if (file.endsWith("-copy.ts")) {
-        expect(source).not.toContain("metaTitle");
-        expect(source).not.toContain("metaDescription");
-      }
-    }
+  it("keeps race-distance SEO copy in next-intl messages", () => {
+    const facts = readFileSync(new URL("./running-plan-facts.ts", import.meta.url), "utf8");
+    expect(facts).not.toContain("metaTitle");
+    expect(facts).not.toContain("metaDescription");
   });
 });

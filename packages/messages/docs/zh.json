@@ -9222,7 +9222,7 @@
         ],
         "current": "当前计划"
       },
-      "raceDistanceChooserCopy": {
+      "raceDistanceChoosers": {
         "10k": {
           "title": "选择适合你的 10 公里计划",
           "subtitle": "先看当前跑步基础和目标，不要直接选择看起来最难的课表。",
@@ -9287,7 +9287,7 @@
           ]
         }
       },
-      "fiveKCopy": {
+      "fiveK": {
         "weeks": "8 周",
         "level": "新手到进阶",
         "weeklyVolume": "每周 4 次跑步",
@@ -9653,32 +9653,32 @@
       "trainingMethod": "训练方法"
     },
     "heroHeadings": {
-      "couch": [
+      "couch-to-5k-training-plan": [
         "免费 9 周",
         "Couch to 5K 训练计划",
         "从走路开始，完成 5 公里"
       ],
-      "5k": [
+      "5k-training-plan": [
         "免费 8 周",
         "5 公里训练计划",
         "稳步完成首个 5K"
       ],
-      "5k-intermediate": [
+      "5k-training-plan-intermediate": [
         "免费 8 周",
         "进阶 5 公里训练计划",
         "用间歇与节奏跑提速"
       ],
-      "10k": [
+      "10k-training-plan": [
         "免费 10 周",
         "10 公里训练计划",
         "从 5K 稳步跑向 10K"
       ],
-      "half-marathon": [
+      "half-marathon-training-plan": [
         "免费 14 周",
         "半马训练计划",
         "为首个 21.1 公里打好基础"
       ],
-      "marathon": [
+      "marathon-training-plan": [
         "免费 18 周",
         "马拉松训练计划",
         "完成你的首场全马"

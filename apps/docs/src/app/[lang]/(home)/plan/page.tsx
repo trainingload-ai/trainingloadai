@@ -19,7 +19,6 @@ import { TrackedLink } from "@/components/TrackedLink";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 import {
   type PlanCollectionCopy,
-  type RunningPlanPageLabels,
 } from "@/lib/running-plan-pages";
 import {
   endurancePlanHubSlugs,
@@ -189,7 +188,6 @@ export default async function PlanCollectionPage({
     namespace: "endurancePlanHubs",
   });
   const copy = t.raw("collection") as PlanCollectionCopy;
-  const pageCopy = t.raw("labels") as RunningPlanPageLabels;
   const hubCollection = tHubs.raw("collection") as EndurancePlanHubCollection;
   const hubs = endurancePlanHubSlugs.map((slug) =>
     normalizeEndurancePlanHub(
@@ -267,8 +265,8 @@ export default async function PlanCollectionPage({
     breadcrumbSchema({
       id: schemaId(pageUrl, "breadcrumb"),
       items: [
-        { name: pageCopy.home, item: `${siteUrl}${prefix}/` },
-        { name: pageCopy.plans, item: pageUrl },
+        { name: t("labels.home"), item: `${siteUrl}${prefix}/` },
+        { name: t("labels.plans"), item: pageUrl },
       ],
     }),
     ...(copy.faq?.length
@@ -429,25 +427,25 @@ export default async function PlanCollectionPage({
                   scope="col"
                   className="px-4 py-2.5 text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground"
                 >
-                  {pageCopy.level}
+                  {t("labels.level")}
                 </th>
                 <th
                   scope="col"
                   className="px-4 py-2.5 text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground"
                 >
-                  {pageCopy.timeline}
+                  {t("labels.timeline")}
                 </th>
                 <th
                   scope="col"
                   className="px-4 py-2.5 text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground"
                 >
-                  {pageCopy.runningPlan}
+                  {t("labels.runningPlan")}
                 </th>
                 <th
                   scope="col"
                   className="px-4 py-2.5 text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground"
                 >
-                  {pageCopy.volume}
+                  {t("labels.volume")}
                 </th>
                 <th scope="col" className="px-4 py-3">
                   <span className="sr-only">{copy.cardPrimary}</span>
@@ -563,7 +561,7 @@ export default async function PlanCollectionPage({
                   {group.title}
                 </h3>
                 <div className="mt-2 text-sm text-muted-foreground">
-                  {group.plans.length} · {pageCopy.runningPlan}
+                  {group.plans.length} · {t("labels.runningPlan")}
                 </div>
               </header>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -601,7 +599,7 @@ export default async function PlanCollectionPage({
                       <div className="rounded-control bg-card/75 p-2.5 sm:p-3">
                         <dt className="flex items-center gap-1.5 text-muted-foreground">
                           <Clock3 aria-hidden="true" className="size-3.5" />
-                          {pageCopy.timeline}
+                          {t("labels.timeline")}
                         </dt>
                         <dd className="mt-1.5 font-semibold">{plan.weeks}</dd>
                       </div>
@@ -611,7 +609,7 @@ export default async function PlanCollectionPage({
                             aria-hidden="true"
                             className="size-3.5"
                           />
-                          {pageCopy.volume}
+                          {t("labels.volume")}
                         </dt>
                         <dd className="mt-1.5 font-semibold">
                           {plan.weeklyVolume}

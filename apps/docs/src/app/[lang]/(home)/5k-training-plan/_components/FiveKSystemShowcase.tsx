@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { TrackedLink } from "@/components/TrackedLink";
 import type { RunningPlanSlug } from "@/lib/running-plan-pages";
-import { FiveKSystemPreview } from "./FiveKProductPreview";
+import { FiveKSystemPreview } from "./FiveKSystemPreview";
 import styles from "../five-k-training-plan.module.css";
 
 type SystemModule = {

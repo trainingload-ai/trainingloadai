@@ -1,29 +1,11 @@
-import { readFileSync } from "node:fs";
-import { createTranslator } from "next-intl";
-import { describe, expect, it, vi } from "vitest";
+import "@/i18n/mock-server-translations";
+import { describe, expect, it } from "vitest";
 
 import {
   officialPlanTemplateHeading,
   officialPlanTemplateMetadata,
   type OfficialPlanSlug,
 } from "./OfficialPlanTemplateDetailPage";
-
-vi.mock("next-intl/server", () => ({
-  getTranslations: ({
-    locale,
-    namespace,
-  }: {
-    locale: string;
-    namespace: string;
-  }) => {
-    const path = new URL(
-      `../../../../packages/messages/docs/${locale}.json`,
-      import.meta.url,
-    );
-    const messages = JSON.parse(readFileSync(path, "utf8"));
-    return Promise.resolve(createTranslator({ locale, namespace, messages }));
-  },
-}));
 
 const routes: Array<{
   slug: OfficialPlanSlug;

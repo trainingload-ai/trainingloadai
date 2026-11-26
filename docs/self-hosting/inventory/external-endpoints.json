@@ -332,11 +332,11 @@
         },
         {
           "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
-          "line": 148
+          "line": 147
         },
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
-          "line": 79
+          "line": 75
         },
         {
           "file": "apps/docs/src/lib/analytics.ts",
@@ -352,10 +352,6 @@
       "host": "app.trainingload.ai",
       "url": "https://app.trainingload.ai/${lang",
       "references": [
-        {
-          "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/_components/FiveKTrainingPlanPage.tsx",
-          "line": 137
-        },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
           "line": 104
@@ -402,7 +398,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
-          "line": 181
+          "line": 180
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
@@ -433,6 +429,10 @@
           "line": 413
         },
         {
+          "file": "apps/docs/src/components/DistancePlanExperience.tsx",
+          "line": 72
+        },
+        {
           "file": "apps/docs/src/components/DocsHeader.tsx",
           "line": 159
         },
@@ -451,10 +451,6 @@
         {
           "file": "apps/docs/src/components/ReleaseBanner.tsx",
           "line": 58
-        },
-        {
-          "file": "apps/docs/src/components/RunningPlanPage.tsx",
-          "line": 56
         }
       ],
       "capability": "product-internal",
@@ -2851,7 +2847,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
-          "line": 353
+          "line": 346
         },
         {
           "file": "apps/docs/src/lib/running-plan-schedules.ts",
@@ -2929,7 +2925,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
-          "line": 359
+          "line": 352
         }
       ],
       "capability": "third-party-sync",
@@ -3100,19 +3096,15 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/10k-training-plan/page.tsx",
-          "line": 14
-        },
-        {
-          "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/_components/FiveKTrainingPlanPage.tsx",
-          "line": 78
+          "line": 8
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/intermediate/page.tsx",
-          "line": 16
+          "line": 10
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/page.tsx",
-          "line": 14
+          "line": 8
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
@@ -3168,7 +3160,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/couch-to-5k-training-plan/page.tsx",
-          "line": 15
+          "line": 9
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/cp-ftp-lthr-estimator/page.tsx",
@@ -3244,7 +3236,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/half-marathon-training-plan/page.tsx",
-          "line": 14
+          "line": 8
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/heart-rate-zones-calculator/page.tsx",
@@ -3272,7 +3264,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/marathon-training-plan/page.tsx",
-          "line": 14
+          "line": 8
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
@@ -3296,7 +3288,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
-          "line": 127
+          "line": 126
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
@@ -3475,16 +3467,16 @@
           "line": 4
         },
         {
+          "file": "apps/docs/src/components/DistancePlanExperience.tsx",
+          "line": 40
+        },
+        {
           "file": "apps/docs/src/components/EndurancePlanHubPage.tsx",
           "line": 32
         },
         {
           "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
           "line": 75
-        },
-        {
-          "file": "apps/docs/src/components/RunningPlanPage.tsx",
-          "line": 34
         },
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",

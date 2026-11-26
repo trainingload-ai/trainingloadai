@@ -9135,7 +9135,7 @@
         ],
         "current": "Current plan"
       },
-      "raceDistanceChooserCopy": {
+      "raceDistanceChoosers": {
         "10k": {
           "title": "Choose the right 10K plan",
           "subtitle": "Start with your current running base and goal, not the fastest-looking schedule.",
@@ -9200,7 +9200,7 @@
           ]
         }
       },
-      "fiveKCopy": {
+      "fiveK": {
         "weeks": "8 weeks",
         "level": "Beginner to intermediate",
         "weeklyVolume": "4 runs/week",
@@ -9569,32 +9569,32 @@
       "trainingMethod": "TRAINING METHOD"
     },
     "heroHeadings": {
-      "couch": [
+      "couch-to-5k-training-plan": [
         "Free 9-week",
         "Couch to 5K plan",
         "From walking to your first 5K"
       ],
-      "5k": [
+      "5k-training-plan": [
         "Free 8-week",
         "5K training plan",
         "Build toward race day"
       ],
-      "5k-intermediate": [
+      "5k-training-plan-intermediate": [
         "Free 8-week",
         "Intermediate 5K plan",
         "Train for a faster 5K"
       ],
-      "10k": [
+      "10k-training-plan": [
         "Free 10-week",
         "10K training plan",
         "Build beyond your first 5K"
       ],
-      "half-marathon": [
+      "half-marathon-training-plan": [
         "Free 14-week",
         "Half marathon plan",
         "Build for your first 21.1K"
       ],
-      "marathon": [
+      "marathon-training-plan": [
         "Free 18-week",
         "Marathon training plan",
         "Prepare for your first 42.2K"

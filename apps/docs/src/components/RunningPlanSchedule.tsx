@@ -18,12 +18,9 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PlanScheduleViewTracker } from "@/components/PlanScheduleViewTracker";
-import {
-  WorkoutStructurePreview,
-  type WorkoutStructureCopy,
-} from "@/components/WorkoutStructurePreview";
+import { WorkoutStructurePreview } from "@/components/WorkoutStructurePreview";
 import { withLocalePath } from "@/lib/locale-url";
-import { RPE_SCALE_PATH, type RpeScaleContent } from "@/lib/rpe-scale-content";
+import { RPE_SCALE_PATH } from "@/lib/rpe-scale-content";
 import type {
   LocalizedRunningPlanSchedule,
   RunningPlanDayKind,
@@ -251,29 +248,7 @@ function rpeGuideHref(lang: string, intensity?: string) {
   return `${withLocalePath(lang, RPE_SCALE_PATH)}#${anchor}`;
 }
 
-export type RunningPlanScheduleCopy = {
-  rpe: Pick<RpeScaleContent, "scheduleGuideLabel" | "intensityLinkLabel">;
-  workoutStructure: WorkoutStructureCopy;
-};
-
-export async function getRunningPlanScheduleCopy(
-  locale: string,
-): Promise<RunningPlanScheduleCopy> {
-  const [plan, rpe] = await Promise.all([
-    getTranslations({ locale, namespace: "runningPlanPages" }),
-    getTranslations({ locale, namespace: "rpeScale.content" }),
-  ]);
-  return {
-    rpe: {
-      scheduleGuideLabel: rpe("scheduleGuideLabel"),
-      intensityLinkLabel: rpe("intensityLinkLabel"),
-    },
-    workoutStructure: plan.raw("workoutStructure") as WorkoutStructureCopy,
-  };
-}
-
-export function RunningPlanSchedule({
-  copy,
+export async function RunningPlanSchedule({
   schedule,
   slug,
   templateSlug,
@@ -284,7 +259,6 @@ export function RunningPlanSchedule({
   anchorPrefix = "",
   showGuidance = true,
 }: {
-  copy: RunningPlanScheduleCopy;
   schedule: LocalizedRunningPlanSchedule;
   slug: string;
   templateSlug?: string;
@@ -295,7 +269,10 @@ export function RunningPlanSchedule({
   anchorPrefix?: string;
   showGuidance?: boolean;
 }) {
-  const rpeCopy = copy.rpe;
+  const t = await getTranslations({
+    locale: lang,
+    namespace: "rpeScale.content",
+  });
   return (
     <section
       id={`${anchorPrefix}schedule`}
@@ -337,7 +314,7 @@ export function RunningPlanSchedule({
             className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/80 bg-white/80 px-4 py-2 text-sm font-bold text-emerald-800 shadow-sm transition hover:border-emerald-500 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-300/20 dark:bg-emerald-300/[0.08] dark:text-emerald-200 dark:hover:bg-emerald-300/[0.12]"
           >
             <BookOpenCheck aria-hidden="true" className="size-4" />
-            {rpeCopy.scheduleGuideLabel}
+            {t("scheduleGuideLabel")}
           </Link>
         </div>
 
@@ -556,7 +533,7 @@ export function RunningPlanSchedule({
                                       <Link
                                         href={rpeGuideHref(lang, day.intensity)}
                                         prefetch={false}
-                                        aria-label={`${day.intensity}: ${rpeCopy.intensityLinkLabel}`}
+                                        aria-label={`${day.intensity}: ${t("intensityLinkLabel")}`}
                                         className="mt-1 inline-flex text-[10px] font-black text-emerald-700 tabular-nums hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-emerald-300"
                                       >
                                         {day.intensity}
@@ -584,7 +561,7 @@ export function RunningPlanSchedule({
                                 <div className="w-full md:w-48 md:max-w-none md:justify-self-end">
                                   <WorkoutStructurePreview
                                     structure={day.structure}
-                                    copy={copy.workoutStructure}
+                                    lang={lang}
                                     compact
                                   />
                                 </div>
@@ -666,7 +643,7 @@ export function RunningPlanSchedule({
                             <Link
                               href={rpeGuideHref(lang, content.intensity)}
                               prefetch={false}
-                              aria-label={`${content.intensity}: ${rpeCopy.intensityLinkLabel}`}
+                              aria-label={`${content.intensity}: ${t("intensityLinkLabel")}`}
                               className={`mt-2 inline-flex rounded-full px-2 py-1 text-[10px] font-black tabular-nums ${styles.badge}`}
                             >
                               {content.intensity}
@@ -675,7 +652,7 @@ export function RunningPlanSchedule({
                           {kind !== "REST" ? (
                             <WorkoutStructurePreview
                               structure={week.structures[dayIndex]}
-                              copy={copy.workoutStructure}
+                              lang={lang}
                               compact
                             />
                           ) : null}
@@ -709,7 +686,7 @@ export function RunningPlanSchedule({
                                   <Link
                                     href={rpeGuideHref(lang, day.intensity)}
                                     prefetch={false}
-                                    aria-label={`${day.intensity}: ${rpeCopy.intensityLinkLabel}`}
+                                    aria-label={`${day.intensity}: ${t("intensityLinkLabel")}`}
                                     className={`rounded-full px-2 py-1 text-[10px] font-black tabular-nums ${styles.badge}`}
                                   >
                                     {day.intensity}
@@ -726,7 +703,7 @@ export function RunningPlanSchedule({
                               ) : null}
                               <WorkoutStructurePreview
                                 structure={day.structure}
-                                copy={copy.workoutStructure}
+                                lang={lang}
                               />
                               <p className="mt-3 text-sm leading-6 text-neutral-700 dark:text-neutral-300">
                                 {day.notes}

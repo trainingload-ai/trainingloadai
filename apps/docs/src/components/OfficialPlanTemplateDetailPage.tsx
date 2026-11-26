@@ -19,7 +19,7 @@ import {
   resolveRunningWorkoutIntensity,
 } from "@shared/plan-templates";
 import { TrackedLink } from "@/components/TrackedLink";
-import { WorkoutStructurePreview, type WorkoutStructureCopy } from "@/components/WorkoutStructurePreview";
+import { WorkoutStructurePreview } from "@/components/WorkoutStructurePreview";
 import { RunningPlanIntentGuide } from "@/components/RunningPlanIntentGuide";
 import { getPlanIntentGuide } from "@/lib/running-plan-intents";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
@@ -137,7 +137,6 @@ export async function OfficialPlanTemplateDetailPage({
   const t = await getPlanTranslations(lang);
   const labels = t.raw("officialTemplate.labels") as typeof messages.runningPlanPages.officialTemplate.labels;
   const pageHeading = await officialPlanTemplateHeading({ lang, slug });
-  const workoutStructureCopy = t.raw("workoutStructure") as WorkoutStructureCopy;
   const copy = template.copy[normalizedLocale];
   const hubPath = routeForTemplate(slug);
   const pagePath = `${hubPath}/${routeSuffix(slug)}`;
@@ -349,7 +348,7 @@ export async function OfficialPlanTemplateDetailPage({
                                   ? resolved.definition.structure
                                   : null
                               }
-                              copy={workoutStructureCopy}
+                              lang={lang}
                             />
                           </div>
                           <p className="mt-4 text-sm leading-6 text-neutral-600 dark:text-neutral-300">

@@ -9547,7 +9547,7 @@
         ],
         "current": "Aktueller Plan"
       },
-      "raceDistanceChooserCopy": {
+      "raceDistanceChoosers": {
         "10k": {
           "title": "Den passenden 10-km-Plan wählen",
           "subtitle": "Starte mit deiner aktuellen Laufbasis und deinem Ziel – nicht mit dem schnellsten Trainingsplan.",
@@ -9612,7 +9612,7 @@
           ]
         }
       },
-      "fiveKCopy": {
+      "fiveK": {
         "weeks": "8 Wochen",
         "level": "Einsteiger bis Fortgeschrittene",
         "weeklyVolume": "4 Läufe/Woche",
@@ -9982,32 +9982,32 @@
       "trainingMethod": "TRAININGSMETHODE"
     },
     "heroHeadings": {
-      "couch": [
+      "couch-to-5k-training-plan": [
         "Kostenloser 9-Wochen-",
         "Couch-to-5K-Plan",
         "Vom Gehen zu deinen ersten 5 km"
       ],
-      "5k": [
+      "5k-training-plan": [
         "Kostenloser 8-Wochen-",
         "5-km-Trainingsplan",
         "Strukturiert bis zum Wettkampftag"
       ],
-      "5k-intermediate": [
+      "5k-training-plan-intermediate": [
         "Kostenloser 8-Wochen-",
         "5-km-Plan für Fortgeschrittene",
         "Gezielt schneller über 5 km"
       ],
-      "10k": [
+      "10k-training-plan": [
         "Kostenloser 10-Wochen-",
         "10-km-Trainingsplan",
         "Sicher über deine ersten 5 km hinaus"
       ],
-      "half-marathon": [
+      "half-marathon-training-plan": [
         "Kostenloser 14-Wochen-",
         "Halbmarathon-Plan",
         "Bereit für deine ersten 21,1 km"
       ],
-      "marathon": [
+      "marathon-training-plan": [
         "Kostenloser 18-Wochen-",
         "Marathon-Trainingsplan",
         "Bereit für deine ersten 42,2 km"

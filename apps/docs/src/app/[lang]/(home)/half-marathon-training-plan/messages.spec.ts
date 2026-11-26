@@ -1,12 +1,13 @@
+import "@/i18n/mock-server-translations";
 import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
 import {
-  createDistanceTrainingPlan,
+  getRunningPlan,
   type RunningPlan,
 } from "@/lib/running-plan-pages";
-import { HALF_MARATHON_PLAN_FACTS } from "@/lib/half-marathon-training-plan-copy";
+import { HALF_MARATHON_PLAN_FACTS } from "@/lib/running-plan-facts";
 import { optimizeSeoText, seoDisplayUnits } from "@/lib/seo-metadata";
 import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 
@@ -17,23 +18,8 @@ const PRIMARY = {
   "zh-hant": "半馬訓練課表",
 } as const;
 
-function messages(locale: string) {
-  return JSON.parse(
-    readFileSync(
-      new URL(`../../../../../../../packages/messages/docs/${locale}.json`, import.meta.url),
-      "utf8",
-    ),
-  );
-}
-
 function plan(locale: string) {
-  return createDistanceTrainingPlan(
-    messages(locale).runningPlanPages.plans[
-      "half-marathon-training-plan"
-    ] as RunningPlan,
-    locale,
-    messages(locale).runningPlanPages.derived,
-  );
+  return getRunningPlan("half-marathon-training-plan", locale);
 }
 
 function blob(value: RunningPlan) {
@@ -41,8 +27,8 @@ function blob(value: RunningPlan) {
 }
 
 describe("half marathon training plan keyword locks", () => {
-  it("leads English metadata with the head term while keeping 14-week beginner/free", () => {
-    const copy = plan("en");
+  it("leads English metadata with the head term while keeping 14-week beginner/free", async () => {
+    const copy = await plan("en");
     expect(copy.metaTitle).toBe(
       "Half Marathon Training Plan: Free 14-Week Beginner Schedule",
     );
@@ -65,8 +51,8 @@ describe("half marathon training plan keyword locks", () => {
     expect(blob(copy).toLowerCase()).toMatch(/pace calculator|workout editor/);
   });
 
-  it("locks Simplified Chinese to 半马训练计划 without calques", () => {
-    const copy = plan("zh");
+  it("locks Simplified Chinese to 半马训练计划 without calques", async () => {
+    const copy = await plan("zh");
     expect(copy.metaTitle.startsWith("半马训练计划")).toBe(true);
     expect(copy.metaTitle).toMatch(/免费.?14\s*周/);
     expect(copy.metaTitle).toMatch(/逐周课表|新手/);
@@ -81,8 +67,8 @@ describe("half marathon training plan keyword locks", () => {
     );
   });
 
-  it("locks Japanese to 練習メニュー instead of a plan-only H1", () => {
-    const copy = plan("ja");
+  it("locks Japanese to 練習メニュー instead of a plan-only H1", async () => {
+    const copy = await plan("ja");
     expect(copy.metaTitle).toContain("ハーフマラソン");
     expect(copy.metaTitle).toContain("練習メニュー");
     expect(copy.metaTitle).toContain("初心者");
@@ -101,8 +87,8 @@ describe("half marathon training plan keyword locks", () => {
     expect(blob(copy)).not.toMatch(/サブ3|サブ4/);
   });
 
-  it("locks Traditional Chinese to 課表／計畫 and keeps HK 計劃 in FAQ", () => {
-    const copy = plan("zh-hant");
+  it("locks Traditional Chinese to 課表／計畫 and keeps HK 計劃 in FAQ", async () => {
+    const copy = await plan("zh-hant");
     expect(copy.metaTitle).toMatch(/半馬訓練課表/);
     expect(copy.metaTitle).toContain("免費14週");
     expect(copy.metaTitle).toMatch(/逐週課表|新手/);
@@ -119,8 +105,8 @@ describe("half marathon training plan keyword locks", () => {
 
   it.each(SEO_INDEXED_LANGUAGES)(
     "keeps %s metadata in snippet range after optimizeSeoText",
-    (locale) => {
-      const copy = plan(locale);
+    async (locale) => {
+      const copy = await plan(locale);
       const seo = optimizeSeoText({
         locale,
         context: "plan",
@@ -139,8 +125,8 @@ describe("half marathon training plan keyword locks", () => {
     },
   );
 
-  it("uses official 14-week finish facts and does not invent threshold sessions", () => {
-    const copy = plan("en");
+  it("uses official 14-week finish facts and does not invent threshold sessions", async () => {
+    const copy = await plan("en");
     expect(copy.weeks).toContain(String(HALF_MARATHON_PLAN_FACTS.weeks));
     expect(copy.weeklyVolume).toContain(String(HALF_MARATHON_PLAN_FACTS.runsPerWeek));
     expect(blob(copy)).toContain(String(HALF_MARATHON_PLAN_FACTS.peakLongRunMinutes));
@@ -150,9 +136,9 @@ describe("half marathon training plan keyword locks", () => {
     );
   });
 
-  it("cross-links improve/target, AI half, marathon, pace calculator, and workout editor", () => {
+  it("cross-links improve/target, AI half, marathon, pace calculator, and workout editor", async () => {
     for (const locale of SEO_INDEXED_LANGUAGES) {
-      const hrefs = plan(locale).relatedLinks?.map((link) => link[1]) ?? [];
+      const hrefs = (await plan(locale)).relatedLinks?.map((link) => link[1]) ?? [];
       expect(hrefs).toEqual(
         expect.arrayContaining([
           "/half-marathon-training-plan/improve",
@@ -163,16 +149,16 @@ describe("half marathon training plan keyword locks", () => {
           "/workout-editor",
         ]),
       );
-      const aiAnchor = plan(locale)
+      const aiAnchor = (await plan(locale))
         .relatedLinks?.find((link) => link[1] === "/ai-half-marathon-training-plan")?.[0]
         .toLowerCase();
       expect(aiAnchor).toMatch(/ai|ki|ia|智能/);
     }
   });
 
-  it("keeps AI modifiers off this URL's primary metadata", () => {
+  it("keeps AI modifiers off this URL's primary metadata", async () => {
     for (const locale of SEO_INDEXED_LANGUAGES) {
-      const copy = plan(locale);
+      const copy = await plan(locale);
       expect(copy.metaTitle).not.toMatch(/AI half marathon training plan/i);
       expect(copy.keywords.join(" ")).not.toMatch(
         /AI half marathon training plan|智能半马训练计划|AIハーフマラソントレーニング計画|AI 半馬訓練計畫/,
@@ -180,18 +166,17 @@ describe("half marathon training plan keyword locks", () => {
     }
   });
 
-  it("renders HowTo JSON-LD from the same how-to steps as the page", () => {
+  it("renders HowTo JSON-LD from the localized plan", () => {
     const source = readFileSync(
       new URL("./page.tsx", import.meta.url),
       "utf8",
     );
     const component = readFileSync(
-      new URL("../../../../components/RunningPlanPage.tsx", import.meta.url),
+      new URL("../../../../components/DistancePlanExperience.tsx", import.meta.url),
       "utf8",
     );
-    expect(source).toContain("createDistanceTrainingPlan");
+    expect(source).toContain("getRunningPlan");
     expect(component).toContain("howToSchema");
-    expect(component).toContain('id="how-to"');
     expect(component).toContain("plan.howToSteps");
     expect(component).toContain("plan.faq");
   });

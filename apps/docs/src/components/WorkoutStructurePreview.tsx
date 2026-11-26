@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type {
   EndurancePlanBlock,
   EnduranceWorkRestStep,
@@ -7,10 +8,7 @@ import { enduranceStructureToChartSegments } from "@/lib/plan-share-chart";
 
 type PreviewStepKind = NonNullable<EnduranceWorkRestStep["stepKind"]>;
 
-export type WorkoutStructureCopy = {
-  chartAriaLabel: string;
-  stepLabels: Record<PreviewStepKind, string>;
-};
+type StepLabels = Record<PreviewStepKind, string>;
 
 const STEP_TONE: Record<PreviewStepKind, { chip: string; color: string }> = {
   WARMUP: {
@@ -60,7 +58,7 @@ function StepChip({
   labels,
 }: {
   step: EnduranceWorkRestStep;
-  labels: WorkoutStructureCopy["stepLabels"];
+  labels: StepLabels;
 }) {
   const stepKind = step.stepKind ?? "OTHER";
   const tone = STEP_TONE[stepKind];
@@ -84,7 +82,7 @@ function StructureBlock({
   labels,
 }: {
   block: EndurancePlanBlock;
-  labels: WorkoutStructureCopy["stepLabels"];
+  labels: StepLabels;
 }) {
   if (block.type === "repeat") {
     return (
@@ -113,24 +111,29 @@ function StructureBlock({
   );
 }
 
-export function WorkoutStructurePreview({
+export async function WorkoutStructurePreview({
   structure,
-  copy,
+  lang,
   compact = false,
 }: {
   structure?: WorkoutStructure | null;
-  copy: WorkoutStructureCopy;
+  lang: string;
   compact?: boolean;
 }) {
   if (!structure || structure.kind !== "ENDURANCE") return null;
+  const t = await getTranslations({
+    locale: lang,
+    namespace: "runningPlanPages.workoutStructure",
+  });
   const segments = enduranceStructureToChartSegments(structure);
   const total = segments.at(-1)?.t1 ?? 0;
+  const labels = t.raw("stepLabels") as StepLabels;
   return (
     <div className={compact ? "mt-3" : "mt-4"}>
       {segments.length > 0 && total > 0 ? (
         <div
           role="img"
-          aria-label={copy.chartAriaLabel}
+          aria-label={t("chartAriaLabel")}
           className={`relative overflow-hidden rounded-control border border-neutral-200/80 bg-white/80 dark:border-white/10 dark:bg-neutral-950/35 ${compact ? "h-10" : "h-16"}`}
         >
           {[25, 50, 75].map((top) => (
@@ -159,7 +162,7 @@ export function WorkoutStructurePreview({
       {!compact ? (
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {structure.blocks.map((block, index) => (
-            <StructureBlock key={index} block={block} labels={copy.stepLabels} />
+            <StructureBlock key={index} block={block} labels={labels} />
           ))}
         </div>
       ) : null}

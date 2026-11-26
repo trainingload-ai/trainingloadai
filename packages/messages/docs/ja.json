@@ -9205,7 +9205,7 @@
         ],
         "current": "現在のプラン"
       },
-      "raceDistanceChooserCopy": {
+      "raceDistanceChoosers": {
         "10k": {
           "title": "自分に合う10kmプランを選ぶ",
           "subtitle": "難しさではなく、現在の走力と目標に合うメニューから始めます。",
@@ -9270,7 +9270,7 @@
           ]
         }
       },
-      "fiveKCopy": {
+      "fiveK": {
         "weeks": "8週間",
         "level": "初心者〜中級者",
         "weeklyVolume": "週4回",
@@ -9636,32 +9636,32 @@
       "trainingMethod": "トレーニング方法"
     },
     "heroHeadings": {
-      "couch": [
+      "couch-to-5k-training-plan": [
         "無料9週間",
         "Couch to 5Kプラン",
         "ウォーキングから、初めての5K完走へ"
       ],
-      "5k": [
+      "5k-training-plan": [
         "無料8週間",
         "5Kトレーニングプラン",
         "レース当日まで着実に"
       ],
-      "5k-intermediate": [
+      "5k-training-plan-intermediate": [
         "無料8週間",
         "中級者向け5Kプラン",
         "インターバルとテンポで速く"
       ],
-      "10k": [
+      "10k-training-plan": [
         "無料10週間",
         "10km練習メニュー",
         "5Kの先へ、着実に完走"
       ],
-      "half-marathon": [
+      "half-marathon-training-plan": [
         "無料14週間",
         "ハーフマラソン練習",
         "初めての21.1km完走へ"
       ],
-      "marathon": [
+      "marathon-training-plan": [
         "無料18週間",
         "フルマラソン練習",
         "初めての42.2km完走へ"

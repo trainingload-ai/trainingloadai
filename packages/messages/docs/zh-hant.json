@@ -9209,7 +9209,7 @@
         ],
         "current": "目前計畫"
       },
-      "raceDistanceChooserCopy": {
+      "raceDistanceChoosers": {
         "10k": {
           "title": "選擇適合你的 10 公里計畫",
           "subtitle": "先看目前跑步基礎和目標，不要直接選擇看起來最難的課表。",
@@ -9274,7 +9274,7 @@
           ]
         }
       },
-      "fiveKCopy": {
+      "fiveK": {
         "weeks": "8 週",
         "level": "新手到進階",
         "weeklyVolume": "每週 4 次跑步",
@@ -9640,32 +9640,32 @@
       "trainingMethod": "訓練方法"
     },
     "heroHeadings": {
-      "couch": [
+      "couch-to-5k-training-plan": [
         "免費 9 週",
         "Couch to 5K 訓練計畫",
         "從走路開始，完成第一個 5K"
       ],
-      "5k": [
+      "5k-training-plan": [
         "免費 8 週",
         "5K 訓練計畫",
         "穩步完成首個 5K"
       ],
-      "5k-intermediate": [
+      "5k-training-plan-intermediate": [
         "免費 8 週",
         "進階 5K 訓練計畫",
         "用間歇與節奏跑提速"
       ],
-      "10k": [
+      "10k-training-plan": [
         "免費 10 週",
         "10 公里訓練計畫",
         "從 5K 穩步跑向 10K"
       ],
-      "half-marathon": [
+      "half-marathon-training-plan": [
         "免費 14 週",
         "半馬訓練計畫",
         "為首個 21.1 公里打好基礎"
       ],
-      "marathon": [
+      "marathon-training-plan": [
         "免費 18 週",
         "馬拉松訓練計畫",
         "完成你的首場全馬"

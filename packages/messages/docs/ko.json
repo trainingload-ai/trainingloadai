@@ -9551,7 +9551,7 @@
         ],
         "current": "현재 플랜"
       },
-      "raceDistanceChooserCopy": {
+      "raceDistanceChoosers": {
         "10k": {
           "title": "내게 맞는 10K 플랜 선택하기",
           "subtitle": "가장 빨라 보이는 일정이 아니라 현재 러닝 기반과 목표에서 시작하세요.",
@@ -9616,7 +9616,7 @@
           ]
         }
       },
-      "fiveKCopy": {
+      "fiveK": {
         "weeks": "8주",
         "level": "초급~중급",
         "weeklyVolume": "주 4회 러닝",
@@ -9987,32 +9987,32 @@
       "trainingMethod": "훈련 방법"
     },
     "heroHeadings": {
-      "couch": [
+      "couch-to-5k-training-plan": [
         "무료 9주",
         "Couch to 5K 훈련 계획",
         "걷기부터 첫 5K 완주까지"
       ],
-      "5k": [
+      "5k-training-plan": [
         "무료 8주",
         "5K 훈련 계획",
         "레이스 당일까지 탄탄하게"
       ],
-      "5k-intermediate": [
+      "5k-training-plan-intermediate": [
         "무료 8주",
         "중급 5K 훈련 계획",
         "인터벌과 템포런으로 더 빠르게"
       ],
-      "10k": [
+      "10k-training-plan": [
         "무료 10주",
         "10K 훈련 계획",
         "첫 5K를 넘어 10K 완주까지"
       ],
-      "half-marathon": [
+      "half-marathon-training-plan": [
         "무료 14주",
         "하프마라톤 훈련 계획",
         "첫 21.1K 완주를 위한 준비"
       ],
-      "marathon": [
+      "marathon-training-plan": [
         "무료 18주",
         "마라톤 훈련 계획",
         "첫 42.2K 완주를 향한 준비"
