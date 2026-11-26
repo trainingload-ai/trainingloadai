@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import pg from "pg";
@@ -120,53 +121,13 @@ postgresTest(
         databaseUrl,
         'SELECT "id", "source" FROM "_trainingload_core_migrations" ORDER BY "id"',
       );
-      assert.deepEqual(ledger.rows, [
-        { id: "0001_core_baseline", source: "baseline" },
-        { id: "0002_neutral_ai_operations", source: "baseline" },
-        { id: "0003_self_host_ai_configuration", source: "baseline" },
-        { id: "0004_core_ai_usage_compatibility", source: "baseline" },
-        { id: "0005_self_host_ai_model_metadata", source: "baseline" },
-        {
-          id: "0006_self_host_operation_analytics_consent",
-          source: "baseline",
-        },
-        { id: "0007_single_owner", source: "baseline" },
-        { id: "0008_core_domain_invariants", source: "baseline" },
-        { id: "0009_core_preference_defaults", source: "baseline" },
-        { id: "0010_background_coach_runs", source: "baseline" },
-        { id: "0011_background_coach_task_kinds", source: "baseline" },
-        { id: "0012_today_suggestion_action_loop", source: "baseline" },
-        { id: "0013_better_auth_jwks_metadata", source: "baseline" },
-        { id: "0014_better_auth_oauth_provider_17", source: "baseline" },
-        { id: "0015_fit_strength_sets", source: "baseline" },
-        { id: "0016_chronological_fitness_replay", source: "baseline" },
-        { id: "0017_activity_data_migration", source: "baseline" },
-        { id: "0018_activity_sport_catalog", source: "baseline" },
-        { id: "0019_workout_step_annotations", source: "baseline" },
-        { id: "0020_saved_routes", source: "baseline" },
-        { id: "0021_health_observations", source: "baseline" },
-        { id: "0022_personal_integrations", source: "baseline" },
-        {
-          id: "0023_external_provider_connection_region",
-          source: "baseline",
-        },
-        { id: "0024_activity_analysis_segments", source: "baseline" },
-        { id: "0025_vdot_forecast_snapshot", source: "baseline" },
-        { id: "0026_athlete_state_updates", source: "baseline" },
-        { id: "0027_scope_fitness_setting_evidence", source: "baseline" },
-        { id: "0028_user_scoped_activity_identity", source: "baseline" },
-        { id: "0029_provider_authorization_revision", source: "baseline" },
-        { id: "0030_independent_workout_activity_links", source: "baseline" },
-        { id: "0031_workout_matching_review", source: "baseline" },
-        { id: "0032_import_source_revision_handoff", source: "baseline" },
-        { id: "0033_today_suggestion_generation", source: "baseline" },
-        { id: "0034_coach_fact_scope", source: "baseline" },
-        { id: "0035_coach_context_timezone", source: "baseline" },
-        { id: "0036_health_daily_fact_revisions", source: "baseline" },
-        { id: "0037_plan_start_conversation", source: "baseline" },
-        { id: "0038_plan_schedule", source: "baseline" },
-        { id: "0039_rolling_plan", source: "baseline" },
-      ]);
+      const manifest = JSON.parse(
+        await readFile(new URL("../migrations/manifest.json", import.meta.url), "utf8"),
+      );
+      assert.deepEqual(
+        ledger.rows,
+        manifest.migrations.map(({ id }) => ({ id, source: "baseline" })),
+      );
       const jwksColumns = await query(
         databaseUrl,
         `SELECT "column_name" FROM information_schema.columns WHERE "table_schema" = 'public' AND "table_name" = 't_jwks' ORDER BY "column_name"`,

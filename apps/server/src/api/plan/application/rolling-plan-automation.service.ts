@@ -360,7 +360,11 @@ export class RollingPlanAutomationService {
       data: { state: 'RETRY', attempts: 0, lastError: null },
     });
     const result = await tx.rollingPlanJob.createMany({
-      data: { ...data, receipt: json({ input }) },
+      data: {
+        ...data,
+        availableAt: data.availableAt ?? new Date(),
+        receipt: json({ input }),
+      },
       skipDuplicates: true,
     });
     return result.count + resumed.count;
@@ -369,26 +373,43 @@ export class RollingPlanAutomationService {
   /** Atomic competing-worker claim, including process-crash recovery and a fresh fencing token. */
   async claim() {
     return this.prisma.$transaction(async (tx) => {
+      const claimAt = new Date();
       await tx.rollingPlanJob.updateMany({
         where: {
           state: 'RUNNING',
           attempts: { gte: MAX_ATTEMPTS },
-          leaseUntil: { lte: new Date() },
+          leaseUntil: { lte: claimAt },
         },
         data: {
           state: 'FAILED',
           claimToken: null,
           leaseUntil: null,
           lastError: 'ROLLING_RETRY_EXHAUSTED',
-          availableAt: new Date(Date.now() + 86400000),
+          availableAt: new Date(claimAt.getTime() + 86_400_000),
         },
       });
       const token = randomUUID();
-      const rows = await tx.$queryRawUnsafe<Array<{ id: string }>>(
-        `WITH picked AS (SELECT id FROM t_rolling_plan_job WHERE ((state IN ('PENDING','RETRY') AND available_at <= now()) OR (state='RUNNING' AND lease_until <= now())) AND attempts < $1 ORDER BY available_at, created_at FOR UPDATE SKIP LOCKED LIMIT 1) UPDATE t_rolling_plan_job j SET state='RUNNING',claim_token=$2,lease_until=now()+interval '5 minutes',attempts=j.attempts+1,updated_at=now() FROM picked WHERE j.id=picked.id RETURNING j.id`,
-        MAX_ATTEMPTS,
-        token,
-      );
+      // Queue dates are stored as UTC timestamps and compared by Prisma elsewhere.
+      const claimTimestamp = claimAt.toISOString().slice(0, -1);
+      const leaseTimestamp = new Date(claimAt.getTime() + LEASE_MS)
+        .toISOString()
+        .slice(0, -1);
+      const rows = await tx.$queryRaw<Array<{ id: string }>>`
+        WITH picked AS (
+          SELECT id FROM t_rolling_plan_job
+          WHERE (
+            (state IN ('PENDING', 'RETRY') AND available_at <= ${claimTimestamp}::timestamp)
+            OR (state = 'RUNNING' AND lease_until <= ${claimTimestamp}::timestamp)
+          ) AND attempts < ${MAX_ATTEMPTS}
+          ORDER BY available_at, created_at
+          FOR UPDATE SKIP LOCKED LIMIT 1
+        )
+        UPDATE t_rolling_plan_job j
+        SET state = 'RUNNING', claim_token = ${token},
+            lease_until = ${leaseTimestamp}::timestamp,
+            attempts = j.attempts + 1, updated_at = ${claimTimestamp}::timestamp
+        FROM picked WHERE j.id = picked.id RETURNING j.id
+      `;
       if (!rows.length) return null;
       return tx.rollingPlanJob.findUniqueOrThrow({ where: { id: rows[0].id } });
     });

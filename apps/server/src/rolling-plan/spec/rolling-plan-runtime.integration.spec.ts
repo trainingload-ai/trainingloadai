@@ -12,6 +12,7 @@ import { RollingPlanAutomationService } from '../../api/plan/application/rolling
 describe('continuous plan runtime / PostgreSQL', () => {
   let database: ChildProcess;
   let prisma: PrismaClient;
+  let databaseUrl: string;
   let f: ReturnType<typeof planStartFixture>;
   beforeAll(async () => {
     database = fork(
@@ -34,9 +35,8 @@ describe('continuous plan runtime / PostgreSQL', () => {
         reject(new Error(`Test database exited: ${code}`)),
       );
     });
-    prisma = new PrismaClient({
-      datasourceUrl: `postgresql://postgres:postgres@${server.address}/postgres?connection_limit=${server.connectionLimit ?? 1}&sslmode=disable`,
-    });
+    databaseUrl = `postgresql://postgres:postgres@${server.address}/postgres?connection_limit=${server.connectionLimit ?? 1}&sslmode=disable`;
+    prisma = new PrismaClient({ datasourceUrl: databaseUrl });
     await prisma.$connect();
     f = planStartFixture(prisma);
   }, 30000);
@@ -56,9 +56,9 @@ describe('continuous plan runtime / PostgreSQL', () => {
   });
 
   const now = new Date('2099-11-20T09:00:00Z');
-  function automation() {
+  function automation(client = prisma) {
     return new RollingPlanAutomationService(
-      prisma as never,
+      client as never,
       f.starts,
       {
         assertAllowed: async () => undefined,
@@ -136,6 +136,37 @@ describe('continuous plan runtime / PostgreSQL', () => {
       },
     });
   }
+  const nativeIt = process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN
+    ? it
+    : it.skip;
+
+  nativeIt('claims a due job and returns a UTC lease in a non-UTC session', async () => {
+    const { planId, policy } = await active();
+    const job = await prisma.rollingPlanJob.create({
+      data: {
+        planId,
+        policyId: policy.id,
+        kind: 'WEEK',
+        windowStart: new Date('2099-11-23'),
+        inputRevision: 'non-utc-claim',
+        availableAt: new Date(Date.now() - 60_000),
+      },
+    });
+    const url = new URL(databaseUrl);
+    url.searchParams.set('connection_limit', '1');
+    const client = new PrismaClient({ datasourceUrl: url.href });
+    try {
+      await client.$executeRaw`SET TIME ZONE 'America/Los_Angeles'`;
+      const queue = automation(client);
+      const claimed = await queue.claim();
+      expect(claimed).toMatchObject({ id: job.id, state: 'RUNNING' });
+      expect(claimed!.leaseUntil!.getTime()).toBeGreaterThan(Date.now());
+      await expect(queue.heartbeat(job.id, claimed!.claimToken!)).resolves.toBeUndefined();
+    } finally {
+      await client.$disconnect();
+    }
+  });
+
   it('waits for the last training day and deduplicates next-week discovery across scanners', async () => {
     const { planId, policy } = await active();
     const a = automation();
