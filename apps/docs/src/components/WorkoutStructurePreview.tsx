@@ -5,8 +5,31 @@ import type {
 import type { WorkoutStructure } from "@shared/workout-structure";
 import { enduranceStructureToChartSegments } from "@/lib/plan-share-chart";
 
-type PreviewLocale = "en" | "zh" | "zh-hant" | "ja";
+type PreviewLocale =
+  | "en"
+  | "zh"
+  | "zh-hant"
+  | "ja"
+  | "ko"
+  | "de"
+  | "fr"
+  | "es"
+  | "it"
+  | "pt-BR";
 type PreviewStepKind = NonNullable<EnduranceWorkRestStep["stepKind"]>;
+
+const CHART_ARIA_LABEL: Record<PreviewLocale, string> = {
+  en: "Workout structure chart",
+  zh: "训练结构图",
+  "zh-hant": "訓練結構圖",
+  ja: "ワークアウト構成図",
+  ko: "훈련 구조 차트",
+  de: "Trainingsstruktur-Diagramm",
+  fr: "Graphique de structure de séance",
+  es: "Gráfico de estructura del entrenamiento",
+  it: "Grafico della struttura dell'allenamento",
+  "pt-BR": "Gráfico de estrutura do treino",
+};
 
 const STEP_COPY: Record<PreviewLocale, Record<PreviewStepKind, string>> = {
   en: {
@@ -41,6 +64,54 @@ const STEP_COPY: Record<PreviewLocale, Record<PreviewStepKind, string>> = {
     COOLDOWN: "クールダウン",
     OTHER: "ステップ",
   },
+  ko: {
+    WARMUP: "워밍업",
+    WORK: "메인",
+    RECOVERY: "회복",
+    REST: "휴식",
+    COOLDOWN: "쿨다운",
+    OTHER: "구간",
+  },
+  de: {
+    WARMUP: "Aufwärmen",
+    WORK: "Belastung",
+    RECOVERY: "Erholung",
+    REST: "Pause",
+    COOLDOWN: "Auslaufen",
+    OTHER: "Abschnitt",
+  },
+  fr: {
+    WARMUP: "Échauffement",
+    WORK: "Travail",
+    RECOVERY: "Récupération",
+    REST: "Repos",
+    COOLDOWN: "Retour au calme",
+    OTHER: "Étape",
+  },
+  es: {
+    WARMUP: "Calentamiento",
+    WORK: "Trabajo",
+    RECOVERY: "Recuperación",
+    REST: "Descanso",
+    COOLDOWN: "Enfriamiento",
+    OTHER: "Bloque",
+  },
+  it: {
+    WARMUP: "Riscaldamento",
+    WORK: "Lavoro",
+    RECOVERY: "Recupero",
+    REST: "Riposo",
+    COOLDOWN: "Defaticamento",
+    OTHER: "Fase",
+  },
+  "pt-BR": {
+    WARMUP: "Aquecimento",
+    WORK: "Trabalho",
+    RECOVERY: "Recuperação",
+    REST: "Descanso",
+    COOLDOWN: "Desaquecimento",
+    OTHER: "Etapa",
+  },
 };
 
 const STEP_TONE: Record<PreviewStepKind, { chip: string; color: string }> = {
@@ -71,9 +142,22 @@ const STEP_TONE: Record<PreviewStepKind, { chip: string; color: string }> = {
 };
 
 function previewLocale(lang: string): PreviewLocale {
-  if (lang.toLowerCase().startsWith("zh-hant")) return "zh-hant";
-  if (lang.toLowerCase().startsWith("zh")) return "zh";
-  if (lang.toLowerCase().startsWith("ja")) return "ja";
+  const normalized = lang.toLowerCase();
+  if (
+    normalized.startsWith("zh-hant") ||
+    normalized.startsWith("zh-tw") ||
+    normalized.startsWith("zh-hk")
+  ) {
+    return "zh-hant";
+  }
+  if (normalized.startsWith("zh")) return "zh";
+  if (normalized.startsWith("ja")) return "ja";
+  if (normalized.startsWith("ko")) return "ko";
+  if (normalized.startsWith("de")) return "de";
+  if (normalized.startsWith("fr")) return "fr";
+  if (normalized.startsWith("es")) return "es";
+  if (normalized.startsWith("it")) return "it";
+  if (normalized.startsWith("pt")) return "pt-BR";
   return "en";
 }
 
@@ -169,15 +253,7 @@ export function WorkoutStructurePreview({
       {segments.length > 0 && total > 0 ? (
         <div
           role="img"
-          aria-label={
-            locale === "zh"
-              ? "训练结构图"
-              : locale === "zh-hant"
-                ? "訓練結構圖"
-                : locale === "ja"
-                  ? "ワークアウト構成図"
-                  : "Workout structure chart"
-          }
+          aria-label={CHART_ARIA_LABEL[locale]}
           className={`relative overflow-hidden rounded-control border border-neutral-200/80 bg-white/80 dark:border-white/10 dark:bg-neutral-950/35 ${compact ? "h-10" : "h-16"}`}
         >
           {[25, 50, 75].map((top) => (

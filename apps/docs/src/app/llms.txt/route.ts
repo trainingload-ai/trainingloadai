@@ -1,5 +1,5 @@
 import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
-import { blogSource } from "@/lib/blog-source";
+import { getNativeBlogLanguages } from "@/lib/blog-source";
 import {
   llmFreeToolPages,
   llmGuidePages,
@@ -25,7 +25,7 @@ const LAST_UPDATED = "2026-11-12";
 
 export async function GET() {
   const siteUrl = getSiteUrl();
-  const hasBlogPosts = blogSource.generateParams().length > 0;
+  const nativeBlogLocales = new Set<string>(getNativeBlogLanguages());
   const lines = [
     "# Trainingload.ai",
     "",
@@ -95,15 +95,15 @@ export async function GET() {
       const items = [
         markdownFileLink(`${lang} homepage`, `${siteUrl}${prefix || "/"}`),
         markdownFileLink(`${lang} tools`, `${siteUrl}${prefix}/tools`),
-        markdownFileLink(`${lang} documentation`, `${siteUrl}${prefix}/docs`),
       ];
-      if (hasBlogPosts) {
-        items.splice(
-          2,
-          0,
+      if (nativeBlogLocales.has(lang)) {
+        items.push(
           markdownFileLink(`${lang} blog`, `${siteUrl}${prefix}/blog`),
         );
       }
+      items.push(
+        markdownFileLink(`${lang} documentation`, `${siteUrl}${prefix}/docs`),
+      );
       return items;
     }),
     "",

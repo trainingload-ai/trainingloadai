@@ -16,12 +16,9 @@ import {
   schemaId,
   schemaLanguage,
 } from "@/lib/seo-schema";
-import { localePrefix } from "@/lib/locale-url";
-import {
-  getDanielsGuideCopy,
-  isVdotContentLocale,
-  vdotContentAlternates,
-} from "@/lib/vdot-plan-content";
+import { isSeoIndexedLanguage } from "@/lib/i18n";
+import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import { getDanielsGuideCopy } from "@/lib/vdot-plan-content";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 
 const GUIDE_PATH = "/daniels-running-formula";
@@ -52,9 +49,9 @@ export async function generateMetadata({
     description: seo.description,
     alternates: {
       canonical: pageUrl,
-      languages: vdotContentAlternates(base, GUIDE_PATH),
+      languages: absoluteAlternatesForPath(base, GUIDE_PATH),
     },
-    robots: isVdotContentLocale(lang)
+    robots: isSeoIndexedLanguage(lang)
       ? { index: true, follow: true }
       : { index: false, follow: true },
     openGraph: {

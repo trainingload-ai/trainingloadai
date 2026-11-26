@@ -1,7 +1,13 @@
-import en from "../../../../packages/messages/running-plan-intents/en.json";
-import zh from "../../../../packages/messages/running-plan-intents/zh.json";
-import zhHant from "../../../../packages/messages/running-plan-intents/zh-hant.json";
-import ja from "../../../../packages/messages/running-plan-intents/ja.json";
+import en from "@trainingloadai/messages/running-plan-intents/en.json";
+import zh from "@trainingloadai/messages/running-plan-intents/zh.json";
+import zhHant from "@trainingloadai/messages/running-plan-intents/zh-hant.json";
+import ja from "@trainingloadai/messages/running-plan-intents/ja.json";
+import ko from "@trainingloadai/messages/running-plan-intents/ko.json";
+import de from "@trainingloadai/messages/running-plan-intents/de.json";
+import fr from "@trainingloadai/messages/running-plan-intents/fr.json";
+import es from "@trainingloadai/messages/running-plan-intents/es.json";
+import it from "@trainingloadai/messages/running-plan-intents/it.json";
+import ptBR from "@trainingloadai/messages/running-plan-intents/pt-BR.json";
 
 export const BRIDGE_PLAN_PATHS = [
   "/5k-to-10k-training-plan",
@@ -42,6 +48,12 @@ const content: Record<string, IntentContent> = {
   zh,
   "zh-hant": zhHant,
   ja,
+  ko,
+  de,
+  fr,
+  es,
+  it,
+  "pt-BR": ptBR,
 };
 
 export function runningPlanIntentContent(lang: string): IntentContent {

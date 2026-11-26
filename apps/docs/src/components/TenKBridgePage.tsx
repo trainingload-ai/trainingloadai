@@ -12,6 +12,7 @@ import {
   type BridgePlanSlug,
 } from "@/lib/running-plan-intents";
 import { absoluteAlternatesForPath, withLocalePath } from "@/lib/locale-url";
+import { isSeoIndexedLanguage } from "@/lib/i18n";
 import {
   breadcrumbSchema,
   schemaGraph,
@@ -49,7 +50,7 @@ export function tenKBridgeMetadata(
       title: copy.metaTitle,
       description: copy.metaDescription,
     },
-    robots: ["en", "zh", "zh-hant", "ja"].includes(lang)
+    robots: isSeoIndexedLanguage(lang)
       ? undefined
       : { index: false, follow: true },
   };

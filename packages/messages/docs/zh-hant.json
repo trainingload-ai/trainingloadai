@@ -510,7 +510,11 @@
     "page": {
       "title": "騎乘功率區間計算器",
       "subtitle": "輸入 FTP，計算 Coggan 騎乘功率區間與對應瓦數。訓練計畫使用其他標準時，也可切換 Friel、Vance、Stryd 或 CP。",
-      "proof": ["無需註冊", "即填即算", "可列印、分享"],
+      "proof": [
+        "無需註冊",
+        "即填即算",
+        "可列印、分享"
+      ],
       "howTo": {
         "title": "怎麼使用這些功率區間",
         "description": "填入你正在使用的瓦特，選擇區間模型，用成績單安排下一次訓練。",
@@ -792,7 +796,10 @@
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次表現。",
         "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
-        "benefits": ["訓練中的實時數據", "訓練後的分析與回顧"],
+        "benefits": [
+          "訓練中的實時數據",
+          "訓練後的分析與回顧"
+        ],
         "cta": "瞭解智能教練",
         "phoneAlt": "Trainingload.ai iPhone 實時訓練記錄頁面"
       },
@@ -966,7 +973,11 @@
     "page": {
       "title": "臨界功率計算器",
       "subtitle": "輸入功率紀錄，或上傳騎乘檔案，估算臨界功率（CP）、W′ 和功體比，為下一次訓練和功率分配提供參考。",
-      "proof": ["無需註冊", "即時計算", "列印或分享"],
+      "proof": [
+        "無需註冊",
+        "即時計算",
+        "列印或分享"
+      ],
       "howTo": {
         "title": "如何使用臨界功率計算器",
         "steps": {
@@ -1221,7 +1232,10 @@
       "heroProduct": {
         "title": "記錄騎乘，了解你的功率。",
         "body": "用 iPhone 記錄訓練，在 Trainingload.ai 中結合功率資料、訓練負荷與恢復情況，安排下一次騎乘。",
-        "benefits": ["即時查看訓練資料", "騎乘結束後回顧表現"],
+        "benefits": [
+          "即時查看訓練資料",
+          "騎乘結束後回顧表現"
+        ],
         "cta": "了解智慧教練",
         "phoneAlt": "iPhone 上的 Trainingload.ai 即時訓練記錄頁面"
       },
@@ -1299,10 +1313,11 @@
         "20 分鐘 / 8 分鐘 / 60 分鐘場地測試估算閾值功率，並標為 LT2",
         "用距離和用時的閾值課估算閾值配速，並標為 LT2",
         "心率、功率和配速的 LT1 區間",
-        "跳轉到心率區間和功率區間",
+        "帶入心率區間與功率區間",
         "複製結果",
         "用常見完賽成績對照 LT2 配速和分段的參考表",
-        "用你的結果填入的閾值範例課"
+        "用你的結果填入的閾值範例課",
+        "可分享的結果卡片"
       ],
       "breadcrumb": {
         "home": "首頁",
@@ -1589,11 +1604,18 @@
         "physiology": "閱讀乳酸閾值的定義",
         "paceZones": "閱讀跑步配速區間"
       },
-      "proof": ["無需註冊", "支援活動檔案", "可列印、分享成績單"],
+      "proof": [
+        "無需註冊",
+        "支援活動檔案",
+        "可列印、分享成績單"
+      ],
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次進步。",
         "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率和訓練負荷，回看這次表現。",
-        "benefits": ["訓練中的實時資料", "訓練後的分析與回顧"],
+        "benefits": [
+          "訓練中的實時資料",
+          "訓練後的分析與回顧"
+        ],
         "cta": "瞭解智能教練",
         "phoneAlt": "iPhone 上 Trainingload.ai 的即時訓練記錄"
       },
@@ -2090,7 +2112,10 @@
         {
           "question": "最大心率和二區心率要去哪裡計算？",
           "answer": "最大心率公式可以在最大心率計算器查看；如果只需要二區範圍，請使用二區心率計算器。\n\n你可以先估算最大心率，再回到這裡產生完整區間表。\n\n本頁會顯示所選模型的所有心率區間，和前述兩個工具的用途不同。",
-          "links": ["maxHr", "zone2"]
+          "links": [
+            "maxHr",
+            "zone2"
+          ]
         }
       ],
       "ui": {
@@ -2115,7 +2140,11 @@
         },
         "onThisPage": "本頁內容"
       },
-      "proof": ["無需註冊", "即時計算", "列印或分享"],
+      "proof": [
+        "無需註冊",
+        "即時計算",
+        "列印或分享"
+      ],
       "links": {
         "estimateHrmax": "估算最大心率",
         "zone2": "只計算二區"
@@ -2690,19 +2719,34 @@
         "insights": {
           "title": "今日概覽與目前計畫",
           "description": "每天先看真正重要的事：今天練什麼，計畫進行到哪裡，最近訓練反馈說明了什麼。",
-          "bullets": ["今日概覽", "目前計畫頁", "今日訓練內容", "近期反馈"],
+          "bullets": [
+            "今日概覽",
+            "目前計畫頁",
+            "今日訓練內容",
+            "近期反馈"
+          ],
           "preview": "首頁與計畫預覽"
         },
         "context": {
           "title": "日歷、負荷與 AI 回顧",
           "description": "通過日歷、訓練負荷和 AI 訓練回顧，理解已經發生了什麼，以及下一步可能需要調整什麼。",
-          "bullets": ["計畫日歷", "訓練負荷訊號", "AI 訓練回顧", "調整依據"],
+          "bullets": [
+            "計畫日歷",
+            "訓練負荷訊號",
+            "AI 訓練回顧",
+            "調整依據"
+          ],
           "preview": "日歷與回顧預覽"
         },
         "trust": {
           "title": "計畫被改動前，先預覽變化",
           "description": "AI 可以生成訓練調整草稿，但只有在你查看並確認後，計畫才會真正更新。",
-          "cards": ["調整前後", "內容檢查", "你來確認", "計畫歷史"],
+          "cards": [
+            "調整前後",
+            "內容檢查",
+            "你來確認",
+            "計畫歷史"
+          ],
           "preview": "訓練調整預覽"
         }
       },
@@ -2735,7 +2779,12 @@
         "hero": "功能頁主圖",
         "placeholderSubtitle": "制定計畫、執行訓練、回顧負荷，並在需要時用 AI 輔助調整"
       },
-      "stats": ["計畫", "執行", "負荷", "AI 回顧"],
+      "stats": [
+        "計畫",
+        "執行",
+        "負荷",
+        "AI 回顧"
+      ],
       "intentPages": [
         {
           "title": "訓練分析頁面",
@@ -2762,7 +2811,11 @@
           "href": "APP:/",
           "icon": "Home",
           "summary": "一開啟就知道今天練什麼，最近練得怎麼樣，計畫有沒有跟上。",
-          "bullets": ["今日該練什麼", "目前計畫進度", "近期訓練回饋"],
+          "bullets": [
+            "今日該練什麼",
+            "目前計畫進度",
+            "近期訓練回饋"
+          ],
           "cta": "查看今天的訓練負荷上下文"
         },
         {
@@ -2770,7 +2823,11 @@
           "href": "APP:/plan",
           "icon": "LayoutList",
           "summary": "不是做一張漂亮表格，而是生成一份每天真的能照著練的計畫。",
-          "bullets": ["週期目標", "週結構", "每日訓練"],
+          "bullets": [
+            "週期目標",
+            "週結構",
+            "每日訓練"
+          ],
           "cta": "制定基於訓練負荷的週計畫"
         },
         {
@@ -2778,7 +2835,11 @@
           "href": "APP:/calendar",
           "icon": "CalendarDays",
           "summary": "計畫和實際完成放在一起看，哪天漏了、哪週堆多了，一眼就清楚。",
-          "bullets": ["計畫與實際對照", "週節奏", "恢復空檔"],
+          "bullets": [
+            "計畫與實際對照",
+            "週節奏",
+            "恢復空檔"
+          ],
           "cta": "對比計畫與完成的訓練負荷"
         },
         {
@@ -2786,7 +2847,11 @@
           "href": "/training-load",
           "icon": "BarChart3",
           "summary": "用 CTL、ATL、TSB 看訓練壓力：現在能不能加，該不該先緩一緩。",
-          "bullets": ["長期體能", "近期疲勞", "狀態與新鮮度"],
+          "bullets": [
+            "長期體能",
+            "近期疲勞",
+            "狀態與新鮮度"
+          ],
           "cta": "在計畫中管理訓練負荷"
         },
         {
@@ -2794,7 +2859,11 @@
           "href": "/ai-training-plan",
           "icon": "Bot",
           "summary": "AI 先看你原計畫怎麼練、實際練成什麼樣，再說下一步怎麼改。",
-          "bullets": ["日回顧", "週回顧", "解釋依據"],
+          "bullets": [
+            "日回顧",
+            "週回顧",
+            "解釋依據"
+          ],
           "cta": "用 AI 調整訓練負荷"
         },
         {
@@ -2802,7 +2871,11 @@
           "href": "/ai-training-plan",
           "icon": "ClipboardCheck",
           "summary": "AI 可以提調整，但不會偷偷改你的計畫。看清楚、確認了，才生效。",
-          "bullets": ["前後對比", "內容校驗", "由你確認"],
+          "bullets": [
+            "前後對比",
+            "內容校驗",
+            "由你確認"
+          ],
           "cta": "確認 AI 給出的負荷調整草稿"
         }
       ],
@@ -2955,8 +3028,8 @@
   },
   "privacy": {
     "metadata": {
-      "title": "Privacy Policy | Trainingload.ai",
-      "description": "How Trainingload.ai collects, uses, shares, retains, and protects account, training, health, location, and AI data.",
+      "title": "隱私政策 | Trainingload.ai",
+      "description": "了解 Trainingload.ai 如何蒐集、使用、分享、保留與保護帳號、訓練、健康、位置及 AI 資料。",
       "keywords": [
         "privacy policy",
         "health and fitness data",
@@ -2964,180 +3037,180 @@
         "Trainingload.ai"
       ],
       "openGraph": {
-        "title": "Privacy Policy | Trainingload.ai",
-        "description": "Understand what data Trainingload.ai uses and the choices you have."
+        "title": "隱私政策 | Trainingload.ai",
+        "description": "了解 Trainingload.ai 使用哪些資料，以及你擁有哪些選擇權。"
       }
     },
     "page": {
       "title": "Privacy Policy",
-      "lastUpdated": "Last updated: {date}",
+      "lastUpdated": "最後更新：{date}",
       "overview": {
         "title": "Privacy at a glance",
-        "body": "Trainingload.ai helps you understand training load, review completed workouts, and manage training plans. Some features need health, fitness, or location data. We treat that information as sensitive and design the Service around data minimization, clear choices, and user control.",
+        "body": "Trainingload.ai 協助你掌握訓練負荷、複盤已完成訓練並管理訓練計畫。部分功能需要健康、體能或位置資料。我們將這類資訊視為敏感資料，並以資料最小化、明確選擇與使用者自主控制為核心來設計本服務。",
         "items": [
-          "We do not sell personal data and do not use health, fitness, location, or AI conversation data for third-party advertising.",
-          "Connecting fitness platforms, syncing HealthKit, using precise location, and enabling AI features are optional and controlled separately.",
-          "You can export eligible data, disconnect providers, withdraw AI permission, delete Coach conversations and activities, or delete your account."
+          "我們不販售個人資料，也不會將健康、體能、位置或 AI 對話資料用於第三方廣告。",
+          "連結運動平台、同步 HealthKit、使用精確位置以及啟用 AI 功能皆為選用項目，並可分別獨立控制。",
+          "你可以匯出適用資料、中斷第三方服務連結、撤回 AI 授權、刪除智能教練對話與活動記錄，或刪除帳號。"
         ]
       },
       "sections": {
         "scope": {
-          "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "title": "1. 我們是誰及本政策的適用範圍",
+          "body": "Trainingload.ai 由你取得本服務的應用程式商店或發行管道上所標明的開發者營運（以下稱「Trainingload.ai」、「我們」或「本公司」）。本政策適用於我們的行動應用程式、網站、網頁應用程式、API、客服支援及相關服務。「個人資料」係指可識別你身分或可合理與你連結的資訊。本政策不取代你選擇連結之第三方服務各自的隱私權聲明。"
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
-          "body": "The data we collect depends on the features you choose to use. It may include:",
+          "body": "我們蒐集的資料取決於你選擇使用的功能，可能包括：",
           "items": [
-            "Account and profile data: name, email address, profile image, language, time zone, account identifiers, sign-in provider identifiers, and a securely hashed password when password sign-in is used.",
-            "Training and activity data: workout type, date and time, duration, distance, route and GPS coordinates, elevation, pace, speed, heart rate, power, cadence, calories, laps, training load, performance estimates, perceived exertion, and imported or generated workout files.",
-            "Health, wellness, and body data: data you enter or authorize from HealthKit or connected services, such as body mass, resting heart rate, heart-rate variability where available, sleep, steps, active energy, recovery trends, VO2max, thresholds, zones, goals, competitions, and plan history.",
-            "Content and communications: Coach prompts, voice transcripts you choose to submit, AI responses, reviews and plans, notes, support messages, feedback, and files you upload.",
-            "Connection and transaction data: connected-provider account IDs, authorization tokens, granted scopes, sync settings and status, product and subscription status, purchase and transaction identifiers, and billing support records. We do not receive or store your full payment-card number.",
-            "Device, location, and usage data: IP address, device and browser type, operating system, app version, language, time zone, cookie or local-storage identifiers, screens and features used, access times, crash and diagnostic metadata, and precise location when you permit route recording."
+            "帳號與個人檔案資料：姓名、電子郵件地址、頭像、語言、時區、帳號識別碼、登入服務商識別碼，以及使用密碼登入時經安全雜湊處理的密碼。",
+            "訓練與活動資料：運動類型、日期與時間、時長、距離、路線與 GPS 座標、海拔、配速、速度、心率、功率、步頻／踏頻、卡路里、分圈、訓練負荷、表現估算、自覺強度（RPE），以及匯入或產生的訓練檔案。",
+            "健康、身心狀態與身體資料：你自行輸入或授權自 HealthKit 或已連結服務取得的資料，例如體重、靜息心率、可用時的心率變異度（HRV）、睡眠、步數、活動能量、恢復趨勢、VO2max、閾值、訓練區間、目標、賽事與計畫歷史記錄。",
+            "內容與通訊資料：向智能教練提交的提問、你選擇送出的語音轉錄文字、AI 回覆、複盤與計畫、備註、客服訊息、意見回饋以及你上傳的檔案。",
+            "連結與交易資料：已連結服務商的帳號 ID、授權權杖、已授予權限範圍、同步設定與狀態、產品與訂閱狀態、購買與交易識別碼，以及帳單客服記錄。我們不會接收或儲存你的完整信用卡卡號。",
+            "裝置、位置與使用資料：IP 位址、裝置與瀏覽器類型、作業系統、應用程式版本、語言、時區、Cookie 或本機儲存空間識別碼、使用過的畫面與功能、存取時間、當機與診斷中繼資料，以及在你允許記錄路線時的精確位置。"
           ]
         },
         "sources": {
-          "title": "3. Where data comes from",
-          "body": "We collect personal data from the following sources:",
+          "title": "3. 資料來源",
+          "body": "我們透過以下來源蒐集個人資料：",
           "items": [
-            "Directly from you when you create an account, complete your profile, upload a file, record a workout, write or dictate a Coach message, configure a plan, make a purchase, or contact support.",
-            "From your device when you grant access to HealthKit, location, microphone, speech recognition, or other operating-system capabilities. Apple Speech Recognition may process microphone audio to produce a transcript; Trainingload.ai sends the transcript only after you choose to submit it and does not store the raw Coach recording.",
-            "From services you connect, including Apple, Google, GitHub, Garmin, COROS, Intervals.icu, Strava, Polar, Wahoo, and Suunto, according to the permissions and sync directions you select.",
-            "Automatically through essential service logs and, when enabled, privacy-limited analytics and diagnostics."
+            "直接來自你：當你建立帳號、完善個人檔案、上傳檔案、記錄訓練、輸入或口述智能教練訊息、設定計畫、進行購買或聯絡客服時。",
+            "來自你的裝置：當你授權存取 HealthKit、位置、麥克風、語音辨識或其他作業系統功能時。Apple 語音辨識可能會處理麥克風音訊以產生轉錄文字；Trainingload.ai 僅在你選擇送出後才會傳送該文字，且不會儲存原始的智能教練語音錄音。",
+            "來自你連結的服務：包括 Apple、Google、GitHub、Garmin、COROS、Intervals.icu、Strava、Polar、Wahoo 與 Suunto，實際範圍依你所選的權限與同步方向而定。",
+            "自動取得：透過維持服務運作所必需的日誌，以及在啟用時受隱私限制的分析與診斷工具。"
           ]
         },
         "howWeUse": {
           "title": "4. How we use data",
-          "body": "We use personal data only for the purposes described below:",
+          "body": "我們僅基於下列目的使用個人資料：",
           "items": [
-            "Create and secure your account, authenticate you, remember settings, and provide support.",
-            "Import, record, store, export, and synchronize workouts and health data at your direction.",
-            "Calculate training load, zones, trends, performance estimates, recovery context, and plan-versus-completed comparisons.",
-            "Provide training plans, Coach conversations, activity reviews, and user-confirmed plan adjustments.",
-            "Process subscriptions and purchases, restore entitlements, send service messages, and maintain transaction records.",
-            "Detect abuse, investigate errors, protect the Service, and improve reliability and product quality using minimized, aggregated, or de-identified data where practical."
+            "建立並保護你的帳號、驗證身分、記住偏好設定並提供客服支援。",
+            "依你的指示匯入、記錄、儲存、匯出及同步訓練與健康資料。",
+            "計算訓練負荷、區間、趨勢、表現估算、恢復脈絡以及計畫與實際執行的對照。",
+            "提供訓練計畫、智能教練對話、活動複盤以及經你確認的計畫調整。",
+            "處理訂閱與購買、還原權益、寄送服務通知並維護交易記錄。",
+            "偵測濫用行為、調查錯誤、保護本服務安全，並在可行情況下運用最小化、彙總或去識別化資料來提升穩定度與產品品質。"
           ]
         },
         "connectedServices": {
-          "title": "5. HealthKit, location, and connected services",
-          "body": "These integrations are optional. We request access when you choose the related feature and use the data only within the scope described to you.",
+          "title": "5. HealthKit、位置與已連結服務",
+          "body": "這些整合皆為選用功能。我們僅在你啟用相關功能時請求權限，並嚴格於告知你的範圍內使用資料。",
           "items": [
-            "HealthKit: the iOS app may request read access to workouts and workout routes, heart rate, resting heart rate, active energy, steps, walking/running and cycling distance, running speed, and running stride length. Authorized samples and derived summaries may sync to your Trainingload.ai account so they are available across your devices.",
-            "Precise location: the mobile app uses location to record outdoor routes, measure distance, and perform pre-start checks. For activity weather, we may send Apple WeatherKit the activity's approximate midpoint coordinate and time rather than the complete route.",
-            "Fitness platforms: depending on the provider and your settings, we may import or export activities, planned workouts, wellness summaries, sport settings, and the identifiers needed to maintain synchronization.",
-            "Authentication and connection credentials are used to sign you in or perform the synchronization you requested. We request the minimum practical scopes and do not use imported fitness data for advertising profiles.",
-            "You may revoke device permission in system settings or disconnect a provider in Trainingload.ai. This stops new collection or synchronization from that source, but does not automatically delete data already imported into your account."
+            "HealthKit：iOS 應用程式可能會請求讀取訓練與訓練路線、心率、靜息心率、活動能量、步數、步行／跑步與騎乘距離、跑步速度及步幅長度。經授權的樣本與衍生摘要可能會同步至你的 Trainingload.ai 帳號，方便跨裝置檢視。",
+            "精確位置：行動應用程式會使用位置資訊來記錄戶外路線、量測距離及執行開始前檢查。針對活動天氣資訊，我們可能會將活動的大約中點座標與時間傳送給 Apple WeatherKit，而不會傳送完整路線。",
+            "運動平台：視服務商與你的設定而定，我們可能會匯入或匯出活動、預定課表、健康摘要、運動設定，以及維持同步所需的識別碼。",
+            "驗證與連線憑證僅用於協助你登入或執行你要求的同步作業。我們僅請求實務上所需的最小權限範圍，且不會將匯入的體能資料用於建立廣告受眾檔案。",
+            "你隨時可以在系統設定中撤銷裝置權限，或在 Trainingload.ai 中斷開服務商連結。這會停止自該來源進行新的資料蒐集或同步，但不會自動刪除先前已匯入你帳號中的資料。"
           ],
-          "note": "HealthKit data is used for health and fitness functionality and is not used for advertising, data brokerage, or sale. Trainingload.ai is not a healthcare provider, and the Service is not a medical device."
+          "note": "HealthKit 資料僅用於健康與體能功能，不會用於廣告、資料仲介或販售。Trainingload.ai 不是醫療服務機構，本服務亦非醫療器材。"
         },
         "ai": {
-          "title": "6. AI Coach and third-party AI",
-          "body": "AI features are optional. Before any AI request is sent, the app presents a separate disclosure and asks for your explicit permission.",
+          "title": "6. 智能教練與第三方 AI",
+          "body": "AI 功能為選用項目。在傳送任何 AI 請求前，應用程式會單獨顯示說明，並徵求你的明確授權。",
           "items": [
-            "Recipient: AI requests are sent to DeepSeek, operated by Hangzhou DeepSeek Artificial Intelligence Co., Ltd. DeepSeek states that data it receives may be processed and stored in mainland China.",
-            "Data sent: your submitted prompt or speech transcript and only the training context relevant to the requested feature. This may include sport, duration, distance and elevation derived from a route, aggregate heart-rate and zone data, pace, power, cadence, load, recovery trends, goals, plans, and relevant profile settings.",
-            "Data not attached by Trainingload.ai: your name, email address, account ID, complete GPS track, and raw HealthKit samples. Your own prompt can still contain identifying or sensitive information, so do not include information that is unnecessary for the request.",
-            "Purpose and provider use: data is sent to generate the Coach reply, plan, adjustment, or review you request. DeepSeek's current public terms state that, after secure encryption and strict irreversible de-identification, it may use inputs and outputs to a minimal extent to provide, maintain, operate, develop, or improve its services. We do not claim that DeepSeek provides zero retention or zero training.",
-            "Storage: Trainingload.ai stores submitted prompts, transcripts, generated replies, plans, and reviews in your account to provide the feature and history. Coach conversations remain until you delete the conversation or account; reviews and plans remain with the related record until that record or account is deleted, subject to legal retention requirements.",
-            "Control: you may decline AI and continue using non-AI features. You can withdraw permission in Mobile Me > Privacy & AI or Web Account Settings > Privacy & AI; this blocks new AI requests and automated reviews but does not delete existing results. A provider or material disclosure change requires permission again.",
-            "Safeguards and limits: requests use encrypted transport, direct account identifiers are removed from generated training context, and AI content is not copied to a separate AI observability provider. AI output can be inaccurate and is for informational and training-support purposes, not diagnosis or medical advice."
+            "接收方：AI 請求會傳送至由杭州深度求索人工智慧基礎技術研究有限公司營運的 DeepSeek。DeepSeek 表示，其接收的資料可能會在中國大陸處理與儲存。",
+            "傳送的資料：你提交的提問或語音轉錄文字，以及僅與所請求功能相關的訓練脈絡。這可能包括運動類型、時長、由路線推算的距離與爬升、彙總的心率與區間資料、配速、功率、步頻／踏頻、訓練負荷、恢復趨勢、目標、計畫與相關個人檔案設定。",
+            "Trainingload.ai 不會主動附加的資料：你的姓名、電子郵件地址、帳號 ID、完整 GPS 軌跡與 HealthKit 原始樣本。但你自行輸入的提問仍可能包含可識別身分或敏感資訊，因此請勿填寫完成請求所不需要的資訊。",
+            "用途與服務商使用方式：資料係用於產生你請求的智能教練回覆、計畫、調整或複盤。DeepSeek 目前公開條款指出，在經安全加密且嚴格不可逆去識別化後，其可能在最小範圍內使用輸入與輸出，以提供、維護、營運、開發或改善其服務。我們不會宣稱 DeepSeek 提供零保留或零訓練。",
+            "儲存方式：Trainingload.ai 會在你的帳號中儲存你提交的提問、轉錄文字、產生的回覆、計畫與複盤，以提供功能與歷史查詢。智能教練對話會保留至你刪除該對話或帳號為止；複盤與計畫則隨關聯記錄保留至該記錄或帳號刪除為止，惟仍受法定保留要求規範。",
+            "自主控制：你可以拒絕啟用 AI，並繼續使用所有非 AI 功能。你隨時可在行動版「我的 > 隱私與 AI」或網頁版「帳號設定 > 隱私與 AI」撤回授權；撤回後將阻擋新的 AI 請求與自動複盤，但不會刪除既有的結果。若服務商或揭露內容有重大變更，我們會再次徵求你的授權。",
+            "保護措施與限制：請求均採加密傳輸，系統產生的訓練脈絡會移除直接帳號識別碼，且 AI 內容不會複製到獨立的 AI 可觀測性服務商。AI 輸出內容可能不準確，僅供資訊與訓練輔助參考，不構成診斷或醫療建議。"
           ],
-          "note": "For a provider-side deletion request concerning an AI request, contact support@trainingload.ai. We will assess and route applicable requests according to the provider's process and applicable law."
+          "note": "如欲針對某筆 AI 請求提出服務商端刪除要求，請聯絡 support@trainingload.ai。我們將依該服務商流程與適用法律評估並轉交適用請求。"
         },
         "sharing": {
-          "title": "7. When we share data",
-          "body": "We share personal data only as needed for the Service, when you direct us to, or when law requires it. Recipients may include:",
+          "title": "7. 我們何時分享資料",
+          "body": "我們僅在提供本服務所需、依你指示或法律要求時分享個人資料。接收方可能包括：",
           "items": [
-            "Infrastructure and storage providers, including Cloudflare R2 when configured, and database, cache, hosting, content-delivery, and security providers that operate the Service.",
-            "Authentication and connected-service providers, including Apple, Google, GitHub, Garmin, COROS, Intervals.icu, Strava, Polar, Wahoo, and Suunto, when you sign in, connect, import, export, or disconnect.",
-            "Billing providers, including Apple and RevenueCat for App Store purchases and supported web billing providers such as Creem or Waffo. They receive account, product, subscription, and transaction information needed to process and reconcile purchases.",
-            "Analytics and reliability providers, including PostHog, Google Analytics, and Sentry when enabled. We configure these services to limit collection and do not intentionally send workout content, precise routes, HealthKit samples, or AI prompts and responses as analytics events.",
-            "Apple WeatherKit for activity weather context, Apple Speech Recognition for optional dictation, email delivery providers for account and support messages, and DeepSeek for AI requests after permission.",
-            "Professional advisers, authorities, or other parties when reasonably necessary to comply with law, protect rights and safety, investigate abuse, resolve disputes, or complete a merger, financing, acquisition, or sale of assets subject to appropriate protections."
+            "基礎架構與儲存服務商：包括經設定時使用的 Cloudflare R2，以及負責營運本服務的資料庫、快取、主機託管、內容傳遞網路（CDN）與資安服務商。",
+            "身分驗證與已連結服務商：當你登入、連結、匯入、匯出或中斷連結時，包括 Apple、Google、GitHub、Garmin、COROS、Intervals.icu、Strava、Polar、Wahoo 與 Suunto。",
+            "金流與計費服務商：包括用於 App Store 購買的 Apple 與 RevenueCat，以及支援的網頁計費服務商（例如 Creem 或 Waffo）。這些服務商僅接收處理與對帳所需的帳號、產品、訂閱及交易資訊。",
+            "分析與穩定度服務商：在啟用時包括 PostHog、Google Analytics 與 Sentry。我們已設定這些服務以限制資料蒐集，且不會刻意將訓練內容、精確路線、HealthKit 樣本或 AI 提問與回覆作為分析事件傳送。",
+            "用於活動天氣脈絡的 Apple WeatherKit、用於選用語音聽寫的 Apple 語音辨識、用於寄送帳號與客服信件的電子郵件發送服務商，以及經你授權後處理 AI 請求的 DeepSeek。",
+            "專業顧問、主管機關或其他相關方：當為遵守法律、保護權益與安全、調查濫用行為、解決爭議，或在具備適當保護措施的前提下完成合併、融資、收購或資產出售而合理必要時。"
           ],
-          "note": "We do not sell personal data. We do not share health, fitness, location, or AI conversation data with data brokers or unrelated third parties for their advertising. We require and confirm that processors receiving user data provide the same or equivalent protection described in this Policy and required by applicable law; if that protection cannot be maintained, we will stop the affected transfer."
+          "note": "我們不販售個人資料，也不會將健康、體能、位置或 AI 對話資料分享給資料仲介或無關第三方用於其廣告用途。我們要求並確認接收使用者資料的受託處理者提供與本政策所述及適用法律所要求相同或同等的保護；若無法維持該等保護，我們將停止受影響的傳輸。"
         },
         "analytics": {
-          "title": "8. Cookies, analytics, and diagnostics",
-          "body": "Our website and apps use local storage, cookies, and limited analytics or diagnostics to operate and understand the Service.",
+          "title": "8. Cookie、分析與診斷",
+          "body": "我們的網站與應用程式使用本機儲存空間、Cookie 及有限的分析或診斷工具，以維持並了解本服務的運作狀況。",
           "items": [
-            "Essential storage keeps you signed in, remembers settings, protects sessions, and supports requested functionality.",
-            "PostHog and Google Analytics may receive events such as page or screen views, feature interactions, app version, platform, locale, time zone, and an account or device identifier when enabled.",
-            "Mobile analytics disables session replay and automatic remote feature collection, disables IP-based geolocation in PostHog, and filters property names associated with prompts, messages, precise coordinates, health metrics, activity IDs, and similar sensitive content.",
-            "Sentry may receive crash, request, device, network, and user or session metadata needed to diagnose failures on affected web properties. AI prompt and response content is not intentionally included.",
-            "You can use browser, device, and available in-product controls to limit non-essential storage or analytics. Where applicable law requires opt-in consent, non-essential technologies should be activated only after that consent."
+            "必要儲存項目用於維持你的登入狀態、記住設定、保護工作階段安全，並支援你請求的功能。",
+            "啟用時，PostHog 與 Google Analytics 可能會收到頁面或畫面瀏覽、功能互動、應用程式版本、平台、語言地區、時區，以及帳號或裝置識別碼等事件。",
+            "行動端分析已停用工作階段錄製（session replay）與自動遠端功能蒐集，在 PostHog 中停用基於 IP 的地理定位，並過濾與提問、訊息、精確座標、健康指標、活動 ID 及類似敏感內容相關的屬性名稱。",
+            "Sentry 可能會收到診斷受影響網頁故障所需的當機、請求、裝置、網路及使用者或工作階段中繼資料。AI 提問與回覆內容不會被刻意納入。",
+            "你可以透過瀏覽器、裝置及產品內提供的控制項，限制非必要的儲存或分析工具。若適用法律要求事前明確同意（opt-in），非必要技術僅會在取得同意後啟用。"
           ]
         },
         "retention": {
-          "title": "9. How long we keep data",
-          "body": "We keep personal data only as long as reasonably necessary for the purpose collected, taking account of the data's nature, sensitivity, legal requirements, and whether the purpose can be achieved another way.",
+          "title": "9. 我們保留資料的期間",
+          "body": "我們僅在達成蒐集目的所合理必要的期間內保留個人資料，並綜合考量資料性質、敏感度、法律要求，以及是否能以其他方式達成目的。",
           "items": [
-            "Account, profile, training, HealthKit, location, plan, and imported data generally remain while your account is active or until you delete the relevant item.",
-            "Coach conversations remain until you delete the conversation or account. Withdrawing AI permission stops new transfers but does not automatically erase existing conversations, plans, or reviews.",
-            "Temporary local processing copies used during cloud-object-storage uploads are scheduled for deletion after 24 hours; retained source files and derived records otherwise follow the related activity or account.",
-            "An in-app account deletion request blocks account access immediately. Automated deletion normally completes within 24 hours and may take up to 7 days. Connected credentials are revoked or cleared, stored files are deleted, and account-linked database records are purged.",
-            "We may retain limited transaction, fraud-prevention, security, dispute, or legal records for the period required by law or reasonably necessary to establish or defend legal claims. Where practical, these records are separated from the deleted account and pseudonymized or de-identified."
+            "帳號、個人檔案、訓練、HealthKit、位置、計畫與匯入的資料，通常會在你的帳號維持啟用期間保留，或保留至你刪除相關項目為止。",
+            "智能教練對話會保留至你刪除該對話或帳號為止。撤回 AI 授權會停止新的傳輸，但不會自動清除既有的對話、計畫或複盤。",
+            "在雲端物件儲存上傳過程中產生的暫時性本機處理複本，排程於 24 小時後刪除；其餘保留的原始檔案與衍生記錄則隨關聯活動或帳號一併管理。",
+            "在應用程式內送出帳號刪除申請後，帳號存取權將立即停用。自動刪除程序通常在 24 小時內完成，最長可能需要 7 天。已連結的憑證將被撤銷或清除，儲存的檔案會被刪除，且與帳號關聯的資料庫記錄也會被徹底清除。",
+            "在法律要求或為確立、行使或防禦法律主張所合理必要的期間內，我們可能會保留有限的交易、防詐欺、資安、爭議或法律記錄。在可行情況下，這些記錄會與已刪除帳號分離，並進行假名化或去識別化處理。"
           ]
         },
         "security": {
-          "title": "10. How we protect data",
-          "body": "We use technical and organizational measures designed to protect personal data. No system can guarantee absolute security.",
+          "title": "10. 我們如何保護資料",
+          "body": "我們採用旨在保護個人資料的技術與組織措施，但沒有任何系統能保證絕對安全。",
           "items": [
-            "Encrypted transport for network requests and restricted access to production systems.",
-            "Data minimization, permission scoping, deletion workflows, and separation of public and private storage.",
-            "Secure password hashing and protection of authentication and integration credentials appropriate to their use.",
-            "Monitoring, rate limits, audit records, and incident investigation procedures intended to detect abuse and operational failures."
+            "對網路請求採用加密傳輸，並嚴格限制對正式營運系統的存取權限。",
+            "落實資料最小化、權限範圍控管、刪除作業流程，以及公開與私有儲存空間分離。",
+            "採用安全的密碼雜湊處理，並依用途保護身分驗證與整合連線憑證。",
+            "建立監控、速率限制、稽核記錄與事件調查程序，以偵測濫用行為與營運故障。"
           ]
         },
         "transfers": {
-          "title": "11. International processing and transfers",
-          "body": "Trainingload.ai is offered globally, and we and our providers may process data outside your country. Privacy laws in those locations may differ from those where you live.",
+          "title": "11. 跨境處理與國際傳輸",
+          "body": "Trainingload.ai 面向全球提供服務，我們與我們的服務商可能會在你所在國家或地區以外處理資料。該等地區的隱私權法律可能與你所在地有所不同。",
           "items": [
-            "Depending on deployment and provider settings, infrastructure, analytics, diagnostics, billing, and connected-service data may be processed in the United States and other countries where those providers operate.",
-            "DeepSeek states that AI request data may be processed and stored in mainland China. This location is disclosed again before you enable AI.",
-            "Where applicable law requires it, we use recognized safeguards for international transfers, such as contractual protections, data minimization, encryption, and transfer assessments, and honor applicable rights regarding those transfers."
+            "視實際部署與服務商設定而定，基礎架構、分析、診斷、計費與已連結服務的資料，可能會在美國及相關服務商營運所在的其他國家或地區處理。",
+            "DeepSeek 表示，AI 請求資料可能會在中國大陸處理與儲存。在你啟用 AI 前，我們會再次揭露此處理地點。",
+            "在適用法律要求時，我們會採用受認可的跨境傳輸保護機制（例如契約保障、資料最小化、加密與傳輸評估），並保障你在相關傳輸上適用的權利。"
           ]
         },
         "legalBasis": {
-          "title": "12. Legal bases for processing",
-          "body": "Where laws such as the GDPR or UK GDPR apply, our legal bases depend on the feature and purpose:",
+          "title": "12. 處理資料的法律依據",
+          "body": "在適用 GDPR 或 UK GDPR 等法律的情況下，我們的處理法律依據取決於具體功能與目的：",
           "items": [
-            "Contract: to create your account and deliver the training, synchronization, support, and billing functions you request.",
-            "Consent: for optional permissions and processing such as connected-provider access, HealthKit, precise location, microphone and speech recognition, third-party AI sharing, and non-essential analytics where required.",
-            "Legitimate interests: to secure, debug, and improve the Service, prevent abuse, and understand minimized usage patterns, after balancing those interests against your rights.",
-            "Legal obligation and legal claims: to comply with tax, accounting, consumer-protection, law-enforcement, and other valid legal requirements or to establish, exercise, or defend claims."
+            "契約履行：用於建立你的帳號，並提供你所請求的訓練、同步、客服與計費功能。",
+            "同意：用於選用權限與處理作業，例如已連結服務商存取、HealthKit、精確位置、麥克風與語音辨識、向第三方 AI 分享資料，以及在法律要求時的非必要分析。",
+            "正當利益：在衡平考量你的權益後，用於保護、除錯與改善本服務、防範濫用及了解最小化的使用模式。",
+            "法定義務與法律主張：用於遵守稅務、會計、消費者保護、執法機關及其他有效法律要求，或用於確立、行使或防禦法律主張。"
           ]
         },
         "rights": {
-          "title": "13. Your choices and privacy rights",
-          "body": "Depending on where you live, you may have some or all of the following rights. We may need to verify your identity before completing a request.",
+          "title": "13. 你的選擇與隱私權",
+          "body": "視你所在地區而定，你可能享有以下部分或全部權利。在完成請求前，我們可能需要驗證你的身分。",
           "items": [
-            "Access personal data we hold about you and obtain information about how it is used and shared.",
-            "Correct inaccurate account or profile data.",
-            "Export eligible account and activity data in a portable format.",
-            "Delete an activity, Coach conversation, connected service, or your account, subject to limited legal exceptions.",
-            "Withdraw consent, object to or restrict certain processing, and opt out of sale, targeted advertising, or qualifying profiling. We do not sell personal data or use it for decisions with legal or similarly significant effects.",
-            "Complain to your local data-protection authority. You will not be discriminated against for exercising a privacy right."
+            "查閱我們所持有的你的個人資料，並取得資料使用與分享方式的相關資訊。",
+            "更正不準確的帳號或個人檔案資料。",
+            "以可攜式格式匯出適用的帳號與活動資料。",
+            "刪除活動、智能教練對話、已連結服務或你的帳號，惟仍受有限的法定例外情況規範。",
+            "撤回同意、反對或限制特定處理，以及選擇退出資料販售、精準廣告或符合條件的自動化剖析。我們不會販售個人資料，也不會將其用於產生法律效力或類似重大影響的決策。",
+            "向當地資料保護主管機關提出申訴。你不會因行使任何隱私權利而受到歧視。"
           ]
         },
         "children": {
-          "title": "14. Children's privacy",
-          "body": "The Service is not directed to children under 13 or a higher minimum age required by local law, and we do not knowingly collect their personal data without valid authorization. If you believe a child has provided data improperly, contact us and we will investigate and delete it where appropriate."
+          "title": "14. 兒童隱私",
+          "body": "本服務並非以未滿 13 歲（或當地法律規定的更高最低年齡）之兒童為對象，未經有效授權，我們不會刻意蒐集其個人資料。如果你認為有兒童不當提供了資料，請聯絡我們，我們將會進行調查並在適當情況下予以刪除。"
         },
         "updates": {
-          "title": "15. Changes to this policy",
-          "body": "We may update this Policy when our product, providers, or legal obligations change. We will update the date above and provide additional notice or request renewed permission when a change is material and applicable law or platform rules require it."
+          "title": "15. 本政策的變更",
+          "body": "當我們的產品、服務商或法律義務有所變動時，我們可能會更新本政策。我們會更新上方的日期；若變更屬重大性質且適用法律或平台規範要求時，我們亦會提供額外通知或重新徵求授權。"
         },
         "notices": {
-          "title": "16. Third-party notices",
-          "body": "The providers below control their own services and publish separate privacy notices. Their policies apply when you interact directly with them. Our responsibility for processors acting on our instructions remains subject to applicable law and our agreements."
+          "title": "16. 第三方隱私權聲明",
+          "body": "下列服務商各自獨立控管其服務並發布獨立的隱私權聲明。當你直接與其互動時，將適用其各自的政策。對於依我們指示行事的受託處理者，我們仍依適用法律及相關協議負起相應責任。"
         },
         "contact": {
           "title": "17. Contact us",
-          "bodyPrefix": "For privacy questions, rights requests, or complaints, contact",
+          "bodyPrefix": "如有隱私相關疑問、權利行使請求或申訴，請聯絡",
           "email": "support@trainingload.ai",
-          "bodySuffix": ". Please include your account email and the request type, but do not send passwords, authentication tokens, raw health files, or other unnecessary sensitive information by email."
+          "bodySuffix": "。來信請註明你的帳號電子郵件地址與請求類型，但請勿透過電子郵件寄送密碼、驗證權杖、原始健康檔案或其他非必要的敏感資訊。"
         }
       }
     }
@@ -3146,7 +3219,11 @@
     "metadata": {
       "title": "條款與條件 | Trainingload.ai",
       "description": "使用 Trainingload.ai 前請閱讀相關條款與條件。",
-      "keywords": ["條款與條件", "服務條款", "Trainingload.ai"],
+      "keywords": [
+        "條款與條件",
+        "服務條款",
+        "Trainingload.ai"
+      ],
       "openGraph": {
         "title": "條款與條件 | Trainingload.ai",
         "description": "查看使用 Trainingload.ai 的相關條款與條件。"
@@ -3302,7 +3379,11 @@
     "page": {
       "title": "FTP 計算器",
       "subtitle": "輸入測試功率或上傳騎乘紀錄，查看 FTP、功率體重比和訓練區間。",
-      "proof": ["無需註冊", "即填即算", "可列印、分享"],
+      "proof": [
+        "無需註冊",
+        "即填即算",
+        "可列印、分享"
+      ],
       "howTo": {
         "title": "如何使用 FTP 計算器",
         "steps": {
@@ -3740,7 +3821,10 @@
       "heroProduct": {
         "title": "記錄訓練，看懂自己的 FTP",
         "body": "用 iPhone 記錄訓練，結束後分析功率資料、估算 FTP，為下一次訓練提供參考。",
-        "benefits": ["運動資料，即時掌握", "有效功率，支援 FTP 估算"],
+        "benefits": [
+          "運動資料，即時掌握",
+          "有效功率，支援 FTP 估算"
+        ],
         "cta": "瞭解智慧教練",
         "phoneAlt": "Trainingload.ai iPhone 即時訓練紀錄頁面"
       },
@@ -4048,7 +4132,11 @@
         "related": "相關的最大心率與訓練工具",
         "allTools": "全部工具"
       },
-      "proof": ["無需註冊", "即時結果", "列印或分享"],
+      "proof": [
+        "無需註冊",
+        "即時結果",
+        "列印或分享"
+      ],
       "scorecard": {
         "summaryTitle": "最大心率成績卡",
         "eyebrow": "建議最大心率",
@@ -4200,7 +4288,10 @@
       "title": "讓訓練計畫跟上你的真實狀態",
       "subtitle": "Trainingload.ai 是一款跑步與騎乘訓練應用，將訓練計畫、實際訓練、訓練負荷與恢復狀態放在一起，幫助你看清偏差並有依據地調整。會員還可透過智能教練取得基於這些資訊的個人化調整建議。",
       "cta": "建立帳號",
-      "titleLines": ["讓訓練計畫跟上", "你的真實狀態"],
+      "titleLines": [
+        "讓訓練計畫跟上",
+        "你的真實狀態"
+      ],
       "links": {
         "docs": "閱讀文件",
         "trainingLoad": "用訓練負荷做計畫",
@@ -4503,7 +4594,12 @@
         "label": "相容平台",
         "more": "等平台…"
       },
-      "sportWords": ["跑步", "騎乘", "游泳", "鐵三"],
+      "sportWords": [
+        "跑步",
+        "騎乘",
+        "游泳",
+        "鐵三"
+      ],
       "iphoneSupport": "支援 iPhone",
       "appStoreCta": "從 App Store 下載"
     },
@@ -4724,27 +4820,43 @@
           "name": "智能教練",
           "title": "需要調整時，再問智能教練",
           "description": "根據計畫、實際訓練和訓練負荷，查看有依據的調整建議。",
-          "points": ["目前計畫", "實際完成", "調整建議"],
+          "points": [
+            "目前計畫",
+            "實際完成",
+            "調整建議"
+          ],
           "cta": "了解智能教練"
         },
         {
           "name": "訓練日曆",
           "title": "對照計畫與實際完成",
           "description": "把計畫訓練與已完成活動放在同一條時間線，改期、跳過和補訓都更清楚。",
-          "points": ["計畫訓練", "已完成活動", "移動或跳過"]
+          "points": [
+            "計畫訓練",
+            "已完成活動",
+            "移動或跳過"
+          ]
         },
         {
           "name": "訓練計畫",
           "title": "看清整個訓練週期",
           "description": "目前階段、每週目標和後續課表一直可見，知道今天練什麼，也知道為什麼這樣練。",
-          "points": ["目前階段", "每週目標", "後續課表"],
+          "points": [
+            "目前階段",
+            "每週目標",
+            "後續課表"
+          ],
           "cta": "查看訓練計畫"
         },
         {
           "name": "訓練分析",
           "title": "判斷負荷與恢復狀態",
           "description": "用體能、疲勞、狀態和趨勢圖表，判斷訓練是否按預期推進。",
-          "points": ["體能與疲勞", "本週負荷", "長期趨勢"],
+          "points": [
+            "體能與疲勞",
+            "本週負荷",
+            "長期趨勢"
+          ],
           "cta": "了解訓練負荷"
         }
       ]
@@ -4902,7 +5014,11 @@
       "kicker": "有氧能力",
       "title": "VO2max 計算機",
       "subtitle": "輸入跑步、快走或心率紀錄，估算有氧能力，了解自己目前的狀態。",
-      "proof": ["無需註冊", "立即出結果", "可列印或分享"],
+      "proof": [
+        "無需註冊",
+        "立即出結果",
+        "可列印或分享"
+      ],
       "jumpLinks": {
         "calculator": "計算機",
         "scorecard": "成績單",
@@ -5362,7 +5478,14 @@
         },
         "help": "年齡和性別用於分級，也會參與 Rockport 計算；Beep 還會用到年齡。"
       },
-      "ageBands": ["30 歲以下", "30–39", "40–49", "50–59", "60–69", "70+"],
+      "ageBands": [
+        "30 歲以下",
+        "30–39",
+        "40–49",
+        "50–59",
+        "60–69",
+        "70+"
+      ],
       "safety": {
         "maximal": "這是大強度。出現胸痛、頭暈或異常氣喘應停止。",
         "submax": "這個選項不需要力竭。"
@@ -5740,7 +5863,11 @@
         "button": "免費開始"
       },
       "kicker": "跑步",
-      "proof": ["無需註冊", "即時計算", "列印或分享"],
+      "proof": [
+        "無需註冊",
+        "即時計算",
+        "列印或分享"
+      ],
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次表現。",
         "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
@@ -6228,10 +6355,22 @@
       "sourcesTitle": "參考概念"
     },
     "loop": [
-      ["計畫", "明確週期目標、每週安排和今日訓練。"],
-      ["執行", "匯入或同步訓練紀錄，看清實際完成情況。"],
-      ["負荷", "用 CTL、ATL、TSB 和近期訓練看壓力有沒有堆過頭。"],
-      ["調整", "讓 AI 給出有依據、你能確認的訓練調整草稿。"]
+      [
+        "計畫",
+        "明確週期目標、每週安排和今日訓練。"
+      ],
+      [
+        "執行",
+        "匯入或同步訓練紀錄，看清實際完成情況。"
+      ],
+      [
+        "負荷",
+        "用 CTL、ATL、TSB 和近期訓練看壓力有沒有堆過頭。"
+      ],
+      [
+        "調整",
+        "讓 AI 給出有依據、你能確認的訓練調整草稿。"
+      ]
     ],
     "cards": [
       [
@@ -6244,7 +6383,11 @@
         "近期訓練壓力",
         "發現最近是否堆得過快，尤其適合識別需要恢復的階段。"
       ],
-      ["TSB", "狀態與新鮮度", "幫助判斷今天適合推進、維持，還是降低強度。"],
+      [
+        "TSB",
+        "狀態與新鮮度",
+        "幫助判斷今天適合推進、維持，還是降低強度。"
+      ],
       [
         "AI Review",
         "AI 教練複盤",
@@ -6348,15 +6491,36 @@
       "faqProductAction": "在產品內確認訓練調整"
     },
     "workflow": [
-      ["生成計畫", "根據目標、時間、經驗和限制，先搭出一份能練的草稿。"],
-      ["執行訓練", "每天知道該練什麼，並把實際完成情況同步或匯入回來。"],
-      ["AI 複盤", "對比原計畫、實際完成、負荷和狀態，解釋哪裡偏了。"],
-      ["確認調整", "預覽訓練調整草稿，確認後再應用到計畫。"]
+      [
+        "生成計畫",
+        "根據目標、時間、經驗和限制，先搭出一份能練的草稿。"
+      ],
+      [
+        "執行訓練",
+        "每天知道該練什麼，並把實際完成情況同步或匯入回來。"
+      ],
+      [
+        "AI 複盤",
+        "對比原計畫、實際完成、負荷和狀態，解釋哪裡偏了。"
+      ],
+      [
+        "確認調整",
+        "預覽訓練調整草稿，確認後再應用到計畫。"
+      ]
     ],
     "cards": [
-      ["計畫上下文", "AI 先讀取目前計畫、今日訓練、明日訓練和本週安排。"],
-      ["實際完成情況", "同步或匯入的訓練紀錄會成為判斷完成品質和偏差的依據。"],
-      ["訓練負荷訊號", "CTL、ATL、TSB 和近期負荷幫助判斷是否該恢復或調整。"],
+      [
+        "計畫上下文",
+        "AI 先讀取目前計畫、今日訓練、明日訓練和本週安排。"
+      ],
+      [
+        "實際完成情況",
+        "同步或匯入的訓練紀錄會成為判斷完成品質和偏差的依據。"
+      ],
+      [
+        "訓練負荷訊號",
+        "CTL、ATL、TSB 和近期負荷幫助判斷是否該恢復或調整。"
+      ],
       [
         "訓練調整草稿",
         "AI 輸出的是可預覽、可校驗、確認後才應用的單次訓練調整。"
@@ -6413,12 +6577,18 @@
       "ctaText": "把計畫、完成情況、訓練負荷與調整理由放進同一條複盤鏈路。"
     },
     "pillars": [
-      ["先看計畫與實際", "先比對計畫安排與實際完成，再解讀任何負荷指標。"],
+      [
+        "先看計畫與實際",
+        "先比對計畫安排與實際完成，再解讀任何負荷指標。"
+      ],
       [
         "負荷與表現反應一起看",
         "把 CTL/ATL/TSB 與 effective VO2max、近期表現一起解讀，避免單指標判斷。"
       ],
-      ["優先單次小調整", "先做可驗證的小改動，再在下一次關鍵課驗證反應。"],
+      [
+        "優先單次小調整",
+        "先做可驗證的小改動，再在下一次關鍵課驗證反應。"
+      ],
       [
         "保留判斷紀錄",
         "讓每次調整都可解釋、可追溯，方便教練與自訓運動員持續優化。"
@@ -6477,19 +6647,40 @@
       "ctaText": "用 AI 整理證據，再結合疲勞、目標與時程做最終確認。"
     },
     "steps": [
-      ["先定本階段目標", "先明確當前訓練階段目標與週結構，再改動具體課表。"],
-      ["追蹤執行品質", "把實際完成帶回計畫，標記關鍵課完成度與偏差。"],
-      ["複盤負荷偏移", "調整前先檢查 ATL/TSB 壓力與 effective VO2max 變化。"],
-      ["確認訓練調整", "只有在理由與取捨清楚時，才把草稿套用到計畫。"]
+      [
+        "先定本階段目標",
+        "先明確當前訓練階段目標與週結構，再改動具體課表。"
+      ],
+      [
+        "追蹤執行品質",
+        "把實際完成帶回計畫，標記關鍵課完成度與偏差。"
+      ],
+      [
+        "複盤負荷偏移",
+        "調整前先檢查 ATL/TSB 壓力與 effective VO2max 變化。"
+      ],
+      [
+        "確認訓練調整",
+        "只有在理由與取捨清楚時，才把草稿套用到計畫。"
+      ]
     ],
     "checks": [
       [
         "一次只改一個主變數",
         "先改訓練量或強度其中之一，再用下一次關鍵課驗證反應。"
       ],
-      ["尊重恢復窗口", "壓力上升過快時先保頻率、降強度，不要直接疊加負荷。"],
-      ["保護馬拉松關鍵課品質", "透過降低周邊疲勞，確保長距離與馬配課品質。"],
-      ["保留調整解釋", "每次調整都應包含前後變化與原因，方便後續複盤。"]
+      [
+        "尊重恢復窗口",
+        "壓力上升過快時先保頻率、降強度，不要直接疊加負荷。"
+      ],
+      [
+        "保護馬拉松關鍵課品質",
+        "透過降低周邊疲勞，確保長距離與馬配課品質。"
+      ],
+      [
+        "保留調整解釋",
+        "每次調整都應包含前後變化與原因，方便後續複盤。"
+      ]
     ],
     "faq": [
       [
@@ -6548,22 +6739,40 @@
       "ctaText": "用 AI 整理證據，再結合疲勞、目標與時程做最終確認。"
     },
     "steps": [
-      ["先定本階段目標", "先明確當前訓練階段目標與週結構，再改動具體課表。"],
-      ["追蹤執行品質", "把實際完成帶回計畫，標記關鍵課完成度與偏差。"],
-      ["複盤負荷偏移", "調整前先檢查 ATL/TSB 壓力與 effective VO2max 變化。"],
-      ["確認訓練調整", "只有在理由與取捨清楚時，才把草稿套用到計畫。"]
+      [
+        "先定本階段目標",
+        "先明確當前訓練階段目標與週結構，再改動具體課表。"
+      ],
+      [
+        "追蹤執行品質",
+        "把實際完成帶回計畫，標記關鍵課完成度與偏差。"
+      ],
+      [
+        "複盤負荷偏移",
+        "調整前先檢查 ATL/TSB 壓力與 effective VO2max 變化。"
+      ],
+      [
+        "確認訓練調整",
+        "只有在理由與取捨清楚時，才把草稿套用到計畫。"
+      ]
     ],
     "checks": [
       [
         "一次只改一個主變數",
         "先改訓練量或強度其中之一，再用下一次關鍵課驗證反應。"
       ],
-      ["尊重恢復窗口", "壓力上升過快時先保頻率、降強度，不要直接疊加負荷。"],
+      [
+        "尊重恢復窗口",
+        "壓力上升過快時先保頻率、降強度，不要直接疊加負荷。"
+      ],
       [
         "保護半馬關鍵課品質",
         "透過降低周邊疲勞，確保每週長跑與週中品質課不被拖垮。"
       ],
-      ["保留調整解釋", "每次調整都應包含前後變化與原因，方便後續複盤。"]
+      [
+        "保留調整解釋",
+        "每次調整都應包含前後變化與原因，方便後續複盤。"
+      ]
     ],
     "faq": [
       [
@@ -6877,7 +7086,9 @@
       "methodologyEyebrow": "解釋方法",
       "methodologyTitle": "怎麼用 PMC，而不是被圖表帶著跑",
       "methodologyText": "Trainingload.ai 把 PMC 當作訓練判斷工具。CTL 看長期負荷方向，ATL 看短期壓力，TSB 估計狀態和新鮮度。真正調整強度或訓練量前，還要結合訓練品質、恢復狀態和原計畫。",
-      "sourcesTitle": "參考概念"
+      "sourcesTitle": "參考概念",
+      "faqTitle": "PMC 體能圖常見問題",
+      "faqSubtitle": "清楚解答關於 PMC、CTL、ATL、TSB 與 ACWR 的常見問題。"
     },
     "blocks": [
       [
@@ -6900,46 +7111,192 @@
     "faq": [
       [
         "體能圖和 PMC 是同一件事嗎？",
-        "在耐力訓練語境裡幾乎是同義。常見的 fitness-fatigue-form 圖，就是由 CTL、ATL、TSB 建立的 PMC。"
+        "在耐力訓練實務中，是的。常見的體能—疲勞—狀態圖，就是由 CTL、ATL 與 TSB 組成的表現管理圖表（Performance Management Chart，簡稱 PMC）。"
       ],
       [
-        "應該每週都追求更高 CTL 嗎？",
-        "不需要。只有 CTL 上升但課表品質下滑，風險反而變高。目標是可持續適應，不是一直衝 CTL。"
+        "我應該每週都追求更高的 CTL 嗎？",
+        "不需要。如果 CTL 上升的同時，關鍵課表品質與恢復狀態卻持續惡化，代表目前的強化週期未必奏效。目標是可持續的進步，而不是一味把 CTL 往上推。"
       ],
       [
-        "如果 ATL 很高但訓練感覺還不錯呢？",
-        "先持續觀察，不要立刻大砍負荷。先看下一堂關鍵課與恢復指標，再做大調整。"
+        "如果 ATL 很高，但訓練感覺仍然不錯怎麼辦？",
+        "持續觀察，但不要因為數字就急著大砍負荷。先用下一堂關鍵訓練與恢復指標確認，再決定是否需要大幅調整。"
+      ],
+      [
+        "TSB 為負代表狀態不好嗎？",
+        "不一定。在累積負荷階段，ATL 常會高於 CTL，因此 TSB 為負相當常見。決定減量前，應綜合評估負值持續時間、關鍵課表品質以及身體感受。"
+      ],
+      [
+        "有沒有適合所有人的統一 ACWR 安全區間？",
+        "沒有。ACWR 只顯示近期推算的訓練負荷相較於長期基線是否偏高，它無法單獨預測傷病，也不能取代教練或醫療專業判斷。"
+      ],
+      [
+        "為什麼我的 PMC 曲線會突然跳動？",
+        "請先檢查是否有重複匯入的活動、閾值變更、負荷來源切換，或單次異常高負荷的活動。資料變動會讓 CTL、ATL 與 ACWR 同時產生變化。"
+      ],
+      [
+        "漏記一次訓練會影響 PMC 嗎？",
+        "會。PMC 只能根據系統內記錄到的訓練負荷計算。漏記訓練會低估 ATL 與 CTL；日後補錄後，後續日期的曲線會重新計算。"
+      ],
+      [
+        "多久看一次 PMC 比較合適？",
+        "不需要時時盯著看。在每週複盤、恢復週、賽前減量期，或當實際執行與計畫明顯出現落差時檢視，通常最有參考價值。"
       ]
     ],
     "answerBlocks": [
       [
         "什麼是 PMC 體能圖？",
-        "PMC 體能圖就是 Performance Management Chart，用來把長期體能、短期疲勞和目前狀態放在一起看。它通常由 CTL、ATL、TSB 組成，幫助你判斷該繼續加負荷、維持計畫，還是先恢復。"
+        "PMC 體能圖就是表現管理圖表（Performance Management Chart），用來同時對照長期體能、短期疲勞與目前狀態。它通常結合 CTL、ATL 與 TSB，協助運動員在訓練品質下滑前，判斷該繼續加量、維持計畫，還是優先恢復。"
       ],
       [
-        "PMC 圖裡的 CTL 代表什麼？",
-        "CTL 是 chronic training load，表示較長期的訓練負荷趨勢。CTL 上升可能代表訓練在累積，但不應該盲目追高。更重要的是：CTL 上升時，關鍵訓練品質和恢復是否還能穩住。"
+        "PMC 圖上的 CTL 代表什麼？",
+        "CTL（慢性訓練負荷，Chronic Training Load）呈現較長期的訓練壓力方向。CTL 上升可能代表體能正在累積，但不應盲目追高；真正該問的是，在 CTL 上升的同時，訓練品質與恢復狀態是否維持穩定。"
       ],
       [
-        "PMC 圖裡的 ATL 代表什麼？",
-        "ATL 是 acute training load，表示近期訓練壓力和疲勞壓力。高 ATL 在強化期不一定是壞事，但如果關鍵訓練完成品質變差、恢復指標下降，或負荷比計畫上升更快，就要謹慎。"
+        "PMC 圖上的 ATL 代表什麼？",
+        "ATL（急性訓練負荷，Acute Training Load）反映近期的訓練壓力與疲勞負荷。在強化期出現高 ATL 不見得是壞事，但若關鍵課表品質下滑、恢復指標轉差，或負荷拉升得比計畫更快，就是需要留意的警訊。"
       ],
       [
-        "PMC 圖裡的 TSB 代表什麼？",
-        "TSB 是 training stress balance，用來估計狀態和新鮮度。訓練週期裡 TSB 偏低很常見，但如果關鍵課前長期被壓低，通常代表需要穩住負荷、移動關鍵課，或增加恢復。"
+        "PMC 圖上的 TSB 代表什麼？",
+        "TSB（訓練壓力平衡，Training Stress Balance）透過比較長期與短期負荷，估算狀態與新鮮度。訓練週期內出現偏低或負的 TSB 很正常，但若在關鍵課前長期受壓，可能代表需要穩住負荷或安排更多恢復。"
+      ],
+      [
+        "PMC 圖上的 ACWR 代表什麼？",
+        "ACWR 是急慢性負荷比（Acute:Chronic Workload Ratio）。Trainingload.ai 以當前 ATL 除以當前 CTL 計算。它能標示近期負荷相較於長期基線是否出現快速變化，但無法獨立預測傷病、恢復狀況或比賽就緒度。"
       ]
     ],
     "sources": [
       "Performance Management Chart：CTL、ATL、TSB 模型概念。",
       "耐力訓練實踐：用訓練完成品質和恢復狀態驗證圖表訊號。",
       "Trainingload.ai 產品方法：先做一個保守調整，再用下一次關鍵訓練驗證。"
-    ]
+    ],
+    "guide": {
+      "ui": {
+        "metricsEyebrow": "核心指標指南",
+        "metricsTitle": "CTL、ATL、TSB 與 ACWR 代表什麼，以及該怎麼讀",
+        "metricsSubtitle": "這 4 項指標都來自同一組每日訓練負荷序列，但各自回答不同時間尺度的問題。先理解各自的計算方式與限制，再把它們放在一起解讀。",
+        "formulaLabel": "目前 Trainingload.ai 公式",
+        "interpretationLabel": "解讀方式",
+        "cautionLabel": "避免誤讀",
+        "docsAction": "閱讀完整指標文件",
+        "patternsEyebrow": "綜合判讀",
+        "patternsTitle": "如何把 PMC 體能圖當作一個系統來讀",
+        "patternsSubtitle": "單一數字很少能直接決定課表。更可靠的做法是辨識曲線組合型態、回溯來源活動，再對照計畫目標與身體回饋加以驗證。",
+        "scenarioHeader": "常見情境",
+        "signalsHeader": "圖表型態",
+        "meaningHeader": "它能確認什麼",
+        "actionHeader": "下一步怎麼做",
+        "advantagesEyebrow": "為什麼選擇 Trainingload.ai",
+        "advantagesTitle": "不只是 PMC 曲線：把負荷訊號納入訓練決策循環",
+        "advantagesSubtitle": "實用的 PMC 工具應該能讓你看清數字從哪來、對應哪些訓練、負荷是否符合計畫，以及下一步是否需要調整。",
+        "freeBadge": "免費版包含",
+        "previewLabel": "展開完整 PMC 桌面版示範",
+        "previewHint": "點擊探索完整 PMC"
+      },
+      "metrics": [
+        {
+          "key": "ctl",
+          "acronym": "CTL",
+          "name": "長期訓練負荷（Chronic Training Load）",
+          "summary": "CTL 是每日訓練負荷的慢速指數加權移動平均。Trainingload.ai 採用 42 天平滑週期，因此 CTL 最適合用來觀察數週來的負荷方向：目前週期是在累積、維持，還是下滑？介面上常將 CTL 標示為「體能」，但它衡量的其實是模型推算的負荷歷史，不等於身體實際吸收了多少訓練，也不是可以直接跨運動員比較的體能分數。",
+          "formula": "decayCTL = exp(-1 / 42)\nCTLtoday = CTLyesterday × decayCTL\n           + daily load × (1 − decayCTL)",
+          "interpretation": "對照目前的訓練週期，觀察 CTL 的方向與斜率。若 CTL 緩步上升且關鍵課表執行穩定，代表負荷正按預期累積。若出現突然跳升，請先檢查是否有異常活動、閾值修改、重複記錄或負荷來源切換。沒有放諸四海皆準的理想 CTL 數值。",
+          "caution": "CTL 上升並不證明身體已成功適應，也不代表越高越好。相同的 CTL 可能來自不同的運動項目、強度分配與資料來源。"
+        },
+        {
+          "key": "atl",
+          "acronym": "ATL",
+          "name": "短期訓練負荷（Acute Training Load）",
+          "summary": "ATL 是同一組每日負荷序列的快速指數加權移動平均。Trainingload.ai 採用 7 天平滑週期，使其對近期訓練更敏感，適合用來找出短期訓練壓力何時升高或下降。介面上常把 ATL 稱為「疲勞」，但 ATL 並不會讀取你的睡眠、疼痛、生病或主觀疲勞感；它提供的是疲勞脈絡，而非生理診斷。",
+          "formula": "decayATL = exp(-1 / 7)\nATLtoday = ATLyesterday × decayATL\n           + daily load × (1 − decayATL)",
+          "interpretation": "當 ATL 快速上升時，檢視過去 7–14 天的長距離、強度課、比賽以及計畫外活動，判斷這波加量是否符合計畫。恢復週期間 ATL 下降速度通常快於 CTL。真正重要的是：ATL 變化的同時，執行品質、主觀狀態或疼痛訊號是否也一起變差。",
+          "caution": "高 ATL 不必然危險，低 ATL 也不代表恢復良好。它描述的是近期負荷，而不是實際測得的疲勞程度。"
+        },
+        {
+          "key": "tsb",
+          "acronym": "TSB",
+          "name": "訓練壓力平衡（Training Stress Balance）",
+          "summary": "TSB 是當前 CTL 與 ATL 的差值，用來描述近期負荷相較於慢速負荷趨勢的位置。負值表示 ATL 高於 CTL，在加量強化期十分常見；正值表示 ATL 低於 CTL，在恢復週或賽前減量期十分常見。TSB 常被標示為「狀態」或「新鮮度」，但它本質上仍是兩個負荷模型之間的數學關係。",
+          "formula": "TSBtoday = CTLtoday − ATLtoday",
+          "interpretation": "把 TSB 當作時機參考。賽前減量時 ATL 下降較快、TSB 回升；加量期則 ATL 上升較快、TSB 轉負。在關鍵課或比賽前，請將曲線型態與自己的歷史資料、計畫目標、執行品質及主觀感受對照，而不要直接套用通用的正負區間。",
+          "caution": "TSB 為正不代表已達巔峰就緒狀態，TSB 為負也不構成過度訓練診斷。固定的「最佳區間」無法跨運動員或不同負荷模型直接套用。"
+        },
+        {
+          "key": "acwr",
+          "acronym": "ACWR",
+          "name": "急慢性負荷比（Acute:Chronic Workload Ratio）",
+          "summary": "ACWR（也寫作 A:C Ratio）用來比較近期負荷與較長期的負荷基線。Trainingload.ai 以當前 ATL 除以當前 CTL 計算，這與網路上常見的「7 天總量除以 28 天平均」演算法並不相同。比值升高只代表推算的近期負荷相較長期基線偏高，適合用來找出負荷急升或潛在的資料異常。",
+          "formula": "ACWRtoday = ATLtoday / CTLtoday\nif CTLtoday = 0, return 0",
+          "interpretation": "看比值前，先看 ATL 與 CTL 各自的絕對數值。ACWR 上升可能源自計畫內的超負荷、單次異常活動、長時間停訓後分母過小、閾值修改或重複匯入。確認資料無誤後，再結合運動衝擊、疼痛、生病、睡眠與課表品質，決定是否調整訓練。",
+          "caution": "ACWR 不是傷病預測工具，也不存在適用於每位運動員的統一「安全甜蜜區」。介面上的區間標示僅作為複查提醒，不能取代醫療或訓練放行判斷。"
+        }
+      ],
+      "patterns": [
+        [
+          "按計畫累積負荷",
+          "CTL 緩步上升；ATL 階段性高於 CTL；TSB 適度為負；ACWR 維持在個人近期常態附近。",
+          "負荷正穩定累積，沒有明顯的異常加速訊號。",
+          "若關鍵課品質、主觀狀態與恢復保持穩定，請維持原計畫；不要為了讓圖表更好看而額外加量。"
+        ],
+        [
+          "近期負荷快速攀升",
+          "ATL 快速上升；CTL 尚未跟上；TSB 明顯下滑；ACWR 同步升高。",
+          "近期推算負荷明顯高於長期基線，但背後原因與身體反應仍需核實。",
+          "回溯來源訓練並排除重複記錄或閾值變動。若關鍵課品質也同步下滑，請只調整單一變數：強度、時長或排程時間。"
+        ],
+        [
+          "恢復週或賽前減量",
+          "ATL 下降得比 CTL 更快；TSB 回升；ACWR 下降；CTL 通常維持平穩或緩慢小幅回落。",
+          "近期負荷正在減少、模型推算的新鮮度提升，但這不代表已達巔峰狀態。",
+          "透過可對照的關鍵課、主觀回饋與賽事需求來驗證；不要因為 CTL 略為下降就急忙補量。"
+        ],
+        [
+          "停訓、缺課或資料缺失",
+          "ATL 與 CTL 雙雙下滑；TSB 可能轉正；ACWR 偏低，或因 CTL 分母過小而失真。",
+          "模型只看到較少的訓練負荷，無法分辨這是主動休息、漏記資料、受傷還是行程中斷。",
+          "先檢查活動完整性與負荷來源，切勿直接將正值 TSB 視為狀態良好的證明。"
+        ],
+        [
+          "圖表與身體感受不一致",
+          "PMC 看起來一切正常，但配速／功率執行表現、睡眠、疼痛或主觀疲勞卻持續惡化。",
+          "負荷模型遺漏了重要脈絡；單憑圖表不能作為繼續加壓的理由。",
+          "把這項衝突視為需要查明的訊號並採取保守調整。若出現疼痛、生病或異常症狀，請優先顧及健康並尋求專業建議。"
+        ]
+      ],
+      "advantages": [
+        [
+          "核心 PMC 圖表與趨勢免費開放",
+          "免費版即包含 PMC、CTL–ATL–TSB 圖表、指標中心與進階儀表板工作區。在為進階功能付費前，就能先用自己的歷史資料體驗核心負荷分析流程。"
+        ],
+        [
+          "公式、閾值與負荷來源透明公開",
+          "Trainingload.ai 清楚說明 7 天 ATL、42 天 CTL、TSB 與 ACWR 的計算公式。活動負荷會依你的閾值與來源優先順序，採用功率、心率、配速或單次訓練 RPE 計算。"
+        ],
+        [
+          "從曲線回溯計畫與實際執行",
+          "圖表不是一條孤立的平滑線。在解釋數字為何變動前，先將 PMC 變化對照到計畫課表、實際完成內容、缺課記錄與來源活動。"
+        ],
+        [
+          "把負荷與表現反應並列比較",
+          "PMC 描述的是施加的壓力；有效 VO2max、閾值趨勢、課表品質與主觀訊號則協助驗證是否出現預期反應，避免陷入盲目追高 CTL 的迷思。"
+        ],
+        [
+          "智能教練起草調整，由你核准套用",
+          "當負荷與執行證據支持微調時，智能教練可在現行計畫中起草保守的調整方案。套用前，你可以先檢視調整原因、具體修改內容與驗證觀察點。"
+        ]
+      ]
+    }
   },
   "powerCurvePage": {
     "metadata": {
       "title": "功率曲線（Power Curve）分析：連到 CP、FTP 與訓練負荷判斷",
       "description": "用 Power Curve 解讀你的功率特性，並把趨勢連到 CP/FTP、區間設定與訓練負荷調整。",
-      "keywords": ["power curve", "功率曲線", "cp 估算", "ftp 估算", "訓練負荷"]
+      "keywords": [
+        "power curve",
+        "功率曲線",
+        "cp 估算",
+        "ftp 估算",
+        "訓練負荷"
+      ]
     },
     "ui": {
       "eyebrow": "Power Curve",
@@ -6953,7 +7310,10 @@
       "toolsAction": "打開訓練工具",
       "productAction": "打開 Trainingload.ai",
       "ctaTitle": "看完曲線，就要知道下一步練哪裡。",
-      "ctaText": "把 Power Curve 連到 CP/FTP、區間與每週負荷，讓分析真的變成訓練調整。"
+      "ctaText": "把 Power Curve 連到 CP/FTP、區間與每週負荷，讓分析真的變成訓練調整。",
+      "updatedLabel": "最後更新",
+      "lastUpdated": "2026 年 5 月 23 日",
+      "lastUpdatedDate": "2026-05-23"
     },
     "blocks": [
       [
@@ -6964,7 +7324,10 @@
         "用近期最佳值評估 CP/FTP 更新",
         "透過近期最大努力，判斷閾值是否需要更新。"
       ],
-      ["把刺激配到真正弱區間", "針對弱勢時間段配置頻率、強度與恢復。"],
+      [
+        "把刺激配到真正弱區間",
+        "針對弱勢時間段配置頻率、強度與恢復。"
+      ],
       [
         "一定要放回負荷脈絡看",
         "不要只看單次提升，要在 CTL/ATL/TSB 脈絡下看變化品質。"
@@ -6975,8 +7338,14 @@
         "Power Curve 和 Power Duration Curve 一樣嗎？",
         "在訓練分析裡通常可視為同義，都是按時間排列最大輸出。"
       ],
-      ["多久看一次比較好？", "一般每週看一次就夠，重點週期後可加看。"],
-      ["跑步也能用嗎？", "可以，只要有跑步功率資料，邏輯一致。"]
+      [
+        "多久看一次比較好？",
+        "一般每週看一次就夠，重點週期後可加看。"
+      ],
+      [
+        "跑步也能用嗎？",
+        "可以，只要有跑步功率資料，邏輯一致。"
+      ]
     ]
   },
   "powerRankingsPage": {
@@ -7006,10 +7375,22 @@
       "ctaText": "看不同時間段名次變化，明確下一個訓練週期該把刺激放在哪裡。"
     },
     "blocks": [
-      ["先確保比較條件一致", "把體重、時間窗、資料品質拉齊，降低比較噪音。"],
-      ["找出高名次與低名次時間段", "保留優勢區，同時針對弱勢區安排刺激。"],
-      ["用區塊前後比較驗證課表", "不要只靠感覺，直接用排名變化看週期成效。"],
-      ["決定調整優先順序", "先處理改善空間最大的時間段。"]
+      [
+        "先確保比較條件一致",
+        "把體重、時間窗、資料品質拉齊，降低比較噪音。"
+      ],
+      [
+        "找出高名次與低名次時間段",
+        "保留優勢區，同時針對弱勢區安排刺激。"
+      ],
+      [
+        "用區塊前後比較驗證課表",
+        "不要只靠感覺，直接用排名變化看週期成效。"
+      ],
+      [
+        "決定調整優先順序",
+        "先處理改善空間最大的時間段。"
+      ]
     ],
     "faq": [
       [
@@ -7020,7 +7401,10 @@
         "名次下滑就代表退步嗎？",
         "不一定。高負荷週或刻意配速策略，都可能造成短期下降。"
       ],
-      ["建議看多長週期？", "通常 4 到 8 週最適合拿來做課表判斷。"]
+      [
+        "建議看多長週期？",
+        "通常 4 到 8 週最適合拿來做課表判斷。"
+      ]
     ]
   },
   "customZonesPage": {
@@ -7050,17 +7434,32 @@
       "ctaText": "用個人化區間把每日課表強度和每週負荷管理對齊。"
     },
     "blocks": [
-      ["閾值更新就同步更新區間", "CP/FTP/LTHR 一變，區間就要一起校正。"],
-      ["不同指標分開管理", "自行車功率、跑步配速、心率可分開設定，避免誤判。"],
-      ["用主觀感受做微調", "數值和體感不一致時，先確保可執行性。"],
-      ["週回顧檢查合理性", "看完成率與疲勞反應，再做二次微調。"]
+      [
+        "閾值更新就同步更新區間",
+        "CP/FTP/LTHR 一變，區間就要一起校正。"
+      ],
+      [
+        "不同指標分開管理",
+        "自行車功率、跑步配速、心率可分開設定，避免誤判。"
+      ],
+      [
+        "用主觀感受做微調",
+        "數值和體感不一致時，先確保可執行性。"
+      ],
+      [
+        "週回顧檢查合理性",
+        "看完成率與疲勞反應，再做二次微調。"
+      ]
     ],
     "faq": [
       [
         "初始區間可以自動建立嗎？",
         "可以，系統可用估算閾值自動建立，再由你手動細調。"
       ],
-      ["需要常常改區間嗎？", "不用，通常在週期節點或狀態改變時更新即可。"],
+      [
+        "需要常常改區間嗎？",
+        "不用，通常在週期節點或狀態改變時更新即可。"
+      ],
       [
         "心率和功率不一致怎麼辦？",
         "先看疲勞與環境因素，再依當日訓練目的選擇主指標。"
@@ -7071,7 +7470,13 @@
     "metadata": {
       "title": "CP、FTP、LTHR 估算：一次校準訓練閾值",
       "description": "結合實績與模型估算 CP、FTP、LTHR，並套用到訓練區間、課表強度與負荷管理。",
-      "keywords": ["cp 估算", "ftp 估算", "lthr 估算", "閾值估算", "訓練分析"]
+      "keywords": [
+        "cp 估算",
+        "ftp 估算",
+        "lthr 估算",
+        "閾值估算",
+        "訓練分析"
+      ]
     },
     "ui": {
       "eyebrow": "CP / FTP / LTHR Estimator",
@@ -7088,18 +7493,36 @@
       "ctaText": "把 CP、FTP、LTHR 連到區間、課表和週負荷判斷，才會產生實際價值。"
     },
     "blocks": [
-      ["有實績先看實績", "資料足夠時，優先採用近期有效實績。"],
-      ["多指標交叉驗證", "CP/FTP/LTHR 要互相對得上，偏差太大就要回頭檢查。"],
-      ["先小範圍試跑", "新閾值先跑 1-2 週，再決定是否正式套用。"],
-      ["每週回顧再決定是否更新", "依完成率與疲勞反應決定要不要調整。"]
+      [
+        "有實績先看實績",
+        "資料足夠時，優先採用近期有效實績。"
+      ],
+      [
+        "多指標交叉驗證",
+        "CP/FTP/LTHR 要互相對得上，偏差太大就要回頭檢查。"
+      ],
+      [
+        "先小範圍試跑",
+        "新閾值先跑 1-2 週，再決定是否正式套用。"
+      ],
+      [
+        "每週回顧再決定是否更新",
+        "依完成率與疲勞反應決定要不要調整。"
+      ]
     ],
     "faq": [
       [
         "只靠估算就能定比賽配速嗎？",
         "可作起始參考，但仍需用實際訓練與比賽反饋微調。"
       ],
-      ["多久重估一次？", "一般 4-8 週重估一次，或在狀態明顯變化時更新。"],
-      ["新手適合用嗎？", "適合，先用粗粒度區間啟動，再逐步校正。"]
+      [
+        "多久重估一次？",
+        "一般 4-8 週重估一次，或在狀態明顯變化時更新。"
+      ],
+      [
+        "新手適合用嗎？",
+        "適合，先用粗粒度區間啟動，再逐步校正。"
+      ]
     ]
   },
   "effectiveVo2maxTrendPage": {
@@ -7129,18 +7552,36 @@
       "ctaText": "把 VO2max 趨勢和 CTL/ATL/TSB 對照，決定刺激和恢復怎麼配。"
     },
     "blocks": [
-      ["不要被單週波動帶著走", "天氣、疲勞、測量誤差都會造成短期起伏。"],
-      ["一定要放回負荷脈絡", "高負荷期短暫下滑很常見，重點是數週內能否回升。"],
-      ["和閾值更新一起看", "確認和 CP/FTP/LTHR 變化方向是否一致。"],
-      ["提早辨識過度負荷", "若下滑趨勢延續，應回頭調整強度分配。"]
+      [
+        "不要被單週波動帶著走",
+        "天氣、疲勞、測量誤差都會造成短期起伏。"
+      ],
+      [
+        "一定要放回負荷脈絡",
+        "高負荷期短暫下滑很常見，重點是數週內能否回升。"
+      ],
+      [
+        "和閾值更新一起看",
+        "確認和 CP/FTP/LTHR 變化方向是否一致。"
+      ],
+      [
+        "提早辨識過度負荷",
+        "若下滑趨勢延續，應回頭調整強度分配。"
+      ]
     ],
     "faq": [
       [
         "這和實驗室 VO2max 一樣嗎？",
         "不一樣。這是基於訓練資料推估的實務指標。"
       ],
-      ["要每天看嗎？", "不用，週尺度更有意義。"],
-      ["一下降就要立刻降課嗎？", "先別急，先看其他指標與下一堂關鍵課結果。"]
+      [
+        "要每天看嗎？",
+        "不用，週尺度更有意義。"
+      ],
+      [
+        "一下降就要立刻降課嗎？",
+        "先別急，先看其他指標與下一堂關鍵課結果。"
+      ]
     ]
   },
   "bestEffortsPage": {
@@ -7170,10 +7611,22 @@
       "ctaText": "把 Best Efforts 連到課表設計與負荷管理，找出下一個成長缺口。"
     },
     "blocks": [
-      ["分時間段評估", "不要只看短時間刷新，也要看中長時間是否同步提升。"],
-      ["確認是否可重現", "比起一次刷新，更重要的是近期間能否再現。"],
-      ["和疲勞狀態一起判讀", "高疲勞下仍刷新有價值，但也要安排對應恢復。"],
-      ["回饋到下一個訓練週期", "依已刷新與未刷新區段，重新分配刺激。"]
+      [
+        "分時間段評估",
+        "不要只看短時間刷新，也要看中長時間是否同步提升。"
+      ],
+      [
+        "確認是否可重現",
+        "比起一次刷新，更重要的是近期間能否再現。"
+      ],
+      [
+        "和疲勞狀態一起判讀",
+        "高疲勞下仍刷新有價值，但也要安排對應恢復。"
+      ],
+      [
+        "回饋到下一個訓練週期",
+        "依已刷新與未刷新區段，重新分配刺激。"
+      ]
     ],
     "faq": [
       [
@@ -7184,7 +7637,10 @@
         "如果一段時間沒刷新就是退步？",
         "不一定，恢復期或基礎期本來就可能以維持為主。"
       ],
-      ["跑步和騎車都能用嗎？", "可以，兩種項目都適用同一套分析方式。"]
+      [
+        "跑步和騎車都能用嗎？",
+        "可以，兩種項目都適用同一套分析方式。"
+      ]
     ]
   },
   "fitnessFatigueFormPage": {
@@ -7214,18 +7670,36 @@
       "ctaText": "用 Fitness/Fatigue/Form 持續堆疊適應，同時降低過度負荷風險。"
     },
     "blocks": [
-      ["Fitness 看長期基礎", "追蹤長期適應是否穩定累積。"],
-      ["Fatigue 看短期壓力", "及早辨識短期疲勞是否過高。"],
-      ["Form 看關鍵課可執行性", "判斷關鍵課是否能維持品質。"],
-      ["週中動態重排", "需要時重新分配強度、時長和休息日。"]
+      [
+        "Fitness 看長期基礎",
+        "追蹤長期適應是否穩定累積。"
+      ],
+      [
+        "Fatigue 看短期壓力",
+        "及早辨識短期疲勞是否過高。"
+      ],
+      [
+        "Form 看關鍵課可執行性",
+        "判斷關鍵課是否能維持品質。"
+      ],
+      [
+        "週中動態重排",
+        "需要時重新分配強度、時長和休息日。"
+      ]
     ],
     "faq": [
-      ["Form 低就一定要休息嗎？", "不一定，還要看課表重要性與主觀體感。"],
+      [
+        "Form 低就一定要休息嗎？",
+        "不一定，還要看課表重要性與主觀體感。"
+      ],
       [
         "Fitness 上升就代表一定進步？",
         "通常是正向訊號，但仍要看完成率與疲勞反應。"
       ],
-      ["新手也適合嗎？", "很適合，特別能避免前期負荷堆太快。"]
+      [
+        "新手也適合嗎？",
+        "很適合，特別能避免前期負荷堆太快。"
+      ]
     ]
   },
   "runningPlanPages": {
@@ -7340,7 +7814,11 @@
         "previewTitle": "5 公里計畫大致長什麼樣",
         "previewSubtitle": "下面只是結構預覽。進入產品後，計畫會根據你的目前能力、可訓練日期和既有運動紀錄生成。",
         "previewRows": [
-          ["第 1-2 週", "跑走結合", "短時間輕鬆跑走交替，跑步日之間保留恢復。"],
+          [
+            "第 1-2 週",
+            "跑走結合",
+            "短時間輕鬆跑走交替，跑步日之間保留恢復。"
+          ],
           [
             "第 3-5 週",
             "連續輕鬆跑",
@@ -7359,7 +7837,10 @@
             "缺課了",
             "優先保住習慣，把訓練順延或簡化，而不是把漏掉的課硬塞回本週。"
           ],
-          ["負荷漲得太快", "先穩定跑量、降低強度，避免小痠痛變成長期中斷。"],
+          [
+            "負荷漲得太快",
+            "先穩定跑量、降低強度，避免小痠痛變成長期中斷。"
+          ],
           [
             "比賽週緊張",
             "最後一週保持簡單，讓你帶著新鮮感去完成第一個 5 公里。"
@@ -7464,7 +7945,11 @@
         "previewTitle": "10 週10公里課表如何推進",
         "previewSubtitle": "官方完賽課表共 10 週、每週三跑。輕鬆跑和長跑占絕大多數；三次受控穩定跑只練習節奏，不進入閾值。",
         "previewRows": [
-          ["第 1–3 週", "建立規律", "每週三跑，長跑從 45 分鐘增加到 50 分鐘。"],
+          [
+            "第 1–3 週",
+            "建立規律",
+            "每週三跑，長跑從 45 分鐘增加到 50 分鐘。"
+          ],
           [
             "第 4–7 週",
             "構築耐力",
@@ -7488,7 +7973,10 @@
             "錯過長跑",
             "可以跳過，或只在仍能保護恢復時改期。不要把下一週輕鬆安排改成補課週。"
           ],
-          ["穩定跑前已經很累", "先保住長跑，再縮短或取消週中穩定跑。"],
+          [
+            "穩定跑前已經很累",
+            "先保住長跑，再縮短或取消週中穩定跑。"
+          ],
           [
             "需要重排整週",
             "到 AI 訓練計畫頁查看依負荷產生的草案。日曆只有在你確認後才會更新。"
@@ -7539,12 +8027,20 @@
           [
             "三次受控穩定跑",
             "第 4、6、8 週用 20 分鐘 RPE 5–6 練習穩定節奏，仍能說出短句。這不是閾值訓練。",
-            ["仍能說出短句", "不跑到喘不過氣", "不要改成間歇課"]
+            [
+              "仍能說出短句",
+              "不跑到喘不過氣",
+              "不要改成間歇課"
+            ]
           ],
           [
             "最長距離 65 分鐘",
             "長跑第 7 週到 65 分鐘，隨後兩週降低。需要時可短暫步行。",
-            ["全程保持可對話", "需要時可短暫步行", "漏掉長跑後不要連續補兩次"]
+            [
+              "全程保持可對話",
+              "需要時可短暫步行",
+              "漏掉長跑後不要連續補兩次"
+            ]
           ]
         ],
         "conversionTitle": "把這份免費 10 週課表加入日曆",
@@ -7591,7 +8087,11 @@
             "/free-ai-workout-review",
             "上傳一次完成的跑步，獲得可核對的複盤。無需帳號。"
           ],
-          ["跑者訓練負荷", "/training-load", "用負荷信号判断该加量还是恢復。"]
+          [
+            "跑者訓練負荷",
+            "/training-load",
+            "用負荷信号判断该加量还是恢復。"
+          ]
         ],
         "trustItems": [
           "完整課表免費",
@@ -7682,7 +8182,10 @@
             "錯過長跑",
             "可以跳過，或只在仍能保護恢復時改期。不要把下一週輕鬆安排改成補課週。"
           ],
-          ["穩定跑前已經很累", "先保住長跑，再縮短或取消週中對比課。"],
+          [
+            "穩定跑前已經很累",
+            "先保住長跑，再縮短或取消週中對比課。"
+          ],
           [
             "需要重排整週",
             "到 AI 半馬訓練計畫頁查看依負荷產生的草案。日曆只有在你確認後才會更新。"
@@ -7883,7 +8386,10 @@
             "錯過長跑",
             "可以跳過，或只在仍能保護恢復時改期。不要把下一週輕鬆安排改成補課週。"
           ],
-          ["穩定跑前已經很累", "先保住長跑，再縮短或取消週中對比課。"],
+          [
+            "穩定跑前已經很累",
+            "先保住長跑，再縮短或取消週中對比課。"
+          ],
           [
             "需要重排整週",
             "到 AI 馬拉松訓練計畫頁查看依負荷產生的草案。日曆只有在你確認後才會更新。"
@@ -8062,10 +8568,26 @@
         "previewTitle": "9 週 Couch to 5K 計畫如何推進",
         "previewSubtitle": "從短時間的跑走交替開始，逐步延長跑步時間，最後以可控強度完成 5 公里。可以開啟任意一週，也可以直接從第 1 週開始。",
         "previewRows": [
-          ["第 1–3 週", "建立習慣", "每週三次短跑走訓練，跑段保持輕鬆可控。"],
-          ["第 4–6 週", "延長跑段", "逐步增加連續跑時間，同時保留恢復日。"],
-          ["第 7–8 週", "準備連續跑", "練習更長的持續跑，但不引入配速目標。"],
-          ["第 9 週", "完成 5 公里", "以可控強度完成距離，需要時可以短暫步行。"]
+          [
+            "第 1–3 週",
+            "建立習慣",
+            "每週三次短跑走訓練，跑段保持輕鬆可控。"
+          ],
+          [
+            "第 4–6 週",
+            "延長跑段",
+            "逐步增加連續跑時間，同時保留恢復日。"
+          ],
+          [
+            "第 7–8 週",
+            "準備連續跑",
+            "練習更長的持續跑，但不引入配速目標。"
+          ],
+          [
+            "第 9 週",
+            "完成 5 公里",
+            "以可控強度完成距離，需要時可以短暫步行。"
+          ]
         ],
         "aiTitle": "現實打亂 Couch to 5K 計畫時怎麼辦？",
         "aiSubtitle": "例如你計畫本週練三次，錯過了週三訓練，週六的主觀強度又明顯偏高。AI 教練可以對照計畫和實際完成情況，檢查近期負荷與恢復，建議重複本週或移動下一次訓練；只有你確認後才會修改日曆。",
@@ -8078,7 +8600,10 @@
             "負荷與恢復背景",
             "結合近期負荷、恢復信號、漏訓和回饋解釋為什麼建議調整。"
           ],
-          ["由你決定", "AI 自動產生建議；只有接受後才會更新訓練日曆。"]
+          [
+            "由你決定",
+            "AI 自動產生建議；只有接受後才會更新訓練日曆。"
+          ]
         ],
         "faq": [
           [
@@ -8132,17 +8657,26 @@
           [
             "直接在這裡免費跟練",
             "下方提供全部週次和訓練，無需帳戶或 App 即可開始。",
-            ["從第 1 週開始", "完整查看 9 週課表"]
+            [
+              "從第 1 週開始",
+              "完整查看 9 週課表"
+            ]
           ],
           [
             "免費加入日曆",
             "選擇開始日期和訓練日，記錄完成情況，並手動移動或修改自己的計畫。",
-            ["與網頁相同的官方訓練", "訓練日期可隨時手動調整"]
+            [
+              "與網頁相同的官方訓練",
+              "訓練日期可隨時手動調整"
+            ]
           ],
           [
             "讓 AI 教練應對變化",
             "AI 教練對照計畫與實際訓練、負荷和恢復，產生有依據的調整建議。",
-            ["持續自動監測", "確認後才修改日曆"]
+            [
+              "持續自動監測",
+              "確認後才修改日曆"
+            ]
           ]
         ],
         "conversionTitle": "免費將官方計畫加入日曆",
@@ -8167,7 +8701,12 @@
         "finalTitle": "今天開始免費計畫",
         "finalText": "直接從本頁第 1 週開始，或免費將同一份官方計畫加入日曆，讓下一次訓練出現在日曆中。",
         "collectionCta": "查看免費 Couch to 5K 計畫",
-        "trustItems": ["完整免費課表", "9 週", "每週 3 跑", "不設配速目標"],
+        "trustItems": [
+          "完整免費課表",
+          "9 週",
+          "每週 3 跑",
+          "不設配速目標"
+        ],
         "routePath": "/couch-to-5k-training-plan",
         "templateSlug": "first-5k"
       }
@@ -9144,7 +9683,10 @@
             "一次只改一個主要變數",
             "大多數調整都應避免同時改變跑量、強度和頻率。"
           ],
-          ["不替代醫療建議", "疼痛、傷病症狀、疾病和醫療限制仍需要專業判斷。"]
+          [
+            "不替代醫療建議",
+            "疼痛、傷病症狀、疾病和醫療限制仍需要專業判斷。"
+          ]
         ],
         "useCases": [
           [
@@ -9166,13 +9708,22 @@
         ],
         "workflowTitle": "跑步 AI 教練如何工作",
         "workflow": [
-          ["從計畫開始", "先有包含目標、週結構、關鍵課和限制條件的跑步計畫。"],
-          ["匯入完成跑步", "同步或上傳訓練，讓 AI 對比計畫和實際完成情況。"],
+          [
+            "從計畫開始",
+            "先有包含目標、週結構、關鍵課和限制條件的跑步計畫。"
+          ],
+          [
+            "匯入完成跑步",
+            "同步或上傳訓練，讓 AI 對比計畫和實際完成情況。"
+          ],
           [
             "複盤負荷和反應",
             "改訓練量或強度前，先看訓練負荷、配速、心率和 effective VO2max。"
           ],
-          ["確認調整", "預覽課表變更，確認後才更新儲存的訓練計畫。"]
+          [
+            "確認調整",
+            "預覽課表變更，確認後才更新儲存的訓練計畫。"
+          ]
         ],
         "relatedTitle": "相關跑步教練頁面",
         "relatedLinks": [
@@ -9191,7 +9742,11 @@
             "/5k-training-plan",
             "生成更短距離的跑步計畫並配合 AI 複盤。"
           ],
-          ["VDOT 計算器", "/vdot-calculator", "根據比賽成績估算跑步配速。"]
+          [
+            "VDOT 計算器",
+            "/vdot-calculator",
+            "根據比賽成績估算跑步配速。"
+          ]
         ],
         "faqTitle": "跑步 AI 教練常見問題",
         "faqSubtitle": "面向想用 AI 管理訓練負荷、備賽計畫和課表調整的跑者。",
@@ -9344,7 +9899,10 @@
             "保護關鍵課",
             "如果降低填充強度能保護最重要的一課，AI 應該明確建議。"
           ],
-          ["保留確認步驟", "基於功率的調整應在更新計畫前顯示原因和變更欄位。"]
+          [
+            "保留確認步驟",
+            "基於功率的調整應在更新計畫前顯示原因和變更欄位。"
+          ]
         ],
         "useCases": [
           [
@@ -9366,23 +9924,40 @@
         ],
         "workflowTitle": "騎行 AI 教練如何工作",
         "workflow": [
-          ["從目標開始", "把 FTP、CP、功率區間和訓練區塊目標附著在計畫上。"],
-          ["匯入完成騎行", "同步或上傳騎行，讓 AI 對比功率、時長和實際執行。"],
+          [
+            "從目標開始",
+            "把 FTP、CP、功率區間和訓練區塊目標附著在計畫上。"
+          ],
+          [
+            "匯入完成騎行",
+            "同步或上傳騎行，讓 AI 對比功率、時長和實際執行。"
+          ],
           [
             "複盤負荷和功率反應",
             "調整前先看 CTL、ATL、TSB、騎行波動和近期功率趨勢。"
           ],
-          ["確認調整", "預覽課表變更，確認後才更新儲存的訓練計畫。"]
+          [
+            "確認調整",
+            "預覽課表變更，確認後才更新儲存的訓練計畫。"
+          ]
         ],
         "relatedTitle": "相關騎行教練頁面",
         "relatedLinks": [
-          ["FTP 計算器", "/ftp-calculator", "根據活動檔案估算 FTP。"],
+          [
+            "FTP 計算器",
+            "/ftp-calculator",
+            "根據活動檔案估算 FTP。"
+          ],
           [
             "功率區間計算器",
             "/power-zones-calculator",
             "生成騎行功率訓練區間。"
           ],
-          ["功率曲線", "/features/power-curve", "查看功率-時間表現。"]
+          [
+            "功率曲線",
+            "/features/power-curve",
+            "查看功率-時間表現。"
+          ]
         ],
         "faqTitle": "騎行 AI 教練常見問題",
         "faqSubtitle": "面向想用 AI 管理 FTP 訓練、訓練負荷和騎行調整的騎行者。",
@@ -9413,7 +9988,11 @@
     "metadata": {
       "title": "免費 AI 訓練複盤｜分析 FIT、GPX、TCX",
       "description": "上傳一次運動檔案，免費取得 AI 訓練複盤、恢復建議與 3D 軌跡。",
-      "keywords": ["AI 訓練複盤", "免費運動分析", "FIT 檔案分析"]
+      "keywords": [
+        "AI 訓練複盤",
+        "免費運動分析",
+        "FIT 檔案分析"
+      ]
     },
     "badge": "免費訓練分析",
     "title": "把一次運動檔案，變成真正有用的訓練複盤",
@@ -9897,7 +10476,11 @@
       "visual": {
         "title": "本機 FIT 檢查",
         "file": "activity.fit",
-        "checks": ["Header", "CRC", "訊息"],
+        "checks": [
+          "Header",
+          "CRC",
+          "訊息"
+        ],
         "status": "完全本機 · 不連線"
       },
       "upload": {
@@ -10238,7 +10821,11 @@
         },
         "onThisPage": "本頁內容"
       },
-      "proof": ["免註冊", "即時結果", "列印或分享"],
+      "proof": [
+        "免註冊",
+        "即時結果",
+        "列印或分享"
+      ],
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次表現。",
         "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
@@ -10723,7 +11310,11 @@
           "answer": "手動訓練編輯器指南說明如何把匯出的訓練放到 Trainingload 計畫的某一天。\n\n例如：複製 DSL，打開指南，在你想要的那一天用 Rules 模式貼上。\n\n是否儲存由你在應用裡決定。"
         }
       ],
-      "proof": ["無需註冊", "即時結果", "列印或分享"],
+      "proof": [
+        "無需註冊",
+        "即時結果",
+        "列印或分享"
+      ],
       "promo": {
         "kicker": "應用程式內",
         "title": "編好一節課，安排好下一周。",
@@ -11120,7 +11711,11 @@
     "page": {
       "title": "訓練負荷計算機",
       "subtitle": "填入每日訓練負荷，看看體能、疲勞和狀態如何變化，為下一週的訓練找到參考。",
-      "proof": ["無需註冊", "即填即算", "可列印、分享成績單"],
+      "proof": [
+        "無需註冊",
+        "即填即算",
+        "可列印、分享成績單"
+      ],
       "formula": "CTL_今天 = CTL_昨天 + (TSS − CTL_昨天) / 42\nATL_今天 = ATL_昨天 + (TSS − ATL_昨天) / 7\nTSB_今天 = CTL_今天 − ATL_今天",
       "teachingNote": "7–14 天的表代替不了幾個月的同步負荷。用它看清一次更新，再打開產品裡的圖表。",
       "howTo": {
@@ -11376,7 +11971,11 @@
     "page": {
       "title": "完賽時間預測",
       "subtitle": "輸入近期比賽成績，或從跑步檔案中選取紀錄，查看 5 公里、10 公里、半馬和全馬的等效完賽時間及配速。",
-      "proof": ["無需註冊", "即填即算", "可列印、分享成績單"],
+      "proof": [
+        "無需註冊",
+        "即填即算",
+        "可列印、分享成績單"
+      ],
       "howTo": {
         "title": "如何預測完賽時間",
         "steps": {
@@ -11885,8 +12484,14 @@
             "計畫外團騎",
             "把衝刺當成真實 TSS。下一堂 VO2 課應挪走或縮短，而不是再疊強度。"
           ],
-          ["長騎前 ATL 升高", "先保住長騎，再砍週中甜區。"],
-          ["需要重寫一週", "騎行智能教練會給出帶理由的草案，由你確認。"]
+          [
+            "長騎前 ATL 升高",
+            "先保住長騎，再砍週中甜區。"
+          ],
+          [
+            "需要重寫一週",
+            "騎行智能教練會給出帶理由的草案，由你確認。"
+          ]
         ],
         "relatedTitle": "把計畫做完整的工具和產品頁",
         "relatedLinks": [
@@ -12081,9 +12686,18 @@
         "aiTitle": "為什麼 70.3 PDF 在一項透支時會失效",
         "aiSubtitle": "靜態半程鐵人訓練計畫看不見 90 公里配速騎已經花掉週日的跑。Trainingload 的閉環是：計畫 → 完成 → 負荷 → 智能草案 → 你確認。",
         "aiSignals": [
-          ["長騎超支", "縮短或放輕鬆下一次跑。不要在疲勞腿上補磚。"],
-          ["游泳量陡增", "密集游泳仍增加疲勞。TSB 已低時先按住騎行強度。"],
-          ["需要重寫", "用智能訓練計畫複盤。只有你確認後日曆才更新。"]
+          [
+            "長騎超支",
+            "縮短或放輕鬆下一次跑。不要在疲勞腿上補磚。"
+          ],
+          [
+            "游泳量陡增",
+            "密集游泳仍增加疲勞。TSB 已低時先按住騎行強度。"
+          ],
+          [
+            "需要重寫",
+            "用智能訓練計畫複盤。只有你確認後日曆才更新。"
+          ]
         ],
         "relatedTitle": "支撐半程鐵人訓練計畫的頁面",
         "relatedLinks": [
@@ -12284,12 +12898,18 @@
         "aiTitle": "爲什麼這比靜態奧運距離 PDF 更好",
         "aiSubtitle": "PDF 版奧運距離鐵人三項訓練計畫看不見昨天集團騎的標準化功率，也看不見一次沉重磚塊。Trainingload 把計畫、完成課、訓練負荷和需確認的 AI 草稿放在同一循環。",
         "aiSignals": [
-          ["周六沉重磚塊", "把騎+跑當成一塊壓力。先縮短周日質量課。"],
+          [
+            "周六沉重磚塊",
+            "把騎+跑當成一塊壓力。先縮短周日質量課。"
+          ],
           [
             "ATL 升高且遊泳偏薄",
             "保住技術量；先削周中騎強度，再砍掉所有遊泳。"
           ],
-          ["需要重寫這一周", "AI 教練帶着理由起草改動。你來確認。"]
+          [
+            "需要重寫這一周",
+            "AI 教練帶着理由起草改動。你來確認。"
+          ]
         ],
         "relatedTitle": "補齊奧運距離計畫的工具與樞紐",
         "relatedLinks": [
@@ -12494,7 +13114,10 @@
             "多了一節俱樂部或公開水域",
             "當成真實負荷。移動或縮短下一次 CSS，而不是加倍強度。"
           ],
-          ["需要重寫這一週", "AI 教練起草修改並給出理由。你來確認。"]
+          [
+            "需要重寫這一週",
+            "AI 教練起草修改並給出理由。你來確認。"
+          ]
         ],
         "relatedTitle": "把計畫補全的工具和產品頁",
         "relatedLinks": [
@@ -12749,7 +13372,11 @@
     "page": {
       "title": "二區心率計算器",
       "subtitle": "依年齡、最大心率、Karvonen 心率儲備或 LTHR，算出一個有氧二區 bpm 範圍，再配合實際體感判斷。",
-      "proof": ["無需註冊", "即時結果", "列印或分享"],
+      "proof": [
+        "無需註冊",
+        "即時結果",
+        "列印或分享"
+      ],
       "howTo": {
         "title": "如何得到二區心率",
         "steps": {
@@ -13095,7 +13722,11 @@
     "page": {
       "title": "臨界泳速計算機",
       "subtitle": "輸入兩組游泳距離與用時，估算臨界泳速，找到適合自己的訓練配速。",
-      "proof": ["無需註冊", "支持游泳文件", "可列印、分享成績單"],
+      "proof": [
+        "無需註冊",
+        "支持游泳文件",
+        "可列印、分享成績單"
+      ],
       "howTo": {
         "title": "如何估算 CSS",
         "steps": {
@@ -13356,7 +13987,10 @@
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次進步。",
         "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合配速、心率與訓練負荷，回看這次表現。",
-        "benefits": ["訓練中的即時資料", "訓練後的分析與回顧"],
+        "benefits": [
+          "訓練中的即時資料",
+          "訓練後的分析與回顧"
+        ],
         "cta": "瞭解智能教練",
         "phoneAlt": "iPhone 上的 Trainingload.ai 即時訓練記錄頁面"
       },

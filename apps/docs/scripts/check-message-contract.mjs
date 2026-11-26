@@ -112,9 +112,6 @@ function collectStrings(value, dottedPath, output) {
   }
 }
 
-// Shared calculator copy must be complete in each indexed language. Other
-// supported languages deliberately retain the existing English fallback.
-const indexedLocales = ["en", "ja", "zh", "zh-hant"];
 const englishMessages = JSON.parse(
   fs.readFileSync(path.join(messagesDirectory, "en.json"), "utf8"),
 );
@@ -236,19 +233,17 @@ for (const locale of supportedLocales) {
     }
   }
 
-  if (indexedLocales.includes(locale)) {
-    for (const entry of toolCopyPaths) {
-      const value = readPath(messages, entry.path);
-      if (typeof value !== "string" || !value.trim()) {
-        errors.push(`${locale}: missing tool copy ${entry.path}`);
-      } else {
-        const reference = readPath(englishMessages, entry.path);
-        if (
-          typeof reference === "string" &&
-          variables(reference) !== variables(value)
-        )
-          errors.push(`${locale}: mismatched placeholders in ${entry.path}`);
-      }
+  for (const entry of toolCopyPaths) {
+    const value = readPath(messages, entry.path);
+    if (typeof value !== "string" || !value.trim()) {
+      errors.push(`${locale}: missing tool copy ${entry.path}`);
+    } else {
+      const reference = readPath(englishMessages, entry.path);
+      if (
+        typeof reference === "string" &&
+        variables(reference) !== variables(value)
+      )
+        errors.push(`${locale}: mismatched placeholders in ${entry.path}`);
     }
   }
 
@@ -282,5 +277,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `Docs message contract ok: ${supportedLocales.length} locales, ${requiredLocalizedStrings.length} required strings, ${functionalFileCopyPaths.length} file-tool strings in every locale, ${toolCopyPaths.length} tool strings in ${indexedLocales.length} indexed locales`,
+  `Docs message contract ok: ${supportedLocales.length} locales, ${requiredLocalizedStrings.length} required strings, ${functionalFileCopyPaths.length} file-tool strings in every locale, ${toolCopyPaths.length} tool strings in every locale`,
 );

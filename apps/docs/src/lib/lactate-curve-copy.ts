@@ -731,9 +731,1066 @@ const ja: BaseLactateCopy = {
   },
 };
 
-// Indexed locales contain complete route copy; secondary locales use English.
+const ko: BaseLactateCopy = {
+  title: "젖산 곡선 계산기",
+  description:
+    "사이클링 또는 러닝 점증 부하 테스트의 실측 혈중 젖산 데이터를 분석합니다. 역치 산출 방법을 비교하고 강도 영역을 설정하며 분석 결과를 내보내세요.",
+  badge: "점증 부하 테스트",
+  privacy:
+    "무료이며 가입이 필요 없습니다. 테스트 데이터는 현재 브라우저 탭에만 유지되며 내보내지 않으면 새로고침 시 사라집니다.",
+  inputTitle: "테스트 데이터",
+  resultTitle: "테스트 분석",
+  empty:
+    "각 단계 데이터를 입력하거나 예시를 불러와 분석 과정을 확인하세요.",
+  stale:
+    "입력이 변경되었습니다. 결과를 사용하거나 내보내기 전에 다시 분석하세요.",
+  sample: "설명용 예시입니다 — 본인의 테스트 데이터가 아닙니다",
+  cycling: "사이클링",
+  running: "러닝",
+  intensity: "강도",
+  lactate: "젖산",
+  heartRate: "심박수",
+  stage: "단계",
+  rest: "안정 시 샘플에는 0을 입력하세요",
+  example: "예시 불러오기",
+  clear: "데이터 지우기",
+  add: "단계 추가",
+  remove: "단계 삭제",
+  analyze: "데이터 분석",
+  calculating: "분석 중…",
+  paste: "표 붙여넣기",
+  import: "CSV 가져오기",
+  template: "CSV 템플릿 다운로드",
+  confirmImport: "이 열 사용",
+  cancel: "취소",
+  mapping: "열과 단위 확인",
+  noColumn: "기록 안 됨",
+  sort: "강도순으로 단계 정렬",
+  overwrite: "현재 단계 데이터를 덮어쓰시겠습니까?",
+  resetSport: "종목을 변경하면 현재 데이터가 삭제됩니다. 계속하시겠습니까?",
+  pasteHelp:
+    "쉼표 또는 탭으로 구분된 행을 붙여넣으세요. 소수점은 “.”를 사용합니다. 데이터를 교체하기 전에 열 매핑을 확인하세요.",
+  inputHelp:
+    "운동 단계 4–30개를 입력하세요(6–10개 권장). 젖산 단위는 mmol/L이며 심박수는 선택 사항입니다. 각 행은 빠짐없이 입력해야 하며, 0은 선택적 안정 시 샘플을 뜻합니다.",
+  method: "방법",
+  threshold: "역치",
+  selected: "차트에 표시된 방법",
+  unavailable: "사용 불가",
+  partial:
+    "일부 방법에서는 역치를 찾을 수 없었습니다. 계산 가능한 결과만 아래에 표시됩니다.",
+  noResult:
+    "적용 가능한 역치를 찾지 못했습니다. 단계 데이터와 방법 설명을 확인하세요. 테스트 범위를 벗어난 외삽은 수행하지 않습니다.",
+  lt1: "제1 역치 (LT1)",
+  lt2: "제2 역치 (LT2)",
+  zones: "세 가지 강도 존",
+  zoneNames: ["LT1 미만", "LT1~LT2", "LT2 초과"],
+  methodHelp:
+    "선택한 방법에 따라 경계가 달라집니다. 젖산 역치는 추정치이며 자동으로 FTP와 동일하지 않습니다.",
+  export: "결과 CSV 다운로드",
+  print: "리포트 인쇄",
+  report: "젖산 테스트 리포트",
+  source: "계산 참고 문헌",
+  copied: "복사됨",
+  copy: "결과 복사",
+  quality: "데이터 품질 참고",
+  methodsTitle: "방법 및 적용 조건",
+  instructionsTitle: "데이터 요구 사항 및 절차",
+  instructions: [
+    "각 단계가 끝날 때 강도와 실측 혈중 젖산을 기록하세요. 선택적으로 기록하는 심박수도 동일한 단계의 값이어야 합니다.",
+    "종목과 기록에 사용한 단위를 선택한 뒤 데이터를 직접 입력하거나 붙여넣기 또는 CSV로 가져오세요.",
+    "곡선과 경고를 확인하고 방법을 비교한 다음 선택한 해석을 내보내세요. 재측정 시 동일한 프로토콜을 유지하는 것이 좋습니다.",
+  ],
+  faqTitle: "젖산 테스트 분석 자주 묻는 질문",
+  faq: [
+    {
+      question: "혈중 젖산 채혈 없이 Garmin 데이터만 사용할 수 있나요?",
+      answer:
+        "이 도구는 각 단계의 실측 젖산값이 필요합니다. 레이스 기록이나 필드 테스트로 추정하려면 별도의 젖산 역치 계산기를 사용하세요.",
+    },
+    {
+      question: "방법마다 수치가 다르게 나오는 이유는 무엇인가요?",
+      answer:
+        "고정 농도, 기준선 상승, 곡선 기하학은 서로 다른 특징을 설명합니다. 어떤 방법은 첫 상승을 찾고, 다른 방법은 더 높은 경계를 추정합니다. 수치의 일치가 생리학적 정확성을 입증하지는 않습니다.",
+    },
+    {
+      question: "LT1과 LT2는 의학적 진단이나 훈련 처방인가요?",
+      answer:
+        "방법에 따라 달라지는 강도 기준치입니다. 단계 시간, 채혈 방식, 일별 변동이 해석에 영향을 줍니다. 방법과 프로토콜을 결과와 함께 보관하고, 적용 시 자격을 갖춘 코치와 상의하세요.",
+    },
+    {
+      question: "내 테스트 데이터는 어떻게 처리되나요?",
+      answer:
+        "계산, CSV 파싱, 리포트 생성은 모두 로컬에서 실행됩니다. 입력값은 업로드되거나 URL에 포함되지 않습니다. 탭을 새로고침하면 삭제되므로 보관이 필요하면 리포트를 다운로드하세요.",
+    },
+  ],
+  alternative: "실측 젖산 샘플이 없으신가요?",
+  alternativeBody:
+    "젖산 역치 계산기를 이용해 레이스나 필드 테스트로 훈련 기준치를 추정해 보세요.",
+  related: "관련 도구",
+  cta: "시간에 따른 훈련 부하와 회복 추세를 추적하세요",
+  ctaBody:
+    "일일 훈련 기록, 강도 분포, 컨디션 추세를 함께 살펴보며 훈련 주기를 계획하고 다음 테스트를 맥락 속에서 해석하세요.",
+  protocol: "선택적 테스트 정보",
+  stageMinutes: "단계당 시간(분)",
+  sampleSite: "채혈 부위",
+  notRecorded: "기록 안 됨",
+  earlobe: "귓불",
+  fingertip: "손가락 끝",
+  other: "기타",
+  incomplete: "마지막 단계를 완료하지 못함",
+  excluded: "분석에서 마지막 단계 제외",
+  runtimeError:
+    "분석을 실행하지 못했습니다. 입력 데이터는 그대로 유지되어 있으니 다시 시도해 주세요.",
+  exportError: "내보내기를 준비하지 못했습니다. 다시 시도해 주세요.",
+  recordingError:
+    "파일, 행, 숫자 값 및 열 매핑을 확인하세요. CSV 제한: 256 KiB, 100줄, 16열.",
+  methodNames,
+  methodDescriptions: {
+    obla_2:
+      "적합된 3차 곡선이 마지막으로 2 mmol/L를 상향 통과하는 강도입니다. 고정 농도가 모든 사람의 제1 역치인 것은 아닙니다.",
+    obla_4:
+      "적합된 3차 곡선이 마지막으로 4 mmol/L를 상향 통과하는 강도입니다. 이 고정 기준이 보편적인 LT2는 아닙니다.",
+    bsln_05:
+      "기준선 + 0.5 mmol/L 지점의 강도입니다. 기준선은 안정 시 샘플이며, 안정 시 샘플이 없으면 첫 번째 운동 단계를 사용합니다.",
+    bsln_10:
+      "기준선 + 1.0 mmol/L 지점의 강도입니다. 단일 기준선 샘플에 따라 추정치가 달라질 수 있습니다.",
+    log_log:
+      "로그 강도와 로그 젖산에 분할 단계를 공유하는 두 직선을 적합합니다. 잔차가 최소인 분할에서 교점을 구하며 최소 5단계가 필요합니다.",
+    dmax: "적합된 3차 곡선의 첫 점과 끝점을 잇는 직선 아래에서 거리가 가장 큰 지점입니다. 운동 단계만 적합합니다.",
+    moddmax:
+      "인접 단계에서 처음으로 젖산이 0.4 mmol/L 이상 상승하기 직전 단계부터 관측된 기준점을 사용해 기준선을 긋습니다.",
+    log_poly_moddmax:
+      "3차 곡선 위의 Log-log 강도 지점에서 마지막 실측 젖산 지점까지 기준선을 긋습니다. 유효한 Log-log 결과가 필요합니다.",
+  },
+  reasons: {
+    invalid_value:
+      "강조된 행을 확인하세요. 젖산과 선택적 심박수는 유한한 양수여야 하며, 강도 0은 안정 시에만 사용할 수 있습니다.",
+    too_few_stages:
+      "최소 4개의 운동 단계가 필요합니다. Log-log는 5단계가 필요합니다.",
+    too_many_stages: "운동 단계는 최대 30개까지 입력할 수 있습니다.",
+    duplicate_intensity:
+      "각 강도는 한 번만 입력해야 합니다. 중복된 단계를 확인하세요.",
+    unsorted_stages:
+      "단계 강도는 오름차순이어야 합니다. 분석 전에 정렬을 확인하세요.",
+    fit_degenerate: "이 단계 데이터로는 안정적인 3차 곡선 적합이 불가능합니다.",
+    target_not_reached:
+      "적합된 곡선이 테스트 범위 내에서 이 목표 농도를 상향 통과하지 않습니다.",
+    loglog_unavailable:
+      "운동 단계 범위 내에서 유효한 Log-log 교점을 찾지 못했습니다.",
+    no_lactate_rise: "인접 단계에서 0.4 mmol/L 이상 상승한 구간이 없습니다.",
+    no_distance: "기준선 아래에 양의 거리를 갖는 지점이 없습니다.",
+    no_resting_sample:
+      "안정 시 샘플 없음: 기준선 상승 방법은 첫 번째 운동 단계를 사용합니다.",
+    few_stages: "단계 수가 적어 단일 샘플이 곡선 적합에 큰 영향을 줄 수 있습니다.",
+    early_dip:
+      "초반 단계에서 젖산이 감소합니다. 샘플과 워밍업 상태를 확인하세요.",
+    final_not_rising:
+      "마지막 단계에서 젖산이 증가하지 않습니다. 의도한 강도에 도달했는지 확인하세요.",
+    uneven_steps:
+      "단계별 강도 증가폭이 일정하지 않습니다. 테스트 프로토콜과 함께 해석하세요.",
+    threshold_at_edge: "이 추정치는 측정 범위의 경계에 위치합니다.",
+    negative_fit:
+      "적합된 곡선이 0 아래로 내려갑니다. 적합 품질과 샘플 값을 확인하세요.",
+    invalid_pair:
+      "존을 사용하기 전에 LT1이 LT2보다 낮도록 유효한 방법을 선택하세요.",
+  },
+};
+
+const de: BaseLactateCopy = {
+  title: "Laktatkurven-Rechner",
+  description:
+    "Analysiere gemessene Blutlaktatwerte aus Stufentests im Radfahren oder Laufen. Vergleiche Schwellenmethoden, definiere Intensitätsbereiche und exportiere die Auswertung.",
+  badge: "Stufentest",
+  privacy:
+    "Kostenlos, ohne Anmeldung. Testdaten bleiben in diesem Browser-Tab und gehen beim Neuladen verloren, sofern sie nicht exportiert werden.",
+  inputTitle: "Deine Testdaten",
+  resultTitle: "Testanalyse",
+  empty:
+    "Gib deine Stufendaten ein oder lade ein Beispiel, um die Auswertung zu sehen.",
+  stale:
+    "Deine Eingaben wurden geändert. Analysiere erneut, bevor du diese Ergebnisse nutzt oder exportierst.",
+  sample: "Veranschaulichungsbeispiel — nicht deine Testdaten",
+  cycling: "Radfahren",
+  running: "Laufen",
+  intensity: "Intensität",
+  lactate: "Laktat",
+  heartRate: "Herzfrequenz",
+  stage: "Stufe",
+  rest: "Für eine Ruheprobe 0 verwenden",
+  example: "Beispiel laden",
+  clear: "Daten löschen",
+  add: "Stufe hinzufügen",
+  remove: "Stufe entfernen",
+  analyze: "Daten analysieren",
+  calculating: "Analysiere…",
+  paste: "Tabelle einfügen",
+  import: "CSV importieren",
+  template: "CSV-Vorlage herunterladen",
+  confirmImport: "Diese Spalten verwenden",
+  cancel: "Abbrechen",
+  mapping: "Spalten und Einheiten prüfen",
+  noColumn: "Nicht erfasst",
+  sort: "Stufen nach Intensität sortieren",
+  overwrite: "Aktuelle Stufendaten ersetzen?",
+  resetSport:
+    "Beim Wechsel der Sportart werden die aktuellen Daten gelöscht. Fortfahren?",
+  pasteHelp:
+    "Komma- oder tabulatorgetrennte Zeilen einfügen. Dezimalpunkt: „.“. Bestätige die Spaltenzuordnung, bevor Daten ersetzt werden.",
+  inputHelp:
+    "4–30 Belastungsstufen eingeben; 6–10 sind empfehlenswert. Laktat: mmol/L. Herzfrequenz ist optional. Jede Zeile muss vollständig sein; 0 markiert eine optionale Ruheprobe.",
+  method: "Methode",
+  threshold: "Schwelle",
+  selected: "Im Diagramm gezeigte Methode",
+  unavailable: "Nicht verfügbar",
+  partial:
+    "Einige Methoden konnten keine Schwelle bestimmen. Verfügbare Ergebnisse stehen unten.",
+  noResult:
+    "Es wurde keine anwendbare Schwelle gefunden. Prüfe Stufendaten und Methodenhinweise; Ergebnisse werden nicht über den Testbereich hinaus extrapoliert.",
+  lt1: "Erste Schwelle (LT1)",
+  lt2: "Zweite Schwelle (LT2)",
+  zones: "Drei Intensitätszonen",
+  zoneNames: ["Unterhalb LT1", "LT1 bis LT2", "Oberhalb LT2"],
+  methodHelp:
+    "Die Methodenwahl verändert die Grenzen. Laktatschwellen sind Schätzwerte; sie entsprechen nicht automatisch der FTP.",
+  export: "Ergebnisse als CSV herunterladen",
+  print: "Bericht drucken",
+  report: "Laktattest-Bericht",
+  source: "Berechnungsreferenz",
+  copied: "Kopiert",
+  copy: "Ergebnisse kopieren",
+  quality: "Hinweise zur Datenqualität",
+  methodsTitle: "Methoden und Anwendbarkeit",
+  instructionsTitle: "Datenanforderungen und Ablauf",
+  instructions: [
+    "Erfasse Intensität und gemessenes Blutlaktat am Ende jeder Stufe. Optionale Herzfrequenzen müssen denselben Stufen entsprechen.",
+    "Wähle die Sportart und die verwendeten Einheiten aus und gib die Zeilen ein, füge sie ein oder importiere sie.",
+    "Prüfe Kurve und Warnhinweise, vergleiche die Methoden und exportiere die gewählte Auswertung. Wiederhole Tests mit vergleichbarem Protokoll.",
+  ],
+  faqTitle: "Fragen zur Laktattest-Analyse",
+  faq: [
+    {
+      question: "Kann ich Garmin-Daten ohne Blutlaktatproben verwenden?",
+      answer:
+        "Dieses Tool benötigt gemessene Laktatwerte pro Stufe. Für eine Schätzung aus Wettkampfergebnissen oder einem Feldtest nutze den separaten Laktatschwellen-Rechner.",
+    },
+    {
+      question: "Warum liefern die Methoden unterschiedliche Werte?",
+      answer:
+        "Feste Konzentrationen, Basislinienanstiege und Kurvengeometrie beschreiben unterschiedliche Merkmale. Manche Methoden zielen auf den ersten Anstieg ab, andere auf eine höhere Grenze. Übereinstimmung beweist keine physiologische Genauigkeit.",
+    },
+    {
+      question: "Sind LT1 und LT2 eine Diagnose oder ein Trainingsplan?",
+      answer:
+        "Sie sind methodenabhängige Intensitätsreferenzen. Stufendauer, Probenahme und Tagesform beeinflussen die Interpretation. Bewahre Methode und Protokoll gemeinsam mit dem Ergebnis auf; ein qualifizierter Coach hilft bei der Anwendung.",
+    },
+    {
+      question: "Was passiert mit meinen Testdaten?",
+      answer:
+        "Berechnung, CSV-Auswertung und Berichterstellung laufen lokal im Browser. Eingaben werden weder hochgeladen noch in der URL gespeichert. Beim Neuladen des Tabs werden sie gelöscht; lade bei Bedarf einen Bericht herunter.",
+    },
+  ],
+  alternative: "Keine gemessenen Laktatproben?",
+  alternativeBody:
+    "Schätze eine Trainingsreferenz aus einem Wettkampf oder Feldtest mit unserem Laktatschwellen-Rechner.",
+  related: "Verwandte Tools",
+  cta: "Trainingsbelastung und Erholung langfristig verfolgen",
+  ctaBody:
+    "Kombiniere tägliche Trainingsaufzeichnungen, Intensitätsverteilung und Formtrends, um deinen Trainingszyklus zu planen und künftige Tests einzuordnen.",
+  protocol: "Optionale Testinformationen",
+  stageMinutes: "Minuten pro Stufe",
+  sampleSite: "Entnahmestelle",
+  notRecorded: "Nicht erfasst",
+  earlobe: "Ohrläppchen",
+  fingertip: "Fingerkuppe",
+  other: "Sonstige",
+  incomplete: "Die letzte Stufe wurde nicht abgeschlossen",
+  excluded: "Letzte Stufe aus der Analyse ausschließen",
+  runtimeError:
+    "Die Analyse konnte nicht ausgeführt werden. Deine Eingaben sind noch vorhanden; bitte versuche es erneut.",
+  exportError:
+    "Der Export konnte nicht vorbereitet werden. Bitte versuche es erneut.",
+  recordingError:
+    "Prüfe Datei, Zeilen, Zahlenwerte und Spaltenzuordnung. CSV-Limit: 256 KiB, 100 Textzeilen, 16 Spalten.",
+  methodNames,
+  methodDescriptions: {
+    obla_2:
+      "Intensität, bei der die kubische Kurve zuletzt steigend 2 mmol/L überschreitet. Eine feste Konzentration ist nicht für alle die erste Schwelle.",
+    obla_4:
+      "Intensität, bei der die kubische Kurve zuletzt steigend 4 mmol/L überschreitet. Dieser feste Wert ist nicht universell LT2.",
+    bsln_05:
+      "Intensität bei Basislinie plus 0,5 mmol/L. Als Basislinie gilt die Ruheprobe oder, falls nicht erfasst, die erste Belastungsstufe.",
+    bsln_10:
+      "Intensität bei Basislinie plus 1,0 mmol/L. Eine einzelne Basisprobe kann diese Schätzung verschieben.",
+    log_log:
+      "Zwei Geraden, angepasst an log-Intensität und log-Laktat mit gemeinsamer gemessener Trennstufe. Die Aufteilung mit minimalem Residuum bestimmt den Schnittpunkt. Mindestens fünf Stufen erforderlich.",
+    dmax: "Größter Abstand unterhalb der Geraden zwischen dem ersten und letzten Punkt der kubischen Anpassung. Es werden nur Belastungsstufen angepasst.",
+    moddmax:
+      "Die Referenzlinie beginnt vor dem ersten benachbarten Laktatanstieg von mindestens 0,4 mmol/L anhand gemessener Ankerwerte.",
+    log_poly_moddmax:
+      "Die Referenzlinie verläuft von der Log-log-Intensität auf der kubischen Kurve bis zum letzten gemessenen Laktatwert. Erfordert ein gültiges Log-log-Ergebnis.",
+  },
+  reasons: {
+    invalid_value:
+      "Prüfe die markierte Zeile. Verwende endliche, positive Laktat- und optionale Herzfrequenzwerte; Intensität 0 ist nur für die Ruheprobe zulässig.",
+    too_few_stages:
+      "Mindestens vier Belastungsstufen erforderlich; Log-log benötigt fünf.",
+    too_many_stages: "Maximal 30 Belastungsstufen verwenden.",
+    duplicate_intensity:
+      "Jede Intensität darf nur einmal vorkommen. Prüfe doppelte Stufen.",
+    unsorted_stages:
+      "Stufenintensitäten müssen aufsteigend sein. Bestätige vor der Analyse die Sortierung.",
+    fit_degenerate:
+      "Diese Stufen bestimmen keine stabile kubische Kurvenanpassung.",
+    target_not_reached:
+      "Die angepasste Kurve steigt im getesteten Bereich nicht über diesen Zielwert.",
+    loglog_unavailable:
+      "Im Bereich der Belastungsstufen wurde kein gültiger Log-log-Schnittpunkt gefunden.",
+    no_lactate_rise:
+      "Kein benachbarter Anstieg von mindestens 0,4 mmol/L gefunden.",
+    no_distance:
+      "Kein positiver Abstand unterhalb der Referenzlinie gefunden.",
+    no_resting_sample:
+      "Keine Ruheprobe: Basislinien-Methoden verwenden die erste Belastungsstufe.",
+    few_stages:
+      "Wenige Stufen: Eine einzelne Probe kann die Anpassung stark beeinflussen.",
+    early_dip:
+      "Das Laktat sinkt in den frühen Stufen. Prüfe Proben und Aufwärmkontext.",
+    final_not_rising:
+      "Das Laktat steigt in der letzten Stufe nicht an. Prüfe, ob die geplante Intensität erreicht wurde.",
+    uneven_steps:
+      "Die Intensitätsstufen sind ungleichmäßig. Bewahre das Testprotokoll zu diesem Ergebnis auf.",
+    threshold_at_edge: "Diese Schätzung liegt am Rand des gemessenen Bereichs.",
+    negative_fit:
+      "Die angepasste Kurve fällt unter null. Prüfe Anpassungsqualität und Messwerte.",
+    invalid_pair:
+      "Wähle verfügbare Methoden mit LT1 unterhalb von LT2, bevor du die Zonen nutzt.",
+  },
+};
+
+const fr: BaseLactateCopy = {
+  title: "Calculateur de courbe de lactate",
+  description:
+    "Analysez le lactate sanguin mesuré lors de tests incrémentaux à vélo ou en course à pied. Comparez les méthodes de seuil, définissez les domaines d'intensité et exportez l'analyse.",
+  badge: "Test par paliers",
+  privacy:
+    "Gratuit, sans inscription. Les données restent dans cet onglet du navigateur et sont perdues lors du rechargement sauf si vous les exportez.",
+  inputTitle: "Vos données de test",
+  resultTitle: "Analyse du test",
+  empty:
+    "Saisissez vos données par palier ou chargez un exemple pour voir comment fonctionne l'analyse.",
+  stale:
+    "Vos données ont été modifiées. Relancez l'analyse avant d'utiliser ou d'exporter ces résultats.",
+  sample: "Exemple illustratif — pas vos données de test",
+  cycling: "Cyclisme",
+  running: "Course à pied",
+  intensity: "Intensité",
+  lactate: "Lactate",
+  heartRate: "Fréquence cardiaque",
+  stage: "Palier",
+  rest: "Utilisez 0 pour un prélèvement au repos",
+  example: "Charger un exemple",
+  clear: "Effacer les données",
+  add: "Ajouter un palier",
+  remove: "Supprimer un palier",
+  analyze: "Analyser les données",
+  calculating: "Analyse en cours…",
+  paste: "Coller un tableau",
+  import: "Importer un CSV",
+  template: "Télécharger le modèle CSV",
+  confirmImport: "Utiliser ces colonnes",
+  cancel: "Annuler",
+  mapping: "Vérifier les colonnes et les unités",
+  noColumn: "Non renseigné",
+  sort: "Trier les paliers par intensité",
+  overwrite: "Remplacer les données actuelles ?",
+  resetSport:
+    "Changer de sport efface les données actuelles. Continuer ?",
+  pasteHelp:
+    "Collez des lignes séparées par des virgules ou des tabulations. Séparateur décimal : « . ». Confirmez la correspondance des colonnes avant de remplacer les données.",
+  inputHelp:
+    "Saisissez 4 à 30 paliers d'effort ; 6 à 10 sont préférables. Lactate : mmol/L. La fréquence cardiaque est facultative. Chaque ligne doit être complète ; 0 indique un prélèvement de repos facultatif.",
+  method: "Méthode",
+  threshold: "Seuil",
+  selected: "Méthode affichée sur le graphique",
+  unavailable: "Indisponible",
+  partial:
+    "Certaines méthodes n'ont pas pu déterminer de seuil. Les résultats disponibles sont affichés ci-dessous.",
+  noResult:
+    "Aucun seuil applicable n'a été trouvé. Vérifiez les données de paliers et les notes de méthode ; les résultats ne sont pas extrapolés hors du test.",
+  lt1: "Premier seuil (LT1)",
+  lt2: "Second seuil (LT2)",
+  zones: "Trois zones d'intensité",
+  zoneNames: ["Sous LT1", "LT1 à LT2", "Au-dessus de LT2"],
+  methodHelp:
+    "Le choix de la méthode modifie les limites. Les seuils lactiques sont des estimations ; ils ne sont pas automatiquement équivalents à la FTP.",
+  export: "Télécharger les résultats CSV",
+  print: "Imprimer le rapport",
+  report: "Rapport de test lactique",
+  source: "Référence de calcul",
+  copied: "Copié",
+  copy: "Copier les résultats",
+  quality: "Notes sur la qualité des données",
+  methodsTitle: "Méthodes et conditions d'application",
+  instructionsTitle: "Données requises et déroulement",
+  instructions: [
+    "Relevez l'intensité et le lactate sanguin mesuré à la fin de chaque palier. Les fréquences cardiaques facultatives doivent correspondre aux mêmes paliers.",
+    "Choisissez le sport et les unités utilisés lors de l'enregistrement, puis saisissez, collez ou importez les lignes.",
+    "Examinez la courbe et les avertissements, comparez les méthodes, puis exportez l'interprétation choisie. Répétez les tests avec un protocole comparable.",
+  ],
+  faqTitle: "Questions sur l'analyse des tests lactiques",
+  faq: [
+    {
+      question:
+        "Puis-je utiliser des données Garmin sans prélèvements de lactate sanguin ?",
+      answer:
+        "Cet outil nécessite un lactate mesuré à chaque palier. Pour une estimation à partir de résultats de course ou d'un test de terrain, utilisez le calculateur de seuil lactique dédié.",
+    },
+    {
+      question: "Pourquoi les méthodes donnent-elles des chiffres différents ?",
+      answer:
+        "Les concentrations fixes, les hausses par rapport à la base et la géométrie de la courbe décrivent des caractéristiques distinctes. Certaines méthodes visent la première élévation, d'autres une limite supérieure. Leur convergence ne prouve pas l'exactitude physiologique.",
+    },
+    {
+      question:
+        "LT1 et LT2 constituent-ils un diagnostic ou une prescription d'entraînement ?",
+      answer:
+        "Ce sont des repères d'intensité dépendants de la méthode. La durée des paliers, le prélèvement et la variabilité quotidienne influencent l'interprétation. Conservez la méthode et le protocole avec le résultat ; un entraîneur qualifié peut vous aider à l'appliquer.",
+    },
+    {
+      question: "Que deviennent mes données de test ?",
+      answer:
+        "Le calcul, la lecture CSV et la génération du rapport s'exécutent localement. Les données ne sont ni téléversées ni placées dans l'URL. Le rechargement de l'onglet les efface ; téléchargez un rapport si vous souhaitez les conserver.",
+    },
+  ],
+  alternative: "Pas de prélèvements de lactate mesurés ?",
+  alternativeBody:
+    "Estimez un repère d'entraînement à partir d'une course ou d'un test de terrain avec notre calculateur de seuil lactique.",
+  related: "Outils associés",
+  cta: "Suivez votre charge d'entraînement et votre récupération dans le temps",
+  ctaBody:
+    "Combinez vos séances quotidiennes, la distribution d'intensité et l'évolution de votre condition pour planifier vos cycles et contextualiser vos prochains tests.",
+  protocol: "Informations facultatives sur le test",
+  stageMinutes: "Minutes par palier",
+  sampleSite: "Site de prélèvement sanguin",
+  notRecorded: "Non renseigné",
+  earlobe: "Lobe d'oreille",
+  fingertip: "Bout du doigt",
+  other: "Autre",
+  incomplete: "Le dernier palier n'a pas été terminé",
+  excluded: "Exclure le dernier palier de l'analyse",
+  runtimeError:
+    "L'analyse n'a pas pu s'exécuter. Vos données sont toujours présentes ; veuillez réessayer.",
+  exportError:
+    "L'export n'a pas pu être préparé. Veuillez réessayer.",
+  recordingError:
+    "Vérifiez le fichier, les lignes, les valeurs numériques et la correspondance des colonnes. Limite CSV : 256 KiB, 100 lignes, 16 colonnes.",
+  methodNames,
+  methodDescriptions: {
+    obla_2:
+      "Intensité à laquelle la courbe cubique franchit 2 mmol/L pour la dernière fois à la hausse. Une concentration fixe ne correspond pas au premier seuil de chacun.",
+    obla_4:
+      "Intensité à laquelle la courbe cubique franchit 4 mmol/L pour la dernière fois à la hausse. Ce repère fixe n'est pas universellement LT2.",
+    bsln_05:
+      "Intensité à la ligne de base plus 0,5 mmol/L. La base est le prélèvement au repos, ou le premier palier d'effort en l'absence de mesure au repos.",
+    bsln_10:
+      "Intensité à la ligne de base plus 1,0 mmol/L. Un seul prélèvement de base peut déplacer cette estimation.",
+    log_log:
+      "Deux droites ajustées sur le logarithme de l'intensité et du lactate, partageant un palier mesuré de séparation. Le découpage à résidu minimal définit leur intersection. Au moins cinq paliers sont requis.",
+    dmax: "Plus grande distance sous la droite reliant le premier et le dernier point de la courbe cubique ajustée. Seuls les paliers d'effort sont ajustés.",
+    moddmax:
+      "La ligne de référence démarre avant la première hausse adjacente de lactate d'au moins 0,4 mmol/L, à partir des valeurs observées.",
+    log_poly_moddmax:
+      "La ligne de référence relie l'intensité Log-log sur la courbe cubique au dernier point de lactate mesuré. Nécessite un résultat Log-log valide.",
+  },
+  reasons: {
+    invalid_value:
+      "Vérifiez la ligne surlignée. Utilisez des valeurs finies et positives pour le lactate et la fréquence cardiaque facultative ; l'intensité 0 est réservée au repos.",
+    too_few_stages:
+      "Au moins quatre paliers d'effort sont nécessaires ; Log-log en nécessite cinq.",
+    too_many_stages: "Utilisez au maximum 30 paliers d'effort.",
+    duplicate_intensity:
+      "Chaque intensité ne doit apparaître qu'une fois. Vérifiez les paliers en double.",
+    unsorted_stages:
+      "Les intensités des paliers doivent être croissantes. Confirmez le tri avant l'analyse.",
+    fit_degenerate:
+      "Ces paliers ne permettent pas d'obtenir un ajustement cubique stable.",
+    target_not_reached:
+      "La courbe ajustée ne franchit pas cette cible à la hausse dans la plage testée.",
+    loglog_unavailable:
+      "Aucune intersection Log-log valide n'a été trouvée dans les paliers d'effort.",
+    no_lactate_rise:
+      "Aucune hausse adjacente d'au moins 0,4 mmol/L n'a été trouvée.",
+    no_distance:
+      "Aucune distance positive sous la ligne de référence n'a été trouvée.",
+    no_resting_sample:
+      "Pas de mesure au repos : les méthodes basées sur la ligne de base utilisent le premier palier d'effort.",
+    few_stages:
+      "Peu de paliers : un seul prélèvement peut fortement influencer l'ajustement.",
+    early_dip:
+      "Le lactate baisse lors des premiers paliers. Vérifiez les prélèvements et l'échauffement.",
+    final_not_rising:
+      "Le lactate n'augmente pas au dernier palier. Vérifiez si le test a atteint l'intensité prévue.",
+    uneven_steps:
+      "Les incréments d'intensité varient. Conservez le protocole de test avec ce résultat.",
+    threshold_at_edge:
+      "Cette estimation se situe au bord de la plage mesurée.",
+    negative_fit:
+      "La courbe ajustée passe sous zéro. Vérifiez la qualité de l'ajustement et les prélèvements.",
+    invalid_pair:
+      "Choisissez des méthodes disponibles avec LT1 inférieur à LT2 avant d'utiliser les zones.",
+  },
+};
+
+const es: BaseLactateCopy = {
+  title: "Calculadora de curva de lactato",
+  description:
+    "Analiza el lactato sanguíneo medido en pruebas incrementales de ciclismo o carrera. Compara métodos de umbral, define dominios de intensidad y exporta el análisis.",
+  badge: "Prueba escalonada incremental",
+  privacy:
+    "Gratis y sin registro. Los datos de prueba permanecen en esta pestaña del navegador y se pierden al recargar a menos que los exportes.",
+  inputTitle: "Datos de tu prueba",
+  resultTitle: "Análisis de la prueba",
+  empty:
+    "Ingresa los datos de cada etapa o carga un ejemplo para ver cómo funciona el análisis.",
+  stale:
+    "Tus datos han cambiado. Vuelve a analizar antes de usar o exportar estos resultados.",
+  sample: "Ejemplo ilustrativo — no son los datos de tu prueba",
+  cycling: "Ciclismo",
+  running: "Carrera",
+  intensity: "Intensidad",
+  lactate: "Lactato",
+  heartRate: "Frecuencia cardíaca",
+  stage: "Etapa",
+  rest: "Usa 0 para una muestra en reposo",
+  example: "Cargar ejemplo",
+  clear: "Borrar datos",
+  add: "Añadir etapa",
+  remove: "Eliminar etapa",
+  analyze: "Analizar datos",
+  calculating: "Analizando…",
+  paste: "Pegar una tabla",
+  import: "Importar CSV",
+  template: "Descargar plantilla CSV",
+  confirmImport: "Usar estas columnas",
+  cancel: "Cancelar",
+  mapping: "Revisar columnas y unidades",
+  noColumn: "Sin registrar",
+  sort: "Ordenar etapas por intensidad",
+  overwrite: "¿Reemplazar los datos actuales de las etapas?",
+  resetSport:
+    "Cambiar de deporte borra los datos actuales. ¿Deseas continuar?",
+  pasteHelp:
+    "Pega filas separadas por comas o tabulaciones. Punto decimal: “.”. Confirma la asignación de columnas antes de reemplazar los datos.",
+  inputHelp:
+    "Ingresa de 4 a 30 etapas de ejercicio; lo ideal son 6–10. Lactato: mmol/L. La frecuencia cardíaca es opcional. Cada fila debe estar completa; 0 indica una muestra opcional en reposo.",
+  method: "Método",
+  threshold: "Umbral",
+  selected: "Método mostrado en el gráfico",
+  unavailable: "No disponible",
+  partial:
+    "Algunos métodos no pudieron hallar un umbral. A continuación se muestran los resultados disponibles.",
+  noResult:
+    "No se encontró ningún umbral aplicable. Revisa los datos de las etapas y las notas del método; los resultados no se extrapolan fuera de la prueba.",
+  lt1: "Primer umbral (LT1)",
+  lt2: "Segundo umbral (LT2)",
+  zones: "Tres zonas de intensidad",
+  zoneNames: ["Por debajo de LT1", "LT1 a LT2", "Por encima de LT2"],
+  methodHelp:
+    "La elección del método cambia los límites. Los umbrales de lactato son estimaciones; no equivalen automáticamente al FTP.",
+  export: "Descargar resultados CSV",
+  print: "Imprimir informe",
+  report: "Informe de prueba de lactato",
+  source: "Referencia de cálculo",
+  copied: "Copiado",
+  copy: "Copiar resultados",
+  quality: "Notas sobre la calidad de los datos",
+  methodsTitle: "Métodos y aplicabilidad",
+  instructionsTitle: "Requisitos de datos y flujo de trabajo",
+  instructions: [
+    "Registra la intensidad y el lactato sanguíneo medido al final de cada etapa. Las frecuencias cardíacas opcionales deben corresponder a las mismas etapas.",
+    "Elige el deporte y las unidades usadas en tu registro; luego ingresa, pega o importa las filas.",
+    "Inspecciona la curva y las advertencias, compara los métodos y exporta la interpretación elegida. Repite las pruebas con un protocolo comparable.",
+  ],
+  faqTitle: "Preguntas sobre el análisis de pruebas de lactato",
+  faq: [
+    {
+      question: "¿Puedo usar datos de Garmin sin muestras de lactato en sangre?",
+      answer:
+        "Esta herramienta necesita lactato medido en cada etapa. Para una estimación a partir de resultados de carrera o una prueba de campo, usa la calculadora de umbral de lactato aparte.",
+    },
+    {
+      question: "¿Por qué los métodos arrojan valores diferentes?",
+      answer:
+        "Las concentraciones fijas, los incrementos sobre la línea base y la geometría de la curva describen características distintas. Algunos métodos buscan el primer ascenso y otros estiman un límite superior. Que coincidan no demuestra precisión fisiológica.",
+    },
+    {
+      question: "¿Son LT1 y LT2 un diagnóstico o una prescripción de entrenamiento?",
+      answer:
+        "Son referencias de intensidad que dependen del método. La duración de las etapas, la toma de muestras y la variación diaria afectan la interpretación. Conserva el método y el protocolo junto al resultado; un entrenador cualificado puede ayudarte a aplicarlo.",
+    },
+    {
+      question: "¿Qué ocurre con los datos de mi prueba?",
+      answer:
+        "El cálculo, la lectura de CSV y la generación del informe se ejecutan localmente. Los datos no se suben ni se incluyen en la URL. Recargar la pestaña los borra; descarga un informe si necesitas conservar un registro.",
+    },
+  ],
+  alternative: "¿No tienes muestras medidas de lactato?",
+  alternativeBody:
+    "Estima una referencia de entrenamiento a partir de una carrera o prueba de campo con nuestra calculadora de umbral de lactato.",
+  related: "Herramientas relacionadas",
+  cta: "Sigue tu carga de entrenamiento y recuperación a lo largo del tiempo",
+  ctaBody:
+    "Combina tus registros diarios de entrenamiento, la distribución de intensidad y las tendencias de estado para planificar tu ciclo y dar contexto a futuras pruebas.",
+  protocol: "Información opcional de la prueba",
+  stageMinutes: "Minutos por etapa",
+  sampleSite: "Sitio de toma de muestra",
+  notRecorded: "Sin registrar",
+  earlobe: "Lóbulo de la oreja",
+  fingertip: "Yema del dedo",
+  other: "Otro",
+  incomplete: "La última etapa no se completó",
+  excluded: "Excluir la última etapa del análisis",
+  runtimeError:
+    "No se pudo ejecutar el análisis. Tus datos siguen aquí; por favor, inténtalo de nuevo.",
+  exportError:
+    "No se pudo preparar la exportación. Por favor, inténtalo de nuevo.",
+  recordingError:
+    "Revisa el archivo, las filas, los valores numéricos y la asignación de columnas. Límite CSV: 256 KiB, 100 líneas de texto, 16 columnas.",
+  methodNames,
+  methodDescriptions: {
+    obla_2:
+      "Intensidad en la que la curva cúbica ajustada cruza por última vez hacia arriba los 2 mmol/L. Una concentración fija no es el primer umbral de todas las personas.",
+    obla_4:
+      "Intensidad en la que la curva cúbica ajustada cruza por última vez hacia arriba los 4 mmol/L. Este valor fijo no equivale universalmente a LT2.",
+    bsln_05:
+      "Intensidad en la línea base más 0,5 mmol/L. La línea base es la muestra en reposo o la primera etapa de ejercicio si no se registró reposo.",
+    bsln_10:
+      "Intensidad en la línea base más 1,0 mmol/L. Una sola muestra base puede desplazar esta estimación.",
+    log_log:
+      "Dos rectas ajustadas al logaritmo de la intensidad y del lactato que comparten una etapa medida de división. La división de residuo mínimo determina su intersección. Se necesitan al menos cinco etapas.",
+    dmax: "Mayor distancia por debajo de la recta que une el primer y el último punto de la curva cúbica ajustada. Solo se ajustan las etapas de ejercicio.",
+    moddmax:
+      "La línea de referencia comienza antes del primer aumento adyacente de lactato de al menos 0,4 mmol/L, usando valores de anclaje observados.",
+    log_poly_moddmax:
+      "La línea de referencia va desde la intensidad Log-log sobre la curva cúbica hasta el último punto de lactato medido. Depende de un resultado válido de Log-log.",
+  },
+  reasons: {
+    invalid_value:
+      "Revisa la fila resaltada. Usa valores finitos y positivos para el lactato y la frecuencia cardíaca opcional; la intensidad solo puede ser 0 para el reposo.",
+    too_few_stages:
+      "Se necesitan al menos cuatro etapas de ejercicio; Log-log requiere cinco.",
+    too_many_stages: "Usa como máximo 30 etapas de ejercicio.",
+    duplicate_intensity:
+      "Cada intensidad debe aparecer solo una vez. Revisa las etapas duplicadas.",
+    unsorted_stages:
+      "Las intensidades de las etapas deben ser crecientes. Confirma el orden antes de analizar.",
+    fit_degenerate:
+      "Estas etapas no permiten determinar un ajuste cúbico estable.",
+    target_not_reached:
+      "La curva ajustada no cruza hacia arriba este objetivo dentro del rango evaluado.",
+    loglog_unavailable:
+      "No se encontró ninguna intersección Log-log válida dentro de las etapas de ejercicio.",
+    no_lactate_rise:
+      "No se encontró ningún aumento adyacente de al menos 0,4 mmol/L.",
+    no_distance:
+      "No se encontró ninguna distancia positiva por debajo de la línea de referencia.",
+    no_resting_sample:
+      "Sin muestra en reposo: los métodos de incremento sobre la base usan la primera etapa de ejercicio.",
+    few_stages:
+      "Pocas etapas: una sola muestra puede influir notablemente en el ajuste.",
+    early_dip:
+      "El lactato desciende en las primeras etapas. Revisa las muestras y el calentamiento.",
+    final_not_rising:
+      "El lactato no aumenta en la última etapa. Comprueba si la prueba alcanzó la intensidad prevista.",
+    uneven_steps:
+      "Los incrementos de intensidad varían. Conserva el protocolo de la prueba junto a este resultado.",
+    threshold_at_edge:
+      "Esta estimación se sitúa en un extremo del rango medido.",
+    negative_fit:
+      "La curva ajustada cae por debajo de cero. Revisa la calidad del ajuste y los valores de las muestras.",
+    invalid_pair:
+      "Elige métodos disponibles con LT1 por debajo de LT2 antes de usar las zonas.",
+  },
+};
+
+const it: BaseLactateCopy = {
+  title: "Calcolatore della curva del lattato",
+  description:
+    "Analizza il lattato ematico misurato nei test incrementali di ciclismo o corsa. Confronta i metodi di soglia, definisci i domini di intensità ed esporta l'analisi.",
+  badge: "Test incrementale a stadi",
+  privacy:
+    "Gratuito, senza registrazione. I dati del test restano in questa scheda del browser e vanno persi al ricaricamento se non esportati.",
+  inputTitle: "I dati del tuo test",
+  resultTitle: "Analisi del test",
+  empty:
+    "Inserisci i dati degli stadi o carica un esempio per vedere come funziona l'analisi.",
+  stale:
+    "I dati inseriti sono cambiati. Riesegui l'analisi prima di usare o esportare questi risultati.",
+  sample: "Esempio illustrativo — non sono i dati del tuo test",
+  cycling: "Ciclismo",
+  running: "Corsa",
+  intensity: "Intensità",
+  lactate: "Lattato",
+  heartRate: "Frequenza cardiaca",
+  stage: "Stadio",
+  rest: "Usa 0 per un campione a riposo",
+  example: "Carica esempio",
+  clear: "Cancella dati",
+  add: "Aggiungi stadio",
+  remove: "Rimuovi stadio",
+  analyze: "Analizza dati",
+  calculating: "Analisi in corso…",
+  paste: "Incolla una tabella",
+  import: "Importa CSV",
+  template: "Scarica modello CSV",
+  confirmImport: "Usa queste colonne",
+  cancel: "Annulla",
+  mapping: "Controlla colonne e unità",
+  noColumn: "Non registrato",
+  sort: "Ordina gli stadi per intensità",
+  overwrite: "Sostituire i dati degli stadi attuali?",
+  resetSport:
+    "Cambiare sport cancella i dati attuali. Continuare?",
+  pasteHelp:
+    "Incolla righe separate da virgole o tabulazioni. Separatore decimale: “.”. Conferma la mappatura delle colonne prima di sostituire i dati.",
+  inputHelp:
+    "Inserisci 4–30 stadi di esercizio; 6–10 sono preferibili. Lattato: mmol/L. La frequenza cardiaca è facoltativa. Ogni riga deve essere completa; 0 indica un campione a riposo facoltativo.",
+  method: "Metodo",
+  threshold: "Soglia",
+  selected: "Metodo mostrato sul grafico",
+  unavailable: "Non disponibile",
+  partial:
+    "Alcuni metodi non hanno trovato una soglia. I risultati disponibili sono mostrati sotto.",
+  noResult:
+    "Non è stata trovata alcuna soglia applicabile. Controlla i dati degli stadi e le note sui metodi; i risultati non vengono estrapolati oltre il test.",
+  lt1: "Prima soglia (LT1)",
+  lt2: "Seconda soglia (LT2)",
+  zones: "Tre zone di intensità",
+  zoneNames: ["Sotto LT1", "Da LT1 a LT2", "Sopra LT2"],
+  methodHelp:
+    "La scelta del metodo cambia i confini. Le soglie del lattato sono stime e non equivalgono automaticamente alla FTP.",
+  export: "Scarica risultati CSV",
+  print: "Stampa report",
+  report: "Report del test del lattato",
+  source: "Riferimento di calcolo",
+  copied: "Copiato",
+  copy: "Copia risultati",
+  quality: "Note sulla qualità dei dati",
+  methodsTitle: "Metodi e applicabilità",
+  instructionsTitle: "Requisiti dei dati e flusso di lavoro",
+  instructions: [
+    "Registra l'intensità e il lattato ematico misurato alla fine di ogni stadio. Le frequenze cardiache facoltative devono appartenere agli stessi stadi.",
+    "Scegli lo sport e le unità usate nella registrazione, poi inserisci, incolla o importa le righe.",
+    "Esamina curva e avvisi, confronta i metodi ed esporta l'interpretazione scelta. Ripeti i test con un protocollo comparabile.",
+  ],
+  faqTitle: "Domande sull'analisi del test del lattato",
+  faq: [
+    {
+      question: "Posso usare dati Garmin senza prelievi di lattato ematico?",
+      answer:
+        "Questo strumento richiede il lattato misurato a ogni stadio. Per una stima da risultati di gara o test sul campo, usa il calcolatore dedicato della soglia del lattato.",
+    },
+    {
+      question: "Perché i metodi restituiscono numeri diversi?",
+      answer:
+        "Concentrazioni fisse, aumenti dalla linea di base e geometria della curva descrivono caratteristiche diverse. Alcuni metodi individuano il primo rialzo, altri stimano un confine più alto. La concordanza non dimostra l'accuratezza fisiologica.",
+    },
+    {
+      question: "LT1 e LT2 sono una diagnosi o una prescrizione di allenamento?",
+      answer:
+        "Sono riferimenti di intensità dipendenti dal metodo. Durata degli stadi, prelievo e variabilità giornaliera influenzano l'interpretazione. Conserva metodo e protocollo insieme al risultato; un allenatore qualificato può aiutarti ad applicarlo.",
+    },
+    {
+      question: "Cosa succede ai dati del mio test?",
+      answer:
+        "Calcolo, lettura CSV e generazione del report avvengono localmente. I dati non vengono caricati né inseriti nell'URL. Ricaricare la scheda li cancella; scarica un report se ti serve conservarli.",
+    },
+  ],
+  alternative: "Nessun campione di lattato misurato?",
+  alternativeBody:
+    "Stima un riferimento di allenamento da una gara o un test sul campo con il nostro calcolatore della soglia del lattato.",
+  related: "Strumenti correlati",
+  cta: "Monitora il carico di allenamento e il recupero nel tempo",
+  ctaBody:
+    "Combina le registrazioni giornaliere, la distribuzione dell'intensità e l'andamento della condizione per pianificare il ciclo di allenamento e contestualizzare i test futuri.",
+  protocol: "Informazioni facoltative sul test",
+  stageMinutes: "Minuti per stadio",
+  sampleSite: "Sede di prelievo ematico",
+  notRecorded: "Non registrato",
+  earlobe: "Lobo dell'orecchio",
+  fingertip: "Polpastrello",
+  other: "Altro",
+  incomplete: "L'ultimo stadio non è stato completato",
+  excluded: "Escludi l'ultimo stadio dall'analisi",
+  runtimeError:
+    "Impossibile eseguire l'analisi. I tuoi dati sono ancora qui; riprova.",
+  exportError:
+    "Impossibile preparare l'esportazione. Riprova.",
+  recordingError:
+    "Controlla file, righe, valori numerici e mappatura delle colonne. Limite CSV: 256 KiB, 100 righe di testo, 16 colonne.",
+  methodNames,
+  methodDescriptions: {
+    obla_2:
+      "Intensità alla quale la curva cubica adattata sale per l'ultima volta oltre 2 mmol/L. Una concentrazione fissa non rappresenta la prima soglia di tutti.",
+    obla_4:
+      "Intensità alla quale la curva cubica adattata sale per l'ultima volta oltre 4 mmol/L. Questo valore fisso non coincide universalmente con LT2.",
+    bsln_05:
+      "Intensità alla linea di base più 0,5 mmol/L. La linea di base è il campione a riposo oppure il primo stadio di esercizio se il riposo non è stato registrato.",
+    bsln_10:
+      "Intensità alla linea di base più 1,0 mmol/L. Un singolo campione di base può spostare questa stima.",
+    log_log:
+      "Due rette adattate a log-intensità e log-lattato che condividono uno stadio di divisione misurato. La divisione a residuo minimo determina l'intersezione. Servono almeno cinque stadi.",
+    dmax: "Distanza massima sotto la retta che unisce il primo e l'ultimo punto della curva cubica adattata. Vengono adattati solo gli stadi di esercizio.",
+    moddmax:
+      "La linea di riferimento parte prima del primo aumento adiacente di lattato di almeno 0,4 mmol/L, usando i valori osservati come ancore.",
+    log_poly_moddmax:
+      "La linea di riferimento va dall'intensità Log-log sulla curva cubica all'ultimo punto di lattato misurato. Richiede un risultato Log-log valido.",
+  },
+  reasons: {
+    invalid_value:
+      "Controlla la riga evidenziata. Usa valori finiti e positivi per lattato e frequenza cardiaca facoltativa; l'intensità può essere 0 solo a riposo.",
+    too_few_stages:
+      "Servono almeno quattro stadi di esercizio; Log-log ne richiede cinque.",
+    too_many_stages: "Usa al massimo 30 stadi di esercizio.",
+    duplicate_intensity:
+      "Ogni intensità deve comparire una sola volta. Controlla gli stadi duplicati.",
+    unsorted_stages:
+      "Le intensità degli stadi devono essere crescenti. Conferma l'ordinamento prima dell'analisi.",
+    fit_degenerate:
+      "Questi stadi non determinano un adattamento cubico stabile.",
+    target_not_reached:
+      "La curva adattata non supera al rialzo questo valore nell'intervallo testato.",
+    loglog_unavailable:
+      "Nessuna intersezione Log-log valida trovata all'interno degli stadi di esercizio.",
+    no_lactate_rise:
+      "Nessun aumento adiacente di almeno 0,4 mmol/L trovato.",
+    no_distance:
+      "Nessuna distanza positiva sotto la linea di riferimento trovata.",
+    no_resting_sample:
+      "Nessun campione a riposo: i metodi di incremento dalla base usano il primo stadio di esercizio.",
+    few_stages:
+      "Pochi stadi: un singolo campione può influenzare fortemente l'adattamento.",
+    early_dip:
+      "Il lattato cala nei primi stadi. Controlla i campioni e il contesto del riscaldamento.",
+    final_not_rising:
+      "Il lattato non aumenta nell'ultimo stadio. Verifica se il test ha raggiunto l'intensità prevista.",
+    uneven_steps:
+      "Gli incrementi di intensità variano. Conserva il protocollo del test con questo risultato.",
+    threshold_at_edge:
+      "Questa stima si trova a un'estremità dell'intervallo misurato.",
+    negative_fit:
+      "La curva adattata scende sotto zero. Controlla la qualità dell'adattamento e i valori dei campioni.",
+    invalid_pair:
+      "Scegli metodi disponibili con LT1 inferiore a LT2 prima di usare le zone.",
+  },
+};
+
+const ptBR: BaseLactateCopy = {
+  title: "Calculadora de curva de lactato",
+  description:
+    "Analise o lactato sanguíneo medido em testes incrementais de ciclismo ou corrida. Compare métodos de limiar, defina domínios de intensidade e exporte a análise.",
+  badge: "Teste escalonado incremental",
+  privacy:
+    "Gratuito e sem cadastro. Os dados do teste ficam nesta aba do navegador e são perdidos ao recarregar, a menos que sejam exportados.",
+  inputTitle: "Dados do seu teste",
+  resultTitle: "Análise do teste",
+  empty:
+    "Insira os dados de cada estágio ou carregue um exemplo para ver como a análise funciona.",
+  stale:
+    "Seus dados foram alterados. Analise novamente antes de usar ou exportar estes resultados.",
+  sample: "Exemplo ilustrativo — não são os dados do seu teste",
+  cycling: "Ciclismo",
+  running: "Corrida",
+  intensity: "Intensidade",
+  lactate: "Lactato",
+  heartRate: "Frequência cardíaca",
+  stage: "Estágio",
+  rest: "Use 0 para uma amostra em repouso",
+  example: "Carregar exemplo",
+  clear: "Limpar dados",
+  add: "Adicionar estágio",
+  remove: "Remover estágio",
+  analyze: "Analisar dados",
+  calculating: "Analisando…",
+  paste: "Colar uma tabela",
+  import: "Importar CSV",
+  template: "Baixar modelo CSV",
+  confirmImport: "Usar estas colunas",
+  cancel: "Cancelar",
+  mapping: "Conferir colunas e unidades",
+  noColumn: "Não registrado",
+  sort: "Ordenar estágios por intensidade",
+  overwrite: "Substituir os dados atuais dos estágios?",
+  resetSport:
+    "Trocar de esporte apaga os dados atuais. Continuar?",
+  pasteHelp:
+    "Cole linhas separadas por vírgula ou tabulação. Ponto decimal: “.”. Confirme o mapeamento das colunas antes de substituir os dados.",
+  inputHelp:
+    "Insira de 4 a 30 estágios de exercício; 6–10 são ideais. Lactato: mmol/L. A frequência cardíaca é opcional. Cada linha deve estar completa; 0 indica uma amostra opcional em repouso.",
+  method: "Método",
+  threshold: "Limiar",
+  selected: "Método exibido no gráfico",
+  unavailable: "Indisponível",
+  partial:
+    "Alguns métodos não conseguiram encontrar um limiar. Os resultados disponíveis aparecem abaixo.",
+  noResult:
+    "Nenhum limiar aplicável foi encontrado. Revise os dados dos estágios e as notas dos métodos; os resultados não são extrapolados além do teste.",
+  lt1: "Primeiro limiar (LT1)",
+  lt2: "Segundo limiar (LT2)",
+  zones: "Três zonas de intensidade",
+  zoneNames: ["Abaixo de LT1", "LT1 a LT2", "Acima de LT2"],
+  methodHelp:
+    "A escolha do método altera os limites. Limiares de lactato são estimativas e não equivalem automaticamente ao FTP.",
+  export: "Baixar resultados CSV",
+  print: "Imprimir relatório",
+  report: "Relatório do teste de lactato",
+  source: "Referência de cálculo",
+  copied: "Copiado",
+  copy: "Copiar resultados",
+  quality: "Notas sobre a qualidade dos dados",
+  methodsTitle: "Métodos e aplicabilidade",
+  instructionsTitle: "Requisitos de dados e fluxo de trabalho",
+  instructions: [
+    "Registre a intensidade e o lactato sanguíneo medido ao final de cada estágio. Frequências cardíacas opcionais devem corresponder aos mesmos estágios.",
+    "Escolha o esporte e as unidades usadas no registro e, em seguida, digite, cole ou importe as linhas.",
+    "Inspecione a curva e os avisos, compare os métodos e exporte a interpretação escolhida. Repita os testes com um protocolo comparável.",
+  ],
+  faqTitle: "Perguntas sobre a análise do teste de lactato",
+  faq: [
+    {
+      question: "Posso usar dados do Garmin sem amostras de lactato sanguíneo?",
+      answer:
+        "Esta ferramenta exige lactato medido em cada estágio. Para uma estimativa a partir de resultados de prova ou teste de campo, use a calculadora de limiar de lactato separada.",
+    },
+    {
+      question: "Por que os métodos retornam valores diferentes?",
+      answer:
+        "Concentrações fixas, aumentos em relação à linha de base e geometria da curva descrevem características distintas. Alguns métodos buscam a primeira elevação; outros estimam um limite mais alto. Concordância entre métodos não comprova precisão fisiológica.",
+    },
+    {
+      question: "LT1 e LT2 são um diagnóstico ou uma prescrição de treino?",
+      answer:
+        "São referências de intensidade dependentes do método. Duração dos estágios, coleta e variação diária afetam a interpretação. Guarde o método e o protocolo junto com o resultado; um treinador qualificado pode ajudar na aplicação.",
+    },
+    {
+      question: "O que acontece com os dados do meu teste?",
+      answer:
+        "O cálculo, a leitura do CSV e a geração do relatório rodam localmente. Os dados não são enviados ao servidor nem colocados na URL. Recarregar a aba apaga os dados; baixe um relatório se precisar guardar o registro.",
+    },
+  ],
+  alternative: "Sem amostras medidas de lactato?",
+  alternativeBody:
+    "Estime uma referência de treino a partir de uma prova ou teste de campo com nossa calculadora de limiar de lactato.",
+  related: "Ferramentas relacionadas",
+  cta: "Acompanhe a carga de treino e a recuperação ao longo do tempo",
+  ctaBody:
+    "Combine seus registros diários de treino, a distribuição de intensidade e as tendências de condicionamento para planejar seu ciclo e contextualizar futuros testes.",
+  protocol: "Informações opcionais do teste",
+  stageMinutes: "Minutos por estágio",
+  sampleSite: "Local da coleta sanguínea",
+  notRecorded: "Não registrado",
+  earlobe: "Lóbulo da orelha",
+  fingertip: "Ponta do dedo",
+  other: "Outro",
+  incomplete: "O último estágio não foi concluído",
+  excluded: "Excluir o último estágio da análise",
+  runtimeError:
+    "Não foi possível executar a análise. Seus dados continuam aqui; tente novamente.",
+  exportError:
+    "Não foi possível preparar a exportação. Tente novamente.",
+  recordingError:
+    "Verifique o arquivo, as linhas, os valores numéricos e o mapeamento das colunas. Limite CSV: 256 KiB, 100 linhas de texto, 16 colunas.",
+  methodNames,
+  methodDescriptions: {
+    obla_2:
+      "Intensidade em que a curva cúbica ajustada cruza para cima pela última vez os 2 mmol/L. Uma concentração fixa não é o primeiro limiar de todas as pessoas.",
+    obla_4:
+      "Intensidade em que a curva cúbica ajustada cruza para cima pela última vez os 4 mmol/L. Esse marcador fixo não é universalmente o LT2.",
+    bsln_05:
+      "Intensidade na linha de base mais 0,5 mmol/L. A linha de base é a amostra de repouso ou o primeiro estágio de exercício quando não há amostra de repouso.",
+    bsln_10:
+      "Intensidade na linha de base mais 1,0 mmol/L. Uma única amostra de base pode deslocar essa estimativa.",
+    log_log:
+      "Duas retas ajustadas ao logaritmo da intensidade e do lactato, compartilhando um estágio medido de divisão. A divisão de menor resíduo determina a interseção. São necessários pelo menos cinco estágios.",
+    dmax: "Maior distância abaixo da reta que liga o primeiro e o último ponto da curva cúbica ajustada. Apenas os estágios de exercício são ajustados.",
+    moddmax:
+      "A linha de referência começa antes do primeiro aumento adjacente de lactato de pelo menos 0,4 mmol/L, usando valores observados como âncora.",
+    log_poly_moddmax:
+      "A linha de referência vai da intensidade Log-log na curva cúbica até o último ponto de lactato medido. Depende de um resultado Log-log válido.",
+  },
+  reasons: {
+    invalid_value:
+      "Verifique a linha destacada. Use valores finitos e positivos para lactato e frequência cardíaca opcional; a intensidade só pode ser 0 para repouso.",
+    too_few_stages:
+      "São necessários pelo menos quatro estágios de exercício; Log-log exige cinco.",
+    too_many_stages: "Use no máximo 30 estágios de exercício.",
+    duplicate_intensity:
+      "Cada intensidade deve aparecer apenas uma vez. Revise estágios duplicados.",
+    unsorted_stages:
+      "As intensidades dos estágios devem ser crescentes. Confirme a ordenação antes da análise.",
+    fit_degenerate:
+      "Estes estágios não determinam um ajuste cúbico estável.",
+    target_not_reached:
+      "A curva ajustada não cruza para cima esse valor-alvo dentro da faixa testada.",
+    loglog_unavailable:
+      "Nenhuma interseção Log-log válida foi encontrada dentro dos estágios de exercício.",
+    no_lactate_rise:
+      "Nenhum aumento adjacente de pelo menos 0,4 mmol/L foi encontrado.",
+    no_distance:
+      "Nenhuma distância positiva abaixo da linha de referência foi encontrada.",
+    no_resting_sample:
+      "Sem amostra de repouso: os métodos de acréscimo sobre a base usam o primeiro estágio de exercício.",
+    few_stages:
+      "Poucos estágios: uma única amostra pode afetar fortemente o ajuste.",
+    early_dip:
+      "O lactato cai nos estágios iniciais. Verifique as amostras e o contexto do aquecimento.",
+    final_not_rising:
+      "O lactato não aumenta no estágio final. Verifique se o teste atingiu a intensidade planejada.",
+    uneven_steps:
+      "Os incrementos de intensidade variam. Guarde o protocolo do teste com este resultado.",
+    threshold_at_edge:
+      "Esta estimativa está em uma extremidade da faixa medida.",
+    negative_fit:
+      "A curva ajustada cai abaixo de zero. Inspecione a qualidade do ajuste e os valores das amostras.",
+    invalid_pair:
+      "Escolha métodos disponíveis com LT1 abaixo de LT2 antes de usar as zonas.",
+  },
+};
+
+// All 10 supported locales provide localized route copy; unknown locales fall back to English.
 export function getLactateCopy(lang: string): LactateCopy {
-  const base =
-    lang === "zh" ? zh : lang === "zh-hant" ? zhHant : lang === "ja" ? ja : en;
+  let base: BaseLactateCopy;
+  switch (lang) {
+    case "zh":
+      base = zh;
+      break;
+    case "zh-hant":
+      base = zhHant;
+      break;
+    case "ja":
+      base = ja;
+      break;
+    case "ko":
+      base = ko;
+      break;
+    case "de":
+      base = de;
+      break;
+    case "fr":
+      base = fr;
+      break;
+    case "es":
+      base = es;
+      break;
+    case "it":
+      base = it;
+      break;
+    case "pt-BR":
+      base = ptBR;
+      break;
+    default:
+      base = en;
+      break;
+  }
   return { ...base, presentation: getLactatePresentationCopy(lang) };
 }

@@ -34,5 +34,15 @@ describe("WorkoutStructurePreview", () => {
     expect(workout.sourceDsl).toMatch(
       /warmup.*repeat.*work.*recovery.*cooldown/s,
     );
+
+    const frenchHtml = renderToStaticMarkup(
+      <WorkoutStructurePreview
+        structure={workout.definition.structure}
+        lang="fr"
+      />,
+    );
+    expect(frenchHtml).toContain(
+      'aria-label="Graphique de structure de séance"',
+    );
   });
 });

@@ -21,6 +21,7 @@ import { WorkoutStructurePreview } from "@/components/WorkoutStructurePreview";
 import { RunningPlanIntentGuide } from "@/components/RunningPlanIntentGuide";
 import { getPlanIntentGuide } from "@/lib/running-plan-intents";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
+import { isSeoIndexedLanguage } from "@/lib/i18n";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import {
   breadcrumbSchema,
@@ -29,7 +30,17 @@ import {
   schemaLanguage,
 } from "@/lib/seo-schema";
 
-type IndexedLocale = "en" | "zh" | "zh-hant" | "ja";
+type CopyLocale =
+  | "en"
+  | "zh"
+  | "zh-hant"
+  | "ja"
+  | "ko"
+  | "de"
+  | "fr"
+  | "es"
+  | "it"
+  | "pt-BR";
 export type OfficialPlanSlug =
   | "improve-10k"
   | "target-10k"
@@ -39,7 +50,7 @@ export type OfficialPlanSlug =
   | "target-marathon";
 
 const LABELS: Record<
-  IndexedLocale,
+  CopyLocale,
   {
     official: string;
     improve: string;
@@ -143,9 +154,135 @@ const LABELS: Record<
     finalText:
       "公開メニューで構成を確認し、現在の走力と走れる曜日を使って個人向けプレビューを作成します。",
   },
+  ko: {
+    official: "공식 훈련 계획",
+    improve: "기록 향상",
+    target: "목표 기록 대비",
+    weeks: "기간",
+    runsPerWeek: "주당 러닝",
+    level: "계획 유형",
+    schedule: "주차별 전체 훈련 일정",
+    scheduleText:
+      "각 주차를 열어 훈련 내용, 구성, 강도 가이드를 확인한 뒤 캘린더에 추가하세요.",
+    example: "예시 강도",
+    exampleText:
+      "아래 페이스는 VDOT 40 예시이며 개인 훈련 페이스가 아닙니다. 로그인 후에는 신뢰할 수 있는 현재 기량 데이터를 사용하며, 목표 기록 계획에는 기준을 충족하는 목표 대회가 필요합니다.",
+    cta: "내 계획 만들기",
+    back: "거리별 가이드로 돌아가기",
+    currentPlan: "현재 계획",
+    workoutCount: "세션",
+    finalTitle: "완성된 계획을 캘린더에 추가하세요",
+    finalText:
+      "공개 일정으로 구성을 먼저 확인한 뒤, 현재 기량과 훈련 가능한 요일에 맞춰 개인 미리보기를 만들어 보세요.",
+  },
+  de: {
+    official: "Offizieller Trainingsplan",
+    improve: "Leistungsaufbau",
+    target: "Zielzeit-Vorbereitung",
+    weeks: "Wochen",
+    runsPerWeek: "Läufe pro Woche",
+    level: "Plantyp",
+    schedule: "Kompletter Wochenplan",
+    scheduleText:
+      "Öffne jede Woche, um Einheiten, Struktur und Intensitätsführung zu prüfen, bevor du den Plan deinem Kalender hinzufügst.",
+    example: "Beispiel-Intensität",
+    exampleText:
+      "Die unten gezeigten Tempi basieren auf einem VDOT-40-Beispiel und sind nicht deine persönlichen Trainingstempi. Nach der Anmeldung nutzt Trainingload.ai belastbare aktuelle Leistungsdaten. Ein Zielzeit-Plan erfordert zudem ein geeignetes Zielrennen.",
+    cta: "Meinen Plan erstellen",
+    back: "Zurück zum Distanz-Guide",
+    currentPlan: "Aktueller Plan",
+    workoutCount: "Einheiten",
+    finalTitle: "Übertrage den kompletten Plan in deinen Kalender",
+    finalText:
+      "Nutze den öffentlichen Wochenplan für die Struktur und erstelle dann eine persönliche Vorschau mit deiner aktuellen Leistungsfähigkeit und deinen verfügbaren Trainingstagen.",
+  },
+  fr: {
+    official: "Plan d'entraînement officiel",
+    improve: "Progression performance",
+    target: "Préparation chrono cible",
+    weeks: "Semaines",
+    runsPerWeek: "Sorties / semaine",
+    level: "Type de plan",
+    schedule: "Programme complet semaine par semaine",
+    scheduleText:
+      "Ouvre chaque semaine pour examiner les séances, la structure et les repères d'effort avant d'ajouter le plan à ton calendrier.",
+    example: "Intensité d'exemple",
+    exampleText:
+      "Les allures affichées ci-dessous correspondent à un exemple VDOT 40 et ne sont pas tes allures personnelles. Après connexion, Trainingload.ai utilise tes données de niveau actuel fiables. Un plan Chrono cible requiert aussi une course objectif éligible.",
+    cta: "Créer mon plan",
+    back: "Retour au guide de la distance",
+    currentPlan: "Plan actuel",
+    workoutCount: "séances",
+    finalTitle: "Ajoute le plan complet à ton calendrier",
+    finalText:
+      "Parcours le programme public pour comprendre la structure, puis crée un aperçu personnalisé selon ton niveau actuel et tes jours disponibles.",
+  },
+  es: {
+    official: "Plan de entrenamiento oficial",
+    improve: "Mejora de rendimiento",
+    target: "Preparación de marca objetivo",
+    weeks: "Semanas",
+    runsPerWeek: "Sesiones por semana",
+    level: "Tipo de plan",
+    schedule: "Calendario completo semana a semana",
+    scheduleText:
+      "Abre cada semana para revisar las sesiones, la estructura y la guía de esfuerzo antes de añadir el plan a tu calendario.",
+    example: "Intensidad de ejemplo",
+    exampleText:
+      "Los ritmos mostrados abajo usan un ejemplo de VDOT 40 y no son tus ritmos personales. Al iniciar sesión, Trainingload.ai usa datos fiables de tu capacidad actual. Un plan de marca objetivo también requiere una carrera objetivo válida.",
+    cta: "Crear mi plan",
+    back: "Volver a la guía de distancia",
+    currentPlan: "Plan actual",
+    workoutCount: "sesiones",
+    finalTitle: "Lleva el plan completo a tu calendario",
+    finalText:
+      "Revisa el calendario público para entender la estructura y luego crea una vista previa personalizada con tu capacidad actual y tus días disponibles.",
+  },
+  it: {
+    official: "Piano di allenamento ufficiale",
+    improve: "Miglioramento prestazione",
+    target: "Preparazione tempo obiettivo",
+    weeks: "Settimane",
+    runsPerWeek: "Corse a settimana",
+    level: "Tipo di piano",
+    schedule: "Programma completo settimana per settimana",
+    scheduleText:
+      "Apri ogni settimana per esaminare sessioni, struttura e indicazioni di sforzo prima di aggiungere il piano al tuo calendario.",
+    example: "Intensità di esempio",
+    exampleText:
+      "I ritmi mostrati qui sotto usano un esempio VDOT 40 e non sono i tuoi ritmi personali. Dopo l'accesso, Trainingload.ai usa dati affidabili sulla tua capacità attuale. Un piano tempo obiettivo richiede anche una gara obiettivo idonea.",
+    cta: "Crea il mio piano",
+    back: "Torna alla guida della distanza",
+    currentPlan: "Piano attuale",
+    workoutCount: "sessioni",
+    finalTitle: "Porta il piano completo nel tuo calendario",
+    finalText:
+      "Esplora il programma pubblico per capire la struttura, poi genera un'anteprima personalizzata con la tua capacità attuale e i giorni disponibili.",
+  },
+  "pt-BR": {
+    official: "Plano de treino oficial",
+    improve: "Evolução de performance",
+    target: "Preparação para tempo-alvo",
+    weeks: "Semanas",
+    runsPerWeek: "Corridas por semana",
+    level: "Tipo de plano",
+    schedule: "Programação completa semana a semana",
+    scheduleText:
+      "Abra cada semana para revisar sessões, estrutura e orientação de esforço antes de adicionar o plano ao seu calendário.",
+    example: "Intensidade de exemplo",
+    exampleText:
+      "Os ritmos exibidos abaixo usam um exemplo de VDOT 40 e não são seus ritmos pessoais. Após o login, o Trainingload.ai usa dados confiáveis da sua capacidade atual. Um plano de tempo-alvo também exige uma prova-alvo qualificada.",
+    cta: "Montar meu plano",
+    back: "Voltar ao guia da distância",
+    currentPlan: "Plano atual",
+    workoutCount: "sessões",
+    finalTitle: "Coloque o plano completo no seu calendário",
+    finalText:
+      "Use a programação pública para entender a estrutura e depois gere uma prévia pessoal com sua capacidade atual e dias disponíveis para treinar.",
+  },
 };
 
-const SEO_TITLES: Record<IndexedLocale, Record<OfficialPlanSlug, string>> = {
+const SEO_TITLES: Record<CopyLocale, Record<OfficialPlanSlug, string>> = {
   en: {
     "improve-10k": "Intermediate 10K Training Plan | 8-Week Schedule",
     "target-10k": "10K Goal-Time Training Plan | Sub-40, 45 & 50",
@@ -182,9 +319,57 @@ const SEO_TITLES: Record<IndexedLocale, Record<OfficialPlanSlug, string>> = {
     "improve-marathon": "フルマラソン中級者向け練習メニュー｜18週間",
     "target-marathon": "フルマラソン目標タイム練習｜サブ3・サブ4の18週間",
   },
+  ko: {
+    "improve-10k": "10K 중급 훈련 계획 | 8주 기록 향상 일정",
+    "target-10k": "10K 목표 기록 훈련 계획 | 40분·45분·50분 돌파",
+    "improve-half-marathon": "하프마라톤 중급 훈련 계획 | 12주 일정",
+    "target-half-marathon": "하프마라톤 목표 기록 훈련 계획 | 서브2 대비 14주",
+    "improve-marathon": "마라톤 중급 훈련 계획 | 18주 기록 향상 일정",
+    "target-marathon": "마라톤 목표 기록 훈련 계획 | 서브3·서브4 18주",
+  },
+  de: {
+    "improve-10k": "10-km-Trainingsplan für Fortgeschrittene | 8 Wochen",
+    "target-10k": "10-km-Zielzeit-Trainingsplan | Sub-40, 45 & 50",
+    "improve-half-marathon": "Halbmarathon-Plan für Fortgeschrittene | 12 Wochen",
+    "target-half-marathon": "Halbmarathon-Zielzeit-Plan | Sub-2-Stunden-Training",
+    "improve-marathon": "Marathon-Plan für Fortgeschrittene | 18 Wochen",
+    "target-marathon": "Marathon-Zielzeit-Plan | Sub-3 & Sub-4, 18 Wochen",
+  },
+  fr: {
+    "improve-10k": "Plan d'entraînement 10 km intermédiaire | 8 semaines",
+    "target-10k": "Plan 10 km chrono cible | Sub-40, 45 & 50 min",
+    "improve-half-marathon": "Plan semi-marathon intermédiaire | 12 semaines",
+    "target-half-marathon": "Plan semi-marathon chrono cible | Objectif Sub-2h",
+    "improve-marathon": "Plan marathon intermédiaire | Programme 18 semaines",
+    "target-marathon": "Plan marathon chrono cible | Sub-3h & Sub-4h, 18 sem.",
+  },
+  es: {
+    "improve-10k": "Plan de entrenamiento 10K intermedio | 8 semanas",
+    "target-10k": "Plan 10K marca objetivo | Sub-40, 45 y 50 min",
+    "improve-half-marathon": "Plan de media maratón intermedio | 12 semanas",
+    "target-half-marathon": "Plan de media maratón marca objetivo | Sub-2 horas",
+    "improve-marathon": "Plan de maratón intermedio | Programa de 18 semanas",
+    "target-marathon": "Plan de maratón marca objetivo | Sub-3 y Sub-4, 18 sem.",
+  },
+  it: {
+    "improve-10k": "Piano di allenamento 10 km intermedio | 8 settimane",
+    "target-10k": "Piano 10 km tempo obiettivo | Sub-40, 45 e 50 min",
+    "improve-half-marathon": "Piano mezza maratona intermedio | 12 settimane",
+    "target-half-marathon": "Piano mezza maratona tempo obiettivo | Sub-2 ore",
+    "improve-marathon": "Piano maratona intermedio | Programma 18 settimane",
+    "target-marathon": "Piano maratona tempo obiettivo | Sub-3 e Sub-4, 18 sett.",
+  },
+  "pt-BR": {
+    "improve-10k": "Plano de treino 10 km intermediário | 8 semanas",
+    "target-10k": "Plano 10 km tempo-alvo | Sub-40, 45 e 50 min",
+    "improve-half-marathon": "Plano de meia maratona intermediário | 12 semanas",
+    "target-half-marathon": "Plano meia maratona tempo-alvo | Treino Sub-2h",
+    "improve-marathon": "Plano de maratona intermediário | 18 semanas",
+    "target-marathon": "Plano maratona tempo-alvo | Sub-3h e Sub-4h, 18 sem.",
+  },
 };
 
-const PAGE_HEADINGS: Record<IndexedLocale, Record<OfficialPlanSlug, string>> = {
+const PAGE_HEADINGS: Record<CopyLocale, Record<OfficialPlanSlug, string>> = {
   en: {
     "improve-10k": "Intermediate 10K Training Plan",
     "target-10k": "10K Goal-Time Training Plan",
@@ -217,6 +402,54 @@ const PAGE_HEADINGS: Record<IndexedLocale, Record<OfficialPlanSlug, string>> = {
     "improve-marathon": "フルマラソン中級者向け練習メニュー",
     "target-marathon": "フルマラソン目標タイム練習メニュー",
   },
+  ko: {
+    "improve-10k": "10K 중급 훈련 계획",
+    "target-10k": "10K 목표 기록 훈련 계획",
+    "improve-half-marathon": "하프마라톤 중급 훈련 계획",
+    "target-half-marathon": "하프마라톤 목표 기록 훈련 계획",
+    "improve-marathon": "마라톤 중급 훈련 계획",
+    "target-marathon": "마라톤 목표 기록 훈련 계획",
+  },
+  de: {
+    "improve-10k": "10-km-Trainingsplan für Fortgeschrittene",
+    "target-10k": "10-km-Zielzeit-Trainingsplan",
+    "improve-half-marathon": "Halbmarathon-Trainingsplan für Fortgeschrittene",
+    "target-half-marathon": "Halbmarathon-Zielzeit-Trainingsplan",
+    "improve-marathon": "Marathon-Trainingsplan für Fortgeschrittene",
+    "target-marathon": "Marathon-Zielzeit-Trainingsplan",
+  },
+  fr: {
+    "improve-10k": "Plan d'entraînement 10 km intermédiaire",
+    "target-10k": "Plan d'entraînement 10 km chrono cible",
+    "improve-half-marathon": "Plan d'entraînement semi-marathon intermédiaire",
+    "target-half-marathon": "Plan d'entraînement semi-marathon chrono cible",
+    "improve-marathon": "Plan d'entraînement marathon intermédiaire",
+    "target-marathon": "Plan d'entraînement marathon chrono cible",
+  },
+  es: {
+    "improve-10k": "Plan de entrenamiento 10K intermedio",
+    "target-10k": "Plan de entrenamiento 10K marca objetivo",
+    "improve-half-marathon": "Plan de entrenamiento media maratón intermedio",
+    "target-half-marathon": "Plan de entrenamiento media maratón marca objetivo",
+    "improve-marathon": "Plan de entrenamiento maratón intermedio",
+    "target-marathon": "Plan de entrenamiento maratón marca objetivo",
+  },
+  it: {
+    "improve-10k": "Piano di allenamento 10 km intermedio",
+    "target-10k": "Piano di allenamento 10 km tempo obiettivo",
+    "improve-half-marathon": "Piano di allenamento mezza maratona intermedio",
+    "target-half-marathon": "Piano di allenamento mezza maratona tempo obiettivo",
+    "improve-marathon": "Piano di allenamento maratona intermedio",
+    "target-marathon": "Piano di allenamento maratona tempo obiettivo",
+  },
+  "pt-BR": {
+    "improve-10k": "Plano de treino de 10 km intermediário",
+    "target-10k": "Plano de treino de 10 km tempo-alvo",
+    "improve-half-marathon": "Plano de treino de meia maratona intermediário",
+    "target-half-marathon": "Plano de treino de meia maratona tempo-alvo",
+    "improve-marathon": "Plano de treino de maratona intermediário",
+    "target-marathon": "Plano de treino de maratona tempo-alvo",
+  },
 };
 
 export function officialPlanTemplateHeading({
@@ -226,13 +459,26 @@ export function officialPlanTemplateHeading({
   lang: string;
   slug: OfficialPlanSlug;
 }) {
-  return PAGE_HEADINGS[indexedLocale(lang)][slug];
+  return PAGE_HEADINGS[copyLocale(lang)][slug];
 }
 
-function indexedLocale(lang: string): IndexedLocale {
-  if (lang === "zh-hant") return "zh-hant";
-  if (lang.startsWith("zh")) return "zh";
-  if (lang === "ja") return "ja";
+function copyLocale(lang: string): CopyLocale {
+  const normalized = lang.toLowerCase();
+  if (
+    normalized.startsWith("zh-hant") ||
+    normalized.startsWith("zh-tw") ||
+    normalized.startsWith("zh-hk")
+  ) {
+    return "zh-hant";
+  }
+  if (normalized.startsWith("zh")) return "zh";
+  if (normalized.startsWith("ja")) return "ja";
+  if (normalized.startsWith("ko")) return "ko";
+  if (normalized.startsWith("de")) return "de";
+  if (normalized.startsWith("fr")) return "fr";
+  if (normalized.startsWith("es")) return "es";
+  if (normalized.startsWith("it")) return "it";
+  if (normalized.startsWith("pt")) return "pt-BR";
   return "en";
 }
 
@@ -261,7 +507,7 @@ export function officialPlanTemplateMetadata({
 }): Metadata {
   const template = getRunPlanTemplate(slug);
   if (!template) throw new Error(`Missing official template: ${slug}`);
-  const locale = indexedLocale(lang);
+  const locale = copyLocale(lang);
   const copy = template.copy[normalizePlanTemplateLocale(lang)];
   const path = `${routeForTemplate(slug)}/${routeSuffix(slug)}`;
   const siteUrl = getSiteUrl();
@@ -291,7 +537,7 @@ export function officialPlanTemplateMetadata({
       title: seo.title,
       description: seo.description,
     },
-    robots: ["en", "zh", "zh-hant", "ja"].includes(lang)
+    robots: isSeoIndexedLanguage(lang)
       ? undefined
       : { index: false, follow: true },
   };
@@ -310,7 +556,7 @@ export function OfficialPlanTemplateDetailPage({
     throw new Error(`Missing official template: ${slug}`);
 
   const normalizedLocale = normalizePlanTemplateLocale(lang);
-  const locale = indexedLocale(lang);
+  const locale = copyLocale(lang);
   const labels = LABELS[locale];
   const pageHeading = officialPlanTemplateHeading({ lang, slug });
   const copy = template.copy[normalizedLocale];

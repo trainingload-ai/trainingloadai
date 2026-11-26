@@ -73,12 +73,15 @@ describe("official race-plan long-tail SEO", () => {
     expect(new Set(titles).size).toBe(routes.length);
   });
 
-  it("prevents unsupported locale variants from being indexed", () => {
+  it("keeps non-indexed locales out of the index", () => {
     const metadata = officialPlanTemplateMetadata({
-      lang: "fr",
+      lang: "nl",
       slug: "improve-10k",
     });
 
     expect(metadata.robots).toMatchObject({ index: false, follow: true });
+    expect(
+      officialPlanTemplateMetadata({ lang: "fr", slug: "improve-10k" }).robots,
+    ).toMatchObject({ index: false, follow: true });
   });
 });

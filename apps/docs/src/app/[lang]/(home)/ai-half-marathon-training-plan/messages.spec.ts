@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 import { optimizeSeoText, seoDisplayUnits } from "@/lib/seo-metadata";
-import de from "../../../../../../../packages/messages/docs/de.json";
-import en from "../../../../../../../packages/messages/docs/en.json";
-import es from "../../../../../../../packages/messages/docs/es.json";
-import fr from "../../../../../../../packages/messages/docs/fr.json";
-import itMessages from "../../../../../../../packages/messages/docs/it.json";
-import ja from "../../../../../../../packages/messages/docs/ja.json";
-import ko from "../../../../../../../packages/messages/docs/ko.json";
-import ptBR from "../../../../../../../packages/messages/docs/pt-BR.json";
-import zhHant from "../../../../../../../packages/messages/docs/zh-hant.json";
-import zh from "../../../../../../../packages/messages/docs/zh.json";
+import de from "@trainingloadai/messages/docs/de.json";
+import en from "@trainingloadai/messages/docs/en.json";
+import es from "@trainingloadai/messages/docs/es.json";
+import fr from "@trainingloadai/messages/docs/fr.json";
+import itMessages from "@trainingloadai/messages/docs/it.json";
+import ja from "@trainingloadai/messages/docs/ja.json";
+import ko from "@trainingloadai/messages/docs/ko.json";
+import ptBR from "@trainingloadai/messages/docs/pt-BR.json";
+import zhHant from "@trainingloadai/messages/docs/zh-hant.json";
+import zh from "@trainingloadai/messages/docs/zh.json";
 
 const messages = {
   de,

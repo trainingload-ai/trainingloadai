@@ -172,7 +172,7 @@ describe("marathon training plan keyword locks", () => {
           (link) => link[1] === "/ai-marathon-training-plan",
         )?.[0]
         .toLowerCase();
-      expect(aiAnchor).toMatch(/ai|智能/);
+      expect(aiAnchor).toMatch(/ai|ki|ia|智能/);
     }
   });
 

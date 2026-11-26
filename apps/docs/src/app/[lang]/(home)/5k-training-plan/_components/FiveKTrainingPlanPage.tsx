@@ -91,7 +91,38 @@ type DistancePlanVariant =
   | "half-marathon"
   | "marathon";
 
-const HERO_HEADINGS: Record<DistancePlanVariant, Record<string, string[]>> = {
+type PlanPageLocale =
+  | "en"
+  | "zh"
+  | "zh-hant"
+  | "ja"
+  | "ko"
+  | "de"
+  | "fr"
+  | "es"
+  | "it"
+  | "pt-BR";
+
+const SECTION_KICKERS: Record<
+  PlanPageLocale,
+  { startHere: string; trainingMethod: string }
+> = {
+  en: { startHere: "START HERE", trainingMethod: "TRAINING METHOD" },
+  zh: { startHere: "从这里开始", trainingMethod: "训练方法" },
+  "zh-hant": { startHere: "從這裡開始", trainingMethod: "訓練方法" },
+  ja: { startHere: "ここから始める", trainingMethod: "トレーニング方法" },
+  ko: { startHere: "여기서 시작", trainingMethod: "훈련 방법" },
+  de: { startHere: "HIER STARTEN", trainingMethod: "TRAININGSMETHODE" },
+  fr: { startHere: "COMMENCER ICI", trainingMethod: "MÉTHODE D'ENTRAÎNEMENT" },
+  es: { startHere: "EMPIEZA AQUÍ", trainingMethod: "MÉTODO DE ENTRENAMIENTO" },
+  it: { startHere: "INIZIA QUI", trainingMethod: "METODO DI ALLENAMENTO" },
+  "pt-BR": { startHere: "COMECE AQUI", trainingMethod: "MÉTODO DE TREINO" },
+};
+
+const HERO_HEADINGS: Record<
+  DistancePlanVariant,
+  Record<PlanPageLocale, string[]>
+> = {
   couch: {
     en: ["Free 9-week", "Couch to 5K plan", "From walking to your first 5K"],
     zh: ["免费 9 周", "Couch to 5K 训练计划", "从走路开始，完成 5 公里"],
@@ -105,30 +136,160 @@ const HERO_HEADINGS: Record<DistancePlanVariant, Record<string, string[]>> = {
       "Couch to 5Kプラン",
       "ウォーキングから、初めての5K完走へ",
     ],
+    ko: ["무료 9주", "Couch to 5K 훈련 계획", "걷기부터 첫 5K 완주까지"],
+    de: [
+      "Kostenloser 9-Wochen-",
+      "Couch-to-5K-Plan",
+      "Vom Gehen zu deinen ersten 5 km",
+    ],
+    fr: [
+      "Plan gratuit 9 semaines",
+      "Couch to 5K",
+      "De la marche à ton premier 5 km",
+    ],
+    es: [
+      "Plan gratuito de 9 semanas",
+      "Couch to 5K",
+      "De caminar a tu primer 5K",
+    ],
+    it: [
+      "Piano gratuito di 9 settimane",
+      "Couch to 5K",
+      "Dalla camminata ai tuoi primi 5 km",
+    ],
+    "pt-BR": [
+      "Plano gratuito de 9 semanas",
+      "Couch to 5K",
+      "Da caminhada aos seus primeiros 5 km",
+    ],
   },
   "5k": {
     en: ["Free 8-week", "5K training plan", "Build toward race day"],
     zh: ["免费 8 周", "5 公里训练计划", "稳步完成首个 5K"],
     "zh-hant": ["免費 8 週", "5K 訓練計畫", "穩步完成首個 5K"],
     ja: ["無料8週間", "5Kトレーニングプラン", "レース当日まで着実に"],
+    ko: ["무료 8주", "5K 훈련 계획", "레이스 당일까지 탄탄하게"],
+    de: [
+      "Kostenloser 8-Wochen-",
+      "5-km-Trainingsplan",
+      "Strukturiert bis zum Wettkampftag",
+    ],
+    fr: [
+      "Plan gratuit 8 semaines",
+      "Plan d'entraînement 5 km",
+      "Progresse jusqu'au jour de course",
+    ],
+    es: [
+      "Plan gratuito de 8 semanas",
+      "Plan de entrenamiento 5K",
+      "Llega listo al día de la carrera",
+    ],
+    it: [
+      "Piano gratuito di 8 settimane",
+      "Piano di allenamento 5 km",
+      "Costruisci verso il giorno gara",
+    ],
+    "pt-BR": [
+      "Plano gratuito de 8 semanas",
+      "Plano de treino de 5 km",
+      "Evolua até o dia da prova",
+    ],
   },
   "5k-intermediate": {
     en: ["Free 8-week", "Intermediate 5K plan", "Train for a faster 5K"],
     zh: ["免费 8 周", "进阶 5 公里训练计划", "用间歇与节奏跑提速"],
     "zh-hant": ["免費 8 週", "進階 5K 訓練計畫", "用間歇與節奏跑提速"],
     ja: ["無料8週間", "中級者向け5Kプラン", "インターバルとテンポで速く"],
+    ko: ["무료 8주", "중급 5K 훈련 계획", "인터벌과 템포런으로 더 빠르게"],
+    de: [
+      "Kostenloser 8-Wochen-",
+      "5-km-Plan für Fortgeschrittene",
+      "Gezielt schneller über 5 km",
+    ],
+    fr: [
+      "Plan gratuit 8 semaines",
+      "Plan 5 km intermédiaire",
+      "Vise un 5 km plus rapide",
+    ],
+    es: [
+      "Plan gratuito de 8 semanas",
+      "Plan 5K intermedio",
+      "Entrena para un 5K más rápido",
+    ],
+    it: [
+      "Piano gratuito di 8 settimane",
+      "Piano 5 km intermedio",
+      "Allenati per un 5 km più veloce",
+    ],
+    "pt-BR": [
+      "Plano gratuito de 8 semanas",
+      "Plano de 5 km intermediário",
+      "Treine para um 5 km mais rápido",
+    ],
   },
   "10k": {
     en: ["Free 10-week", "10K training plan", "Build beyond your first 5K"],
     zh: ["免费 10 周", "10 公里训练计划", "从 5K 稳步跑向 10K"],
     "zh-hant": ["免費 10 週", "10 公里訓練計畫", "從 5K 穩步跑向 10K"],
     ja: ["無料10週間", "10km練習メニュー", "5Kの先へ、着実に完走"],
+    ko: ["무료 10주", "10K 훈련 계획", "첫 5K를 넘어 10K 완주까지"],
+    de: [
+      "Kostenloser 10-Wochen-",
+      "10-km-Trainingsplan",
+      "Sicher über deine ersten 5 km hinaus",
+    ],
+    fr: [
+      "Plan gratuit 10 semaines",
+      "Plan d'entraînement 10 km",
+      "Va au-delà de ton premier 5 km",
+    ],
+    es: [
+      "Plan gratuito de 10 semanas",
+      "Plan de entrenamiento 10K",
+      "Da el salto más allá de tu primer 5K",
+    ],
+    it: [
+      "Piano gratuito di 10 settimane",
+      "Piano di allenamento 10 km",
+      "Vai oltre i tuoi primi 5 km",
+    ],
+    "pt-BR": [
+      "Plano gratuito de 10 semanas",
+      "Plano de treino de 10 km",
+      "Vá além dos seus primeiros 5 km",
+    ],
   },
   "half-marathon": {
     en: ["Free 14-week", "Half marathon plan", "Build for your first 21.1K"],
     zh: ["免费 14 周", "半马训练计划", "为首个 21.1 公里打好基础"],
     "zh-hant": ["免費 14 週", "半馬訓練計畫", "為首個 21.1 公里打好基礎"],
     ja: ["無料14週間", "ハーフマラソン練習", "初めての21.1km完走へ"],
+    ko: ["무료 14주", "하프마라톤 훈련 계획", "첫 21.1K 완주를 위한 준비"],
+    de: [
+      "Kostenloser 14-Wochen-",
+      "Halbmarathon-Plan",
+      "Bereit für deine ersten 21,1 km",
+    ],
+    fr: [
+      "Plan gratuit 14 semaines",
+      "Plan semi-marathon",
+      "Prépare ton premier 21,1 km",
+    ],
+    es: [
+      "Plan gratuito de 14 semanas",
+      "Plan de media maratón",
+      "Prepara tus primeros 21,1 km",
+    ],
+    it: [
+      "Piano gratuito di 14 settimane",
+      "Piano mezza maratona",
+      "Prepara i tuoi primi 21,1 km",
+    ],
+    "pt-BR": [
+      "Plano gratuito de 14 semanas",
+      "Plano de meia maratona",
+      "Prepare-se para seus primeiros 21,1 km",
+    ],
   },
   marathon: {
     en: [
@@ -139,6 +300,32 @@ const HERO_HEADINGS: Record<DistancePlanVariant, Record<string, string[]>> = {
     zh: ["免费 18 周", "马拉松训练计划", "完成你的首场全马"],
     "zh-hant": ["免費 18 週", "馬拉松訓練計畫", "完成你的首場全馬"],
     ja: ["無料18週間", "フルマラソン練習", "初めての42.2km完走へ"],
+    ko: ["무료 18주", "마라톤 훈련 계획", "첫 42.2K 완주를 향한 준비"],
+    de: [
+      "Kostenloser 18-Wochen-",
+      "Marathon-Trainingsplan",
+      "Bereit für deine ersten 42,2 km",
+    ],
+    fr: [
+      "Plan gratuit 18 semaines",
+      "Plan d'entraînement marathon",
+      "Prépare ton premier 42,2 km",
+    ],
+    es: [
+      "Plan gratuito de 18 semanas",
+      "Plan de entrenamiento maratón",
+      "Prepara tus primeros 42,2 km",
+    ],
+    it: [
+      "Piano gratuito di 18 settimane",
+      "Piano di allenamento maratona",
+      "Prepara i tuoi primi 42,2 km",
+    ],
+    "pt-BR": [
+      "Plano gratuito de 18 semanas",
+      "Plano de treino de maratona",
+      "Prepare-se para seus primeiros 42,2 km",
+    ],
   },
 };
 
@@ -151,12 +338,31 @@ function planVariant(slug: RunningPlan["slug"]): DistancePlanVariant {
   return "5k";
 }
 
+function resolvePlanPageLocale(lang: string): PlanPageLocale | null {
+  const normalized = lang.toLowerCase();
+  if (
+    normalized.startsWith("zh-hant") ||
+    normalized.startsWith("zh-tw") ||
+    normalized.startsWith("zh-hk")
+  ) {
+    return "zh-hant";
+  }
+  if (normalized.startsWith("zh")) return "zh";
+  if (normalized.startsWith("ja")) return "ja";
+  if (normalized.startsWith("ko")) return "ko";
+  if (normalized.startsWith("de")) return "de";
+  if (normalized.startsWith("fr")) return "fr";
+  if (normalized.startsWith("es")) return "es";
+  if (normalized.startsWith("it")) return "it";
+  if (normalized.startsWith("pt")) return "pt-BR";
+  if (normalized.startsWith("en")) return "en";
+  return null;
+}
+
 function heroHeading(lang: string, plan: RunningPlan) {
   const headings = HERO_HEADINGS[planVariant(plan.slug)];
-  if (lang.toLowerCase().startsWith("zh-hant")) return headings["zh-hant"];
-  if (lang.toLowerCase().startsWith("zh")) return headings.zh;
-  if (lang.toLowerCase().startsWith("ja")) return headings.ja;
-  if (lang.toLowerCase().startsWith("en")) return headings.en;
+  const locale = resolvePlanPageLocale(lang);
+  if (locale) return headings[locale];
   return [plan.title];
 }
 
@@ -178,6 +384,7 @@ export function FiveKTrainingPlanPage({
   signup: FiveKSignupCopy;
 }) {
   const prefix = localePrefix(lang);
+  const sectionKickers = SECTION_KICKERS[resolvePlanPageLocale(lang) ?? "en"];
   const siteUrl = getSiteUrl();
   const appUrl = `https://app.trainingload.ai/${lang}`;
   const routePath = plan.routePath ?? `/${plan.slug}`;
@@ -380,7 +587,7 @@ export function FiveKTrainingPlanPage({
         <section id="choose-plan" className={styles.chooser}>
           <div className={styles.shell}>
             <div className={styles.sectionIntro}>
-              <p className={styles.kicker}>{plan.distance} / START HERE</p>
+              <p className={styles.kicker}>{plan.distance} / {sectionKickers.startHere}</p>
               <h2>{plan.planChooser.title}</h2>
               <p>{plan.planChooser.subtitle}</p>
             </div>
@@ -478,7 +685,7 @@ export function FiveKTrainingPlanPage({
       <section id="plan-method" className={styles.methodSection}>
         <div className={styles.shell}>
           <div className={styles.methodHeading}>
-            <p className={styles.kicker}>{plan.distance} / TRAINING METHOD</p>
+            <p className={styles.kicker}>{plan.distance} / {sectionKickers.trainingMethod}</p>
             <h2>{plan.contentTitle ?? plan.previewTitle}</h2>
             {plan.contentSubtitle ? <p>{plan.contentSubtitle}</p> : null}
           </div>

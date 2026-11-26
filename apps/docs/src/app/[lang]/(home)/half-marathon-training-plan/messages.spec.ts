@@ -165,7 +165,7 @@ describe("half marathon training plan keyword locks", () => {
       const aiAnchor = plan(locale)
         .relatedLinks?.find((link) => link[1] === "/ai-half-marathon-training-plan")?.[0]
         .toLowerCase();
-      expect(aiAnchor).toMatch(/ai|智能/);
+      expect(aiAnchor).toMatch(/ai|ki|ia|智能/);
     }
   });
 

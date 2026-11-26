@@ -510,7 +510,11 @@
     "page": {
       "title": "サイクリングパワーゾーン計算機",
       "subtitle": "FTPを入力すると、Coggan式のサイクリングパワーゾーンをワットで確認できます。プランに合わせてFriel、Vance、Stryd、CPにも切り替えられます。",
-      "proof": ["登録不要", "すぐに計算", "印刷・共有可能"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有可能"
+      ],
       "howTo": {
         "title": "パワーゾーンの使い方",
         "description": "使っているワットを入力し、ゾーンモデルを選んで、次のセッションのスコアカードにします。",
@@ -792,7 +796,10 @@
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
         "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
-        "benefits": ["運動中のリアルタイムデータ", "トレーニング後の分析"],
+        "benefits": [
+          "運動中のリアルタイムデータ",
+          "トレーニング後の分析"
+        ],
         "cta": "AI コーチを見る",
         "phoneAlt": "Trainingload.ai の iPhone 運動記録画面"
       },
@@ -966,7 +973,11 @@
     "page": {
       "title": "クリティカルパワー計算機",
       "subtitle": "パワー記録の入力、またはライドファイルのアップロードで、CP、W′、パワーウェイトレシオを推定。次のトレーニングに役立てましょう。",
-      "proof": ["登録不要", "すぐに計算", "印刷・共有"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有"
+      ],
       "howTo": {
         "title": "クリティカルパワー計算機の使い方",
         "steps": {
@@ -1295,15 +1306,16 @@
       "applicationCategory": "HealthApplication",
       "description": "レースやフィールドテストからLT1、LT2、LTHR、閾値ペースまたはパワーを推定し、心拍・パワーゾーンを確認できます。無料で、結果の印刷と共有にも対応します。",
       "featureList": [
-        "直近の5km、10km、ハーフ、マラソン、または任意距離から閾値ペースを推定",
-        "20分テストの LTHR を LT2 として表示",
-        "20分 / 8分 / 60分テストの閾値パワーを LT2 として表示",
-        "距離と時間の閾値努力から閾値ペースを LT2 として表示",
-        "心拍・パワー・ペースの LT1 帯",
-        "心拍ゾーンとパワーゾーンへの引き継ぎ",
-        "結果をコピー",
-        "代表的なレースタイムから LT2 ペースとスプリットを示す表",
-        "計算結果で埋まる閾値練習の例"
+        "最近の5K、10K、ハーフマラソン、マラソン、または任意の距離の記録から閾値ペースを算出",
+        "20分間のタイムトライアル・走力テストからLTHRを算出し、LT2として表示",
+        "20分・8分・60分のフィールドテストから閾値パワーを算出し、LT2として表示",
+        "距離とタイムの記録から閾値ペースを算出し、LT2として表示",
+        "心拍数・パワー・ペースごとのLT1レンジを表示",
+        "心拍ゾーンおよびパワーゾーン計算ツールへそのまま引き継ぎ",
+        "計算結果のコピー機能",
+        "代表的なレースタイムからLT2ペースおよびラップの目安を引ける参照表",
+        "算出結果をもとに自動入力される閾値ワークアウト例",
+        "共有可能な結果カード"
       ],
       "breadcrumb": {
         "home": "ホーム",
@@ -2098,7 +2110,10 @@
         {
           "question": "最大心拍数やゾーン2はどこで計算できますか？",
           "answer": "最大心拍数の計算式は最大心拍数計算機で確認できます。ゾーン2だけを知りたい場合は、ゾーン2心拍数計算機を使ってください。\n\nそこで最大心拍数を推定してから、このページで全ゾーンを計算できます。\n\nこのページでは選択したモデルの全ゾーンを表示します。前述の2つの計算機とは用途が異なります。",
-          "links": ["maxHr", "zone2"]
+          "links": [
+            "maxHr",
+            "zone2"
+          ]
         }
       ],
       "ui": {
@@ -2123,7 +2138,11 @@
         },
         "onThisPage": "このページの内容"
       },
-      "proof": ["登録不要", "すぐに計算", "印刷・共有"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有"
+      ],
       "links": {
         "estimateHrmax": "最大心拍を推定",
         "zone2": "ゾーン2だけを計算"
@@ -2718,7 +2737,12 @@
         "trust": {
           "title": "計画に反映する前に変更を確認",
           "description": "AI はワークアウト変更案を作成できますが、計画が更新されるのはあなたが確認して承認した後です。",
-          "cards": ["変更前後", "内容チェック", "あなたが確認", "計画履歴"],
+          "cards": [
+            "変更前後",
+            "内容チェック",
+            "あなたが確認",
+            "計画履歴"
+          ],
           "preview": "ワークアウト調整プレビュー"
         }
       },
@@ -2751,7 +2775,12 @@
         "hero": "機能ページのメインビジュアル",
         "placeholderSubtitle": "計画し、実行し、負荷を振り返り、必要な時に AI で調整します"
       },
-      "stats": ["計画", "実行", "負荷", "AI レビュー"],
+      "stats": [
+        "計画",
+        "実行",
+        "負荷",
+        "AI レビュー"
+      ],
       "intentPages": [
         {
           "title": "トレーニング分析ページ",
@@ -2790,7 +2819,11 @@
           "href": "APP:/plan",
           "icon": "LayoutList",
           "summary": "実際に続けられる計画を作成、保存、有効化、調整します。",
-          "bullets": ["サイクル目標", "週構成", "実行できるワークアウト"],
+          "bullets": [
+            "サイクル目標",
+            "週構成",
+            "実行できるワークアウト"
+          ],
           "cta": "トレーニング負荷ベースの週次計画を作成する"
         },
         {
@@ -2798,7 +2831,11 @@
           "href": "APP:/calendar",
           "icon": "CalendarDays",
           "summary": "予定と実際のワークアウトを並べ、抜け、密度の高い週、回復の隙間を見つけます。",
-          "bullets": ["計画と実績", "週のリズム", "回復の隙間"],
+          "bullets": [
+            "計画と実績",
+            "週のリズム",
+            "回復の隙間"
+          ],
           "cta": "計画と実績のトレーニング負荷を比較する"
         },
         {
@@ -2806,7 +2843,11 @@
           "href": "/training-load",
           "icon": "BarChart3",
           "summary": "CTL、ATL、TSB を使い、トレーニングストレスを進歩の根拠に変えます。",
-          "bullets": ["フィットネス傾向", "最近の疲労", "フォームと新鮮さ"],
+          "bullets": [
+            "フィットネス傾向",
+            "最近の疲労",
+            "フォームと新鮮さ"
+          ],
           "cta": "計画の中でトレーニング負荷を管理する"
         },
         {
@@ -2814,7 +2855,11 @@
           "href": "/ai-training-plan",
           "icon": "Bot",
           "summary": "AI が計画、実際のワークアウト、負荷、準備状態を読み、何を変えるべきか説明します。",
-          "bullets": ["日次レビュー", "週次レビュー", "根拠の説明"],
+          "bullets": [
+            "日次レビュー",
+            "週次レビュー",
+            "根拠の説明"
+          ],
           "cta": "AI でトレーニング負荷を調整する"
         },
         {
@@ -2822,7 +2867,11 @@
           "href": "/ai-training-plan",
           "icon": "ClipboardCheck",
           "summary": "調整は変更前後の草案として表示され、検証後、確認してから反映されます。",
-          "bullets": ["変更前後", "項目検証", "ユーザー確認"],
+          "bullets": [
+            "変更前後",
+            "項目検証",
+            "ユーザー確認"
+          ],
           "cta": "AI レビュー後に負荷調整案を確認する"
         }
       ],
@@ -2914,23 +2963,23 @@
       "channels": [
         {
           "title": "製品サポート",
-          "description": "プラン、カレンダー、概要、Chat 分析など、日常的な利用に関する質問。",
-          "subject": "Trainingload.ai product support"
+          "description": "トレーニングプラン、カレンダー、概要、チャット分析、日常的な操作ワークフローに関するご質問。",
+          "subject": "Trainingload.ai 製品サポート"
         },
         {
-          "title": "データと同期",
-          "description": "Strava、Polar、Intervals.icu 同期、ファイルアップロード、アクティビティ解析、指標の異常。",
-          "subject": "Trainingload.ai data and platform sync"
+          "title": "データとプラットフォーム同期",
+          "description": "Strava、Polar、Intervals.icu の同期、ファイルアップロード、アクティビティ解析、トレーニング指標の異常に関するお問い合わせ。",
+          "subject": "Trainingload.ai データとプラットフォーム同期"
         },
         {
           "title": "メンバーシップと請求",
-          "description": "PLUS、トライアル、サブスクリプション、請求書、支払いに関する質問。",
-          "subject": "Trainingload.ai membership and billing"
+          "description": "PLUSメンバーシップ、トライアル利用、サブスクリプション、請求書、お支払いに関するご質問。",
+          "subject": "Trainingload.ai メンバーシップと請求"
         },
         {
           "title": "フィードバックと提携",
-          "description": "機能要望、コーチングチームでの利用、コンテンツ提携、その他の協業アイデア。",
-          "subject": "Trainingload.ai feedback and partnerships"
+          "description": "機能のご要望、コーチングチームでの導入、コンテンツ提携、その他の協業のご相談。",
+          "subject": "Trainingload.ai フィードバックと提携"
         }
       ],
       "detailsTitle": "早く確認するために送ってほしい情報",
@@ -2975,8 +3024,8 @@
   },
   "privacy": {
     "metadata": {
-      "title": "Privacy Policy | Trainingload.ai",
-      "description": "How Trainingload.ai collects, uses, shares, retains, and protects account, training, health, location, and AI data.",
+      "title": "プライバシーポリシー | Trainingload.ai",
+      "description": "Trainingload.ai がアカウント、トレーニング、健康、位置情報、およびAI関連データをどのように収集・利用・共有・保持・保護するかを説明します。",
       "keywords": [
         "privacy policy",
         "health and fitness data",
@@ -2984,180 +3033,180 @@
         "Trainingload.ai"
       ],
       "openGraph": {
-        "title": "Privacy Policy | Trainingload.ai",
-        "description": "Understand what data Trainingload.ai uses and the choices you have."
+        "title": "プライバシーポリシー | Trainingload.ai",
+        "description": "Trainingload.ai が利用するデータの内容と、ご自身で管理できる選択肢を確認できます。"
       }
     },
     "page": {
       "title": "Privacy Policy",
-      "lastUpdated": "Last updated: {date}",
+      "lastUpdated": "最終更新日: {date}",
       "overview": {
         "title": "Privacy at a glance",
-        "body": "Trainingload.ai helps you understand training load, review completed workouts, and manage training plans. Some features need health, fitness, or location data. We treat that information as sensitive and design the Service around data minimization, clear choices, and user control.",
+        "body": "Trainingload.ai は、トレーニング負荷の把握、完了ワークアウトの振り返り、トレーニングプランの管理を支援するサービスです。一部の機能では健康・フィットネスデータや位置情報が必要になります。当社はこれらの情報を機微な情報として取り扱い、データ最小化、明確な選択肢、ユーザーによるコントロールを前提に本サービスを設計しています。",
         "items": [
-          "We do not sell personal data and do not use health, fitness, location, or AI conversation data for third-party advertising.",
-          "Connecting fitness platforms, syncing HealthKit, using precise location, and enabling AI features are optional and controlled separately.",
-          "You can export eligible data, disconnect providers, withdraw AI permission, delete Coach conversations and activities, or delete your account."
+          "当社は個人データを販売せず、健康・フィットネス・位置情報・AI会話データを第三者広告に利用しません。",
+          "フィットネスプラットフォーム連携、HealthKit 同期、正確な位置情報の利用、AI機能の有効化はいずれも任意であり、個別に制御できます。",
+          "対象データのエクスポート、連携サービスの解除、AI利用許可の撤回、AIコーチとの会話やアクティビティの削除、アカウントの削除が可能です。"
         ]
       },
       "sections": {
         "scope": {
-          "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "title": "1. 運営者情報および本ポリシーの適用範囲",
+          "body": "Trainingload.ai は、本サービスを入手したアプリストアまたは配信チャネル上に表示される開発者（以下「Trainingload.ai」「当社」）によって運営されています。本ポリシーは、当社のモバイルアプリ、ウェブサイト、ウェブアプリ、API、サポート、および関連サービスに適用されます。「個人データ」とは、特定の個人を識別できる情報、または合理的に個人と紐付け可能な情報を指します。本ポリシーは、ユーザーが任意で連携する外部サービスのプライバシーポリシーに代わるものではありません。"
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
-          "body": "The data we collect depends on the features you choose to use. It may include:",
+          "body": "当社が収集するデータは、ご利用になる機能に応じて異なり、以下が含まれる場合があります。",
           "items": [
-            "Account and profile data: name, email address, profile image, language, time zone, account identifiers, sign-in provider identifiers, and a securely hashed password when password sign-in is used.",
-            "Training and activity data: workout type, date and time, duration, distance, route and GPS coordinates, elevation, pace, speed, heart rate, power, cadence, calories, laps, training load, performance estimates, perceived exertion, and imported or generated workout files.",
-            "Health, wellness, and body data: data you enter or authorize from HealthKit or connected services, such as body mass, resting heart rate, heart-rate variability where available, sleep, steps, active energy, recovery trends, VO2max, thresholds, zones, goals, competitions, and plan history.",
-            "Content and communications: Coach prompts, voice transcripts you choose to submit, AI responses, reviews and plans, notes, support messages, feedback, and files you upload.",
-            "Connection and transaction data: connected-provider account IDs, authorization tokens, granted scopes, sync settings and status, product and subscription status, purchase and transaction identifiers, and billing support records. We do not receive or store your full payment-card number.",
-            "Device, location, and usage data: IP address, device and browser type, operating system, app version, language, time zone, cookie or local-storage identifiers, screens and features used, access times, crash and diagnostic metadata, and precise location when you permit route recording."
+            "アカウントおよびプロフィールデータ：氏名、メールアドレス、プロフィール画像、言語、タイムゾーン、アカウント識別子、サインインプロバイダー識別子、およびパスワード認証利用時の安全にハッシュ化されたパスワード。",
+            "トレーニングおよびアクティビティデータ：ワークアウト種別、日時、時間、距離、ルートおよびGPS座標、標高、ペース、速度、心拍数、パワー、ケイデンス、消費カロリー、ラップ、トレーニング負荷、パフォーマンス推定値、主観的運動強度（RPE）、インポートまたは生成されたワークアウトファイル。",
+            "健康・ウェルネス・身体データ：ユーザーが入力、または HealthKit や連携サービスから許可した体重、安静時心拍数、利用可能な場合の心拍変動（HRV）、睡眠、歩数、アクティブエネルギー、回復トレンド、VO₂max、閾値、ゾーン、目標、大会予定、プラン履歴。",
+            "コンテンツおよびコミュニケーション：AIコーチへのプロンプト、送信を選択した音声書き起こし、AIの応答、レビューおよびプラン、メモ、サポートへの連絡内容、フィードバック、アップロードしたファイル。",
+            "連携および取引データ：連携プロバイダーのアカウントID、認証トークン、許可されたスコープ、同期設定およびステータス、商品・サブスクリプション状態、購入・取引識別子、請求サポート記録。当社はクレジットカード番号の全文を受領・保存しません。",
+            "デバイス・位置情報・利用状況データ：IPアドレス、デバイスおよびブラウザ種別、OS、アプリバージョン、言語、タイムゾーン、Cookieまたはローカルストレージ識別子、利用画面・機能、アクセス日時、クラッシュおよび診断メタデータ、ならびにルート記録を許可した場合の正確な位置情報。"
           ]
         },
         "sources": {
-          "title": "3. Where data comes from",
-          "body": "We collect personal data from the following sources:",
+          "title": "3. データの取得元",
+          "body": "当社は以下の取得元から個人データを収集します。",
           "items": [
-            "Directly from you when you create an account, complete your profile, upload a file, record a workout, write or dictate a Coach message, configure a plan, make a purchase, or contact support.",
-            "From your device when you grant access to HealthKit, location, microphone, speech recognition, or other operating-system capabilities. Apple Speech Recognition may process microphone audio to produce a transcript; Trainingload.ai sends the transcript only after you choose to submit it and does not store the raw Coach recording.",
-            "From services you connect, including Apple, Google, GitHub, Garmin, COROS, Intervals.icu, Strava, Polar, Wahoo, and Suunto, according to the permissions and sync directions you select.",
-            "Automatically through essential service logs and, when enabled, privacy-limited analytics and diagnostics."
+            "ユーザーご本人から直接：アカウント作成、プロフィール入力、ファイルアップロード、ワークアウト記録、AIコーチへのメッセージ入力・音声入力、プラン設定、購入手続き、サポートへの問い合わせ時。",
+            "お使いのデバイスから：HealthKit、位置情報、マイク、音声認識、その他のOS機能へのアクセスを許可した場合。Apple Speech Recognition は文字起こし生成のためにマイク音声を処理することがありますが、Trainingload.ai はユーザーが送信を選択した後のテキストのみを送信し、AIコーチ向けの生音声録音は保存しません。",
+            "連携サービスから：ユーザーが選択した権限と同期方向に基づき、Apple、Google、GitHub、Garmin、COROS、Intervals.icu、Strava、Polar、Wahoo、Suunto などの外部サービスから取得します。",
+            "自動収集：サービス運営に必須のログ、および有効化されている場合のプライバシー制限付き分析・診断データを通じて取得します。"
           ]
         },
         "howWeUse": {
           "title": "4. How we use data",
-          "body": "We use personal data only for the purposes described below:",
+          "body": "当社は、以下に定める目的の範囲内でのみ個人データを利用します。",
           "items": [
-            "Create and secure your account, authenticate you, remember settings, and provide support.",
-            "Import, record, store, export, and synchronize workouts and health data at your direction.",
-            "Calculate training load, zones, trends, performance estimates, recovery context, and plan-versus-completed comparisons.",
-            "Provide training plans, Coach conversations, activity reviews, and user-confirmed plan adjustments.",
-            "Process subscriptions and purchases, restore entitlements, send service messages, and maintain transaction records.",
-            "Detect abuse, investigate errors, protect the Service, and improve reliability and product quality using minimized, aggregated, or de-identified data where practical."
+            "アカウントの作成と保護、本人認証、設定の保持、およびサポートの提供。",
+            "ユーザーの指示に基づくワークアウトおよび健康データのインポート、記録、保存、エクスポート、同期。",
+            "トレーニング負荷、ゾーン、トレンド、パフォーマンス推定、回復文脈、および計画対実績比較の算出。",
+            "トレーニングプラン、AIコーチとの会話、アクティビティレビュー、およびユーザー確認を伴うプラン調整の提供。",
+            "サブスクリプションおよび購入の処理、利用権限の復元、サービス通知の送信、および取引記録の維持。",
+            "不正利用の検知、エラー調査、本サービスの保護、ならびに可能な範囲で最小化・集計・非識別化したデータを用いた信頼性および製品品質の改善。"
           ]
         },
         "connectedServices": {
-          "title": "5. HealthKit, location, and connected services",
-          "body": "These integrations are optional. We request access when you choose the related feature and use the data only within the scope described to you.",
+          "title": "5. HealthKit、位置情報、および連携サービス",
+          "body": "これらの連携機能は任意です。関連機能を選択された際にアクセス許可を求め、ご説明した範囲内でのみデータを利用します。",
           "items": [
-            "HealthKit: the iOS app may request read access to workouts and workout routes, heart rate, resting heart rate, active energy, steps, walking/running and cycling distance, running speed, and running stride length. Authorized samples and derived summaries may sync to your Trainingload.ai account so they are available across your devices.",
-            "Precise location: the mobile app uses location to record outdoor routes, measure distance, and perform pre-start checks. For activity weather, we may send Apple WeatherKit the activity's approximate midpoint coordinate and time rather than the complete route.",
-            "Fitness platforms: depending on the provider and your settings, we may import or export activities, planned workouts, wellness summaries, sport settings, and the identifiers needed to maintain synchronization.",
-            "Authentication and connection credentials are used to sign you in or perform the synchronization you requested. We request the minimum practical scopes and do not use imported fitness data for advertising profiles.",
-            "You may revoke device permission in system settings or disconnect a provider in Trainingload.ai. This stops new collection or synchronization from that source, but does not automatically delete data already imported into your account."
+            "HealthKit：iOSアプリは、ワークアウトおよびワークアウトルート、心拍数、安静時心拍数、アクティブエネルギー、歩数、ウォーキング・ランニング・サイクリングの距離、ランニング速度、ランニングストライド長の読み取り権限を求める場合があります。許可されたサンプルと集計サマリーは、複数デバイスで利用できるよう Trainingload.ai アカウントに同期されることがあります。",
+            "正確な位置情報：モバイルアプリは屋外ルートの記録、距離計測、開始前チェックのために位置情報を使用します。アクティビティの気象情報取得にあたっては、完全なルートではなく、アクティビティのおおよその中間座標と時刻のみを Apple WeatherKit に送信する場合があります。",
+            "フィットネスプラットフォーム：連携先と設定に応じ、アクティビティ、予定ワークアウト、ウェルネスサマリー、スポーツ設定、および同期維持に必要な識別子をインポートまたはエクスポートする場合があります。",
+            "認証・連携資格情報は、サインインまたはご要望の同期処理のために使用します。当社は実務上最小限のスコープのみを要求し、インポートしたフィットネスデータを広告プロファイルには使用しません。",
+            "端末のシステム設定から権限を取り消すか、Trainingload.ai 内で連携プロバイダーを解除できます。これにより該当ソースからの新規収集・同期は停止されますが、すでにアカウントへインポート済みのデータは自動削除されません。"
           ],
-          "note": "HealthKit data is used for health and fitness functionality and is not used for advertising, data brokerage, or sale. Trainingload.ai is not a healthcare provider, and the Service is not a medical device."
+          "note": "HealthKit データは健康およびフィットネス機能の提供にのみ使用され、広告、データブローカーへの提供、または販売には一切使用されません。Trainingload.ai は医療機関ではなく、本サービスは医療機器ではありません。"
         },
         "ai": {
-          "title": "6. AI Coach and third-party AI",
-          "body": "AI features are optional. Before any AI request is sent, the app presents a separate disclosure and asks for your explicit permission.",
+          "title": "6. AIコーチと第三者AI",
+          "body": "AI機能は任意です。AIリクエストが送信される前に、アプリ上で独立した説明を表示し、明示的な許可を求めます。",
           "items": [
-            "Recipient: AI requests are sent to DeepSeek, operated by Hangzhou DeepSeek Artificial Intelligence Co., Ltd. DeepSeek states that data it receives may be processed and stored in mainland China.",
-            "Data sent: your submitted prompt or speech transcript and only the training context relevant to the requested feature. This may include sport, duration, distance and elevation derived from a route, aggregate heart-rate and zone data, pace, power, cadence, load, recovery trends, goals, plans, and relevant profile settings.",
-            "Data not attached by Trainingload.ai: your name, email address, account ID, complete GPS track, and raw HealthKit samples. Your own prompt can still contain identifying or sensitive information, so do not include information that is unnecessary for the request.",
-            "Purpose and provider use: data is sent to generate the Coach reply, plan, adjustment, or review you request. DeepSeek's current public terms state that, after secure encryption and strict irreversible de-identification, it may use inputs and outputs to a minimal extent to provide, maintain, operate, develop, or improve its services. We do not claim that DeepSeek provides zero retention or zero training.",
-            "Storage: Trainingload.ai stores submitted prompts, transcripts, generated replies, plans, and reviews in your account to provide the feature and history. Coach conversations remain until you delete the conversation or account; reviews and plans remain with the related record until that record or account is deleted, subject to legal retention requirements.",
-            "Control: you may decline AI and continue using non-AI features. You can withdraw permission in Mobile Me > Privacy & AI or Web Account Settings > Privacy & AI; this blocks new AI requests and automated reviews but does not delete existing results. A provider or material disclosure change requires permission again.",
-            "Safeguards and limits: requests use encrypted transport, direct account identifiers are removed from generated training context, and AI content is not copied to a separate AI observability provider. AI output can be inaccurate and is for informational and training-support purposes, not diagnosis or medical advice."
+            "送信先：AIリクエストは、Hangzhou DeepSeek Artificial Intelligence Co., Ltd. が運営する DeepSeek に送信されます。DeepSeek は、受領したデータが中国本土で処理・保存される場合があることを明記しています。",
+            "送信されるデータ：ユーザーが送信したプロンプトまたは音声書き起こしと、リクエストされた機能に関連するトレーニング文脈のみ。これには種目、時間、ルートから算出された距離・標高、集計された心拍・ゾーンデータ、ペース、パワー、ケイデンス、負荷、回復トレンド、目標、プラン、関連プロフィール設定が含まれる場合があります。",
+            "Trainingload.ai が自動添付しないデータ：氏名、メールアドレス、アカウントID、完全なGPSトラック、生の HealthKit サンプル。ただし、ユーザー自身のプロンプト入力に個人特定情報や機微情報が含まれる可能性があるため、リクエストに不要な情報は入力しないでください。",
+            "利用目的とプロバイダー側の取り扱い：データは、ご希望のAIコーチの返信、プラン作成、調整案、またはレビューを生成するために送信されます。DeepSeek の現行公開規約では、安全な暗号化と厳格かつ不可逆的な非識別化を施したうえで、サービスの提供・維持・運用・開発・改善のために最小限の範囲で入出力を利用する場合があると規定されています。当社は、DeepSeek がデータ保持ゼロまたは学習利用ゼロであることを主張しません。",
+            "保存：Trainingload.ai は、機能提供と履歴表示のため、送信されたプロンプト、書き起こし、生成された応答、プラン、レビューをあなたのアカウント内に保存します。AIコーチの会話は会話またはアカウントを削除するまで保持され、レビューやプランは法的保存義務に従い、関連レコードまたはアカウントが削除されるまで保持されます。",
+            "コントロール：AI機能を拒否しても、AI以外の機能を引き続き利用できます。許可の撤回は、モバイル版の「マイページ > プライバシーとAI」またはウェブ版の「アカウント設定 > プライバシーとAI」から行えます。撤回すると新規のAIリクエストと自動レビューはブロックされますが、既存の結果は削除されません。AIプロバイダーや重要な開示事項に変更がある場合は、改めて許可を求めます。",
+            "保護措置と限界：リクエストは暗号化通信で送信され、生成されるトレーニング文脈から直接的なアカウント識別子は除去されます。また、AIコンテンツを別のAI可観測性プロバイダーへ複製することはありません。AIの出力は不正確な場合があり、情報提供およびトレーニング支援を目的としたもので、医療診断や医学的助言ではありません。"
           ],
-          "note": "For a provider-side deletion request concerning an AI request, contact support@trainingload.ai. We will assess and route applicable requests according to the provider's process and applicable law."
+          "note": "AIリクエストに関するプロバイダー側のデータ削除をご希望の場合は、support@trainingload.ai までご連絡ください。プロバイダーの手続きおよび適用法に従い、対象となる要請を評価・取り次ぎます。"
         },
         "sharing": {
-          "title": "7. When we share data",
-          "body": "We share personal data only as needed for the Service, when you direct us to, or when law requires it. Recipients may include:",
+          "title": "7. データを共有する場合",
+          "body": "当社は、本サービスの提供に必要な場合、ユーザーご本人の指示がある場合、または法令上必要な場合に限り個人データを共有します。共有先には以下が含まれることがあります。",
           "items": [
-            "Infrastructure and storage providers, including Cloudflare R2 when configured, and database, cache, hosting, content-delivery, and security providers that operate the Service.",
-            "Authentication and connected-service providers, including Apple, Google, GitHub, Garmin, COROS, Intervals.icu, Strava, Polar, Wahoo, and Suunto, when you sign in, connect, import, export, or disconnect.",
-            "Billing providers, including Apple and RevenueCat for App Store purchases and supported web billing providers such as Creem or Waffo. They receive account, product, subscription, and transaction information needed to process and reconcile purchases.",
-            "Analytics and reliability providers, including PostHog, Google Analytics, and Sentry when enabled. We configure these services to limit collection and do not intentionally send workout content, precise routes, HealthKit samples, or AI prompts and responses as analytics events.",
-            "Apple WeatherKit for activity weather context, Apple Speech Recognition for optional dictation, email delivery providers for account and support messages, and DeepSeek for AI requests after permission.",
-            "Professional advisers, authorities, or other parties when reasonably necessary to comply with law, protect rights and safety, investigate abuse, resolve disputes, or complete a merger, financing, acquisition, or sale of assets subject to appropriate protections."
+            "インフラおよびストレージ事業者：構成に応じた Cloudflare R2、ならびに本サービスを運用するデータベース、キャッシュ、ホスティング、コンテンツ配信、セキュリティ事業者。",
+            "認証および連携サービス事業者：サインイン、連携、インポート、エクスポート、連携解除の際に利用する Apple、Google、GitHub、Garmin、COROS、Intervals.icu、Strava、Polar、Wahoo、Suunto。",
+            "決済・請求事業者：App Store 購入のための Apple および RevenueCat、ならびに Creem や Waffo などの対応ウェブ決済事業者。購入処理と照合に必要なアカウント・商品・サブスクリプション・取引情報を受領します。",
+            "分析および信頼性向上事業者：有効化されている場合の PostHog、Google Analytics、Sentry。当社は収集範囲を制限するよう設定しており、ワークアウト内容、正確なルート、HealthKit サンプル、AIプロンプトおよび応答を意図的に分析イベントとして送信することはありません。",
+            "その他の機能プロバイダー：アクティビティ気象文脈のための Apple WeatherKit、任意の音声入力のための Apple Speech Recognition、アカウント・サポート通知のためのメール配信事業者、許可後のAIリクエスト処理のための DeepSeek。",
+            "専門アドバイザー・公的機関・その他の第三者：法令遵守、権利・安全の保護、不正調査、紛争解決、または適切な保護措置を講じたうえでの合併・資金調達・買収・資産譲渡の遂行に合理的に必要な場合。"
           ],
-          "note": "We do not sell personal data. We do not share health, fitness, location, or AI conversation data with data brokers or unrelated third parties for their advertising. We require and confirm that processors receiving user data provide the same or equivalent protection described in this Policy and required by applicable law; if that protection cannot be maintained, we will stop the affected transfer."
+          "note": "当社は個人データを販売しません。また、健康・フィットネス・位置情報・AI会話データをデータブローカーや無関係な第三者の広告目的で共有しません。当社はユーザーデータを受領する処理委託先に対し、本ポリシーおよび適用法と同等以上の保護水準を求め確認しており、その保護を維持できない場合は該当するデータ移転を停止します。"
         },
         "analytics": {
-          "title": "8. Cookies, analytics, and diagnostics",
-          "body": "Our website and apps use local storage, cookies, and limited analytics or diagnostics to operate and understand the Service.",
+          "title": "8. Cookie、分析、および診断",
+          "body": "当社のウェブサイトおよびアプリでは、本サービスの運用と利用状況の把握のため、ローカルストレージ、Cookie、および限定的な分析・診断機能を使用しています。",
           "items": [
-            "Essential storage keeps you signed in, remembers settings, protects sessions, and supports requested functionality.",
-            "PostHog and Google Analytics may receive events such as page or screen views, feature interactions, app version, platform, locale, time zone, and an account or device identifier when enabled.",
-            "Mobile analytics disables session replay and automatic remote feature collection, disables IP-based geolocation in PostHog, and filters property names associated with prompts, messages, precise coordinates, health metrics, activity IDs, and similar sensitive content.",
-            "Sentry may receive crash, request, device, network, and user or session metadata needed to diagnose failures on affected web properties. AI prompt and response content is not intentionally included.",
-            "You can use browser, device, and available in-product controls to limit non-essential storage or analytics. Where applicable law requires opt-in consent, non-essential technologies should be activated only after that consent."
+            "必須ストレージは、ログイン状態の維持、設定の記憶、セッションの保護、および要求された機能の動作を支えます。",
+            "有効化されている場合、PostHog および Google Analytics は、ページまたは画面の閲覧、機能操作、アプリバージョン、プラットフォーム、ロケール、タイムゾーン、アカウントまたはデバイス識別子などのイベントを受領することがあります。",
+            "モバイル分析では、セッションリプレイおよび自動リモート機能収集を無効化し、PostHog におけるIPベースの位置推定を無効化したうえで、プロンプト、メッセージ、正確な座標、健康指標、アクティビティIDなどの機微情報に関連するプロパティ名をフィルタリングしています。",
+            "Sentry は、対象ウェブサイトの障害診断に必要なクラッシュ情報、リクエスト、デバイス、ネットワーク、ユーザーまたはセッションのメタデータを受領する場合があります。AIプロンプトや応答内容は意図的に含めません。",
+            "ブラウザ、デバイス、および製品内の設定を用いて、必須ではないストレージや分析を制限できます。適用法上オプトイン同意が必要な場合は、同意を得た後にのみ必須外の技術を有効化します。"
           ]
         },
         "retention": {
-          "title": "9. How long we keep data",
-          "body": "We keep personal data only as long as reasonably necessary for the purpose collected, taking account of the data's nature, sensitivity, legal requirements, and whether the purpose can be achieved another way.",
+          "title": "9. データの保持期間",
+          "body": "当社は、データの性質、機微性、法的要件、および他の手段で目的を達成できるかを考慮し、収集目的の達成に合理的に必要な期間のみ個人データを保持します。",
           "items": [
-            "Account, profile, training, HealthKit, location, plan, and imported data generally remain while your account is active or until you delete the relevant item.",
-            "Coach conversations remain until you delete the conversation or account. Withdrawing AI permission stops new transfers but does not automatically erase existing conversations, plans, or reviews.",
-            "Temporary local processing copies used during cloud-object-storage uploads are scheduled for deletion after 24 hours; retained source files and derived records otherwise follow the related activity or account.",
-            "An in-app account deletion request blocks account access immediately. Automated deletion normally completes within 24 hours and may take up to 7 days. Connected credentials are revoked or cleared, stored files are deleted, and account-linked database records are purged.",
-            "We may retain limited transaction, fraud-prevention, security, dispute, or legal records for the period required by law or reasonably necessary to establish or defend legal claims. Where practical, these records are separated from the deleted account and pseudonymized or de-identified."
+            "アカウント、プロフィール、トレーニング、HealthKit、位置情報、プラン、インポートデータは、原則としてアカウントが有効な間、またはユーザーが該当項目を削除するまで保持されます。",
+            "AIコーチの会話は、会話またはアカウントを削除するまで保持されます。AI利用許可を撤回すると新規転送は停止されますが、既存の会話・プラン・レビューは自動削除されません。",
+            "クラウドオブジェクトストレージへのアップロード時に使用される一時的なローカル処理コピーは24時間後に削除されるようスケジュールされています。保持された元ファイルおよび派生レコードは、関連するアクティビティまたはアカウントの保持期間に従います。",
+            "アプリ内でのアカウント削除リクエストを行うと、アカウントへのアクセスは直ちに遮断されます。自動削除処理は通常24時間以内に完了し、最大7日かかる場合があります。連携資格情報は失効または消去され、保存ファイルは削除され、アカウントに紐づくデータベースレコードは完全に消去されます。",
+            "法令で義務付けられている期間、または法的請求の確立・行使・防御に合理的に必要な期間に限り、取引・不正防止・セキュリティ・紛争・法務に関する限定的な記録を保持する場合があります。これらの記録は、実務上可能な限り削除済みアカウントから分離し、仮名化または非識別化します。"
           ]
         },
         "security": {
-          "title": "10. How we protect data",
-          "body": "We use technical and organizational measures designed to protect personal data. No system can guarantee absolute security.",
+          "title": "10. データの保護方法",
+          "body": "当社は、個人データを保護するための技術的および組織的措置を講じています。ただし、いかなるシステムも絶対的な安全性を保証することはできません。",
           "items": [
-            "Encrypted transport for network requests and restricted access to production systems.",
-            "Data minimization, permission scoping, deletion workflows, and separation of public and private storage.",
-            "Secure password hashing and protection of authentication and integration credentials appropriate to their use.",
-            "Monitoring, rate limits, audit records, and incident investigation procedures intended to detect abuse and operational failures."
+            "ネットワーク通信の暗号化および本番システムへのアクセス制限。",
+            "データ最小化、権限スコープの限定、削除ワークフローの整備、および公開ストレージと非公開ストレージの分離。",
+            "安全なパスワードハッシュ化、ならびに用途に応じた認証・連携資格情報の保護。",
+            "不正利用や運用障害を検知するための監視、レート制限、監査ログ、およびインシデント調査手順の運用。"
           ]
         },
         "transfers": {
-          "title": "11. International processing and transfers",
-          "body": "Trainingload.ai is offered globally, and we and our providers may process data outside your country. Privacy laws in those locations may differ from those where you live.",
+          "title": "11. 国際的なデータ処理および越境移転",
+          "body": "Trainingload.ai はグローバルに提供されており、当社および委託先プロバイダーがお住まいの国・地域外でデータを処理する場合があります。移転先の国・地域におけるプライバシー法令は、お住まいの地域と異なることがあります。",
           "items": [
-            "Depending on deployment and provider settings, infrastructure, analytics, diagnostics, billing, and connected-service data may be processed in the United States and other countries where those providers operate.",
-            "DeepSeek states that AI request data may be processed and stored in mainland China. This location is disclosed again before you enable AI.",
-            "Where applicable law requires it, we use recognized safeguards for international transfers, such as contractual protections, data minimization, encryption, and transfer assessments, and honor applicable rights regarding those transfers."
+            "構成やプロバイダー設定に応じ、インフラ、分析、診断、決済、連携サービスのデータは、米国および各プロバイダーが事業を展開するその他の国・地域で処理される場合があります。",
+            "DeepSeek は、AIリクエストデータが中国本土で処理・保存される場合があることを明記しています。この処理地域については、AI機能を有効化する前にも再度明示されます。",
+            "適用法で求められる場合、当社は契約上の保護条項、データ最小化、暗号化、移転影響評価など認められた保護措置を講じたうえで越境移転を行い、関連する権利行使に対応します。"
           ]
         },
         "legalBasis": {
-          "title": "12. Legal bases for processing",
-          "body": "Where laws such as the GDPR or UK GDPR apply, our legal bases depend on the feature and purpose:",
+          "title": "12. 処理の法的根拠",
+          "body": "GDPR や UK GDPR などの法令が適用される地域では、当社のデータ処理の法的根拠は機能と目的に応じて以下のとおりです。",
           "items": [
-            "Contract: to create your account and deliver the training, synchronization, support, and billing functions you request.",
-            "Consent: for optional permissions and processing such as connected-provider access, HealthKit, precise location, microphone and speech recognition, third-party AI sharing, and non-essential analytics where required.",
-            "Legitimate interests: to secure, debug, and improve the Service, prevent abuse, and understand minimized usage patterns, after balancing those interests against your rights.",
-            "Legal obligation and legal claims: to comply with tax, accounting, consumer-protection, law-enforcement, and other valid legal requirements or to establish, exercise, or defend claims."
+            "契約の履行：アカウントの作成、およびご希望のトレーニング管理、同期、サポート、決済機能の提供のため。",
+            "同意：連携プロバイダーへのアクセス、HealthKit、正確な位置情報、マイク・音声認識、第三者AIへの共有、および同意が必要な必須外分析などの任意機能のため。",
+            "正当な利益：ユーザーの権利とのバランスを考慮したうえでの、本サービスのセキュリティ確保、デバッグ、改善、不正防止、および最小化された利用傾向の把握のため。",
+            "法的義務および法的請求：税務、会計、消費者保護、法執行機関からの適法な要請への対応、または法的請求の確立・行使・防御のため。"
           ]
         },
         "rights": {
-          "title": "13. Your choices and privacy rights",
-          "body": "Depending on where you live, you may have some or all of the following rights. We may need to verify your identity before completing a request.",
+          "title": "13. お客様の選択とプライバシー権",
+          "body": "お住まいの地域に応じて、以下の権利の一部または全部が認められる場合があります。ご請求の履行にあたり、本人確認をお願いすることがあります。",
           "items": [
-            "Access personal data we hold about you and obtain information about how it is used and shared.",
-            "Correct inaccurate account or profile data.",
-            "Export eligible account and activity data in a portable format.",
-            "Delete an activity, Coach conversation, connected service, or your account, subject to limited legal exceptions.",
-            "Withdraw consent, object to or restrict certain processing, and opt out of sale, targeted advertising, or qualifying profiling. We do not sell personal data or use it for decisions with legal or similarly significant effects.",
-            "Complain to your local data-protection authority. You will not be discriminated against for exercising a privacy right."
+            "当社が保有するご自身の個人データへのアクセス、およびその利用・共有方法に関する情報の取得。",
+            "不正確なアカウントまたはプロフィールデータの訂正。",
+            "対象となるアカウントおよびアクティビティデータのポータブルな形式でのエクスポート。",
+            "法令上の限定的な例外を除き、アクティビティ、AIコーチの会話、連携サービス、またはアカウントの削除。",
+            "同意の撤回、特定の処理に対する異議申立てまたは制限、ならびに販売・ターゲティング広告・対象プロファイリングのオプトアウト。なお当社は個人データの販売や、法的またはこれに準ずる重大な影響を及ぼす自動意思決定を行いません。",
+            "お住まいの地域のデータ保護監督機関への苦情申立て。プライバシー権を行使したことを理由に不利益な扱いを受けることはありません。"
           ]
         },
         "children": {
-          "title": "14. Children's privacy",
-          "body": "The Service is not directed to children under 13 or a higher minimum age required by local law, and we do not knowingly collect their personal data without valid authorization. If you believe a child has provided data improperly, contact us and we will investigate and delete it where appropriate."
+          "title": "14. 子どものプライバシー",
+          "body": "本サービスは13歳未満の子ども、または居住地域の法令で定められたより高い最低年齢未満の子どもを対象としておらず、有効な許可なく意図的にその個人データを収集することはありません。子どもが不適切にデータを提供したと思われる場合は当社までご連絡ください。調査のうえ適切に削除します。"
         },
         "updates": {
-          "title": "15. Changes to this policy",
-          "body": "We may update this Policy when our product, providers, or legal obligations change. We will update the date above and provide additional notice or request renewed permission when a change is material and applicable law or platform rules require it."
+          "title": "15. 本ポリシーの変更",
+          "body": "当社は、製品、提携プロバイダー、または法的義務の変更に伴い本ポリシーを更新する場合があります。更新時には上記の最終更新日を変更し、重要な変更であって適用法やプラットフォーム規則で求められる場合には、追加の通知または再度の同意取得を行います。"
         },
         "notices": {
-          "title": "16. Third-party notices",
-          "body": "The providers below control their own services and publish separate privacy notices. Their policies apply when you interact directly with them. Our responsibility for processors acting on our instructions remains subject to applicable law and our agreements."
+          "title": "16. 第三者プロバイダーのプライバシー通知",
+          "body": "以下のプロバイダーはそれぞれのサービスを独自に管理し、個別のプライバシー通知を公開しています。これらと直接やり取りされる場合は各社のポリシーが適用されます。当社の指示に従ってデータ処理を行う委託先に対する当社の責任は、適用法および契約条件に従います。"
         },
         "contact": {
           "title": "17. Contact us",
-          "bodyPrefix": "For privacy questions, rights requests, or complaints, contact",
+          "bodyPrefix": "プライバシーに関するご質問、権利行使のご請求、または苦情については、",
           "email": "support@trainingload.ai",
-          "bodySuffix": ". Please include your account email and the request type, but do not send passwords, authentication tokens, raw health files, or other unnecessary sensitive information by email."
+          "bodySuffix": " までご連絡ください。アカウントのメールアドレスとご要望の種類を明記のうえ、パスワード、認証トークン、生の健康データファイル、その他不要な機微情報はメールに記載しないでください。"
         }
       }
     }
@@ -3166,7 +3215,11 @@
     "metadata": {
       "title": "利用規約 | Trainingload.ai",
       "description": "Trainingload.ai の利用に適用される規約。",
-      "keywords": ["利用規約", "サービス利用規約", "Trainingload.ai"],
+      "keywords": [
+        "利用規約",
+        "サービス利用規約",
+        "Trainingload.ai"
+      ],
       "openGraph": {
         "title": "利用規約 | Trainingload.ai",
         "description": "Trainingload.ai 利用に関する規約をご確認ください。"
@@ -3322,7 +3375,11 @@
     "page": {
       "title": "FTP計算機",
       "subtitle": "テストのパワーを入力するか、ライドをアップロード。FTP、パワーウェイトレシオ、トレーニングゾーンを確認できます。",
-      "proof": ["登録不要", "すぐに計算", "印刷・共有可能"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有可能"
+      ],
       "howTo": {
         "title": "FTP計算機の使い方",
         "steps": {
@@ -4071,7 +4128,11 @@
         "related": "関連する最大心拍数・トレーニングツール",
         "allTools": "すべてのツール"
       },
-      "proof": ["登録不要", "すぐ結果", "印刷または共有"],
+      "proof": [
+        "登録不要",
+        "すぐ結果",
+        "印刷または共有"
+      ],
       "scorecard": {
         "summaryTitle": "HRMAX スコアカード",
         "eyebrow": "推奨最大心拍数",
@@ -4223,7 +4284,10 @@
       "title": "トレーニングプランを、今の自分に合わせる",
       "subtitle": "Trainingload.ai は、トレーニングプラン、実際のワークアウト、トレーニング負荷、回復をひとつにまとめるランニング・サイクリングトレーニングアプリです。計画と実績のずれが見え、根拠に基づいて調整できます。メンバーはさらに、これらの情報に基づく個別の調整案をAIコーチから受け取れます。",
       "cta": "アカウントを作成",
-      "titleLines": ["トレーニングプランを", "今の自分に合わせる"],
+      "titleLines": [
+        "トレーニングプランを",
+        "今の自分に合わせる"
+      ],
       "links": {
         "docs": "トレーニング負荷を学ぶ",
         "trainingLoad": "計画の中で負荷を管理する",
@@ -4526,7 +4590,12 @@
         "label": "対応プラットフォーム",
         "more": "など"
       },
-      "sportWords": ["ランニング", "サイクリング", "スイミング", "トライアスロン"],
+      "sportWords": [
+        "ランニング",
+        "サイクリング",
+        "スイミング",
+        "トライアスロン"
+      ],
       "iphoneSupport": "iPhone に対応",
       "appStoreCta": "App Store からダウンロード"
     },
@@ -4747,27 +4816,43 @@
           "name": "AIコーチ",
           "title": "調整が必要なとき、AIコーチに相談",
           "description": "プラン、実際のワークアウト、トレーニング負荷に基づく調整案を確認できます。",
-          "points": ["現在のプラン", "実際の達成状況", "調整案"],
+          "points": [
+            "現在のプラン",
+            "実際の達成状況",
+            "調整案"
+          ],
           "cta": "AIコーチを見る"
         },
         {
           "name": "トレーニングカレンダー",
           "title": "計画と実績を並べて確認",
           "description": "予定したワークアウトと完了したアクティビティを同じタイムラインに表示。日程変更、スキップ、追加分も明確です。",
-          "points": ["予定ワークアウト", "完了した活動", "移動またはスキップ"]
+          "points": [
+            "予定ワークアウト",
+            "完了した活動",
+            "移動またはスキップ"
+          ]
         },
         {
           "name": "トレーニングプラン",
           "title": "トレーニングサイクル全体を把握",
           "description": "現在の段階、週間目標、今後のワークアウトが見えるため、今日やることとその理由がわかります。",
-          "points": ["現在の段階", "週間目標", "今後のワークアウト"],
+          "points": [
+            "現在の段階",
+            "週間目標",
+            "今後のワークアウト"
+          ],
           "cta": "トレーニングプランを見る"
         },
         {
           "name": "トレーニング分析",
           "title": "負荷と回復を判断",
           "description": "体力、疲労、コンディション、トレンドから、トレーニングが予定どおり進んでいるかを判断できます。",
-          "points": ["体力と疲労", "今週の負荷", "長期トレンド"],
+          "points": [
+            "体力と疲労",
+            "今週の負荷",
+            "長期トレンド"
+          ],
           "cta": "トレーニング負荷を見る"
         }
       ]
@@ -4925,7 +5010,11 @@
       "kicker": "有酸素能力",
       "title": "VO2max 計算機",
       "subtitle": "ランニングやウォーキング、心拍数の記録から有酸素能力を推定して、今の走力を確かめてみましょう。",
-      "proof": ["登録不要", "その場で結果を確認", "印刷・共有できる"],
+      "proof": [
+        "登録不要",
+        "その場で結果を確認",
+        "印刷・共有できる"
+      ],
       "jumpLinks": {
         "calculator": "計算機",
         "scorecard": "計算結果",
@@ -5385,7 +5474,14 @@
         },
         "help": "年齢と性別は参考区分に使います。Rockportでは両方、シャトルランでは年齢も計算に使います。"
       },
-      "ageBands": ["30歳未満", "30–39", "40–49", "50–59", "60–69", "70+"],
+      "ageBands": [
+        "30歳未満",
+        "30–39",
+        "40–49",
+        "50–59",
+        "60–69",
+        "70+"
+      ],
       "safety": {
         "maximal": "強い運動になります。胸の痛み、めまい、いつもと違う息切れがあれば中止してください。",
         "submax": "全力で運動する必要がない方法です。"
@@ -5763,7 +5859,11 @@
         "button": "無料で始める"
       },
       "kicker": "ランニング",
-      "proof": ["登録不要", "すぐに計算", "印刷・共有"],
+      "proof": [
+        "登録不要",
+        "すぐに計算",
+        "印刷・共有"
+      ],
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
         "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
@@ -6251,13 +6351,22 @@
       "sourcesTitle": "参照概念"
     },
     "loop": [
-      ["計画", "サイクル目標、週構成、今日のワークアウトを定義します。"],
+      [
+        "計画",
+        "サイクル目標、週構成、今日のワークアウトを定義します。"
+      ],
       [
         "実行",
         "実際のアクティビティを同期または取り込み、何が起きたか記録します。"
       ],
-      ["負荷", "CTL、ATL、TSB、最近の負荷からストレスを判断します。"],
-      ["調整", "AI が根拠のある変更案を作成し、あなたが確認します。"]
+      [
+        "負荷",
+        "CTL、ATL、TSB、最近の負荷からストレスを判断します。"
+      ],
+      [
+        "調整",
+        "AI が根拠のある変更案を作成し、あなたが確認します。"
+      ]
     ],
     "cards": [
       [
@@ -6386,8 +6495,14 @@
         "ワークアウトを実行",
         "今日何を練るかを確認し、実際のアクティビティを計画へ戻します。"
       ],
-      ["AI でレビュー", "予定、実績、負荷、準備状態を比較します。"],
-      ["変更を確認", "保存済み計画へ反映する前に調整案をプレビューします。"]
+      [
+        "AI でレビュー",
+        "予定、実績、負荷、準備状態を比較します。"
+      ],
+      [
+        "変更を確認",
+        "保存済み計画へ反映する前に調整案をプレビューします。"
+      ]
     ],
     "cards": [
       [
@@ -6532,12 +6647,18 @@
         "ブロック意図を設定",
         "現フェーズ目標と週構成を明確にしてからセッションを変更します。"
       ],
-      ["実行を追跡", "実績を計画へ戻し、完了品質とズレを記録します。"],
+      [
+        "実行を追跡",
+        "実績を計画へ戻し、完了品質とズレを記録します。"
+      ],
       [
         "負荷ドリフトを確認",
         "量や強度を変える前に ATL/TSB 圧力と effective VO2max 反応を確認します。"
       ],
-      ["調整を確定", "理由とトレードオフが明確な場合のみ草案を適用します。"]
+      [
+        "調整を確定",
+        "理由とトレードオフが明確な場合のみ草案を適用します。"
+      ]
     ],
     "checks": [
       [
@@ -6618,12 +6739,18 @@
         "ブロック意図を設定",
         "現フェーズ目標と週構成を明確にしてからセッションを変更します。"
       ],
-      ["実行を追跡", "実績を計画へ戻し、完了品質とズレを記録します。"],
+      [
+        "実行を追跡",
+        "実績を計画へ戻し、完了品質とズレを記録します。"
+      ],
       [
         "負荷ドリフトを確認",
         "量や強度を変える前に ATL/TSB 圧力と effective VO2max 反応を確認します。"
       ],
-      ["調整を確定", "理由とトレードオフが明確な場合のみ草案を適用します。"]
+      [
+        "調整を確定",
+        "理由とトレードオフが明確な場合のみ草案を適用します。"
+      ]
     ],
     "checks": [
       [
@@ -6955,7 +7082,9 @@
       "methodologyEyebrow": "解釈方法",
       "methodologyTitle": "PMC を過剰に読みすぎないために",
       "methodologyText": "Trainingload.ai は PMC を判断補助として扱います。CTL は長期負荷、ATL は短期圧力、TSB は新鮮さの推定です。強度や量を変える前に、練習品質、回復、元の計画と合わせて確認します。",
-      "sourcesTitle": "参照概念"
+      "sourcesTitle": "参照概念",
+      "faqTitle": "PMCフィットネスチャート よくある質問",
+      "faqSubtitle": "パフォーマンス管理チャート（PMC）、CTL、ATL、TSB、ACWR に関するよくある疑問にわかりやすくお答えします。"
     },
     "blocks": [
       [
@@ -6977,41 +7106,181 @@
     ],
     "faq": [
       [
-        "フィットネスチャートとPMCは同じですか？",
-        "持久系トレーニングではほぼ同義です。一般的なfitness-fatigue-formチャートはCTL・ATL・TSBで構成されるPMCです。"
+        "フィットネスチャートとPMCは同じものですか？",
+        "持久系トレーニングの実務では同じものとして扱われます。一般的な「フィットネス / 疲労 / コンディション」チャートは、CTL・ATL・TSB から構成されるパフォーマンス管理チャート（PMC）のことです。"
       ],
       [
         "毎週CTLを上げ続けるべきですか？",
-        "いいえ。実行品質を伴わないCTL上昇はリスクを増やします。目標は「上げ続けること」ではなく持続可能な適応です。"
+        "いいえ。CTL が上がっていても、ポイント練習の質や回復状態が悪化し続けているなら、現在の積み上げ方は機能していない可能性があります。目的は CTL を止めずに上げ続けることではなく、持続可能な成長です。"
       ],
       [
-        "ATLが高くても練習感覚が良いときは？",
-        "急な削減は避け、次の重要セッションと回復指標で確認してから大きな変更を入れてください。"
+        "ATLが高いのに練習の感触が良い場合はどうすればよいですか？",
+        "経過観察を続けつつ、反射的な大幅減量は避けましょう。大きく計画を変える前に、次のポイント練習の質と回復指標で状態を確認してください。"
+      ],
+      [
+        "TSBがマイナスだとコンディションが悪いという意味ですか？",
+        "必ずしもそうとは限りません。強化期には ATL が CTL を上回ることが多いため、TSB がマイナスになるのは一般的です。負荷を下げる前に、マイナスが続いている期間、ポイント練習の質、主観的な疲労感をあわせて確認してください。"
+      ],
+      [
+        "誰にでも当てはまる安全なACWRの範囲はありますか？",
+        "ありません。ACWR が示すのは、長期の基準値に対して直近のモデル負荷が高いかどうかだけです。単独でケガを予測したり、コーチや医療専門家の判断に代わったりすることはできません。"
+      ],
+      [
+        "PMCの曲線が急に跳ね上がったのはなぜですか？",
+        "重複したアクティビティ、閾値設定の変更、負荷ソースの切り替え、あるいは通常より極端に高い負荷のワークアウトがないか確認してください。データ側の変化で CTL・ATL・ACWR が同時に大きく動くことがあります。"
+      ],
+      [
+        "記録が抜けたワークアウトはPMCに影響しますか？",
+        "はい。PMC はシステムに記録された負荷しか計算できません。ワークアウトが欠けていると ATL と CTL は過小評価され、後から追加するとそれ以降の日付の数値も再計算されます。"
+      ],
+      [
+        "PMCはどのくらいの頻度で確認すべきですか？",
+        "常に張り付いて見る必要はありません。週次の振り返り、リカバリー週、レース前のテーパリング、または計画と実績に明らかなズレが出たタイミングで確認するのが効果的です。"
       ]
     ],
     "answerBlocks": [
       [
-        "PMCフィットネスチャートとは？",
-        "PMCフィットネスチャートは、長期的なフィットネス、短期的な疲労、現在のフォームを比較する Performance Management Chart です。通常は CTL、ATL、TSB を組み合わせ、負荷を増やすか、維持するか、回復するかの判断に使います。"
+        "PMCフィットネスチャートとは何ですか？",
+        "PMCフィットネスチャートとは、長期的なフィットネス、短期的な疲労、現在のコンディションを比較するためのパフォーマンス管理チャート（PMC）です。通常は CTL・ATL・TSB を組み合わせて表示し、練習の質が落ちる前に「負荷を上げる・計画を維持する・回復を入れる」を判断する手がかりにします。"
       ],
       [
-        "PMCのCTLは何を示しますか？",
-        "CTL は chronic training load の略で、長期的なトレーニング負荷の方向を示します。CTL の上昇は積み上げの兆候ですが、追い続けるものではありません。重要なのは、CTL 上昇と練習品質・回復が両立しているかです。"
+        "PMCチャート上のCTLは何を示しますか？",
+        "CTL（慢性トレーニング負荷）は、長期的なトレーニングストレスの推移を示します。CTL の上昇はフィットネス構築の目安になり得ますが、闇雲に追うべき数値ではありません。重要なのは、ワークアウトの質と回復を保ったまま CTL が伸びているかどうかです。"
       ],
       [
-        "PMCのATLは何を示しますか？",
-        "ATL は acute training load の略で、最近のトレーニングストレスと疲労圧を示します。高い ATL はビルド期では普通ですが、重要ワークアウトの質低下、回復悪化、予定以上の負荷上昇がある場合は注意が必要です。"
+        "PMCチャート上のATLは何を示しますか？",
+        "ATL（急性トレーニング負荷）は、直近のトレーニングストレスと疲労の圧力を反映します。強化期に ATL が高くなること自体は問題ありませんが、ポイント練習の質が落ちたり、回復指標が低下したり、計画以上のペースで負荷が上がったりしたときは警戒サインになります。"
       ],
       [
-        "PMCのTSBは何を示しますか？",
-        "TSB は training stress balance の略で、慢性負荷と急性負荷の差からフォームや新鮮さを推定します。トレーニング期の低い TSB は普通ですが、重要セッション前に低い状態が続くなら、負荷維持や回復追加を検討します。"
+        "PMCチャート上のTSBは何を示しますか？",
+        "TSB（トレーニングストレスバランス）は、慢性負荷と急性負荷の差からコンディションやフレッシュさを推定する指標です。強化ブロック中に TSB が低めまたはマイナスになるのは自然ですが、重要セッションの前に低下が長引く場合は、負荷の据え置きや回復日の追加を検討する材料になります。"
+      ],
+      [
+        "PMCチャート上のACWRは何を示しますか？",
+        "ACWR は急性・慢性負荷比（Acute:Chronic Workload Ratio）です。Trainingload.ai では現在の ATL を現在の CTL で割って算出します。長期ベースラインに対する直近負荷の急変を検知するのに役立ちますが、ケガのリスク、回復度、レース準備状態を単独で予測するものではありません。"
       ]
     ],
     "sources": [
       "Performance Management Chart：CTL、ATL、TSB のモデル概念。",
       "持久系トレーニング実践：練習品質と回復でチャート信号を検証する。",
       "Trainingload.ai のプロダクト手法：まず保守的に1つ調整し、次の重要セッションで確認する。"
-    ]
+    ],
+    "guide": {
+      "ui": {
+        "metricsEyebrow": "主要指標ガイド",
+        "metricsTitle": "CTL・ATL・TSB・ACWRの意味と読み方",
+        "metricsSubtitle": "4つの指標はいずれも同じ日次トレーニング負荷の時系列から算出されますが、答える問いの時間軸が異なります。組み合わせる前に、それぞれの計算式と限界を押さえておきましょう。",
+        "formulaLabel": "現在の Trainingload.ai 計算式",
+        "interpretationLabel": "読み取りのポイント",
+        "cautionLabel": "誤解しやすい点",
+        "docsAction": "詳細な指標ドキュメントを読む",
+        "patternsEyebrow": "複合的な解釈",
+        "patternsTitle": "PMCフィットネスチャートを一つのシステムとして読む方法",
+        "patternsSubtitle": "単一の数値だけでトレーニングを決めることはほとんどありません。確度の高い判断は、曲線のパターンを捉え、元のアクティビティにさかのぼり、計画の目的と本人の体感で裏付けることで生まれます。",
+        "scenarioHeader": "シナリオ",
+        "signalsHeader": "チャートのパターン",
+        "meaningHeader": "確認できること",
+        "actionHeader": "次のアクション",
+        "advantagesEyebrow": "Trainingload.ai が選ばれる理由",
+        "advantagesTitle": "ただのPMCグラフではない：意思決定ループに組み込まれた負荷シグナル",
+        "advantagesSubtitle": "実用的な PMC ツールは、数値の根拠、対象となったワークアウト、計画との整合性、そして次に調整すべき点（あるいは維持すべき理由）までつなげて見せる必要があります。",
+        "freeBadge": "Freeプランに含まれます",
+        "previewLabel": "PMCデスクトップデモを拡大表示",
+        "previewHint": "クリックしてPMC全体を見る"
+      },
+      "metrics": [
+        {
+          "key": "ctl",
+          "acronym": "CTL",
+          "name": "慢性トレーニング負荷",
+          "summary": "CTL は日次トレーニング負荷の緩やかな指数加重移動平均（EWMA）です。Trainingload.ai では42日間の平滑化期間を採用しており、数週間単位での負荷の方向性（積み上げ中・維持・低下）を把握するのに適しています。画面上では「フィットネス」と表記されることも多いですが、実際に測っているのはモデル化された負荷履歴であり、身体への定着量や他アスリートと比較できる絶対的な体力スコアではありません。",
+          "formula": "decayCTL = exp(-1 / 42)\nCTLtoday = CTLyesterday × decayCTL\n           + 日次負荷 × (1 − decayCTL)",
+          "interpretation": "現在のトレーニングブロックと照らし合わせ、CTL の向きと傾きを読み取ります。ポイント練習の質を保ったまま緩やかに上昇していれば、意図どおりに負荷が蓄積しているサインです。急激な跳ね上がりがある場合は、異常値のアクティビティ、閾値変更、重複データ、負荷ソースの切り替えを確認してください。万人に共通する理想の CTL 値はありません。",
+          "caution": "CTL の上昇は適応の成功を証明するものではなく、高ければ良いわけでもありません。同じ CTL でも、種目構成・強度配分・データソースによって意味合いは大きく異なります。"
+        },
+        {
+          "key": "atl",
+          "acronym": "ATL",
+          "name": "急性トレーニング負荷",
+          "summary": "ATL は同じ日次負荷シリーズに対する反応の速い指数加重移動平均です。Trainingload.ai では7日間の平滑化期間を使っており、直近のセッションに敏感に反応するため、短期的なトレーニング圧力がいつ増減したかを特定できます。画面上では「疲労」と呼ばれることが多いものの、睡眠・痛み・体調不良・主観的疲労を直接測るものではなく、生理学的な診断ではなく疲労の文脈を示す指標です。",
+          "formula": "decayATL = exp(-1 / 7)\nATLtoday = ATLyesterday × decayATL\n           + 日次負荷 × (1 − decayATL)",
+          "interpretation": "ATL が急に上昇したら、直近7〜14日間のロング走・ロングライド、ポイント練習、レース、予定外のアクティビティを確認し、計画どおりの増加かどうかを見極めます。リカバリー週には通常、ATL は CTL より速く低下します。重要なのは、ATL の変動と同時に実行品質の低下、主観的不調、痛みの兆候が出ていないかを確認することです。",
+          "caution": "ATL が高いからといって直ちに危険なわけではなく、ATL が低いからといって十分に回復しているとも限りません。測っているのは実測の疲労ではなく直近の負荷です。"
+        },
+        {
+          "key": "tsb",
+          "acronym": "TSB",
+          "name": "トレーニングストレスバランス",
+          "summary": "TSB は現在の CTL と ATL の差分であり、長期の負荷トレンドに対して直近負荷がどの位置にあるかを表します。マイナスは ATL が CTL を上回っている状態（強化期によく見られる）、プラスは ATL が CTL を下回っている状態（回復期やテーパリング期によく見られる）です。一般に「コンディション」や「フレッシュさ」と表記されますが、本質は2つの負荷モデルの数学的な差です。",
+          "formula": "TSBtoday = CTLtoday − ATLtoday",
+          "interpretation": "TSB はタイミングを測る文脈として活用します。テーパリング期には ATL が先に下がって TSB が上昇し、強化期には ATL が先に上がって TSB がマイナスになります。ポイント練習やレース前には、一律のプラス・マイナス基準を当てはめるのではなく、本人の過去履歴、計画の目的、実行品質、主観的コンディションと照合してください。",
+          "caution": "TSB がプラスでもピーク状態とは限らず、マイナスでもオーバートレーニングとは限りません。固定の「最適レンジ」を異なるアスリートや負荷モデルにそのまま当てはめることはできません。"
+        },
+        {
+          "key": "acwr",
+          "acronym": "ACWR",
+          "name": "急性・慢性負荷比",
+          "summary": "ACWR（A:C Ratio とも表記）は、直近の負荷を長期の負荷ベースラインと比較する比率です。Trainingload.ai では現在の ATL を現在の CTL で割って計算しており、一般的な「7日合計 ÷ 28日平均」の実装とは異なります。比率の上昇が示すのは、長期基準に比べて直近のモデル負荷が高いという事実だけであり、急増やデータ異常を見つける手がかりとして使います。",
+          "formula": "ACWRtoday = ATLtoday / CTLtoday\nCTLtoday = 0 の場合は 0",
+          "interpretation": "比率を見る前に、必ず ATL と CTL の絶対値を確認してください。ACWR が上がる背景には、計画的な過負荷、単発の異常アクティビティ、長期休養後の分母（CTL）の小ささ、閾値変更、重複インポートなどが考えられます。データに問題がないことを確認したうえで、種目特有の衝撃負荷、痛み、体調不良、睡眠、練習の質を総合して調整を判断します。",
+          "caution": "ACWR はケガの予測指標ではなく、すべてのアスリートに共通する「安全なスイートスポット」も存在しません。表示レンジは確認を促す目安であり、医学的判断やトレーニング可否の保証ではありません。"
+        }
+      ],
+      "patterns": [
+        [
+          "計画どおりの負荷構築",
+          "CTL が緩やかに上昇し、ATL は周期的に CTL を上回る。TSB は適度なマイナス、ACWR は最近の傾向付近で推移する。",
+          "目立った急加速シグナルはなく、負荷が順調に積み上がっている。",
+          "ポイント練習の質、主観的な調子、回復が安定していれば計画を維持します。グラフの見栄えだけのために負荷を足す必要はありません。"
+        ],
+        [
+          "直近負荷の急加速",
+          "ATL が急上昇し、CTL の追従が追いつかない。TSB が急落し、同時に ACWR も跳ね上がる。",
+          "直近のモデル負荷が長期ベースラインを明確に上回っているが、原因と身体の反応はまだ検証が必要。",
+          "元になったワークアウトをたどり、重複や閾値変更を除外します。ポイント練習の質も落ちている場合は、強度・時間・配置のうち1変数だけを調整してください。"
+        ],
+        [
+          "リカバリー週・テーパリング",
+          "ATL が CTL より速く低下し、TSB は上昇、ACWR は低下。CTL は概ね維持または緩やかに下降する。",
+          "直近の負荷が抜けてモデル上のフレッシュさは高まっているが、ピーク仕上がりの証明ではない。",
+          "比較可能なポイント練習、主観的フィードバック、本番レースの要求水準で仕上がりを確認します。CTL がわずかに下がったからといって焦って負荷を足さないでください。"
+        ],
+        [
+          "休養・練習抜け・データ欠損",
+          "ATL と CTL がともに低下し、TSB がプラスに転じることもある。ACWR は低水準、または CTL の分母が小さいために歪む。",
+          "モデル上は負荷減少として映るが、計画休養・記録漏れ・ケガ・スケジュール中断の区別はつかない。",
+          "まずアクティビティの網羅性と負荷ソースを確認してください。プラスの TSB を好調の証拠とみなさないよう注意が必要です。"
+        ],
+        [
+          "チャートと体感の不一致",
+          "PMC 上は正常に見えるのに、ペースやパワーの実行品質、睡眠、痛み、主観的疲労が悪化し続けている。",
+          "負荷モデルが重要な文脈を捉えきれておらず、グラフだけを根拠にさらなる負荷をかけることはできない。",
+          "この不一致を調査シグナルとして受け止め、調整は保守的に行います。痛み・体調不良・異常な症状がある場合は健康と専門家の助言を優先してください。"
+        ]
+      ],
+      "advantages": [
+        [
+          "主要なPMCチャートとトレンド分析が無料",
+          "Freeプランには PMC、CTL–ATL–TSB チャート、指標ハブ、詳細ダッシュボードが含まれます。課金前にご自身のトレーニング履歴で実際のワークフローを検証できます。"
+        ],
+        [
+          "計算式・閾値・負荷ソースをすべて公開",
+          "Trainingload.ai は7日 ATL、42日 CTL、TSB、ACWR の計算式を明示しています。アクティビティ負荷は、あなたの閾値とソース優先順位に従い、パワー・心拍数・ペース・セッション RPE から算出されます。"
+        ],
+        [
+          "曲線の変化を計画と実績ワークアウトへ逆引き",
+          "グラフを孤立した滑らかな線として終わらせません。PMC の変化を計画セッション、完了実績、未実施ワークアウト、元アクティビティと結び付けて原因を確認できます。"
+        ],
+        [
+          "負荷だけでなくパフォーマンス応答と比較",
+          "PMC が表すのは加えた圧力です。Effective VO₂max、閾値トレンド、ワークアウトの質、主観シグナルと並べて見ることで、狙いどおりの適応が起きているか検証でき、CTL だけを追う罠を防げます。"
+        ],
+        [
+          "AIが変更案を下書きし、最終承認はあなたが行う",
+          "負荷と実行データの根拠から調整が必要と判断されるとき、AIコーチが現在のプラン内で保守的な修正案を作成します。理由・具体的な変更内容・検証ポイントを確認してから適用できます。"
+        ]
+      ]
+    }
   },
   "powerCurvePage": {
     "metadata": {
@@ -7037,7 +7306,10 @@
       "toolsAction": "トレーニングツールを開く",
       "productAction": "Trainingload.aiを開く",
       "ctaTitle": "形を見るだけで終わらせない。",
-      "ctaText": "Power Curveをゾーン、閾値、週間負荷に接続して実行可能な調整にします。"
+      "ctaText": "Power Curveをゾーン、閾値、週間負荷に接続して実行可能な調整にします。",
+      "updatedLabel": "最終更新",
+      "lastUpdated": "2026年5月23日",
+      "lastUpdatedDate": "2026-05-23"
     },
     "blocks": [
       [
@@ -7229,7 +7501,10 @@
         "適用前に小さく検証",
         "新閾値は1〜2週間の実行反応を見てから固定します。"
       ],
-      ["週次レビューで更新判断", "完遂率と疲労反応をもとに更新可否を決めます。"]
+      [
+        "週次レビューで更新判断",
+        "完遂率と疲労反応をもとに更新可否を決めます。"
+      ]
     ],
     "faq": [
       [
@@ -7281,7 +7556,10 @@
         "負荷との整合を見る",
         "負荷増加期に一時低下しても、数週で回復するかを確認します。"
       ],
-      ["閾値との関係を確認", "CP/FTP/LTHR更新と同方向かを見ます。"],
+      [
+        "閾値との関係を確認",
+        "CP/FTP/LTHR更新と同方向かを見ます。"
+      ],
       [
         "過負荷サインを早期検知",
         "低下トレンドが続く場合は強度配分を見直します。"
@@ -7292,7 +7570,10 @@
         "実測VO2maxと同じですか？",
         "同一ではありません。トレーニングデータから推定した実用指標です。"
       ],
-      ["毎日見る必要がありますか？", "日次より週次の確認が有効です。"],
+      [
+        "毎日見る必要がありますか？",
+        "日次より週次の確認が有効です。"
+      ],
       [
         "下がったらすぐ負荷を落とすべき？",
         "即断せず、他指標と次の重要セッション結果を確認してください。"
@@ -7338,7 +7619,10 @@
         "疲労状態と合わせる",
         "高疲労下での更新は価値が高いが、回復計画も必要です。"
       ],
-      ["次ブロックに反映", "更新帯域と未更新帯域で刺激配分を決めます。"]
+      [
+        "次ブロックに反映",
+        "更新帯域と未更新帯域で刺激配分を決めます。"
+      ]
     ],
     "faq": [
       [
@@ -7382,10 +7666,22 @@
       "ctaText": "Fitness/Fatigue/Formを使って、過負荷を避けつつ適応を積み上げます。"
     },
     "blocks": [
-      ["Fitnessは土台の推移", "長期適応の積み上がりを把握します。"],
-      ["Fatigueは短期圧力", "短期疲労の高まりを早期に検知します。"],
-      ["Formは実行可否の目安", "重要セッションの品質を守れるかを判断します。"],
-      ["週の中で再配分する", "必要なら強度・時間・休養日を再配置します。"]
+      [
+        "Fitnessは土台の推移",
+        "長期適応の積み上がりを把握します。"
+      ],
+      [
+        "Fatigueは短期圧力",
+        "短期疲労の高まりを早期に検知します。"
+      ],
+      [
+        "Formは実行可否の目安",
+        "重要セッションの品質を守れるかを判断します。"
+      ],
+      [
+        "週の中で再配分する",
+        "必要なら強度・時間・休養日を再配置します。"
+      ]
     ],
     "faq": [
       [
@@ -8357,17 +8653,26 @@
           [
             "このページで無料実行",
             "全週・全ワークアウトを掲載し、アカウントやAppなしで始められます。",
-            ["1週目から開始", "9週間をすべて確認"]
+            [
+              "1週目から開始",
+              "9週間をすべて確認"
+            ]
           ],
           [
             "無料でカレンダーへ",
             "開始日と曜日を選び、完了を記録し、自分で移動・編集できます。",
-            ["同じ公式ワークアウト", "日程はいつでも手動で調整可能"]
+            [
+              "同じ公式ワークアウト",
+              "日程はいつでも手動で調整可能"
+            ]
           ],
           [
             "AIコーチで変化に対応",
             "AIコーチは予定と実績、負荷、回復を比較し、根拠のある調整案を生成します。",
-            ["継続的な自動確認", "承認後のみ変更"]
+            [
+              "継続的な自動確認",
+              "承認後のみ変更"
+            ]
           ]
         ],
         "conversionTitle": "同じ無料公式プランをカレンダーへ",
@@ -8392,7 +8697,12 @@
         "finalTitle": "無料プランを今日から始める",
         "finalText": "このページの1週目から始めるか、同じ公式プランを無料でカレンダーに追加して次の練習を始められます。",
         "collectionCta": "無料Couch to 5Kプランを見る",
-        "trustItems": ["完全無料メニュー", "9週間", "週3回", "目標ペースなし"],
+        "trustItems": [
+          "完全無料メニュー",
+          "9週間",
+          "週3回",
+          "目標ペースなし"
+        ],
         "routePath": "/couch-to-5k-training-plan",
         "templateSlug": "first-5k"
       }
@@ -10122,7 +10432,11 @@
       "visual": {
         "title": "ローカルFIT検査",
         "file": "activity.fit",
-        "checks": ["Header", "CRC", "メッセージ"],
+        "checks": [
+          "Header",
+          "CRC",
+          "メッセージ"
+        ],
         "status": "端末内のみ・通信なし"
       },
       "upload": {
@@ -10463,7 +10777,11 @@
         },
         "onThisPage": "このページの内容"
       },
-      "proof": ["登録不要", "すぐに結果", "印刷または共有"],
+      "proof": [
+        "登録不要",
+        "すぐに結果",
+        "印刷または共有"
+      ],
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
         "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
@@ -10948,7 +11266,11 @@
           "answer": "マニュアルワークアウトエディタのガイドが、書き出したセッションを Trainingload の計画日に置く手順を示します。\n\n例: DSL をコピーし、ガイドを開いて、置きたい日の Rules モードに貼ります。\n\n保存するかどうかは、アプリで自分で決めます。"
         }
       ],
-      "proof": ["登録不要", "すぐに結果", "印刷または共有"],
+      "proof": [
+        "登録不要",
+        "すぐに結果",
+        "印刷または共有"
+      ],
       "promo": {
         "kicker": "アプリ内",
         "title": "一回の練習から、一週間の計画へ。",
@@ -11347,7 +11669,11 @@
     "page": {
       "title": "トレーニング負荷計算機",
       "subtitle": "日々のトレーニング負荷から、フィットネス・疲労・フォームの変化を確認。次の1週間の計画に役立てましょう。",
-      "proof": ["登録不要", "入力すると即計算", "印刷・共有に対応"],
+      "proof": [
+        "登録不要",
+        "入力すると即計算",
+        "印刷・共有に対応"
+      ],
       "formula": "CTL_今日 = CTL_昨日 + (TSS − CTL_昨日) / 42\nATL_今日 = ATL_昨日 + (TSS − ATL_昨日) / 7\nTSB_今日 = CTL_今日 − ATL_今日",
       "teachingNote": "7–14 日の表は、何か月分の同期データに代わりません。更新の見え方を確認してから、製品のチャートを開いてください。",
       "howTo": {
@@ -11603,7 +11929,11 @@
     "page": {
       "title": "レースタイム予測",
       "subtitle": "最近のレース記録を入力するか、ランニングファイルから区間を選んで、5km・10km・ハーフ・フルマラソンの換算タイムとペースを確認できます。",
-      "proof": ["登録不要", "入力するとすぐに計算", "印刷・共有に対応"],
+      "proof": [
+        "登録不要",
+        "入力するとすぐに計算",
+        "印刷・共有に対応"
+      ],
       "howTo": {
         "title": "レースタイムの予測方法",
         "steps": {
@@ -12534,7 +12864,10 @@
             "ATL上昇でスイムが薄い",
             "技術量を守る。全スイムを切る前に週中のバイク強度を削る。"
           ],
-          ["週の書き直しが必要", "AIコーチが理由付きで草案する。確認はあなた。"]
+          [
+            "週の書き直しが必要",
+            "AIコーチが理由付きで草案する。確認はあなた。"
+          ]
         ],
         "relatedTitle": "オリンピックプランを完成させるツールとハブ",
         "relatedLinks": [
@@ -12997,7 +13330,11 @@
     "page": {
       "title": "ゾーン2心拍数計算機",
       "subtitle": "年齢、最大心拍数、Karvonen HRR、LTHRから有酸素ゾーン2の範囲を計算し、実際の感覚と照らし合わせます。",
-      "proof": ["登録不要", "すぐに結果を表示", "印刷または共有"],
+      "proof": [
+        "登録不要",
+        "すぐに結果を表示",
+        "印刷または共有"
+      ],
       "howTo": {
         "title": "ゾーン2心拍数の計算方法",
         "steps": {
@@ -13608,7 +13945,10 @@
       "heroProduct": {
         "title": "毎回の練習を記録し、進歩を知る。",
         "body": "iPhone で記録し、Trainingload.ai でペース・心拍数・トレーニング負荷から練習を振り返りましょう。",
-        "benefits": ["練習中のリアルタイムデータ", "練習後の分析と振り返り"],
+        "benefits": [
+          "練習中のリアルタイムデータ",
+          "練習後の分析と振り返り"
+        ],
         "cta": "AI コーチを見る",
         "phoneAlt": "iPhoneのTrainingload.aiトレーニング記録画面"
       },
@@ -13756,5 +14096,47 @@
     "health": "健康データ {count} 件",
     "network": "ファイル処理サービスに接続できません。もう一度お試しください。",
     "failed": "ファイルを読み取れませんでした（{status}）。"
+  },
+  "planShare": {
+    "badge": "取り込めるプラン",
+    "notActivated": "スケジュールのスナップショット（カレンダー未適用）",
+    "takeCta": "このプランを取り込む",
+    "takeHint": "下書きとしてインポートされます。現在のプランはそのまま維持されます。",
+    "disclaimer": "これはスケジュールのスナップショットであり、あなたの現在のフィットネスに合わせた個別コーチングではありません。開始前に内容を確認してください。",
+    "statWeeks": "週数",
+    "statDaysPerWeek": "日 / 週",
+    "statWorkouts": "ワークアウト数",
+    "overviewTitle": "概要",
+    "weekBreakdownTitle": "週ごとのプラン",
+    "weekTitle": "第{week}週",
+    "sessionsCount": "{count}セッション",
+    "emptyDay": "予定されたワークアウトはありません",
+    "loadTitle": "推定負荷",
+    "loadHint": "あなたの閾値ではなく、ワークアウト構造から算出した一般的な推定値です。インポート後に再計算されます。",
+    "loadBadge": "負荷 {value}",
+    "loadGenericTip": "一般的な推定負荷 {value}。インポート後、あなたの閾値に基づいて再計算されます。",
+    "dialogTitle": "ワークアウト詳細",
+    "dialogTitleWithWeek": "第{week}週 · {day}",
+    "notesLabel": "メモ",
+    "chartLabel": "ワークアウト",
+    "errorTitle": "この共有リンクを開けませんでした",
+    "errorText": "リンクが無効か、プレビューが一時的に利用できない可能性があります。",
+    "goneTitle": "この共有リンクは取り消されました",
+    "goneText": "作成者がこのリンクの共有を停止しました。すでにインポート済みの場合、あなたの下書きはそのまま残ります。",
+    "weekday": {
+      "1": "月",
+      "2": "火",
+      "3": "水",
+      "4": "木",
+      "5": "金",
+      "6": "土",
+      "7": "日"
+    },
+    "sport": {
+      "RUN": "ラン",
+      "CYCLING": "バイク",
+      "SWIM": "スイム",
+      "STRETCHING": "モビリティ"
+    }
   }
 }

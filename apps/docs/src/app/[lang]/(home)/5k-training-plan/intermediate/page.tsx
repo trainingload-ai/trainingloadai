@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { isSeoIndexedLanguage } from "@/lib/i18n";
 
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 import {
@@ -36,7 +37,7 @@ export async function generateMetadata({
   const path = plan.routePath ?? "/5k-training-plan/intermediate";
   const prefix = localePrefix(lang);
   const siteUrl = getSiteUrl();
-  const indexed = ["en", "zh", "zh-hant", "ja"].includes(lang);
+  const indexed = isSeoIndexedLanguage(lang);
   return {
     title: plan.metaTitle,
     description: plan.metaDescription,

@@ -30,8 +30,8 @@ describe("RPE scale content", () => {
     },
   );
 
-  it("falls back to English without making unreviewed locales indexable", () => {
-    expect(getRpeScaleContent("de")).toBe(getRpeScaleContent("en"));
+  it("falls back to English without making unsupported locales indexable", () => {
+    expect(getRpeScaleContent("nl")).toBe(getRpeScaleContent("en"));
   });
 
   it("keeps every FAQ answer visible and schema-ready", () => {

@@ -14,10 +14,6 @@ import {
   localePrefix,
   withLocalePath,
 } from "@/lib/locale-url";
-import {
-  VDOT_CONTENT_LOCALES,
-  vdotContentAlternates,
-} from "@/lib/vdot-plan-content";
 import { isIndexableSitemapUrl } from "@/lib/public-html-url";
 import { stat } from "node:fs/promises";
 import { join } from "node:path";
@@ -355,6 +351,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/css-calculator",
     "/vo2-max-calculator",
     "/vdot-calculator",
+    "/daniels-running-formula",
     "/running-pace-calculator",
     "/race-time-predictor",
     "/power-zones-calculator",
@@ -364,25 +361,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/contact",
     "/privacy",
     "/terms-and-conditions",
-    "/docs",
   ];
 
   for (const lang of SEO_INDEXED_LANGUAGES) {
     for (const path of staticPaths) {
       // as-needed locale prefix:
-      // - default locale (en): "/docs"
-      // - other locales (zh): "/zh/docs"
+      // - default locale (en): "/tools"
+      // - other locales (zh): "/zh/tools"
       const urlPath = withLocalePath(lang, path || "/");
       const pathname =
         path === "" ? "/" : path.startsWith("/") ? path : `/${path}`;
 
-      // Prefer real content mtime for docs index.
-      const lastModified =
-        pathname === "/docs"
-          ? await resolveLastModifiedFromFiles(docFileCandidates(lang, []), now)
-          : STATIC_LAST_MODIFIED[pathname]
-            ? new Date(`${STATIC_LAST_MODIFIED[pathname]}T00:00:00.000Z`)
-            : undefined;
+      const lastModified = STATIC_LAST_MODIFIED[pathname]
+        ? new Date(`${STATIC_LAST_MODIFIED[pathname]}T00:00:00.000Z`)
+        : undefined;
       entries.push({
         url: `${siteUrl}${urlPath}`,
         ...(lastModified ? { lastModified } : {}),
@@ -409,20 +401,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
       ...getChangeFreqAndPriority("/blog"),
     });
-  }
-
-  for (const path of ["/daniels-running-formula"]) {
-    for (const lang of VDOT_CONTENT_LOCALES) {
-      const urlPath = `${localePrefix(lang)}${path}`;
-      entries.push({
-        url: `${siteUrl}${urlPath}`,
-        lastModified: new Date(`${STATIC_LAST_MODIFIED[path]!}T00:00:00.000Z`),
-        alternates: {
-          languages: vdotContentAlternates(siteUrl, path),
-        },
-        ...getChangeFreqAndPriority(path),
-      });
-    }
   }
 
   for (const p of generateNativeBlogParams()) {

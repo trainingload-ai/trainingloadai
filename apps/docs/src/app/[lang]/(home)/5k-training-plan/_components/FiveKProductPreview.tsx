@@ -14,10 +14,18 @@ type PreviewCopy = {
 
 type SystemPreviewKind = "calendar" | "analysis" | "coach";
 type PreviewLocale = "en" | "zh" | "zh-hant" | "ja";
+type PreviewCopyLocale =
+  | PreviewLocale
+  | "ko"
+  | "de"
+  | "fr"
+  | "es"
+  | "it"
+  | "pt-BR";
 type WebPreviewSurface = "web-plan" | "web-calendar" | "web-coach";
 type MobilePreviewSurface = "mobile-plan" | "mobile-calendar" | "mobile-coach";
 
-const COPY: Record<"en" | "zh" | "zh-hant" | "ja", PreviewCopy> = {
+const COPY: Record<PreviewCopyLocale, PreviewCopy> = {
   en: {
     webAlt: "TrainingLoad.ai Web training plan detail",
     mobileAlt: "TrainingLoad.ai iOS plan screen with today's workout",
@@ -46,12 +54,87 @@ const COPY: Record<"en" | "zh" | "zh-hant" | "ja", PreviewCopy> = {
     mobileCalendarAlt:
       "トレーニングデータが入ったTrainingLoad.ai iOS版カレンダー",
   },
+  ko: {
+    webAlt: "TrainingLoad.ai 웹 훈련 계획 상세 화면",
+    mobileAlt: "오늘의 훈련이 표시된 TrainingLoad.ai iOS 계획 화면",
+    webCalendarAlt:
+      "완료된 훈련과 예정된 훈련이 표시된 TrainingLoad.ai 웹 훈련 캘린더",
+    mobileCalendarAlt: "훈련 데이터가 표시된 TrainingLoad.ai iOS 훈련 캘린더",
+  },
+  de: {
+    webAlt: "TrainingLoad.ai Web-Trainingsplandetail",
+    mobileAlt: "TrainingLoad.ai iOS-Planansicht mit dem heutigen Training",
+    webCalendarAlt:
+      "TrainingLoad.ai Web-Trainingskalender mit absolvierten und geplanten Einheiten",
+    mobileCalendarAlt:
+      "TrainingLoad.ai iOS-Trainingskalender mit Trainingsdaten",
+  },
+  fr: {
+    webAlt: "Détail du plan d'entraînement TrainingLoad.ai sur le Web",
+    mobileAlt: "Écran de plan TrainingLoad.ai iOS avec la séance du jour",
+    webCalendarAlt:
+      "Calendrier d'entraînement TrainingLoad.ai Web avec séances réalisées et planifiées",
+    mobileCalendarAlt:
+      "Calendrier d'entraînement TrainingLoad.ai iOS avec données de séance",
+  },
+  es: {
+    webAlt: "Detalle del plan de entrenamiento de TrainingLoad.ai en Web",
+    mobileAlt:
+      "Pantalla de plan en TrainingLoad.ai iOS con el entrenamiento de hoy",
+    webCalendarAlt:
+      "Calendario de entrenamiento de TrainingLoad.ai en Web con sesiones completadas y planificadas",
+    mobileCalendarAlt:
+      "Calendario de entrenamiento de TrainingLoad.ai en iOS con datos de entrenamiento",
+  },
+  it: {
+    webAlt: "Dettaglio del piano di allenamento TrainingLoad.ai Web",
+    mobileAlt: "Schermata del piano TrainingLoad.ai iOS con l'allenamento di oggi",
+    webCalendarAlt:
+      "Calendario di allenamento TrainingLoad.ai Web con sessioni completate e pianificate",
+    mobileCalendarAlt:
+      "Calendario di allenamento TrainingLoad.ai iOS con dati di allenamento",
+  },
+  "pt-BR": {
+    webAlt: "Detalhes do plano de treino do TrainingLoad.ai na Web",
+    mobileAlt: "Tela do plano no TrainingLoad.ai iOS com o treino de hoje",
+    webCalendarAlt:
+      "Calendário de treino do TrainingLoad.ai na Web com treinos concluídos e planejados",
+    mobileCalendarAlt:
+      "Calendário de treino do TrainingLoad.ai no iOS com dados de treino",
+  },
 };
 
 function previewLocale(lang: string): PreviewLocale {
-  if (lang.toLowerCase().startsWith("zh-hant")) return "zh-hant";
-  if (lang.toLowerCase().startsWith("zh")) return "zh";
-  if (lang.toLowerCase().startsWith("ja")) return "ja";
+  const normalized = lang.toLowerCase();
+  if (
+    normalized.startsWith("zh-hant") ||
+    normalized.startsWith("zh-tw") ||
+    normalized.startsWith("zh-hk")
+  ) {
+    return "zh-hant";
+  }
+  if (normalized.startsWith("zh")) return "zh";
+  if (normalized.startsWith("ja")) return "ja";
+  return "en";
+}
+
+function previewCopyLocale(lang: string): PreviewCopyLocale {
+  const normalized = lang.toLowerCase();
+  if (
+    normalized.startsWith("zh-hant") ||
+    normalized.startsWith("zh-tw") ||
+    normalized.startsWith("zh-hk")
+  ) {
+    return "zh-hant";
+  }
+  if (normalized.startsWith("zh")) return "zh";
+  if (normalized.startsWith("ja")) return "ja";
+  if (normalized.startsWith("ko")) return "ko";
+  if (normalized.startsWith("de")) return "de";
+  if (normalized.startsWith("fr")) return "fr";
+  if (normalized.startsWith("es")) return "es";
+  if (normalized.startsWith("it")) return "it";
+  if (normalized.startsWith("pt")) return "pt-BR";
   return "en";
 }
 
@@ -234,7 +317,7 @@ export function FiveKProductPreview({
   distance: string;
 }) {
   const locale = previewLocale(lang);
-  const copy = COPY[locale];
+  const copy = COPY[previewCopyLocale(lang)];
   const showPlan = usesPlanDetail(planSlug);
   const showMobilePlan = usesDistanceSpecificMobilePlan(planSlug);
   const appPath = showPlan ? "/plans" : "/calendar";
@@ -273,7 +356,7 @@ export function FiveKWorkflowPreview({
   distance: string;
 }) {
   const locale = previewLocale(lang);
-  const copy = COPY[locale];
+  const copy = COPY[previewCopyLocale(lang)];
   const showPlan = usesPlanDetail(planSlug);
   const showMobilePlan = usesDistanceSpecificMobilePlan(planSlug);
   const appPath = showPlan ? "/plans" : "/calendar";

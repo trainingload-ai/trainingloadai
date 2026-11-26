@@ -253,7 +253,7 @@ describe("shared official schedules in Docs", () => {
     expect(plan.keywords).toContain("couch to 5k");
     expect(plan.primaryCtaTarget).toBe("schedule");
     expect(plan.secondaryCtaTarget).toBe("app");
-    expect(plan.faq).toHaveLength(8);
+    expect(plan.faq).toHaveLength(11);
     expect(plan.title).not.toContain("Free Couch to 5K Training Plan");
   });
 

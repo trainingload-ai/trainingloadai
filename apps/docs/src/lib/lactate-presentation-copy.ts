@@ -245,14 +245,427 @@ const ja: LactatePresentationCopy = {
   moreDetails: "方法の説明",
   available: "方法が算出可能",
 };
+const ko: LactatePresentationCopy = {
+  engineVersion: "계산 엔진 버전",
+  tooltipStage: "단계",
+  tooltipMeasured: "실측 젖산",
+  tooltipFitted: "적합 젖산",
+  tooltipResidual: "잔차",
+  tooltipZone: "강도 영역",
+  hoverHint: "샘플에 마우스를 올리거나 탭·포커스하여 단계별 수치를 확인하세요",
+  ctaAction: "무료 계정 만들기",
+  ctaExplore: "훈련 부하 살펴보기",
+  ctaNote: "이 도구의 테스트 데이터는 계정에 자동으로 저장되지 않습니다.",
+  ctaImageAlt: "Trainingload.ai 훈련 부하 및 컨디션 추세 관리 화면",
+  ctaImageCaption: "Trainingload.ai · 훈련 부하 화면 예시",
+  ctaBenefitLoad: "훈련 부하 추세",
+  ctaBenefitZones: "강도 분포",
+  ctaBenefitPlan: "훈련 주기 계획",
+  workflowInput: "테스트 입력",
+  workflowReport: "분석 리포트",
+  editData: "테스트 데이터 편집",
+  readCurve: "젖산–강도 프로파일",
+  readCurveBody:
+    "운동 단계 샘플에 대한 3차 다항식 적합 곡선입니다. 단계에 마우스를 올리거나 선택하면 실측 젖산, 적합 젖산, 심박수를 확인할 수 있습니다.",
+  thresholdBasis: "역치 산출 기준",
+  inputGuide: "운동 4–30단계 · 젖산 mmol/L · 심박수(선택)",
+  returnReport: "리포트로 돌아가기",
+  overview: "테스트 개요",
+  stages: "운동 단계",
+  peak: "마지막 측정 강도",
+  fit: "3차 곡선 적합",
+  curve: "젖산 곡선",
+  samples: "실측 샘플",
+  fitted: "적합 곡선",
+  anchor: "기준선",
+  distance: "최대 거리",
+  compareTitle: "역치 산출 방법 비교",
+  compareBody:
+    "동일한 테스트에서 산출한 추정치를 운동 강도 축에 맞춰 표시합니다. 방법을 선택해 계산 방식과 적용 조건을 확인하세요.",
+  sharedScale: "공통 강도 축",
+  earlyGroup: "기준선 및 변곡점",
+  dmaxGroup: "Dmax 계열",
+  fixedGroup: "고정 농도",
+  notInterval:
+    "각 표식은 서로 다른 방법의 추정치이며 신뢰구간이 아닙니다.",
+  zonesBody:
+    "선택한 LT1과 LT2 방법에 따라 경계가 결정됩니다. 색상 띠는 세 가지 강도 영역을 나타냅니다.",
+  lowDomain: "LT1 미만",
+  middleDomain: "LT1~LT2 구간",
+  highDomain: "LT2 초과",
+  qualityFitTitle: "적합도 진단",
+  qualityFitBody:
+    "잔차 = 실측 젖산 − 적합 젖산. 곡선 적합도가 높다고 해서 생리학적 정확성이 보장되는 것은 아닙니다.",
+  rmse: "평균 제곱근 오차",
+  maxResidual: "최대 절대 잔차",
+  residuals: "단계별 잔차",
+  logAxes: "Log-log 보기 · 양쪽 축 모두 로그 눈금",
+  noHr: "기록된 심박수 샘플 없음",
+  preview: "예시 분석",
+  previewBody:
+    "LT1/LT2, 강도 영역, 심박수 반응을 포함한 전체 점증 부하 테스트 분석 예시입니다.",
+  previewCaption: "예시 데이터 · 개인 테스트 결과가 아닙니다",
+  moreDetails: "방법 상세 설명",
+  available: "가지 방법 사용 가능",
+};
+const de: LactatePresentationCopy = {
+  engineVersion: "Engine-Version",
+  tooltipStage: "Stufe",
+  tooltipMeasured: "Gemessenes Laktat",
+  tooltipFitted: "Angepasstes Laktat",
+  tooltipResidual: "Residuum",
+  tooltipZone: "Intensitätsbereich",
+  hoverHint:
+    "Messpunkt antippen, fokussieren oder mit der Maus darüberfahren für Stufenwerte",
+  ctaAction: "Kostenloses Konto erstellen",
+  ctaExplore: "Trainingsbelastung entdecken",
+  ctaNote:
+    "Testdaten aus diesem Tool werden nicht automatisch in deinem Konto gespeichert.",
+  ctaImageAlt:
+    "Trainingload.ai Fitness-Management mit Trends zu Trainingsbelastung und Form",
+  ctaImageCaption: "Trainingload.ai · Beispielansicht Trainingsbelastung",
+  ctaBenefitLoad: "Belastungstrends",
+  ctaBenefitZones: "Intensitätsverteilung",
+  ctaBenefitPlan: "Trainingszyklus-Planung",
+  workflowInput: "Test eingeben",
+  workflowReport: "Analysebericht",
+  editData: "Testdaten bearbeiten",
+  readCurve: "Laktat-Intensitäts-Profil",
+  readCurveBody:
+    "Kubische Polynomanpassung an die Belastungsstufen. Fahre über eine Stufe oder wähle sie aus, um gemessenes Laktat, angepasstes Laktat und Herzfrequenz zu prüfen.",
+  thresholdBasis: "Schwellenkriterien",
+  inputGuide: "4–30 Belastungsstufen · Laktat in mmol/L · optionale Herzfrequenz",
+  returnReport: "Zurück zum Bericht",
+  overview: "Testübersicht",
+  stages: "Belastungsstufen",
+  peak: "Letzte getestete Intensität",
+  fit: "Kubische Anpassung",
+  curve: "Laktatkurve",
+  samples: "Gemessene Proben",
+  fitted: "Angepasste Kurve",
+  anchor: "Referenzlinie",
+  distance: "Maximaler Abstand",
+  compareTitle: "Vergleich der Schwellenmethoden",
+  compareBody:
+    "Schätzwerte aus demselben Test, ausgerichtet an der Belastungsintensität. Wähle eine Methode, um Berechnung und Anwendbarkeit zu prüfen.",
+  sharedScale: "Gemeinsame Intensitätsskala",
+  earlyGroup: "Basislinie & Knickpunkt",
+  dmaxGroup: "Dmax-Familie",
+  fixedGroup: "Feste Konzentration",
+  notInterval:
+    "Die Markierungen zeigen Schätzwerte verschiedener Methoden, kein Konfidenzintervall.",
+  zonesBody:
+    "Die Grenzen folgen deinen gewählten LT1- und LT2-Methoden. Die Farbbänder zeigen die drei Intensitätsbereiche.",
+  lowDomain: "Unterhalb LT1",
+  middleDomain: "Zwischen LT1 und LT2",
+  highDomain: "Oberhalb LT2",
+  qualityFitTitle: "Anpassungsdiagnostik",
+  qualityFitBody:
+    "Residuum = gemessenes minus angepasstes Laktat. Eine enge Anpassung beweist keine physiologische Genauigkeit.",
+  rmse: "Mittlerer quadratischer Fehler (RMSE)",
+  maxResidual: "Größtes absolutes Residuum",
+  residuals: "Stufenresiduen",
+  logAxes: "Log-log-Ansicht · beide Achsen mit logarithmischer Skala",
+  noHr: "Keine Herzfrequenzdaten erfasst",
+  preview: "Beispielanalyse",
+  previewBody:
+    "Eine vollständige Stufentest-Analyse mit LT1/LT2, Intensitätsbereichen und Herzfrequenzverlauf.",
+  previewCaption: "Demonstrationsdaten · kein persönliches Testergebnis",
+  moreDetails: "Methodendetails",
+  available: "Methoden verfügbar",
+};
+const fr: LactatePresentationCopy = {
+  engineVersion: "Version du moteur",
+  tooltipStage: "Palier",
+  tooltipMeasured: "Lactate mesuré",
+  tooltipFitted: "Lactate ajusté",
+  tooltipResidual: "Résidu",
+  tooltipZone: "Domaine d'intensité",
+  hoverHint:
+    "Survolez, touchez ou sélectionnez un échantillon pour voir les valeurs du palier",
+  ctaAction: "Créer un compte gratuit",
+  ctaExplore: "Découvrir la charge d'entraînement",
+  ctaNote:
+    "Les données de test de cet outil ne sont pas enregistrées automatiquement dans votre compte.",
+  ctaImageAlt:
+    "Suivi de la forme Trainingload.ai avec tendances de charge d'entraînement et de condition",
+  ctaImageCaption: "Trainingload.ai · exemple de vue de charge d'entraînement",
+  ctaBenefitLoad: "Tendances de charge",
+  ctaBenefitZones: "Distribution d'intensité",
+  ctaBenefitPlan: "Planification des cycles",
+  workflowInput: "Saisir le test",
+  workflowReport: "Rapport d'analyse",
+  editData: "Modifier les données",
+  readCurve: "Profil lactate–intensité",
+  readCurveBody:
+    "Ajustement polynomial cubique sur les paliers d'effort. Survolez ou sélectionnez un palier pour examiner le lactate mesuré, le lactate ajusté et la fréquence cardiaque.",
+  thresholdBasis: "Critères de seuil",
+  inputGuide:
+    "4–30 paliers d'effort · lactate en mmol/L · fréquence cardiaque facultative",
+  returnReport: "Retour au rapport",
+  overview: "Aperçu du test",
+  stages: "paliers d'effort",
+  peak: "Dernière intensité testée",
+  fit: "Ajustement cubique",
+  curve: "Courbe de lactate",
+  samples: "Échantillons mesurés",
+  fitted: "Courbe ajustée",
+  anchor: "Ligne de référence",
+  distance: "Distance maximale",
+  compareTitle: "Comparaison des méthodes de seuil",
+  compareBody:
+    "Estimations issues du même test, alignées sur l'intensité d'effort. Sélectionnez une méthode pour consulter son calcul et ses conditions d'application.",
+  sharedScale: "Échelle d'intensité commune",
+  earlyGroup: "Ligne de base et point d'inflexion",
+  dmaxGroup: "Famille Dmax",
+  fixedGroup: "Concentration fixe",
+  notInterval:
+    "Les repères indiquent les estimations de différentes méthodes, pas un intervalle de confiance.",
+  zonesBody:
+    "Les limites suivent vos méthodes LT1 et LT2 sélectionnées. Les bandes colorées représentent les trois domaines d'intensité.",
+  lowDomain: "Sous LT1",
+  middleDomain: "Entre LT1 et LT2",
+  highDomain: "Au-dessus de LT2",
+  qualityFitTitle: "Diagnostic d'ajustement",
+  qualityFitBody:
+    "Résidu = lactate mesuré moins lactate ajusté. Un bon ajustement ne garantit pas la précision physiologique.",
+  rmse: "Erreur quadratique moyenne (RMSE)",
+  maxResidual: "Plus grand résidu absolu",
+  residuals: "Résidus par palier",
+  logAxes: "Vue Log-log · les deux axes utilisent une échelle logarithmique",
+  noHr: "Aucune donnée de fréquence cardiaque enregistrée",
+  preview: "Exemple d'analyse",
+  previewBody:
+    "Une analyse complète de test incrémental incluant LT1/LT2, les domaines d'intensité et la réponse cardiaque.",
+  previewCaption: "Données de démonstration · pas un résultat personnel",
+  moreDetails: "Détails de la méthode",
+  available: "méthodes disponibles",
+};
+const es: LactatePresentationCopy = {
+  engineVersion: "Versión del motor",
+  tooltipStage: "Etapa",
+  tooltipMeasured: "Lactato medido",
+  tooltipFitted: "Lactato ajustado",
+  tooltipResidual: "Residuo",
+  tooltipZone: "Dominio de intensidad",
+  hoverHint:
+    "Pasa el cursor, toca o enfoca una muestra para ver los valores de la etapa",
+  ctaAction: "Crear una cuenta gratuita",
+  ctaExplore: "Explorar carga de entrenamiento",
+  ctaNote:
+    "Los datos de prueba de esta herramienta no se guardan automáticamente en tu cuenta.",
+  ctaImageAlt:
+    "Gestión de la forma física en Trainingload.ai con tendencias de carga de entrenamiento y estado",
+  ctaImageCaption:
+    "Trainingload.ai · vista de ejemplo de carga de entrenamiento",
+  ctaBenefitLoad: "Tendencias de carga",
+  ctaBenefitZones: "Distribución de intensidad",
+  ctaBenefitPlan: "Planificación de ciclos",
+  workflowInput: "Ingresar prueba",
+  workflowReport: "Informe de análisis",
+  editData: "Editar datos de la prueba",
+  readCurve: "Perfil lactato–intensidad",
+  readCurveBody:
+    "Ajuste polinómico cúbico sobre las muestras de las etapas de ejercicio. Pasa el cursor o selecciona una etapa para revisar el lactato medido, el ajustado y la frecuencia cardíaca.",
+  thresholdBasis: "Criterios de umbral",
+  inputGuide:
+    "4–30 etapas de ejercicio · lactato en mmol/L · frecuencia cardíaca opcional",
+  returnReport: "Volver al informe",
+  overview: "Resumen de la prueba",
+  stages: "etapas de ejercicio",
+  peak: "Última intensidad evaluada",
+  fit: "Ajuste cúbico",
+  curve: "Curva de lactato",
+  samples: "Muestras medidas",
+  fitted: "Curva ajustada",
+  anchor: "Línea de referencia",
+  distance: "Distancia máxima",
+  compareTitle: "Comparación de métodos de umbral",
+  compareBody:
+    "Estimaciones de la misma prueba, alineadas por intensidad de ejercicio. Selecciona un método para revisar su cálculo y aplicabilidad.",
+  sharedScale: "Escala de intensidad compartida",
+  earlyGroup: "Línea base y punto de giro",
+  dmaxGroup: "Familia Dmax",
+  fixedGroup: "Concentración fija",
+  notInterval:
+    "Los marcadores muestran estimaciones de distintos métodos, no un intervalo de confianza.",
+  zonesBody:
+    "Los límites siguen los métodos LT1 y LT2 seleccionados. Las bandas de color muestran los tres dominios de intensidad.",
+  lowDomain: "Por debajo de LT1",
+  middleDomain: "Entre LT1 y LT2",
+  highDomain: "Por encima de LT2",
+  qualityFitTitle: "Diagnóstico del ajuste",
+  qualityFitBody:
+    "Residuo = lactato medido menos lactato ajustado. Un ajuste cercano no demuestra precisión fisiológica.",
+  rmse: "Error cuadrático medio (RMSE)",
+  maxResidual: "Mayor residuo absoluto",
+  residuals: "Residuos por etapa",
+  logAxes: "Vista Log-log · ambos ejes usan escala logarítmica",
+  noHr: "No se registraron muestras de frecuencia cardíaca",
+  preview: "Análisis de ejemplo",
+  previewBody:
+    "Un análisis completo de prueba escalonada, incluyendo LT1/LT2, dominios de intensidad y respuesta de frecuencia cardíaca.",
+  previewCaption: "Datos de demostración · no es un resultado personal",
+  moreDetails: "Detalles del método",
+  available: "métodos disponibles",
+};
+const it: LactatePresentationCopy = {
+  engineVersion: "Versione del motore",
+  tooltipStage: "Stadio",
+  tooltipMeasured: "Lattato misurato",
+  tooltipFitted: "Lattato stimato",
+  tooltipResidual: "Residuo",
+  tooltipZone: "Dominio di intensità",
+  hoverHint:
+    "Passa il cursore, tocca o seleziona un campione per i valori dello stadio",
+  ctaAction: "Crea un account gratuito",
+  ctaExplore: "Esplora il carico di allenamento",
+  ctaNote:
+    "I dati del test di questo strumento non vengono salvati automaticamente nel tuo account.",
+  ctaImageAlt:
+    "Gestione della forma fisica Trainingload.ai con andamenti di carico di allenamento e condizione",
+  ctaImageCaption: "Trainingload.ai · esempio di vista del carico di allenamento",
+  ctaBenefitLoad: "Andamento del carico",
+  ctaBenefitZones: "Distribuzione dell'intensità",
+  ctaBenefitPlan: "Pianificazione dei cicli",
+  workflowInput: "Inserisci test",
+  workflowReport: "Report di analisi",
+  editData: "Modifica dati del test",
+  readCurve: "Profilo lattato–intensità",
+  readCurveBody:
+    "Adattamento polinomiale cubico sui campioni degli stadi di esercizio. Passa il cursore o seleziona uno stadio per verificare lattato misurato, lattato stimato e frequenza cardiaca.",
+  thresholdBasis: "Criteri di soglia",
+  inputGuide:
+    "4–30 stadi di esercizio · lattato in mmol/L · frequenza cardiaca facoltativa",
+  returnReport: "Torna al report",
+  overview: "Panoramica del test",
+  stages: "stadi di esercizio",
+  peak: "Ultima intensità testata",
+  fit: "Adattamento cubico",
+  curve: "Curva del lattato",
+  samples: "Campioni misurati",
+  fitted: "Curva adattata",
+  anchor: "Linea di riferimento",
+  distance: "Distanza massima",
+  compareTitle: "Confronto dei metodi di soglia",
+  compareBody:
+    "Stime ricavate dallo stesso test, allineate per intensità di esercizio. Seleziona un metodo per esaminarne calcolo e applicabilità.",
+  sharedScale: "Scala di intensità condivisa",
+  earlyGroup: "Linea di base e punto di svolta",
+  dmaxGroup: "Famiglia Dmax",
+  fixedGroup: "Concentrazione fissa",
+  notInterval:
+    "I marcatori mostrano stime di metodi diversi, non un intervallo di confidenza.",
+  zonesBody:
+    "I confini seguono i metodi LT1 e LT2 selezionati. Le bande colorate mostrano i tre domini di intensità.",
+  lowDomain: "Sotto LT1",
+  middleDomain: "Tra LT1 e LT2",
+  highDomain: "Sopra LT2",
+  qualityFitTitle: "Diagnostica dell'adattamento",
+  qualityFitBody:
+    "Residuo = lattato misurato meno lattato stimato. Un buon adattamento non dimostra l'accuratezza fisiologica.",
+  rmse: "Errore quadratico medio (RMSE)",
+  maxResidual: "Residuo assoluto massimo",
+  residuals: "Residui per stadio",
+  logAxes: "Vista Log-log · entrambi gli assi usano una scala logaritmica",
+  noHr: "Nessun campione di frequenza cardiaca registrato",
+  preview: "Analisi di esempio",
+  previewBody:
+    "Un'analisi completa del test incrementale con LT1/LT2, domini di intensità e risposta della frequenza cardiaca.",
+  previewCaption: "Dati dimostrativi · non è un risultato personale",
+  moreDetails: "Dettagli del metodo",
+  available: "metodi disponibili",
+};
+const ptBR: LactatePresentationCopy = {
+  engineVersion: "Versão do motor",
+  tooltipStage: "Estágio",
+  tooltipMeasured: "Lactato medido",
+  tooltipFitted: "Lactato ajustado",
+  tooltipResidual: "Resíduo",
+  tooltipZone: "Domínio de intensidade",
+  hoverHint:
+    "Passe o cursor, toque ou selecione uma amostra para ver os valores do estágio",
+  ctaAction: "Criar uma conta gratuita",
+  ctaExplore: "Explorar carga de treino",
+  ctaNote:
+    "Os dados do teste desta ferramenta não são salvos automaticamente na sua conta.",
+  ctaImageAlt:
+    "Gestão de condicionamento no Trainingload.ai com tendências de carga de treino e forma",
+  ctaImageCaption: "Trainingload.ai · visualização de exemplo da carga de treino",
+  ctaBenefitLoad: "Tendências de carga",
+  ctaBenefitZones: "Distribuição de intensidade",
+  ctaBenefitPlan: "Planejamento de ciclos",
+  workflowInput: "Inserir teste",
+  workflowReport: "Relatório de análise",
+  editData: "Editar dados do teste",
+  readCurve: "Perfil lactato–intensidade",
+  readCurveBody:
+    "Ajuste polinomial cúbico às amostras dos estágios de exercício. Passe o cursor ou selecione um estágio para inspecionar o lactato medido, o ajustado e a frequência cardíaca.",
+  thresholdBasis: "Critérios de limiar",
+  inputGuide:
+    "4–30 estágios de exercício · lactato em mmol/L · frequência cardíaca opcional",
+  returnReport: "Voltar ao relatório",
+  overview: "Visão geral do teste",
+  stages: "estágios de exercício",
+  peak: "Última intensidade testada",
+  fit: "Ajuste cúbico",
+  curve: "Curva de lactato",
+  samples: "Amostras medidas",
+  fitted: "Curva ajustada",
+  anchor: "Linha de referência",
+  distance: "Distância máxima",
+  compareTitle: "Comparação dos métodos de limiar",
+  compareBody:
+    "Estimativas obtidas do mesmo teste, alinhadas pela intensidade de exercício. Selecione um método para ver o cálculo e a aplicabilidade.",
+  sharedScale: "Escala de intensidade compartilhada",
+  earlyGroup: "Linha de base e ponto de inflexão",
+  dmaxGroup: "Família Dmax",
+  fixedGroup: "Concentração fixa",
+  notInterval:
+    "Os marcadores mostram estimativas de diferentes métodos, não um intervalo de confiança.",
+  zonesBody:
+    "Os limites seguem os métodos de LT1 e LT2 selecionados. As faixas coloridas mostram os três domínios de intensidade.",
+  lowDomain: "Abaixo de LT1",
+  middleDomain: "Entre LT1 e LT2",
+  highDomain: "Acima de LT2",
+  qualityFitTitle: "Diagnóstico do ajuste",
+  qualityFitBody:
+    "Resíduo = lactato medido menos lactato ajustado. Um ajuste próximo não comprova precisão fisiológica.",
+  rmse: "Raiz do erro quadrático médio (RMSE)",
+  maxResidual: "Maior resíduo absoluto",
+  residuals: "Resíduos por estágio",
+  logAxes: "Visualização Log-log · ambos os eixos usam escala logarítmica",
+  noHr: "Nenhuma amostra de frequência cardíaca registrada",
+  preview: "Análise de exemplo",
+  previewBody:
+    "Uma análise completa de teste escalonado, incluindo LT1/LT2, domínios de intensidade e resposta da frequência cardíaca.",
+  previewCaption: "Dados de demonstração · não é um resultado pessoal",
+  moreDetails: "Detalhes do método",
+  available: "métodos disponíveis",
+};
 export function getLactatePresentationCopy(
   lang: string,
 ): LactatePresentationCopy {
-  return lang === "zh"
-    ? zh
-    : lang === "zh-hant"
-      ? zhHant
-      : lang === "ja"
-        ? ja
-        : en;
+  switch (lang) {
+    case "zh":
+      return zh;
+    case "zh-hant":
+      return zhHant;
+    case "ja":
+      return ja;
+    case "ko":
+      return ko;
+    case "de":
+      return de;
+    case "fr":
+      return fr;
+    case "es":
+      return es;
+    case "it":
+      return it;
+    case "pt-BR":
+      return ptBR;
+    default:
+      return en;
+  }
 }

@@ -23,7 +23,14 @@ import { buildHomeDaySourceCopy } from "./home-day-demo/copy";
 import { HomeDayDemoApp } from "./home-day-demo/home-day-demo-app";
 
 import "dayjs/locale/zh-cn";
+import "dayjs/locale/zh-tw";
 import "dayjs/locale/ja";
+import "dayjs/locale/ko";
+import "dayjs/locale/de";
+import "dayjs/locale/fr";
+import "dayjs/locale/es";
+import "dayjs/locale/it";
+import "dayjs/locale/pt-br";
 
 type DemoSport = "RUN" | "CYCLING" | "SWIM";
 
@@ -199,7 +206,19 @@ type CalendarDemoCopy = {
   minuteUnit: string;
 };
 
-const copyByLang: Record<"en" | "zh" | "zh-hant" | "ja", CalendarDemoCopy> = {
+type CalendarDemoLocale =
+  | "en"
+  | "zh"
+  | "zh-hant"
+  | "ja"
+  | "ko"
+  | "de"
+  | "fr"
+  | "es"
+  | "it"
+  | "pt-BR";
+
+const copyByLang: Record<CalendarDemoLocale, CalendarDemoCopy> = {
   en: {
     overview: {
       title: "Current plan",
@@ -529,25 +548,553 @@ const copyByLang: Record<"en" | "zh" | "zh-hant" | "ja", CalendarDemoCopy> = {
     distanceUnit: "km",
     minuteUnit: "分",
   },
+  ko: {
+    overview: {
+      title: "현재 계획",
+      cycle: "마라톤 베이스 블록",
+      weekLabel: "5 / 12주차",
+      targetLoadLabel: "목표",
+      targetLoadValue: "420",
+      completedLabel: "완료",
+      completedValue: "248",
+      driftLabel: "지난주 대비",
+      driftValue: "+17",
+      syncLabel: "동기화됨",
+    },
+    monthModeLabel: "월간 개요",
+    weekModeLabel: "주간 포커스",
+    today: "오늘",
+    addButton: "추가",
+    calendarSubscriptionButton: "구독",
+    viewDay: "일간 보기",
+    selectedDateLabel: "선택한 날짜",
+    loadLabel: "훈련 부하",
+    activityTab: "활동",
+    trainingTab: "훈련",
+    planCycleLabel: "훈련 블록",
+    planWorkoutCount: (count) => `계획된 세션 ${count}개`,
+    noPlannedTraining: "계획된 훈련 없음",
+    noActivities: "완료된 활동 없음",
+    summaryScope: {
+      plan: "계획",
+      month: "월간",
+    },
+    planProgressTitle: "계획 진행률",
+    monthOverview: "월간 개요",
+    comparisonLabelPlan: "이전 블록 대비",
+    comparisonLabelMonth: "지난달 대비",
+    delta: {
+      up: "상승",
+      down: "하락",
+      flat: "보합",
+    },
+    summary: {
+      count: "세션 수",
+      tss: "TSS",
+      distance: "거리",
+      duration: "시간",
+    },
+    workoutMeta: {
+      duration: "시간",
+      steps: "단계",
+      repeats: "반복",
+      parsed: "파싱된 DSL",
+    },
+    sportLabels: {
+      RUN: "러닝",
+      CYCLING: "사이클",
+      SWIM: "수영",
+    },
+    workoutNames: {
+      easyRun: "이지 런 45분",
+      tempoRun: "스테디 런 35분",
+      strength: "근력 활성화 20분",
+      longRun: "롱 런 90분",
+      recoveryRide: "리커버리 라이드 50분",
+      swim: "테크닉 수영 1.6 km",
+    },
+    workoutNotes: {
+      easyRun: "Z2 유산소 볼륨",
+      tempoRun: "안정적 유산소 제어",
+      strength: "모빌리티 및 활성화",
+      longRun: "장거리 지구력",
+      recoveryRide: "저강도 회전 라이딩",
+      swim: "영법 테크닉 집중",
+    },
+    activityNames: {
+      easyRun: "이지 런",
+      tempoRun: "스테디 유산소 런",
+      longRun: "롱 런",
+      ride: "리커버리 라이드",
+    },
+    distanceUnit: "km",
+    minuteUnit: "분",
+  },
+  de: {
+    overview: {
+      title: "Aktueller Plan",
+      cycle: "Marathon-Grundlagenblock",
+      weekLabel: "Woche 5 / 12",
+      targetLoadLabel: "Ziel",
+      targetLoadValue: "420",
+      completedLabel: "Absolviert",
+      completedValue: "248",
+      driftLabel: "Vs. Vorwoche",
+      driftValue: "+17",
+      syncLabel: "Synchronisiert",
+    },
+    monthModeLabel: "Monatsübersicht",
+    weekModeLabel: "Wochenfokus",
+    today: "Heute",
+    addButton: "Hinzufügen",
+    calendarSubscriptionButton: "Abonnieren",
+    viewDay: "Tag ansehen",
+    selectedDateLabel: "Ausgewähltes Datum",
+    loadLabel: "Belastung",
+    activityTab: "Aktivität",
+    trainingTab: "Training",
+    planCycleLabel: "Trainingsblock",
+    planWorkoutCount: (count) =>
+      count === 1 ? "1 geplante Einheit" : `${count} geplante Einheiten`,
+    noPlannedTraining: "Kein geplantes Training",
+    noActivities: "Keine absolvierte Aktivität",
+    summaryScope: {
+      plan: "Plan",
+      month: "Monat",
+    },
+    planProgressTitle: "Planfortschritt",
+    monthOverview: "Monatsübersicht",
+    comparisonLabelPlan: "vs. vorheriger Block",
+    comparisonLabelMonth: "vs. Vormonat",
+    delta: {
+      up: "höher",
+      down: "niedriger",
+      flat: "stabil",
+    },
+    summary: {
+      count: "Einheiten",
+      tss: "TSS",
+      distance: "Distanz",
+      duration: "Dauer",
+    },
+    workoutMeta: {
+      duration: "Dauer",
+      steps: "Schritte",
+      repeats: "Wiederholung",
+      parsed: "Geparste DSL",
+    },
+    sportLabels: {
+      RUN: "Lauf",
+      CYCLING: "Rad",
+      SWIM: "Schwimmen",
+    },
+    workoutNames: {
+      easyRun: "Lockerer Lauf 45 Min.",
+      tempoRun: "Gleichmäßiger Lauf 35 Min.",
+      strength: "Kraftaktivierung 20 Min.",
+      longRun: "Langer Lauf 90 Min.",
+      recoveryRide: "Regenerationsfahrt 50 Min.",
+      swim: "Technikschwimmen 1,6 km",
+    },
+    workoutNotes: {
+      easyRun: "Z2-Grundlagenumfang",
+      tempoRun: "Kontrollierte aerobe Ausdauer",
+      strength: "Mobilität und Aktivierung",
+      longRun: "Lange Ausdauer",
+      recoveryRide: "Lockeres Ausfahren",
+      swim: "Technikfokus",
+    },
+    activityNames: {
+      easyRun: "Lockerer Lauf",
+      tempoRun: "Gleichmäßiger Dauerlauf",
+      longRun: "Langer Lauf",
+      ride: "Regenerationsfahrt",
+    },
+    distanceUnit: "km",
+    minuteUnit: "Min.",
+  },
+  fr: {
+    overview: {
+      title: "Plan actuel",
+      cycle: "Bloc de base marathon",
+      weekLabel: "Semaine 5 / 12",
+      targetLoadLabel: "Objectif",
+      targetLoadValue: "420",
+      completedLabel: "Réalisé",
+      completedValue: "248",
+      driftLabel: "Vs sem. préc.",
+      driftValue: "+17",
+      syncLabel: "Synchronisé",
+    },
+    monthModeLabel: "Vue du mois",
+    weekModeLabel: "Focus semaine",
+    today: "Aujourd'hui",
+    addButton: "Ajouter",
+    calendarSubscriptionButton: "S'abonner",
+    viewDay: "Voir la journée",
+    selectedDateLabel: "Date sélectionnée",
+    loadLabel: "Charge",
+    activityTab: "Activité",
+    trainingTab: "Entraînement",
+    planCycleLabel: "Bloc d'entraînement",
+    planWorkoutCount: (count) =>
+      count === 1 ? "1 séance prévue" : `${count} séances prévues`,
+    noPlannedTraining: "Aucun entraînement prévu",
+    noActivities: "Aucune activité réalisée",
+    summaryScope: {
+      plan: "Plan",
+      month: "Mois",
+    },
+    planProgressTitle: "Progression du plan",
+    monthOverview: "Vue du mois",
+    comparisonLabelPlan: "vs bloc précédent",
+    comparisonLabelMonth: "vs mois dernier",
+    delta: {
+      up: "en hausse",
+      down: "en baisse",
+      flat: "stable",
+    },
+    summary: {
+      count: "Séances",
+      tss: "TSS",
+      distance: "Distance",
+      duration: "Durée",
+    },
+    workoutMeta: {
+      duration: "Durée",
+      steps: "Étapes",
+      repeats: "Répétition",
+      parsed: "DSL analysé",
+    },
+    sportLabels: {
+      RUN: "Course",
+      CYCLING: "Vélo",
+      SWIM: "Natation",
+    },
+    workoutNames: {
+      easyRun: "Footing facile 45 min",
+      tempoRun: "Allure soutenue 35 min",
+      strength: "Activation musculaire 20 min",
+      longRun: "Sortie longue 90 min",
+      recoveryRide: "Sortie vélo récup 50 min",
+      swim: "Natation technique 1,6 km",
+    },
+    workoutNotes: {
+      easyRun: "Volume aérobie Z2",
+      tempoRun: "Contrôle aérobie régulier",
+      strength: "Mobilité et activation",
+      longRun: "Endurance longue",
+      recoveryRide: "Pédalage basse intensité",
+      swim: "Travail technique",
+    },
+    activityNames: {
+      easyRun: "Footing facile",
+      tempoRun: "Course aérobie soutenue",
+      longRun: "Sortie longue",
+      ride: "Sortie vélo récup",
+    },
+    distanceUnit: "km",
+    minuteUnit: "min",
+  },
+  es: {
+    overview: {
+      title: "Plan actual",
+      cycle: "Bloque base de maratón",
+      weekLabel: "Semana 5 / 12",
+      targetLoadLabel: "Objetivo",
+      targetLoadValue: "420",
+      completedLabel: "Completado",
+      completedValue: "248",
+      driftLabel: "Vs semana ant.",
+      driftValue: "+17",
+      syncLabel: "Sincronizado",
+    },
+    monthModeLabel: "Vista mensual",
+    weekModeLabel: "Enfoque semanal",
+    today: "Hoy",
+    addButton: "Añadir",
+    calendarSubscriptionButton: "Suscribirse",
+    viewDay: "Ver día",
+    selectedDateLabel: "Fecha seleccionada",
+    loadLabel: "Carga",
+    activityTab: "Actividad",
+    trainingTab: "Entrenamiento",
+    planCycleLabel: "Bloque de entrenamiento",
+    planWorkoutCount: (count) =>
+      count === 1 ? "1 sesión planificada" : `${count} sesiones planificadas`,
+    noPlannedTraining: "Sin entrenamiento planificado",
+    noActivities: "Sin actividades completadas",
+    summaryScope: {
+      plan: "Plan",
+      month: "Mes",
+    },
+    planProgressTitle: "Progreso del plan",
+    monthOverview: "Vista mensual",
+    comparisonLabelPlan: "vs bloque anterior",
+    comparisonLabelMonth: "vs mes pasado",
+    delta: {
+      up: "al alza",
+      down: "a la baja",
+      flat: "estable",
+    },
+    summary: {
+      count: "Sesiones",
+      tss: "TSS",
+      distance: "Distancia",
+      duration: "Duración",
+    },
+    workoutMeta: {
+      duration: "Duración",
+      steps: "Pasos",
+      repeats: "Repetición",
+      parsed: "DSL analizado",
+    },
+    sportLabels: {
+      RUN: "Carrera",
+      CYCLING: "Ciclismo",
+      SWIM: "Natación",
+    },
+    workoutNames: {
+      easyRun: "Rodaje suave 45 min",
+      tempoRun: "Rodaje constante 35 min",
+      strength: "Activación de fuerza 20 min",
+      longRun: "Tirada larga 90 min",
+      recoveryRide: "Rodaje ciclista suave 50 min",
+      swim: "Natación técnica 1,6 km",
+    },
+    workoutNotes: {
+      easyRun: "Volumen aeróbico Z2",
+      tempoRun: "Control aeróbico constante",
+      strength: "Movilidad y activación",
+      longRun: "Resistencia larga",
+      recoveryRide: "Pedaleo de baja intensidad",
+      swim: "Enfoque técnico",
+    },
+    activityNames: {
+      easyRun: "Rodaje suave",
+      tempoRun: "Carrera aeróbica constante",
+      longRun: "Tirada larga",
+      ride: "Rodaje ciclista suave",
+    },
+    distanceUnit: "km",
+    minuteUnit: "min",
+  },
+  it: {
+    overview: {
+      title: "Piano attuale",
+      cycle: "Blocco base maratona",
+      weekLabel: "Settimana 5 / 12",
+      targetLoadLabel: "Obiettivo",
+      targetLoadValue: "420",
+      completedLabel: "Completato",
+      completedValue: "248",
+      driftLabel: "Vs sett. scorsa",
+      driftValue: "+17",
+      syncLabel: "Sincronizzato",
+    },
+    monthModeLabel: "Panoramica mese",
+    weekModeLabel: "Focus settimana",
+    today: "Oggi",
+    addButton: "Aggiungi",
+    calendarSubscriptionButton: "Iscriviti",
+    viewDay: "Vedi giorno",
+    selectedDateLabel: "Data selezionata",
+    loadLabel: "Carico",
+    activityTab: "Attività",
+    trainingTab: "Allenamento",
+    planCycleLabel: "Blocco di allenamento",
+    planWorkoutCount: (count) =>
+      count === 1 ? "1 sessione pianificata" : `${count} sessioni pianificate`,
+    noPlannedTraining: "Nessun allenamento pianificato",
+    noActivities: "Nessuna attività completata",
+    summaryScope: {
+      plan: "Piano",
+      month: "Mese",
+    },
+    planProgressTitle: "Avanzamento piano",
+    monthOverview: "Panoramica mese",
+    comparisonLabelPlan: "vs blocco precedente",
+    comparisonLabelMonth: "vs mese scorso",
+    delta: {
+      up: "in aumento",
+      down: "in calo",
+      flat: "stabile",
+    },
+    summary: {
+      count: "Sessioni",
+      tss: "TSS",
+      distance: "Distanza",
+      duration: "Durata",
+    },
+    workoutMeta: {
+      duration: "Durata",
+      steps: "Fasi",
+      repeats: "Ripetuta",
+      parsed: "DSL analizzato",
+    },
+    sportLabels: {
+      RUN: "Corsa",
+      CYCLING: "Bici",
+      SWIM: "Nuoto",
+    },
+    workoutNames: {
+      easyRun: "Corsa facile 45 min",
+      tempoRun: "Corsa costante 35 min",
+      strength: "Attivazione forza 20 min",
+      longRun: "Lungo 90 min",
+      recoveryRide: "Uscita recupero 50 min",
+      swim: "Nuoto tecnico 1,6 km",
+    },
+    workoutNotes: {
+      easyRun: "Volume aerobico Z2",
+      tempoRun: "Controllo aerobico costante",
+      strength: "Mobilità e attivazione",
+      longRun: "Resistenza prolungata",
+      recoveryRide: "Pedalata a bassa intensità",
+      swim: "Focus tecnico",
+    },
+    activityNames: {
+      easyRun: "Corsa facile",
+      tempoRun: "Corsa aerobica costante",
+      longRun: "Lungo",
+      ride: "Uscita recupero",
+    },
+    distanceUnit: "km",
+    minuteUnit: "min",
+  },
+  "pt-BR": {
+    overview: {
+      title: "Plano atual",
+      cycle: "Bloco de base para maratona",
+      weekLabel: "Semana 5 / 12",
+      targetLoadLabel: "Meta",
+      targetLoadValue: "420",
+      completedLabel: "Concluído",
+      completedValue: "248",
+      driftLabel: "Vs semana ant.",
+      driftValue: "+17",
+      syncLabel: "Sincronizado",
+    },
+    monthModeLabel: "Visão do mês",
+    weekModeLabel: "Foco da semana",
+    today: "Hoje",
+    addButton: "Adicionar",
+    calendarSubscriptionButton: "Assinar",
+    viewDay: "Ver dia",
+    selectedDateLabel: "Data selecionada",
+    loadLabel: "Carga",
+    activityTab: "Atividade",
+    trainingTab: "Treino",
+    planCycleLabel: "Bloco de treino",
+    planWorkoutCount: (count) =>
+      count === 1 ? "1 sessão planejada" : `${count} sessões planejadas`,
+    noPlannedTraining: "Nenhum treino planejado",
+    noActivities: "Nenhuma atividade concluída",
+    summaryScope: {
+      plan: "Plano",
+      month: "Mês",
+    },
+    planProgressTitle: "Progresso do plano",
+    monthOverview: "Visão do mês",
+    comparisonLabelPlan: "vs bloco anterior",
+    comparisonLabelMonth: "vs mês passado",
+    delta: {
+      up: "em alta",
+      down: "em queda",
+      flat: "estável",
+    },
+    summary: {
+      count: "Sessões",
+      tss: "TSS",
+      distance: "Distância",
+      duration: "Duração",
+    },
+    workoutMeta: {
+      duration: "Duração",
+      steps: "Etapas",
+      repeats: "Repetição",
+      parsed: "DSL analisado",
+    },
+    sportLabels: {
+      RUN: "Corrida",
+      CYCLING: "Ciclismo",
+      SWIM: "Natação",
+    },
+    workoutNames: {
+      easyRun: "Corrida leve 45 min",
+      tempoRun: "Corrida constante 35 min",
+      strength: "Ativação de força 20 min",
+      longRun: "Longão 90 min",
+      recoveryRide: "Pedal regenerativo 50 min",
+      swim: "Natação técnica 1,6 km",
+    },
+    workoutNotes: {
+      easyRun: "Volume aeróbico em Z2",
+      tempoRun: "Controle aeróbico estável",
+      strength: "Mobilidade e ativação",
+      longRun: "Resistência prolongada",
+      recoveryRide: "Giro de baixa intensidade",
+      swim: "Foco técnico",
+    },
+    activityNames: {
+      easyRun: "Corrida leve",
+      tempoRun: "Corrida aeróbica constante",
+      longRun: "Longão",
+      ride: "Pedal regenerativo",
+    },
+    distanceUnit: "km",
+    minuteUnit: "min",
+  },
 };
 
+const INTL_LOCALE_BY_LANG: Record<CalendarDemoLocale, string> = {
+  en: "en",
+  zh: "zh-CN",
+  "zh-hant": "zh-Hant",
+  ja: "ja",
+  ko: "ko",
+  de: "de",
+  fr: "fr",
+  es: "es",
+  it: "it",
+  "pt-BR": "pt-BR",
+};
+
+const DAYJS_LOCALE_BY_LANG: Record<CalendarDemoLocale, string> = {
+  en: "en",
+  zh: "zh-cn",
+  "zh-hant": "zh-tw",
+  ja: "ja",
+  ko: "ko",
+  de: "de",
+  fr: "fr",
+  es: "es",
+  it: "it",
+  "pt-BR": "pt-br",
+};
+
+function resolveLocale(lang: string): CalendarDemoLocale {
+  if (lang in copyByLang) return lang as CalendarDemoLocale;
+  const lower = lang.toLowerCase();
+  if (lower === "zh-hant" || lower === "zh-tw" || lower === "zh-hk") {
+    return "zh-hant";
+  }
+  if (lower.startsWith("zh")) return "zh";
+  if (lower.startsWith("pt")) return "pt-BR";
+  if (lower in copyByLang) return lower as CalendarDemoLocale;
+  return "en";
+}
+
 function getCopy(lang: string): CalendarDemoCopy {
-  if (lang === "zh-hant") return copyByLang["zh-hant"];
-  if (lang === "ja") return copyByLang.ja;
-  if (lang.startsWith("zh")) return copyByLang.zh;
-  return copyByLang.en;
+  return copyByLang[resolveLocale(lang)];
 }
 
 function getIntlLocale(lang: string) {
-  if (lang === "zh-hant") return "zh-Hant";
-  if (lang === "pt-BR") return "pt-BR";
-  return lang || "en";
+  return INTL_LOCALE_BY_LANG[resolveLocale(lang)];
 }
 
 function getDayjsLocale(lang: string) {
-  if (lang.startsWith("zh")) return "zh-cn";
-  if (lang === "ja") return "ja";
-  return "en";
+  return DAYJS_LOCALE_BY_LANG[resolveLocale(lang)];
 }
 
 function parseClockToSeconds(token: string) {

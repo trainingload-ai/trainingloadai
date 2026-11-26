@@ -50,6 +50,89 @@ const coreFeatureIcons = new Set<keyof typeof featureIconMap>([
   "Bot",
 ]);
 
+type FeaturesMcpLocale =
+  | "en"
+  | "zh"
+  | "zh-hant"
+  | "ja"
+  | "ko"
+  | "de"
+  | "fr"
+  | "es"
+  | "it"
+  | "pt-BR";
+
+const mcpCopyByLang: Record<
+  FeaturesMcpLocale,
+  {
+    eyebrow: string;
+    title: string;
+    text: string;
+    cta: string;
+  }
+> = {
+  en: {
+    eyebrow: "TrainingLoad MCP",
+    title: "Let your AI read training—and make every conclusion verifiable.",
+    text: "24 read-only training tools plus native resources and prompts for current state, period comparison, activity detail, plan execution, competitions, and sync diagnostics.",
+    cta: "Explore MCP",
+  },
+  zh: {
+    eyebrow: "TrainingLoad MCP",
+    title: "让你的 AI 读取训练，也让每个结论可验证。",
+    text: "24 个只读训练工具，加上原生 Resources 与 Prompts，覆盖当前状态、周期比较、活动细节、计划执行、比赛与同步诊断。",
+    cta: "查看 MCP",
+  },
+  "zh-hant": {
+    eyebrow: "TrainingLoad MCP",
+    title: "讓你的 AI 讀取訓練資料，也讓每個結論都可驗證。",
+    text: "24 個唯讀訓練工具，搭配原生 Resources 與 Prompts，涵蓋目前狀態、週期比較、活動細節、課表執行、賽事與同步診斷。",
+    cta: "探索 MCP",
+  },
+  ja: {
+    eyebrow: "TrainingLoad MCP",
+    title: "AI にトレーニングを読み込ませ、すべての結論を検証可能に。",
+    text: "24 の読み取り専用トレーニングツールとネイティブのリソース・プロンプトで、現在の状態、期間比較、アクティビティ詳細、計画の実行状況、レース、同期診断を網羅します。",
+    cta: "MCP を見る",
+  },
+  ko: {
+    eyebrow: "TrainingLoad MCP",
+    title: "AI가 훈련 데이터를 읽고, 모든 결론을 검증할 수 있게 하세요.",
+    text: "24개의 읽기 전용 훈련 도구와 네이티브 리소스·프롬프트로 현재 상태, 기간 비교, 활동 상세, 계획 실행, 대회 정보, 동기화 진단까지 지원합니다.",
+    cta: "MCP 살펴보기",
+  },
+  de: {
+    eyebrow: "TrainingLoad MCP",
+    title: "Lass deine KI dein Training lesen – und mache jede Aussage überprüfbar.",
+    text: "24 schreibgeschützte Trainingstools plus native Ressourcen und Prompts für aktuellen Stand, Periodenvergleich, Aktivitätsdetails, Planumsetzung, Wettkämpfe und Sync-Diagnose.",
+    cta: "MCP entdecken",
+  },
+  fr: {
+    eyebrow: "TrainingLoad MCP",
+    title: "Laissez votre IA lire votre entraînement et rendez chaque conclusion vérifiable.",
+    text: "24 outils d'entraînement en lecture seule ainsi que des ressources et prompts natifs pour l'état actuel, la comparaison de périodes, le détail des activités, l'exécution du plan, les compétitions et le diagnostic de synchronisation.",
+    cta: "Découvrir MCP",
+  },
+  es: {
+    eyebrow: "TrainingLoad MCP",
+    title: "Deja que tu IA lea tu entrenamiento y haz verificable cada conclusión.",
+    text: "24 herramientas de entrenamiento de solo lectura, junto con recursos y prompts nativos para el estado actual, comparación de períodos, detalle de actividades, ejecución del plan, competiciones y diagnóstico de sincronización.",
+    cta: "Explorar MCP",
+  },
+  it: {
+    eyebrow: "TrainingLoad MCP",
+    title: "Fai leggere il tuo allenamento all'AI e rendi verificabile ogni conclusione.",
+    text: "24 strumenti di allenamento in sola lettura con risorse e prompt nativi per stato attuale, confronto tra periodi, dettagli delle attività, esecuzione del piano, gare e diagnostica di sincronizzazione.",
+    cta: "Esplora MCP",
+  },
+  "pt-BR": {
+    eyebrow: "TrainingLoad MCP",
+    title: "Deixe sua IA ler seus treinos e torne cada conclusão verificável.",
+    text: "24 ferramentas de treino somente leitura, além de recursos e prompts nativos para estado atual, comparação de períodos, detalhes de atividades, execução do plano, provas e diagnóstico de sincronização.",
+    cta: "Explorar MCP",
+  },
+};
+
 function getSiteUrl() {
   const raw = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.trainingload.ai";
   return raw.replace(/\/+$/, "");
@@ -306,21 +389,7 @@ export default async function FeaturesPage({
     (item) => !coreFeatureIcons.has(item.iconKey),
   );
   const expandDemoLabel = ui.expandDemoLabel ?? "Expand demo";
-  const mcpCopy =
-    lang === "zh"
-      ? {
-          eyebrow: "TrainingLoad MCP",
-          title: "让你的 AI 读取训练，也让每个结论可验证。",
-          text: "24 个只读训练工具，加上原生 Resources 与 Prompts，覆盖当前状态、周期比较、活动细节、计划执行、比赛与同步诊断。",
-          cta: "查看 MCP",
-        }
-      : {
-          eyebrow: "TrainingLoad MCP",
-          title:
-            "Let your AI read training—and make every conclusion verifiable.",
-          text: "24 read-only training tools plus native resources and prompts for current state, period comparison, activity detail, plan execution, competitions, and sync diagnostics.",
-          cta: "Explore MCP",
-        };
+  const mcpCopy = mcpCopyByLang[lang as FeaturesMcpLocale] ?? mcpCopyByLang.en;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -362,9 +431,11 @@ export default async function FeaturesPage({
             <h1
               className="mx-auto mt-5 max-w-5xl text-balance text-[2rem] font-black leading-[1.08] tracking-normal md:text-6xl lg:text-7xl"
               style={
-                lang === "en"
-                  ? undefined
-                  : { overflowWrap: "anywhere", wordBreak: "break-all" }
+                lang === "zh" || lang === "zh-hant" || lang === "ja"
+                  ? { overflowWrap: "anywhere", wordBreak: "break-all" }
+                  : lang === "en"
+                    ? undefined
+                    : { overflowWrap: "break-word" }
               }
             >
               {ui.headline}

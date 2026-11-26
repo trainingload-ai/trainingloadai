@@ -7,10 +7,10 @@ import {
   ToolPageMain,
   ToolSection,
 } from "@/components/ToolPageLayout";
+import { isSeoIndexedLanguage } from "@/lib/i18n";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 import {
   getRpeScaleContent,
-  isRpeScaleContentLocale,
   RPE_SCALE_PATH,
 } from "@/lib/rpe-scale-content";
 import {
@@ -67,7 +67,7 @@ export async function generateMetadata({
       canonical: pageUrl,
       languages: absoluteAlternatesForPath(siteUrl, RPE_SCALE_PATH),
     },
-    robots: isRpeScaleContentLocale(lang)
+    robots: isSeoIndexedLanguage(lang)
       ? { index: true, follow: true }
       : { index: false, follow: true },
     openGraph: {

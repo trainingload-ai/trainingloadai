@@ -109,7 +109,10 @@ describe("running-plan long-tail content", () => {
     },
   );
 
-  it("keeps unsupported language variants out of the index", () => {
+  it("keeps non-indexed locales out of the index", () => {
+    expect(
+      tenKBridgeMetadata("nl", "couch-to-10k-training-plan").robots,
+    ).toMatchObject({ index: false, follow: true });
     expect(
       tenKBridgeMetadata("fr", "couch-to-10k-training-plan").robots,
     ).toMatchObject({ index: false, follow: true });
