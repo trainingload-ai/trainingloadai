@@ -1416,7 +1416,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
   );
 
   nativeIt(
-    'preserves a user completion committed between activity evidence and workout locking',
+    'preserves a user completion when matching waits for the plan write',
     async () => {
       const f = await matchingScenario();
       const { service: plans } = planStartFixture(prisma);
@@ -1424,28 +1424,22 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
         where: { id: f.independent.id },
         data: { plannedDurationSeconds: 7200 },
       });
-      const workouts = new PlanWorkoutRepository(prisma as never);
-      const lock = workouts.lockForUpdate.bind(workouts);
-      let reachedWorkoutLock!: () => void;
-      let resumeMatching!: () => void;
-      const beforeWorkoutLock = new Promise<void>((resolve) => { reachedWorkoutLock = resolve; });
-      const proceed = new Promise<void>((resolve) => { resumeMatching = resolve; });
-      jest.spyOn(workouts, 'lockForUpdate').mockImplementationOnce(async (id, tx) => {
-        reachedWorkoutLock();
-        await proceed;
-        return lock(id, tx);
-      });
-      const matching = matcher(workouts).tryAutoLinkForActivity(f.activity.id);
-      try {
-        await Promise.race([
-          beforeWorkoutLock,
-          matching.then(() => { throw new Error('Matching did not reach the workout lock'); }),
-        ]);
-        await plans.updateWorkoutStatus('user', f.plan.id, f.workout.id, 'DONE');
-      } finally {
-        resumeMatching();
-        await matching;
-      }
+
+      const result = await raceWithUncommittedPlanWrite(
+        prisma,
+        (tx) =>
+          plans.updateWorkoutStatus(
+            'user',
+            f.plan.id,
+            f.workout.id,
+            'DONE',
+            undefined,
+            { tx },
+          ),
+        () => matcher().tryAutoLinkForActivity(f.activity.id),
+      );
+
+      expect(result.status).toBe('fulfilled');
       await expect(prisma.planWorkout.findUniqueOrThrow({ where: { id: f.workout.id } }))
         .resolves.toMatchObject({ status: 'DONE', revision: f.workout.revision + 1 });
       await expect(prisma.planWorkoutActivityLink.findFirst({
@@ -1477,27 +1471,34 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
           return rows;
         });
       const matching = matcher(workouts).tryAutoLinkForActivity(f.activity.id);
-      await snapshot;
-      let importedId = '';
+      let importedId: string;
       try {
-        const imported = await service.createIndependentWorkout({
-          userId: 'user',
-          scheduledDate: new Date('2026-07-06'),
-          sportType: 'RUN',
-          structureKind: 'FREEFORM',
-          plannedDurationSeconds: 1800,
-          text: 'Late course',
-          blocks: [],
+        await Promise.race([
+          snapshot,
+          matching.then(() => {
+            throw new Error('Matching did not reach the workout snapshot');
+          }),
+        ]);
+        // The normal plan writer takes the same user lock. Insert outside that
+        // path to exercise the matcher against a row added after its snapshot.
+        const imported = await prisma.planWorkout.create({
+          data: {
+            userId: 'user',
+            dayOffset: 0,
+            scheduledDate: new Date('2026-07-06'),
+            sportType: 'RUN',
+            structureKind: 'FREEFORM',
+            plannedDurationSeconds: 1800,
+            text: 'Late course',
+            status: 'DONE',
+            completedAt: f.activity.startTime,
+          },
         });
         importedId = imported.id;
-        await prisma.planWorkout.update({
-          where: { id: importedId },
-          data: { status: 'DONE', completedAt: f.activity.startTime },
-        });
       } finally {
         resume();
+        await matching;
       }
-      await matching;
       await matcher().onWorkoutsChanged(
         new PlanWorkoutsChangedEvent('user', 'external_import', [importedId]),
       );
