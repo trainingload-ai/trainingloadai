@@ -674,3 +674,55 @@ test("indexes the homepage and tools in every supported locale", async ({
   }
   expect(xml).toContain("<loc>https://www.trainingload.ai/ja/docs</loc>");
 });
+
+test("renders localized Coach and metric controls in the features demos", async ({
+  page,
+}) => {
+  const translationErrors: string[] = [];
+  page.on("console", (message) => {
+    if (
+      message.type() === "error" &&
+      /INVALID_KEY|MISSING_MESSAGE|FORMATTING_ERROR/.test(message.text())
+    ) {
+      translationErrors.push(message.text());
+    }
+  });
+  await page.goto("/fr/features");
+
+  const coachName = "Agrandir la démo: Revue workout AI";
+  await page.getByRole("button", { name: coachName, exact: true }).click();
+  const coachDialog = page.getByRole("dialog", { name: coachName });
+  await coachDialog
+    .getByRole("button", { name: "Plan semi-marathon 12 semaines", exact: true })
+    .click();
+  await expect(
+    coachDialog.getByText("4 semaines · 15 séances", { exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(coachDialog).toBeHidden();
+
+  const metricName = "Agrandir la démo: Charge d'entraînement";
+  await page.getByRole("button", { name: metricName, exact: true }).click();
+  const metricDialog = page.getByRole("dialog", { name: metricName });
+  await metricDialog.getByText("Stress d'entraînement", { exact: true }).click();
+  await expect(
+    metricDialog.getByRole("button", { name: "Recalculer", exact: true }),
+  ).toBeVisible();
+  await expect(
+    metricDialog.getByRole("button", { name: "Retour à l'accueil", exact: true }),
+  ).toBeVisible();
+  expect(translationErrors).toEqual([]);
+});
+
+test("loads the localized metric messages in the standalone PMC preview", async ({
+  page,
+}) => {
+  await page.goto("/zh/features/pmc-fitness-chart");
+  const name = "展开完整 PMC 桌面端演示";
+  await page.getByRole("button", { name, exact: true }).click();
+  await expect(
+    page
+      .getByRole("dialog", { name })
+      .getByRole("button", { name: "重新计算", exact: true }),
+  ).toBeVisible();
+});

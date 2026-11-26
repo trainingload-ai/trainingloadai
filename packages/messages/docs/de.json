@@ -4546,6 +4546,562 @@
     "visualSubtitle": "Plan, Kalender, Belastung, Aktivitätsfeedback und AI Review in einem Trainingsloop"
   },
   "home": {
+    "demo": {
+      "coach": {
+        "review": "KI-Analyse",
+        "history": "Verlauf",
+        "newChat": "Neuer Chat",
+        "today": "Heute",
+        "yesterday": "Gestern",
+        "past": "Früher",
+        "composerHint": "Shift + Enter für Zeilenumbruch",
+        "thinking": "Denkt nach",
+        "send": "Senden",
+        "questions": {
+          "title": "Kurze Rückfragen",
+          "answeredBadge": "Beantwortet",
+          "submit": "Senden",
+          "answeredCount": "{answered} / {total}"
+        },
+        "readCards": {
+          "toggleDetails": "Details anzeigen"
+        },
+        "workoutAdjustment": {
+          "before": "Vorher",
+          "after": "Nachher",
+          "apply": "Änderung anwenden",
+          "changes": "Änderungen",
+          "position": "Woche {week} · Tag {day}"
+        },
+        "planDraft": {
+          "weekColumn": "Woche",
+          "weekdays": [
+            "Mo",
+            "Di",
+            "Mi",
+            "Do",
+            "Fr",
+            "Sa",
+            "So"
+          ],
+          "weekLabel": "W{week}",
+          "restLabel": "Ruhe",
+          "summary": "{weeks} Wochen · {sessions} Einheiten",
+          "createPlan": "Plan erstellen"
+        },
+        "sessions": [
+          {
+            "id": "adjust",
+            "title": "Anpassung Marathon-Grundlagenphase",
+            "bucket": "today",
+            "composer": "Nachfragen: Wenn sich Freitag gut anfühlt, können wir die Intensität zurückbringen?",
+            "messages": [
+              {
+                "id": "adjust-u1",
+                "role": "user",
+                "text": "Ich fühle mich diese Woche müde. Sollten wir den Tempolauf am Donnerstag anpassen?"
+              },
+              {
+                "id": "adjust-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "Behalte das Trainingsziel bei, aber mach aus dem Donnerstag einen kürzeren, ruhigen Dauerlauf. So bleibt der lange Lauf am Samstag geschützt und der Block läuft weiter."
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "Aktueller Plan",
+                        "subtitle": "Woche 5 · Do"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "Letzte Aktivitäten",
+                        "subtitle": "Letzte 7 Tage · 4 Einheiten"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "Trainingsbelastung",
+                        "subtitle": "2026-05-24 → 2026-06-30",
+                        "stats": [
+                          {
+                            "label": "Aktive Tage",
+                            "value": "18"
+                          },
+                          {
+                            "label": "Ruhetage",
+                            "value": "12"
+                          },
+                          {
+                            "label": "Gesamtlast",
+                            "value": "842"
+                          },
+                          {
+                            "label": "Ø pro Tag",
+                            "value": "47"
+                          },
+                          {
+                            "label": "TSB",
+                            "value": "-4"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "planAdjustment",
+                    "data": {
+                      "planId": "demo-plan",
+                      "workoutId": "demo-workout-thu",
+                      "title": "Anpassung Donnerstagseinheit",
+                      "reason": "Die Ermüdung ist diese Woche erhöht. Belastung am Donnerstag senken und den aeroben Rhythmus halten.",
+                      "before": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "Tempolauf",
+                        "text": "work 3x10m pace Z4"
+                      },
+                      "after": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "Dauerlauf",
+                        "text": "work 35m pace Z2"
+                      },
+                      "changes": [
+                        {
+                          "field": "text",
+                          "before": "work 3x10m pace Z4",
+                          "after": "work 35m pace Z2"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "create",
+            "title": "12-Wochen-Halbmarathonplan",
+            "bucket": "yesterday",
+            "composer": "Können wir in Woche 8 noch eine Qualitätseinheit ergänzen?",
+            "messages": [
+              {
+                "id": "create-u1",
+                "role": "user",
+                "text": "Erstelle mir einen 12-Wochen-Halbmarathonplan. Ich laufe aktuell 4-mal pro Woche."
+              },
+              {
+                "id": "create-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "question",
+                    "data": {
+                      "questions": [
+                        {
+                          "id": "goal",
+                          "header": "Wettkampfziel",
+                          "question": "Was ist dein primäres Wettkampfziel?",
+                          "options": [
+                            {
+                              "value": "sub-2",
+                              "label": "Halbmarathon Sub-2:00",
+                              "description": "Ausgewogener Aufbau mit einer Qualitätseinheit pro Woche."
+                            },
+                            {
+                              "value": "finish",
+                              "label": "Stark ins Ziel kommen",
+                              "description": "Konservativer Umfang mit extra Erholungsabständen."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "reply": {
+                      "repliesToAssistantMessageId": "create-a1",
+                      "answers": {
+                        "goal": "sub-2"
+                      },
+                      "notes": {
+                        "goal": ""
+                      },
+                      "kind": "coach_question_reply"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "create-u2",
+                "role": "user",
+                "text": "Ziel: Halbmarathon Sub-2:00 · 4 Läufe/Woche · 12 Wochen"
+              },
+              {
+                "id": "create-a2",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "Hier ist ein Entwurf mit progressiven langen Läufen, einer wöchentlichen Qualitätseinheit und Erholungsabständen passend zu deinem aktuellen Umfang."
+                  },
+                  {
+                    "type": "planDraft",
+                    "data": {
+                      "title": "Halbmarathon-Aufbau · 12 Wochen",
+                      "description": "Erst aerobe Grundlage, dann Schwellenarbeit und wettkampfspezifische lange Läufe in den letzten 4 Wochen.",
+                      "periodWeeks": 4,
+                      "workouts": [
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Locker 45m",
+                          "name": "Lockerer Lauf"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Dauerlauf 35m",
+                          "name": "Dauerlauf"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Lang 80m",
+                          "name": "Langer Lauf"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Locker 40m",
+                          "name": "Lockerer Lauf"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 3x8m",
+                          "name": "Tempolauf"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Locker 35m",
+                          "name": "Lockerer Lauf"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Lang 95m",
+                          "name": "Langer Lauf"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Locker 45m",
+                          "name": "Lockerer Lauf"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Steigerung 50m",
+                          "name": "Steigerungslauf"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Lang 105m",
+                          "name": "Langer Lauf"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 7,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Regeneration 30m",
+                          "name": "Regenerationslauf"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Locker 40m",
+                          "name": "Lockerer Lauf"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 2x12m",
+                          "name": "Tempolauf"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Dauerlauf 40m",
+                          "name": "Dauerlauf"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Lang 120m",
+                          "name": "Langer Lauf"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "long-run",
+            "title": "Langen Lauf am Wochenende nachholen",
+            "bucket": "past",
+            "composer": "Soll ich die Intervalle am Dienstag verschieben, wenn die Beine noch schwer sind?",
+            "messages": [
+              {
+                "id": "long-u1",
+                "role": "user",
+                "text": "Ich habe den langen Lauf am Samstag wegen einer Reise verpasst. Wie sollte ich diese Woche aufholen?"
+              },
+              {
+                "id": "long-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "Packe den verpassten langen Lauf nicht komplett zusätzlich in diese Woche. Verschiebe eine aerobe Einheit weiter nach hinten und behalte die Qualität am Dienstag nur bei, wenn Schlaf und TSB stabil sind."
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "Plan dieser Woche",
+                        "subtitle": "Woche 6 · Sa verpasst"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "Verpasste Einheit",
+                        "subtitle": "Langer Lauf Sa · ausgelassen"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "Erholungstrend",
+                        "subtitle": "Letzte 14 Tage",
+                        "stats": [
+                          {
+                            "label": "TSB",
+                            "value": "-6"
+                          },
+                          {
+                            "label": "Ø Schlaf",
+                            "value": "6.8h"
+                          },
+                          {
+                            "label": "Ruhetage",
+                            "value": "2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "metric": {
+        "sportLabels": {
+          "all": "Alle Sportarten",
+          "RUN": "Laufen",
+          "CYCLING": "Radfahren",
+          "SWIM": "Schwimmen"
+        },
+        "timeLabels": {
+          "thisYear": "Dieses Jahr",
+          "last30": "Letzte 30 Tage",
+          "last90": "Letzte 90 Tage"
+        },
+        "pmc": {
+          "calculate": "Neu berechnen",
+          "calculating": "Berechnung läuft...",
+          "combinedTitle": "PMC-Gesamtanalyse",
+          "fitnessChart": "Fitness-Verlauf",
+          "fatigueChart": "Ermüdungs-Verlauf",
+          "formChart": "Form-Verlauf",
+          "noData": "Keine Daten verfügbar",
+          "abbr": {
+            "fitness": "CTL",
+            "fatigue": "ATL",
+            "form": "TSB"
+          },
+          "fitness": {
+            "title": "Chronische Trainingsbelastung (CTL)"
+          },
+          "fatigue": {
+            "title": "Akute Trainingsbelastung (ATL)"
+          },
+          "form": {
+            "title": "Training Stress Balance (TSB)"
+          },
+          "load": {
+            "title": "Trainingsbelastung"
+          },
+          "zoneHelp": {
+            "ariaLabel": "Erklärung der Form-Zonen",
+            "title": "Erklärung der Form-Zonen",
+            "danger": "Tiefer Negativbereich (Rot): Form < -30. ATL liegt deutlich über CTL.",
+            "optimal": "Aufbauzone (Grün): -30 ≤ Form < -10.",
+            "neutral": "Neutrale Zone (Grau): -10 ≤ Form < +5.",
+            "fresh": "Frische-Zone (Blau): +5 ≤ Form < +15.",
+            "peak": "Wettkampf-Peak (Violett): +15 ≤ Form < +25.",
+            "transition": "Übergangszone (Orange): Form ≥ +25."
+          },
+          "acmpHelp": {
+            "title": "ACWR (ATL/CTL) Erklärung",
+            "formula": "ACWR = ATL / CTL.",
+            "sweet": "Referenzbereich (Grün): 0,8–1,3, nur zur Einordnung.",
+            "danger": "Prüfbereich (Rot): ≥ 1,5. Aktuelle Trainingsbelastung und Daten prüfen.",
+            "advice": "Nutze ACWR immer im Kontext von Trainingsqualität und Erholung."
+          }
+        },
+        "power": {
+          "tabs": {
+            "curve": "Kurve",
+            "maximum": "Maximum",
+            "zones": "Zonen",
+            "profile": "Profil"
+          },
+          "zonesTitle": "Leistungszonenverteilung",
+          "maximumTitle": "Verlauf der Maximalleistung",
+          "profileTitle": "Leistungsprofil",
+          "chartTitle": "Leistungs-Dauer-Kurve",
+          "noData": "Keine Leistungsdaten",
+          "ftp": "FTP",
+          "cp": "CP",
+          "table": {
+            "fiveSeconds": "5s",
+            "thirtySeconds": "30s",
+            "oneMinute": "1 Min",
+            "threeMinutes": "3 Min",
+            "fiveMinutes": "5 Min",
+            "twentyMinutes": "20 Min",
+            "sixtyMinutes": "60 Min",
+            "twoHours": "2 Std",
+            "threeHours": "3 Std"
+          },
+          "profile": {
+            "male": "Männlich",
+            "female": "Weiblich",
+            "riderType": "Fahrertyp",
+            "levels": [
+              "Weltklasse",
+              "Außergewöhnlich",
+              "Ausgezeichnet",
+              "Sehr gut",
+              "Gut",
+              "Moderat",
+              "Solide",
+              "Einsteiger",
+              "Untrainiert"
+            ],
+            "durations": {
+              "5s": "5s",
+              "1m": "1 Min",
+              "5m": "5 Min",
+              "FTP": "FTP"
+            }
+          },
+          "maximum": {
+            "bucketDay": "Tag",
+            "bucketWeek": "Woche",
+            "bucketMonth": "Monat"
+          }
+        },
+        "pace": {
+          "tabs": {
+            "curve": "Kurve",
+            "zones": "Zonen"
+          },
+          "chartTitle": "Pace-Kurve",
+          "zonesTitle": "Pace-Zonenverteilung",
+          "noData": "Keine Pace-Daten",
+          "cs": "CS",
+          "table": {
+            "segment": "Distanz",
+            "pace": "Pace",
+            "time": "Zeit"
+          },
+          "distances": {
+            "400m": "400m",
+            "800m": "800m",
+            "1500m": "1500m",
+            "1mi": "1 Meile",
+            "3k": "3 km",
+            "5k": "5 km",
+            "10k": "10 km",
+            "20k": "20 km",
+            "marathon": "42,2 km"
+          }
+        },
+        "heartRate": {
+          "tabs": {
+            "curve": "Kurve",
+            "zones": "Zonen"
+          },
+          "chartTitle": "Herzfrequenz-Dauer-Kurve",
+          "zonesTitle": "Herzfrequenzzonenverteilung",
+          "noData": "Keine Herzfrequenzdaten",
+          "maxHr": "Max. HF",
+          "lthr": "LTHR",
+          "table": {
+            "fiveSeconds": "5s",
+            "thirtySeconds": "30s",
+            "oneMinute": "1 Min",
+            "threeMinutes": "3 Min",
+            "fiveMinutes": "5 Min",
+            "tenMinutes": "10 Min",
+            "twentyMinutes": "20 Min",
+            "sixtyMinutes": "60 Min",
+            "twoHours": "2 Std",
+            "threeHours": "3 Std",
+            "sixHours": "6 Std"
+          }
+        }
+      }
+    },
     "metadata": {
       "title": "Lauf- und Radtrainings-App + KI-Coach | Trainingload.ai",
       "description": "Lauf- und Radtrainings-App: 12 offizielle Laufpläne ohne Konto ansehen, Trainingsbelastung und Erholung verfolgen. Mitglieder erhalten Vorschläge vom KI-Coach.",
@@ -6582,6 +7138,7 @@
     }
   },
   "commonLinks": {
+    "demoOverviewBack": "Zurück zur Startseite",
     "tools": "Werkzeuge",
     "home": "Startseite",
     "allTools": "Alle Werkzeuge",

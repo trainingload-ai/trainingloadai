@@ -4546,6 +4546,562 @@
     "visualSubtitle": "계획, 캘린더, 부하, 활동 피드백, AI 리뷰가 하나의 훈련 루프로 연결됩니다"
   },
   "home": {
+    "demo": {
+      "coach": {
+        "review": "AI 리뷰",
+        "history": "기록",
+        "newChat": "새 대화",
+        "today": "오늘",
+        "yesterday": "어제",
+        "past": "이전",
+        "composerHint": "Shift + Enter로 줄바꿈",
+        "thinking": "생각 중",
+        "send": "전송",
+        "questions": {
+          "title": "간단 확인",
+          "answeredBadge": "답변 완료",
+          "submit": "전송",
+          "answeredCount": "{answered} / {total}"
+        },
+        "readCards": {
+          "toggleDetails": "자세히 보기"
+        },
+        "workoutAdjustment": {
+          "before": "변경 전",
+          "after": "변경 후",
+          "apply": "변경 적용",
+          "changes": "변경 항목",
+          "position": "{week}주차 · {day}일차"
+        },
+        "planDraft": {
+          "weekColumn": "주",
+          "weekdays": [
+            "월",
+            "화",
+            "수",
+            "목",
+            "금",
+            "토",
+            "일"
+          ],
+          "weekLabel": "{week}주",
+          "restLabel": "휴식",
+          "summary": "{weeks}주 · {sessions}개 세션",
+          "createPlan": "계획 만들기"
+        },
+        "sessions": [
+          {
+            "id": "adjust",
+            "title": "마라톤 기초 주기 조정",
+            "bucket": "today",
+            "composer": "이어서 질문: 금요일에 컨디션이 회복되면 강도를 다시 올려도 될까요?",
+            "messages": [
+              {
+                "id": "adjust-u1",
+                "role": "user",
+                "text": "이번 주에 좀 피곤한데, 목요일 템포 런을 조정하는 게 좋을까요?"
+              },
+              {
+                "id": "adjust-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "훈련 의도는 유지하되 목요일은 조금 짧은 스테디 런으로 바꾸는 편이 좋습니다. 블록 흐름을 끊지 않으면서 토요일 장거리 주를 위한 회복 여유를 확보할 수 있습니다."
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "현재 계획",
+                        "subtitle": "5주차 · 목"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "최근 활동",
+                        "subtitle": "최근 7일 · 4개 세션"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "훈련 부하",
+                        "subtitle": "2026-05-24 → 2026-06-30",
+                        "stats": [
+                          {
+                            "label": "활동일",
+                            "value": "18"
+                          },
+                          {
+                            "label": "휴식일",
+                            "value": "12"
+                          },
+                          {
+                            "label": "총 부하",
+                            "value": "842"
+                          },
+                          {
+                            "label": "일평균",
+                            "value": "47"
+                          },
+                          {
+                            "label": "TSB",
+                            "value": "-4"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "planAdjustment",
+                    "data": {
+                      "planId": "demo-plan",
+                      "workoutId": "demo-workout-thu",
+                      "title": "목요일 훈련 조정",
+                      "reason": "이번 주 피로도가 높은 편입니다. 유산소 리듬은 유지하면서 목요일 자극을 낮춥니다.",
+                      "before": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "템포 런",
+                        "text": "work 3x10m pace Z4"
+                      },
+                      "after": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "스테디 런",
+                        "text": "work 35m pace Z2"
+                      },
+                      "changes": [
+                        {
+                          "field": "text",
+                          "before": "work 3x10m pace Z4",
+                          "after": "work 35m pace Z2"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "create",
+            "title": "12주 하프 마라톤 계획",
+            "bucket": "yesterday",
+            "composer": "8주차에 포인트 훈련을 한 번 더 넣을 수 있을까요?",
+            "messages": [
+              {
+                "id": "create-u1",
+                "role": "user",
+                "text": "12주 하프 마라톤 계획을 짜 주세요. 현재 주 4회 달리고 있습니다."
+              },
+              {
+                "id": "create-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "question",
+                    "data": {
+                      "questions": [
+                        {
+                          "id": "goal",
+                          "header": "대회 목표",
+                          "question": "가장 우선하는 대회 목표는 무엇인가요?",
+                          "options": [
+                            {
+                              "value": "sub-2",
+                              "label": "하프 마라톤 Sub-2:00",
+                              "description": "주 1회 포인트 훈련을 포함한 균형 잡힌 빌드업."
+                            },
+                            {
+                              "value": "finish",
+                              "label": "안정적인 완주",
+                              "description": "보수적인 주간 거리와 넉넉한 회복 간격."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "reply": {
+                      "repliesToAssistantMessageId": "create-a1",
+                      "answers": {
+                        "goal": "sub-2"
+                      },
+                      "notes": {
+                        "goal": ""
+                      },
+                      "kind": "coach_question_reply"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "create-u2",
+                "role": "user",
+                "text": "목표: 하프 Sub-2:00 · 주 4회 · 12주"
+              },
+              {
+                "id": "create-a2",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "현재 주간 훈련량에 맞춘 초안입니다. 점진적인 장거리 주와 주 1회 포인트 훈련, 적절한 회복 간격을 배치했습니다."
+                  },
+                  {
+                    "type": "planDraft",
+                    "data": {
+                      "title": "하프 마라톤 빌드 · 12주",
+                      "description": "초반에는 유산소 기초를 다지고, 마지막 4주에 역치 보강과 레이스 특화 장거리 주를 넣습니다.",
+                      "periodWeeks": 4,
+                      "workouts": [
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "이지 런 45m",
+                          "name": "이지 런"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "스테디 35m",
+                          "name": "스테디 런"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "장거리 80m",
+                          "name": "장거리 주"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "이지 런 40m",
+                          "name": "이지 런"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "템포 3x8m",
+                          "name": "템포 런"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "이지 런 35m",
+                          "name": "이지 런"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "장거리 95m",
+                          "name": "장거리 주"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "이지 런 45m",
+                          "name": "이지 런"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "빌드업 50m",
+                          "name": "빌드업 런"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "장거리 105m",
+                          "name": "장거리 주"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 7,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "회복 런 30m",
+                          "name": "회복 런"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "이지 런 40m",
+                          "name": "이지 런"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "템포 2x12m",
+                          "name": "템포 런"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "스테디 40m",
+                          "name": "스테디 런"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "장거리 120m",
+                          "name": "장거리 주"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "long-run",
+            "title": "주말 장거리 주 보충",
+            "bucket": "past",
+            "composer": "다리가 아직 무거우면 화요일 인터벌을 미루는 게 좋을까요?",
+            "messages": [
+              {
+                "id": "long-u1",
+                "role": "user",
+                "text": "출장 때문에 토요일 장거리 주를 못 뛰었습니다. 이번 주에 어떻게 보충하면 좋을까요?"
+              },
+              {
+                "id": "long-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "놓친 장거리 주 전체를 이번 주 계획에 그대로 얹지 않는 것이 좋습니다. 유산소 세션 하나를 주 후반으로 옮기고, 수면과 TSB가 안정적일 때만 화요일 포인트 훈련을 유지하세요."
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "이번 주 계획",
+                        "subtitle": "6주차 · 토요일 미실시"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "누락된 훈련",
+                        "subtitle": "토요일 장거리 주 · 건너뜀"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "회복 추세",
+                        "subtitle": "최근 14일",
+                        "stats": [
+                          {
+                            "label": "TSB",
+                            "value": "-6"
+                          },
+                          {
+                            "label": "평균 수면",
+                            "value": "6.8h"
+                          },
+                          {
+                            "label": "휴식일",
+                            "value": "2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "metric": {
+        "sportLabels": {
+          "all": "모든 종목",
+          "RUN": "러닝",
+          "CYCLING": "사이클링",
+          "SWIM": "수영"
+        },
+        "timeLabels": {
+          "thisYear": "올해",
+          "last30": "최근 30일",
+          "last90": "최근 90일"
+        },
+        "pmc": {
+          "calculate": "다시 계산",
+          "calculating": "계산 중...",
+          "combinedTitle": "PMC 종합 분석",
+          "fitnessChart": "체력 차트",
+          "fatigueChart": "피로 차트",
+          "formChart": "컨디션 차트",
+          "noData": "데이터가 없습니다",
+          "abbr": {
+            "fitness": "CTL",
+            "fatigue": "ATL",
+            "form": "TSB"
+          },
+          "fitness": {
+            "title": "장기 훈련 부하 (CTL)"
+          },
+          "fatigue": {
+            "title": "단기 훈련 부하 (ATL)"
+          },
+          "form": {
+            "title": "훈련 스트레스 균형 (TSB)"
+          },
+          "load": {
+            "title": "훈련 부하"
+          },
+          "zoneHelp": {
+            "ariaLabel": "컨디션 구간 설명",
+            "title": "컨디션 구간 설명",
+            "danger": "깊은 음수 구간(빨강): TSB < -30. ATL이 CTL보다 크게 높습니다.",
+            "optimal": "부하 축적 구간(초록): -30 ≤ TSB < -10.",
+            "neutral": "중립 구간(회색): -10 ≤ TSB < +5.",
+            "fresh": "신선 구간(파랑): +5 ≤ TSB < +15.",
+            "peak": "피크 구간(보라): +15 ≤ TSB < +25.",
+            "transition": "전환 구간(주황): TSB ≥ +25."
+          },
+          "acmpHelp": {
+            "title": "ACWR (ATL/CTL) 설명",
+            "formula": "ACWR = ATL / CTL.",
+            "sweet": "참고 범위(초록): 0.8–1.3(맥락 참고용).",
+            "danger": "점검 범위(빨강): ≥ 1.5. 최근 훈련 부하와 데이터를 점검하세요.",
+            "advice": "ACWR은 훈련의 질과 회복 상태와 함께 참고 지표로 활용하세요."
+          }
+        },
+        "power": {
+          "tabs": {
+            "curve": "커브",
+            "maximum": "최댓값",
+            "zones": "구간",
+            "profile": "프로필"
+          },
+          "zonesTitle": "파워 구간 분포",
+          "maximumTitle": "최대 파워 기록",
+          "profileTitle": "파워 프로필",
+          "chartTitle": "파워 지속 시간 커브",
+          "noData": "파워 데이터가 없습니다",
+          "ftp": "FTP",
+          "cp": "CP",
+          "table": {
+            "fiveSeconds": "5초",
+            "thirtySeconds": "30초",
+            "oneMinute": "1분",
+            "threeMinutes": "3분",
+            "fiveMinutes": "5분",
+            "twentyMinutes": "20분",
+            "sixtyMinutes": "60분",
+            "twoHours": "2시간",
+            "threeHours": "3시간"
+          },
+          "profile": {
+            "male": "남성",
+            "female": "여성",
+            "riderType": "라이더 유형",
+            "levels": [
+              "월드 클래스",
+              "최상급",
+              "우수",
+              "매우 좋음",
+              "좋음",
+              "보통",
+              "양호",
+              "초급",
+              "미훈련"
+            ],
+            "durations": {
+              "5s": "5초",
+              "1m": "1분",
+              "5m": "5분",
+              "FTP": "FTP"
+            }
+          },
+          "maximum": {
+            "bucketDay": "일",
+            "bucketWeek": "주",
+            "bucketMonth": "월"
+          }
+        },
+        "pace": {
+          "tabs": {
+            "curve": "커브",
+            "zones": "구간"
+          },
+          "chartTitle": "페이스 커브",
+          "zonesTitle": "페이스 구간 분포",
+          "noData": "페이스 데이터가 없습니다",
+          "cs": "CS",
+          "table": {
+            "segment": "구간",
+            "pace": "페이스",
+            "time": "시간"
+          },
+          "distances": {
+            "400m": "400m",
+            "800m": "800m",
+            "1500m": "1500m",
+            "1mi": "1마일",
+            "3k": "3km",
+            "5k": "5km",
+            "10k": "10km",
+            "20k": "20km",
+            "marathon": "42.2km"
+          }
+        },
+        "heartRate": {
+          "tabs": {
+            "curve": "커브",
+            "zones": "구간"
+          },
+          "chartTitle": "심박 지속 시간 커브",
+          "zonesTitle": "심박 구간 분포",
+          "noData": "심박 데이터가 없습니다",
+          "maxHr": "최대 심박수",
+          "lthr": "LTHR(젖산 역치 심박)",
+          "table": {
+            "fiveSeconds": "5초",
+            "thirtySeconds": "30초",
+            "oneMinute": "1분",
+            "threeMinutes": "3분",
+            "fiveMinutes": "5분",
+            "tenMinutes": "10분",
+            "twentyMinutes": "20분",
+            "sixtyMinutes": "60분",
+            "twoHours": "2시간",
+            "threeHours": "3시간",
+            "sixHours": "6시간"
+          }
+        }
+      }
+    },
     "metadata": {
       "title": "러닝·사이클링 훈련 앱: 훈련 부하와 AI 코치 | Trainingload.ai",
       "description": "Trainingload.ai는 러닝·사이클링 계획, 실제 훈련, 부하, 회복을 한곳에 모읍니다. 공식 러닝 플랜 12개는 가입 없이 볼 수 있고 회원은 AI 코치의 조정 제안을 받습니다.",
@@ -6582,6 +7138,7 @@
     }
   },
   "commonLinks": {
+    "demoOverviewBack": "홈으로 돌아가기",
     "home": "홈",
     "tools": "도구",
     "allTools": "모든 도구",

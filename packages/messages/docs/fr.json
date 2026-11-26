@@ -4547,6 +4547,562 @@
     "visualSubtitle": "Plan, calendrier, charge, retour d'activité et revue AI dans une même boucle"
   },
   "home": {
+    "demo": {
+      "coach": {
+        "review": "Bilan IA",
+        "history": "Historique",
+        "newChat": "Nouvelle discussion",
+        "today": "Aujourd'hui",
+        "yesterday": "Hier",
+        "past": "Plus tôt",
+        "composerHint": "Maj + Entrée pour aller à la ligne",
+        "thinking": "Réflexion",
+        "send": "Envoyer",
+        "questions": {
+          "title": "Questions rapides",
+          "answeredBadge": "Répondu",
+          "submit": "Envoyer",
+          "answeredCount": "{answered} / {total}"
+        },
+        "readCards": {
+          "toggleDetails": "Afficher les détails"
+        },
+        "workoutAdjustment": {
+          "before": "Avant",
+          "after": "Après",
+          "apply": "Appliquer",
+          "changes": "Modifications",
+          "position": "Semaine {week} · Jour {day}"
+        },
+        "planDraft": {
+          "weekColumn": "Sem.",
+          "weekdays": [
+            "Lun",
+            "Mar",
+            "Mer",
+            "Jeu",
+            "Ven",
+            "Sam",
+            "Dim"
+          ],
+          "weekLabel": "S{week}",
+          "restLabel": "Repos",
+          "summary": "{weeks} semaines · {sessions} séances",
+          "createPlan": "Créer le plan"
+        },
+        "sessions": [
+          {
+            "id": "adjust",
+            "title": "Ajustement du bloc foncier marathon",
+            "bucket": "today",
+            "composer": "Demander : si les sensations reviennent vendredi, peut-on remettre de l'intensité ?",
+            "messages": [
+              {
+                "id": "adjust-u1",
+                "role": "user",
+                "text": "Je me sens fatigué cette semaine. Faut-il ajuster la séance tempo de jeudi ?"
+              },
+              {
+                "id": "adjust-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "Gardons l'intention de la séance, mais remplaçons le tempo de jeudi par une sortie soutenue plus courte. Cela protège la sortie longue de samedi tout en maintenant la dynamique du bloc."
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "Plan actuel",
+                        "subtitle": "Semaine 5 · Jeu"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "Activités récentes",
+                        "subtitle": "7 derniers jours · 4 séances"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "Charge d'entraînement",
+                        "subtitle": "2026-05-24 → 2026-06-30",
+                        "stats": [
+                          {
+                            "label": "Jours actifs",
+                            "value": "18"
+                          },
+                          {
+                            "label": "Jours de repos",
+                            "value": "12"
+                          },
+                          {
+                            "label": "Charge totale",
+                            "value": "842"
+                          },
+                          {
+                            "label": "Moy. / jour",
+                            "value": "47"
+                          },
+                          {
+                            "label": "TSB",
+                            "value": "-4"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "planAdjustment",
+                    "data": {
+                      "planId": "demo-plan",
+                      "workoutId": "demo-workout-thu",
+                      "title": "Ajustement de la séance de jeudi",
+                      "reason": "La fatigue est élevée cette semaine. Réduire le stress jeudi tout en gardant le rythme aérobie.",
+                      "before": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "Course tempo",
+                        "text": "work 3x10m pace Z4"
+                      },
+                      "after": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "Allure soutenue",
+                        "text": "work 35m pace Z2"
+                      },
+                      "changes": [
+                        {
+                          "field": "text",
+                          "before": "work 3x10m pace Z4",
+                          "after": "work 35m pace Z2"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "create",
+            "title": "Plan semi-marathon 12 semaines",
+            "bucket": "yesterday",
+            "composer": "Peut-on ajouter une séance qualité en semaine 8 ?",
+            "messages": [
+              {
+                "id": "create-u1",
+                "role": "user",
+                "text": "Construis-moi un plan semi-marathon de 12 semaines. Je cours actuellement 4 fois par semaine."
+              },
+              {
+                "id": "create-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "question",
+                    "data": {
+                      "questions": [
+                        {
+                          "id": "goal",
+                          "header": "Objectif course",
+                          "question": "Quel est votre objectif principal sur cette course ?",
+                          "options": [
+                            {
+                              "value": "sub-2",
+                              "label": "Semi-marathon Sub-2:00",
+                              "description": "Progression équilibrée avec une séance clé par semaine."
+                            },
+                            {
+                              "value": "finish",
+                              "label": "Terminer solide",
+                              "description": "Volume prudent avec davantage de récupération."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "reply": {
+                      "repliesToAssistantMessageId": "create-a1",
+                      "answers": {
+                        "goal": "sub-2"
+                      },
+                      "notes": {
+                        "goal": ""
+                      },
+                      "kind": "coach_question_reply"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "create-u2",
+                "role": "user",
+                "text": "Objectif : Semi Sub-2:00 · 4 sorties/sem. · 12 semaines"
+              },
+              {
+                "id": "create-a2",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "Voici une ébauche de bloc avec des sorties longues progressives, une séance qualité hebdomadaire et des temps de récupération adaptés à votre volume actuel."
+                  },
+                  {
+                    "type": "planDraft",
+                    "data": {
+                      "title": "Préparation semi-marathon · 12 semaines",
+                      "description": "Base aérobie d'abord, puis travail au seuil et sorties longues spécifiques sur les 4 dernières semaines.",
+                      "periodWeeks": 4,
+                      "workouts": [
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Facile 45m",
+                          "name": "Footing facile"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Soutenu 35m",
+                          "name": "Allure soutenue"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Longue 80m",
+                          "name": "Sortie longue"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Facile 40m",
+                          "name": "Footing facile"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 3x8m",
+                          "name": "Course tempo"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Facile 35m",
+                          "name": "Footing facile"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Longue 95m",
+                          "name": "Sortie longue"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Facile 45m",
+                          "name": "Footing facile"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Progressif 50m",
+                          "name": "Run progressif"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Longue 105m",
+                          "name": "Sortie longue"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 7,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Récup 30m",
+                          "name": "Footing récup"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Facile 40m",
+                          "name": "Footing facile"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 2x12m",
+                          "name": "Course tempo"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Soutenu 40m",
+                          "name": "Allure soutenue"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Longue 120m",
+                          "name": "Sortie longue"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "long-run",
+            "title": "Rattrapage sortie longue du week-end",
+            "bucket": "past",
+            "composer": "Dois-je décaler le fractionné de mardi si les jambes restent lourdes ?",
+            "messages": [
+              {
+                "id": "long-u1",
+                "role": "user",
+                "text": "J'ai manqué ma sortie longue de samedi à cause d'un déplacement. Comment rattraper cette semaine ?"
+              },
+              {
+                "id": "long-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "N'empilez pas l'intégralité de la sortie longue manquée sur cette semaine. Décalez une séance aérobie plus tard dans la semaine et ne gardez la séance clé de mardi que si sommeil et TSB restent stables."
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "Plan de la semaine",
+                        "subtitle": "Semaine 6 · Sam manqué"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "Séance manquée",
+                        "subtitle": "Sortie longue sam. · ignorée"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "Tendance récupération",
+                        "subtitle": "14 derniers jours",
+                        "stats": [
+                          {
+                            "label": "TSB",
+                            "value": "-6"
+                          },
+                          {
+                            "label": "Sommeil moy.",
+                            "value": "6.8h"
+                          },
+                          {
+                            "label": "Jours de repos",
+                            "value": "2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "metric": {
+        "sportLabels": {
+          "all": "Tous les sports",
+          "RUN": "Course à pied",
+          "CYCLING": "Cyclisme",
+          "SWIM": "Natation"
+        },
+        "timeLabels": {
+          "thisYear": "Cette année",
+          "last30": "30 derniers jours",
+          "last90": "90 derniers jours"
+        },
+        "pmc": {
+          "calculate": "Recalculer",
+          "calculating": "Calcul en cours...",
+          "combinedTitle": "Analyse combinée PMC",
+          "fitnessChart": "Courbe de forme physique",
+          "fatigueChart": "Courbe de fatigue",
+          "formChart": "Courbe de fraîcheur",
+          "noData": "Aucune donnée disponible",
+          "abbr": {
+            "fitness": "CTL",
+            "fatigue": "ATL",
+            "form": "TSB"
+          },
+          "fitness": {
+            "title": "Charge d'entraînement chronique (CTL)"
+          },
+          "fatigue": {
+            "title": "Charge d'entraînement aiguë (ATL)"
+          },
+          "form": {
+            "title": "Équilibre du stress d'entraînement (TSB)"
+          },
+          "load": {
+            "title": "Charge d'entraînement"
+          },
+          "zoneHelp": {
+            "ariaLabel": "Explication des zones de fraîcheur",
+            "title": "Explication des zones de fraîcheur",
+            "danger": "Zone négative profonde (Rouge) : TSB < -30. L'ATL dépasse nettement la CTL.",
+            "optimal": "Zone de développement (Vert) : -30 ≤ TSB < -10.",
+            "neutral": "Zone neutre (Gris) : -10 ≤ TSB < +5.",
+            "fresh": "Zone de fraîcheur (Bleu) : +5 ≤ TSB < +15.",
+            "peak": "Zone de pic de forme (Violet) : +15 ≤ TSB < +25.",
+            "transition": "Zone de transition (Orange) : TSB ≥ +25."
+          },
+          "acmpHelp": {
+            "title": "Explication ACWR (ATL/CTL)",
+            "formula": "ACWR = ATL / CTL.",
+            "sweet": "Zone de référence (Vert) : 0,8–1,3, à titre indicatif.",
+            "danger": "Zone de vigilance (Rouge) : ≥ 1,5. Vérifiez la charge récente et les données.",
+            "advice": "Interprétez l'ACWR en lien avec la qualité des séances et votre récupération."
+          }
+        },
+        "power": {
+          "tabs": {
+            "curve": "Courbe",
+            "maximum": "Maximum",
+            "zones": "Zones",
+            "profile": "Profil"
+          },
+          "zonesTitle": "Répartition des zones de puissance",
+          "maximumTitle": "Historique des puissances maximales",
+          "profileTitle": "Profil de puissance",
+          "chartTitle": "Courbe de puissance critique",
+          "noData": "Aucune donnée de puissance",
+          "ftp": "FTP",
+          "cp": "CP",
+          "table": {
+            "fiveSeconds": "5 s",
+            "thirtySeconds": "30 s",
+            "oneMinute": "1 min",
+            "threeMinutes": "3 min",
+            "fiveMinutes": "5 min",
+            "twentyMinutes": "20 min",
+            "sixtyMinutes": "60 min",
+            "twoHours": "2 h",
+            "threeHours": "3 h"
+          },
+          "profile": {
+            "male": "Homme",
+            "female": "Femme",
+            "riderType": "Profil de cycliste",
+            "levels": [
+              "Classe mondiale",
+              "Exceptionnel",
+              "Excellent",
+              "Très bon",
+              "Bon",
+              "Modéré",
+              "Correct",
+              "Débutant",
+              "Non entraîné"
+            ],
+            "durations": {
+              "5s": "5 s",
+              "1m": "1 min",
+              "5m": "5 min",
+              "FTP": "FTP"
+            }
+          },
+          "maximum": {
+            "bucketDay": "Jour",
+            "bucketWeek": "Semaine",
+            "bucketMonth": "Mois"
+          }
+        },
+        "pace": {
+          "tabs": {
+            "curve": "Courbe",
+            "zones": "Zones"
+          },
+          "chartTitle": "Courbe d'allure",
+          "zonesTitle": "Répartition des zones d'allure",
+          "noData": "Aucune donnée d'allure",
+          "cs": "CS",
+          "table": {
+            "segment": "Distance",
+            "pace": "Allure",
+            "time": "Temps"
+          },
+          "distances": {
+            "400m": "400 m",
+            "800m": "800 m",
+            "1500m": "1500 m",
+            "1mi": "1 mile",
+            "3k": "3 km",
+            "5k": "5 km",
+            "10k": "10 km",
+            "20k": "20 km",
+            "marathon": "42,2 km"
+          }
+        },
+        "heartRate": {
+          "tabs": {
+            "curve": "Courbe",
+            "zones": "Zones"
+          },
+          "chartTitle": "Courbe de fréquence cardiaque",
+          "zonesTitle": "Répartition des zones cardiaques",
+          "noData": "Aucune donnée cardiaque",
+          "maxHr": "FC max",
+          "lthr": "LTHR",
+          "table": {
+            "fiveSeconds": "5 s",
+            "thirtySeconds": "30 s",
+            "oneMinute": "1 min",
+            "threeMinutes": "3 min",
+            "fiveMinutes": "5 min",
+            "tenMinutes": "10 min",
+            "twentyMinutes": "20 min",
+            "sixtyMinutes": "60 min",
+            "twoHours": "2 h",
+            "threeHours": "3 h",
+            "sixHours": "6 h"
+          }
+        }
+      }
+    },
     "metadata": {
       "title": "App course à pied et vélo avec coach IA | Trainingload.ai",
       "description": "Application course et cyclisme avec séances, charge et récupération. Consultez sans inscription 12 plans officiels gratuits ; l’abonnement inclut le coach IA.",
@@ -6583,6 +7139,7 @@
     }
   },
   "commonLinks": {
+    "demoOverviewBack": "Retour à l'accueil",
     "home": "Accueil",
     "tools": "Outils",
     "allTools": "Tous les outils",

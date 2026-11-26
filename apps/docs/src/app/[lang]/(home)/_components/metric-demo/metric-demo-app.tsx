@@ -1,33 +1,22 @@
 "use client";
 
-import { resolveDemoCopy } from "@/lib/demo-i18n";
-
-import { metricDemoCopy } from "./copy";
 import { HeartRateDemoApp } from "./heart-rate/heart-rate-demo-app";
 import { PaceDemoApp } from "./pace/pace-demo-app";
 import { PmcDemoApp } from "./pmc/pmc-demo-app";
 import { PowerDemoApp } from "./power/power-demo-app";
 import type { MetricDemoView } from "./types";
 
-export function MetricDemoApp({
-  lang,
-  view,
-}: {
-  lang: string;
-  view: MetricDemoView;
-}) {
-  resolveDemoCopy(metricDemoCopy, lang);
-
+export function MetricDemoApp({ view }: { view: MetricDemoView }) {
   switch (view) {
     case "pmc":
-      return <PmcDemoApp lang={lang} />;
+      return <PmcDemoApp />;
     case "power":
-      return <PowerDemoApp lang={lang} />;
+      return <PowerDemoApp />;
     case "pace":
-      return <PaceDemoApp lang={lang} />;
+      return <PaceDemoApp />;
     case "heart-rate":
-      return <HeartRateDemoApp lang={lang} />;
+      return <HeartRateDemoApp />;
     default:
-      return <PmcDemoApp lang={lang} />;
+      return <PmcDemoApp />;
   }
 }

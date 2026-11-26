@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { ClientMessages } from "@/components/ClientMessages";
 import { JsonLd } from "@/components/JsonLd";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { ProductBrowserWindow } from "@/components/ProductBrowserChrome";
@@ -233,9 +234,9 @@ function FeatureDemoPreview({
     >
       <HomeDemoLightbox
         label={label}
-        expanded={<HomeChatPreview lang={lang} variant="expanded" />}
+        expanded={<HomeChatPreview variant="expanded" />}
       >
-        <HomeChatPreview lang={lang} />
+        <HomeChatPreview />
       </HomeDemoLightbox>
     </ProductBrowserWindow>
   );
@@ -357,7 +358,7 @@ export default async function FeaturesPage({
     ],
   };
 
-  return (
+  const content = (
     <div className="client-demo-radius overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <JsonLd id="features-structured-data" data={jsonLd} />
 
@@ -650,5 +651,14 @@ export default async function FeaturesPage({
         </div>
       </section>
     </div>
+  );
+
+  return (
+    <ClientMessages
+      locale={lang}
+      namespaces={["home.demo.coach", "home.demo.metric"]}
+    >
+      {content}
+    </ClientMessages>
   );
 }

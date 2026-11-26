@@ -12,10 +12,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { resolveDemoCopy } from "@/lib/demo-i18n";
 import { cn } from "@/lib/utils";
 
-import { metricDemoCopy } from "../copy";
+import { useMetricDemoCopy } from "../copy";
 import {
   DEMO_PACE_CS,
   DEMO_PACE_ROWS,
@@ -33,8 +32,8 @@ import {
   type DemoTimeKey,
 } from "../shared/demo-types";
 
-export function PaceDemoApp({ lang }: { lang: string }) {
-  const copy = resolveDemoCopy(metricDemoCopy, lang);
+export function PaceDemoApp() {
+  const copy = useMetricDemoCopy();
   const filters = useDemoFilters({ sportType: "RUN" });
   const [activeTab, setActiveTab] = useState("curve");
 
@@ -48,7 +47,7 @@ export function PaceDemoApp({ lang }: { lang: string }) {
 
   const distanceLabels = PACE_DISTANCE_KEYS.map((key) => ({
     key,
-    label: copy.pace.distances[key],
+    label: copy.pace.distances[key === "42.2k" ? "marathon" : key],
   }));
 
   const chartSeries = activeRows.map((row, index) => ({

@@ -3,9 +3,8 @@
 import { useState } from "react";
 
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { resolveDemoCopy } from "@/lib/demo-i18n";
 
-import { metricDemoCopy } from "../copy";
+import { useMetricDemoCopy } from "../copy";
 import {
   DEMO_HEART_RATE_ROWS,
   DEMO_HEART_RATE_THRESHOLDS,
@@ -23,8 +22,8 @@ import {
   type DemoTimeKey,
 } from "../shared/demo-types";
 
-export function HeartRateDemoApp({ lang }: { lang: string }) {
-  const copy = resolveDemoCopy(metricDemoCopy, lang);
+export function HeartRateDemoApp() {
+  const copy = useMetricDemoCopy();
   const filters = useDemoFilters({ sportType: "all" });
   const [activeTab, setActiveTab] = useState("curve");
 

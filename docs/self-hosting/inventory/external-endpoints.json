@@ -394,7 +394,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 295
+          "line": 296
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
@@ -406,7 +406,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
-          "line": 94
+          "line": 95
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
@@ -2232,7 +2232,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 335
+          "line": 336
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
@@ -3212,7 +3212,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 77
+          "line": 78
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-course-converter/page.tsx",
@@ -3300,7 +3300,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
-          "line": 17
+          "line": 18
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-curve/page.tsx",

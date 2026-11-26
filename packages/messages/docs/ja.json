@@ -4263,6 +4263,562 @@
     "visualSubtitle": "計画、カレンダー、負荷、アクティビティフィードバック、AI レビューをひとつの流れに"
   },
   "home": {
+    "demo": {
+      "coach": {
+        "review": "AI レビュー",
+        "history": "履歴",
+        "newChat": "新しい相談",
+        "today": "今日",
+        "yesterday": "昨日",
+        "past": "以前",
+        "composerHint": "Shift + Enter で改行",
+        "thinking": "思考中",
+        "send": "送信",
+        "questions": {
+          "title": "確認事項",
+          "answeredBadge": "回答済み",
+          "submit": "送信",
+          "answeredCount": "{answered} / {total}"
+        },
+        "readCards": {
+          "toggleDetails": "詳細を表示"
+        },
+        "workoutAdjustment": {
+          "before": "変更前",
+          "after": "調整案",
+          "apply": "変更を確認",
+          "changes": "変更内容",
+          "position": "第 {week} 週 · {day} 日目"
+        },
+        "planDraft": {
+          "weekColumn": "週",
+          "weekdays": [
+            "月",
+            "火",
+            "水",
+            "木",
+            "金",
+            "土",
+            "日"
+          ],
+          "weekLabel": "{week} 週",
+          "restLabel": "休",
+          "summary": "{weeks} 週 · {sessions} セッション",
+          "createPlan": "計画を作成"
+        },
+        "sessions": [
+          {
+            "id": "adjust",
+            "title": "マラソン基礎期の調整",
+            "bucket": "today",
+            "composer": "続けて質問：金曜に回復していたら、強度を戻せますか？",
+            "messages": [
+              {
+                "id": "adjust-u1",
+                "role": "user",
+                "text": "今週は少し疲れています。木曜のテンポ走は調整すべきですか？"
+              },
+              {
+                "id": "adjust-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "練習の目的は残しつつ、木曜のテンポ走を短めのステディ走に変えるのがおすすめです。ブロックの流れを止めず、土曜のロング走に向けた回復も確保できます。"
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "現在の計画",
+                        "subtitle": "第 5 週 · 木"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "直近の練習",
+                        "subtitle": "過去 7 日 · 4 セッション"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "トレーニング負荷",
+                        "subtitle": "2026-05-24 → 2026-06-30",
+                        "stats": [
+                          {
+                            "label": "アクティブ日",
+                            "value": "18"
+                          },
+                          {
+                            "label": "休息日",
+                            "value": "12"
+                          },
+                          {
+                            "label": "総負荷",
+                            "value": "842"
+                          },
+                          {
+                            "label": "日平均",
+                            "value": "47"
+                          },
+                          {
+                            "label": "TSB",
+                            "value": "-4"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "planAdjustment",
+                    "data": {
+                      "planId": "demo-plan",
+                      "workoutId": "demo-workout-thu",
+                      "title": "木曜の練習調整",
+                      "reason": "今週は疲労が高めです。木曜の負荷を下げつつ、有酸素リズムは維持します。",
+                      "before": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "テンポ走",
+                        "text": "work 3x10m pace Z4"
+                      },
+                      "after": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "ステディ走",
+                        "text": "work 35m pace Z2"
+                      },
+                      "changes": [
+                        {
+                          "field": "text",
+                          "before": "work 3x10m pace Z4",
+                          "after": "work 35m pace Z2"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "create",
+            "title": "12 週ハーフ計画",
+            "bucket": "yesterday",
+            "composer": "第 8 週にもう 1 本クオリティを入れられますか？",
+            "messages": [
+              {
+                "id": "create-u1",
+                "role": "user",
+                "text": "12 週間のハーフマラソン計画を作ってください。現在は週 4 走です。"
+              },
+              {
+                "id": "create-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "question",
+                    "data": {
+                      "questions": [
+                        {
+                          "id": "goal",
+                          "header": "レース目標",
+                          "question": "主なレース目標はどれですか？",
+                          "options": [
+                            {
+                              "value": "sub-2",
+                              "label": "ハーフ Sub-2:00",
+                              "description": "週 1 本のクオリティを保ちながら段階的に積み上げます。"
+                            },
+                            {
+                              "value": "finish",
+                              "label": "安定完走",
+                              "description": "保守的な走量と回復間隔。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "reply": {
+                      "kind": "coach_question_reply",
+                      "repliesToAssistantMessageId": "create-a1",
+                      "answers": {
+                        "goal": "sub-2"
+                      },
+                      "notes": {
+                        "goal": ""
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "create-u2",
+                "role": "user",
+                "text": "目標：ハーフ Sub-2:00 · 週 4 走 · 12 週"
+              },
+              {
+                "id": "create-a2",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "現在の走量に合わせた草案です。有酸素基盤を作り、その後しきい値サポートとレース向けロング走を入れます。"
+                  },
+                  {
+                    "type": "planDraft",
+                    "data": {
+                      "title": "ハーフマラソン · 12 週",
+                      "description": "前半は有酸素中心、最後の 4 週でしきい値とレース向けロング走を強化します。",
+                      "periodWeeks": 4,
+                      "workouts": [
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 45m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Steady 35m",
+                          "name": "Steady run"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Long 80m",
+                          "name": "Long run"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 40m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 3x8m",
+                          "name": "Tempo run"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 35m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Long 95m",
+                          "name": "Long run"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 45m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Progression 50m",
+                          "name": "Progression run"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Long 105m",
+                          "name": "Long run"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 7,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Recovery 30m",
+                          "name": "Recovery run"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Easy 40m",
+                          "name": "Easy run"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 2x12m",
+                          "name": "Tempo run"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Steady 40m",
+                          "name": "Steady run"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Long 120m",
+                          "name": "Long run"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "long-run",
+            "title": "週末ロング走の補填",
+            "bucket": "past",
+            "composer": "脚がまだ重いなら、火曜のインターバルは延期すべきですか？",
+            "messages": [
+              {
+                "id": "long-u1",
+                "role": "user",
+                "text": "土曜のロング走を出張で逃しました。今週はどう補填すべきですか？"
+              },
+              {
+                "id": "long-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "逃したロング走をそのまま今週に全部載せるのは避けましょう。週後半に有酸素 1 本をずらし、睡眠と TSB が安定している場合だけ火曜のクオリティを残します。"
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "今週の計画",
+                        "subtitle": "第 6 週 · 土曜欠走"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "欠走",
+                        "subtitle": "土曜ロング · 未実施"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "回復トレンド",
+                        "subtitle": "過去 14 日",
+                        "stats": [
+                          {
+                            "label": "TSB",
+                            "value": "-6"
+                          },
+                          {
+                            "label": "平均睡眠",
+                            "value": "6.8h"
+                          },
+                          {
+                            "label": "休息日",
+                            "value": "2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "metric": {
+        "sportLabels": {
+          "all": "全種目",
+          "RUN": "ラン",
+          "CYCLING": "バイク",
+          "SWIM": "スイム"
+        },
+        "timeLabels": {
+          "thisYear": "今年",
+          "last30": "過去 30 日",
+          "last90": "過去 90 日"
+        },
+        "pmc": {
+          "calculate": "再計算",
+          "calculating": "計算中...",
+          "combinedTitle": "PMC 総合分析",
+          "fitnessChart": "フィットネス推移",
+          "fatigueChart": "疲労推移",
+          "formChart": "コンディション推移",
+          "noData": "データがありません",
+          "abbr": {
+            "fitness": "CTL",
+            "fatigue": "ATL",
+            "form": "TSB"
+          },
+          "fitness": {
+            "title": "長期トレーニング負荷 (CTL)"
+          },
+          "fatigue": {
+            "title": "短期トレーニング負荷 (ATL)"
+          },
+          "form": {
+            "title": "トレーニングストレスバランス (TSB)"
+          },
+          "load": {
+            "title": "トレーニング負荷"
+          },
+          "zoneHelp": {
+            "ariaLabel": "コンディションゾーンの説明",
+            "title": "コンディションゾーンの説明",
+            "danger": "深いマイナス領域（赤）：TSB < -30。ATL が CTL を大きく上回っています。",
+            "optimal": "負荷構築ゾーン（緑）：-30 ≤ TSB < -10。",
+            "neutral": "ニュートラルゾーン（灰）：-10 ≤ TSB < +5。",
+            "fresh": "フレッシュゾーン（青）：+5 ≤ TSB < +15。",
+            "peak": "ピークゾーン（紫）：+15 ≤ TSB < +25。",
+            "transition": "移行期ゾーン（橙）：TSB ≥ +25。"
+          },
+          "acmpHelp": {
+            "title": "ACWR (ATL/CTL) の説明",
+            "formula": "ACWR = ATL / CTL。",
+            "sweet": "目安レンジ（緑）：0.8–1.3（参考値）。",
+            "danger": "要確認レンジ（赤）：≥ 1.5。直近の負荷とデータを確認してください。",
+            "advice": "ACWR は練習の質や回復状態とあわせて判断の参考に使ってください。"
+          }
+        },
+        "power": {
+          "tabs": {
+            "curve": "カーブ",
+            "maximum": "最大値",
+            "zones": "ゾーン",
+            "profile": "プロファイル"
+          },
+          "zonesTitle": "パワーゾーン分布",
+          "maximumTitle": "最大パワー履歴",
+          "profileTitle": "パワープロファイル",
+          "chartTitle": "パワー持続時間カーブ",
+          "noData": "パワーデータがありません",
+          "ftp": "FTP",
+          "cp": "CP",
+          "table": {
+            "fiveSeconds": "5秒",
+            "thirtySeconds": "30秒",
+            "oneMinute": "1分",
+            "threeMinutes": "3分",
+            "fiveMinutes": "5分",
+            "twentyMinutes": "20分",
+            "sixtyMinutes": "60分",
+            "twoHours": "2時間",
+            "threeHours": "3時間"
+          },
+          "profile": {
+            "male": "男性",
+            "female": "女性",
+            "riderType": "ライダータイプ",
+            "levels": [
+              "ワールドクラス",
+              "傑出",
+              "優秀",
+              "非常に良い",
+              "良い",
+              "中級",
+              "標準",
+              "初級",
+              "未トレーニング"
+            ],
+            "durations": {
+              "5s": "5秒",
+              "1m": "1分",
+              "5m": "5分",
+              "FTP": "FTP"
+            }
+          },
+          "maximum": {
+            "bucketDay": "日",
+            "bucketWeek": "週",
+            "bucketMonth": "月"
+          }
+        },
+        "pace": {
+          "tabs": {
+            "curve": "カーブ",
+            "zones": "ゾーン"
+          },
+          "chartTitle": "ペースカーブ",
+          "zonesTitle": "ペースゾーン分布",
+          "noData": "ペースデータがありません",
+          "cs": "CS",
+          "table": {
+            "segment": "距離",
+            "pace": "ペース",
+            "time": "タイム"
+          },
+          "distances": {
+            "400m": "400m",
+            "800m": "800m",
+            "1500m": "1500m",
+            "1mi": "1マイル",
+            "3k": "3km",
+            "5k": "5km",
+            "10k": "10km",
+            "20k": "20km",
+            "marathon": "42.2km"
+          }
+        },
+        "heartRate": {
+          "tabs": {
+            "curve": "カーブ",
+            "zones": "ゾーン"
+          },
+          "chartTitle": "心拍持続時間カーブ",
+          "zonesTitle": "心拍ゾーン分布",
+          "noData": "心拍データがありません",
+          "maxHr": "最大心拍",
+          "lthr": "LTHR（乳酸閾値心拍）",
+          "table": {
+            "fiveSeconds": "5秒",
+            "thirtySeconds": "30秒",
+            "oneMinute": "1分",
+            "threeMinutes": "3分",
+            "fiveMinutes": "5分",
+            "tenMinutes": "10分",
+            "twentyMinutes": "20分",
+            "sixtyMinutes": "60分",
+            "twoHours": "2時間",
+            "threeHours": "3時間",
+            "sixHours": "6時間"
+          }
+        }
+      }
+    },
     "metadata": {
       "title": "ラン・バイク向けアプリ：負荷管理とAIコーチ｜Trainingload.ai",
       "description": "Trainingload.ai はラン・バイクの計画、実績、負荷、回復を一元管理します。公式ランニングプラン12種は登録なしで閲覧でき、メンバーはAIコーチの調整案を受け取れます。",
@@ -6241,6 +6797,7 @@
     }
   },
   "commonLinks": {
+    "demoOverviewBack": "ホームに戻る",
     "home": "ホーム",
     "tools": "ツール",
     "allTools": "すべてのツール",

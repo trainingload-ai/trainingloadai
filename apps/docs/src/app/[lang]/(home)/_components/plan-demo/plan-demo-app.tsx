@@ -31,7 +31,7 @@ export function PlanDemoApp({
   interactive?: boolean;
 }) {
   const copy = resolveDemoCopy(planDemoCopy, lang);
-  const { view, openDay, goMain } = useDemoSubView({ lang, interactive });
+  const { view, openDay, goMain } = useDemoSubView({ interactive });
   const [selectedWeek, setSelectedWeek] = useState(copy.payload.selectedWeek);
   const [dayDateKey, setDayDateKey] = useState(HOME_DEMO_ISO_DATE);
   const sourceCopy = useMemo(() => buildHomeDaySourceCopy(lang), [lang]);

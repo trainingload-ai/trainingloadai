@@ -24,7 +24,7 @@ export function DashboardDemoApp({
   interactive?: boolean;
 }) {
   const copy = resolveDemoCopy(dashboardDemoCopy, lang);
-  const { view, openMetric } = useDemoSubView({ lang, interactive });
+  const { view, openMetric } = useDemoSubView({ interactive });
   const { metricDialog, openMetricHistory, closeMetricHistory } =
     useMetricHistoryDialog(lang, copy.aboutMetric);
 
@@ -33,7 +33,7 @@ export function DashboardDemoApp({
   };
 
   if (view !== "main" && interactive) {
-    return <MetricDemoApp lang={lang} view={view as MetricDemoView} />;
+    return <MetricDemoApp view={view as MetricDemoView} />;
   }
 
   return (

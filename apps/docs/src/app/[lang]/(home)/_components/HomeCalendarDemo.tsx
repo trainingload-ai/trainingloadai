@@ -1717,7 +1717,6 @@ export function HomeCalendarDemo({
   }, [currentMonth, lang]);
   const isExpanded = variant === "expanded";
   const { view, openDay, goMain } = useDemoSubView({
-    lang,
     interactive: isExpanded,
   });
   const [dayDateKey, setDayDateKey] = React.useState(() =>

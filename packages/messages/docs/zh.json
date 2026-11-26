@@ -4271,6 +4271,562 @@
     "visualSubtitle": "计划、日历、负荷、活动反馈和智能教练复盘放在一个训练闭环里"
   },
   "home": {
+    "demo": {
+      "coach": {
+        "review": "智能教练复盘",
+        "history": "历史对话",
+        "newChat": "新对话",
+        "today": "今天",
+        "yesterday": "昨天",
+        "past": "更早",
+        "composerHint": "Shift + Enter 换行",
+        "thinking": "思考",
+        "send": "发送",
+        "questions": {
+          "title": "补充信息",
+          "answeredBadge": "已回答",
+          "submit": "发送",
+          "answeredCount": "{answered} / {total}"
+        },
+        "readCards": {
+          "toggleDetails": "展开详情"
+        },
+        "workoutAdjustment": {
+          "before": "调整前",
+          "after": "调整后",
+          "apply": "确认调整",
+          "changes": "变更项",
+          "position": "第 {week} 周 · 周{weekday}"
+        },
+        "planDraft": {
+          "weekColumn": "周",
+          "weekdays": [
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六",
+            "日"
+          ],
+          "weekLabel": "第 {week} 周",
+          "restLabel": "休息",
+          "summary": "{weeks} 周 · {sessions} 次训练",
+          "createPlan": "创建计划"
+        },
+        "sessions": [
+          {
+            "id": "adjust",
+            "title": "马拉松基础周期调整",
+            "bucket": "today",
+            "composer": "继续问：如果周五恢复很好，可以把强度加回来吗？",
+            "messages": [
+              {
+                "id": "adjust-u1",
+                "role": "user",
+                "text": "这周有点累，周四的节奏跑要不要调整？"
+              },
+              {
+                "id": "adjust-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "建议保留训练目标，但把周四节奏跑改成较短的稳态跑。这样不打断周期，也能给周六长距离留出恢复空间。"
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "当前计划",
+                        "subtitle": "第 5 周 · 周四"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "最近训练",
+                        "subtitle": "近 7 天 · 4 次"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "训练负荷",
+                        "subtitle": "2026-05-24 → 2026-06-30",
+                        "stats": [
+                          {
+                            "label": "活跃天",
+                            "value": "18"
+                          },
+                          {
+                            "label": "休息天",
+                            "value": "12"
+                          },
+                          {
+                            "label": "总负荷",
+                            "value": "842"
+                          },
+                          {
+                            "label": "日均",
+                            "value": "47"
+                          },
+                          {
+                            "label": "TSB",
+                            "value": "-4"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "planAdjustment",
+                    "data": {
+                      "planId": "demo-plan",
+                      "workoutId": "demo-workout-thu",
+                      "title": "周四训练调整",
+                      "reason": "本周疲劳偏高，降低周四刺激，同时保留有氧节奏。",
+                      "before": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "节奏跑",
+                        "text": "work 3x10m pace Z4"
+                      },
+                      "after": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "稳态跑",
+                        "text": "work 35m pace Z2"
+                      },
+                      "changes": [
+                        {
+                          "field": "text",
+                          "before": "work 3x10m pace Z4",
+                          "after": "work 35m pace Z2"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "create",
+            "title": "12 周半马计划",
+            "bucket": "yesterday",
+            "composer": "第 8 周能不能再加一次质量课？",
+            "messages": [
+              {
+                "id": "create-u1",
+                "role": "user",
+                "text": "帮我做一个 12 周半马计划，目前每周跑 4 次。"
+              },
+              {
+                "id": "create-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "question",
+                    "data": {
+                      "questions": [
+                        {
+                          "id": "goal",
+                          "header": "比赛目标",
+                          "question": "你的主要比赛目标是什么？",
+                          "options": [
+                            {
+                              "value": "sub-2",
+                              "label": "半马 Sub-2:00",
+                              "description": "均衡推进，每周保留 1 次质量课。"
+                            },
+                            {
+                              "value": "finish",
+                              "label": "稳健完赛",
+                              "description": "保守跑量，额外恢复间隔。"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "reply": {
+                      "kind": "coach_question_reply",
+                      "repliesToAssistantMessageId": "create-a1",
+                      "answers": {
+                        "goal": "sub-2"
+                      },
+                      "notes": {
+                        "goal": ""
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "create-u2",
+                "role": "user",
+                "text": "目标：半马 Sub-2:00 · 每周 4 跑 · 12 周"
+              },
+              {
+                "id": "create-a2",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "这是按你当前跑量生成的草案：先打有氧基础，再逐步加入阈值支持和赛前长距离。"
+                  },
+                  {
+                    "type": "planDraft",
+                    "data": {
+                      "title": "半马周期 · 12 周",
+                      "description": "前段以有氧为主，后 4 周加入阈值支持和比赛型长距离。",
+                      "periodWeeks": 4,
+                      "workouts": [
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 45m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "稳态跑 35m",
+                          "name": "稳态跑"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "长距离 80m",
+                          "name": "长距离"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 40m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "节奏跑 3x8m",
+                          "name": "节奏跑"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 35m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "长距离 95m",
+                          "name": "长距离"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 45m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "递进跑 50m",
+                          "name": "递进跑"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "长距离 105m",
+                          "name": "长距离"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 7,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "恢复跑 30m",
+                          "name": "恢复跑"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "轻松跑 40m",
+                          "name": "轻松跑"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "节奏跑 2x12m",
+                          "name": "节奏跑"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "稳态跑 40m",
+                          "name": "稳态跑"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "长距离 120m",
+                          "name": "长距离"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "long-run",
+            "title": "周末长跑补训",
+            "bucket": "past",
+            "composer": "如果腿还是沉，周二间歇要不要顺延？",
+            "messages": [
+              {
+                "id": "long-u1",
+                "role": "user",
+                "text": "周六长距离因为出差错过了，这周应该怎么补？"
+              },
+              {
+                "id": "long-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "不建议把完整的长距离直接叠加到本周计划上。可以把一次有氧课挪到本周后半段，周二质量课只有在睡眠和 TSB 都稳定时再保留。"
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "本周计划",
+                        "subtitle": "第 6 周 · 周六漏训"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "漏训记录",
+                        "subtitle": "周六长距离 · 未执行"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "恢复趋势",
+                        "subtitle": "近 14 天",
+                        "stats": [
+                          {
+                            "label": "TSB",
+                            "value": "-6"
+                          },
+                          {
+                            "label": "平均睡眠",
+                            "value": "6.8h"
+                          },
+                          {
+                            "label": "休息天",
+                            "value": "2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "metric": {
+        "sportLabels": {
+          "all": "全部项目",
+          "RUN": "跑步",
+          "CYCLING": "骑行",
+          "SWIM": "游泳"
+        },
+        "timeLabels": {
+          "thisYear": "今年",
+          "last30": "最近 30 天",
+          "last90": "最近 90 天"
+        },
+        "pmc": {
+          "calculate": "重新计算",
+          "calculating": "计算中...",
+          "combinedTitle": "PMC 综合分析",
+          "fitnessChart": "体能曲线",
+          "fatigueChart": "疲劳曲线",
+          "formChart": "状态曲线",
+          "noData": "暂无数据",
+          "abbr": {
+            "fitness": "CTL",
+            "fatigue": "ATL",
+            "form": "TSB"
+          },
+          "fitness": {
+            "title": "长期训练负荷 (CTL)"
+          },
+          "fatigue": {
+            "title": "短期训练负荷 (ATL)"
+          },
+          "form": {
+            "title": "训练压力平衡 (TSB)"
+          },
+          "load": {
+            "title": "训练负荷"
+          },
+          "zoneHelp": {
+            "ariaLabel": "状态分区说明",
+            "title": "状态分区说明",
+            "danger": "深度负值区（红）：TSB < -30，表示 ATL 明显高于 CTL。",
+            "optimal": "负荷构建区（绿）：-30 ≤ TSB < -10。",
+            "neutral": "中性区（灰）：-10 ≤ TSB < +5。",
+            "fresh": "新鲜区（蓝）：+5 ≤ TSB < +15。",
+            "peak": "巅峰区（紫）：+15 ≤ TSB < +25。",
+            "transition": "过渡期（橙）：TSB ≥ +25。"
+          },
+          "acmpHelp": {
+            "title": "ACWR (ATL/CTL) 说明",
+            "formula": "ACWR = ATL / CTL。",
+            "sweet": "参考区间（绿）：0.8–1.3，仅供对照。",
+            "danger": "复查区间（红）：≥ 1.5，需要检查近期负荷和数据。",
+            "advice": "把 ACWR 与训练质量、恢复状态结合起来判断。"
+          }
+        },
+        "power": {
+          "tabs": {
+            "curve": "曲线",
+            "maximum": "最大值",
+            "zones": "区间",
+            "profile": "档案"
+          },
+          "zonesTitle": "功率区间分布",
+          "maximumTitle": "最大功率历史",
+          "profileTitle": "功率档案",
+          "chartTitle": "功率时长曲线",
+          "noData": "暂无功率数据",
+          "ftp": "FTP",
+          "cp": "CP",
+          "table": {
+            "fiveSeconds": "5秒",
+            "thirtySeconds": "30秒",
+            "oneMinute": "1分钟",
+            "threeMinutes": "3分钟",
+            "fiveMinutes": "5分钟",
+            "twentyMinutes": "20分钟",
+            "sixtyMinutes": "60分钟",
+            "twoHours": "2小时",
+            "threeHours": "3小时"
+          },
+          "profile": {
+            "male": "男性",
+            "female": "女性",
+            "riderType": "骑手类型",
+            "levels": [
+              "世界级",
+              "卓越",
+              "优秀",
+              "很好",
+              "良好",
+              "中等",
+              "一般",
+              "新手",
+              "未训练"
+            ],
+            "durations": {
+              "5s": "5秒",
+              "1m": "1分钟",
+              "5m": "5分钟",
+              "FTP": "FTP"
+            }
+          },
+          "maximum": {
+            "bucketDay": "日",
+            "bucketWeek": "周",
+            "bucketMonth": "月"
+          }
+        },
+        "pace": {
+          "tabs": {
+            "curve": "曲线",
+            "zones": "区间"
+          },
+          "chartTitle": "配速曲线",
+          "zonesTitle": "配速区间分布",
+          "noData": "暂无配速数据",
+          "cs": "CS",
+          "table": {
+            "segment": "距离",
+            "pace": "配速",
+            "time": "用时"
+          },
+          "distances": {
+            "400m": "400米",
+            "800m": "800米",
+            "1500m": "1500米",
+            "1mi": "1英里",
+            "3k": "3公里",
+            "5k": "5公里",
+            "10k": "10公里",
+            "20k": "20公里",
+            "marathon": "42.2公里"
+          }
+        },
+        "heartRate": {
+          "tabs": {
+            "curve": "曲线",
+            "zones": "区间"
+          },
+          "chartTitle": "心率时长曲线",
+          "zonesTitle": "心率区间分布",
+          "noData": "暂无心率数据",
+          "maxHr": "最大心率",
+          "lthr": "乳酸阈心率",
+          "table": {
+            "fiveSeconds": "5秒",
+            "thirtySeconds": "30秒",
+            "oneMinute": "1分钟",
+            "threeMinutes": "3分钟",
+            "fiveMinutes": "5分钟",
+            "tenMinutes": "10分钟",
+            "twentyMinutes": "20分钟",
+            "sixtyMinutes": "60分钟",
+            "twoHours": "2小时",
+            "threeHours": "3小时",
+            "sixHours": "6小时"
+          }
+        }
+      }
+    },
     "metadata": {
       "title": "跑步与骑行训练应用：训练负荷与智能教练｜Trainingload.ai",
       "description": "Trainingload.ai 是一款跑步与骑行训练应用，整合实际训练、训练负荷与恢复状态。无需注册即可查看官方发布的免费跑步训练计划；会员可用智能教练获得调整建议。",
@@ -6249,6 +6805,7 @@
     }
   },
   "commonLinks": {
+    "demoOverviewBack": "返回首页",
     "home": "首页",
     "tools": "工具",
     "allTools": "全部工具",

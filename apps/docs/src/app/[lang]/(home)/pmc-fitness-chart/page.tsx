@@ -11,6 +11,7 @@ import {
   PmcFitnessChartGuide,
   type PmcFitnessChartGuideData,
 } from "../_components/pmc-fitness-chart-guide";
+import { ClientMessages } from "@/components/ClientMessages";
 import { PmcProductPreview } from "../_components/PmcProductPreview";
 
 function getSiteUrl() {
@@ -114,11 +115,13 @@ export default async function PmcFitnessChartPage({
       variant={guide ? "editorial" : "default"}
       heroAside={
         guide ? (
-          <PmcProductPreview
-            lang={lang}
-            label={guide.ui.previewLabel}
-            hint={guide.ui.previewHint}
-          />
+          <ClientMessages locale={lang} namespaces={["home.demo.metric"]}>
+            <PmcProductPreview
+              lang={lang}
+              label={guide.ui.previewLabel}
+              hint={guide.ui.previewHint}
+            />
+          </ClientMessages>
         ) : undefined
       }
       guideContent={

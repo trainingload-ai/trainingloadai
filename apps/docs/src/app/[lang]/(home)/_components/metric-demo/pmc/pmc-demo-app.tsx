@@ -2,9 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import { resolveDemoCopy } from "@/lib/demo-i18n";
 
-import { metricDemoCopy } from "../copy";
+import { useMetricDemoCopy } from "../copy";
 import { buildPmcSeries, DEMO_PMC_EXTREMES } from "../demo-fixtures";
 import {
   DemoRecalculateButton,
@@ -14,8 +13,8 @@ import {
 import { PmcDemoCharts } from "./pmc-demo-charts";
 import { PmcDemoStat } from "./pmc-demo-stat";
 
-export function PmcDemoApp({ lang }: { lang: string }) {
-  const copy = resolveDemoCopy(metricDemoCopy, lang);
+export function PmcDemoApp() {
+  const copy = useMetricDemoCopy();
   const filters = useDemoFilters({ singleTime: "last90", sportType: "all" });
   const [selected, setSelected] = useState<"fitness" | "fatigue" | "form">(
     "fitness",

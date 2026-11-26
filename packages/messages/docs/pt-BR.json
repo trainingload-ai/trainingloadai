@@ -4547,6 +4547,562 @@
     "visualSubtitle": "Plano, calendário, carga, feedback de atividade e revisão AI em um único fluxo"
   },
   "home": {
+    "demo": {
+      "coach": {
+        "review": "Revisão de IA",
+        "history": "Histórico",
+        "newChat": "Novo chat",
+        "today": "Hoje",
+        "yesterday": "Ontem",
+        "past": "Anteriores",
+        "composerHint": "Shift + Enter para quebra de linha",
+        "thinking": "Pensando",
+        "send": "Enviar",
+        "questions": {
+          "title": "Perguntas rápidas",
+          "answeredBadge": "Respondido",
+          "submit": "Enviar",
+          "answeredCount": "{answered} / {total}"
+        },
+        "readCards": {
+          "toggleDetails": "Mostrar detalhes"
+        },
+        "workoutAdjustment": {
+          "before": "Antes",
+          "after": "Depois",
+          "apply": "Aplicar ajuste",
+          "changes": "Alterações",
+          "position": "Semana {week} · Dia {day}"
+        },
+        "planDraft": {
+          "weekColumn": "Sem.",
+          "weekdays": [
+            "Seg",
+            "Ter",
+            "Qua",
+            "Qui",
+            "Sex",
+            "Sáb",
+            "Dom"
+          ],
+          "weekLabel": "S{week}",
+          "restLabel": "Descanso",
+          "summary": "{weeks} semanas · {sessions} sessões",
+          "createPlan": "Criar plano"
+        },
+        "sessions": [
+          {
+            "id": "adjust",
+            "title": "Ajuste da base de maratona",
+            "bucket": "today",
+            "composer": "Perguntar: se sexta eu me sentir bem, podemos voltar com a intensidade?",
+            "messages": [
+              {
+                "id": "adjust-u1",
+                "role": "user",
+                "text": "Estou me sentindo cansado esta semana. Devemos ajustar o tempo run de quinta?"
+              },
+              {
+                "id": "adjust-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "Mantenha a intenção do treino, mas transforme quinta em uma corrida contínua mais curta. Isso protege o longão de sábado sem interromper o bloco."
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "Plano atual",
+                        "subtitle": "Semana 5 · Qui"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "Atividades recentes",
+                        "subtitle": "Últimos 7 dias · 4 sessões"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "Carga de treino",
+                        "subtitle": "2026-05-24 → 2026-06-30",
+                        "stats": [
+                          {
+                            "label": "Dias ativos",
+                            "value": "18"
+                          },
+                          {
+                            "label": "Descanso",
+                            "value": "12"
+                          },
+                          {
+                            "label": "Carga total",
+                            "value": "842"
+                          },
+                          {
+                            "label": "Média diária",
+                            "value": "47"
+                          },
+                          {
+                            "label": "TSB",
+                            "value": "-4"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "planAdjustment",
+                    "data": {
+                      "planId": "demo-plan",
+                      "workoutId": "demo-workout-thu",
+                      "title": "Ajuste do treino de quinta",
+                      "reason": "A fadiga está elevada esta semana. Reduza o estresse de quinta mantendo o ritmo aeróbico.",
+                      "before": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "Tempo run",
+                        "text": "work 3x10m pace Z4"
+                      },
+                      "after": {
+                        "weekIndex": 5,
+                        "dayIndex": 4,
+                        "sportType": "RUN",
+                        "name": "Corrida contínua",
+                        "text": "work 35m pace Z2"
+                      },
+                      "changes": [
+                        {
+                          "field": "text",
+                          "before": "work 3x10m pace Z4",
+                          "after": "work 35m pace Z2"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "create",
+            "title": "Plano de meia maratona de 12 semanas",
+            "bucket": "yesterday",
+            "composer": "Podemos adicionar mais um treino de qualidade na semana 8?",
+            "messages": [
+              {
+                "id": "create-u1",
+                "role": "user",
+                "text": "Monte um plano de 12 semanas para meia maratona. Hoje eu corro 4 vezes por semana."
+              },
+              {
+                "id": "create-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "question",
+                    "data": {
+                      "questions": [
+                        {
+                          "id": "goal",
+                          "header": "Meta da prova",
+                          "question": "Qual é o seu objetivo principal para a prova?",
+                          "options": [
+                            {
+                              "value": "sub-2",
+                              "label": "Meia maratona Sub-2:00",
+                              "description": "Progressão equilibrada com um treino de qualidade por semana."
+                            },
+                            {
+                              "value": "finish",
+                              "label": "Completar bem",
+                              "description": "Volume conservador com mais margem de recuperação."
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "reply": {
+                      "repliesToAssistantMessageId": "create-a1",
+                      "answers": {
+                        "goal": "sub-2"
+                      },
+                      "notes": {
+                        "goal": ""
+                      },
+                      "kind": "coach_question_reply"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "create-u2",
+                "role": "user",
+                "text": "Meta: Meia Sub-2:00 · 4 treinos/sem. · 12 semanas"
+              },
+              {
+                "id": "create-a2",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "Aqui está um rascunho de bloco com longões progressivos, um treino de qualidade por semana e intervalos de recuperação compatíveis com seu volume atual."
+                  },
+                  {
+                    "type": "planDraft",
+                    "data": {
+                      "title": "Preparação meia maratona · 12 semanas",
+                      "description": "Primeiro base aeróbica, depois trabalho de limiar e longões específicos nas 4 semanas finais.",
+                      "periodWeeks": 4,
+                      "workouts": [
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Leve 45m",
+                          "name": "Corrida leve"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Contínuo 35m",
+                          "name": "Corrida contínua"
+                        },
+                        {
+                          "weekIndex": 1,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Longão 80m",
+                          "name": "Longão"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Leve 40m",
+                          "name": "Corrida leve"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 3x8m",
+                          "name": "Tempo run"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Leve 35m",
+                          "name": "Corrida leve"
+                        },
+                        {
+                          "weekIndex": 2,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Longão 95m",
+                          "name": "Longão"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Leve 45m",
+                          "name": "Corrida leve"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 4,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Progressivo 50m",
+                          "name": "Treino progressivo"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Longão 105m",
+                          "name": "Longão"
+                        },
+                        {
+                          "weekIndex": 3,
+                          "dayIndex": 7,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Regenerativo 30m",
+                          "name": "Corrida regenerativa"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 2,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Leve 40m",
+                          "name": "Corrida leve"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 3,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Tempo 2x12m",
+                          "name": "Tempo run"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 5,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Contínuo 40m",
+                          "name": "Corrida contínua"
+                        },
+                        {
+                          "weekIndex": 4,
+                          "dayIndex": 6,
+                          "sessionIndex": 1,
+                          "sportType": "RUN",
+                          "text": "Longão 120m",
+                          "name": "Longão"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "long-run",
+            "title": "Compensação do longão do fim de semana",
+            "bucket": "past",
+            "composer": "Devo mover os intervalados de terça se as pernas ainda estiverem pesadas?",
+            "messages": [
+              {
+                "id": "long-u1",
+                "role": "user",
+                "text": "Perdi o longão de sábado por causa de uma viagem. Como devo compensar nesta semana?"
+              },
+              {
+                "id": "long-a1",
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "text": "Não empilhe o longão perdido inteiro em cima do plano desta semana. Empurre um treino aeróbico para o fim da semana e mantenha a qualidade de terça apenas se o sono e o TSB estiverem estáveis."
+                  },
+                  {
+                    "type": "readCards",
+                    "cards": [
+                      {
+                        "name": "PlanDayView",
+                        "title": "Plano desta semana",
+                        "subtitle": "Semana 6 · Sáb perdido"
+                      },
+                      {
+                        "name": "ActivityRecent",
+                        "title": "Treino perdido",
+                        "subtitle": "Longão sáb. · pulado"
+                      },
+                      {
+                        "name": "PmcRange",
+                        "title": "Tendência de recuperação",
+                        "subtitle": "Últimos 14 dias",
+                        "stats": [
+                          {
+                            "label": "TSB",
+                            "value": "-6"
+                          },
+                          {
+                            "label": "Média sono",
+                            "value": "6.8h"
+                          },
+                          {
+                            "label": "Descanso",
+                            "value": "2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "metric": {
+        "sportLabels": {
+          "all": "Todos os esportes",
+          "RUN": "Corrida",
+          "CYCLING": "Ciclismo",
+          "SWIM": "Natação"
+        },
+        "timeLabels": {
+          "thisYear": "Este ano",
+          "last30": "Últimos 30 dias",
+          "last90": "Últimos 90 dias"
+        },
+        "pmc": {
+          "calculate": "Recalcular",
+          "calculating": "Calculando...",
+          "combinedTitle": "Análise combinada PMC",
+          "fitnessChart": "Gráfico de condicionamento",
+          "fatigueChart": "Gráfico de fadiga",
+          "formChart": "Gráfico de forma",
+          "noData": "Sem dados disponíveis",
+          "abbr": {
+            "fitness": "CTL",
+            "fatigue": "ATL",
+            "form": "TSB"
+          },
+          "fitness": {
+            "title": "Carga de treino crônica (CTL)"
+          },
+          "fatigue": {
+            "title": "Carga de treino aguda (ATL)"
+          },
+          "form": {
+            "title": "Balanço de estresse de treino (TSB)"
+          },
+          "load": {
+            "title": "Carga de treino"
+          },
+          "zoneHelp": {
+            "ariaLabel": "Explicação das zonas de forma",
+            "title": "Explicação das zonas de forma",
+            "danger": "Zona negativa profunda (Vermelho): TSB < -30. ATL está bem acima do CTL.",
+            "optimal": "Zona de construção de carga (Verde): -30 ≤ TSB < -10.",
+            "neutral": "Zona neutra (Cinza): -10 ≤ TSB < +5.",
+            "fresh": "Zona de frescor (Azul): +5 ≤ TSB < +15.",
+            "peak": "Zona de pico (Roxo): +15 ≤ TSB < +25.",
+            "transition": "Zona de transição (Laranja): TSB ≥ +25."
+          },
+          "acmpHelp": {
+            "title": "Explicação de ACWR (ATL/CTL)",
+            "formula": "ACWR = ATL / CTL.",
+            "sweet": "Faixa de referência (Verde): 0,8–1,3, apenas para contexto.",
+            "danger": "Faixa de atenção (Vermelho): ≥ 1,5. Revise a carga recente e os dados.",
+            "advice": "Use o ACWR como contexto junto com a qualidade do treino e a recuperação."
+          }
+        },
+        "power": {
+          "tabs": {
+            "curve": "Curva",
+            "maximum": "Máximo",
+            "zones": "Zonas",
+            "profile": "Perfil"
+          },
+          "zonesTitle": "Distribuição das zonas de potência",
+          "maximumTitle": "Histórico de potência máxima",
+          "profileTitle": "Perfil de potência",
+          "chartTitle": "Curva potência-duração",
+          "noData": "Sem dados de potência",
+          "ftp": "FTP",
+          "cp": "CP",
+          "table": {
+            "fiveSeconds": "5 s",
+            "thirtySeconds": "30 s",
+            "oneMinute": "1 min",
+            "threeMinutes": "3 min",
+            "fiveMinutes": "5 min",
+            "twentyMinutes": "20 min",
+            "sixtyMinutes": "60 min",
+            "twoHours": "2 h",
+            "threeHours": "3 h"
+          },
+          "profile": {
+            "male": "Masculino",
+            "female": "Feminino",
+            "riderType": "Tipo de ciclista",
+            "levels": [
+              "Classe mundial",
+              "Excepcional",
+              "Excelente",
+              "Muito bom",
+              "Bom",
+              "Moderado",
+              "Regular",
+              "Iniciante",
+              "Destreinado"
+            ],
+            "durations": {
+              "5s": "5 s",
+              "1m": "1 min",
+              "5m": "5 min",
+              "FTP": "FTP"
+            }
+          },
+          "maximum": {
+            "bucketDay": "Dia",
+            "bucketWeek": "Semana",
+            "bucketMonth": "Mês"
+          }
+        },
+        "pace": {
+          "tabs": {
+            "curve": "Curva",
+            "zones": "Zonas"
+          },
+          "chartTitle": "Curva de ritmo",
+          "zonesTitle": "Distribuição das zonas de ritmo",
+          "noData": "Sem dados de ritmo",
+          "cs": "CS",
+          "table": {
+            "segment": "Distância",
+            "pace": "Ritmo",
+            "time": "Tempo"
+          },
+          "distances": {
+            "400m": "400 m",
+            "800m": "800 m",
+            "1500m": "1500 m",
+            "1mi": "1 milha",
+            "3k": "3 km",
+            "5k": "5 km",
+            "10k": "10 km",
+            "20k": "20 km",
+            "marathon": "42,2 km"
+          }
+        },
+        "heartRate": {
+          "tabs": {
+            "curve": "Curva",
+            "zones": "Zonas"
+          },
+          "chartTitle": "Curva de frequência cardíaca",
+          "zonesTitle": "Distribuição das zonas de FC",
+          "noData": "Sem dados de frequência cardíaca",
+          "maxHr": "FC máx.",
+          "lthr": "LTHR",
+          "table": {
+            "fiveSeconds": "5 s",
+            "thirtySeconds": "30 s",
+            "oneMinute": "1 min",
+            "threeMinutes": "3 min",
+            "fiveMinutes": "5 min",
+            "tenMinutes": "10 min",
+            "twentyMinutes": "20 min",
+            "sixtyMinutes": "60 min",
+            "twoHours": "2 h",
+            "threeHours": "3 h",
+            "sixHours": "6 h"
+          }
+        }
+      }
+    },
     "metadata": {
       "title": "App de corrida e ciclismo: treinador de IA | Trainingload.ai",
       "description": "App de corrida e ciclismo para reunir treinos, carga e recuperação. Veja sem cadastro 12 planos oficiais gratuitos; a assinatura inclui o treinador de IA.",
@@ -6583,6 +7139,7 @@
     }
   },
   "commonLinks": {
+    "demoOverviewBack": "Voltar ao início",
     "home": "Início",
     "tools": "Ferramentas",
     "allTools": "Todas as ferramentas",
