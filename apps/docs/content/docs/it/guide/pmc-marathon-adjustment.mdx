@@ -1,58 +1,128 @@
 ---
-title: Using PMC for Marathon Adjustments
-description: How to use CTL, ATL, and TSB in a practical marathon workflow without overreacting to daily noise.
-keywords: ["PMC", "marathon training load", "CTL ATL TSB", "marathon adjustment"]
+title: Usare il PMC per gli adattamenti maratona
+description: Come usare CTL, ATL e TSB in un flusso pratico per la maratona senza reagire eccessivamente al rumore quotidiano.
+keywords:
+  ["PMC", "carico di allenamento maratona", "CTL ATL TSB", "adattamento maratona"]
 ---
 
-# Using PMC for Marathon Adjustments
+# Usare il PMC per gli adattamenti maratona
 
-PMC metrics are decision aids, not automatic commands.
-For marathon blocks, use them to protect consistency and key-session quality.
+Le metriche del PMC descrivono la pressione di allenamento accumulata. Non decidono da sole se un allenamento è sicuro, non dimostrano l'adattamento fisiologico e non diagnosticano la fatica. In un blocco maratona usale per proteggere la costanza e lo scopo delle sessioni chiave.
 
-## What each signal is good for
+## Prima di iniziare
 
-- [CTL](/docs/metrics/pmc/chronic-training-load): direction of fitness load.
-- [ATL](/docs/metrics/pmc/acute-training-load): short-term stress pressure.
-- [TSB](/docs/metrics/pmc/training-stress-balance): readiness context before key sessions.
+- Attendi che le attività pertinenti completino l'elaborazione così che il loro carico arrivi al PMC.
+- Verifica le soglie di corsa e la priorità delle fonti di carico nel profilo.
+- Collega le attività completate ai rispettivi allenamenti pianificati.
+- Scegli una sola finestra decisionale, di solito le ultime 2–6 settimane più i prossimi 7 giorni.
+- Individua la prossima sessione chiave: lungo, allenamento a ritmo maratona, sessione di soglia o gara.
+- Annota il contesto esterno ai grafici come sonno, malattia, dolore, viaggi, caldo ed RPE di sessione: il PMC non include questi elementi.
 
-## Practical adjustment rules
+## 1. Apri la finestra PMC corretta
 
-### ATL rises fast, CTL flattens
+Apri **Analisi → PMC / Gestione fitness** e seleziona **Corsa**. Usa lo storico registrato per individuare la costruzione del carico e le variazioni recenti, poi controlla le date future pertinenti. Segui [Leggere storico e previsioni PMC](/it/docs/guide/pmc-forecast) per scelta della metrica, ispezione delle date e ipotesi previsionali. Per una finestra più ravvicinata apri una scheda Fitness, Fatica o Forma nella dashboard e scegli la sua scheda storica.
 
-Typical action:
+Leggi insieme i tre segnali:
 
-- Keep run frequency.
-- Downgrade one quality session to easy aerobic.
-- Recheck after 48 hours.
+- [CTL](/it/docs/metrics/pmc/chronic-training-load) riassume l'andamento del carico di lungo periodo.
+- [ATL](/it/docs/metrics/pmc/acute-training-load) reagisce più rapidamente allo stress recente.
+- [TSB](/it/docs/metrics/pmc/training-stress-balance) esprime il rapporto tra carico di lungo periodo e carico recente; è un segnale di contesto, non una garanzia di prontezza.
 
-### TSB stays deeply negative before marathon-pace work
+<DocsScreenshot
+  id="pmc-marathon-window"
+  title="Leggi la finestra di carico della corsa"
+  description="Esempio sintetico di corsa. Leggi insieme CTL, ATL e TSB attuali, poi esamina lo storico registrato e la proiezione futura condizionata."
+  imageSrc="/docs/analysis/en/pmc-forecast-overview.webp"
+  imageAlt="Esempio PMC di corsa con valori attuali, storico registrato, proiezione futura e carico giornaliero"
+  route="Analisi → PMC"
+/>
 
-Typical action:
+## 2. Trova l'evento dietro la curva
 
-- Move marathon-pace session later.
-- Protect long run quality.
-- Trim non-key intensity first.
+Individua la data in cui l'ATL ha accelerato, il CTL ha cambiato direzione o il TSB si è mosso bruscamente, poi apri le attività e gli allenamenti pianificati attorno a quel giorno.
 
-### CTL rises, but execution quality falls
+Verifica se la variazione deriva da:
 
-Typical action:
+- Una settimana di carico pianificata.
+- Una gara, un lungo o una sessione di qualità insolitamente impegnativa.
+- Un'attività extra non pianificata.
+- Una modifica alle soglie o alla fonte di carico.
+- Dati duplicati, sport classificato male o registrazione incompleta.
 
-- Hold volume.
-- Simplify intensity distribution for one week.
-- Confirm adaptation using next key workout.
+Non modificare il piano finché il movimento della curva non è spiegato da un allenamento reale o da una variazione nota delle impostazioni.
 
-## Use with execution evidence
+## 3. Confronta carico ed esecuzione
 
-Never read PMC alone. Combine with:
+Usa il Calendario o il piano attivo per rispondere:
 
-- Plan completion.
-- Long-run quality.
-- Perceived fatigue.
-- effective VO2max trend.
+- Le sessioni chiave sono state svolte centrando il loro obiettivo?
+- La corsa facile è rimasta davvero facile, oppure la qualità dell'esecuzione sta calando?
+- Le sessioni saltate dipendono da impegni, fatica, dolore o da un allenamento progettato male?
+- La prossima sessione chiave ha ancora senso dopo la settimana reale appena svolta?
 
-## Related workflows
+Il PMC ti dice quanta pressione si è accumulata. Il confronto tra piano e realtà ti dice se quella pressione ha prodotto il lavoro voluto.
 
-- [PMC fitness chart page](/pmc-fitness-chart)
-- [AI marathon plan adjustments](/docs/guide/ai-marathon-plan-adjustments)
-- [Training analysis workflow](/docs/guide/training-analysis-workflow)
-- [AI training plan page](/marathon-training-plan)
+## 4. Scegli il più piccolo adattamento utile
+
+Usa l'andamento come spunto di riflessione, non come soglia rigida automatica.
+
+### La pressione recente è salita e la qualità delle sessioni chiave è calata
+
+- Mantieni il ritmo settimanale se possibile.
+- Sostituisci una sessione di qualità non essenziale con corsa aerobica facile o riposo.
+- Proteggi o il lungo oppure la sessione a ritmo maratona, anziché cercare di salvare entrambi.
+- Rivaluta dopo 24–48 ore o dopo la prossima sessione completata.
+
+### Il TSB è più basso del solito prima di una sessione chiave
+
+- Confrontalo con il tuo intervallo abituale in cui rendi bene e con il tuo stato soggettivo attuale.
+- Sposta la sessione di 24–48 ore se il calendario lo consente.
+- Accorcia la sessione preservandone lo scopo se rimandarla scombinerebbe la settimana.
+- Non dedurre infortuni o malattie dal TSB: basati sui sintomi reali e sul parere di un professionista quando necessario.
+
+### Il CTL sale mentre peggiora la qualità di esecuzione
+
+- Fermati temporaneamente con l'aumento del carico.
+- Controlla se soglie, priorità delle fonti o duplicati stanno gonfiando la curva.
+- Semplifica una settimana prima di aggiungere altro volume o intensità.
+- Usa la prossima sessione chiave comparabile come punto di verifica.
+
+### Le curve sono stabili e l'esecuzione è solida
+
+Lascia il piano invariato. Un grafico non impone un intervento solo perché lo stai guardando.
+
+## 5. Annota la decisione
+
+Metti per iscritto cinque elementi prima di toccare il piano:
+
+1. **Andamento osservato:** cosa è cambiato nel PMC e in quali date.
+2. **Prove di esecuzione:** quali attività o allenamenti saltati sostengono il dubbio.
+3. **Adattamento:** l'allenamento futuro esatto e il campo che cambia.
+4. **Intento protetto:** ciò che la settimana deve comunque raggiungere.
+5. **Punto di verifica:** la data o la prossima sessione che metterà alla prova la scelta.
+
+Puoi portare questo riepilogo al [Coach AI](/it/docs/guide/ai-coach) e chiedere una sola bozza prudente coerente con il piano.
+
+## Verifica l'adattamento
+
+- Sport e intervallo di date scelti corrispondono alla domanda sulla maratona.
+- Il movimento della curva è riconducibile ad attività reali o a una modifica nota delle impostazioni.
+- Stato soggettivo ed esecuzione delle sessioni chiave sono stati valutati insieme al PMC.
+- È cambiato solo l'allenamento futuro voluto; lo storico completato resta intatto.
+- È stato fissato un punto di verifica preciso.
+- L'adattamento può essere annullato o rivisto se i dati successivi indicano altro.
+
+## Risoluzione dei problemi
+
+- **Il PMC è vuoto:** controlla che le attività siano in stato Ready, verifica il filtro sport e che abbiano un carico di allenamento utilizzabile. Usa Riprova se la pagina segnala un errore di richiesta.
+- **I valori sono cambiati dopo aver modificato le impostazioni:** individua quale soglia o fonte di carico è cambiata e rileggi in modo coerente l'intera finestra di confronto.
+- **Una singola attività crea un picco estremo:** aprila e controlla durata, dati dei sensori, classificazione sport, duplicati e fonte di carico selezionata.
+- **Piano e grafico mostrano date diverse:** verifica fuso orario dell'account e orario di inizio dell'attività.
+- **Metriche e sensazioni soggettive non concordano:** considera il disaccordo un dato da approfondire, non un motivo per scartare uno dei due lati; mantieni prudente la prossima modifica.
+- **Sono presenti dolore, malattia o sintomi insoliti:** non usare PMC o Coach AI come via libera medico; fermati o riduci l'allenamento e rivolgiti a personale qualificato quando serve.
+
+## Prossimi passi
+
+- Usa [Capire il VO2max effettivo nell'allenamento endurance](/it/docs/guide/effective-vo2max-for-endurance) per affiancare un andamento di risposta.
+- Segui [Adattamenti AI per piani maratona](/it/docs/guide/ai-marathon-plan-adjustments) per preparare e confermare una modifica.
+- Torna al [Flusso di analisi dell'allenamento](/it/docs/guide/training-analysis-workflow) completo.

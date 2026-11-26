@@ -1,113 +1,165 @@
 ---
-title: Manage an Active Plan
-description: Execute an active training plan in Trainingload.ai, update workout status, link activities, compare expected and actual load, and ask AI Coach for follow-up.
-keywords: ["active training plan", "plan execution", "workout status", "training plan compliance"]
+title: Aktiven Plan verwalten
+description: Setze einen aktiven Trainingsplan in Trainingload.ai um, aktualisiere Einheitenstatus, verknüpfe Aktivitäten, vergleiche erwartete und tatsächliche Belastung und nutze den KI-Coach für die Begleitung.
+keywords:
+  [
+    "aktiver Trainingsplan",
+    "Planumsetzung",
+    "Einheitenstatus",
+    "Trainingsplan-Einhaltung",
+  ]
 ---
 
-# Manage an Active Plan
+# Aktiven Plan verwalten
 
-An active plan is the plan Trainingload.ai treats as your current schedule. It connects planned workouts, completed activities, training load, and AI Coach follow-up.
+Dein aktiver Plan ist der Zeitplan, den du gestartet hast und dem du aktuell folgst. Nutze ihn, um Einheiten einzusehen, absolvierte Aktivitäten zu verknüpfen, Trainingsbelastungen zu vergleichen und im Gespräch mit dem KI-Coach nachzusteuern.
 
-Open it from the main **Plan** area, or open a specific plan from the plan list.
+Du öffnest ihn über den Hauptbereich **Plan** oder wählst einen bestimmten Plan aus der Planliste aus.
 
-## Plan status
+## Bevor du beginnst
 
-Plans can have these statuses:
+- Aktiviere den gewünschten Plan mit dem richtigen Startdatum.
+- Prüfe Konto-Zeitzone und aktuelle Schwellenwerte.
+- Lass absolvierte Aktivitäten fertig verarbeiten, bevor du sie verknüpfst.
+- Prüfe die aktuelle Woche regelmäßig, statt davon auszugehen, dass der ursprüngliche Entwurf noch zur Realität passt.
 
-- **Draft**: saved, but not started.
-- **Active**: currently being executed.
-- **Paused**: temporarily stopped, but still available for schedule changes.
-- **Completed**: finished.
-- **Cancelled**: ended before completion.
+## Täglicher Umsetzungsablauf
 
-Only one plan is usually treated as the current active schedule. Draft and completed plans remain useful for review, but they are not the current execution surface.
+1. Öffne den aktuellen Plan und suche die heute geplante Einheit.
+2. Lies Struktur und Notizen vor dem Training.
+3. Öffne nach dem Training die absolvierte Aktivität und prüfe, ob es die richtige Aufzeichnung ist.
+4. Verknüpfe sie mit der geplanten Einheit und aktualisiere den Einheitenstatus ehrlich.
+5. Vergleiche erwartete und tatsächliche Trainingsbelastung im Kontext und entscheide dann, ob eine zukünftige Einheit angepasst werden sollte.
 
-## Workout status
+<DocsScreenshot
+  id="active-plan-execution"
+  title="Umsetzung des aktiven Plans"
+  description="Betrachte Einheitenstatus, verknüpfte Aktivität sowie erwartete und tatsächliche Belastung gemeinsam, bevor du den restlichen Zeitplan änderst."
+  route="Pläne → Aktueller Plan"
+/>
 
-Each planned workout has its own status:
+## Planstatus
 
-- **Planned**: scheduled but not started.
-- **In progress**: currently being worked through or partially handled.
-- **Done**: completed.
-- **Skipped**: intentionally missed.
-- **Moved**: rescheduled.
+Trainingspläne können folgende Status haben:
 
-Use status changes to keep the plan honest. A skipped workout is different from a completed workout with low load, and both should be visible.
+- **Entwurf**: Gespeichert, aber noch nicht gestartet.
+- **Aktiv**: Wird aktuell umgesetzt.
+- **Pausiert**: Vorübergehend angehalten, aber weiterhin für Zeitplanänderungen verfügbar.
+- **Abgeschlossen**: Beendet.
+- **Abgebrochen**: Vor Abschluss beendet.
 
-## Link completed activities
+In der Regel gilt nur ein Plan als dein aktuell aktiver Zeitplan. Entwürfe und abgeschlossene Pläne bleiben für Rückblicke nützlich, bilden aber nicht die laufende Umsetzungsoberfläche.
 
-Link real activities to planned workouts when they belong together.
+## Einheitenstatus
 
-Activity links make these comparisons possible:
+Jede geplante Einheit hat ihren eigenen Status:
 
-- Planned session vs completed session.
-- Expected load vs actual load.
-- Session completion rate.
-- Load compliance.
-- AI Coach plan follow-up.
+- **Geplant**: Terminiert, aber noch nicht begonnen.
+- **In Bearbeitung**: Wird gerade durchgeführt oder ist teilweise erledigt.
+- **Erledigt**: Abgeschlossen.
+- **Übersprungen**: Bewusst ausgelassen.
+- **Verschoben**: Auf ein anderes Datum verlegt.
 
-Trainingload.ai may suggest or create links automatically in some cases, but you can also link or unlink manually when the wrong activity is connected.
+Nutze die Statusänderungen, um deinen Plan ehrlich zu führen. Eine übersprungene Einheit ist etwas anderes als eine absolvierte Einheit mit geringer Belastung – beides sollte klar sichtbar bleiben.
 
-## Expected vs actual load
+## Absolvierte Aktivitäten verknüpfen
 
-The plan view can compare:
+Verknüpfe echte Aktivitäten mit den geplanten Einheiten, zu denen sie gehören.
 
-- **Expected load**: the planned workload estimate for the workout.
-- **Actual load**: the load from the completed primary activity.
+Erst durch diese Verknüpfungen werden folgende Vergleiche möglich:
 
-This comparison is most useful when the expected and actual load are based on compatible signals. For example, power-based planned load and power-based activity load are easier to compare than mixed-source estimates.
+- Geplante Einheit vs. absolvierte Aktivität.
+- Erwartete Belastung vs. tatsächliche Belastung.
+- Abschlussquote der Einheiten.
+- Belastungs-Einhaltung.
+- Planbegleitung durch den KI-Coach.
 
-Use the comparison as a planning signal, not a scorecard. One workout can be intentionally lighter or harder than planned; the pattern across days and weeks matters more.
+Trainingload.ai kann Verknüpfungen in manchen Fällen automatisch vorschlagen oder herstellen; du kannst sie aber jederzeit manuell verknüpfen oder lösen, wenn die falsche Aktivität verbunden wurde.
 
-## Current plan view
+## Erwartete vs. tatsächliche Belastung
 
-The current plan view is designed for daily execution. Use it to:
+Die Planansicht kann gegenüberstellen:
 
-- See today's scheduled workouts.
-- Review the current week.
-- Open workout details.
-- Link completed activities.
-- Mark a workout done or skipped.
-- Move workouts when the schedule changes.
-- Compare weekly planned and completed load.
+- **Erwartete Belastung**: Die geschätzte geplante Arbeitslast für die Einheit.
+- **Tatsächliche Belastung**: Die Belastung der absolvierten primären Aktivität.
 
-Use [Calendar](/docs/guide/calendar) when you want the same plan and activity data in a broader date-based view.
+Dieser Vergleich ist am aussagekräftigsten, wenn erwartete und tatsächliche Belastung auf kompatiblen Signalen beruhen. Zum Beispiel lassen sich leistungsbasierte Planbelastung und leistungsbasierte Aktivitätsbelastung deutlich besser vergleichen als Schätzungen aus unterschiedlichen Quellen.
 
-When the plan is active or paused, schedule changes can be applied to unfinished workouts. Completed or skipped workouts should generally stay as historical records.
+Nutze den Vergleich als Planungssignal, nicht als Zeugnisnote. Eine einzelne Einheit darf bewusst leichter oder härter ausfallen als geplant – entscheidend ist das Muster über Tage und Wochen hinweg.
 
-## Plan detail view
+## Ansicht „Aktueller Plan“
 
-The plan detail page is better for reviewing the whole cycle. Use it to:
+Die Ansicht „Aktueller Plan“ ist für die tägliche Umsetzung ausgelegt. Nutze sie, um:
 
-- Check plan metadata and status.
-- Activate a draft.
-- Review week-by-week structure.
-- Inspect workout charts or descriptions.
-- See execution summaries.
-- Ask AI Coach to review remaining work.
+- Die heute geplanten Einheiten zu sehen.
+- Die laufende Woche zu überblicken.
+- Einheiten-Details zu öffnen.
+- Absolvierte Aktivitäten zu verknüpfen.
+- Eine Einheit als erledigt oder übersprungen zu markieren.
+- Einheiten bei Zeitplanänderungen zu verschieben.
+- Geplante und absolvierte Wochenbelastung zu vergleichen.
 
-From a plan detail page, the AI Coach follow-up includes plan context and the number of unfinished workouts.
+Nutze den [Kalender](/de/docs/guide/calendar), wenn du dieselben Plan- und Aktivitätsdaten in einer breiteren datumsbasierten Übersicht sehen möchtest.
 
-## When to adjust the plan
+Solange der Plan aktiv oder pausiert ist, kannst du Zeitplanänderungen auf noch nicht abgeschlossene Einheiten anwenden. Erledigte oder übersprungene Einheiten sollten grundsätzlich als historische Datensätze unverändert bleiben.
 
-Adjust the plan when the schedule and reality have clearly diverged.
+Um mehrere kommende Einheiten gemeinsam zu ändern, öffne den **Kalender**, klicke mit der rechten Maustaste auf ein Datum und wähle **Zeitplan anpassen**. Prüfe alle Änderungen in einem gemeinsamen Entwurf, bevor du bestätigst. Den genauen Ablauf findest du in der [Kalender-Anleitung zum Anpassen kommender Einheiten](/de/docs/guide/calendar#adjust-upcoming-workouts).
 
-Common reasons:
+## Plandetailansicht
 
-- Missed workouts are accumulating.
-- Actual load is repeatedly higher than planned.
-- Fatigue is rising faster than fitness.
-- A race, travel day, or recovery need changes the next week.
-- A key workout was completed, but the response was very different from expected.
+Die Plandetailseite eignet sich besser für den Blick auf den gesamten Trainingszyklus. Nutze sie, um:
 
-Avoid changing the plan after every small fluctuation. The goal is to keep the plan aligned with reality without losing the training intent.
+- Metadaten und Status des Plans zu prüfen.
+- Einen Entwurf zu aktivieren.
+- Die Woche-für-Woche-Struktur zu überprüfen.
+- Einheiten-Diagramme oder -Beschreibungen anzusehen.
+- Zusammenfassungen zur Umsetzung zu lesen.
+- Den KI-Coach die verbleibenden Einheiten prüfen zu lassen.
 
-## Ask AI Coach
+Öffnest du den KI-Coach direkt aus einer Plandetailseite, erhält das Gespräch automatisch den Plankontext sowie die Anzahl der noch offenen Einheiten.
 
-Helpful prompts:
+## Wann du den Plan anpassen solltest
 
-- "Review my current plan progress and load."
-- "Which unfinished workouts matter most this week?"
-- "Should I move tomorrow's workout after today's hard session?"
-- "My actual load is above plan for two weeks. What should change?"
-- "Help me adjust the next seven days without losing the main goal."
+Passe den Plan an, sobald Zeitplan und Realität spürbar auseinanderlaufen.
+
+Häufige Gründe:
+
+- Verpasste Einheiten häufen sich.
+- Die tatsächliche Belastung liegt wiederholt über der geplanten.
+- Die Ermüdung steigt schneller als die Fitness.
+- Ein Wettkampf, ein Reisetag oder zusätzlicher Erholungsbedarf verändert die kommende Woche.
+- Eine Schlüsseleinheit wurde absolviert, aber die Körperreaktion fiel ganz anders aus als erwartet.
+
+Vermeide es, den Plan bei jeder kleinen Schwankung umzubauen. Ziel ist es, den Plan im Einklang mit der Realität zu halten, ohne den Trainingsfokus aus den Augen zu verlieren.
+
+## Den KI-Coach fragen
+
+Hilfreiche Fragen:
+
+- „Prüfe meinen aktuellen Planfortschritt und meine Trainingsbelastung.“
+- „Welche offenen Einheiten sind diese Woche am wichtigsten?“
+- „Sollte ich die morgige Einheit nach der heutigen harten Einheit verschieben?“
+- „Meine tatsächliche Belastung liegt seit zwei Wochen über Plan. Was sollte ich ändern?“
+- „Hilf mir, die nächsten sieben Tage anzupassen, ohne das Hauptziel zu verlieren.“
+
+## Aktuellen Stand überprüfen
+
+- Das Planstartdatum ordnet die Einheiten den richtigen Kalendertagen zu.
+- Die heutige Einheit hat den zutreffenden Status und passende Notizen.
+- Die verknüpfte Aktivität ist tatsächlich die Aufzeichnung, die diese Einheit erfüllt hat.
+- Erwartete und tatsächliche Belastung behalten ihre getrennten Quellen und Bedeutungen.
+- Erledigte oder übersprungene Historie bleibt unverändert, wenn offene Einheiten verschoben werden.
+
+## Fehlerbehebung
+
+- **Es erscheint kein aktueller Plan:** Prüfe, ob der gewünschte Plan den Status **Aktiv** hat und nicht **Entwurf**, **Pausiert**, **Abgeschlossen** oder **Abgebrochen**.
+- **Eine Aktivität lässt sich nicht verknüpfen:** Prüfe Zeitraum, Sportartkompatibilität, Verarbeitungsstatus und ob sie bereits an anderer Stelle verknüpft ist.
+- **Die falsche Aktivität wurde automatisch verknüpft:** Löse die Verknüpfung und wähle manuell die richtige Aktivität aus, nachdem du Startzeit und Sportart geprüft hast.
+- **Eine Planänderung verursacht einen Konflikt:** Ein anderes Gerät oder eine KI-Aktion hat die Version geändert; lade neu und prüfe die neuere Planversion, bevor du es erneut versuchst.
+- **Die tatsächliche Belastung ist nicht verfügbar:** Prüfe die absolvierte Aktivität und deren Belastungsquelle, statt die geplante Schätzung zu bearbeiten.
+
+## Nächste Schritte
+
+- [Kalender](/de/docs/guide/calendar)
+- [Aktivitätsdetails](/de/docs/guide/activity-detail)
+- [KI-Coach](/de/docs/guide/ai-coach)

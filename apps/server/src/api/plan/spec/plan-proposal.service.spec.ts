@@ -78,7 +78,7 @@ function createService() {
     {
       estimateForViewerWorkouts: jest.fn(async () => [{ estimatedLoad: null }]),
     } as never,
-    {} as never,
+    { registerCoachCalendarAdjustment: jest.fn(async () => undefined) } as never,
   );
   return { service, proposals, workout, prescriptions };
 }

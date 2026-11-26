@@ -1,68 +1,94 @@
 ---
-title: Upload Activity Files
-description: Upload GPX, TCX, or FIT activity files to Trainingload.ai and understand duplicate checks, import batches, processing status, and post-import analysis.
-keywords: ["upload FIT file", "upload GPX", "upload TCX", "activity file import", "Trainingload.ai upload"]
+title: Enviar arquivos de atividade
+description: Envie arquivos FIT, TCX ou GPX pela página de Atividades na web, acompanhe o progresso da importação, encontre suas gravações e resolva envios duplicados ou com falha.
+keywords:
+  [
+    "enviar arquivo FIT",
+    "enviar GPX",
+    "enviar TCX",
+    "importar arquivo de atividade",
+    "upload Trainingload.ai",
+  ]
 ---
 
-# Upload Activity Files
+# Enviar arquivos de atividade
 
-Use file upload when you have activity files from a watch, bike computer, training platform, or exported archive.
+Envie uma gravação exportada do seu relógio, ciclocomputador ou plataforma de treino para ver detalhes, gráficos e carga de treino no Trainingload.ai. Estas etapas usam o aplicativo web.
 
-Trainingload.ai supports the file-based workflow used by the activity import screen. After upload, files are processed as an import batch so you can see progress and failures clearly.
+## Prepare seus arquivos [#before-uploading]
 
-## Before uploading
+Use arquivos de treino FIT, TCX ou GPX. Você pode enviar até 100 arquivos de uma vez. Arquivos originais exportados do seu dispositivo ou plataforma têm mais chance de preservar dados de frequência cardíaca, potência e trajeto.
 
-Check that the file is one of the supported activity formats:
+## Enviar a partir de Atividades
 
-- GPX
-- TCX
-- FIT
+1. Clique em **Atividades** na barra lateral esquerda para abrir a página de Atividades.
+2. No cartão **Enviar arquivos de atividade** à direita, clique em **Escolher arquivos de atividade**.
 
-For better analysis, prefer original files from the device or platform. Screenshots, CSV exports without time series, and manually edited files may not include enough data for charts or load metrics.
+<DocsScreenshot
+  id="activity-upload-location"
+  title="Encontre a ação de envio em Atividades"
+  description="Clique em Atividades na barra lateral esquerda e depois em Escolher arquivos de atividade no cartão à direita."
+  imageAlt="Página completa de Atividades com navegação do aplicativo e botão Escolher arquivos de atividade"
+  route="Barra lateral esquerda: Atividades → Cartão à direita: Escolher arquivos de atividade"
+/>
 
-## Upload from Activities
+3. Arraste os arquivos que deseja importar para a janela ou clique na área de seleção para escolhê-los.
+4. Clique em **Enviar** no canto inferior direito da janela.
 
-1. Open **Activities**.
-2. Choose the upload action.
-3. Select one or more files.
-4. Confirm the upload.
-5. Keep the import progress dialog open or return later from the recent import batch button.
+<DocsScreenshot
+  id="activity-import-entry"
+  title="Selecione os arquivos e envie"
+  description="Arraste os arquivos para a janela ou clique para selecioná-los e depois clique em Enviar no canto inferior direito."
+  imageAlt="Janela de envio de atividades com seleção de arquivos e ação separada de envio"
+  route="Janela de envio: Escolher arquivos → Enviar"
+  demoLabel="Ver atividades existentes na Demo"
+/>
 
-If Trainingload.ai detects possible duplicates, review the duplicate warning before continuing. You can cancel, keep the existing activity, or force a new import when you intentionally want a separate copy.
+A janela de progresso da importação abre logo após o envio e exibe o resultado de cada arquivo.
 
-## Import statuses
+## Acompanhe o progresso da importação [#import-statuses]
 
-During import, each item may move through states such as:
+Você pode continuar navegando enquanto os arquivos são importados. Se fechar a janela, clique em **Progresso da importação** na página de Atividades para reabri-la.
 
-- **Queued**: waiting to be processed.
-- **Normalizing**: converting the source file into the internal activity format.
-- **Materializing**: creating or updating the activity record.
-- **Parquet building**: preparing time-series data for charts and analysis.
-- **Done**: import completed.
-- **Skipped**: not imported, usually because it matched an existing activity.
-- **Failed**: the file could not be processed.
+| Status exibido | O que fazer |
+| --- | --- |
+| Na fila, Normalizando, Materializando, Montando análise | Seus arquivos ainda estão em processamento. Aguarde a conclusão da importação. |
+| Concluído | Volte para Atividades para encontrar a gravação. |
+| Ignorado | Geralmente já existe uma gravação correspondente. Procure por ela em Atividades. |
+| Falhou, Interrompido | Leia a mensagem ao lado do arquivo e siga os passos de solução de problemas abaixo. |
 
-The batch can finish as completed, partially failed, failed, or cancelled.
+## Encontre suas atividades importadas [#after-upload]
 
-## After upload
+Quando a importação terminar, clique em **Atividades** na barra lateral esquerda. Localize sua gravação pela data do treino e clique nela para ver duração, distância, gráficos e carga de treino.
 
-Once processing is complete:
+Consulte [Feed e busca de atividades](/pt-BR/docs/guide/activity-feed-search) e [Detalhes da atividade](/pt-BR/docs/guide/activity-detail) para conhecer cada página.
 
-- Open the new activity from the import dialog or activity feed.
-- Check whether key metrics are present.
-- Confirm sport type if it was inferred incorrectly.
-- Link the activity to a planned workout if it belongs to a training plan.
-- Ask AI Coach to review the session if you want context.
+## Solução de problemas
 
-For ongoing review and filtering, see [Activities Feed and Search](/docs/guide/activity-feed-search).
+### O botão Enviar está desativado
 
-## Troubleshooting
+Selecione os arquivos primeiro. Se ainda estiverem sendo validados, aguarde um instante. Se um arquivo exibir erro, siga a orientação da mensagem ou remova esse arquivo antes de tentar novamente.
 
-If a file fails:
+### Aparece um aviso de duplicata
 
-- Export the original activity again from the source platform.
-- Avoid editing the file manually before upload.
-- Check whether the file contains time-series data.
-- Try importing one file at a time to isolate the failing file.
+Se o treino já está em Atividades, você pode manter a gravação existente ou cancelar o envio. Force uma nova importação apenas se quiser manter uma cópia separada.
 
-If analysis looks incomplete, the file may lack heart rate, power, GPS, elevation, or pace data. Trainingload.ai can still show the activity, but some metrics may be unavailable or estimated.
+### Um arquivo falha ao enviar ou importar
+
+Leia a mensagem ao lado do arquivo. Tente exportar novamente o arquivo FIT, TCX ou GPX original do dispositivo ou plataforma e envie esse arquivo individualmente. Trocar a extensão no nome do arquivo não converte o formato.
+
+Capturas de tela, planilhas CSV comuns e arquivos FIT que contenham apenas dados de saúde do dia inteiro não servem aqui para importar uma gravação de treino.
+
+### Minha gravação não tem frequência cardíaca, potência ou trajeto
+
+Aguarde primeiro o término do processamento da atividade. Os gráficos dependem dos dados correspondentes na gravação original. Um treino indoor sem GPS, por exemplo, não exibirá mapa. Confira a plataforma de origem e tente exportar novamente o arquivo original do treino.
+
+## Precisa de outro formato de arquivo? [#convert-between-formats]
+
+Os envios aceitam FIT, TCX e GPX, portanto normalmente não é preciso converter. Se você também precisar do arquivo para outra plataforma, use o [conversor de FIT, GPX e TCX](/pt-BR/converter).
+
+## Próximos passos
+
+- [Feed e busca de atividades](/pt-BR/docs/guide/activity-feed-search)
+- [Detalhes da atividade](/pt-BR/docs/guide/activity-detail)
+- [Solução de problemas](/pt-BR/docs/guide/troubleshooting)

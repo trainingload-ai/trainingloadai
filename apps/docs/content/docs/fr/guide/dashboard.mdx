@@ -1,77 +1,126 @@
 ---
-title: Dashboard
-description: Use the Trainingload.ai dashboard to review training trends, filter by time and sport, customize cards, and connect summary signals with deeper metric pages.
-keywords: ["Trainingload.ai dashboard", "training dashboard", "fitness status", "training load dashboard"]
+title: Tableau de bord
+description: Utilisez le tableau de bord de Trainingload.ai pour suivre vos tendances d’entraînement, filtrer par période et par sport, personnaliser vos cartes et relier vos indicateurs récapitulatifs aux pages d’analyse détaillées.
+keywords:
+  [
+    "tableau de bord Trainingload.ai",
+    "tableau de bord d’entraînement",
+    "état de forme",
+    "tableau de bord charge d’entraînement",
+  ]
 ---
 
-# Dashboard
+# Tableau de bord
 
-The dashboard is the fastest way to understand your recent training pattern. It combines summary cards, fitness status, and configurable overview metrics.
+Le tableau de bord constitue le moyen le plus rapide de saisir votre dynamique d’entraînement récente. Il réunit cartes récapitulatives, état de forme et indicateurs de synthèse configurables.
 
-Use it when you want to answer:
+Utilisez-le pour répondre aux questions suivantes :
 
-- How much have I trained recently?
-- Is my load rising, stable, or falling?
-- Which sport is driving the trend?
-- Do I need to look deeper at activities, PMC, power, pace, or heart rate?
+- Quelle quantité d’entraînement ai-je réalisée récemment ?
+- Ma charge d’entraînement est-elle en hausse, stable ou en baisse ?
+- Quel sport tire la tendance ?
+- Dois-je examiner plus en détail les activités, le PMC, la puissance, l’allure ou la fréquence cardiaque ?
 
-## Filters
+## Avant de commencer
 
-The dashboard supports global filters:
+- Importez suffisamment d’activités récentes pour que la période sélectionnée soit représentative.
+- Configurez vos seuils et l’ordre de priorité des sources de charge avant de comparer des métriques basées sur l’intensité.
+- Analysez un sport à la fois lorsque la course à pied, le cyclisme et la natation reposent sur des seuils différents.
 
-- **Time range**: switch between recent periods.
-- **Sport type**: focus on running, cycling, swimming, or all activity.
+## Méthode de revue des tendances
 
-When you change filters, the cards and charts update to match the selected context.
+1. Sélectionnez la période et le sport souhaités.
+2. Lisez l’état de forme comme une tendance, jamais comme un diagnostic ni un verdict de disponibilité.
+3. Repérez la carte ou le graphique qui a évolué.
+4. Ouvrez les activités à l’origine de cette évolution.
+5. Poursuivez sur la page PMC, puissance, allure ou fréquence cardiaque correspondante avant de modifier le plan.
 
-## Fitness status
+<DocsScreenshot
+  id="dashboard-trend-review"
+  title="Revue des tendances sur le tableau de bord"
+  description="Vérifiez les filtres de période et de sport avant de rapprocher l’état de forme et les cartes de synthèse des activités sous-jacentes."
+  route="Accueil → Tableau de bord"
+/>
 
-Fitness status cards summarize the current training picture. They are meant for scanning, not final decisions.
+## Filtres
 
-Common signals include:
+Le tableau de bord propose des filtres globaux :
 
-- Long-term load and fitness trend.
-- Recent fatigue.
-- Readiness/form context.
-- Training consistency.
+- **Période** : basculez entre différentes fenêtres récentes.
+- **Sport** : ciblez la course à pied, le cyclisme, la natation ou l’ensemble des activités.
 
-For the underlying model, read:
+Lorsque vous modifiez les filtres, les cartes et graphiques s’actualisent en fonction du contexte sélectionné.
 
-- [Chronic Training Load](/docs/metrics/pmc/chronic-training-load)
-- [Acute Training Load](/docs/metrics/pmc/acute-training-load)
-- [Training Stress Balance](/docs/metrics/pmc/training-stress-balance)
+## État de forme
 
-## Overview cards
+Les cartes d’état de forme résument la situation d’entraînement actuelle. Elles servent à balayer rapidement la tendance, pas à trancher une décision à elles seules.
 
-Overview cards summarize activity volume and performance-related metrics. Depending on your data, they can include distance, duration, elevation, heart rate, power, cadence, and other training fields.
+Les signaux courants comprennent :
 
-Use overview cards to spot changes, then open the relevant page for detail:
+- La tendance de charge à long terme et de forme.
+- La fatigue récente.
+- Le contexte de fraîcheur et de disponibilité.
+- La régularité d’entraînement.
 
-- **Activities** for the workouts behind the numbers.
-- **PMC** for load trend.
-- **Power** for FTP, CP, NP, VI, and power curve context.
-- **Pace** for running pace, GAP, NGP, and best-distance views.
-- **Heart Rate** for HR response, zones, EF, and decoupling.
+Pour comprendre le modèle sous-jacent, consultez :
 
-## Edit layout
+- [Charge d’entraînement chronique (CTL)](/fr/docs/metrics/pmc/chronic-training-load)
+- [Charge d’entraînement aiguë (ATL)](/fr/docs/metrics/pmc/acute-training-load)
+- [Équilibre de stress d’entraînement (TSB)](/fr/docs/metrics/pmc/training-stress-balance)
 
-On desktop, the dashboard supports editing the layout of key sections. Use this when you want the dashboard to match your training focus.
+## Cartes de synthèse
 
-Examples:
+Les cartes de synthèse résument le volume d’activités et les indicateurs liés à la performance. Selon vos données, elles peuvent inclure distance, durée, dénivelé, fréquence cardiaque, puissance, cadence et d’autres champs d’entraînement.
 
-- Put load and consistency first during base training.
-- Put power or pace metrics first during a race-specific block.
-- Keep recovery and fatigue visible when returning from a high-load week.
+Servez-vous des cartes de synthèse pour repérer un changement, puis ouvrez la page correspondante pour approfondir :
 
-After editing, save the layout so the dashboard opens in the same structure next time.
+- **Activités** pour consulter les séances derrière les chiffres.
+- **PMC** pour la tendance de charge.
+- **Puissance** pour FTP, CP, NP, VI et la courbe de puissance.
+- **Allure** pour l’allure en course, GAP, NGP et les meilleures distances.
+- **Fréquence cardiaque** pour la réponse cardiaque, les zones, l’EF et le découplage.
 
-## How to interpret dashboard changes
+## Modifier la disposition
 
-Do not overreact to one card changing for one day. A better workflow:
+Sur ordinateur, le tableau de bord permet de réorganiser les principales sections afin de l’adapter à votre priorité du moment.
 
-1. Check whether the time range and sport filter are correct.
-2. Open recent activities behind the change.
-3. Compare load with subjective fatigue.
-4. Use AI Coach if you want a plan-aware interpretation.
+Exemples :
 
-The dashboard is your starting point. The decision should still consider the plan, recent workouts, and how you feel.
+- Mettre la charge d’entraînement et la régularité en tête pendant le travail foncier.
+- Placer la puissance ou l’allure en premier lors d’un bloc spécifique de course.
+- Garder la récupération et la fatigue bien visibles au sortir d’une semaine chargée.
+
+Après modification, enregistrez la disposition afin que le tableau de bord s’ouvre dans la même structure à la visite suivante.
+
+## Comment interpréter les variations du tableau de bord
+
+Ne surréagissez pas à l’évolution d’une carte sur une seule journée. Préférez cette démarche :
+
+1. Vérifiez que la période et le filtre de sport sont bien ceux voulus.
+2. Ouvrez les activités récentes qui expliquent la variation.
+3. Confrontez la charge d’entraînement à votre fatigue ressentie.
+4. Sollicitez le Coach IA si vous souhaitez une interprétation tenant compte du plan.
+
+Le tableau de bord sert de point de départ. Votre décision doit toujours intégrer le plan, les séances récentes et vos sensations réelles.
+
+## Vérifier le résultat
+
+- Les filtres actifs correspondent à la question que vous vouliez éclairer.
+- Les activités visibles et les totaux couvrent exactement la même période et le même sport.
+- Chaque tendance peut être reliée à des activités précises.
+- Les indicateurs dépendant des seuils utilisent les valeurs actuelles de votre profil.
+- Une disposition enregistrée sur ordinateur reste en place après réouverture du tableau de bord.
+
+## Dépannage
+
+- **Les cartes sont vides :** élargissez la période, réinitialisez le filtre de sport et vérifiez que les activités sont à l’état Prêt.
+- **Un total diffère de la liste d’activités :** comparez le fuseau horaire, la plage de dates, le filtre de sport et l’état de traitement.
+- **La charge ou l’état a changé de manière inattendue :** vérifiez l’historique des seuils et la priorité des sources de charge avant de conclure que votre entraînement a changé.
+- **Une disposition n’a pas été conservée :** enregistrez la modification et assurez-vous d’être connecté à votre compte avant d’actualiser.
+- **Une carte affiche une valeur extrême :** ouvrez l’activité sous-jacente et vérifiez la qualité des capteurs avant de réagir à cette valeur atypique.
+
+## Étapes suivantes
+
+- [Méthode d’analyse d’entraînement](/fr/docs/guide/training-analysis-workflow)
+- [Détail de l’activité](/fr/docs/guide/activity-detail)
+- [Charge d’entraînement](/fr/docs/metrics/training-load)

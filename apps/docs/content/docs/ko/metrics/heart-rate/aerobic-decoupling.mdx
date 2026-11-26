@@ -1,84 +1,85 @@
 ---
-title: Aerobic Decoupling
-description: Aerobic decoupling compares output-to-heart-rate efficiency between the first and second half of a steady endurance session.
-keywords: ["Aerobic Decoupling", "Cardiac Drift", "Pw:Hr", "Pa:Hr", "EF", "Efficiency Factor", "Aerobic Endurance", "heart rate drift"]
+title: 유산소 디커플링 (Aerobic Decoupling)
+description: 유산소 디커플링은 일정 강도의 지구력 훈련 전반부와 후반부 사이에서 출력 대비 심박수 효율이 어떻게 변했는지 비교하는 지표입니다.
+keywords: ["유산소 디커플링", "Aerobic Decoupling", "심박 드리프트", "Cardiac Drift", "Pw:Hr", "Pa:Hr", "EF", "효율성 계수", "유산소 지구력"]
 ---
 
-# Aerobic Decoupling
+# 유산소 디커플링 (Aerobic Decoupling)
 
-**Aerobic Decoupling** (also called **cardiac decoupling / cardiac drift**) measures whether the relationship between your heart rate and your power or pace changes during a steady effort.
+**유산소 디커플링(Aerobic Decoupling)**(또는 **심장 디커플링 / 심박 드리프트, Cardiac Drift**)은 일정한 강도로 운동할 때 심박수와 파워(또는 페이스) 사이의 관계가 시간이 지남에 따라 얼마나 변하는지를 측정하는 지표입니다.
 
-## Core Concept: Coupling vs. Decoupling
+## 핵심 개념: 커플링 vs 디커플링
 
-During a well-controlled steady endurance effort, your **input** (heart rate) and **output** (power or pace) should stay reasonably coupled. If the same output requires a higher heart rate later in the session, or the same heart rate produces less output, efficiency is drifting.
+잘 통제된 일정 강도의 지구력 훈련에서는 **입력**(심박수)과 **출력**(파워 또는 페이스)이 안정적으로 맞물려 유지되어야 합니다. 훈련 후반부에 같은 출력을 내기 위해 심박수가 더 높아지거나, 같은 심박수에서 출력이 떨어진다면 유산소 효율이 흔들리고 있다는 뜻입니다.
 
-During a long steady effort, we call it **Decoupling** if either of these happens:
-1.  **Heart rate drift**: power stays similar but heart rate gradually rises.
-2.  **Power/pace fade**: heart rate stays similar but power/pace gradually drops.
+장시간 일정 강도 훈련에서 아래 두 가지 중 하나가 나타나면 **디커플링(Decoupling)**이라고 부릅니다.
 
-This can reflect fatigue, heat stress, dehydration, fueling issues, pacing that was too aggressive for the day, or data-quality problems.
+1. **심박 드리프트(Heart rate drift)**: 파워나 페이스는 비슷한데 심박수가 점차 상승하는 현상
+2. **파워/페이스 저하(Power/pace fade)**: 심박수는 비슷한데 파워나 페이스가 점차 떨어지는 현상
 
-Common interpretation:
+이는 누적 피로, 더위 스트레스, 탈수, 보급 부족, 그날 컨디션 대비 과도한 페이싱, 또는 센서 데이터 품질 문제를 반영할 수 있습니다.
 
-- **Positive value**: aerobic efficiency decreases over time (often due to fatigue, heat/dehydration, poor fueling, or going too hard)
-- **Typical range**: often **0% - 10%** (implementations, environment, and data quality vary by platform)
-- **Best use case**: long, **steady** efforts (endurance / steady-state segments). Very short or highly variable efforts are less meaningful.
+일반적인 해석 기준은 다음과 같습니다.
 
-## Calculation Formula
+- **양수(+) 값**: 시간이 지날수록 유산소 효율이 떨어졌음을 의미합니다(피로, 더위·탈수, 보급 부족, 과도한 강도 등이 주원인).
+- **일반적인 범위**: 대개 **0% ~ 10%** 사이에 분포합니다(플랫폼 구현 방식, 환경, 데이터 품질에 따라 차이 있음).
+- **가장 적합한 활용**: 장시간의 **일정한 강도(steady-state)** 훈련(지구력 / 지속주 구간). 매우 짧거나 강도 변동이 큰 훈련에서는 의미가 크게 줄어듭니다.
 
-The logic involves taking a steady-state workout (excluding warm-up) and splitting it **in half**:
+## 계산 공식
 
-1.  Calculate the Efficiency Factor ($EF_1$) for the **first half**.
-2.  Calculate the Efficiency Factor ($EF_2$) for the **second half**.
+일정 강도 훈련에서 웜업을 제외한 구간을 **전반부와 후반부로 절반씩 나누어** 계산합니다.
 
-Here, **EF / AE (Aerobic Efficiency)** is essentially “output / heart rate”:
+1. **전반부**의 효율성 계수($EF_1$)를 계산합니다.
+2. **후반부**의 효율성 계수($EF_2$)를 계산합니다.
 
-- **Pw:Hr**: using power as output, $EF = \frac{Power}{HR}$
-- **Pa:Hr**: using speed as output, $EF = \frac{Speed}{HR}$
+여기서 **EF / AE(Aerobic Efficiency, 유산소 효율)**는 기본적으로 “출력 / 심박수”입니다.
+
+- **Pw:Hr**: 파워를 출력으로 사용, $EF = \frac{Power}{HR}$
+- **Pa:Hr**: 속도를 출력으로 사용, $EF = \frac{Speed}{HR}$
 
 $$
 Pw:Hr[\%] / Pa:Hr[\%] = \frac{AE_1 - AE_2}{AE_1} \times 100\%
 $$
 
-Usually expressed as the percentage change of **Pw:Hr** or **Pa:Hr**.
+일반적으로 **Pw:Hr** 또는 **Pa:Hr**의 백분율 변화량으로 표기합니다.
 
-## Common Reference: The 5% Rule
+## 대표적인 기준: 5% 법칙
 
-According to **Joe Friel**, **5%** is often used as a practical reference point:
+**조 프리엘(Joe Friel)**의 기준에 따르면 **5%**가 실무에서 널리 쓰이는 기준점입니다.
 
-| Decoupling | Level | Meaning & Suggestion |
+| 디커플링 | 수준 | 의미 및 권장 해석 |
 | :--- | :--- | :--- |
-| **< 5%** | **Stable** | Efficiency stayed fairly stable for this duration and intensity. This is a positive sign for aerobic durability. |
-| **5% - 10%** | **Moderate drift** | Fatigue, heat, fueling, terrain, or pacing may be affecting the second half. Compare with similar sessions before changing the plan. |
-| **> 10%** | **High drift** | The session may have been too long, too hard, too hot, or poorly fueled for the current state. Treat it as a signal to review context. |
+| **< 5%** | **안정적** | 해당 시간과 강도에서 효율이 비교적 안정적으로 유지되었습니다. 유산소 내구성이 양호하다는 긍정적 신호입니다. |
+| **5% - 10%** | **중간 수준의 드리프트** | 피로, 더위, 보급, 지형, 페이싱 등이 후반부에 영향을 주었을 수 있습니다. 훈련 플랜을 바꾸기 전에 유사한 세션과 비교해 보세요. |
+| **> 10%** | **높은 드리프트** | 현재 컨디션에 비해 너무 길거나, 너무 강하거나, 너무 덥거나, 보급이 부족했을 가능성이 있습니다. 맥락을 점검하는 신호로 활용하세요. |
 
-## Practical Guide: How to Test?
+## 실전 테스트 가이드
 
-Don’t rely on random workouts. Use a structured **Aerobic Threshold Test**:
+무작위 훈련에 의존하기보다 구조화된 **유산소 역치 테스트(Aerobic Threshold Test)**를 활용해 보세요.
 
-1.  **Intensity**: strictly stay in **Zone 2** (aerobic endurance).
-    -   Power/pace: 65–75% FTP / FTPa.
-    -   Heart rate: below AeT (Aerobic Threshold), often LTHR minus 20–30 bpm.
-2.  **Duration**:
-    -   Olympic / Half marathon target: 1–1.5 hours.
-    -   Ironman / Ultramarathon target: 2–4 hours.
-3.  **Environment**: flat terrain or trainer; stay hydrated (avoid pseudo-decoupling caused by dehydration).
+1. **강도**: 철저히 **존 2**(유산소 지구력 구간)를 유지합니다.
+   - 파워/페이스: FTP 또는 FTPa의 65–75%
+   - 심박수: AeT(유산소 역치) 이하, 보통 LTHR보다 20–30 bpm 낮은 수준
+2. **시간**:
+   - 올림픽 코스 / 하프 마라톤 목표: 1–1.5시간
+   - 아이언맨 / 울트라마라톤 목표: 2–4시간
+3. **환경**: 평지 또는 인도어 트레이너를 권장하며, 탈수로 인한 가짜 디커플링을 막기 위해 수분을 충분히 섭취합니다.
 
-## How Trainingload.ai uses aerobic decoupling
+## Trainingload.ai의 유산소 디커플링 활용 방식
 
--   **Long-session quality check**: after steady long runs or rides, decoupling helps show whether aerobic efficiency held up.
--   **Context-aware review**: Trainingload.ai reads high decoupling alongside heat, elevation, pace/power variability, fueling, and recent load before treating it as a warning.
--   **Base training feedback**: repeated low decoupling in similar sessions can support the case that aerobic durability is improving.
--   **Not for every workout**: intervals, races with surges, hilly routes, and very short sessions can produce noisy decoupling values.
+- **장거리 세션 품질 점검**: 일정 강도의 장거리 러닝이나 라이딩 후 유산소 효율이 끝까지 유지되었는지 확인합니다.
+- **맥락 기반 해석**: Trainingload.ai는 높은 디커플링을 곧바로 경고로 단정하지 않고 기온, 고도, 페이스/파워 변동성, 보급 상태, 최근 훈련 부하와 함께 검토합니다.
+- **기반 훈련 피드백**: 유사한 세션에서 낮은 디커플링이 반복되면 유산소 내구성이 향상되고 있다는 근거로 활용할 수 있습니다.
+- **모든 훈련에 적용하지 않음**: 인터벌, 급가속이 잦은 레이스, 고저차가 큰 코스, 매우 짧은 훈련에서는 노이즈가 커집니다.
 
-## Related docs
+## 관련 문서
 
-- [Efficiency Factor (EF)](/docs/metrics/heart-rate/efficiency-factor)
-- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
-- [Pace Zones](/docs/metrics/pace/zones)
+- [효율성 계수 (EF)](/ko/docs/metrics/heart-rate/efficiency-factor)
+- [심박수 존](/ko/docs/metrics/heart-rate/zones)
+- [페이스 존](/ko/docs/metrics/pace/zones)
 
-## References
+## 참고 자료
 
--   [Joe Friel: Are You Fit? All About Aerobic Endurance and Decoupling](https://www.trainingpeaks.com/blog/aerobic-endurance-and-decoupling/)
--   [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)
--   [TrainingPeaks Help: Aerobic Decoupling (Pw:Hr and Pa:HR) and Efficiency Factor (EF)](https://help.trainingpeaks.com/hc/en-us/articles/204071724-Aerobic-Decoupling-Pw-Hr-and-Pa-HR-and-Efficiency-Factor-EF)
+- [Joe Friel: Are You Fit? All About Aerobic Endurance and Decoupling](https://www.trainingpeaks.com/blog/aerobic-endurance-and-decoupling/)
+- [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)
+- [TrainingPeaks Help: Aerobic Decoupling (Pw:Hr and Pa:HR) and Efficiency Factor (EF)](https://help.trainingpeaks.com/hc/en-us/articles/204071724-Aerobic-Decoupling-Pw-Hr-and-Pa-HR-and-Efficiency-Factor-EF)

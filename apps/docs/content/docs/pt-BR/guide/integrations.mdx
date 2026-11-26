@@ -1,0 +1,185 @@
+---
+title: "Integrações de apps de treino: Strava, Garmin e COROS"
+description: "Compare as integrações de apps de treino do Trainingload.ai para Strava, Garmin, COROS, Polar, Suunto, Wahoo e Intervals.icu e escolha a melhor forma de importar."
+keywords:
+  [
+    "integrações apps de treino",
+    "integração Strava",
+    "integração Garmin",
+    "sincronização COROS",
+    "integração Intervals.icu",
+  ]
+---
+
+# Integrações de apps de treino: Strava, Garmin e COROS
+
+Escolha de onde importar seus registros de treino e decida se precisa de sincronização contínua ou de uma importação pontual de histórico. Esta página cobre conexões da versão Cloud; siga [Conectar Strava, Garmin e COROS](/pt-BR/docs/guide/connect-third-party-platforms) para o passo a passo.
+
+Para hospedagem própria, use as [configurações do Intervals.icu](/pt-BR/docs/self-host/configuration#connect-intervalsicu) e o [guia da Garmin Personal API](/pt-BR/docs/self-host/garmin-personal-api), ou envie arquivos de atividade diretamente.
+
+A disponibilidade das plataformas e as direções compatíveis podem mudar. Considere sempre os controles exibidos na janela de conexão como a referência final.
+
+<DocsScreenshot
+  id="integrations-connections"
+  title="Conexões de terceiros"
+  description="Cada cartão de plataforma mostra o estado da conexão e as ações atualmente disponíveis para a conta."
+  route="Menu da conta na barra lateral → Conta → Conexões de terceiros"
+/>
+
+## Antes de conectar
+
+- Entre na conta da plataforma de origem que armazena os dados de treino que você deseja importar.
+- Defina qual plataforma será a origem principal de cada atividade. Evite encaminhar o mesmo treino por dois serviços conectados.
+- Verifique se você precisa de uma conexão contínua, uma importação pontual de histórico ou envio manual de arquivos.
+- Tenha credenciais e chaves de API da plataforma à mão, mas insira-as apenas na janela oficial de conexão.
+- Anote a atividade mais recente já exibida no Trainingload.ai para reconhecer facilmente a primeira importação concluída.
+
+## Escolha o caminho de importação
+
+| Origem | Melhor para | Modelo de conexão |
+| --- | --- | --- |
+| Strava | Sincronização contínua de atividades | Conta conectada com configurações de sincronização |
+| Polar | Importação contínua de atividades Polar | Conexão OAuth e configurações de sincronização |
+| COROS | Sincronização de atividades e dados diários; exportação compatível de planos | Conta conectada com controles de sincronização manual |
+| Intervals.icu | Sincronização de atividades e fluxos compatíveis de treinos planejados | OAuth ou chave de API, conforme a conta |
+| Suunto | Importação contínua de treinos e fluxos compatíveis de guias | Conexão OAuth e configurações de sincronização |
+| Wahoo | Importação contínua de treinos Wahoo | Conexão OAuth e configurações de sincronização |
+| Garmin | Sincronização de novos treinos ou histórico antigo de atividades | Conexão OAuth ou importação de arquivo |
+| FIT / TCX / GPX | Arquivos avulsos ou exportações de origens sem integração | Envio manual |
+
+## Conectar uma plataforma
+
+1. Selecione o cartão da plataforma.
+2. Leia as direções de dados solicitadas e as configurações.
+3. Autorize via OAuth ou informe a chave de API exigida.
+4. Salve as preferências de sincronização.
+5. Execute a sincronização inicial quando a janela oferecer essa opção.
+6. Abra Atividades e confirme o treino importado mais recente.
+
+Nunca cole uma chave de API de plataforma no Treinador de IA, nas anotações de plano ou em capturas de tela de suporte. Use apenas a janela de conexão da plataforma. Segredos salvos não são exibidos novamente para o cliente.
+
+## Sincronização inicial versus sincronização automática
+
+Uma sincronização inicial importa uma janela recente elegível ou inicia um trabalho histórico. A sincronização automática trata novos eventos da plataforma. Algumas plataformas também oferecem uma ação manual de reconciliação para notificações perdidas.
+
+Durante uma importação grande:
+
+- Deixe o lote atual terminar antes de iniciá-lo novamente.
+- Espere que as atividades fiquem visíveis em momentos diferentes conforme o processamento avança.
+- Revise a detecção de duplicatas em vez de ficar reconectando a conta.
+- Verifique os dados de origem quando alguma série de sensor estiver faltando.
+
+## Importação histórica da Garmin
+
+**Atualmente, o Trainingload.ai não consegue recuperar atividades gravadas antes da autorização por meio da conexão oficial Garmin OAuth. Desconectar e reconectar não preenche esse histórico.** Importe um ZIP de exportação completa da Garmin (ou o link temporário de download), ou envie arquivos FIT, TCX ou GPX individuais para esses registros. Essa limitação não se aplica à Garmin Personal API na hospedagem própria; siga o guia específico dela.
+
+Na página da Garmin, **OAuth** recebe novas atividades e resumos de saúde autorizados. **Importação de arquivo** fornece registros antigos de treino. São ações separadas — escolha a que você precisa.
+
+## Como os treinos planejados sincronizam com o Intervals.icu?
+
+São os treinos agendados no seu calendário, e não gravações de atividades concluídas. Nas configurações de conexão do Intervals.icu, você pode ativar separadamente **Importar treinos planejados** e **Exportar treinos planejados**.
+
+- **Importar treinos planejados** traz adições, edições e exclusões do Intervals.icu para o Trainingload.ai.
+- **Exportar treinos planejados** envia adições, edições e exclusões do Trainingload.ai para o Intervals.icu.
+
+**Com as duas direções ativadas, exclusões também são sincronizadas.** Se a outra cópia não tiver sido alterada desde a última sincronização, excluir uma cópia também exclui a outra.
+
+### O que acontece quando eu adiciono, edito ou excluo um treino?
+
+Esta tabela considera as duas direções ativadas:
+
+| O que você faz | O que acontece do outro lado |
+| --- | --- |
+| Adiciona um treino no Trainingload.ai | Um novo treino correspondente aparece no Intervals.icu. |
+| Adiciona um treino no Intervals.icu | Um novo treino correspondente aparece no Trainingload.ai. |
+| Altera apenas data, nome ou prescrição no Trainingload.ai | O treino correspondente no Intervals.icu é atualizado. |
+| Altera apenas data, nome ou prescrição no Intervals.icu | O treino correspondente no Trainingload.ai é atualizado. |
+| Exclui um treino no Trainingload.ai | A cópia no Intervals.icu é excluída se não foi alterada. Se foi alterada, a cópia editada é mantida. |
+| Exclui um treino no Intervals.icu | A cópia no Trainingload.ai é excluída se não foi alterada. Se foi alterada, a cópia editada é mantida. |
+
+### Qual versão prevalece se eu editar as duas cópias?
+
+Depende da direção que está sendo sincronizada no momento:
+
+- A importação do Intervals.icu usa a versão do Intervals.icu.
+- A exportação para o Intervals.icu usa a versão do Trainingload.ai.
+
+A sincronização automática diária importa antes de exportar. Se as duas cópias já tiverem sido editadas quando essa execução começar, a versão do Intervals.icu tem prioridade.
+
+Para evitar sobrescrever uma edição, termine de editar em um lado, aguarde a sincronização e só então continue do outro lado.
+
+### Por que uma cópia continua lá depois que eu excluí a outra?
+
+A cópia restante foi editada depois da última sincronização. Essas edições são preservadas, os dois treinos deixam de atualizar um ao outro e a sincronização não recria imediatamente o treino que você excluiu.
+
+Por exemplo: você exclui a corrida de domingo no Intervals.icu depois de mover a cópia dela no Trainingload.ai para sábado. O Trainingload.ai mantém a corrida de sábado, e o treino excluído no Intervals.icu não reaparece por causa disso.
+
+Se o sistema não conseguir confirmar se a outra cópia mudou, ele mantém essa cópia em vez de correr o risco de excluí-la. Treinos concluídos ou pulados, e treinos vinculados a uma atividade real, também preservam o histórico necessário.
+
+### E se eu excluir um treino e criar outro com o mesmo nome?
+
+O treino recriado é um novo treino e sincroniza separadamente. Mesmo nomes, datas e prescrições idênticos não o reconectam a um treino excluído. Notificações repetidas sobre o mesmo treino não criam cópias extras.
+
+### Por que o outro lado ainda não atualizou?
+
+As duas páginas não atualizam instantaneamente juntas. O sistema recebe notificações da plataforma e verifica periodicamente os treinos futuros. As verificações automáticas diárias cobrem de ontem até os próximos sete dias no seu fuso horário.
+
+Mover um treino para fora desse intervalo de datas não significa por si só que ele foi excluído: sua posição atual é verificada separadamente. Uma conexão temporariamente indisponível também não faz a outra cópia ser excluída.
+
+## Desconexão
+
+Desconectar interrompe futuras sincronizações e remove a credencial ativa. Normalmente não exclui atividades que já foram importadas. Exclua uma atividade separadamente apenas após confirmar que ela não é a única cópia que você deseja manter.
+
+## Verificar a conexão
+
+- O cartão da plataforma exibe estado conectado quando aplicável.
+- Uma sincronização manual retorna resultado concluído ou na fila, em vez de erro de autorização.
+- As atividades importadas identificam a origem esperada.
+- Ao reabrir a janela, as configurações salvas de sincronização continuam marcadas.
+
+## Solução de problemas
+
+### A autorização volta para um cartão desconectado
+
+Confirme se você aprovou todas as permissões solicitadas e se o navegador voltou para a mesma conta do Trainingload.ai. Tente novamente a partir do cartão da plataforma, sem reutilizar uma URL antiga de autorização. Em conexões por chave de API, substitua uma chave expirada ou revogada na janela.
+
+### A conexão funciona, mas nenhuma atividade aparece
+
+Verifique a janela de datas elegível e o tipo de atividade exibido pela plataforma. Execute uma vez a sincronização manual ou inicial disponível e aguarde o processamento da tarefa de importação. Se o registro estiver fora da janela suportada, exporte em FIT, TCX ou GPX e use o envio de arquivos.
+
+### O mesmo treino aparece mais de uma vez
+
+Identifique a origem exibida em cada atividade. Mantenha uma rota principal — por exemplo, importação direta da COROS ou COROS encaminhada pelo Strava — e desative o caminho duplicado antes de importar mais histórico. Revise o aviso de duplicata antes de excluir qualquer cópia.
+
+### Faltam detalhes de frequência cardíaca, potência, GPS ou força
+
+Abra o treino primeiro na plataforma de origem. O Trainingload.ai não pode importar uma série que a plataforma não expôs. Se a origem contiver esses dados, aguarde o fim do processamento e tente novamente a ação de reconciliação da plataforma, se disponível.
+
+### Um controle descrito aqui não aparece
+
+A janela de conexão é a referência definitiva para a conta, plataforma e sistema atuais. Algumas ações dependem de aprovação da plataforma, nível de assinatura ou etapa de liberação.
+
+## Perguntas frequentes
+
+### Quais integrações de apps de treino o Trainingload.ai oferece?
+
+Strava, Polar, COROS, Intervals.icu, Suunto e Wahoo podem permanecer conectados. A Garmin oferece conexão OAuth para novos dados e importação de arquivo para histórico. FIT, TCX e GPX atendem arquivos avulsos ou relógios sem integração direta.
+
+### Integração Strava ou importação Garmin?
+
+Use Garmin OAuth para novos treinos Garmin e importação de histórico para registros antigos. Se os mesmos treinos também chegam ao Strava, escolha um caminho principal de importação para evitar duplicatas.
+
+### Posso ativar duas integrações para o mesmo relógio?
+
+Pode, mas não deve importar a mesma gravação duas vezes. Escolha uma rota principal — por exemplo, COROS direto, e não COROS mais encaminhamento pelo Strava — antes de fazer uma grande importação histórica.
+
+### Onde concluo a conexão?
+
+Na web, abra o menu da conta na parte inferior da barra lateral, selecione **Conta** e role até **Conexões de terceiros**. No celular, abra **Eu → Menu → Autorização de dados**. Depois siga [Conectar Strava, Garmin e COROS](/pt-BR/docs/guide/connect-third-party-platforms) para os passos de cada plataforma.
+
+## Próximos passos
+
+- Siga [Conectar Strava, Garmin e COROS](/pt-BR/docs/guide/connect-third-party-platforms) para autorização, primeira sincronização e solução de problemas.
+- Leia [Conectar dados de treino](/pt-BR/docs/guide/connect-data) para entender ingestão, processamento, duplicatas e identificação de origem.
+- [Explore os conversores de GPX, FIT e TCX](/pt-BR/converter) se precisar de um arquivo portátil antes do envio.
+- [Gerencie carga de treino com CTL, ATL e TSB no seu plano](/pt-BR/training-load) assim que o histórico importado estiver pronto.

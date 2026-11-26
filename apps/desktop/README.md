@@ -2,6 +2,10 @@
 
 The Electron desktop app is part of this AGPL-3.0-only Public repository. It runs the same Next.js Client, NestJS Server, and database migrations as browser Self-host, with a local PGlite database. Native windows, menus, credentials, backups, startup UI, and packaging are maintained here.
 
+![Trainingload.ai Personal calendar with the desktop title bar and workspace sidebar](../docs/public/readme/desktop-calendar-en.png)
+
+[View the Simplified Chinese desktop preview](../docs/public/readme/desktop-calendar-zh.png). Both previews use synthetic training data.
+
 ## Build and run
 
 Use Node.js 22+ and pnpm 9+. From the repository root:
@@ -103,6 +107,7 @@ Apple submissions are recorded before waiting for a result, so failed or timed-o
 - The default data directory is `~/Library/Application Support/Trainingload.ai/user/data`. `--user-data-dir` also isolates the default data root. No login item is registered.
 - Closing a macOS window hides it; the Dock reopens it. `Cmd+Q` stops child services and closes the database.
 - The application menu's Settings entry (`Cmd+,`) opens the existing product Settings page. Data Storage Location is separate and affects the next launch; existing data is retained without automatic movement.
+- The title bar shows the current workspace section. Its controls start with the sidebar toggle, followed by Back and Forward. The native Navigation menu offers the same history actions with `Cmd+[` and `Cmd+]`. Open Calendar from the sidebar, then right-click a date and choose **Adjust schedule** to edit an active plan.
 - The native UI uses this Client's supported locales, locale resolver, `NEXT_LOCALE` preference, and shared navigation/settings translations. Desktop-specific strings are in `messages/`, with the same ten locales and build-time key/parameter validation.
 - The startup window uses the Client's desktop theme tokens and loading spinner. The existing next-themes preference is cached locally for startup, with a system-theme default and reduced-motion support. It does not add a second theme setting.
 - Startup failures display a stable error code and retain existing data. Browser isolation, sandboxing, loopback-only services, and the private internal API credential stay enabled.

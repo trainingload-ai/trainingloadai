@@ -1,0 +1,146 @@
+---
+title: "Manueller Einheiten-Editor: Einheiten in Trainingload bearbeiten"
+description: "Produktdokumentation zum Bearbeiten geplanter Einheiten in Trainingload. Erfahre, wie du Ausdauer- und Krafteinheiten direkt im In-App-Editor manuell erstellst."
+keywords:
+  [
+    "manueller Einheiten-Editor",
+    "Einheiten bearbeiten",
+    "Trainingseinheiten manuell bearbeiten",
+    "Trainingload Einheiten-Editor Anleitung",
+    "strukturierte Einheit bearbeiten",
+    "In-App Workout-Editor",
+  ]
+---
+
+# Einheiten manuell in Trainingload bearbeiten
+
+Dies ist die **Produktanleitung für den manuellen Einheiten-Editor in Trainingload.ai**. Sie erklärt, wie du eine geplante Einheit direkt in einem Trainingsplan bearbeitest: Sportart wählen, Ausdauerschritte oder Kraftsätze anlegen, Vorschau prüfen und einen gültigen Entwurf speichern.
+
+Es handelt sich dabei nicht um einen eigenständigen **Workout-Editor** bzw. **Workout-Builder**. Wenn du ein kostenloses Browser-Tool suchst, um Schritte frei zu entwerfen und die Workout-DSL zu kopieren, nutze den [Workout Editor & Builder](/de/workout-editor). Komm hierher zurück, sobald du das Speichern in der App, den Kraft-Builder oder die Zuweisung zu Plantagen brauchst.
+
+## Bevor du startest
+
+- Öffne einen manuellen Trainingsplan oder eine bearbeitbare geplante Einheit.
+- Prüfe die Athleten-Schwellenwerte, auf denen eventuelle Zonen- oder Prozentziele basieren.
+- Entscheide vorab, ob es sich um eine Ausdauer- oder eine Krafteinheit handelt.
+- Falls du zunächst nur einen öffentlichen Entwurf erstellen möchtest, [baue die Einheit im Workout-Editor](/de/workout-editor) und füge sie danach hier ein oder baue sie nach.
+
+## 1. Sportart wählen
+
+Der manuelle Editor bietet bewusst eine fokussierte Auswahl für die Trainingsplanung:
+
+- Laufen: Laufen, Trailrunning, Laufband.
+- Radfahren: Radfahren, Mountainbike, Indoor Cycling.
+- Schwimmen: Beckenschwimmen, Freiwasserschwimmen.
+- Sonstiges: Krafttraining.
+
+Die gewählte Sportart steuert die verfügbaren Zieleinheiten und kann den Strukturtyp der Einheit ändern. Ein Wechsel zwischen Ausdauer und Kraft setzt inkompatible Entwurfsstrukturen zurück – wähle die Sportart daher unbedingt, bevor du detaillierte Schritte anlegst.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Editor aus dem Planzeitplan öffnen"
+  description="Wechsle im Manuellen Plan-Builder zur Datumsauswahl und wähle am gewünschten Tag + Einheit."
+  route="Pläne → Manueller Plan-Builder → Datumsauswahl → + Einheit"
+/>
+
+<DocsScreenshot
+  id="manual-workout-editor"
+  title="Manueller Einheiten-Editor"
+  description="Sportart wählen, strukturierte Abschnitte anlegen, Coaching-Notizen ergänzen und vor dem Speichern die Vorschau prüfen."
+  route="Pläne → Manueller Plan → Einheit hinzufügen"
+/>
+
+## 2. Namen und Notizen hinzufügen
+
+Nutze den Namen für eine kurze, eindeutige Bezeichnung wie „Aerobe Intervalle“ oder „Kraft Unterkörper“. Nutze Notizen für menschliche Hinweise, die nicht als Maschinenstruktur gespeichert werden sollen:
+
+- Technikhilfen und Bewegungsfokus.
+- Hinweise zur benötigten Ausrüstung.
+- Verpflegungsempfehlungen.
+- Strecken- oder Geländehinweise.
+- Abbruch- oder Reduktionskriterien für die Einheit.
+
+Schreibe keine Fließtexte in ein DSL-Feld. Trainingsschritte gehören in den Modus **Manuell** oder **Regeln**, Coaching-Kontext gehört in die Notizen.
+
+## 3. Eine Ausdauereinheit aufbauen
+
+Füge im manuellen Modus einen Schritt oder ein Wiederholungsmodul hinzu. Für jeden Schritt gilt:
+
+1. Wähle den Schritttyp, z. B. Aufwärmen, Belastung oder Erholung.
+2. Lege Dauer oder Distanz fest.
+3. Füge nur dann ein Ziel hinzu, wenn ein verlässlicher Referenzwert im Profil hinterlegt ist.
+4. Nutze für Intervalle ein Wiederholungsmodul, statt identische Belastungs- und Erholungsschritte mehrfach zu kopieren.
+5. Prüfe das Diagramm laufend, während du die Struktur aufbaust.
+
+Eine gültige Ausdauerstruktur braucht mindestens einen sinnvollen Schritt. Bei einem Zielbereich muss der Startwert kleiner oder gleich dem Endwert sein.
+
+## 4. Eine Krafteinheit aufbauen
+
+Wähle **Krafttraining**, um den Kraft-Builder zu öffnen. Füge Übungen und Arbeitssätze hinzu, wie unter [Krafteinheiten](/de/docs/planning/strength-workouts) beschrieben. Für die Texteingabe folge der [Kraft-Workout-DSL](/de/docs/planning/strength-workout-dsl).
+
+## 5. Wann sich der Regelmodus lohnt
+
+Der Modus **Regeln** akzeptiert die unterstützte Workout-DSL. Er eignet sich hervorragend für kompaktes Erstellen und wiederverwendbare Textbausteine, ist aber kein Freitextfeld für Coaching-Notizen.
+
+Vor dem Speichern im Regelmodus:
+
+- Schreibe genau eine Anweisung pro unterstütztem DSL-Ausdruck.
+- Lege sprachliche Erklärungen in die Notizen.
+- Validiere die Eingabe und prüfe die gerenderte Struktur.
+- Schlage die passende Syntax in der [Ausdauer-Workout-DSL](/de/docs/planning/workout-dsl) oder [Kraft-Workout-DSL](/de/docs/planning/strength-workout-dsl) nach.
+- Du kannst [dieselbe DSL zuerst im öffentlichen Workout-Editor entwerfen](/de/workout-editor) und anschließend hier einfügen.
+
+## 6. Speichern
+
+Wähle **Entwurf speichern**. Trainingload.ai prüft die Einheit vor dem Hinzufügen zum Planentwurf.
+
+## Gespeicherte Einheit prüfen
+
+Kontrolliere, dass:
+
+- die gewählte Sportart stimmt;
+- die Vorschau die geplante Belastungs-/Erholungsfolge bzw. alle Kraftsätze korrekt abbildet;
+- Notizen sauber von der Struktur getrennt bleiben;
+- die gespeicherte Einheit in der richtigen Woche, am richtigen Tag und in der richtigen Reihenfolge erscheint;
+- eine erwartete Trainingsbelastung nur dann angezeigt wird, wenn ausreichend Eingangsdaten vorliegen.
+
+## Fehlerbehebung
+
+- **Die Sportartenliste weicht von den Aktivitätstypen ab:** Stelle sicher, dass du dich im manuellen Plan-Editor befindest. Seine Auswahlliste ist bewusst auf die neun oben genannten Sportarten begrenzt; in der Aktivitätsklassifizierung steht ein größerer Katalog zur Verfügung.
+- **Ein Sportartwechsel löscht den Entwurf:** Ausdauer- und Kraftstrukturen sind nicht kompatibel. Wähle zuerst die Sportart und kopiere wiederverwendbare Notizen oder Regeln vor dem Wechsel.
+- **Die Ausdauervorschau bleibt leer:** Füge mindestens einen gültigen Schritt hinzu und prüfe Dauer/Distanz sowie Zielwerte.
+- **Ein Zielbereich wird abgelehnt:** Setze den niedrigeren Wert vor den höheren und prüfe, ob die Einheit zur gewählten Sportart passt.
+- **„Für jede Übung einen Namen eingeben“:** Trage bei jeder Kraftübung einen echten Namen ein – Platzhaltertext wird nicht gespeichert.
+- **Eine Kraftübung lässt sich nicht speichern:** Jede Übung benötigt mindestens eine Satzgruppe und mindestens einen Arbeitssatz.
+- **Eine Fehlermeldung im Regelmodus erscheint noch auf Englisch:** Kopiere die rohe Servermeldung nicht in die Notizen. Halte für den Support die angezeigte Meldung, die gewählte Sportart und die fehlerhafte DSL-Zeile fest.
+- **Die gespeicherte Einheit erscheint am falschen Tag:** Prüfe Plan-Startdatum, Wochen-/Tagesversatz, Reihenfolge am Tag und Konto-Zeitzone.
+
+## Häufige Fragen (FAQ)
+
+### Was ist der manuelle Einheiten-Editor?
+
+Er ist die In-App-Ansicht zum Bearbeiten einzelner geplanter Einheiten in Trainingload. Du wählst eine Sportart, legst Ausdauerschritte oder Kraftübungen an, ergänzt Coaching-Notizen, prüfst die Vorschau und speicherst die Einheit an einem bestimmten Wochentag. Der öffentliche [Workout Editor & Builder](/de/workout-editor) ist ein davon getrenntes Entwurfswerkzeug.
+
+### Wie bearbeite ich eine Einheit manuell in Trainingload?
+
+Öffne eine bearbeitbare geplante Einheit, wähle zuerst die Sportart und füge dann Schritte oder ein Wiederholungsmodul hinzu. Lege Dauer oder Distanz fest, ergänze nur bei verlässlichen Schwellenwerten ein Ziel und nutze für Intervalle ein Wiederholungsmodul statt mehrfacher Kopien.
+
+### Kann der In-App-Editor auch Krafteinheiten erstellen?
+
+Ja. Wähle **Krafttraining**, um den Kraft-Builder zu öffnen. Lege benannte Übungen und mindestens einen Arbeitssatz pro Übung an. Für die Texteingabe nutze die [Kraft-Workout-DSL](/de/docs/planning/strength-workout-dsl).
+
+### Manueller Modus oder Regelmodus?
+
+Nutze den **Manuellen** Modus, wenn du Schritte lieber per Klick zusammenstellst. Nutze den Modus **Regeln**, wenn du kompakte, wiederverwendbare DSL bevorzugst. Schreibe keine Fließtext-Hinweise in das DSL-Feld – diese gehören in die Notizen. Siehe auch [Ausdauer-Workout-DSL](/de/docs/planning/workout-dsl).
+
+### Warum setzt ein Sportartwechsel den Entwurf zurück?
+
+Ausdauer- und Kraftstrukturen sind technisch inkompatibel. Wähle die Sportart daher zuerst und sichere wiederverwendbare Notizen oder Regeln, bevor du wechselst.
+
+## Nächste Schritte
+
+- [Entwirf eine strukturierte Einheit im Workout-Editor](/de/workout-editor), wenn du zunächst einen öffentlichen Builder nutzen möchtest.
+- Fahre mit [Planstatus verwalten](/de/docs/planning/plan-lifecycle) fort und aktiviere den Plan, sobald der gesamte Zeitplan steht.
+- Nutze die [Ausdauer-Workout-DSL](/de/docs/planning/workout-dsl) für textbasiertes Erstellen.
+- Nutze [Krafteinheiten](/de/docs/planning/strength-workouts) für den visuellen Kraft-Builder.
+- [Nutze die Auswertung durch den KI-Coach, um deine Trainingsbelastung sicher anzupassen](/de/ai-training-plan), nachdem die Einheit absolviert wurde.

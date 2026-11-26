@@ -392,7 +392,7 @@ describe('ReviewWorkerService model failure deferral', () => {
 
   it('defers instead of finishing with a rule-based digest when the digest call stops the run', async () => {
     const runForDailyJob = jest.fn(async () => undefined);
-    const { service, reviewJobUpdate } = createWorker({
+    const { service, reviewJobUpdate, ensureNotification } = createWorker({
       daily: { runForDailyJob },
       reviewModeValue: JSON.stringify({ dailyReview: true }),
       digest: {
@@ -406,6 +406,7 @@ describe('ReviewWorkerService model failure deferral', () => {
     await (service as unknown as ReviewWorkerInternals).processJob(job);
 
     expect(runForDailyJob).not.toHaveBeenCalled();
+    expect(ensureNotification).not.toHaveBeenCalled();
     expectDeferred(reviewJobUpdate);
   });
 

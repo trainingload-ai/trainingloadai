@@ -65,6 +65,7 @@ import { getActivityDetailState } from "@shared/activity-detail";
 
 interface ActivityHeaderProps {
   activity: Activity;
+  readOnly?: boolean;
 }
 
 const SPORT_TYPE_CHIP_CLASS =
@@ -120,7 +121,7 @@ function formatThirdPartyProvider(provider: string, uploadLabel: string) {
   return getThirdPartyProviderName(normalized) ?? provider;
 }
 
-export function ActivityHeader({ activity }: ActivityHeaderProps) {
+export function ActivityHeader({ activity, readOnly = false }: ActivityHeaderProps) {
   const t = useTranslations();
   const tDetail = useTranslations("ActivityDetail");
   const tActivityTitle = useTranslations("ActivityTitle");
@@ -142,6 +143,7 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
   const { data: sportCatalog = [] } = useSportCatalog();
   const currentSportType = (activity.sportType as SportType) || "UNKNOWN";
   const detailPolicy = getActivityDetailPolicy(activity);
+  const canEditSportType = !readOnly && detailPolicy.canEditSportType;
   const currentSportDefinition =
     sportCatalog.find(
       (sport) =>
@@ -250,13 +252,13 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
   );
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-4">
-      <div className="flex min-w-0 items-start justify-between gap-3">
-        <h1 className="min-w-0 truncate text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+    <div className="@container/activity-header flex w-full min-w-0 flex-1 flex-col gap-4">
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-2">
+        <h1 className="min-w-0 flex-1 basis-40 wrap-anywhere text-2xl font-semibold tracking-tight text-foreground @min-[42rem]/activity-header:text-3xl">
           {displayTitle}
         </h1>
         <div className="flex shrink-0 items-center gap-2">
-          {isEditing ? (
+          {canEditSportType && isEditing ? (
             <div className="flex shrink-0 items-center gap-2">
               <Select
                 value={selectedSportCode}
@@ -294,7 +296,7 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
               )}
             </div>
-          ) : detailPolicy.canEditSportType ? (
+          ) : canEditSportType ? (
             <button
               type="button"
               aria-label={`${t("activityDetails.editSportType")}: ${currentSportLabel}`}
@@ -333,7 +335,7 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-mobile-caption text-muted-foreground pc:text-xs">
           <span className="inline-flex min-w-0 items-center gap-1.5">
             <Database className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -352,14 +354,14 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
         <div className="flex flex-wrap items-center gap-2">
           {activity.hashId &&
           getActivityDetailState(activity).canShowEnhancedDetail ? (
-            <ActivityDetailPlanLinkControl hashId={activity.hashId} />
+            <ActivityDetailPlanLinkControl hashId={activity.hashId} readOnly={readOnly} />
           ) : null}
-          <ActivitySessionRpeControl activity={activity} />
+          <ActivitySessionRpeControl activity={activity} readOnly={readOnly} />
         </div>
       </div>
 
       <AlertDialog
-        open={confirmOpen}
+        open={canEditSportType && confirmOpen}
         onOpenChange={(open) => {
           if (setSportTypeMutation.isPending) return;
           if (!open) {

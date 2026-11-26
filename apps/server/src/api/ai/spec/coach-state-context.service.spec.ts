@@ -149,10 +149,10 @@ describe('CoachStateContextService', () => {
 
     expect(prisma.coachDecision.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
+        where: expect.objectContaining({
           contextId: 'context-1',
           context: { userId: 'user-1' },
-        },
+        }),
         take: 8,
       }),
     );

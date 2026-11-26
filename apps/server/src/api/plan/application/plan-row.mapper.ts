@@ -1,4 +1,10 @@
 import { generationCoverage } from '@shared/rolling-plan';
+import {
+  getPlanTemplateCopy,
+  getPlanTemplateVariant,
+  getRunPlanTemplate,
+  normalizePlanTemplateLocale,
+} from '@shared/plan-templates/registry';
 import type { PlanStatus } from '../plan.constants';
 import { defaultSportDefinitionCode } from '@/sports/sport-catalog.types';
 import type { EndurancePlanBlock } from '../../../../../../packages/shared/endurance-workout-ir';
@@ -33,6 +39,7 @@ export type PlanWorkoutRowLike = {
   dayOffset?: number | null;
   sessionIndex?: number | null;
   scheduledDate?: Date | string | null;
+  revision?: number;
   sportType: string;
   sportDefinitionCode?: string | null;
   name?: string | null;
@@ -232,6 +239,7 @@ export function normalizePlanWorkoutRow(
     dayOffset: row.dayOffset,
     sessionIndex: row.sessionIndex ?? 1,
     scheduledDate: normalizePlanDate(row.scheduledDate),
+    revision: row.revision,
     sportType: row.sportType,
     sportDefinitionCode:
       row.sportDefinitionCode ??
@@ -290,6 +298,30 @@ export function normalizePlanWorkoutRow(
   };
 }
 
+export function planDescription(
+  plan: Pick<PlanRowLike, 'description' | 'sourceType' | 'generationMetadata' | 'periodWeeks'>,
+) {
+  let description = plan.description ?? null;
+  // Older official drafts stored the public template copy, even for a
+  // different variant. Leave any description edited by the athlete intact.
+  if (plan.sourceType === 'TEMPLATE') {
+    const metadata = plan.generationMetadata as {
+      planTemplate?: { key?: string; variantId?: string; locale?: string };
+    } | null;
+    const origin = metadata?.planTemplate;
+    const template = origin?.key === 'RUN_5K_FIRST' ? getRunPlanTemplate(origin.key) : null;
+    const variant = template && origin?.variantId
+      ? getPlanTemplateVariant(template, origin.variantId)
+      : null;
+    const locale = normalizePlanTemplateLocale(origin?.locale);
+    if (template && variant && variant.periodWeeks === plan.periodWeeks &&
+      description === template.copy[locale].description) {
+      description = getPlanTemplateCopy(template, variant, locale).description;
+    }
+  }
+  return description;
+}
+
 export function normalizePlanRow(
   plan: PlanRowLike | null,
   deps: PlanRowMapperDeps,
@@ -300,7 +332,7 @@ export function normalizePlanRow(
     id: plan.id,
     userId: plan.userId,
     title: plan.title,
-    description: plan.description ?? null,
+    description: planDescription(plan),
     goal: plan.goal ?? null,
     sourceType: plan.sourceType,
     generationMetadata: plan.generationMetadata ?? null,

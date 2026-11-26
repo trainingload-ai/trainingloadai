@@ -10,7 +10,7 @@ import {
   markNotificationRead,
   type NotificationItem,
 } from "@/api/notifications";
-import { MarkdownProse } from "@/components/MarkdownProse";
+import { NotificationMarkdown } from "@/components/notifications/NotificationMarkdown";
 import {
   getNotificationPreview,
   resolveNotificationDisplay,
@@ -302,7 +302,10 @@ export function MobileNotificationsPanel() {
             </div>
             <div className="py-4">
               {selectedDisplay.bodyMarkdown?.trim() ? (
-                <MarkdownProse markdown={selectedDisplay.bodyMarkdown} />
+                <NotificationMarkdown
+                  item={selected}
+                  markdown={selectedDisplay.bodyMarkdown}
+                />
               ) : (
                 <p className="text-mobile-control text-muted-foreground">
                   {t("noBody")}

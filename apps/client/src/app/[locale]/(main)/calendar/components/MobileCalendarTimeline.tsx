@@ -160,7 +160,6 @@ export function MobileCalendarTimeline({
 }) {
   const locale = useLocale();
   const t = useTranslations("MobileCalendarTimeline");
-  const rollingT = useTranslations("RollingPlan");
   const translate = useTranslations();
   const selectedKey = selectedDate.format("YYYY-MM-DD");
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -417,9 +416,10 @@ export function MobileCalendarTimeline({
                         ) : null}
                       </span>
                     ))}
-                    {itemCount === 0 && rangeCompetitions.length === 0 ? (
+                    {itemCount === 0 && rangeCompetitions.length === 0 &&
+                    !(activePlan && isPlanDateNotGenerated(activePlan, key)) ? (
                       <span className="text-mobile-caption pc:text-xs text-muted-foreground">
-                        {activePlan && isPlanDateNotGenerated(activePlan, key) ? rollingT("notGenerated") : t("rest")}
+                        {t("rest")}
                       </span>
                     ) : null}
                   </span>

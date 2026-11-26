@@ -97,6 +97,9 @@ importers:
       '@radix-ui/react-collapsible':
         specifier: ^1.1.12
         version: 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@radix-ui/react-context-menu':
+        specifier: ^2.2.16
+        version: 2.2.16(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@radix-ui/react-dialog':
         specifier: ^1.1.14
         version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -295,6 +298,9 @@ importers:
       react-photo-view:
         specifier: ^1.2.7
         version: 1.2.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react-resizable-panels:
+        specifier: 4.15.0
+        version: 4.15.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react-scan:
         specifier: ^0.4.3
         version: 0.4.3(@types/react@19.2.15)(next@15.5.28(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(rollup@4.61.0)
@@ -739,8 +745,8 @@ importers:
         specifier: 0.35.5
         version: 0.35.5(@types/node@22.19.19)
       trackswap:
-        specifier: 0.2.7
-        version: 0.2.7
+        specifier: 0.2.8
+        version: 0.2.8
       tz-lookup:
         specifier: ^6.1.25
         version: 6.1.25
@@ -9691,6 +9697,12 @@ packages:
       '@types/react':
         optional: true
 
+  react-resizable-panels@4.15.0:
+    resolution: {integrity: sha512-DRjF1E8QHg4j5n6RcpxDoeP0C15T0w+dlEE9eyooGCwOE8rPPxfXt4OfhJjEuezzCG/JjRwh5ZHLVkakUJF+dA==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+
   react-scan@0.4.3:
     resolution: {integrity: sha512-jhAQuQ1nja6HUYrSpbmNFHqZPsRCXk8Yqu0lHoRIw9eb8N96uTfXCpVyQhTTnJ/nWqnwuvxbpKVG/oWZT8+iTQ==}
     hasBin: true
@@ -10609,6 +10621,10 @@ packages:
 
   trackswap@0.2.7:
     resolution: {integrity: sha512-QZz5jcHDFXRxO8GxH4WJxtzPfG4ueQ9yYEuqVAICQKdouDkgR3W0qAsApqaeuW1PUIlXeZatUacmNRCTQW0zRA==}
+    engines: {node: '>=18.0.0'}
+
+  trackswap@0.2.8:
+    resolution: {integrity: sha512-whPg8dzNNMAfaex8a4wus5gRaQAsvnZnQ5HxkaIC4k68o6F6mhlCw3SIdQ7rMQ2Yis3M+eQvWo3ry5ug0rBTDg==}
     engines: {node: '>=18.0.0'}
 
   trim-lines@3.0.1:
@@ -21941,6 +21957,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.15
 
+  react-resizable-panels@4.15.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+    dependencies:
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
+
   react-scan@0.4.3(@types/react@19.2.15)(next@15.5.28(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(rollup@4.61.0):
     dependencies:
       '@babel/core': 7.29.7
@@ -23199,6 +23220,13 @@ snapshots:
       punycode: 2.3.1
 
   trackswap@0.2.7:
+    dependencies:
+      '@garmin/fitsdk': 21.212.0
+      dayjs: 1.11.21
+      geolib: 3.3.14
+      htmlparser2: 10.1.0
+
+  trackswap@0.2.8:
     dependencies:
       '@garmin/fitsdk': 21.212.0
       dayjs: 1.11.21

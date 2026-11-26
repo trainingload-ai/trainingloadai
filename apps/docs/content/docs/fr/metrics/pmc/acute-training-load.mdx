@@ -1,14 +1,14 @@
 ---
 title: Fatigue (ATL)
-description: Découvrez comment Trainingload.ai modélise la Fatigue (ATL) à partir de la charge quotidienne, sans confondre cet indicateur avec une mesure directe de la fatigue.
-keywords: ["fatigue", "charge aiguë", "ATL", "formule ATL", "charge récente"]
+description: Découvrez comment Trainingload.ai modélise la fatigue (ATL) à partir de la charge d’entraînement quotidienne, et comment lire la tendance sans confondre l’ATL avec une mesure directe de la fatigue.
+keywords: ["fatigue", "charge aiguë", "ATL", "formule ATL", "charge d'entraînement récente", "comment lire l'ATL"]
 ---
 
-# Qu’est-ce que la Fatigue (ATL) ?
+# Qu’est-ce que la fatigue (ATL) ?
 
-La **Fatigue (ATL)**, ou charge aiguë d’entraînement, est une moyenne exponentielle qui réagit rapidement à la charge quotidienne. Les jours récents pèsent davantage ; l’ATL évolue donc plus vite que la Condition physique (CTL). Trainingload.ai utilise par défaut une constante de temps de sept jours.
+La **fatigue (ATL)**, ou Acute Training Load (charge aiguë), est une moyenne exponentielle rapide de la charge d’entraînement quotidienne. Elle accorde davantage de poids aux jours récents et évolue plus vite que la forme (CTL). Trainingload.ai utilise par défaut une constante de temps de 7 jours.
 
-« Fatigue » est un libellé lisible dans l’interface. L’ATL résume une charge récente modélisée ; elle ne mesure directement ni la fatigue physiologique ou ressentie, ni la récupération, la santé ou l’adaptation.
+« Fatigue » est un libellé lisible dans l’interface. L’ATL résume la charge récente modélisée ; elle ne mesure directement ni la fatigue physiologique ou ressentie, ni la récupération, ni la santé, ni l’adaptation.
 
 <div className="my-6 max-w-sm w-full mx-auto">
   <AtlStatPreviewCard
@@ -16,35 +16,61 @@ La **Fatigue (ATL)**, ou charge aiguë d’entraînement, est une moyenne expone
     percent={72}
     metricLabel="ATL"
     valuePopoverTitle="Valeur ATL"
-    valuePopoverBody="Moyenne exponentielle rapide des charges quotidiennes retenues selon vos priorités de source."
+    valuePopoverBody="Moyenne exponentielle rapide calculée à partir des charges quotidiennes retenues par vos réglages de sources de charge."
     percentPopoverTitle="Pourcentage ATL"
-    percentPopoverBody="ATL actuelle rapportée à votre maximum historique ; ce n’est pas un percentile universel de fatigue."
+    percentPopoverBody="Votre ATL actuelle par rapport à votre maximum historique ; ce n’est pas un centile universel de fatigue."
     helpTitle="Charge récente"
-    details="Reliez chaque variation aux séances et au contexte de récupération."
+    details="Utilisez l’ATL pour observer l’évolution de la charge modélisée sur les derniers jours, puis examinez les séances et le contexte de récupération."
   />
 </div>
 
-## Origine et formule
+_Les valeurs d’exemple servent uniquement à l’aperçu de l’interface._
 
-Pour chaque activité, Trainingload.ai retient une charge issue de la puissance, de la fréquence cardiaque, de l’allure ou du RPE de séance. Les activités d’une même journée sont additionnées dans `daily_load`. Une journée sans charge enregistrée vaut zéro et l’ATL précédente décroît progressivement.
+## D’où vient la valeur
+
+Trainingload.ai retient une seule valeur de charge disponible pour chaque activité selon votre ordre de priorité des sources de charge. Selon l’activité et vos préférences, cette valeur peut provenir de la puissance, de la fréquence cardiaque, de l’allure ou du RPE de séance. Les charges de plusieurs activités effectuées le même jour sont additionnées dans `daily_load`.
+
+Des activités manquantes ou en double, une modification des seuils ou un changement de priorité des sources de charge peuvent tous modifier l’ATL. Un jour sans charge enregistrée apporte zéro ; l’ATL précédente décroît alors progressivement au lieu de tomber brutalement à zéro.
+
+## Formule
 
 ```text
 decay_ATL = exp(-1 / 7)
 ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
 ```
 
-Avec le réglage par défaut, `decay_ATL ≈ 0.866878` et la charge du jour pèse environ `0.133122`. Sept jours désignent une **constante de temps**, pas une moyenne simple sur une semaine. Après un passage à une charge quotidienne constante, l’ATL accomplit environ 63,2 % du changement en une constante et 95 % en trois.
+Ici, `exp` désigne la fonction exponentielle naturelle. Avec la constante de temps par défaut, `decay_ATL ≈ 0.866878`, ce qui donne à la charge du jour un poids d’environ `0.133122`.
 
-## Interprétation et limites
+Sept jours correspondent à une **constante de temps**, et non à une moyenne simple ou à un total des sept derniers jours calendaires. L’entraînement plus ancien continue de contribuer avec un poids progressivement plus faible. Après un passage à une charge quotidienne constante, l’ATL accomplit environ 63,2 % de la transition en une constante de temps et environ 95,0 % en trois constantes.
 
-L’ATL monte lorsque la charge récente dépasse son niveau actuel, se stabilise quand elle le maintient et baisse pendant le repos, la récupération ou l’affûtage. Une hausse indique seulement davantage de charge récente modélisée.
+## Lire la tendance
 
-Utilisez-la avec la [Condition physique (CTL)](/fr/docs/metrics/pmc/chronic-training-load), la [Forme (TSB)](/fr/docs/metrics/pmc/training-stress-balance), la qualité des séances, le sommeil, la douleur, les signes de maladie, le RPE et le ressenti.
+- **ATL en hausse :** la charge quotidienne récente est globalement supérieure à l’ATL actuelle.
+- **ATL stable :** la charge récente maintient globalement le niveau modélisé.
+- **ATL en baisse :** la charge récente est inférieure au niveau modélisé, comme lors d’un repos, d’une semaine de récupération ou d’un affûtage.
+
+Comme l’ATL réagit vite, une seule grosse journée peut la faire évoluer nettement. Une hausse indique seulement que la charge récente modélisée a augmenté ; elle ne dit pas si cette charge a été bien assimilée.
+
+## Ce à quoi l’ATL peut — ou non — répondre
+
+L’ATL vous aide à repérer l’enchaînement de séances à forte charge, à vérifier qu’une semaine de récupération fait bien baisser la charge récente et à expliquer les écarts par rapport au plan d’entraînement.
+
+À elle seule, l’ATL ne peut pas dire si un athlète est physiologiquement fatigué, si un niveau donné est sans danger, s’il faut annuler la séance suivante ou si l’athlète est récupéré et prêt pour la course.
+
+Lisez-la toujours avec la [forme (CTL)](/fr/docs/metrics/pmc/chronic-training-load), la [fraîcheur (TSB)](/fr/docs/metrics/pmc/training-stress-balance), la qualité d’exécution des séances réalisées, le sommeil, les douleurs, les signaux de maladie, le RPE de séance et l’état subjectif.
 
 ## Références
 
-- [Intervals.icu : formules Fitness, Fatigue et Form](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
-- [RUNALYZE : Acute Training Load](https://runalyze.com/glossary/atl)
-- [TrainingPeaks : Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
-- [Code GoldenCheetah : PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
-- [Calvert et al. (1976)](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Intervals.icu developer explanation of the Fitness, Fatigue, and Form formulas](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE glossary: Acute Training Load (ATL)](https://runalyze.com/glossary/atl)
+- [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [GoldenCheetah source: PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Clarke and Skiba (2013): Mathematical modeling of athletic training and performance](https://doi.org/10.1152/advan.00078.2011)
+
+## Pages associées
+
+- [Forme (CTL)](/fr/docs/metrics/pmc/chronic-training-load)
+- [Fraîcheur (TSB)](/fr/docs/metrics/pmc/training-stress-balance)
+- [Projeter CTL, ATL et TSB à partir du TSS quotidien](/fr/training-load-calculator)
+- [Workflow d’analyse de l’entraînement](/fr/docs/guide/training-analysis-workflow)

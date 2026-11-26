@@ -497,24 +497,46 @@ export class PrismaAthleteMemoryStore implements AthleteMemoryStore {
   }
 
   /** Hash every eligible semantic version without loading private claims into the caller. */
-  async ambientFingerprint(userId: string, asOf: Date) {
+  async ambientFingerprint(
+    userId: string,
+    asOf: Date,
+    excludeSourceMessageId?: string,
+  ) {
     const rows = await this.prisma.$queryRaw<Array<{ fingerprint: string }>>`
       SELECT md5(COALESCE(string_agg(json_build_array(id, version, status, claim, value,
         epistemic_status, confidence, event_start, event_end, valid_from, valid_until,
         decay_profile, relevance_anchor_at, review_after)::text, '|' ORDER BY id), '')) AS fingerprint
-      FROM t_athlete_memory_fact WHERE user_id=${userId} AND status='ACTIVE'
+      FROM t_athlete_memory_fact fact WHERE user_id=${userId} AND status='ACTIVE'
         AND decay_profile <> 'EPISODIC'
         AND (valid_from IS NULL OR valid_from <= ${asOf})
         AND (valid_until IS NULL OR valid_until >= ${asOf})
-        AND (decay_profile <> 'ACUTE_RECOVERY' OR relevance_anchor_at >= ${new Date(asOf.getTime() - 72 * 3_600_000)})`;
+        AND (decay_profile <> 'ACUTE_RECOVERY' OR relevance_anchor_at >= ${new Date(asOf.getTime() - 72 * 3_600_000)})
+        ${excludeSourceMessageId ? Prisma.sql`
+          AND NOT (
+            epistemic_status <> 'USER_CONFIRMED'
+            AND EXISTS (
+              SELECT 1 FROM t_athlete_memory_evidence evidence
+              WHERE evidence.fact_id = fact.id
+                AND evidence.source_message_id = ${excludeSourceMessageId}
+            )
+            AND NOT EXISTS (
+              SELECT 1 FROM t_athlete_memory_evidence evidence
+              WHERE evidence.fact_id = fact.id
+                AND evidence.source_message_id <> ${excludeSourceMessageId}
+            )
+          )
+        ` : Prisma.empty}`;
     return rows[0]?.fingerprint ?? '';
   }
 
   /** Extraction state is a limitation, never a substitute for a persisted fact. */
-  contextInputStatus(userId: string) {
+  contextInputStatus(userId: string, excludeSourceMessageId?: string) {
     return this.prisma.aiCoachMemoryExtractionJob.findMany({
       where: {
         userId,
+        ...(excludeSourceMessageId
+          ? { sourceMessageId: { not: excludeSourceMessageId } }
+          : {}),
         status: { in: ['PENDING', 'RUNNING', 'FAILED', 'DEAD'] },
         createdAt: { gte: new Date(Date.now() - 7 * 86_400_000) },
       },
@@ -529,6 +551,17 @@ export class PrismaAthleteMemoryStore implements AthleteMemoryStore {
       where: {
         userId: input.userId,
         status: { in: input.statuses as AthleteMemoryStatus[] },
+        ...(input.excludeSourceMessageId
+          ? {
+              NOT: {
+                epistemicStatus: { not: 'USER_CONFIRMED' as const },
+                evidence: {
+                  some: { sourceMessageId: input.excludeSourceMessageId },
+                  none: { sourceMessageId: { not: input.excludeSourceMessageId } },
+                },
+              },
+            }
+          : {}),
         ...(input.ambientAsOf
           ? {
               decayProfile: { not: 'EPISODIC' as const },

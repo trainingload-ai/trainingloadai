@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { uiSurfaceAssistantForToolResult } from '../tool-loop-agent.runtime';
+import { stopAfterUiSurfaceTool, uiSurfaceAssistantForToolResult } from '../tool-loop-agent.runtime';
 import { coachQueryYieldsToUIMessageStream } from '../coach-ui-message-stream';
 import { buildStoredCoachUiMessageEnvelope } from '../coach-history-messages';
 import { presentCoachPlanDraftTool } from '../tools/presentCoachPlanDraft.tool';
@@ -77,6 +77,13 @@ async function roundtrip(name: string, output: unknown) {
 }
 
 describe('real tool -> card stream -> storage -> client parsing contracts', () => {
+  it('persists the saved independent draft card and stops before another model step', async () => {
+    const toolName = 'present_independent_workout_draft';
+    const output = { draftId: 'independent-workout-draft-1' };
+    await expect(roundtrip(toolName, output)).resolves.toEqual(output);
+    expect(stopAfterUiSurfaceTool({ steps: [{ toolResults: [{ toolName, output }] }] })).toBe(true);
+  });
+
   it('preserves enforceable plan constraints through the public card parser', async () => {
     const qualityContract = {
       startDate: '2026-09-07',
@@ -97,8 +104,8 @@ describe('real tool -> card stream -> storage -> client parsing contracts', () =
           weekPhases: [...qualityContract.weekPhases],
         },
         workouts: [
-          { weekIndex: 1, dayIndex: 1, sportType: 'RUN', text: 'work 30m' },
-          { weekIndex: 2, dayIndex: 1, sportType: 'RUN', text: 'work 20m' },
+          { weekIndex: 1, dayIndex: 1, sportType: 'RUN', text: 'work 30m', plannedSessionRpe: 5 },
+          { weekIndex: 2, dayIndex: 1, sportType: 'RUN', text: 'work 20m', plannedSessionRpe: 3 },
         ],
       },
     );
@@ -107,10 +114,11 @@ describe('real tool -> card stream -> storage -> client parsing contracts', () =
     expect(web.ok && web.data.qualityContract).toEqual(qualityContract);
     expect(input).toMatchObject({ qualityReport: { valid: true } });
     if (!web.ok) throw new Error(web.error);
-    // The emitted contract still rejects a tampered recovery duration.
+    expect(web.data.workouts.map(({ plannedSessionRpe }) => plannedSessionRpe)).toEqual([5, 3]);
+    // The emitted contract still rejects a recovery with unchanged estimated load.
     const report = assessPlanQuality(
       web.data.periodWeeks,
-      web.data.workouts.map((w) => ({ ...w, durationSeconds: 1800 })),
+      web.data.workouts.map((w) => ({ ...w, durationSeconds: 1800, estimatedLoad: 25 })),
       web.data.qualityContract,
     );
     expect(report.valid).toBe(false);

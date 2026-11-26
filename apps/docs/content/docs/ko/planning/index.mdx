@@ -1,0 +1,70 @@
+---
+title: 훈련 플랜과 워크아웃
+description: Trainingload.ai에서 훈련 플랜, 예정된 워크아웃, 지구력·근력 구조, 예상 훈련 부하, 완료된 활동 연결을 어떻게 모델링하는지 안내합니다.
+keywords:
+  ["Trainingload.ai 훈련 플랜", "구조화된 워크아웃", "훈련 플랜 수명 주기"]
+---
+
+# 훈련 플랜과 워크아웃
+
+Trainingload.ai는 훈련 플랜을 정적인 PDF 문서가 아니라 살아 있는 작업 공간으로 다룹니다. 하나의 플랜에는 날짜가 지정되었거나 상대 일정으로 배치된 워크아웃이 담기며, 각 워크아웃은 기계가 읽을 수 있는 구조, 사람이 읽는 메모, 예상 훈련 부하, 실행 상태, 완료된 활동과의 연결 정보를 함께 가질 수 있습니다.
+
+## 훈련 계획 모델
+
+<Mermaid
+  chart={`flowchart TD
+  Goal["목표 및 제약 조건"] --> Plan["훈련 플랜"]
+  Plan --> Workout["예정된 워크아웃"]
+  Workout --> Structure["지구력 또는 근력 구조"]
+  Structure --> Expected["예상 훈련 부하"]
+  Workout --> Activity["완료된 활동 연결"]
+  Activity --> Actual["실제 훈련 부하 및 실행 결과"]
+  Expected --> Review["플랜 리뷰"]
+  Actual --> Review
+  Review --> Adjustment["확정된 조정안"]
+  Adjustment --> Plan`}
+/>
+
+## 플랜 상태
+
+- **초안(Draft)** — 작성 중이며 자유롭게 편집할 수 있는 플랜입니다. 실행 전 검토 단계에서 사용합니다.
+- **활성(Active)** — 시작일이 지정되어 일일 실행 맥락을 제공하는 현재 진행 중인 플랜입니다.
+- **일시 중지(Paused)** — 플랜과 기존 이력을 보존한 채 일시적으로 중단한 상태입니다.
+- **완료(Completed)** — 의도한 대로 마무리된 플랜입니다.
+- **취소(Canceled)** — 원래 의도대로 완료하지 않고 종료한 플랜입니다.
+
+이미 완료된 활동이 연결되어 있는 플랜의 상태를 변경하기 전에 [플랜 상태 및 가져오기 관리](/ko/docs/planning/plan-lifecycle)를 먼저 읽어 보세요.
+
+## 워크아웃 구조 유형
+
+### 지구력(Endurance)
+
+지구력 워크아웃은 웜업, 본 운동(Work), 회복(Recovery), 반복(Repeat) 등의 단계로 구성되며, 시간 또는 거리 처방과 함께 구간(Zone), 페이스, 속도, 파워, 케이던스, 심박수 같은 선택적 목표를 포함합니다.
+
+앱 내 시각적 편집은 [수동 워크아웃 편집기 가이드](/ko/docs/planning/manual-workout-editor)를, 공개 세션 초안 작성은 [워크아웃 편집기 및 빌더](/ko/workout-editor)를, 간결한 텍스트 규칙 작성은 [지구력 워크아웃 DSL](/ko/docs/planning/workout-dsl)을 참고하세요.
+
+### 근력(Strength)
+
+근력 워크아웃은 운동 종목(Exercise)과 세트 그룹으로 구성됩니다. 반복 횟수 또는 시간 기준으로 처방할 수 있으며, 지원되는 범위 내에서 오픈 부하(Open load), 고정 중량, 1RM 백분율, 맨몸, 강도 지표(RPE/RIR), 휴식 시간을 설정할 수 있습니다.
+
+시각적 작성 흐름은 [근력 워크아웃](/ko/docs/planning/strength-workouts)을, 단계별 규칙(Rules) 모드 작성법은 [근력 워크아웃 DSL](/ko/docs/planning/strength-workout-dsl)을 참고하세요.
+
+## 예상 훈련 부하와 실제 훈련 부하
+
+예상 훈련 부하(Expected load)는 워크아웃 구조, 임곗값, 목표 정보가 충분한 신호를 제공할 때만 계산됩니다. 실제 훈련 부하(Actual load)는 완료된 활동 데이터와 설정된 훈련 부하 소스 우선순위에서 산출됩니다.
+
+두 값은 서로 다른 질문에 답합니다.
+
+- 예상 훈련 부하: “이 계획은 어느 정도의 훈련 스트레스를 의도했는가?”
+- 실제 훈련 부하: “실제 완료한 세션은 어느 정도의 스트레스를 발생시켰는가?”
+
+예상 훈련 부하를 억지로 얻기 위해 임곗값이나 목표를 임의로 지어내지 마세요. 부정확한 수치보다 명시적인 미상 상태가 훨씬 안전합니다.
+
+## 권장 학습 순서
+
+1. [훈련 플랜 만들기](/ko/docs/guide/create-training-plan)
+2. [수동 워크아웃 편집기 가이드](/ko/docs/planning/manual-workout-editor)
+3. 근력 세션을 구성하는 경우 [근력 워크아웃 DSL](/ko/docs/planning/strength-workout-dsl)
+4. [플랜 상태 및 가져오기 관리](/ko/docs/planning/plan-lifecycle)
+5. [활성 플랜 관리하기](/ko/docs/guide/manage-active-plan)
+6. [AI 코치](/ko/docs/guide/ai-coach)

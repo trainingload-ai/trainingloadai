@@ -13,9 +13,15 @@ import {
 import {
   REVIEW_DIGEST_PROMPT_VERSION,
   buildReviewDigestMessages,
+  reviewReportAnalysisSchema,
   type ReviewDigestCoachingContext,
+  type ReviewDigestHighlight,
+  type ReviewReportAnalysis,
 } from '@/api/ai/core/prompt-contracts/review-digest.contract';
-import { resolveEffectiveActivityVo2Max } from '@/analyze/vo2max/vo2max-source';
+import { ActivityAiReviewService } from '@/api/activity/activity-ai-review.service';
+import { HealthDataQueryService } from '@/health-data/health-data-query.service';
+import { healthLocalDateKey } from '@/health-data/health-local-day';
+import { completedReviewWindow } from './review-date-window';
 import { readyActivityWhere } from '@/utils/activity-ready-where';
 import { ReviewDigestContextService } from './review-digest-context.service';
 import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service';
@@ -25,24 +31,31 @@ import {
   isReviewConsentRequiredError,
 } from './review-model-call-guard';
 import { AiService } from '@/api/ai/ai.service';
+import {
+  buildReviewReportTraining,
+  renderReviewReport,
+  type ReviewReportActivity,
+  type ReviewReportTraining,
+} from './review-report';
+import {
+  reviewRecoveryWindow,
+  summarizeReviewRecovery,
+  type ReviewRecoveryRow,
+} from './review-recovery';
 
 type AggregatedActivity = {
   id: number;
+  hashId: string;
   sportType: string | null;
   startTime: Date | null;
   timerTime: number | null;
   elapsedTime: number | null;
   distance: number | null;
   activityName: string | null;
-  avgHeartRate: number | null;
-  avgPower: number | null;
   cogganBikeStress: number | null;
   govss: number | null;
   swimScore: number | null;
   trimp100: number | null;
-  vo2maxVdotByRace: number | null;
-  vo2maxVdotByHr: number | null;
-  vo2maxVdotByFactor: number | null;
 };
 
 type NormalizedSportType = 'RUN' | 'CYCLING' | 'SWIM' | 'UNKNOWN';
@@ -91,24 +104,6 @@ type WriteSnapshotAndDetailsArgs = {
   highlights: HighlightItem[];
 };
 
-type MarkdownSummaryArgs = {
-  type: ReviewDigestType;
-  lang: string;
-  totals: Pick<
-    AggregatedTotals,
-    'totalSessions' | 'totalDurationSec' | 'totalDistanceM' | 'totalTss'
-  > & { totalLoad?: number };
-  highlights: Array<{
-    rank: number;
-    sportType: string;
-    durationSec: number | null;
-    distanceM: number | null;
-    tss: number | null;
-    title: string | null;
-    startTime: Date | null;
-  }>;
-};
-
 type GenerateAiSummaryArgs = {
   userId: string;
   type: ReviewDigestType;
@@ -117,16 +112,10 @@ type GenerateAiSummaryArgs = {
   periodEnd: Date;
   timezone: string;
   totals: AggregatedTotals;
-  highlights: Array<{
-    rank: number;
-    sportType: string;
-    durationSec: number | null;
-    distanceM: number | null;
-    tss: number | null;
-    title: string | null;
-    startTime: Date | null;
-  }>;
+  highlights: Array<ReviewDigestHighlight & { activityId?: number }>;
   coachingContext?: ReviewDigestCoachingContext | null;
+  training?: ReviewReportTraining;
+  recovery?: ReviewRecoveryRow[];
 };
 
 type EnsureDigestForJobArgs = {
@@ -160,6 +149,8 @@ export class ReviewDigestService {
     @Optional() private readonly digestContext?: ReviewDigestContextService,
     @Optional() private readonly aiDataConsent?: AiDataConsentService,
     @Optional() private readonly ai?: AiService,
+    @Optional() private readonly health?: HealthDataQueryService,
+    @Optional() private readonly activityReviews?: ActivityAiReviewService,
   ) {}
 
   findManyByIdsForUser(userId: string, ids: string[]) {
@@ -196,6 +187,8 @@ export class ReviewDigestService {
   }
 
   private digestSportLabel(lang: string, sportType: string) {
+    if (sportType === 'UNKNOWN')
+      return this.digestText(lang, 'report.otherSport');
     const key = `common.aiCoach.mutation.userFitnessMetric.sports.${sportType}`;
     const value = this.i18n.t(key, { lang });
     return typeof value === 'string' && value !== key ? value : sportType;
@@ -269,85 +262,57 @@ export class ReviewDigestService {
     return null;
   }
 
-  /**
-   * 解析 VO2max/VDOT（来自不同估算来源的一个可用值）。
-   * 目前仅用于未来扩展（趋势/提示），不参与核心汇总。
-   */
-  private resolveVo2max(
-    a: Pick<
-      AggregatedActivity,
-      'vo2maxVdotByRace' | 'vo2maxVdotByHr' | 'vo2maxVdotByFactor'
-    >,
-  ) {
-    return resolveEffectiveActivityVo2Max(a)?.value ?? null;
-  }
-
-  /**
-   * 聚合一个时间窗口内的活动数据，产出：
-   * - 宽表所需的汇总指标（次数/时长/距离/TSS/综合负荷）
-   * - 运动类型分组统计（用于明细表）
-   * - Top highlights（用于“本周期重点训练”）
-   *
-   * 约束：
-   * - `take: 500` 是保护阈值，避免极端用户拉取过多记录导致 worker 抖动
-   * - highlights 的 score 优先使用综合负荷，其次 TSS，再次时长（分钟）
-   */
+  /** Read the full period in bounded pages; highlights retain the existing load ranking. */
   async aggregateWindow(
     args: AggregateWindowArgs,
   ): Promise<AggregateWindowResult> {
-    const rows = await this.activities.findMany({
-      where: readyActivityWhere({
-        userId: args.userId,
-        startTime: {
-          gte: args.periodStart,
-          lt: args.periodEnd,
-        },
-      }),
-      orderBy: { startTime: 'desc' },
-      take: 500,
-      select: {
-        id: true,
-        sportType: true,
-        startTime: true,
-        timerTime: true,
-        elapsedTime: true,
-        distance: true,
-        activityName: true,
-        avgHeartRate: true,
-        avgPower: true,
-        coggan: { select: { bikeStress: true } },
-        govss: { select: { govss: true } },
-        swimScore: { select: { swimScore: true } },
-        trimp: { select: { trimp100: true } },
-        vo2max: {
-          select: {
-            vo2maxVdotByRace: true,
-            vo2maxVdotByHr: true,
-            vo2maxVdotByFactor: true,
-          },
-        },
-      },
+    const where = readyActivityWhere({
+      userId: args.userId,
+      startTime: { gte: args.periodStart, lt: args.periodEnd },
     });
-
-    const activities: AggregatedActivity[] = rows.map((r) => ({
-      id: r.id,
-      sportType: r.sportType ?? null,
-      startTime: r.startTime ?? null,
-      timerTime: (r.timerTime as number | null) ?? null,
-      elapsedTime: (r.elapsedTime as number | null) ?? null,
-      distance: (r.distance as number | null) ?? null,
-      activityName: (r.activityName as string | null) ?? null,
-      avgHeartRate: (r.avgHeartRate as number | null) ?? null,
-      avgPower: (r.avgPower as number | null) ?? null,
-      cogganBikeStress: (r.coggan?.bikeStress as number | null) ?? null,
-      govss: (r.govss?.govss as number | null) ?? null,
-      swimScore: (r.swimScore?.swimScore as number | null) ?? null,
-      trimp100: (r.trimp?.trimp100 as number | null) ?? null,
-      vo2maxVdotByRace: (r.vo2max?.vo2maxVdotByRace as number | null) ?? null,
-      vo2maxVdotByHr: (r.vo2max?.vo2maxVdotByHr as number | null) ?? null,
-      vo2maxVdotByFactor:
-        (r.vo2max?.vo2maxVdotByFactor as number | null) ?? null,
-    }));
+    const activities: AggregatedActivity[] = [];
+    const pageSize = 500;
+    let cursor: number | undefined;
+    for (;;) {
+      const rows = await this.activities.findMany({
+        where,
+        orderBy: [{ startTime: 'desc' }, { id: 'desc' }],
+        take: pageSize,
+        ...(cursor !== undefined ? { cursor: { id: cursor }, skip: 1 } : {}),
+        select: {
+          id: true,
+          hashId: true,
+          sportType: true,
+          startTime: true,
+          timerTime: true,
+          elapsedTime: true,
+          distance: true,
+          activityName: true,
+          coggan: { select: { bikeStress: true } },
+          govss: { select: { govss: true } },
+          swimScore: { select: { swimScore: true } },
+          trimp: { select: { trimp100: true } },
+        },
+      });
+      for (const row of rows) {
+        activities.push({
+          id: row.id,
+          hashId: row.hashId,
+          sportType: row.sportType ?? null,
+          startTime: row.startTime ?? null,
+          timerTime: row.timerTime ?? null,
+          elapsedTime: row.elapsedTime ?? null,
+          distance: Number.isFinite(row.distance) ? row.distance : null,
+          activityName: row.activityName ?? null,
+          cogganBikeStress: row.coggan?.bikeStress ?? null,
+          govss: row.govss?.govss ?? null,
+          swimScore: row.swimScore?.swimScore ?? null,
+          trimp100: row.trimp?.trimp100 ?? null,
+        });
+      }
+      if (rows.length < pageSize) break;
+      cursor = rows[rows.length - 1].id;
+    }
 
     const bySport: TotalsBySport = {
       RUN: { sessions: 0, durationSec: 0, distanceM: 0, tss: 0 },
@@ -375,13 +340,9 @@ export class ReviewDigestService {
         totalDurationSec += dur;
       }
 
-      const dist =
-        typeof a.distance === 'number' && Number.isFinite(a.distance)
-          ? a.distance
-          : null;
-      if (dist != null) {
-        bySport[sport].distanceM += dist;
-        totalDistanceM += dist;
+      if (a.distance != null) {
+        bySport[sport].distanceM += a.distance;
+        totalDistanceM += a.distance;
       }
 
       const tss = this.resolveTss(a);
@@ -407,10 +368,7 @@ export class ReviewDigestService {
           | 'UNKNOWN',
         startTime: a.startTime,
         durationSec: this.resolveDurationSec(a),
-        distanceM:
-          typeof a.distance === 'number' && Number.isFinite(a.distance)
-            ? a.distance
-            : null,
+        distanceM: a.distance,
         tss: this.resolveTss(a),
         title: a.activityName,
         score:
@@ -550,75 +508,6 @@ export class ReviewDigestService {
   }
 
   /**
-   * 规则版（非 AI）Markdown 摘要：当 AI 关闭/不可用/失败时使用。
-   * 只输出最基本的概览 + Top highlights，避免编造推断。
-   * 文案走 nestjs-i18n，与通知同一套 `common.notification.reviewDigest.*`。
-   */
-  async buildMarkdownSummary(args: MarkdownSummaryArgs) {
-    const { type, lang, totals, highlights } = args;
-    const hours = Math.round((totals.totalDurationSec / 3600) * 10) / 10;
-    const km = Math.round((totals.totalDistanceM / 1000) * 10) / 10;
-    const tss = Math.round(totals.totalTss);
-    const load = totals.totalLoad != null ? Math.round(totals.totalLoad) : null;
-    const overviewKey =
-      type === 'DAILY'
-        ? 'fallbackOverviewDaily'
-        : type === 'WEEKLY'
-          ? 'fallbackOverviewWeekly'
-          : 'fallbackOverviewMonthly';
-
-    const lines: string[] = [
-      this.digestText(lang, overviewKey),
-      this.digestText(lang, 'fallbackSessions', {
-        count: totals.totalSessions,
-      }),
-      this.digestText(lang, 'fallbackDurationHours', { hours }),
-      this.digestText(lang, 'fallbackDistanceKm', { km }),
-    ];
-    if (load != null && load > 0) {
-      lines.push(this.digestText(lang, 'fallbackLoad', { load }));
-    } else if (totals.totalTss > 0) {
-      lines.push(this.digestText(lang, 'fallbackTss', { tss }));
-    }
-    if (highlights.length) {
-      lines.push('');
-      lines.push(this.digestText(lang, 'fallbackHighlightsHeading'));
-      for (const h of highlights) {
-        const durMin =
-          h.durationSec != null ? Math.round(h.durationSec / 60) : null;
-        const distKm =
-          h.distanceM != null
-            ? Math.round((h.distanceM / 1000) * 10) / 10
-            : null;
-        const title = h.title?.trim();
-        const parts = [
-          title ? title : this.digestSportLabel(lang, h.sportType),
-          durMin != null
-            ? this.digestText(lang, 'fallbackHighlightDuration', {
-                minutes: durMin,
-              })
-            : null,
-          distKm != null
-            ? this.digestText(lang, 'fallbackHighlightDistance', { km: distKm })
-            : null,
-          h.tss != null
-            ? this.digestText(lang, 'fallbackHighlightTss', {
-                tss: Math.round(h.tss),
-              })
-            : null,
-        ].filter((part): part is string => Boolean(part));
-        lines.push(
-          this.digestText(lang, 'fallbackHighlightItem', {
-            rank: h.rank,
-            summary: parts.join(' · '),
-          }),
-        );
-      }
-    }
-    return lines.join('\n');
-  }
-
-  /**
    * AI 开关：用于整体开启/关闭复盘 AI（失败时会自动降级为规则版）。
    */
   private isAiEnabled() {
@@ -630,16 +519,12 @@ export class ReviewDigestService {
     return String(process.env.REVIEW_AI_MODEL ?? '').trim() || getCoachModel();
   }
 
-  /**
-   * 调用 LLM 生成复盘 Markdown。
-   * - 若未开启 AI / 未配置 key：直接返回 null（上游走规则版）
-   * - 若调用失败：记录 warning 并返回 null（上游走规则版）
-   * - 若本轮已连续 3 次模型失败：抛出 ReviewModelDeferredError，由 worker 顺延任务
-   */
-  async generateAiSummaryMarkdown(args: GenerateAiSummaryArgs): Promise<{
-    markdown: string;
+  /** Generate optional coach findings without delegating the report tables. */
+  async generateAiAnalysis(args: GenerateAiSummaryArgs): Promise<{
+    analysis: ReviewReportAnalysis;
     model: string;
     promptVersion: string;
+    activityExcerpts: Map<number, string>;
   } | null> {
     if (!this.isAiEnabled()) return null;
     if (!this.ai) return null;
@@ -656,6 +541,7 @@ export class ReviewDigestService {
     if (!model) return null;
 
     try {
+      const analysisExcerpts = await this.loadActivityReviewExcerpts(args);
       const messages = buildReviewDigestMessages({
         type: args.type,
         lang: args.lang,
@@ -663,14 +549,19 @@ export class ReviewDigestService {
         periodEnd: args.periodEnd,
         timezone: args.timezone,
         totals: args.totals,
-        highlights: args.highlights,
+        highlights: args.highlights.map((highlight) => ({
+          ...highlight,
+          analysisExcerpt: analysisExcerpts.get(highlight.activityId ?? 0),
+        })),
         coachingContext: args.coachingContext,
+        training: args.training,
+        recovery: args.recovery,
         delivery: 'agent-tool',
       });
       const task = await this.modelGuard.run(
         `digest:${args.type}`,
         (signal) =>
-          this.ai!.runBackgroundCoachTask<{ markdown: string }>({
+          this.ai!.runBackgroundCoachTask<ReviewReportAnalysis>({
             userId: args.userId,
             lang: args.lang,
             taskType: `REVIEW_DIGEST_${args.type}`,
@@ -692,30 +583,22 @@ export class ReviewDigestService {
                   `${message.role.toUpperCase()}_TASK_DATA_BEGIN\n${message.content}\n${message.role.toUpperCase()}_TASK_DATA_END`,
               )
               .join('\n\n'),
-            validateResult: (raw) => {
-              const obj =
-                raw && typeof raw === 'object' && !Array.isArray(raw)
-                  ? (raw as Record<string, unknown>)
-                  : null;
-              const markdown = String(obj?.markdown ?? '').trim();
-              if (!markdown) throw new Error('Review markdown is required.');
-              return { markdown: markdown.slice(0, 24_000) };
-            },
+            validateResult: (raw) => reviewReportAnalysisSchema.parse(raw),
           }),
         {
           failureReason: (result) =>
             !result.usage.reported
               ? 'usage_missing'
-              : result.result.markdown.trim()
+              : result.result.headline.trim()
                 ? null
                 : 'empty_response',
         },
       );
 
-      const md = task.result.markdown.trim();
-      if (!md) return null;
+      if (!task.result.headline.trim()) return null;
       return {
-        markdown: md,
+        analysis: task.result,
+        activityExcerpts: analysisExcerpts,
         model: task.model,
         promptVersion: REVIEW_DIGEST_PROMPT_VERSION,
       };
@@ -808,32 +691,93 @@ export class ReviewDigestService {
       totals: agg.totals,
       highlights: agg.highlights,
     });
-    const coachingContext = await this.buildCoachingContext(args);
-    const ai = await this.generateAiSummaryMarkdown({
+    const timezone = args.timezone ?? 'UTC';
+    const activities = agg.activities.map(
+      (activity): ReviewReportActivity => ({
+        id: activity.id,
+        hashId: activity.hashId,
+        title: activity.activityName,
+        sportType: activity.sportType,
+        date: healthLocalDateKey(
+          activity.startTime ?? args.periodStart,
+          timezone,
+        ),
+        durationSec: this.resolveDurationSec(activity),
+        distanceM: activity.distance,
+        load: args.type === 'WEEKLY' ? this.resolveLoad(activity) : undefined,
+      }),
+    );
+    const training = buildReviewReportTraining({
+      ...args,
+      timezone,
+      activities,
+    });
+    const byId = new Map(activities.map((activity) => [activity.id, activity]));
+    const included = new Set(
+      agg.highlights.map(({ activityId }) => activityId),
+    );
+    const candidates = [
+      ...agg.highlights,
+      ...agg.activities
+        .filter(({ id }) => !included.has(id))
+        .slice(0, 12 - agg.highlights.length)
+        .map((activity, index) => ({
+          activityId: activity.id,
+          rank: agg.highlights.length + index + 1,
+          sportType: activity.sportType ?? 'UNKNOWN',
+          title: activity.activityName,
+          startTime: activity.startTime,
+          durationSec: this.resolveDurationSec(activity),
+          distanceM: activity.distance,
+          tss: null,
+        })),
+    ];
+    const references = candidates.flatMap(({ activityId, rank }) => {
+      const activity = byId.get(activityId);
+      return activity ? [{ rank, activity }] : [];
+    });
+    const [coachingContext, recovery, previousPeriod] =
+      await Promise.all([
+        this.buildCoachingContext(args),
+        this.buildRecovery({ ...args, timezone }),
+        args.type !== 'DAILY'
+          ? this.getPreviousTrainingPeriod({ ...args, timezone })
+          : undefined,
+      ]);
+    training.previousPeriod = previousPeriod;
+    const ai = await this.generateAiAnalysis({
       userId: args.userId,
       type: args.type,
       lang: args.lang,
       periodStart: args.periodStart,
       periodEnd: args.periodEnd,
-      timezone: args.timezone ?? 'UTC',
+      timezone,
       totals: agg.totals,
-      highlights: agg.highlights,
+      highlights: candidates,
       coachingContext,
+      training,
+      recovery,
     });
-    const md =
-      ai?.markdown ??
-      (await this.buildMarkdownSummary({
-        type: args.type,
-        lang: args.lang,
-        totals: agg.totals,
-        highlights: agg.highlights,
-      }));
+    const md = renderReviewReport({
+      type: args.type,
+      lang: args.lang,
+      training,
+      activities,
+      references: references.map((reference) => ({
+        ...reference,
+        excerpt: ai?.activityExcerpts.get(reference.activity.id),
+      })),
+      recovery,
+      analysis: ai?.analysis,
+      translate: (key, values) => this.digestText(args.lang, key, values),
+      sportLabel: (sport) => this.digestSportLabel(args.lang, sport),
+    });
     await this.digests.digests().update({
       where: { id: args.digestId },
       data: {
         aiSummaryMarkdown: md,
-        model: ai?.model ?? 'rule_based_v0',
-        promptVersion: ai?.promptVersion ?? 'v0',
+        model: ai?.model ?? 'rule_based_v1',
+        promptVersion: ai?.promptVersion ?? 'report_v1',
       },
     });
 
@@ -848,6 +792,85 @@ export class ReviewDigestService {
       args.digestId,
       md,
     );
+    return md;
+  }
+
+  private async getPreviousTrainingPeriod(
+    args: FinalizeDigestContentArgs & { timezone: string },
+  ) {
+    const current = completedReviewWindow(
+      args.type,
+      args.periodEnd,
+      args.timezone,
+    );
+    if (
+      current.periodStart.getTime() !== args.periodStart.getTime() ||
+      current.periodEnd.getTime() !== args.periodEnd.getTime()
+    ) {
+      return undefined;
+    }
+    const previous = completedReviewWindow(
+      args.type,
+      args.periodStart,
+      args.timezone,
+    );
+    try {
+      const rows = await this.activities.findMany({
+        where: readyActivityWhere({
+          userId: args.userId,
+          startTime: { gte: previous.periodStart, lt: previous.periodEnd },
+        }),
+        select: { timerTime: true, elapsedTime: true },
+      });
+      const durations = rows.map((row) => this.resolveDurationSec(row));
+      return {
+        sessions: rows.length,
+        durationSec: durations.every((value) => value !== null)
+          ? durations.reduce((sum, value) => sum + value, 0)
+          : null,
+      };
+    } catch {
+      this.logger.warn('Could not load the previous training period');
+    }
+    return undefined;
+  }
+
+  private async loadActivityReviewExcerpts(args: GenerateAiSummaryArgs) {
+    if (!this.activityReviews) return new Map<number, string>();
+    try {
+      const ids = args.highlights.flatMap(({ activityId }) =>
+        activityId === undefined ? [] : [activityId],
+      );
+      return await this.activityReviews.findReviewExcerpts(
+        args.userId,
+        ids,
+        args.lang,
+      );
+    } catch {
+      this.logger.warn(
+        `Could not load activity review excerpts for ${args.type} review`,
+      );
+      return new Map<number, string>();
+    }
+  }
+
+  private async buildRecovery(
+    args: FinalizeDigestContentArgs & { timezone: string },
+  ): Promise<ReviewRecoveryRow[]> {
+    if (!this.health) return [];
+    try {
+      const window = reviewRecoveryWindow(args);
+      const { observations } = await this.health.getCoachingFacts(
+        args.userId,
+        window.through,
+        new Date(),
+        window.queryDays,
+      );
+      return summarizeReviewRecovery(args.type, window, observations);
+    } catch {
+      this.logger.warn(`Could not load recovery data for ${args.type} review`);
+      return [];
+    }
   }
 
   /** 计划上下文失败不应阻断活动 Digest；保留纯活动复盘作为可靠降级路径。 */

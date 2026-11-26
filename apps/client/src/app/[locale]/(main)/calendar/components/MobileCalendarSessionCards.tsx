@@ -259,22 +259,22 @@ const SheetActivityCard = React.memo(function SheetActivityCard({
 
 export const MobileCalendarDayContent = React.memo(
   function MobileCalendarDayContent({
-    notGenerated,
     activities,
     events,
     onActivityPress,
     onEventPress,
     onWorkoutPress,
     variant = "selected",
+    workoutContent,
     workouts,
   }: {
-    notGenerated?: boolean;
     activities: Activity[];
     events: CompetitionEvent[];
     onActivityPress: (activity: Activity) => void;
     onEventPress: (event: CompetitionEvent) => void;
     onWorkoutPress: (workout: PlanWorkout) => void;
     variant?: "selected" | "sheet";
+    workoutContent?: React.ReactNode;
     workouts: PlanWorkout[];
   }) {
     const t = useTranslations();
@@ -287,7 +287,7 @@ export const MobileCalendarDayContent = React.memo(
     if (!hasContent) {
       return (
         <p className="text-sm text-zinc-400 dark:text-zinc-500">
-          {notGenerated ? t("RollingPlan.notGenerated") : t(
+          {t(
             variant === "sheet"
               ? "MobileCalendarTimeline.restHint"
               : "MobileCalendarTimeline.selectDateHint",
@@ -306,7 +306,7 @@ export const MobileCalendarDayContent = React.memo(
             t={t}
           />
         ))}
-        {workouts.map((workout) => (
+        {workoutContent ?? workouts.map((workout) => (
           <MobilePlanWorkoutRow
             key={workout.id}
             workout={workout}

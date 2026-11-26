@@ -1,0 +1,40 @@
+---
+title: Sécurité et confidentialité MCP
+description: OAuth, minimisation des données, cloisonnement des comptes, assainissement, limites, journalisation et cadre des données de santé pour TrainingLoad MCP.
+---
+
+# Sécurité et confidentialité MCP
+
+Lorsque vous connectez TrainingLoad MCP, le client IA que vous autorisez peut consulter des synthèses d’entraînement et répondre à vos questions. MCP est strictement en lecture seule : il ne peut modifier ni vos activités, ni vos plans d’entraînement, ni vos compétitions, ni votre profil, ni les paramètres de votre compte.
+
+## Vous maîtrisez les autorisations
+
+Lors de la connexion, le client ouvre la page d’autorisation TrainingLoad. Vérifiez le nom du client ainsi que les portées (scopes) demandées avant de valider. Vous n’avez jamais à communiquer votre mot de passe TrainingLoad ni aucune clé API au client.
+
+Chaque requête vérifie l’état courant de l’autorisation du compte. Un client ne peut lire que les données que vous avez expressément autorisées. Une autorisation manquante, un accès expiré ou un incident temporaire renvoie une erreur explicite correspondante.
+
+Les données de santé nécessitent la portée (scope) distincte `health:read`, qui n’est pas incluse par défaut. Vous pouvez révoquer l’accès d’un client à tout moment depuis votre compte.
+
+## Ce que le client peut lire
+
+Les outils renvoient uniquement les synthèses nécessaires aux questions d’entraînement, comme la durée des activités, la charge d’entraînement, la réalisation du plan d’entraînement et l’évolution des métriques. Les requêtes sur les activités et les plans sont strictement limitées aux enregistrements appartenant au compte que vous avez autorisé.
+
+MCP ne renvoie jamais d’adresses e-mail, d’identifiants utilisateur internes, de traces GPS précises, de flux bruts de capteurs, d’identifiants tiers ni de fichiers FIT complets. Les listes et plages de dates sont bornées ; un client peut donc devoir effectuer plusieurs requêtes pour explorer un historique plus long.
+
+## Les notes d’activité sont des données, pas des instructions
+
+Les noms d’activités, descriptions, intitulés de séances et notes de compétition sont traités comme de simples données d’entraînement. Le service nettoie les contenus textuels à risque et indique aux clients de ne jamais suivre de commandes ou de liens intégrés dans ces champs.
+
+## Cadre d’utilisation des données de santé
+
+L’outil santé fournit une synthèse quotidienne réduite du bien-être pour éclairer l’analyse d’entraînement. Il ne constitue ni un diagnostic médical ni un substitut à l’avis d’un professionnel qualifié.
+
+## Limites de requêtes et journaux de diagnostic
+
+Le service peut limiter les requêtes trop fréquentes ou portant sur un volume de données excessif. Le client doit suivre les indications de l’erreur, réduire la plage de dates ou patienter avant de réessayer.
+
+Le service conserve des informations techniques utiles au diagnostic, telles que le nom de l’outil, le statut du résultat, le code d’erreur, la durée et l’identifiant de requête. Les identifiants utilisateur et client y sont pseudonymisés. Ces journaux ne contiennent ni jetons d’accès ni contenu complet des requêtes ou des réponses.
+
+## En cas de doute sur un accès non souhaité
+
+Révoquez immédiatement l’accès du client depuis votre compte TrainingLoad, puis signalez l’incident via le canal de support du site. Précisez l’heure approximative, le nom du client et l’identifiant de requête s’il a été affiché. Ne transmettez jamais de jetons d’accès ni de dossiers de santé complets.

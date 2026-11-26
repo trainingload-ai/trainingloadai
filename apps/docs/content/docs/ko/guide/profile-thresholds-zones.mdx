@@ -1,142 +1,187 @@
 ---
-title: Profile, Thresholds, and Zones
-description: Set up athlete profile values, thresholds, load-source priority, and training zones so Trainingload.ai can interpret workouts, plans, and AI Coach context more accurately.
-keywords: ["athlete profile", "training thresholds", "training zones", "load source priority", "Trainingload.ai settings"]
+title: 프로필, 역치 및 훈련 존
+description: 선수 프로필, 역치, 부하 소스 우선순위, 훈련 존을 설정해 Trainingload.ai가 워크아웃, 플랜, AI 코치 맥락을 더 정확하게 해석하도록 합니다.
+keywords:
+  [
+    "선수 프로필",
+    "훈련 역치",
+    "훈련 존",
+    "부하 소스 우선순위",
+    "Trainingload.ai 설정",
+  ]
 ---
 
-# Profile, Thresholds, and Zones
+# 프로필, 역치 및 훈련 존
 
-Profile, thresholds, and zones are the calibration layer of Trainingload.ai. They help the product interpret your workouts, estimate load, build useful charts, and give AI Coach enough context to avoid generic advice.
+프로필, 역치, 훈련 존을 설정하면 훈련 부하 추정치, 존 차트, 코칭 조언이 본인의 실제 상태에 맞게 계산됩니다. 예를 들어 파워 훈련에는 적절한 FTP가 필요하며, 심박수 존은 선택한 기준값과 모델에 따라 달라집니다.
 
-You do not need every field on day one. Start with the values you trust, then refine them after tests, races, or consistent training data.
+첫날부터 모든 항목을 채울 필요는 없습니다. 신뢰할 수 있는 값부터 입력한 뒤 테스트, 대회, 꾸준한 훈련 데이터가 쌓이면서 점차 다듬어 나가면 됩니다.
 
-## Basic profile
+## 시작하기 전에
 
-Basic profile values affect display, calendar logic, and some physiology-related calculations.
+- 최근의 신뢰할 수 있는 테스트, 대회, 기기 또는 코치에게서 얻은 현재 값을 사용합니다.
+- 실제로 훈련하는 종목과 사용하는 센서를 미리 파악해 둡니다.
+- 다른 선수의 역치나 존을 그대로 복사하지 않습니다.
+- 값의 변화 이력이 중요하다면 측정 날짜와 방법을 함께 메모해 둡니다.
 
-Check:
+## 보정(캘리브레이션) 순서
 
-- **Time zone**: used for calendar days, review windows, and date-based training views.
-- **Unit system**: controls how distance, pace, elevation, and related values are displayed.
-- **Body weight**: useful for relative power and weight-related metrics.
-- **Height, birthday, and gender**: used where age, body-size context, or demographic reference ranges are relevant.
-- **Primary sport**: helps choose sport-specific defaults and display choices.
+1. 시간대, 단위, 기본 프로필 항목을 설정합니다.
+2. 근거가 있는 현재 역치 값만 추가합니다.
+3. 센서 신뢰도를 기준으로 부하 소스 우선순위를 지정합니다.
+4. 관련 종목별로 존을 선택하거나 직접 정의합니다.
+5. 저장한 뒤 최근에 처리가 완료된(Ready) 활동을 열어 단위, 존, 부하 맥락이 알맞게 반영되었는지 확인합니다.
 
-If your time zone is wrong, a workout may appear on the wrong training day. Fix time zone before judging calendar or review summaries.
+<DocsScreenshot
+  id="profile-thresholds-calibration"
+  title="프로필 및 역치 보정"
+  description="먼저 시간대와 단위를 설정한 다음 현재 역치, 부하 소스 우선순위, 종목별 존을 구성합니다."
+  route="Account → Profile and zones"
+/>
 
-## Key thresholds
+## 기본 프로필
 
-Thresholds convert raw workout data into intensity and load.
+기본 프로필 값은 화면 표시, 캘린더 날짜 기준, 일부 생리학적 계산에 영향을 미칩니다.
 
-Common fields include:
+확인할 항목:
 
-- **FTP**: functional threshold power, mainly used for cycling power intensity and power-based load.
-- **CP**: critical power, useful for power-duration and critical-power-based analysis.
-- **W' / W Prime**: finite work capacity above critical power.
-- **Pmax**: peak power context for power profiling.
-- **LTHR**: lactate threshold heart rate, useful for heart-rate zones and threshold-oriented HR analysis.
-- **Max heart rate**: used by max-HR-based zones and some heart-rate comparisons.
-- **Resting heart rate**: used with max HR for heart-rate reserve.
-- **CS**: critical speed, used for pace or speed benchmarks.
-- **TP**: threshold pace or threshold speed context, depending on sport and display.
+- **시간대(Time zone)**: 캘린더 날짜, 리뷰 기간, 날짜 기반 훈련 보기에 사용됩니다.
+- **단위 체계(Unit system)**: 거리, 페이스, 고도 및 관련 수치의 표시 단위를 제어합니다.
+- **체중(Body weight)**: 상대 파워(W/kg)와 체중 관련 지표에 활용됩니다.
+- **신장, 생년월일, 성별**: 연령, 신체 조건 맥락 또는 인구통계 기준 범위가 필요한 지표에 사용됩니다.
+- **주 종목(Primary sport)**: 종목별 기본값과 화면 표시 옵션을 정하는 데 도움이 됩니다.
 
-Use the latest reliable value, not the best value you have ever seen. Thresholds should represent what you can currently sustain in training decisions.
+시간대가 잘못 설정되어 있으면 워크아웃이 다른 날짜에 표시될 수 있습니다. 캘린더나 리뷰 요약을 판단하기 전에 시간대부터 바로잡아 주세요.
 
-## Load-source priority
+## 주요 역치
 
-Trainingload.ai can derive activity load from different signals. Your load-source priority tells the system which signal to prefer when more than one is available.
+역치는 원시 워크아웃 데이터를 강도와 훈련 부하로 변환하는 기준이 됩니다.
 
-Available sources include:
+주요 항목은 다음과 같습니다.
 
-- **Power**.
-- **Heart rate**.
-- **Pace**.
-- **Session RPE**.
+- **FTP**: 기능적 역치 파워(Functional Threshold Power)로, 주로 사이클링 파워 강도와 파워 기반 부하 계산에 사용됩니다.
+- **CP**: 임계 파워(Critical Power)로, 파워-지속시간 곡선과 CP 기반 분석에 유용합니다.
+- **W' / W Prime**: 임계 파워 이상에서 수행할 수 있는 유한한 작업 용량입니다.
+- **Pmax**: 파워 프로파일링을 위한 최대 파워 기준입니다.
+- **LTHR**: 젖산 역치 심박수(Lactate Threshold Heart Rate)로, 심박수 존 및 역치 중심 심박 분석에 쓰입니다.
+- **최대 심박수(Max heart rate)**: 최대 심박수 기반 존과 일부 심박 비교 지표에 사용됩니다.
+- **안정시 심박수(Resting heart rate)**: 최대 심박수와 함께 여유 심박수(HRR) 계산에 쓰입니다.
+- **CS**: 임계 속도(Critical Speed)로, 페이스 또는 속도 기준 지표로 활용됩니다.
+- **TP**: 종목과 표시 설정에 따라 역치 페이스 또는 역치 속도 기준을 나타냅니다.
 
-A practical default is to put the most reliable sensor first:
+생애 최고 기록이 아니라 현재 신뢰할 수 있는 최신 값을 입력하세요. 역치는 지금 훈련 의사결정에 실제로 유지할 수 있는 수준을 반영해야 합니다.
 
-- Cycling with a reliable power meter: power first.
-- Running without power: pace or heart rate first, depending on terrain and data quality.
-- Indoor or sensor-limited sessions: heart rate or session RPE may be more useful.
+## 부하 소스 우선순위
 
-Changing load-source priority can change historical load interpretation. Do it when your data quality or training setup changes, not as a way to make a single workout look better.
+Trainingload.ai는 여러 신호에서 활동 부하를 산출할 수 있습니다. 부하 소스 우선순위는 둘 이상의 신호가 함께 기록되었을 때 어떤 신호를 우선할지 시스템에 알려 줍니다.
 
-## Zone models
+사용 가능한 소스:
 
-Training zones group intensity into ranges you can use in charts, workout targets, and review.
+- **파워(Power)**
+- **심박수(Heart rate)**
+- **페이스(Pace)**
+- **세션 RPE(Session RPE)**
 
-Trainingload.ai supports model-based and custom zones:
+가장 신뢰도 높은 센서를 맨 앞에 두는 것이 실용적인 기본값입니다.
 
-- **Heart rate zones** can use max HR, heart-rate reserve, LTHR, or custom values.
-- **Power zones** can use FTP, CP, or custom values.
-- **Pace zones** can use CS or custom values.
+- 신뢰할 수 있는 파워미터를 쓰는 사이클링: 파워 우선
+- 파워 센서가 없는 러닝: 지형과 데이터 품질에 따라 페이스 또는 심박수 우선
+- 실내 훈련이나 센서가 제한적인 세션: 심박수 또는 세션 RPE가 더 유용할 수 있음
 
-Zone models are shortcuts, not universal truth. If your coach uses a specific model, match that model. If you have lab or field-test zones, custom zones may be the better choice.
+부하 소스 우선순위를 바꾸면 과거 활동의 부하 해석도 달라질 수 있습니다. 단일 워크아웃 수치를 보기 좋게 만들려는 목적이 아니라, 실제 데이터 품질이나 훈련 장비 구성이 바뀌었을 때 변경하세요.
 
-## Sport-specific zones
+## 존 모델
 
-Zones can differ by sport. Running, cycling, and swimming should not always share the same interpretation.
+훈련 존은 강도를 구간별로 나누어 차트, 워크아웃 목표, 리뷰에서 일관되게 활용할 수 있도록 돕습니다.
 
-Examples:
+Trainingload.ai는 모델 기반 존과 사용자 지정 존을 모두 지원합니다.
 
-- Cycling power zones depend on cycling power benchmarks.
-- Running pace zones depend on running speed or pace benchmarks.
-- Swimming pace zones are usually expressed per 100 m.
-- Heart-rate response can differ across running, cycling, and swimming.
+- **심박수 존**: 최대 심박수, 여유 심박수(HRR), LTHR 또는 사용자 지정 값 사용 가능
+- **파워 존**: FTP, CP 또는 사용자 지정 값 사용 가능
+- **페이스 존**: CS 또는 사용자 지정 값 사용 가능
 
-Set zones for the sports you actually train. Missing zones do not block activity import, but charts, workout targets, and AI Coach explanations may be less specific.
+존 모델은 실용적인 기준이지 절대 진리가 아닙니다. 담당 코치가 특정 모델을 쓴다면 그 모델에 맞추고, 실험실 측정이나 필드 테스트로 얻은 존이 있다면 사용자 지정 존이 더 적합할 수 있습니다.
 
-## Custom zones
+## 종목별 존
 
-Use custom zones when:
+존은 종목마다 다를 수 있습니다. 러닝, 사이클링, 수영에 항상 같은 기준을 적용해서는 안 됩니다.
 
-- Your coach has already defined your zones.
-- You tested in a lab or with a trusted protocol.
-- Model-generated zones do not match your training reality.
-- You need sport-specific ranges that the default model does not capture.
+예시:
 
-Custom zones are entered as absolute values:
+- 사이클링 파워 존은 사이클링 파워 기준값에 따릅니다.
+- 러닝 페이스 존은 러닝 속도 또는 페이스 기준값에 따릅니다.
+- 수영 페이스 존은 보통 100m당 시간으로 표현합니다.
+- 심박수 반응은 러닝, 사이클링, 수영 종목마다 다르게 나타날 수 있습니다.
 
-- Power in watts.
-- Heart rate in bpm.
-- Running pace in seconds per kilometer.
-- Swimming pace in seconds per 100 m.
+실제로 훈련하는 종목의 존을 설정해 두세요. 존이 비어 있어도 활동 가져오기는 막히지 않지만, 차트·워크아웃 목표·AI 코치 설명이 덜 구체적일 수 있습니다.
 
-Keep zone names short and ordered. Clear labels make charts and AI Coach context easier to read.
+## 사용자 지정 존
 
-## When to update thresholds
+다음과 같은 경우에 사용자 지정 존을 활용합니다.
 
-Update thresholds when there is enough evidence that your current settings are no longer representative.
+- 코치가 이미 개인별 존을 정해 준 경우
+- 실험실 테스트나 신뢰할 수 있는 프로토콜로 측정한 경우
+- 모델이 자동 생성한 존이 실제 훈련 체감과 맞지 않는 경우
+- 기본 모델이 반영하지 못하는 종목별 구간이 필요한 경우
 
-Good reasons:
+사용자 지정 존은 절대값으로 입력합니다.
 
-- A recent test produced a credible new value.
-- A race performance clearly changes your current benchmark.
-- Several weeks of workouts show sustained improvement or decline.
-- A device or measurement method changed.
-- You returned from a long break, illness, or injury.
+- 파워: 와트(W)
+- 심박수: bpm
+- 러닝 페이스: km당 초(seconds per km)
+- 수영 페이스: 100m당 초(seconds per 100 m)
 
-Avoid updating thresholds after one unusually good or bad day. Threshold changes should explain a pattern, not chase noise.
+존 이름은 짧고 순서대로 정리하세요. 라벨이 명확할수록 차트와 AI 코치 맥락을 읽기 쉬워집니다.
 
-## How this affects AI Coach
+## 역치를 업데이트해야 할 때
 
-AI Coach can use profile values, thresholds, zones, and load-source priority as context.
+현재 설정이 더 이상 실제 수준을 대표하지 못한다는 근거가 충분할 때 역치를 업데이트합니다.
 
-Better setup helps AI Coach answer questions such as:
+적절한 시점:
 
-- Whether a workout matched the intended intensity.
-- Whether load is rising too quickly.
-- Whether a planned workout looks appropriate after recent fatigue.
-- Whether a pace, heart-rate, or power target is realistic.
+- 최근 테스트에서 신뢰할 수 있는 새 값이 나왔을 때
+- 대회 기록으로 현재 기준값이 명확히 바뀌었을 때
+- 수주간의 워크아웃에서 지속적인 향상 또는 저하 추세가 확인될 때
+- 측정 기기나 방식이 바뀌었을 때
+- 긴 휴식, 질병, 부상에서 복귀했을 때
 
-If key values are missing, AI Coach may still help, but it should be more cautious and may ask follow-up questions.
+유난히 컨디션이 좋았거나 나빴던 하루의 기록만으로 역치를 바꾸지 마세요. 역치 변경은 일시적 노이즈를 쫓는 것이 아니라 패턴을 설명하기 위한 것입니다.
 
-## Related pages
+## AI 코치에 미치는 영향
+
+AI 코치는 프로필 값, 역치, 존, 부하 소스 우선순위를 대화 맥락으로 활용합니다.
+
+설정이 잘 갖춰져 있으면 AI 코치가 다음과 같은 질문에 훨씬 정확하게 답할 수 있습니다.
+
+- 이번 워크아웃이 의도한 강도에 맞았는지
+- 훈련 부하가 너무 빠르게 상승하고 있는지
+- 최근 피로를 고려했을 때 예정된 워크아웃이 적절한지
+- 설정한 페이스·심박수·파워 목표가 현실적인지
+
+핵심 값이 비어 있어도 AI 코치는 도움을 줄 수 있지만, 더 보수적으로 답하거나 추가 질문을 할 수 있습니다.
+
+## 설정 확인 방법
+
+- 캘린더 날짜가 본인의 현지 훈련 날짜와 일치합니다.
+- 거리, 페이스, 체중, 고도가 원하는 단위로 표시됩니다.
+- 존 차트가 선택한 종목과 기준값을 사용합니다.
+- 필요한 센서 데이터가 있을 때 최근 활동의 부하 소스가 설정한 우선순위와 일치합니다.
+- AI 코치 응답에 인용된 역치나 존이 저장된 설정과 일치하는지 확인합니다.
+
+## 문제 해결
+
+- **활동이 다른 날짜로 밀려 표시됨:** 계정 시간대를 수정한 뒤 원래 시작 시각과 원본 소스의 시간대를 다시 확인합니다.
+- **존이 너무 쉽거나 어렵게 느껴짐:** 개별 경계값을 수정하기 전에 기준값, 모델, 종목, 단위가 맞는지 먼저 확인합니다.
+- **설정 변경 후 훈련 부하가 달라짐:** 어떤 역치나 소스 우선순위가 바뀌었는지 확인하세요. 활동 원본은 변하지 않았더라도 과거 부하 해석이 갱신될 수 있습니다.
+- **수영 페이스가 이상하게 표시됨:** 러닝 페이스 단위가 아니라 100m당 초 단위로 입력되었는지 확인합니다.
+- **정확히 모르는 항목이 있음:** 추측해서 넣지 말고 신뢰할 수 있는 근거가 생길 때까지 비워 둡니다.
+
+## 다음 단계
 
 - [무료 최대 심박수 계산기](/ko/max-heart-rate-calculator)
-- [Getting Started](/docs/guide/getting-started)
-- [Connect Data](/docs/guide/connect-data)
-- [Activity Detail](/docs/guide/activity-detail)
-- [Create a Training Plan](/docs/guide/create-training-plan)
-- [AI Coach](/docs/guide/ai-coach)
-- [Training Load](/docs/metrics/training-load)
+- [첫 번째 활동 가져오기](/ko/docs/guide/getting-started)
+- [훈련 데이터 연동](/ko/docs/guide/connect-data)
+- [활동 상세 분석](/ko/docs/guide/activity-detail)
+- [훈련 플랜 만들기](/ko/docs/guide/create-training-plan)
+- [AI 코치](/ko/docs/guide/ai-coach)
+- [훈련 부하 지표](/ko/docs/metrics/training-load)

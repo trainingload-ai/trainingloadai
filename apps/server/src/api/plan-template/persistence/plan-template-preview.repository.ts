@@ -4,6 +4,13 @@ import { PrismaService } from '@/prisma/prisma.service';
 
 type PlanTemplatePreviewDb = PrismaService | Prisma.TransactionClient;
 
+export function findConsumedTemplatePlan(tx: Prisma.TransactionClient, planId: string) {
+  return tx.planTemplatePreview.findUnique({
+    where: { createdPlanId: planId },
+    select: { userId: true, consumedAt: true, normalizedInput: true },
+  });
+}
+
 @Injectable()
 export class PlanTemplatePreviewRepository {
   constructor(private readonly prisma: PrismaService) {}

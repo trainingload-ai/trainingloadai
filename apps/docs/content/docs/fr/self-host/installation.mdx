@@ -1,0 +1,158 @@
+---
+title: Démarrage rapide de l’auto-hébergement
+description: Vérifiez une version signée de Trainingload.ai, installez l’instance locale, créez le compte Owner et réalisez une première sauvegarde vérifiée.
+seoTitle: "Installer Trainingload.ai en auto-hébergement (version signée)"
+seoDescription: "Suivez le démarrage rapide Trainingload.ai sur Linux, macOS ou Windows : vérifiez l’archive, installez l’instance, créez le compte Owner et sauvegardez."
+keywords:
+  [
+    "installer Trainingload.ai",
+    "démarrage rapide auto-hébergement",
+    "paquet de version signé",
+    "Docker Compose auto-hébergement",
+  ]
+---
+
+# Démarrage rapide de l’auto-hébergement
+
+## Objectif
+
+Terminer avec une instance locale Trainingload.ai opérationnelle, un compte Owner créé, une vérification de santé réussie et une première sauvegarde vérifiée.
+
+## Avant de commencer
+
+Préparez l’un des systèmes hôtes pris en charge :
+
+- Ubuntu 24.04 sur `amd64` ou `arm64` ;
+- macOS sur Apple Silicon avec Docker Desktop ;
+- Windows 11 sur `amd64` avec Docker Desktop utilisant WSL2 et les conteneurs Linux.
+
+L’hôte doit également disposer de :
+
+- Node.js 22 ou version ultérieure ;
+- Docker Engine et Docker Compose v2 ;
+- Cosign prenant en charge `verify-blob --bundle` ;
+- au moins 2 vCPU, 2 GiB de mémoire vive et 5 GiB d’espace disque libre pour Core Local.
+
+Téléchargez l’archive de la version exacte, son fichier de somme de contrôle et son bundle de signature depuis la page officielle [GitHub Releases](https://github.com/trainingload-ai/trainingloadai/releases). N’utilisez pas un clone du dépôt source ni une archive non versionnée comme déploiement de production.
+
+Le répertoire de données par défaut est `./data` à l’intérieur de l’archive extraite. Si vous souhaitez utiliser un disque dédié ou un autre emplacement, lisez [Choisir l’emplacement des données locales](/fr/docs/self-host/configuration#choose-the-local-data-path) avant de lancer l’installateur.
+
+## Installer sur Linux, macOS ou WSL2
+
+### 1. Vérifier l’archive téléchargée
+
+Exécutez ces commandes dans le dossier contenant les trois fichiers téléchargés :
+
+```bash
+version='<exact-version>'
+archive="trainingload-selfhost-$version.tar.gz"
+identity="https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$version"
+
+cosign verify-blob \
+  --bundle "$archive.sha256.bundle.json" \
+  --certificate-identity "$identity" \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  "$archive.sha256"
+```
+
+Vérifiez ensuite l’empreinte SHA-256 de l’archive avec la commande adaptée à votre système :
+
+```bash
+# Linux ou WSL2
+sha256sum -c "$archive.sha256"
+
+# macOS
+shasum -a 256 -c "$archive.sha256"
+```
+
+Ne poursuivez que si la signature et la somme de contrôle sont toutes deux valides.
+
+### 2. Extraire l’archive et inspecter le plan d’installation
+
+```bash
+tar -xzf "$archive"
+cd "trainingload-selfhost-$version"
+./install.sh --dry-run --json
+```
+
+La simulation (`dry-run`) vérifie la signature interne du bundle, les prérequis de l’hôte, la version exacte, la configuration, le chemin de données et le plan de cycle de vie. Ne continuez que lorsque le résultat JSON contient `"ok": true`.
+
+### 3. Installer l’instance
+
+```bash
+./install.sh --json
+```
+
+L’installateur génère des secrets locaux protégés, prépare le répertoire de données déclaré, démarre des images épinglées par digest, exécute les migrations de base de données et attend que les services requis soient prêts.
+
+## Installer sur Windows 11
+
+Utilisez PowerShell dans le dossier contenant les fichiers téléchargés :
+
+```powershell
+$Version = '<exact-version>'
+$Archive = "trainingload-selfhost-$Version.tar.gz"
+$Identity = "https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$Version"
+
+cosign verify-blob `
+  --bundle "$Archive.sha256.bundle.json" `
+  --certificate-identity $Identity `
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' `
+  "$Archive.sha256"
+
+$Expected = ((Get-Content "$Archive.sha256" -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+$Actual = (Get-FileHash $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($Actual -ne $Expected) { throw 'Release archive checksum mismatch' }
+
+tar.exe -xzf $Archive
+Set-Location "trainingload-selfhost-$Version"
+.\install.ps1 --dry-run --json
+.\install.ps1 --json
+```
+
+Ne lancez l’installation depuis PowerShell que si le `dry-run` renvoie `"ok": true`.
+
+## Créer un compte local
+
+L’installation par défaut n’écoute que sur `127.0.0.1`. Une fois les services prêts, ouvrez `http://localhost:43210` sur le même ordinateur. La page de premier lancement demande uniquement un nom d’utilisateur ; aucune adresse e-mail ni aucun mot de passe n’est requis. Sa validation crée l’unique compte Owner, ouvre une session locale et lance directement l’accueil initial. Si cette session expire par la suite, l’ouverture de l’application restaure automatiquement une session pour ce même Owner.
+
+L’accès sans mot de passe n’est activé que lorsque l’origine du site, l’adresse d’écoute du Client et l’adresse cliente de confiance sont toutes en boucle locale (`loopback`) et que la requête provient du navigateur sur la même origine. Aucun mot de passe vide n’est enregistré en base de données.
+
+Pour accéder à l’application depuis un autre ordinateur, gardez l’instance liée à la boucle locale et utilisez une redirection de port SSH vers `localhost:43210`. L’application publique propose la configuration du nom d’utilisateur et la restauration de session locale ; elle n’inclut pas les pages Cloud d’e-mail, mot de passe, inscription ou OAuth. N’exposez jamais directement sur Internet une instance sans mot de passe.
+
+## Que se passe-t-il ensuite
+
+Le site par défaut s’ouvre à l’adresse `http://localhost:43210`. Les données PostgreSQL, les fichiers téléversés, les caches, les sauvegardes et les journaux d’opérations restent sous la racine de données déclarée. Le Client est le seul service publié ; la documentation est déployée séparément. Aucune clé IA ni clé de plateforme d’entraînement n’est nécessaire au démarrage. Le compte Owner pourra ensuite configurer une IA BYOK, une clé API personnelle Intervals.icu et Garmin Personal API.
+
+## Vérifier l’installation
+
+Exécutez les vérifications en lecture seule, puis créez la première sauvegarde vérifiée :
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host backup --output first-verified-backup --dry-run --json
+./self-host backup --output first-verified-backup --json
+```
+
+L’installation est prête lorsque :
+
+- `status` et `doctor` renvoient `"ok": true` ;
+- vous accédez à l’instance à l’adresse configurée ;
+- la sauvegarde contient un fichier `backup-result.json` valide et réussit son étape de vérification.
+
+Déplacez la sauvegarde vérifiée vers un stockage chiffré dans un domaine de panne distinct. Une sauvegarde conservée uniquement sur le même disque ne constitue pas une protection suffisante.
+
+## Dépannage rapide
+
+- **L’installateur refuse l’hôte :** ne contournez pas la vérification de plateforme ; utilisez l’une des combinaisons hôtes prises en charge.
+- **La vérification de signature ou de somme de contrôle échoue :** arrêtez la procédure et retéléchargez l’ensemble des fichiers de la même version exacte.
+- **Docker est indisponible :** vérifiez que Docker fonctionne avec Compose v2 et un moteur de conteneurs Linux.
+- **Le port est déjà utilisé :** configurez une autre adresse d’écoute ou un autre port pris en charge avant de démarrer l’instance.
+- **Les services ne deviennent pas prêts :** lancez `./self-host doctor --json` ; ne remplacez pas les commandes de cycle de vie par des commandes `docker compose` saisies manuellement.
+
+Pour les codes d’erreur stables et les procédures de récupération sûres, consultez le [dépannage de l’auto-hébergement](/fr/docs/self-host/troubleshooting).
+
+## Étape suivante
+
+Poursuivez avec la [Configuration](/fr/docs/self-host/configuration) pour définir l’exposition réseau et activer si besoin un fournisseur IA BYOK. Consultez ensuite [Gérer votre instance](/fr/docs/self-host/operations) avant d’importer des données importantes.

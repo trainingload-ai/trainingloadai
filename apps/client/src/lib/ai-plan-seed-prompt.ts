@@ -40,7 +40,8 @@ export type AiPlanSeedPayload = {
   intent: AiPlanSeedIntent;
   raceDiscipline?: AiPlanSeedRaceDiscipline;
   raceDistance?: AiPlanSeedRaceDistance;
-  cycleWeeks: number;
+  cycleWeeks: number | null;
+  planningMode?: "ROLLING";
   weeklyDays: number;
   dailyMinutes: number;
   strength: AiPlanSeedStrengthBrief;
@@ -97,9 +98,10 @@ export function parseAiPlanSeedFromSearchParams(
   const weeksRaw = searchParams.get("weeks");
   const daysRaw = searchParams.get("days");
   const minsRaw = searchParams.get("mins");
-  if (weeksRaw == null || daysRaw == null || minsRaw == null) return null;
+  const rolling = searchParams.get("planMode") === "rolling";
+  if ((!rolling && weeksRaw == null) || daysRaw == null || minsRaw == null) return null;
 
-  const cycleWeeks = parsePositiveInt(weeksRaw, 8, 52);
+  const cycleWeeks = rolling ? null : parsePositiveInt(weeksRaw, 8, 52);
   const weeklyDays = parsePositiveInt(daysRaw, 5, 7);
   const dailyMinutes = parsePositiveInt(minsRaw, 60, 24 * 60);
   const strengthPreference = (() => {
@@ -143,6 +145,7 @@ export function parseAiPlanSeedFromSearchParams(
     raceDiscipline,
     raceDistance,
     cycleWeeks,
+    ...(rolling ? { planningMode: "ROLLING" as const } : {}),
     weeklyDays,
     dailyMinutes,
     strength,
@@ -155,7 +158,7 @@ export function aiPlanSeedDedupeKey(payload: AiPlanSeedPayload): string {
     "ap",
     payload.intent,
     payload.sportTypes.slice().sort().join(","),
-    payload.cycleWeeks,
+    payload.planningMode ?? payload.cycleWeeks,
     payload.weeklyDays,
     payload.dailyMinutes,
     payload.strength.preference,
@@ -209,7 +212,7 @@ export function buildAiPlanPromptFromSeed(
       "已知条件：",
       `- 训练意图：${intentLabel.zh[payload.intent]}`,
       `- 计划运动组成（可多选）：${payload.sportTypes.map((item) => sportLabel.zh[item]).join("、")}`,
-      `- 周期：${payload.cycleWeeks} 周`,
+      payload.planningMode === "ROLLING" ? "- 持续训练计划" : `- 周期：${payload.cycleWeeks} 周`,
       `- 每周训练天数：${payload.weeklyDays} 天`,
       `- 每天可训练时长：${payload.dailyMinutes} 分钟`,
       `- 力量训练偏好：${payload.strength.preference === "INCLUDE" ? "必须作为独立辅助课纳入计划" : payload.strength.preference === "EXCLUDE" ? "不包含" : "由 AI 根据目标和恢复空间建议"}`,
@@ -241,7 +244,9 @@ export function buildAiPlanPromptFromSeed(
     "Known brief:",
     `- Training intent: ${intentLabel.en[payload.intent]}`,
     `- Plan sport mix (multi-select): ${payload.sportTypes.map((item) => sportLabel.en[item]).join(", ")}`,
-    `- Duration: ${payload.cycleWeeks} weeks`,
+    payload.planningMode === "ROLLING"
+      ? "- Continuous training plan"
+      : `- Duration: ${payload.cycleWeeks} weeks`,
     `- Weekly training days: ${payload.weeklyDays}`,
     `- Daily training time: ${payload.dailyMinutes} minutes`,
     `- Strength training: ${payload.strength.preference === "INCLUDE" ? "required as separate supporting workouts" : payload.strength.preference.toLowerCase()}`,
@@ -300,6 +305,7 @@ export function stripAiPlanSeedParams(next: URLSearchParams): void {
   next.delete("prompt");
   next.delete("intent");
   next.delete("planIntent");
+  next.delete("planMode");
   next.delete("sports");
   next.delete("weeks");
   next.delete("days");

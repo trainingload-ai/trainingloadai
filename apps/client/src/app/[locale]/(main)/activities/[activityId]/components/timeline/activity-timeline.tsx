@@ -11,6 +11,7 @@ import {
 import { useTranslations } from "next-intl";
 import { MoreHorizontal, RotateCcw, Pencil } from "lucide-react";
 import type { Activity } from "@/api/activities";
+import type { CoachActivityFocus } from "@shared/ai-coach-schema";
 import { useHeartRateZones } from "@/api/use-heart-rate";
 import { useActivityPowerZones } from "@/api/use-power";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ import { formatSecondsToTime } from "@/utils/timeFormatter";
 import { getPowerZoneColorByZone } from "@/utils/util";
 import {
   coordinateAtTrackTime,
+  recordedTimelineFocus,
   sliceTrackByTime,
   timelineValueAt,
   timelineTimeAtDistance,
@@ -66,15 +68,20 @@ const timeLabel = (value: number) => formatSecondsToTime(Math.round(value));
 export default function ActivityTimeline({
   activity,
   activityId,
+  initialFocus,
+  readOnly = false,
 }: {
   activity: Activity;
   activityId: string;
+  initialFocus?: CoachActivityFocus;
+  readOnly?: boolean;
 }) {
   const t = useTranslations("ActivityTimeline");
   const { model, loading, errors, retry, segments, formatDistance } =
     useActivityTimeline(activity, activityId);
   const { layout, setLayout } = useActivityTimelineLayout(
     activity.sportType === "RUN",
+    !readOnly,
   );
   const heartRateZones = useHeartRateZones(activityId);
   const powerZones = useActivityPowerZones(activityId);
@@ -109,6 +116,19 @@ export default function ActivityTimeline({
   const [keyboardInspecting, setKeyboardInspecting] = useState(false);
   const [range, setRange] = useState<TimelineRange | null>(null);
   const [zoom, setZoom] = useState<TimelineRange | null>(null);
+  const focusApplied = useRef(false);
+  const [focusUnavailable, setFocusUnavailable] = useState(false);
+  useEffect(() => {
+    if (!initialFocus || !model || loading || focusApplied.current) return;
+    focusApplied.current = true;
+    const focused = recordedTimelineFocus(initialFocus, model);
+    if (focused) {
+      setRange(focused);
+      setZoom(focused);
+    } else {
+      setFocusUnavailable(true);
+    }
+  }, [initialFocus, loading, model]);
   const [preview, setPreview] = useState<TimelineRange | null>(null);
   const plotRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -534,6 +554,11 @@ export default function ActivityTimeline({
       data-timeline-start={viewport[0]}
       data-timeline-end={viewport[1]}
     >
+      {focusUnavailable ? (
+        <p role="status" className="border-b border-border/60 px-3 py-2 text-xs text-muted-foreground">
+          {t("focusUnavailable")}
+        </p>
+      ) : null}
       {analysis.error ? (
         <div
           role="alert"
@@ -615,7 +640,7 @@ export default function ActivityTimeline({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <Button
+              {!readOnly ? <Button
                 variant="ghost"
                 size="compact"
                 className="-ml-2 self-start text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
@@ -624,7 +649,7 @@ export default function ActivityTimeline({
               >
                 <Pencil />
                 {t("editSegments")}
-              </Button>
+              </Button> : null}
             </div>
             <div
               className="relative h-[120px] min-w-0"
@@ -693,6 +718,7 @@ export default function ActivityTimeline({
                 onMove={(direction) => moveRow(config.id, direction)}
                 canMoveUp={index > 0}
                 canMoveDown={index < visibleRows.length - 1}
+                readOnly={readOnly}
               />
             ))}
             {visibleRows.length ? (
@@ -847,7 +873,7 @@ export default function ActivityTimeline({
           ) : null}
         </div>
       </div>
-      {editing ? (
+      {!readOnly && editing ? (
         <TimelineSegmentsDialog
           segments={analysis.segments}
           native={nativeSegments}
@@ -872,7 +898,7 @@ export default function ActivityTimeline({
           }}
         />
       ) : null}
-      <TimelineAddChartDialog
+      {!readOnly ? <TimelineAddChartDialog
         metrics={model.availableMetrics}
         onAdd={(metric) =>
           setLayout((value) => ({
@@ -883,7 +909,7 @@ export default function ActivityTimeline({
             ],
           }))
         }
-      />
+      /> : null}
     </section>
   );
 }

@@ -1,0 +1,271 @@
+---
+title: "Strava, Garmin, COROS 등 플랫폼 연동 및 워크아웃 가져오기"
+description: "Strava, Garmin, COROS, Polar, Suunto, Wahoo를 연동해 워크아웃을 가져옵니다. OAuth, API 키, Garmin 과거 기록 가져오기와 첫 동기화 검증 절차를 안내합니다."
+keywords:
+  [
+    "Strava 연동",
+    "Garmin 연동",
+    "COROS 연동",
+    "Polar 동기화",
+    "Wahoo 워크아웃 가져오기",
+    "Garmin 과거 기록 가져오기",
+  ]
+---
+
+# Strava, Garmin, COROS 등 플랫폼 연동 및 워크아웃 가져오기
+
+Cloud 서비스에서 훈련 플랫폼을 연동하고 동기화할 항목을 선택한 뒤 첫 활동이 정상 도착했는지 확인합니다. Garmin OAuth는 신규 데이터를 수신하며, 과거 기록은 파일 가져오기로 불러옵니다.
+
+셀프 호스팅 환경이라면 별도의 [Intervals.icu 설정](/ko/docs/self-host/configuration#connect-intervalsicu)과 [Garmin Personal API 가이드](/ko/docs/self-host/garmin-personal-api)를 참고하세요. 셀프 호스팅에서는 아래 Cloud 연동이 모두 제공되지는 않습니다.
+
+## 시작하기 전에
+
+- 가져오려는 워크아웃이 저장된 외부 플랫폼 계정으로 로그인합니다.
+- 기록된 워크아웃마다 하나의 주 가져오기 경로를 정합니다. 예를 들어 COROS 기록을 COROS 직접 연동과 Strava 경유로 동시에 가져오지 않습니다.
+- 현재 Trainingload.ai에 이미 표시된 가장 최근 활동을 미리 확인해 둡니다.
+- 프로필, 존, 예정 워크아웃 동기화 방향을 켜기 전에 어느 플랫폼을 기준(원본)으로 관리할지 먼저 결정합니다.
+- API 키와 임시 다운로드 링크는 반드시 해당하는 Trainingload.ai 연동 대화상자 안에서만 입력합니다.
+
+## 연동 화면 열기
+
+웹에서는 사이드바 하단의 계정 메뉴에서 **Account(계정)**를 연 뒤 **Third Party Connections(서드파티 연동)**에서 원하는 플랫폼을 선택합니다.
+
+모바일에서는 **Me → Menu → Data authorization**을 엽니다. OAuth를 시작하면 시스템 브라우저에서 외부 플랫폼이 열리고 승인 후 앱으로 돌아옵니다. Strava, Polar, COROS, Suunto, Wahoo, Intervals.icu, Garmin OAuth 연동은 모두 모바일에서도 관리할 수 있으며, Garmin 과거 기록 ZIP 및 임시 링크 가져오기도 모바일 Garmin 설정에서 지원합니다.
+
+특정 플랫폼 카드가 보이지 않는다면 현재 계정에서 직접 연동이 지원되지 않는 상태입니다. 이 경우 원본 플랫폼에서 FIT, TCX 또는 GPX 파일을 내보내 **Activities(활동)**에서 업로드하세요.
+
+<DocsScreenshot
+  id="integrations-connections"
+  title="서드파티 연동 위치 찾기"
+  description="계정(Account)에서 서드파티 연동(Third Party Connections)으로 스크롤해 설정할 플랫폼을 엽니다."
+  route="사이드바 계정 메뉴 → Account → Third Party Connections"
+/>
+
+| 플랫폼 | 웹 | 모바일 | 인증 방식 | 일반적인 초기 작업 |
+| --- | --- | --- | --- | --- |
+| Strava | 지원 | 지원 | OAuth | 선택 시 최근 60일 가져오기 |
+| Polar | 지원 | 지원 | OAuth | 선택 시 최근 30일 가져오기 |
+| COROS | 지원 | 지원 | OAuth | 활동 동기화와 건강 동기화를 각각 실행 |
+| Intervals.icu | 지원 | 지원 | OAuth 또는 API 키 | 최근 활동 가져오기 |
+| Suunto | 지원 | 지원 | OAuth | 최근 워크아웃 초기 가져오기 |
+| Wahoo | 지원 | 지원 | OAuth | 연동 후 방향 저장, 이어서 동기화 실행 |
+| Garmin 동기화 | 지원 | 지원 | OAuth | 연동 이후 새 활동 및 승인된 건강 데이터 수신 |
+| Garmin 과거 기록 가져오기 | 지원 | 지원 | Garmin 내보내기 ZIP 또는 임시 다운로드 링크 | 과거 활동 기록 가져오기 |
+
+## Strava 연동
+
+1. **Connections → Strava**를 엽니다.
+2. 권한 승인 전에 최근 60일 기록을 즉시 가져올지 선택합니다.
+3. 지속적 데이터 동기화 방향을 선택합니다.
+   - 새 Strava 활동 자동 가져오기
+   - Strava 외 Trainingload.ai 활동을 Strava로 업로드
+   - Strava에서 선수 프로필 및 존 가져오기
+   - Trainingload.ai의 선수 프로필 및 존을 Strava로 업로드
+4. **Connect with Strava**를 선택해 요청 권한을 승인하고 Trainingload.ai로 돌아옵니다.
+5. Strava 설정을 다시 열어 저장된 옵션을 확인하고, 누락분 확인이 필요할 때만 **Sync now**를 한 번 실행합니다.
+
+어느 쪽 값을 우선할지 명확히 정하지 않았다면 프로필 양방향 동기화를 동시에 켜지 마세요. 자동 활동 가져오기는 Strava 알림을 통해 동작하며, 수동 동기화는 같은 기간을 반복 가져오기 위한 기능이 아니라 누락 보완용입니다.
+
+<DocsScreenshot
+  id="strava-oauth-settings"
+  title="Strava 연동 설정"
+  description="Strava 인증 페이지로 이동하기 전에 초기 가져오기와 지속적 데이터 방향을 선택합니다."
+  route="Account → Third Party Connections → Strava"
+/>
+
+Strava가 유일한 로그인 수단인 경우, 비밀번호나 다른 로그인 계정을 추가하기 전까지 연동 해제가 제한될 수 있습니다. 이는 Trainingload.ai 계정 접근 권한을 보호하기 위한 조치입니다.
+
+## Polar 연동
+
+1. **Connections → Polar**를 엽니다.
+2. 최근 30일 기록을 즉시 가져올지 선택합니다.
+3. Polar를 지속적인 활동 소스로 유지하려면 새 활동 자동 동기화를 켭니다.
+4. Polar의 일일 활동, 연속 심박수, 수면 등 지원되는 웰니스 데이터가 필요할 때만 웰니스 동기화를 켭니다.
+5. **Connect with Polar**를 선택해 Polar Flow에서 권한을 승인하고 Trainingload.ai로 돌아옵니다.
+6. 최근 기간 활동이 보이지 않으면 대화상자를 다시 열어 **Sync now**를 한 번 실행합니다.
+
+Polar 수동 동기화는 지원되는 최근 기간을 확인하는 동작이며 전체 계정 아카이브 가져오기가 아닙니다. Strava와 마찬가지로 Polar가 유일한 로그인 수단이라면 다른 로그인 수단을 추가하기 전까지 연동을 해제할 수 없습니다.
+
+## COROS 연동
+
+1. **Connections → COROS**를 열고 OAuth 권한 승인을 완료합니다.
+2. 카드에 연동됨(Connected)이 표시되면 **Sync activities**를 선택해 워크아웃을 동기화합니다.
+3. 지원되는 일일 또는 건강 데이터를 맞추려면 웹에서는 **Sync daily**, 모바일에서는 **Sync health now**를 선택합니다.
+4. 카드에 표시된 마지막 동기화 상태와 오류 여부를 확인합니다.
+
+COROS는 활동 동기화와 일일 데이터 동기화가 의도적으로 분리되어 있습니다. 활동 동기화가 성공했다고 해서 건강 데이터 동기화까지 자동으로 실행된 것은 아닙니다. COROS 카드가 보이지 않는다면 활동 파일 업로드를 이용하세요.
+
+## Intervals.icu 연동
+
+API 키 인증이 꼭 필요한 경우가 아니라면 OAuth 방식을 권장합니다.
+
+### OAuth
+
+1. **Connections → Intervals.icu → OAuth**를 엽니다.
+2. Intervals.icu에서 Trainingload.ai 권한을 승인하고 같은 계정으로 돌아옵니다.
+3. 원하는 동기화 방향을 선택합니다.
+4. 설정을 저장하고 초기 또는 수동 동기화를 한 번 실행합니다.
+
+### API 키
+
+1. 본인 Intervals.icu 계정에서 API 키를 생성하거나 복사합니다.
+2. **Connections → Intervals.icu → API Key**를 엽니다.
+3. 보호된 입력란에 키를 붙여 넣고 연결합니다.
+4. 계정에 이미 다른 키가 연결되어 있다면 교체 확인을 진행합니다.
+
+Trainingload.ai는 저장된 API 키를 다시 표시하지 않으며, 연동 화면에는 마지막 4자리만 노출합니다. OAuth를 API 키로 바꾸거나 API 키를 OAuth로 바꿔도 이미 가져온 기록은 유지되며 향후 동기화에 사용할 인증 수단만 변경됩니다.
+
+<DocsScreenshot
+  id="intervals-icu-auth-methods"
+  title="Intervals.icu 인증 방식"
+  description="OAuth 또는 API 키를 선택한 뒤 지원하는 동기화 방향을 설정합니다."
+  route="Account → Third Party Connections → Intervals.icu"
+/>
+
+현재 활성화된 기능에 따라 대화상자에서 다음 옵션을 제공할 수 있습니다.
+
+- 일일 자동 활동 동기화
+- Trainingload.ai에서 활동 내보내기
+- 선수 프로필 및 존 가져오기 또는 내보내기
+- 예정 워크아웃 가져오기 또는 내보내기
+
+존과 예정 워크아웃을 어느 플랫폼에서 주로 관리할지 미리 정하세요. 양방향 자동 업데이트를 모두 켜 두면 유지하려던 수정 사항이 덮어씌워질 수 있습니다.
+
+예정 워크아웃 가져오기에는 인터벌 스텝이 없는 일반 캘린더 워크아웃도 포함됩니다. 이는 별도의 훈련 플랜이 필요 없는 독립 워크아웃으로, 날짜·이름·종목·설명과 제공된 운동 시간이 캘린더 및 홈의 오늘의 워크아웃에 표시되며 누락된 시간이나 강도는 미지정 상태로 남습니다. 완료된 활동을 수동으로 연결하거나 연결을 해제할 수 있지만, 활동을 업로드한다고 해서 일반 워크아웃이 자동 완료되지는 않습니다. 이러한 일반 워크아웃에 대한 로컬 편집은 Intervals.icu로 내보내지지 않으며 구조화 워크아웃 파일도 생성되지 않습니다.
+
+## Suunto 연동
+
+1. **Connections → Suunto**를 엽니다.
+2. 필요한 지속 동기화 방향(자동 워크아웃 가져오기, 웰니스 데이터, 완료 활동 내보내기, 예정 워크아웃 내보내기)을 선택합니다.
+3. OAuth 연동 동작을 선택해 Suunto에서 워크아웃 접근 권한을 승인합니다.
+4. Trainingload.ai로 돌아와 최근 워크아웃 초기 가져오기가 완료될 때까지 기다립니다.
+5. 설정을 변경해 저장하거나 **Sync now**를 실행하려면 대화상자를 다시 엽니다.
+
+새 워크아웃은 보통 Suunto 알림으로 도착하며, 정기 재조정이 보조 수단으로 작동합니다. 웰니스 데이터에는 지원하는 심박수, 걸음 수, 수면, 회복 데이터가 포함될 수 있습니다. 연동을 해제하면 향후 교환은 중단되지만 이미 가져온 워크아웃은 삭제되지 않습니다.
+
+## Wahoo 연동
+
+1. **Connections → Wahoo**를 엽니다.
+2. 필요한 동기화 방향(자동 워크아웃 가져오기, 완료 활동 내보내기, 예정 워크아웃 내보내기, 프로필 가져오기 또는 프로필 내보내기)을 선택합니다.
+3. OAuth를 시작해 Wahoo에서 접근을 승인하고 Trainingload.ai로 돌아옵니다.
+4. 설정을 저장한 뒤 최근 워크아웃이 누락되었다면 **Sync now**를 한 번 실행합니다.
+
+어느 플랫폼이 기준값을 관리할지 결정하지 않은 상태에서 프로필 가져오기와 프로필 내보내기를 동시에 켜지 마세요. 다시 연동하기 전에 대화상자의 마지막 동기화 시각(last-sync)과 마지막 오류(last-error) 항목을 확인하세요.
+
+## 모바일에서 플랫폼 관리하기
+
+모바일 연동 시트는 웹과 동일한 저장 연동 정보를 공유하므로, 한쪽에서 변경하면 양쪽 클라이언트에 모두 반영됩니다.
+
+1. **Me → Menu → Data authorization**을 열고 플랫폼을 선택합니다.
+2. Strava 또는 Polar에서 초기 동기화 옵션이 표시되면 OAuth 시작 전에 먼저 선택합니다.
+3. 시스템 브라우저에서 권한 승인을 마치고 앱으로 복귀하도록 허용합니다.
+4. 플랫폼 시트를 다시 열어 지원하는 동기화 방향을 설정합니다.
+5. **Save settings**를 선택한 뒤 누락 보완이 필요할 때만 **Sync now**를 실행합니다.
+6. COROS의 경우 활동 동기화와 건강 동기화를 각각 실행합니다.
+
+Intervals.icu는 전용 모바일 설정 시트를 제공하며, Garmin 설정에서도 ZIP 또는 임시 다운로드 링크를 통한 과거 기록 가져오기를 지원합니다.
+
+<DocsScreenshot
+  id="mobile-provider-settings"
+  title="모바일 플랫폼 연동 설정"
+  description="동기화 방향, 수동 동기화, 연동 해제 제어가 포함된 연동 완료 플랫폼 시트입니다."
+  route="Me → Menu → Data authorization"
+  platformLabel="모바일"
+  platform="mobile"
+/>
+
+## Garmin 신규 데이터 연동
+
+**현재 공식 Garmin OAuth 연동으로는 권한 승인 이전에 기록된 과거 활동을 불러올 수 없습니다. 연동을 해제했다가 다시 연결해도 과거 기록은 채워지지 않습니다.** 과거 기록은 Garmin 전체 내보내기 ZIP(또는 임시 다운로드 링크)으로 가져오거나 개별 FIT, TCX, GPX 파일을 업로드하세요. 이 제약은 셀프 호스팅용 Garmin Personal API에는 해당하지 않으므로 셀프 호스팅 사용자는 별도 가이드를 따르세요.
+
+1. **Account → Third Party Connections → Garmin**을 엽니다.
+2. **OAuth**를 선택해 Garmin에서 접근을 승인하고 Trainingload.ai로 돌아옵니다.
+3. 페이지에 **Garmin connected** 상태가 표시되는지 확인합니다.
+4. 필요에 따라 **New activities(새 활동)** 또는 **Health and recovery(건강 및 회복)**를 켜고 설정을 저장합니다.
+5. 새 워크아웃을 마친 뒤 **Activities(활동)**에서 소스와 상세 정보를 확인합니다.
+
+이 연동은 신규 데이터만 수신합니다. 과거 활동은 아래의 **File import(파일 가져오기)**를 이용하세요. OAuth가 제공되지 않는 경우에도 파일 가져오기를 사용합니다. 셀프 호스팅 환경이라면 [Garmin Personal API 가이드](/ko/docs/self-host/garmin-personal-api)를 따르세요.
+
+<DocsScreenshot
+  id="garmin-oauth-settings"
+  title="Garmin 신규 데이터 설정"
+  description="OAuth 탭에서 새 활동과 건강 요약을 선택합니다. 과거 기록은 File import 탭을 사용합니다."
+  imageAlt="OAuth와 File import 탭이 있는 Garmin 설정 계정 화면"
+  route="Account → Third Party Connections → Garmin → OAuth"
+/>
+
+## Garmin 과거 기록 가져오기
+
+과거 기록 가져오기는 이전 활동을 불러오는 기능이며 지속적 자동 동기화를 켜지 않습니다. 앞으로의 훈련을 자동 수신하려면 위의 Garmin OAuth 연동을 사용하세요.
+
+1. 웹에서는 **Account → Third Party Connections → Garmin**, 모바일에서는 **Me → Menu → Data authorization → Garmin → History import**를 엽니다.
+2. 대화상자에서 [Garmin 공식 데이터 내보내기 페이지](https://www.garmin.com/account/datamanagement/exportdata/)를 열어 내보내기를 요청합니다.
+3. Garmin에서 이메일이 도착할 때까지 기다립니다. 대기 시간은 Garmin 처리 상황에 따라 달라집니다.
+4. 가져오기 방식을 선택합니다. Garmin 전체 내보내기 ZIP을 다운로드해 업로드하거나, 이메일의 **Download** 버튼에 걸린 URL을 복사합니다.
+5. Garmin 과거 기록 가져오기 대화상자에서 **Upload file** 또는 **Use URL**을 선택한 뒤 **Start import**를 누릅니다. 용량이 매우 큰 내보내기는 보통 URL 방식이 더 빠릅니다.
+6. 대화상자로 돌아와 대기(queued), 다운로드(downloading), 스캔(scanning), 가져오기(importing), 완료(completed), 부분 실패(partial-failure), 실패(failure) 상태를 확인합니다.
+7. 완료되면 발견됨(discovered), 대기열(queued), 가져옴(imported), 중복(duplicate) 건수를 예상과 비교해 확인합니다.
+
+<DocsScreenshot
+  id="garmin-history-import"
+  title="Garmin 과거 기록 가져오기"
+  description="Garmin 내보내기 ZIP을 업로드하거나 임시 이메일 링크를 붙여 넣어 작업을 시작하고 단계별 진행 상태를 모니터링합니다."
+  route="Account → Third Party Connections → Garmin"
+/>
+
+내보내기 URL은 임시 다운로드 자격 증명 역할을 합니다. 채팅, AI 코치, 이슈 티켓, 스크린샷에 절대 붙여 넣지 마세요. Trainingload.ai는 보안이 적용된 Garmin 호스팅 URL만 허용하며, 작업 대기 중에는 암호화해 보관하고 아카이브 다운로드가 끝나면 즉시 삭제합니다. 직접 업로드한 ZIP 파일도 가져오기에만 사용되며 스캔 완료 후 삭제됩니다.
+
+## 로그인 계정은 별개입니다
+
+**Login Accounts(로그인 계정)** 아래의 Google, Apple, GitHub는 로그인 인증 수단입니다. 이를 연결하면 간편 로그인에 사용할 수 있을 뿐, 워크아웃·건강 데이터·플랜·프로필 존을 가져오지 않습니다. 비밀번호를 설정하거나 다른 로그인 계정을 연결하기 전에는 마지막 로그인 수단 제거가 제한될 수 있습니다.
+
+## 모든 연동 검증 체크리스트
+
+플랫폼 연동을 마친 뒤 다음을 확인합니다.
+
+1. 플랫폼 카드에 **Connected(연동됨)** 상태가 표시됩니다.
+2. 카드를 다시 열었을 때 선택한 설정이 저장되어 있습니다.
+3. 초기 또는 수동 동기화는 최대 한 번만 실행했습니다.
+4. **Activities(활동)**를 열어 알고 있는 최근 워크아웃 하나가 기대한 소스로 들어왔는지 확인합니다.
+5. 활동 상세 화면을 열어 원본이 실제로 심박수, 파워, GPS, 고도 데이터를 제공했는지 확인합니다.
+6. 양방향 기능을 켰다면 영향이 없는 테스트 변경을 한 번 해 보고 의도한 대상만 바뀌는지 확인합니다.
+
+OAuth 승인이 정상적으로 돌아왔다고 해서 활동까지 자동으로 가져와졌다고 판단하지 마세요. 권한 승인, 데이터 수집, 활동 분석 처리는 서로 다른 단계입니다.
+
+## 문제 해결
+
+| 증상 | 확인할 사항 |
+| --- | --- |
+| OAuth에서 돌아왔는데 카드가 미연동 상태 | 플랫폼 카드에서 다시 시작해 모든 요청 권한을 승인하고, 브라우저가 같은 Trainingload.ai 계정으로 돌아왔는지 확인합니다. 오래된 인증 URL은 재사용하지 마세요. |
+| 연동되었지만 최근 활동이 보이지 않음 | 플랫폼의 초기 가져오기 기간을 확인하고 수동 동기화를 한 번 실행한 뒤 처리를 기다립니다. 활동 목록에서 날짜와 소스로 검색해 보며, 기간 밖 과거 기록은 파일 업로드나 Garmin 과거 기록 가져오기를 사용합니다. |
+| 같은 워크아웃이 두 번 표시됨 | 두 활동의 소스 라벨을 확인한 뒤, 추가 데이터를 가져오기 전에 중복 전달 경로 하나를 비활성화합니다. |
+| 심박수, 파워, GPS 또는 고도가 누락됨 | 원본 플랫폼에서 해당 활동을 열어 확인합니다. 플랫폼이 제공하지 않는 스트림은 Trainingload.ai가 가져올 수 없습니다. |
+| 플랫폼 카드가 화면에 없음 | COROS 등은 플랫폼 승인이나 배포 상태에 따라 노출 여부가 달라질 수 있습니다. 미노출 시 파일 업로드를 이용하세요. |
+| Intervals.icu에서 교체 API 키가 거부됨 | 새 키가 해당 계정 소유인지 확인한 뒤 자격 증명 교체를 명시적으로 승인합니다. |
+| Garmin 링크가 거부됨 | 다운로드한 ZIP 파일을 직접 업로드하거나, 이메일 페이지 URL이 아니라 이메일 내 Download 버튼의 실제 링크를 복사했는지와 보안 Garmin 호스팅 주소인지 확인합니다. |
+| 연동 해제 버튼이 비활성화됨 | 해당 플랫폼이 유일한 로그인 수단인 경우 먼저 비밀번호를 설정하거나 다른 로그인 계정을 연결하세요. |
+
+## 자주 묻는 질문(FAQ)
+
+### Strava를 Trainingload.ai에 어떻게 연동하나요?
+
+**Account → Third Party Connections → Strava**를 열고 최근 60일 가져오기 여부와 데이터 방향을 선택한 뒤 권한을 승인합니다. 돌아온 뒤 Strava 설정을 다시 열어 최신 라이딩이나 러닝이 누락된 경우에만 **Sync now**를 한 번 실행하세요.
+
+### Garmin을 연동해 계속 동기화할 수 있나요?
+
+네. Garmin **OAuth** 연동은 저장한 설정에 따라 새 활동과 승인된 건강 데이터를 수신합니다. **과거 기록 파일 가져오기**는 이전 기록을 불러오며 지속 동기화를 켜지 않습니다. 두 방식을 함께 사용할 수 있지만 같은 활동을 반복해서 가져오지 않도록 주의하세요.
+
+### COROS나 Polar는 어떻게 연동하나요?
+
+플랫폼 카드에서 권한을 승인한 뒤 첫 동기화를 실행합니다. COROS는 **Sync activities**와 일일/건강 동기화가 분리되어 있으므로 한쪽 성공이 다른 쪽 실행을 뜻하지 않습니다. Polar는 최근 30일 활동과 선택적으로 웰니스 데이터를 가져올 수 있습니다.
+
+### 같은 워크아웃이 왜 두 번 표시되나요?
+
+예를 들어 COROS 직접 연동과 Strava 경유처럼 두 경로가 같은 파일을 전달했기 때문입니다. 기록된 워크아웃당 하나의 주 경로만 남기고, 추가 기록을 가져오기 전에 여분의 경로를 비활성화하세요.
+
+## 다음 단계
+
+- 두 번째 경로를 승인하기 전에 [훈련 앱 연동 옵션](/ko/docs/guide/integrations)에서 플랫폼별 차이를 비교해 보세요.
+- 처리 과정과 소스 식별을 이해하려면 [훈련 데이터 연동](/ko/docs/guide/connect-data)을 읽어 보세요.
+- 미지원 플랫폼이나 개별 과거 기록 파일은 [활동 파일 업로드](/ko/docs/guide/upload-activity-files)를 이용하세요.
+- 첫 주간의 세션을 가져온 뒤 [훈련 플랜에서 CTL, ATL, TSB로 훈련 부하 관리하기](/ko/training-load)를 살펴보세요.

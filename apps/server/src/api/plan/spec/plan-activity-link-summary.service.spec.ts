@@ -302,7 +302,7 @@ describe('PlanActivityLinkService activity link summary', () => {
         state: 1,
         mergedIntoActivityId: null,
       },
-      select: { id: true, startTime: true },
+      select: { id: true, startTime: true, sportType: true, timezone: true },
     });
   });
 

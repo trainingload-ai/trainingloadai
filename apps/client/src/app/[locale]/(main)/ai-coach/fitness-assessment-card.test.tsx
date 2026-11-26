@@ -92,6 +92,7 @@ describe("fitness assessment user actions", () => {
   });
   it("disables expired adoption while keeping reassessment available", () => {
     const r = fixture();
+    r.preparationStatus = "READY";
     r.applyOptions[0].expiresAt = "2020-01-01T00:00:00Z";
     render(<FitnessAssessmentCard input={r} onAction={() => {}} />);
     const applyButton = screen.getByRole("button", { name: "确认采用" });

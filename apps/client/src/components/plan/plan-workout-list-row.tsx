@@ -56,12 +56,14 @@ function statusPillClassName(displayKind: PlanWorkoutDisplayKind) {
 export function PlanWorkoutListRow({
   ariaLabel,
   chart,
+  className,
   dateLabel,
   dayLabel,
   displayKind,
   footerActions,
   footerLeading,
   footerVisibility = "always",
+  headerClassName,
   loadBadge,
   meta,
   metrics,
@@ -73,6 +75,7 @@ export function PlanWorkoutListRow({
 }: {
   ariaLabel?: string;
   chart?: ReactNode;
+  className?: string;
   dateLabel?: string;
   dayLabel?: string;
   displayKind: PlanWorkoutDisplayKind;
@@ -80,6 +83,7 @@ export function PlanWorkoutListRow({
   footerLeading?: ReactNode;
   /** iOS 首页卡片把训练操作收进详情 Sheet；桌面端仍可保留快捷操作。 */
   footerVisibility?: "always" | "desktop";
+  headerClassName?: string;
   loadBadge?: ReactNode;
   meta?: string | null;
   metrics?: readonly PlanWorkoutFocusMetric[];
@@ -107,6 +111,7 @@ export function PlanWorkoutListRow({
       className={cn(
         "relative overflow-hidden rounded-surface p-3 text-left transition-colors pc:p-2.5",
         getWeekWorkoutCardChrome(displayKind),
+        className,
       )}
     >
       <button
@@ -117,7 +122,7 @@ export function PlanWorkoutListRow({
         className="absolute inset-0 z-0 cursor-pointer rounded-[inherit] bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:cursor-default"
       />
 
-      <div className="pointer-events-none relative z-10 flex min-w-0 items-center gap-3 pc:gap-2.5">
+      <div className={cn("pointer-events-none relative z-10 flex min-w-0 items-center gap-3 pc:gap-2.5", headerClassName)}>
         {showDate ? (
           <div className="flex h-14 w-16 shrink-0 flex-col items-center justify-center rounded-control-lg bg-background/70 dark:bg-black/20 pc:h-12 pc:w-14 pc:rounded-control">
             <span className="whitespace-nowrap px-1 text-[10px] font-medium uppercase text-muted-foreground">

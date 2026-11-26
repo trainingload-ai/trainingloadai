@@ -107,6 +107,7 @@ export class AmbientMemoryContextService {
     timezone: string;
     maxItems?: number;
     maxTokens?: number;
+    excludeSourceMessageId?: string;
   }): Promise<AmbientMemoryContext> {
     const empty = {
       asOf: input.asOf.toISOString(),
@@ -124,8 +125,15 @@ export class AmbientMemoryContextService {
           statuses: ['ACTIVE'],
           take: 201,
           ambientAsOf: input.asOf,
+          ...(input.excludeSourceMessageId
+            ? { excludeSourceMessageId: input.excludeSourceMessageId }
+            : {}),
         }),
-        this.store.ambientFingerprint?.(input.userId, input.asOf),
+        this.store.ambientFingerprint?.(
+          input.userId,
+          input.asOf,
+          input.excludeSourceMessageId,
+        ),
       ]);
       const maxItems = Math.min(Math.max(input.maxItems ?? 8, 1), 12);
       const maxTokens = Math.min(

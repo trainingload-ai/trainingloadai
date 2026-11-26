@@ -23,6 +23,7 @@ export class CoachFactContextService {
     timezone: string;
     allowAi: boolean;
     allowWithoutConsent?: boolean;
+    excludeMemorySourceMessageId?: string;
   }) {
     const [user, consent] = await Promise.all([
       this.users.users().findUnique({
@@ -48,6 +49,7 @@ export class CoachFactContextService {
         userId: input.userId,
         asOf,
         timezone: input.timezone,
+        excludeSourceMessageId: input.excludeMemorySourceMessageId,
       }),
       this.training?.build(input.userId, input.date, input.timezone) ??
         Promise.resolve(null),

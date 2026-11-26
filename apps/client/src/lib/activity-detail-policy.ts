@@ -13,6 +13,8 @@ export type ActivityDetailTabId =
   | "pace"
   | "runningDynamics";
 
+export type ActivityDetailSection = ActivityDetailTabId | "map";
+
 type ActivityDetailPolicy = {
   group: ActivityDetailSportGroup;
   canEditSportType: boolean;

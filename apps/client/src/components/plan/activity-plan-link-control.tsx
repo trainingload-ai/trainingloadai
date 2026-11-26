@@ -34,8 +34,10 @@ import { queryKeys } from "@/lib/query-keys";
 export function ActivityPlanLinkControl({
   activity,
   onLinkedPlanWorkoutChange,
+  readOnly = false,
 }: {
   activity: Pick<V2ActivityListItem, "hashId" | "linkedPlanWorkout">;
+  readOnly?: boolean;
   onLinkedPlanWorkoutChange?: (
     linked: V2ActivityListItem["linkedPlanWorkout"],
   ) => void;
@@ -56,9 +58,10 @@ export function ActivityPlanLinkControl({
     React.useState<ActivityPlanCandidate | null>(null);
 
   const linked = activity.linkedPlanWorkout ?? null;
+  const linkedName = linked?.name?.trim() || t("dropdown.linkedFallback");
 
   React.useEffect(() => {
-    if (!menuOpen || !activity.hashId) return;
+    if (readOnly || !menuOpen || !activity.hashId) return;
     let cancelled = false;
     setLoading(true);
     setCandidates(null);
@@ -70,7 +73,7 @@ export function ActivityPlanLinkControl({
     return () => {
       cancelled = true;
     };
-  }, [menuOpen, activity.hashId]);
+  }, [menuOpen, activity.hashId, readOnly]);
 
   const displayWorkoutName = React.useCallback(
     (c: ActivityPlanCandidate) =>
@@ -128,6 +131,15 @@ export function ActivityPlanLinkControl({
     }
   };
 
+  if (readOnly) {
+    return linked ? (
+      <span className="inline-flex min-w-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-mobile-caption text-muted-foreground pc:text-xs">
+        <Link2 aria-hidden className="size-3.5 shrink-0" />
+        <span className="min-w-0 break-words">{linkedName}</span>
+      </span>
+    ) : null;
+  }
+
   return (
     <>
       <div onClick={(e) => e.stopPropagation()}>
@@ -160,7 +172,7 @@ export function ActivityPlanLinkControl({
                   title={linked?.name?.trim() ? linked.name.trim() : undefined}
                 >
                   {linked
-                    ? linked.name?.trim() || t("dropdown.linkedFallback")
+                    ? linkedName
                     : t("label.unlinked")}
                 </span>
                 {linked?.source === "AUTO" ? (
@@ -279,7 +291,10 @@ export function ActivityPlanLinkControl({
 }
 
 /** Share the existing editor and link cache across desktop and mobile detail views. */
-export function ActivityDetailPlanLinkControl({ hashId }: { hashId: string }) {
+export function ActivityDetailPlanLinkControl({
+  hashId,
+  readOnly = false,
+}: { hashId: string; readOnly?: boolean }) {
   const queryClient = useQueryClient();
   const queryKey = queryKeys.activity.planLink(hashId);
   const link = useQuery({
@@ -290,13 +305,13 @@ export function ActivityDetailPlanLinkControl({ hashId }: { hashId: string }) {
 
   return (
     <ActivityPlanLinkControl
+      readOnly={readOnly}
       activity={{
         hashId,
         linkedPlanWorkout: link.data.linkedPlanWorkout,
       }}
       onLinkedPlanWorkoutChange={(linkedPlanWorkout) => {
         queryClient.setQueryData(queryKey, { linkedPlanWorkout });
-        void queryClient.invalidateQueries({ queryKey });
       }}
     />
   );

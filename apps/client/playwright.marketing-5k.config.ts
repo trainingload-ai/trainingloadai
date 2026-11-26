@@ -8,15 +8,15 @@ export default defineConfig({
   timeout: 90_000,
   expect: { timeout: 15_000 },
   use: {
-    baseURL: "http://localhost:3013",
+    baseURL: "http://localhost:3016",
     trace: "retain-on-failure",
     launchOptions: { channel: "chrome" },
   },
   webServer: {
     command:
-      "NODE_OPTIONS=--no-experimental-webstorage NEXT_PUBLIC_SELF_HOST_MODE=core-local COACH_E2E=1 pnpm exec next dev -p 3013",
-    url: "http://localhost:3013/zh/login",
-    reuseExistingServer: false,
+      "NODE_OPTIONS=--no-experimental-webstorage NEXT_PUBLIC_SELF_HOST_MODE=core-local COACH_E2E=1 MARKETING_CAPTURE=1 pnpm exec next dev --hostname localhost -p 3016",
+    url: "http://localhost:3016/robots.txt",
+    reuseExistingServer: process.env.MARKETING_CAPTURE_REUSE === "1",
     timeout: 120_000,
   },
   projects: [

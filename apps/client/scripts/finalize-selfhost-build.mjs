@@ -73,6 +73,7 @@ const PLATFORM_PACKAGE_PREFIXES = [
 const BUILD_ONLY_PACKAGES = new Set([
   "@swc+core",
   "ajv",
+  "ajv-formats",
   "ajv-keywords",
   "babel-plugin-react-compiler",
   "browserslist",
@@ -151,7 +152,7 @@ async function pruneBuildToolPackages() {
   const entries = await fs.readdir(standalonePnpmRoot, { withFileTypes: true });
   let removed = 0;
   for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
+    if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
     const packageName = packageNameFromPnpmDirectory(entry.name);
     if (
       !BUILD_ONLY_PACKAGES.has(packageName) &&

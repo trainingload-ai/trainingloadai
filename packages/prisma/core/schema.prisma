@@ -1203,6 +1203,7 @@ model T_user {
   pmcData                           PMCData[]
   plans                             Plan[]
   planProposalPreviews              PlanProposalPreview[]
+  independentWorkoutCreations       IndependentWorkoutCreation[]
   planTemplatePreviews              PlanTemplatePreview[]
   planShareLineages                 PlanShareLineage[]
   competitionEvents                 CompetitionEvent[]
@@ -2080,6 +2081,7 @@ model AiCoachSession {
   runs                 CoachRun[]
   memoryExtractionJobs AiCoachMemoryExtractionJob[]
   assessmentCases      CoachAssessmentCase[]
+  independentWorkoutDrafts IndependentWorkoutDraft[]
 
   @@id([userId, id])
   @@unique([userId, planStartPlanId])
@@ -2412,6 +2414,7 @@ model CoachRunAttempt {
   /// Prevent automatic replay after a side effect; pending IDs also fence recovery.
   mutationStarted   Boolean        @default(false) @map("mutation_started")
   unresolvedTools   Json           @default("[]") @map("unresolved_tools")
+  planRejections    CoachPlanValidationRejection[]
 
   @@unique([userId, requestId])
   @@unique([userId, operationId])
@@ -2419,6 +2422,18 @@ model CoachRunAttempt {
   @@index([runId, startedAt])
   @@index([status, heartbeatAt])
   @@map("t_coach_run_attempt")
+}
+
+/// Private diagnostics for generated plan candidates rejected before delivery.
+model CoachPlanValidationRejection {
+  attemptId  String          @map("attempt_id")
+  attempt    CoachRunAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  toolCallId String          @map("tool_call_id")
+  payload    Json
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  @@id([attemptId, toolCallId])
+  @@map("t_coach_plan_validation_rejection")
 }
 
 /// 导入批次任务：承载一次“用户发起的导入请求”，例如批量上传 100 个文件
@@ -2636,7 +2651,7 @@ model ImportItemJob {
   lastErrorCode    String? @map("last_error_code")
   lastError        String? @map("last_error") @db.Text
 
-  availableAt    DateTime  @default(now()) @map("available_at")
+  availableAt    DateTime  @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)")) @map("available_at")
   attempts       Int       @default(0) @map("attempts")
   startedAt      DateTime? @map("started_at")
   completedAt    DateTime? @map("completed_at")
@@ -5403,12 +5418,21 @@ model PlanProposalPreview {
   expiresAt DateTime  @map("expires_at")
   appliedAt DateTime? @map("applied_at")
 
+  calendarAdjustmentId String?   @map("calendar_adjustment_id")
+  calendarVersion      Int?      @map("calendar_version")
+  discardedAt          DateTime? @map("discarded_at")
+  calendarReceipt      Json?     @map("calendar_receipt")
+  calendarSyncClaimedAt DateTime? @map("calendar_sync_claimed_at")
+  calendarSyncSentAt    DateTime? @map("calendar_sync_sent_at")
+
   decisionId        String?        @unique @map("decision_id")
   decision          CoachDecision? @relation("PlanProposalDecision", fields: [decisionId], references: [id], onDelete: SetNull)
   appliedDecisionId String?        @unique @map("applied_decision_id")
   createdPlanId     String?        @unique @map("created_plan_id")
   createdPlan       Plan?          @relation("PlanProposalCreatedPlan", fields: [createdPlanId], references: [id], onDelete: SetNull)
 
+  @@unique([calendarAdjustmentId, calendarVersion], map: "plan_calendar_adjustment_version_key")
+  @@index([userId, sourcePlanId, calendarAdjustmentId, calendarVersion], map: "plan_calendar_adjustment_owner_idx")
   @@index([userId, expiresAt])
   @@index([sourcePlanId, expiresAt])
   @@index([expiresAt, appliedAt])
@@ -5826,6 +5850,33 @@ model CoachCommit {
   @@index([contextId, eventToSeq(sort: Desc)])
   @@index([decisionId])
   @@map("t_coach_commit")
+}
+
+/// Keeps an idempotency record even after the original workout is removed.
+model IndependentWorkoutCreation {
+  userId      String @map("user_id")
+  user        T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key         String @db.Uuid
+  fingerprint String
+  workoutId   String @map("workout_id")
+
+  @@id([userId, key])
+  @@map("t_independent_workout_creation")
+}
+
+model IndependentWorkoutDraft {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  sid             String
+  originMessageId String   @map("origin_message_id")
+  session         AiCoachSession @relation(fields: [userId, sid], references: [userId, id], onDelete: Cascade, map: "t_independent_workout_draft_session_fkey")
+  workout         Json
+  revision        Int      @default(1)
+  workoutId       String?  @map("workout_id")
+  discardedAt     DateTime? @map("discarded_at")
+
+  @@unique([userId, sid, originMessageId], map: "t_independent_workout_draft_origin_key")
+  @@map("t_independent_workout_draft")
 }
 
 model PlanWorkout {

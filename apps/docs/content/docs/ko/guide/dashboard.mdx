@@ -1,77 +1,126 @@
 ---
-title: Dashboard
-description: Use the Trainingload.ai dashboard to review training trends, filter by time and sport, customize cards, and connect summary signals with deeper metric pages.
-keywords: ["Trainingload.ai dashboard", "training dashboard", "fitness status", "training load dashboard"]
+title: 대시보드
+description: Trainingload.ai 대시보드에서 훈련 추세를 리뷰하고 기간·종목 필터를 적용하며 카드를 맞춤 배치하고 요약 신호를 상세 지표 페이지로 연결합니다.
+keywords:
+  [
+    "Trainingload.ai 대시보드",
+    "훈련 대시보드",
+    "체력 상태",
+    "훈련 부하 대시보드",
+  ]
 ---
 
-# Dashboard
+# 대시보드
 
-The dashboard is the fastest way to understand your recent training pattern. It combines summary cards, fitness status, and configurable overview metrics.
+대시보드는 최근 훈련 패턴을 가장 빠르게 파악할 수 있는 화면입니다. 요약 카드, 체력 상태, 맞춤 설정 가능한 개요 지표를 한곳에 모아 보여 줍니다.
 
-Use it when you want to answer:
+다음과 같은 질문에 답할 때 활용하세요.
 
-- How much have I trained recently?
-- Is my load rising, stable, or falling?
-- Which sport is driving the trend?
-- Do I need to look deeper at activities, PMC, power, pace, or heart rate?
+- 최근에 훈련을 얼마나 했는가?
+- 훈련 부하가 상승 중인가, 유지 중인가, 감소 중인가?
+- 어느 종목이 전체 추세를 이끌고 있는가?
+- 활동 상세, PMC, 파워, 페이스, 심박수 중 어느 페이지를 더 깊이 봐야 하는가?
 
-## Filters
+## 시작하기 전에
 
-The dashboard supports global filters:
+- 선택한 기간이 의미를 갖도록 충분한 최근 활동을 가져옵니다.
+- 강도 기반 지표를 비교하기 전에 역치와 부하 소스 우선순위를 설정합니다.
+- 러닝, 사이클링, 수영이 서로 다른 역치를 사용한다면 한 번에 한 종목씩 필터링해 살펴봅니다.
 
-- **Time range**: switch between recent periods.
-- **Sport type**: focus on running, cycling, swimming, or all activity.
+## 추세 리뷰 워크플로
 
-When you change filters, the cards and charts update to match the selected context.
+1. 목적에 맞는 기간과 종목 필터를 선택합니다.
+2. 체력 상태는 단정적인 진단이나 준비도 판정이 아니라 '추세'로 읽습니다.
+3. 변화가 나타난 카드나 차트를 찾아냅니다.
+4. 그 변화의 원인이 된 개별 활동을 열어 확인합니다.
+5. 플랜을 바꾸기 전에 해당하는 PMC, 파워, 페이스 또는 심박수 페이지로 이어서 점검합니다.
 
-## Fitness status
+<DocsScreenshot
+  id="dashboard-trend-review"
+  title="대시보드 추세 리뷰"
+  description="체력 상태와 개요 카드를 실제 활동과 비교하기 전에 기간 및 종목 필터가 맞는지 먼저 확인합니다."
+  route="Home → Dashboard"
+/>
 
-Fitness status cards summarize the current training picture. They are meant for scanning, not final decisions.
+## 필터
 
-Common signals include:
+대시보드는 전역 필터를 지원합니다.
 
-- Long-term load and fitness trend.
-- Recent fatigue.
-- Readiness/form context.
-- Training consistency.
+- **기간(Time range)**: 최근 기간 범위를 전환합니다.
+- **종목(Sport type)**: 러닝, 사이클링, 수영 또는 전체 활동에 집중합니다.
 
-For the underlying model, read:
+필터를 변경하면 모든 카드와 차트가 선택한 맥락에 맞춰 갱신됩니다.
 
-- [Chronic Training Load](/docs/metrics/pmc/chronic-training-load)
-- [Acute Training Load](/docs/metrics/pmc/acute-training-load)
-- [Training Stress Balance](/docs/metrics/pmc/training-stress-balance)
+## 체력 상태(Fitness status)
 
-## Overview cards
+체력 상태 카드는 현재 훈련 그림을 요약해 줍니다. 최종 의사결정 도구라기보다 전체 흐름을 빠르게 훑어보는 용도입니다.
 
-Overview cards summarize activity volume and performance-related metrics. Depending on your data, they can include distance, duration, elevation, heart rate, power, cadence, and other training fields.
+주요 신호:
 
-Use overview cards to spot changes, then open the relevant page for detail:
+- 장기 훈련 부하 및 체력(CTL) 추세
+- 최근 피로(ATL)
+- 컨디션(TSB) / 준비도 맥락
+- 훈련 일관성
 
-- **Activities** for the workouts behind the numbers.
-- **PMC** for load trend.
-- **Power** for FTP, CP, NP, VI, and power curve context.
-- **Pace** for running pace, GAP, NGP, and best-distance views.
-- **Heart Rate** for HR response, zones, EF, and decoupling.
+기반 모델에 대한 상세 설명은 아래 문서를 참고하세요.
 
-## Edit layout
+- [장기 훈련 부하 (CTL)](/ko/docs/metrics/pmc/chronic-training-load)
+- [단기 훈련 부하 (ATL)](/ko/docs/metrics/pmc/acute-training-load)
+- [훈련 스트레스 밸런스 (TSB)](/ko/docs/metrics/pmc/training-stress-balance)
 
-On desktop, the dashboard supports editing the layout of key sections. Use this when you want the dashboard to match your training focus.
+## 개요 카드
 
-Examples:
+개요 카드는 활동량과 퍼포먼스 관련 지표를 요약합니다. 보유 데이터에 따라 거리, 운동 시간, 획득 고도, 심박수, 파워, 케이던스 등 다양한 훈련 항목이 포함될 수 있습니다.
 
-- Put load and consistency first during base training.
-- Put power or pace metrics first during a race-specific block.
-- Keep recovery and fatigue visible when returning from a high-load week.
+개요 카드에서 변화를 포착했다면 아래 페이지로 이동해 세부 내용을 확인하세요.
 
-After editing, save the layout so the dashboard opens in the same structure next time.
+- **Activities(활동)**: 수치의 근거가 되는 개별 워크아웃 확인
+- **PMC**: 누적 훈련 부하 추세 확인
+- **Power(파워)**: FTP, CP, NP, VI 및 파워 커브 맥락 확인
+- **Pace(페이스)**: 러닝 페이스, GAP, NGP 및 구간 최고 기록 확인
+- **Heart Rate(심박수)**: 심박 반응, 존 분포, 효율 지수(EF), 디커플링 확인
 
-## How to interpret dashboard changes
+## 레이아웃 편집
 
-Do not overreact to one card changing for one day. A better workflow:
+데스크톱에서는 대시보드 주요 섹션의 레이아웃을 편집할 수 있습니다. 현재 훈련 초점에 맞춰 화면을 재구성해 보세요.
 
-1. Check whether the time range and sport filter are correct.
-2. Open recent activities behind the change.
-3. Compare load with subjective fatigue.
-4. Use AI Coach if you want a plan-aware interpretation.
+활용 예시:
 
-The dashboard is your starting point. The decision should still consider the plan, recent workouts, and how you feel.
+- 기초(베이스) 훈련기에는 훈련 부하와 일관성을 상단에 배치
+- 대회 특화 블록에서는 파워나 페이스 지표를 전면에 배치
+- 고부하 주간 이후 복귀할 때는 회복과 피로 지표를 눈에 잘 띄게 유지
+
+편집을 마친 뒤 레이아웃을 저장하면 다음에 대시보드를 열 때도 같은 구성이 유지됩니다.
+
+## 대시보드 변화 해석 방법
+
+하루 동안 카드 하나가 변했다고 성급하게 반응하지 마세요. 다음 순서로 해석하는 것이 좋습니다.
+
+1. 기간 필터와 종목 필터가 올바르게 설정되어 있는지 확인합니다.
+2. 변화의 원인이 된 최근 활동을 직접 열어 봅니다.
+3. 훈련 부하 수치를 주관적 피로감과 비교합니다.
+4. 플랜을 고려한 해석이 필요하면 AI 코치에게 질문합니다.
+
+대시보드는 점검의 출발점입니다. 최종 훈련 결정은 플랜, 최근 워크아웃, 실제 몸 상태를 함께 고려해 내려야 합니다.
+
+## 결과 확인
+
+- 현재 활성화된 필터가 확인하려는 질문과 일치합니다.
+- 표시된 활동과 합계 수치가 동일한 날짜 및 종목 범위를 다룹니다.
+- 추세 변화를 특정 완료 활동으로 거슬러 확인할 수 있습니다.
+- 역치 의존 지표가 최신 프로필 설정값을 사용합니다.
+- 데스크톱에서 저장한 레이아웃이 대시보드를 다시 열어도 유지됩니다.
+
+## 문제 해결
+
+- **카드가 비어 있음:** 기간을 넓히고 종목 필터를 초기화한 뒤 활동이 처리 완료(Ready) 상태인지 확인합니다.
+- **합계가 활동 목록과 다름:** 시간대, 날짜 범위, 종목 필터, 처리 상태를 비교합니다.
+- **부하나 상태가 예상과 다르게 바뀜:** 훈련 자체의 변화라고 단정하기 전에 역치 변경 이력과 부하 소스 우선순위를 확인합니다.
+- **레이아웃이 저장되지 않음:** 새로고침하기 전에 편집 내용을 저장했는지, 계정에 로그인된 상태인지 확인합니다.
+- **특정 카드 수치가 극단적으로 보임:** 이상치에 따라 행동하기 전에 해당 활동을 열어 센서 데이터 품질을 먼저 점검합니다.
+
+## 다음 단계
+
+- [훈련 분석 워크플로](/ko/docs/guide/training-analysis-workflow)
+- [활동 상세 분석](/ko/docs/guide/activity-detail)
+- [훈련 부하 지표](/ko/docs/metrics/training-load)

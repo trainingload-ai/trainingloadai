@@ -15,6 +15,7 @@ import {
 jest.mock('@/api/user/user.service', () => ({ UserService: class {} }));
 
 import { PlanLoadEstimatorService } from '../plan-load-estimator.service';
+import { WorkoutService } from '@/api/workout/workout.service';
 import { PlanRepository } from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 
@@ -424,12 +425,13 @@ describe('PlanLoadEstimatorService.applyForWorkout', () => {
     expect(tx.planWorkout.update).not.toHaveBeenCalled();
   });
 
-  it('estimates active workouts from persisted steps and writes the snapshot', async () => {
+  it('persists the same measured load as the preview when a session RPE is also present', async () => {
     const tx = {
       planWorkout: {
         findUnique: jest.fn(async () => ({
           id: 'workout-1',
           sportType: SportType.CYCLING,
+          plannedSessionRpe: 3,
           plan: { userId: 'user-1', status: PlanStatus.ACTIVE },
           steps: [
             timeStep({
@@ -454,15 +456,19 @@ describe('PlanLoadEstimatorService.applyForWorkout', () => {
     const service = buildEstimator(
       tx as never,
       userService as never,
-      {} as never,
+      new WorkoutService({} as never),
       {} as never,
       {} as never,
     );
 
     const result = await service.applyForWorkout('workout-1');
+    const [preview] = await service.estimateForViewerWorkouts('user-1', [
+      { sportType: 'CYCLING', text: 'work 30m power 220W', plannedSessionRpe: 3 },
+    ]);
 
     expect(result?.estimatedLoad).toBe(38.7);
     expect(result?.estimatedLoadSource).toBe(PlanLoadSource.POWER);
+    expect(preview).toMatchObject({ estimatedLoad: 38.7, estimatedLoadSource: PlanLoadSource.POWER });
     expect(tx.planWorkout.update).toHaveBeenCalledWith({
       where: { id: 'workout-1' },
       data: {
@@ -685,6 +691,101 @@ describe('PlanLoadEstimatorService.applyForPlan', () => {
 });
 
 describe('PlanLoadEstimatorService.estimateForViewerWorkouts', () => {
+  it.each([8, 12, 24].flatMap((weeks) =>
+    (['RUN', 'CYCLING', 'SWIM', 'STRENGTH', 'MIXED'] as const).map((sport) => [weeks, sport] as const),
+  ))('evaluates %d %s weeks against the same assessed schedule and estimates', async (weeks, sport) => {
+    const service = buildEstimator({}, {
+      getComposedUserProfile: async () => ({ ftp: 250, lthr: 170 }),
+      getEffectiveUserFitnessMetric: async () => null,
+    }, new WorkoutService({} as never));
+    const targets = Array.from({ length: weeks }, (_, index) => ({
+      weekIndex: index + 1,
+      phase: index % 4 === 3 ? 'RECOVERY' as const : 'BUILD' as const,
+      focus: index % 4 === 3 ? 'Reduce the work duration' : 'Build consistent work',
+      trainingDays: { min: 1, max: 1 },
+      durationMinutes: { min: 25, max: 100 },
+    }));
+    const scheduled = targets.flatMap(({ weekIndex, phase }) => {
+      const minutes = phase === 'RECOVERY' ? 25 : 40;
+      const disciplines = sport === 'MIXED' ? ['RUN', 'STRENGTH', 'SWIM'] : [sport];
+      return disciplines.map((discipline, index) => ({
+        weekIndex,
+        dayIndex: 1,
+        sessionIndex: index + 1,
+        sportType: discipline === 'STRENGTH' ? 'UNKNOWN' : discipline,
+        structureKind: discipline === 'STRENGTH' ? 'STRENGTH' : 'ENDURANCE',
+        text: discipline === 'CYCLING' ? `work ${minutes}m power 200W` : `work ${minutes}m`,
+        durationSeconds: minutes * 60,
+        plannedSessionRpe: 6,
+      }));
+    });
+    for (const target of targets) target.durationMinutes.max = sport === 'MIXED' ? 120 : 40;
+    const contract = { weekPhases: targets.map((week) => week.phase) };
+    const report = await service.assessPlanQualityForViewer('athlete', weeks, scheduled, contract, undefined, { weekTargets: targets });
+    expect(report.valid).toBe(true);
+    expect(report.weeks).toHaveLength(weeks);
+    expect(report.issues.filter((issue) => issue.code.startsWith('RECOVERY_'))).toEqual([]);
+    const expected = sport === 'CYCLING' ? [42.7, 26.7] : sport === 'MIXED' ? [120, 75] : [40, 25];
+    expect(report.weeks.slice(-2).map((week) => week.totalEstimatedLoad)).toEqual(expected);
+  });
+
+  it('replays the two archived weeks with a shorter taper but increased prescribed effort', async () => {
+    const service = buildEstimator({}, { getComposedUserProfile: async () => ({}) }, new WorkoutService({} as never));
+    const build = [[35 * 60, 4], [38 * 60 + 20, 5], [80 * 60, 5]];
+    const taper = [[30 * 60, 4], [32 * 60, 5], [75 * 60, 7]];
+    const report = await service.assessPlanQualityForViewer('athlete', 2, [build, taper].flatMap((week, weekIndex) =>
+      week.map(([durationSeconds, plannedSessionRpe], index) => ({
+        weekIndex: weekIndex + 1, dayIndex: [1, 3, 6][index], sportType: 'RUN',
+        durationSeconds, text: `work ${durationSeconds}s`, plannedSessionRpe,
+      }))), { weekPhases: ['BUILD', 'TAPER'] });
+
+    expect(report.weeks.map((week) => week.totalEstimatedLoad)).toEqual([121.9, 134.2]);
+    expect(report.issues).toEqual(expect.arrayContaining([expect.objectContaining({
+      code: 'RECOVERY_NOT_REDUCED', target: { scope: 'WEEK', weekIndex: 2 },
+    })]));
+    expect('workoutLoadEstimates' in report && report.workoutLoadEstimates?.at(-1)).toMatchObject({
+      durationSeconds: 4500, plannedSessionRpe: 7, estimatedLoad: 87.5, source: PlanLoadSource.SESSION_RPE,
+    });
+  });
+
+  it('uses whole-session RPE when only the warm-up has a power target', async () => {
+    const service = buildEstimator({}, { getComposedUserProfile: async () => ({ ftp: 250 }) }, new WorkoutService({} as never));
+    const [estimate] = await service.estimateForViewerWorkouts('athlete', [
+      { sportType: 'CYCLING', text: 'warmup 10m power 140W\nwork 20m', plannedSessionRpe: 4 },
+    ]);
+    expect(estimate).toMatchObject({ estimatedLoad: 20, estimatedLoadSource: PlanLoadSource.SESSION_RPE });
+  });
+
+  it('counts a distance workout against time limits only when its prescribed pace supports a duration', async () => {
+    const service = buildEstimator({}, { getComposedUserProfile: async () => ({ tp: 4 }) }, new WorkoutService({} as never));
+    const run = { weekIndex: 1, dayIndex: 1, sportType: 'RUN', durationSeconds: null };
+    const assessment = async (text: string) => service.assessPlanQualityForViewer('athlete', 1, [{ ...run, text }], { maxDailyMinutes: 45 });
+    const supported = await assessment('work 10km pace 5:00-5:00');
+    expect(supported.issues).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'DAILY_TIME_BUDGET' })]));
+    expect(supported.weeks[0]?.totalDurationSeconds).toBe(3000);
+    const unknown = await assessment('work 10km');
+    expect(unknown.valid).toBe(true);
+    expect(unknown.weeks[0]?.totalDurationSeconds).toBeNull();
+    const bounded = await service.assessPlanQualityForViewer('athlete', 1, [
+      { ...run, text: 'work 10km' },
+    ], { maxDailyMinutes: 45 }, undefined, {
+      weekTargets: [{ weekIndex: 1, phase: 'RACE', focus: 'Goal test', trainingDays: { min: 1, max: 1 }, durationMinutes: { min: 10, max: 45 } }],
+    });
+    expect(bounded.valid).toBe(false);
+    expect(bounded.issues).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'UNBOUNDED_DISTANCE_SESSION' })]));
+  });
+
+  it('evaluates recovery using the actual measured target when a session also supplies an RPE', async () => {
+    const service = buildEstimator(
+      {}, { getComposedUserProfile: async () => ({ ftp: 300 }) }, new WorkoutService({} as never),
+    );
+    const report = await service.assessPlanQualityForViewer('athlete', 2, [
+      { weekIndex: 1, dayIndex: 1, sportType: 'CYCLING', durationSeconds: 3600, text: 'work 60m power 300W' },
+      { weekIndex: 2, dayIndex: 1, sportType: 'CYCLING', durationSeconds: 3600, text: 'work 60m power 300W', plannedSessionRpe: 3 },
+    ], { weekPhases: ['BUILD', 'RECOVERY'] });
+    expect(report.valid).toBe(false);
+    expect(report.weeks.map((week) => week.totalEstimatedLoad)).toEqual([100, 100]);
+  });
   const hrDraft = {
     stepType: 'WORK' as const,
     orderIndex: 0,

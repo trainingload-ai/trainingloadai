@@ -45,7 +45,7 @@ export class NotificationRepository {
     return this.prisma.notification.count(args);
   }
 
-  transaction(operations: Prisma.PrismaPromise<unknown>[]) {
+  transaction<T extends Prisma.PrismaPromise<unknown>[]>(operations: [...T]) {
     return this.prisma.$transaction(operations);
   }
 }

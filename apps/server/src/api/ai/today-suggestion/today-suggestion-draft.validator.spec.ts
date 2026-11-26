@@ -7,7 +7,7 @@ import type { TodaySuggestionConstraintProjection } from './today-suggestion.typ
 describe('validateTodaySuggestionDraft', () => {
   const valid = {
     headline: 'Easy run today',
-    summary: 'Keep the session conversational and stop if pain appears.',
+    summary: 'An easy session fits the time available. Keep the session conversational and stop if pain appears.',
     recommendation: {
       kind: 'TRAIN',
       durationMinutes: 30,
@@ -45,13 +45,13 @@ describe('validateTodaySuggestionDraft', () => {
     ).toThrow('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
   });
 
-  it('accepts an optional extra session whose reason is worded differently from its summary', () => {
+  it('includes the reason for an optional session in the athlete-facing summary', () => {
     const reason = 'Recent sessions have been easy and the athlete has time.';
     expect(
       validateTodaySuggestionDraftForProjection(
         {
           ...valid,
-          summary: 'If you want to train today, keep the extra run easy.',
+          summary: `If you want to train today, keep the extra run easy. ${reason}`,
           trainingBasis: { kind: 'ADDITIONAL', reason },
         },
         projection,
@@ -70,7 +70,7 @@ describe('validateTodaySuggestionDraft', () => {
           { ...valid, trainingBasis: { kind: 'ADDITIONAL', reason } },
           projection,
         ),
-      ).toThrow('TODAY_SUGGESTION_TRAINING_BASIS_REASON_REQUIRED');
+      ).toThrow(expect.objectContaining({ code: 'TRAINING_BASIS_REASON_REQUIRED' }));
     },
   );
 
@@ -187,7 +187,7 @@ describe('validateTodaySuggestionDraft', () => {
         ...valid,
         preferredIntent: 'OPEN_ARBITRARY_URL',
       }),
-    ).toThrow('TODAY_SUGGESTION_INVALID_INTENT');
+    ).toThrow(expect.objectContaining({ code: 'INVALID_INTENT' }));
     expect(
       validateTodaySuggestionDraft({
         ...valid,
@@ -202,8 +202,28 @@ describe('validateTodaySuggestionDraft', () => {
         ...valid,
         summary: 'Open https://example.com and continue.',
       }),
-    ).toThrow('TODAY_SUGGESTION_URL_NOT_ALLOWED');
+    ).toThrow(expect.objectContaining({ code: 'URL_NOT_ALLOWED' }));
   });
+
+  it.each([
+    ['SCHEDULED', 'TRAINING_BASIS_WORKOUT_REQUIRED', 'trainingBasis.workoutId'],
+    ['ADDITIONAL', 'TRAINING_BASIS_REASON_REQUIRED', 'trainingBasis.reason'],
+  ])(
+    'names the missing %s basis field in the correction',
+    (kind, code, field) => {
+      expect(() =>
+        validateTodaySuggestionDraft({
+          ...valid,
+          trainingBasis: { kind },
+        }),
+      ).toThrow(
+        expect.objectContaining({
+          code,
+          correction: expect.stringContaining(field),
+        }),
+      );
+    },
+  );
 
   it('rejects drafts that conflict with authoritative safety facts', () => {
     expect(() =>
@@ -447,6 +467,7 @@ describe('validateTodaySuggestionDraft', () => {
           ...valid,
           headline: "Review today's training",
           recommendation: { kind: 'RECOVER' },
+          trainingBasis: undefined,
           preferredIntent: 'OPEN_ACTIVITY_REVIEW',
           secondaryIntents: ['ASK_COACH'],
         },

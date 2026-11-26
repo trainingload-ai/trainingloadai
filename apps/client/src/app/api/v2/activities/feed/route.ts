@@ -9,7 +9,7 @@ import type {
 import {
   mapV2ActivityListItem,
   mapV2ExternalActivityMirror,
-} from "../activity-feed-mapper";
+} from "@/api/activity-feed-mapper";
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 100;

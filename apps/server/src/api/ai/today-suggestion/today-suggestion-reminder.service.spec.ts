@@ -3,7 +3,10 @@ import { TodaySuggestionReminderService } from './today-suggestion-reminder.serv
 describe('TodaySuggestionReminderService', () => {
   afterEach(() => jest.useRealTimers());
 
-  function createService(structuredResult: Record<string, unknown>) {
+  function createService(
+    structuredResult: Record<string, unknown>,
+    currentFactHash = 'facts',
+  ) {
     const prisma = {
       aiTodaySuggestion: {
         findFirst: jest.fn(async () => ({
@@ -35,7 +38,7 @@ describe('TodaySuggestionReminderService', () => {
         {
           project: jest.fn(async () => ({
             date: '2026-10-28',
-            factHash: 'facts',
+            factHash: currentFactHash,
             constraintHash: 'constraints',
             highConcern: false,
           })),
@@ -102,5 +105,20 @@ describe('TodaySuggestionReminderService', () => {
         remindAt: '2026-10-28T01:04:00.000Z',
       }),
     ).rejects.toThrow('TODAY_SUGGESTION_REMINDER_TIME_INVALID');
+  });
+
+  it('rejects a reminder from advice whose calendar facts are superseded', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-28T01:00:00.000Z'));
+    const { service, notifications } = createService({
+      ...baseResult,
+      primaryIntent: { type: 'OPEN_DECISION', decisionId: 'expired-calendar-proposal' },
+    }, 'facts-without-the-expired-calendar-proposal');
+
+    await expect(service.schedule({
+      userId: 'user-1',
+      generationToken: 'generation-1',
+      remindAt: '2026-10-28T02:00:00.000Z',
+    })).rejects.toThrow('TODAY_SUGGESTION_FACTS_CHANGED');
+    expect(notifications.scheduleTrainingReminder).not.toHaveBeenCalled();
   });
 });

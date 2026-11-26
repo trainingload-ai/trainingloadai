@@ -1,0 +1,139 @@
+---
+title: Séances de renforcement musculaire
+description: Créez des séances structurées de renforcement musculaire avec exercices, séries d’échauffement et de travail, répétitions ou temps, charge, effort et repos dans Trainingload.ai.
+keywords: ["éditeur séance renforcement", "plan renforcement musculaire"]
+---
+
+# Séances de renforcement musculaire
+
+Les séances de renforcement musculaire reposent sur des exercices, des séries, des répétitions, une charge, un niveau d’effort et un temps de repos, plutôt que sur des étapes d’endurance en temps ou en distance. Trainingload.ai propose un éditeur dédié au renforcement et peut afficher la prescription planifiée en regard de l’activité réalisée.
+
+## Avant de commencer
+
+- Ouvrez un brouillon de plan ou une séance future modifiable. Ne réécrivez pas une activité réalisée pour en faire une nouvelle prescription.
+- Choisissez **Renforcement musculaire** comme sport pour ouvrir l’éditeur dédié.
+- Décidez si vous préférez le mode **Manuel** ou **Règles**. Les deux produisent exactement la même structure de séance.
+- Rassemblez les noms d’exercices, l’équipement, les charges ou valeurs 1RM fiables ainsi que le RPE/RIR visé. Choisissez **Charge libre** lorsqu’aucune charge chiffrée n’est connue.
+
+## Vue d’ensemble de la structure
+
+<Mermaid
+  chart={`flowchart TD
+  Session["Séance de renforcement"] --> Exercise["Exercice"]
+  Exercise --> Warmup["Groupe de séries d’échauffement"]
+  Exercise --> Work["Groupe de séries de travail"]
+  Work --> Prescription["Répétitions ou temps"]
+  Work --> Load["Libre, poids, % 1RM ou poids du corps"]
+  Work --> Effort["RPE ou RIR"]
+  Work --> Rest["Durée de repos"]`}
+/>
+
+## 1. Choisir Renforcement musculaire
+
+Ouvrez l’éditeur manuel de séances et sélectionnez **Renforcement musculaire**. L’éditeur passe alors des étapes d’endurance au constructeur de renforcement.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Ouvrir l’éditeur depuis le calendrier du plan"
+  description="Dans le créateur de plan manuel, passez à la sélection des dates, puis cliquez sur + Séance le jour souhaité."
+  route="Plans → Créateur de plan manuel → Sélection des dates → + Séance"
+/>
+
+<DocsScreenshot
+  id="strength-workout-builder"
+  title="Constructeur de séance de renforcement"
+  description="Un exercice complet comprend un nom et au moins un groupe de séries de travail ; les séries d’échauffement sont facultatives."
+  route="Plans → Séance manuelle → Renforcement musculaire"
+/>
+
+## 2. Définir les repères globaux de la séance
+
+Ajoutez une durée prévue et un RPE de séance uniquement s’ils sont utiles pour le plan. Le RPE de séance reflète la difficulté globale visée, et non l’effort cible de chaque série prise isolément.
+
+## 3. Ajouter un exercice
+
+Chaque exercice doit porter un nom non vide. Utilisez une dénomination stable et reconnaissable afin de pouvoir comparer facilement le prévu et le réalisé par la suite. L’équipement est facultatif et doit indiquer le matériel nécessaire sans répéter le nom de l’exercice.
+
+Exemples :
+
+- Squat barre — Barre
+- Soulevé de terre roumain — Barre
+- Tractions — Poids du corps
+- Fentes bulgares — Haltères
+
+## 4. Ajouter des groupes de séries
+
+Un groupe de séries décrit plusieurs séries partageant la même prescription.
+
+- **Échauffement** — séries préparatoires ; facultatif.
+- **Travail** — séries qui constituent le cœur de la prescription ; obligatoire pour chaque exercice.
+
+Choisissez des répétitions pour un travail classique ou une durée pour un exercice isométrique ou chronométré. Pour une plage de répétitions, la borne minimale ne doit pas dépasser la borne maximale.
+
+## 5. Choisir la charge
+
+- **Charge libre** — aucune charge chiffrée n’est imposée. Utilisez cette option lorsque le matériel ou le niveau de force actuel n’est pas connu.
+- **Poids fixe** — un poids chiffré avec une unité prise en charge.
+- **Pourcentage de 1RM** — pertinent uniquement lorsque le 1RM correspondant est connu et récent.
+- **Poids du corps** — le poids corporel de l’athlète.
+- **Poids du corps avec décalage** — poids du corps augmenté ou allégé d’une charge externe lorsque l’option est prise en charge.
+
+Les plans de renforcement générés par l’IA ne doivent pas inventer de kilos, de livres ni de pourcentages de 1RM lorsque l’athlète n’a ni historique vérifié ni 1RM connu. Une charge libre associée à un repère RPE/RIR constitue le choix le plus sûr par défaut.
+
+## 6. Ajouter l’effort et le temps de repos
+
+Utilisez le RPE pour exprimer l’effort perçu ou le RIR pour indiquer le nombre de répétitions gardées en réserve. Restez cohérent : évitez d’associer une charge très lourde à une cible d’effort très facile, sauf intention particulière.
+
+Le repos est enregistré par groupe de séries. Prévoyez une durée adaptée à la qualité recherchée plutôt que d’appliquer le même temps de repos à tous les exercices.
+
+## 7. Écrire la même séance en DSL de renforcement
+
+En mode **Règles**, une séance de renforcement peut s’écrire ainsi :
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+
+exercise "Pull Up" equipment bodyweight {
+  work 3x8 bodyweight rir 2 rest 90s
+}
+```
+
+Suivez [DSL de séance de renforcement](/fr/docs/planning/strength-workout-dsl) pour la grammaire complète, les noms d’exercices localisés, les formats de charge, la validation et la résolution des erreurs. Le DSL de renforcement est une prescription statique : il n’exécute ni `if/else`, ni progression hebdomadaire, ni script de décharge, ni blocs imbriqués, ni scripts arbitraires.
+
+## Vérifier la séance
+
+Avant d’enregistrer, vérifiez que :
+
+- Au moins un exercice est présent.
+- Chaque exercice a un nom.
+- Chaque exercice possède au moins un groupe de séries.
+- Chaque exercice inclut au moins un groupe de séries de travail.
+- Les séries, répétitions, secondes, efforts et charges restent dans les plages prises en charge.
+- L’aperçu reflète bien la séance prévue.
+
+Après l’enregistrement, rouvrez la séance et vérifiez que la même structure apparaît dans l’éditeur visuel ou dans le DSL normalisé. Le résumé d’aperçu doit compter le nombre exact d’exercices et de séries de travail prévus.
+
+## Dépannage
+
+- **« Saisissez un nom pour chaque exercice » :** indiquez un nom non vide entre guillemets dans le DSL ou renseignez le champ Exercice dans l’éditeur visuel.
+- **« Chaque exercice doit comporter au moins un groupe de séries » :** ajoutez un groupe d’échauffement ou de travail avant de fermer l’exercice.
+- **« Chaque exercice doit comporter au moins une série de travail » :** un exercice composé uniquement d’échauffement est invalide ; ajoutez au moins une ligne `work`.
+- **Une plage de répétitions échoue :** placez la plus petite valeur en premier, par exemple `3x8-12`.
+- **La charge ou l’effort échoue à la validation :** utilisez un format de charge pris en charge et choisissez RPE ou RIR, jamais les deux.
+- **L’accolade fermante est refusée :** fermez chaque exercice une seule fois et n’imbriquez jamais les blocs d’exercices.
+- **Passer du renforcement à l’endurance vide l’éditeur :** les deux structures sont volontairement différentes. Enregistrez ou copiez votre texte avant de changer de sport.
+
+## Séances de renforcement réalisées
+
+Les activités de renforcement peuvent enregistrer les exercices, la réalisation des séries et l’achèvement global de la séance. Après l’entraînement, ouvrez le détail de l’activité de renforcement et vérifiez les noms d’exercices, les séries réalisées, la charge, les répétitions ou durées ainsi que le contexte global avant de l’utiliser dans votre bilan.
+
+## Étapes suivantes
+
+- Suivez [DSL de séance de renforcement](/fr/docs/planning/strength-workout-dsl) pour un tutoriel complet en mode texte.
+- Ajoutez la séance à un plan et poursuivez avec [Gérer l’état d’un plan](/fr/docs/planning/plan-lifecycle) ou [Gérer un plan actif](/fr/docs/guide/manage-active-plan).

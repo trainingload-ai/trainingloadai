@@ -10,6 +10,7 @@ import {
   WorkoutPlanValueUnit,
 } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
+import { isPrismaSerializableConflict } from '@/prisma/prisma-transaction-errors';
 import { UserService } from '@/api/user/user.service';
 import {
   WorkoutService,
@@ -24,6 +25,12 @@ import { PlanRepository } from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import type { PlanDb } from '../persistence/plan-db';
 import { PlanWorkoutTargetResolver } from './plan-workout-target-resolver.service';
+import {
+  assessPlanQuality,
+  type PlanAssessment,
+  type PlanQualityContract,
+  type PlanQualityWorkout,
+} from '@shared/plan-quality';
 
 /**
  * 计划训练「期望负荷」估算
@@ -81,6 +88,7 @@ export interface EstimateStepContribution {
   durationSec: number;
   contribution: number;
   partialEstimate: boolean;
+  fallbackDuration?: boolean;
   reason?: string;
   thresholdSource?: LthrCalculationSource;
 }
@@ -90,6 +98,8 @@ export interface EstimateInputs {
   bySteps: EstimateStepContribution[];
   /** 整张 workout 没有任何可估算 step 时为 true（UI 兜底用） */
   empty: boolean;
+  incomplete?: boolean;
+  unratedEffort?: boolean;
   /** 主导 target 与次席的 contribution 占比差小于 10% 时为 true（mixedSource 提示用） */
   mixedSource?: boolean;
   strength?: {
@@ -272,7 +282,7 @@ export class PlanLoadEstimatorService {
     bucket: EstimateBucket,
     ifValue: number,
     thresholds: ThresholdSnapshot,
-  ): { sec: number | null; partial: boolean } {
+  ): { sec: number | null; partial: boolean; fallback?: boolean } {
     const value = step.durationValue ?? 0;
     if (value <= 0) return { sec: null, partial: false };
 
@@ -289,8 +299,7 @@ export class PlanLoadEstimatorService {
       // 优先用 step 自己的速度（SPEED target）；否则按 IF 反推阈速；都不行用兜底速度
       let speedMps: number | null = null;
       if (
-        step.targetType === WorkoutPlanStepTargetType.SPEED &&
-        bucket === 'PACE'
+        step.targetType === WorkoutPlanStepTargetType.SPEED
       ) {
         const stepPaceSecPerUnit = this.midPaceSecPerUnit(step);
         if (stepPaceSecPerUnit) {
@@ -320,11 +329,12 @@ export class PlanLoadEstimatorService {
         const thresholdMps = 100 / thresholds.swimThresholdPaceSecPer100m;
         speedMps = thresholdMps * ifValue;
       }
+      const fallback = speedMps == null;
       if (speedMps == null) {
         const kmh = this.resolveFallbackKmh(sport, thresholds, bucket, ifValue);
         speedMps = kmh / 3.6;
       }
-      return { sec: meters / speedMps, partial: true };
+      return { sec: meters / speedMps, partial: true, fallback };
     }
     return { sec: null, partial: false };
   }
@@ -493,9 +503,16 @@ export class PlanLoadEstimatorService {
   }): EstimateResult {
     const { sport, steps, thresholds, plannedSessionRpe } = args;
     const flat = this.flattenSteps(steps);
+    const hasUnestimatedRepeat = steps.some(
+      (step) =>
+        step.stepType === 'REPEAT' &&
+        step.durationType !== WorkoutPlanStepDurationType.REPEAT_COUNT,
+    );
 
     const contributions: EstimateStepContribution[] = [];
     let totalLoad = 0;
+    let unratedEffort = false;
+    let hasMeasuredWorkTarget = false;
 
     for (const { step, multiplier } of flat) {
       const targetResult = this.computeIfFromTarget(sport, step, thresholds);
@@ -504,7 +521,9 @@ export class PlanLoadEstimatorService {
       let partial = false;
       let reason: string | undefined;
 
+      const work = !['WARMUP', 'COOLDOWN', 'RECOVERY', 'REST'].includes(step.intensity ?? '');
       if (ifValue == null) {
+        if (work) unratedEffort = true;
         // 缺阈值或目标缺信息 → 退到 intensity 常量（RPE 兜底）
         const fallback = step.intensity
           ? INTENSITY_FALLBACK_IF[step.intensity]
@@ -521,7 +540,7 @@ export class PlanLoadEstimatorService {
         bucket = 'RPE';
       }
 
-      const { sec, partial: durationPartial } = this.resolveDurationSeconds(
+      const { sec, partial: durationPartial, fallback } = this.resolveDurationSeconds(
         sport,
         step,
         bucket,
@@ -529,6 +548,7 @@ export class PlanLoadEstimatorService {
         thresholds,
       );
       if (sec == null || sec <= 0) continue;
+      if (work && bucket !== 'RPE' && !fallback) hasMeasuredWorkTarget = true;
 
       const stepLoad = ifValue * ifValue * (sec / 3600) * 100 * multiplier;
       totalLoad += stepLoad;
@@ -541,6 +561,7 @@ export class PlanLoadEstimatorService {
         durationSec: sec * multiplier,
         contribution: stepLoad,
         partialEstimate: partial || durationPartial,
+        ...(fallback ? { fallbackDuration: true } : {}),
         reason,
         thresholdSource: targetResult.thresholdSource,
       });
@@ -558,13 +579,13 @@ export class PlanLoadEstimatorService {
       };
     }
 
-    const sessionRpeLoad = computeSessionRpeLoad({
-      rating: plannedSessionRpe,
-      timerTimeSeconds: contributions.reduce(
-        (total, contribution) => total + contribution.durationSec,
-        0,
-      ),
-    });
+    const sessionRpeLoad = hasMeasuredWorkTarget
+      ? null
+      : computeSessionRpeLoad({
+          rating: plannedSessionRpe,
+          timerTimeSeconds: contributions.reduce((total, step) => total + step.durationSec, 0),
+        });
+    const incomplete = hasUnestimatedRepeat || contributions.length !== flat.length;
     if (sessionRpeLoad) {
       return {
         estimatedLoad: round(sessionRpeLoad.normalizedLoad, 1),
@@ -573,6 +594,7 @@ export class PlanLoadEstimatorService {
           thresholds,
           bySteps: contributions,
           empty: false,
+          ...(incomplete ? { incomplete: true } : {}),
           sessionRpe: {
             formulaVersion: 1,
             durationMinutes: sessionRpeLoad.durationMinutes,
@@ -610,6 +632,8 @@ export class PlanLoadEstimatorService {
         thresholds,
         bySteps: contributions,
         empty: false,
+        ...(incomplete ? { incomplete: true } : {}),
+        ...(unratedEffort ? { unratedEffort: true } : {}),
         mixedSource: mixedSource ? true : undefined,
       },
     };
@@ -664,14 +688,17 @@ export class PlanLoadEstimatorService {
     if (persisted.length > 0) {
       return persisted as PlanWorkoutStepRow[];
     }
-    const raw = typeof workout.text === 'string' ? workout.text.trim() : '';
+    return this.draftsToFlatRows(this.parseStepsForEstimate(workout.text));
+  }
+
+  private parseStepsForEstimate(text?: string | null): WorkoutPlanStepDraft[] {
+    const raw = text?.trim();
     if (!raw) {
       return [];
     }
     try {
       const blocks = this.workoutService.parsePlanText(raw);
-      const drafts = this.workoutService.buildWorkoutPlanSteps(blocks);
-      return this.draftsToFlatRows(drafts);
+      return this.workoutService.buildWorkoutPlanSteps(blocks);
     } catch (err) {
       this.logger.warn(
         `[PlanLoadEstimator] parse DSL fallback failed: ${
@@ -735,7 +762,7 @@ export class PlanLoadEstimatorService {
       durationSeconds?: number | null;
       plannedSessionRpe?: number | null;
     }>,
-    options?: { includeInputs?: boolean },
+    options?: { includeInputs?: boolean; tx?: PlanDb },
   ): Promise<
     Array<{
       estimatedLoad: number | null;
@@ -743,20 +770,29 @@ export class PlanLoadEstimatorService {
       estimatedLoadInputs?: EstimateResult['estimatedLoadInputs'];
     }>
   > {
+    const drafts = workouts.map((workout) => ({
+      ...workout,
+      sportType: asViewerSport(workout.sportType),
+      steps: ['STRENGTH', 'FREEFORM'].includes(String(workout.structureKind).toUpperCase())
+        ? [] : this.parseStepsForEstimate(workout.text),
+    }));
     const sports = [
-      ...new Set(workouts.map((workout) => asViewerSport(workout.sportType))),
+      ...new Set(drafts.map((workout) => workout.sportType)),
     ];
     const thresholdsBySport = new Map<SportType, ThresholdSnapshot>();
-    await Promise.all(
-      sports.map(async (sport) => {
-        thresholdsBySport.set(
-          sport,
-          await this.loadThresholdsForUser(userId, sport),
-        );
-      }),
-    );
+    const [resolved] = await Promise.all([
+      this.workoutTargetResolver?.resolveWorkouts(userId, drafts, options?.tx) ?? drafts,
+      Promise.all(
+        sports.map(async (sport) => {
+          thresholdsBySport.set(
+            sport,
+            await this.loadThresholdsForUser(userId, sport, options?.tx),
+          );
+        }),
+      ),
+    ]);
 
-    return workouts.map((workout) => {
+    return resolved.map((workout) => {
       const kind = String(workout.structureKind ?? 'ENDURANCE').toUpperCase();
       if (kind === 'STRENGTH' || kind === 'FREEFORM') {
         const result = this.estimateStrength({
@@ -771,10 +807,10 @@ export class PlanLoadEstimatorService {
             : {}),
         };
       }
-      const sport = asViewerSport(workout.sportType);
+      const sport = workout.sportType;
       const result = this.estimate({
         sport,
-        steps: this.resolvePlanStepsForEstimate({ text: workout.text }),
+        steps: this.draftsToFlatRows(workout.steps),
         thresholds: thresholdsBySport.get(sport)!,
         plannedSessionRpe: workout.plannedSessionRpe,
       });
@@ -786,6 +822,74 @@ export class PlanLoadEstimatorService {
           : {}),
       };
     });
+  }
+
+  async assessPlanQualityForViewer(
+    userId: string,
+    periodWeeks: number,
+    workouts: PlanQualityWorkout[],
+    contract?: PlanQualityContract,
+    tx?: PlanDb,
+    assessment?: Pick<PlanAssessment, 'weekTargets' | 'phases'>,
+  ) {
+    const weekTargets = assessment?.weekTargets;
+    const needsDuration = Boolean(weekTargets || contract?.maxDailyMinutes || contract?.maxMinutesByIsoWeekday) &&
+      workouts.some((workout) => workout.durationSeconds == null && workout.text);
+    if (!needsDuration && !weekTargets?.some((target) => target.loadTarget) &&
+      !contract?.weekPhases?.some((phase) => phase === 'RECOVERY' || phase === 'TAPER')) {
+      return assessPlanQuality(periodWeeks, workouts, contract, assessment);
+    }
+    const estimates = await this.estimateForViewerWorkouts(
+      userId,
+      workouts.map((workout) => ({ ...workout, sportType: workout.sportType ?? 'UNKNOWN' })),
+      { includeInputs: true, tx },
+    );
+    const workoutLoadEstimates = estimates.map((estimate, index) => {
+      const workout = workouts[index];
+      const { estimatedLoadInputs: inputs } = estimate;
+      const missingThreshold = inputs?.bySteps.find((step) =>
+        step.reason?.startsWith('missing_threshold_'),
+      )?.reason;
+      const unavailableReason = inputs?.incomplete ? 'incomplete_steps'
+        : !inputs?.sessionRpe && missingThreshold ? missingThreshold
+        : inputs?.bySteps.some((step) => step.fallbackDuration) ? 'estimated_step_duration'
+        : inputs?.unratedEffort ? 'missing_prescribed_effort'
+        : estimate.estimatedLoad == null ? 'no_estimate' : undefined;
+      const bySteps = inputs?.bySteps ?? [];
+      const session = inputs?.sessionRpe ?? inputs?.strength;
+      const methods = [...new Set(bySteps.filter((step) => step.bucket !== 'RPE')
+        .map((step) => step.thresholdSource ? `${step.bucket}/${step.thresholdSource}` : step.bucket))].sort();
+      const loadMethod = session ? 'SESSION_RPE' : methods.join('+') || estimate.estimatedLoadSource;
+      const preciseLoad = session?.normalizedLoad ?? bySteps.reduce((sum, step) => sum + step.contribution, 0);
+      const stepDuration = bySteps.reduce((sum, step) => sum + step.durationSec, 0);
+      const durationNeedsPace = bySteps.some((step) => step.fallbackDuration);
+      return {
+        weekIndex: workout.weekIndex,
+        dayIndex: workout.dayIndex,
+        sessionIndex: workout.sessionIndex ?? 1,
+        sportType: workout.structureKind === 'STRENGTH' ? 'STRENGTH' : workout.sportType,
+        durationSeconds: bySteps.length ? stepDuration : workout.durationSeconds,
+        durationDerivedFromPace: workout.durationSeconds == null && stepDuration > 0 &&
+          !inputs?.incomplete && !durationNeedsPace,
+        durationNeedsPace,
+        plannedSessionRpe: workout.plannedSessionRpe ?? null,
+        estimatedLoad: unavailableReason ? null : estimate.estimatedLoad,
+        unavailableReason,
+        source: unavailableReason ? undefined : estimate.estimatedLoadSource,
+        loadMethod: unavailableReason ? undefined : loadMethod,
+        estimatedLoadRange: unavailableReason ? undefined : { min: preciseLoad, max: preciseLoad },
+      };
+    });
+    const report = assessPlanQuality(
+      periodWeeks,
+      workouts.map((workout, index) => {
+        const { estimatedLoad, estimatedLoadRange, loadMethod, durationDerivedFromPace, durationSeconds, durationNeedsPace } = workoutLoadEstimates[index];
+        return { ...workout, durationSeconds: durationDerivedFromPace ? durationSeconds : workout.durationSeconds, durationNeedsPace, estimatedLoad, estimatedLoadRange, loadMethod };
+      }),
+      contract,
+      assessment,
+    );
+    return { ...report, workoutLoadEstimates };
   }
 
   /** 计算单节课并写回快照（含阈值读取）。Tx 可选；缺省走全局 prisma。 */
@@ -833,11 +937,9 @@ export class PlanLoadEstimatorService {
     }
 
     const result =
-      workout.structureKind === 'STRENGTH'
+      workout.structureKind === 'STRENGTH' || workout.structureKind === 'FREEFORM'
         ? this.estimateStrength(workout)
-        : workout.structureKind === 'FREEFORM'
-          ? this.estimateStrength({})
-          : await (async () => {
+        : await (async () => {
               const currentWorkout = this.workoutTargetResolver
                 ? await this.workoutTargetResolver.resolveWorkout(
                     userId,
@@ -856,7 +958,7 @@ export class PlanLoadEstimatorService {
                 thresholds,
                 plannedSessionRpe: workout.plannedSessionRpe,
               });
-            })();
+          })();
 
     await this.workouts.update(
       {
@@ -916,6 +1018,7 @@ export class PlanLoadEstimatorService {
         });
         if (res) count += 1;
       } catch (err) {
+        if (tx && isPrismaSerializableConflict(err)) throw err;
         this.logger.warn(
           `[PlanLoadEstimator] applyForWorkout(${workout.id}) failed: ${
             err instanceof Error ? err.message : String(err)

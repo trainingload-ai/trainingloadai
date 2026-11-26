@@ -2,6 +2,15 @@ import type {
   PlanProposalPreviewRequest,
   PlanProposalPreviewResult,
 } from '@shared/plan-proposal';
+import { UnprocessableEntityException } from '@nestjs/common';
+import { asRecord } from '../ai-common.util';
+import { isCalendarDate } from '@shared/plan-calendar';
+import {
+  calendarMonthEnd,
+  hasRollingWeekTargets,
+  conflictingRollingMonthTargets,
+  parseRollingStartSettings,
+} from '@shared/rolling-plan';
 import {
   aiToolError,
   buildAiTool,
@@ -9,6 +18,39 @@ import {
   requireSignedInUser,
   type AiToolDef,
 } from '../tool.types';
+
+const targetRangeProperties = {
+  min: { type: 'number', minimum: 0 },
+  max: { type: 'number', minimum: 0 },
+};
+const nullableTargetRange = {
+  anyOf: [
+    { type: 'null' },
+    {
+      type: 'object',
+      properties: targetRangeProperties,
+      required: ['min', 'max'],
+      additionalProperties: false,
+    },
+  ],
+};
+const rollingRanges = {
+  loadRange: {
+    anyOf: [
+      { type: 'null' },
+      {
+        type: 'object',
+        properties: {
+          unit: { type: 'string', const: 'NORMALIZED_LOAD' },
+          ...targetRangeProperties,
+        },
+        required: ['unit', 'min', 'max'],
+        additionalProperties: false,
+      },
+    ],
+  },
+  durationMinutesRange: nullableTargetRange,
+};
 
 export const planProposalPreviewTool: AiToolDef<
   PlanProposalPreviewRequest,
@@ -22,7 +64,6 @@ export const planProposalPreviewTool: AiToolDef<
   searchHint:
     'adapt replace supersede plan workout prescription zone preview confirmation',
   applicableSkills: [
-    'plan-builder',
     'plan-followup',
     'plan-start',
     'plan-cycle-review',
@@ -44,6 +85,16 @@ export const planProposalPreviewTool: AiToolDef<
       planId: {
         type: 'string',
         description: 'Source plan id for ADAPT, START or SCHEDULE.',
+      },
+      calendarAdjustment: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['id', 'baseVersionId'],
+        properties: {
+          id: { type: 'string' },
+          baseVersionId: { type: 'string' },
+        },
+        description: 'SCHEDULE only. Use when the athlete asks to revise a specific saved adjustment. Read pendingCalendarAdjustments first, use the exact current version, and include only the requested delta.',
       },
       range: {
         type: 'object',
@@ -170,35 +221,8 @@ export const planProposalPreviewTool: AiToolDef<
               properties: {
                 monthStart: { type: 'string' },
                 objective: { type: 'string' },
-                loadRange: {
-                  anyOf: [
-                    { type: 'null' },
-                    {
-                      type: 'object',
-                      properties: {
-                        unit: { type: 'string', const: 'NORMALIZED_LOAD' },
-                        min: { type: 'number', minimum: 0 },
-                        max: { type: 'number', minimum: 0 },
-                      },
-                      required: ['unit', 'min', 'max'],
-                      additionalProperties: false,
-                    },
-                  ],
-                },
-                durationMinutesRange: {
-                  anyOf: [
-                    { type: 'null' },
-                    {
-                      type: 'object',
-                      properties: {
-                        min: { type: 'number', minimum: 0 },
-                        max: { type: 'number', minimum: 0 },
-                      },
-                      required: ['min', 'max'],
-                      additionalProperties: false,
-                    },
-                  ],
-                },
+                ...rollingRanges,
+                runningDistanceKmRange: nullableTargetRange,
                 weekFocus: {
                   type: 'array',
                   items: {
@@ -206,8 +230,14 @@ export const planProposalPreviewTool: AiToolDef<
                     properties: {
                       weekStart: { type: 'string' },
                       focus: { type: 'string' },
+                      ...rollingRanges,
                     },
-                    required: ['weekStart', 'focus'],
+                    required: [
+                      'weekStart',
+                      'focus',
+                      'loadRange',
+                      'durationMinutesRange',
+                    ],
                     additionalProperties: false,
                   },
                 },
@@ -399,6 +429,11 @@ export const planProposalPreviewTool: AiToolDef<
   },
   checkPermissions: async (ctx) => requireSignedInUser(ctx),
   validateInput: (ctx, input) => {
+    if (ctx.calendarScheduleOnly && input?.mode !== 'SCHEDULE')
+      return aiToolError(
+        'Calendar moves require a SCHEDULE proposal',
+        'INVALID_INPUT',
+      );
     if (!ctx.coachBranching) {
       return aiToolError('Plan proposal previews are unavailable', 'FORBIDDEN');
     }
@@ -447,7 +482,8 @@ export const planProposalPreviewTool: AiToolDef<
         !input.planId ||
         (input.mode === 'START'
           ? !/^\d{4}-\d{2}-\d{2}$/.test(input.startDate)
-          : !input.range?.from || !input.range?.to) ||
+          : !ctx.calendarScheduleOnly &&
+            (!input.range?.from || !input.range?.to)) ||
         !input.rationale?.trim() ||
         !Array.isArray(input.evidenceRefs) ||
         input.evidenceRefs.length === 0)
@@ -478,17 +514,72 @@ export const planProposalPreviewTool: AiToolDef<
           'INVALID_INPUT',
         );
     }
+    if (
+      input.mode === 'START' &&
+      input.rolling &&
+      isCalendarDate(input.startDate)
+    ) {
+      try {
+        const settings = parseRollingStartSettings(
+          input.rolling,
+          input.startDate,
+        );
+        for (const strategy of settings.monthStrategies) {
+          const from =
+            input.startDate > strategy.monthStart
+              ? input.startDate
+              : strategy.monthStart;
+          if (
+            !hasRollingWeekTargets(
+              strategy,
+              from,
+              calendarMonthEnd(strategy.monthStart),
+            )
+          ) {
+            return aiToolError(
+              'Each remaining ISO week in every included month needs a focus and explicit load and duration ranges. Use null for unknown ranges.',
+              'ROLLING_WEEK_TARGETS_REQUIRED',
+            );
+          }
+          const conflicts = conflictingRollingMonthTargets(strategy);
+          if (conflicts.length)
+            return aiToolError(
+              `The week segments in ${strategy.monthStart} cannot reach the monthly range for ${conflicts.join(', ')}. Revise the monthly and weekly goals together.`,
+              'ROLLING_MONTH_TARGET_CONFLICT',
+            );
+        }
+      } catch (error) {
+        return aiToolError(
+          error instanceof Error
+            ? error.message
+            : 'Invalid rolling start settings',
+          'INVALID_INPUT',
+        );
+      }
+    }
     return { ok: true };
   },
-  summarizeForModel: ({ output }) => ({
+  summarizeForModel: ({ ctx, output }) => ({
     kind: output.kind,
     previewId: output.previewId,
     mode: output.mode,
     expiresAt: output.expiresAt,
     decisionType: output.decisionType,
+    ...(output.mode === 'START'
+      ? {
+          startDate: output.presentation.startDate,
+          firstTrainingDates: [...new Set(output.presentation.rows
+            .map((row) => row.scheduledDate)
+            .filter(isCalendarDate))].sort().slice(0, 3),
+        }
+      : {}),
     decisionPayload:
       output.mode === 'START' || output.mode === 'SCHEDULE'
-        ? { planId: output.decisionPayload.planId, previewId: output.previewId }
+        ? {
+            planId: output.decisionPayload.planId,
+            previewId: output.previewId,
+            calendarAdjustmentId: output.decisionPayload.calendarAdjustmentId,
+          }
         : output.decisionPayload,
     ...(output.mode === 'START' || output.mode === 'SCHEDULE'
       ? {
@@ -510,6 +601,21 @@ export const planProposalPreviewTool: AiToolDef<
           relatedCalendarConflicts:
             output.presentation.relatedCalendarConflicts,
           warnings: output.presentation.warnings,
+          ...(ctx.calendarScheduleOnly
+            ? {
+                changedRows: output.presentation.rows
+                  .filter((row) => row.changeKind && row.changeKind !== 'PRESERVED')
+                  .slice(0, 12)
+                  .map((row) => ({
+                    changeKind: row.changeKind,
+                    name: row.name,
+                    from: row.beforeScheduledDate,
+                    to: row.scheduledDate,
+                    before: row.before,
+                    after: row.after,
+                  })),
+              }
+            : {}),
         }
       : {}),
   }),
@@ -525,17 +631,33 @@ export const planProposalPreviewTool: AiToolDef<
     if (!userId || !ctx.coachBranching) {
       throw new Error('plan.proposal_preview requires a signed-in user');
     }
-    return ctx.coachBranching.createPlanProposalPreview({
-      userId,
-      request: input,
-      binding:
-        ctx.sid && (ctx.branchId || input.mode === 'SCHEDULE')
-          ? {
-              sid: ctx.sid,
-              branchId: ctx.branchId ?? '',
-              userMessageId: ctx.currentUserMessageId,
-            }
-          : undefined,
-    });
+    try {
+      return await ctx.coachBranching.createPlanProposalPreview({
+        userId,
+        request: input,
+        binding:
+          ctx.sid && (ctx.branchId || input.mode === 'SCHEDULE')
+            ? {
+                sid: ctx.sid,
+                branchId: ctx.branchId ?? '',
+                userMessageId: ctx.currentUserMessageId,
+              }
+            : undefined,
+      });
+    } catch (error) {
+      if (input.mode === 'START' && error instanceof UnprocessableEntityException) {
+        const response = asRecord(error.getResponse());
+        if (response?.code === 'PLAN_SCHEDULE_INVALID' && Array.isArray(response.issues)) {
+          const issues = response.issues.slice(0, 8).map((value) => {
+            const issue = asRecord(value);
+            return isCalendarDate(issue?.date) ? `${issue.code} on ${issue.date}` : issue?.code;
+          });
+          throw new Error(
+            `PLAN_SCHEDULE_INVALID (${response.issues.length}): ${issues.join(', ')}. Recalculate workout positions from the selected date and retry with the existing schedule rules.`,
+          );
+        }
+      }
+      throw error;
+    }
   },
 });

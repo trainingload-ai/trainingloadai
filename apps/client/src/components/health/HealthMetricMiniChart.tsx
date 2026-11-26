@@ -551,6 +551,7 @@ export function HealthMetricMiniChart({
   previousPoints,
   baseline,
   intraday,
+  sleepByDay = false,
 }: {
   card: HealthOverviewCard;
   locale: string;
@@ -559,6 +560,7 @@ export function HealthMetricMiniChart({
   previousPoints: HealthChartPoint[];
   baseline?: HealthBaseline | null;
   intraday?: HealthIntradayResponse;
+  sleepByDay?: boolean;
 }) {
   const hasIntraday = intraday != null && intraday.current.length > 0;
   if (rangeDays === "latest" && card.key === "sleep" && hasIntraday) {
@@ -677,7 +679,7 @@ export function HealthMetricMiniChart({
     />
   );
 
-  if (card.chartKind === "sleep" && rangeDays === "latest") {
+  if (card.chartKind === "sleep" && (rangeDays === "latest" || sleepByDay)) {
     return (
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart {...common} barCategoryGap="24%">

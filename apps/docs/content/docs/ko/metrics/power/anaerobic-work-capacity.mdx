@@ -1,45 +1,45 @@
 ---
-title: Anaerobic Work Capacity (W')
-description: W' (W prime) describes the finite work capacity available above Critical Power and helps interpret repeated high-intensity efforts.
-keywords: ["W'", "W Prime", "W prime calculator", "Anaerobic Work Capacity", "FRC", "Functional Reserve Capacity", "AWC", "Critical Power", "CP"]
+title: 무산소 작업 용량 (W')
+description: W'(W 프라임)은 임계 파워(CP) 이상에서 발휘할 수 있는 유한한 작업 용량을 나타내며, 반복적인 고강도 노력을 해석하는 데 유용합니다.
+keywords: ["W'", "W Prime", "W 프라임 계산기", "무산소 작업 용량", "FRC", "기능적 예비 용량", "AWC", "임계 파워", "CP"]
 ---
 
-# W' (Anaerobic Work Capacity)
+# W' (무산소 작업 용량)
 
-**W'** (pronounced “W prime”) represents your **Anaerobic Work Capacity**. It is an energy quantity, typically expressed in joules or kilojoules, describing the finite amount of work available above **[Critical Power (CP)](/docs/metrics/power/critical-power)**.
+**W'**(“W 프라임”으로 읽음)는 **무산소 작업 용량(Anaerobic Work Capacity)**을 나타냅니다. 일반적으로 줄(J) 또는 킬로줄(kJ) 단위로 표현되는 에너지 양으로, **[임계 파워(CP)](/ko/docs/metrics/power/critical-power)** 이상에서 수행할 수 있는 유한한 작업량을 의미합니다.
 
-## Core Concept
+## 핵심 개념
 
-Think of your performance as two parts:
-1.  **Critical Power (CP)**: the model’s high sustainable threshold.
-2.  **W'**: the finite work reserve used when power is above CP.
+선수의 파워 수행 능력을 두 부분으로 나누어 생각할 수 있습니다.
+1. **임계 파워 (CP)**: 모델이 나타내는 높은 지속 가능 역치.
+2. **W'**: 파워가 CP를 초과할 때 꺼내 쓰는 유한한 작업 예비량(배터리).
 
-## W' depletion and recovery
+## W'의 소모와 회복
 
--   **Depletion**: when power > CP, `depletion rate = current power - CP`. The higher above CP, the faster W' is spent.
--   **Recovery**: when power < CP, W' begins to recover. Recovery rate depends on how far below CP you are and on your aerobic recovery ability.
+- **소모**: 파워가 CP보다 높으면 `소모 속도 = 현재 파워 - CP`로 줄어듭니다. CP를 많이 초과할수록 W'가 더 빠르게 소진됩니다.
+- **회복**: 파워가 CP 아래로 내려가면 W'가 회복되기 시작합니다. 회복 속도는 CP보다 얼마나 낮게 유지하는지, 그리고 선수의 유산소 회복 능력에 따라 달라집니다.
 
-## What does “empty” mean?
+## “바닥났다(0)”는 의미
 
-When **W' reaches 0**, it doesn’t mean you can’t move. It means you **can’t sustain any power above CP**. You’re forced to drop to CP or below.
+**W'가 0에 도달했다**고 해서 움직일 수 없다는 뜻은 아닙니다. **더 이상 CP 이상의 파워를 유지할 수 없다**는 의미이며, 어쩔 수 없이 출력을 CP 이하로 낮춰야 합니다.
 
-## Practical uses
+## 실전 활용
 
--   **Race pacing**: in short time trials or climbs, manage W' so you finish near “empty” at the line.
--   **Interval training**: track W' balance (W' bal) to see whether your intervals truly deplete anaerobic reserves.
+- **레이스 페이싱**: 짧은 타임트라이얼이나 업힐에서 결승선 통과 시점에 맞춰 W'를 거의 다 쓰도록 배분합니다.
+- **인터벌 훈련**: W' 잔량(W' bal)을 추적하여 인터벌이 무산소 예비량을 의도대로 충분히 자극했는지 확인합니다.
 
-## How Trainingload.ai uses W'
+## Trainingload.ai의 W' 활용 방식
 
-Trainingload.ai uses W' to interpret work above CP. A workout can have a similar total TSS but very different above-threshold demands depending on how much W' it uses.
+Trainingload.ai는 CP 이상에서 수행한 작업의 성격을 해석하는 데 W'를 활용합니다. 총 TSS가 비슷한 두 워크아웃이라도 W'를 얼마나 소모했는지에 따라 역치 이상 부담은 완전히 달라질 수 있습니다.
 
-W' is useful for reviewing:
+W'는 다음 항목을 리뷰할 때 유용합니다.
 
--   whether short attacks, hill repeats, or VO2 intervals were demanding enough;
--   whether recovery intervals were easy enough to restore repeatability;
--   whether an athlete has a larger short-power reserve or a stronger sustained-power profile.
+- 짧은 어택, 힐 리피트, VO2 인터벌이 충분한 자극을 주었는지 여부
+- 인터벌 사이 회복 구간이 반복 수행 능력을 되살릴 만큼 충분히 가벼웠는지 여부
+- 선수가 단시간 고출력 예비량이 큰 유형인지, 지속 파워가 강한 유형인지 파악
 
-For a model-based estimate, use the [fit Critical Power and W' for training load planning](/critical-power-calculator), which fits CP and W' together.
+모델 기반 추정치를 구하려면 CP와 W'를 함께 피팅하는 [임계 파워 및 W' 계산기](/ko/critical-power-calculator)를 이용해 보세요.
 
-## Limitations
+## 한계점
 
-W' is model-dependent. It is only as good as the maximal efforts used to fit the power-duration curve. If your recent data lacks hard efforts in the 1–5 minute and 10–20 minute ranges, the estimate may be unstable.
+W'는 모델 의존적 지표입니다. 파워-지속시간 곡선(PDC) 피팅에 사용된 최대 노력 기록의 품질만큼만 정확합니다. 최근 데이터에 1–5분 및 10–20분 구간의 전력 기록이 부족하면 추정치가 불안정해질 수 있습니다.

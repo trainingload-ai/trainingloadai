@@ -5,8 +5,6 @@ export const PLAN_REVIEW_SKILLS = [
   'plan-cycle-review',
 ] as const;
 
-export const PLAN_DRAFT_SKILLS = ['plan-builder', 'plan-cycle-review'] as const;
-
 export const ACTIVITY_REVIEW_SKILLS = [
   'plan-followup',
   'plan-day-review',

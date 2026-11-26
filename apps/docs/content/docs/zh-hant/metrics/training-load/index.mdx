@@ -1,48 +1,81 @@
 ---
-title: 訓練負荷是什麼？TSS、TRIMP 與強度係數怎麼看
-description: 訓練負荷用 TSS、TRIMP 和強度係數量化一次課或一週的訓練劑量。看這些指標如何比較不同時長與類型的訓練，並為計畫複盤、恢復安排和後續調整提供證據。
+title: "什麼是訓練負荷？一次看懂 TSS、TRIMP 與 IF"
+description: "訓練負荷透過 TSS、TRIMP 與強度係數（IF）量化單次與每週的訓練劑量。了解這些指標如何跨課表比較，並支援訓練計畫回顧。"
 keywords:
-  ["訓練負荷是什麼", "訓練負荷怎麼看", "TSS 和 TRIMP", "訓練負荷指標", "訓練負荷怎麼算"]
+  [
+    "什麼是訓練負荷",
+    "訓練負荷說明",
+    "TSS 與 TRIMP 比較",
+    "訓練負荷指標",
+    "如何量測訓練負荷",
+  ]
 ---
 
-# 訓練負荷是什麼？TSS、TRIMP 與強度係數怎麼看
+# 什麼是訓練負荷？一次看懂 TSS、TRIMP 與 IF
 
-**訓練負荷**是一次課、一週或一個週期的模型化劑量。本頁說明 TSS、TRIMP 和強度係數如何比較「兩小時輕鬆」和「三十分鐘間歇」，並判斷計畫該繼續加量、維持、恢復還是調整。產品決策見[訓練負荷管理](/zh-hant/training-load)；下面各頁負責定義。
+**訓練負荷（Training Load）**是針對單次課表、單週或單一訓練週期所建立的模型化訓練劑量。本總覽頁介紹核心指標家族——TSS、TRIMP 與強度係數（IF）——幫助你把「長時間輕鬆課表」與「短時間高強度間歇」放在同一個尺度下比較，進而評估訓練計畫該推進、維持、安排恢復或微調。關於產品內的決策應用請參考[訓練負荷管理](/zh-hant/training-load)，各指標的完整定義則收錄於下方頁面。
 
-如果冇負荷指標，就好難比較「2 個鐘輕鬆踩/跑」同「30 分鐘間歇課」到底邊個更“傷”；亦更難判斷最近負荷係咪升得太快，令恢復跟唔上。
+沒有負荷指標時，很難客觀比較「2 小時輕鬆騎／輕鬆跑」與「30 分鐘高強度間歇」的壓力差異，也更難察覺近期負荷是否拉升得超過身體恢復速度。
 
 ## 核心指標
 
 <Cards>
-  <Card title="TSS（Training Stress Score）" href="/zh-hant/docs/metrics/training-load/training-stress-score" />
-  <Card title="IF（Intensity Factor）" href="/zh-hant/docs/metrics/training-load/intensity-factor" />
-  <Card title="TRIMP（Training Impulse）" href="/zh-hant/docs/metrics/training-load/training-impulse" />
+  <Card
+    title="TSS（訓練壓力分數）"
+    href="/zh-hant/docs/metrics/training-load/training-stress-score"
+  />
+  <Card
+    title="IF（強度係數）"
+    href="/zh-hant/docs/metrics/training-load/intensity-factor"
+  />
+  <Card
+    title="TRIMP（訓練衝量）"
+    href="/zh-hant/docs/metrics/training-load/training-impulse"
+  />
 </Cards>
 
-## 點解要量化訓練負荷？
+## 為什麼要量化訓練負荷？
 
-1. **客觀比較**：用同一把尺去衡量唔同時長、唔同類型嘅課表
-2. **追蹤進步**：確保每週負荷逐步上升，避免突然暴衝增加受傷風險
-3. **管理恢復**：負荷越高，一般需要越多恢復；量化可以令你更理性咁安排訓練同休息
+1. **客觀比較**：用統一的尺度評估不同時長與不同類型的訓練。
+2. **追蹤趨勢**：清楚掌握每週模型化負荷是穩健成長還是突然飆升。
+3. **補齊恢復脈絡**：在規劃課表與休息時，將負荷歷程與課表執行品質、個人體感回饋整合判讀。
+
+## 訓練負荷如何支援自適應訓練計畫
+
+訓練負荷本身不是訓練計畫，而是支撐更佳訓練決策的證據層：
+
+- **課表完成後**：不只看「有沒有打卡完成」，而是比對實際負荷與原訂負荷的差距。
+- **週期回顧時**：CTL、ATL 與 TSB 用來比較長期與近期負荷趨勢，而非直接量測真實體能、疲勞或準備度。
+- **調整課表前**：缺課、異常疲勞或負荷爬升過快，都能作為微調接下來幾天課表的具體依據。
+
+Trainingload.ai 在整個產品閉環中貫徹這套邏輯：訓練計畫 → 已完成活動 → 負荷趨勢 → 智能教練回顧 → 確認後更新調整。
 
 ## 常見問題
 
-### 訓練負荷是什麼？
+### 什麼是訓練負荷？
 
-訓練負荷是模型化的訓練劑量。TSS 或 TRIMP 估算一次課；CTL 和 ATL 把這些分數彙總成趨勢，用來比較週與週，而不只看「有沒有完成」。
+訓練負荷是模型化的訓練劑量。單次課表分數（例如 TSS 或 TRIMP）估算該次訓練壓力，而 CTL 與 ATL 則隨時間彙整這些分數，讓你能跨週比較，而不只是記錄「有沒有完成」。
 
-### TSS 和 TRIMP 哪個衡量訓練負荷？
+### TSS 與 TRIMP 該用哪一個衡量訓練負荷？
 
-有功率或可靠配速時，TSS 是常用的外部負荷。TRIMP 用心率和時長看內部負荷。Trainingload.ai 會按項目和你設定的負荷來源優先順序選擇。
+當具備功率或可靠配速資料時，通常以 TSS 作為外部負荷分數；TRIMP 則是依據心率與時間計算的內部負荷。Trainingload.ai 可依運動項目與你設定的負荷來源優先順序彈性選用。
 
-## 相關
+### 跑步與單車分別如何量測訓練負荷？
 
-- [訓練壓力分數 TSS](/zh-hant/docs/metrics/training-load/training-stress-score)
-- [強度係數 IF](/zh-hant/docs/metrics/training-load/intensity-factor)
-- [訓練衝量 TRIMP](/zh-hant/docs/metrics/training-load/training-impulse)
-- [用時長、NP 和 FTP 計算 TSS](/zh-hant/tss-calculator)
-- [用每日 TSS 推演 CTL、ATL、TSB](/zh-hant/training-load-calculator)
-- [慢性訓練負荷 CTL](/zh-hant/docs/metrics/pmc/chronic-training-load)
-- [在計畫中管理訓練負荷](/zh-hant/training-load)
-- [用 AI 教練產生負荷調整建議](/zh-hant/ai-training-plan)
+單車通常透過 NP、IF 與 FTP 計算功率 TSS；跑步常透過 NGP 與閾值配速計算 rTSS，若僅心率資料可靠則改用 TRIMP。建議先在同一運動項目內比較數值，再謹慎看待跨項目比較。
 
+### 接下來建議閱讀哪些頁面？
+
+可依序閱讀 [TSS](/zh-hant/docs/metrics/training-load/training-stress-score)、[TRIMP](/zh-hant/docs/metrics/training-load/training-impulse) 與 [強度係數（IF）](/zh-hant/docs/metrics/training-load/intensity-factor) 的定義頁，再進一步了解如何[在訓練計畫中透過 CTL、ATL 與 TSB 管理訓練負荷](/zh-hant/training-load)。
+
+## 相關概念
+
+- [訓練壓力分數（TSS）](/zh-hant/docs/metrics/training-load/training-stress-score)：單次課表的訓練壓力。
+- [強度係數（IF）](/zh-hant/docs/metrics/training-load/intensity-factor)：課表強度相對於閾值的比例。
+- [訓練衝量（TRIMP）](/zh-hant/docs/metrics/training-load/training-impulse)：以心率為基礎的內部負荷。
+- [以時間、NP 與 FTP 計算 TSS](/zh-hant/tss-calculator)
+- [以每日 TSS 推算 CTL、ATL 與 TSB](/zh-hant/training-load-calculator)
+- [慢性訓練負荷（CTL）](/zh-hant/docs/metrics/pmc/chronic-training-load)：長期負荷趨勢。
+- [急性訓練負荷（ATL）](/zh-hant/docs/metrics/pmc/acute-training-load)：變化較快的近期負荷趨勢。
+- [訓練壓力平衡（TSB）](/zh-hant/docs/metrics/pmc/training-stress-balance)：同日 CTL 減去同日 ATL。
+- [使用智能教練回顧安全調整訓練負荷](/zh-hant/ai-training-plan)

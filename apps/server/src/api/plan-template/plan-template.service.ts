@@ -14,6 +14,7 @@ import {
   getPlanTemplateIntensityGuidance,
   getPlanTemplateVariant,
   getRunPlanTemplate,
+  getPlanTemplateCopy,
   normalizePlanTemplateLocale,
   publicExampleCapability,
   resolvePlanTemplateWorkoutDefinitions,
@@ -102,10 +103,7 @@ export class PlanTemplateService {
             ? 'PACE_RANGE_WITH_RPE_FALLBACK'
             : 'RPE_WITH_OPTIONAL_PERSONAL_PACE',
           contentHash: template.contentHash,
-          title: template.copy[locale].title,
-          description: template.copy[locale].description,
-          eligibility: template.copy[locale].eligibility,
-          promise: template.copy[locale].promise,
+          ...getPlanTemplateCopy(template, variant, locale),
           periodWeeks: variant.periodWeeks,
           trainingDaysPerWeek: variant.trainingDaysPerWeek,
           availableVariants: template.variants.map((item) => ({
@@ -636,7 +634,7 @@ export class PlanTemplateService {
         id: item.id,
         periodWeeks: item.periodWeeks,
       })),
-      ...template.copy[locale],
+      ...getPlanTemplateCopy(template, variant, locale),
       coachFlow: getPlanTemplateCoachFlow(locale),
       weeks: variant.weeks.map((week) => ({
         weekIndex: week.weekIndex,

@@ -40,6 +40,7 @@ export function draftToCreatePlanDto(draft: CoachPlanDraft): CreatePlanDto {
       dayIndex: w.dayIndex,
       sessionIndex: Math.max(1, w.sessionIndex ?? 1),
       text: w.text.trim(),
+      ...(w.plannedSessionRpe != null ? { plannedSessionRpe: w.plannedSessionRpe } : {}),
       ...(w.notes?.trim() ? { notes: w.notes.trim() } : {}),
       ...(w.name?.trim() ? { name: w.name.trim() } : {}),
       sportType:
@@ -82,12 +83,13 @@ export function draftToCreatePlanDto(draft: CoachPlanDraft): CreatePlanDto {
   return {
     title: draft.title.trim(),
     sourceType: "AI",
-    ...(draft.qualityContract || draft.scheduleConstraints
+    ...(draft.qualityContract || draft.planAssessment || draft.scheduleConstraints
       ? {
           generationMetadata: {
             ...(draft.qualityContract
               ? { qualityContract: draft.qualityContract }
               : {}),
+            ...(draft.planAssessment ? { planAssessment: draft.planAssessment } : {}),
             ...(draft.scheduleConstraints
               ? { scheduleConstraints: draft.scheduleConstraints }
               : {}),
@@ -97,7 +99,10 @@ export function draftToCreatePlanDto(draft: CoachPlanDraft): CreatePlanDto {
     ...(draft.description?.trim()
       ? { description: draft.description.trim() }
       : {}),
-    periodWeeks: draft.periodWeeks,
+    ...(draft.goal?.trim() ? { goal: draft.goal.trim() } : {}),
+    ...(draft.planningMode === "ROLLING"
+      ? { planningMode: "ROLLING" as const, periodWeeks: null }
+      : { periodWeeks: draft.periodWeeks }),
     workouts,
   };
 }

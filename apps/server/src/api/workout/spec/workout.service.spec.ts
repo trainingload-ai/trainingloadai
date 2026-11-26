@@ -636,6 +636,21 @@ describe('WorkoutService workout step generation', () => {
     );
   });
 
+  it('keeps swim distances distinct from minutes and normalizes yards on readback', () => {
+    const service = createService();
+    const blocks = service.parsePlanText('work 50m\nwork 50meters\nwork 50yd');
+    expect(service.buildWorkoutPlanSteps(blocks).map(({ durationType, durationValue, durationUnit }) =>
+      [durationType, durationValue, durationUnit],
+    )).toEqual([
+      ['TIME', 3000, 'SECONDS'],
+      ['DISTANCE', 50, 'METERS'],
+      ['DISTANCE', 45.72, 'METERS'],
+    ]);
+    expect(service.parsePlanText(service.stringifyPlan(blocks, { sportType: 'SWIM' }))).toEqual(
+      service.parsePlanText('work 50m\nwork 50meters\nwork 45.72meters'),
+    );
+  });
+
   it('preserves zone target provenance through draft and block restoration', () => {
     const service = createService();
     const blocks: PlanBlock[] = [

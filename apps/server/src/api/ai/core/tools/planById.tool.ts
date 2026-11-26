@@ -17,6 +17,9 @@ type Input = {
   planId: string;
   asOf?: string;
   includeAllWorkouts?: boolean;
+  showCalendar?: boolean;
+  showDetail?: boolean;
+  includePendingCalendarAdjustments?: boolean;
   workoutOffset?: number;
   workoutLimit?: number;
   calendarFrom?: string;
@@ -90,6 +93,15 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
           description:
             'Include every workout in this plan. Use for full plan/cycle review only.',
         },
+        includePendingCalendarAdjustments: {
+          type: 'boolean',
+          description: 'Read saved calendar adjustments when the athlete asks to resume or amend one. Use the exact ID and version to propose a delta.',
+        },
+        showCalendar: {
+          type: 'boolean',
+          description: 'Attach a clickable calendar for this plan, opening at calendarFrom or asOf.',
+        },
+        showDetail: { type: 'boolean', description: 'Show a clickable detail card for this plan.' },
       },
     },
     checkPermissions: async (ctx) => requireSignedInUser(ctx),
@@ -104,6 +116,7 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
       relatedCalendar: output.relatedCalendar,
       scheduleRulePeriods: output.scheduleRulePeriods,
       scheduleRuleInventory: output.scheduleRuleInventory,
+      pendingCalendarAdjustments: output.pendingCalendarAdjustments,
       candidateCapacity: 10000,
     }),
     execute: async (ctx, input) => {
@@ -186,6 +199,19 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
           hasMore: nextOffset < periods.length,
           nextOffset: nextOffset < periods.length ? nextOffset : null,
         };
+      }
+      if (input.includePendingCalendarAdjustments && ctx.coachBranching) {
+        const adjustments = await ctx.coachBranching.listCalendarAdjustments(userId!, planId);
+        output.pendingCalendarAdjustments = adjustments
+          .filter((item) => !['DISCARDED', 'APPLIED'].includes(item.state))
+          .slice(0, 12)
+          .map((item) => ({
+            id: item.id, versionId: item.versionId, state: item.state, range: item.presentation.range,
+            workouts: item.presentation.rows
+              .filter((row) => row.changeKind && row.changeKind !== 'PRESERVED')
+              .slice(0, 12)
+              .map((row) => ({ name: row.name, from: row.beforeScheduledDate, to: row.scheduledDate })),
+          }));
       }
       return output;
     },

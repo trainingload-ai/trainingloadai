@@ -15,6 +15,7 @@ import type { CoachUiMessage } from "@/lib/ai-coach-ui-parts";
 import { COACH_MESSAGE_COMPONENTS } from "./coach-message-renderer";
 import { CoachTurnRetryContext } from "./coach-turn-retry-context";
 import { useState } from "react";
+import zhMessages from "../../../../../../../packages/messages/client-core/zh.json";
 
 vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -72,14 +73,17 @@ function answeredTurnResponse() {
 }
 
 const messages = {
+  ...zhMessages,
   AiCoachPage: {
+    ...zhMessages.AiCoachPage,
     status: { phaseModel: "生成回复" },
     transcript: {
+      ...zhMessages.AiCoachPage.transcript,
       titleModelUnavailable: "模型暂时无法响应",
       reasonModelUnavailable: "请尝试切换模型后重试，或稍后再试。",
       titleTurnFailed: "回复未生成完成",
       reasonUnknown: "生成过程出现问题。",
-      titleAccessRequired: "AI 访问暂不可用",
+      titleAccessRequired: "智能教练暂不可用",
       reasonAccessRequired: "请检查 AI 配置或账户权限。",
       retry: "重试",
       switchToDeepAndRetry: "切换到深度模式重试",
@@ -87,6 +91,7 @@ const messages = {
     },
   },
   AiOperationErrors: {
+    ...zhMessages.AiOperationErrors,
     accessRequired: "当前无法使用 AI，请检查实例配置或账户权限。",
   },
   CoachTurnErrors: {
@@ -234,6 +239,51 @@ describe("coach turn error card", () => {
     expect(
       screen.queryByRole("button", { name: "切换到深度模式重试" }),
     ).toBeNull();
+  });
+
+  it("shows one retryable warning for two rejected attempts of the same run", () => {
+    const attempts = ["first", "retry"].map(
+      (id): CoachUiMessage => ({
+        id,
+        role: "assistant",
+        metadata: { schemaVersion: 2, runId: "run-1", attemptId: id },
+        parts: [
+          {
+            type: "data-coach-run",
+            data: {
+              runId: "run-1",
+              attemptId: id,
+              messageId: id,
+              revision: 1,
+              status: "failed",
+              startedAt: "2026-11-20T00:00:00Z",
+              previousExecutionMs: 0,
+              executionMs: 0,
+            },
+          },
+          {
+            type: "data-coach-turn-error",
+            id: "coach-turn-error",
+            data: {
+              code: "AI_OPERATION_IN_PROGRESS",
+              message: "AI_OPERATION_IN_PROGRESS",
+            },
+          },
+        ],
+      }),
+    );
+    render(
+      <Harness
+        fetchStream={vi.fn()}
+        prepareRetry={vi.fn()}
+        initialMessages={attempts}
+      />,
+    );
+
+    expect(
+      screen.getAllByText(zhMessages.AiOperationErrors.inProgress),
+    ).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "重试" })).toHaveLength(1);
   });
 
   it("offers the deployment recovery slot when AI access is unavailable", async () => {

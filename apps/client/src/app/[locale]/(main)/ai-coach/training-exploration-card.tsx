@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import { BarChart3, ChevronLeft, ChevronRight } from "lucide-react";
@@ -21,6 +21,10 @@ import {
   nearestExplorationPoint,
 } from "@shared/training-chart-model";
 import { CoachCard } from "./cards/CoachCard";
+import { CoachActivityPreviewContext } from "./coach-preview-panel";
+import { readCoachActivityView } from "@shared/ai-coach-schema";
+import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
 
 function useExplorationLabels() {
   const t = useTranslations("AiCoachPage.trainingVisualization.exploration");
@@ -345,6 +349,7 @@ function ExplorationPlot({ panel }: { panel: ExplorationPanel }) {
 
 function ExplorationData({ panel }: { panel: ExplorationPanel }) {
   const { t, axis, series, format } = useExplorationLabels();
+  const openActivity = useContext(CoachActivityPreviewContext);
   const [page, setPage] = useState(0);
   const rows = useMemo(
     () =>
@@ -375,9 +380,16 @@ function ExplorationData({ panel }: { panel: ExplorationPanel }) {
             </tr>
           </thead>
           <tbody>
-            {rows.slice(current * 20, (current + 1) * 20).map((p, i) => (
+            {rows.slice(current * 20, (current + 1) * 20).map((p, i) => {
+              const label = p.label ?? p.series;
+              const target = readCoachActivityView({ kind: "activity_detail", hashId: p.activityHashId, section: "power" });
+              return (
               <tr key={i} className="even:bg-muted/40">
-                <td className="px-3 py-2">{p.label ?? p.series}</td>
+                <td className="px-3 py-2">
+                  {target && openActivity ? (
+                    <Button size="auto" variant="link" onClick={() => openActivity(target, label)}>{label}</Button>
+                  ) : target ? <Link className="underline" href={`/activities/${target.hashId}`}>{label}</Link> : label}
+                </td>
                 <td className="pr-3">{format(p.x, panel.x)}</td>
                 <td>
                   {format(p.y, p.axis)}{" "}
@@ -389,7 +401,8 @@ function ExplorationData({ panel }: { panel: ExplorationPanel }) {
                     : `${Math.round(p.coverage * 100)}%`}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

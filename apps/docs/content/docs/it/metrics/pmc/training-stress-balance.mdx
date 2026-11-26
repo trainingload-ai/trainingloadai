@@ -1,37 +1,77 @@
 ---
 title: Forma (TSB)
-description: Scopri come Trainingload.ai calcola la Forma (TSB) da Forma fisica e Fatica dello stesso giorno, senza confonderla con la prontezza.
-keywords: ["forma", "Training Stress Balance", "TSB", "formula TSB", "equilibrio del carico"]
+description: "Scopri come Trainingload.ai calcola la Forma (TSB) da Fitness (CTL) e Fatica (ATL) dello stesso giorno, e come leggere il bilancio del carico senza scambiarlo per prontezza."
+keywords: ["forma", "training stress balance", "TSB", "formula TSB", "bilancio del carico", "come leggere il TSB"]
 ---
 
-# Che cos’è la Forma (TSB)?
+# Cos'è la Forma (TSB)?
 
-La **Forma (TSB)** è la differenza tra Forma fisica (CTL) e Fatica (ATL). Mostra dove si trova il carico recente, più reattivo, rispetto al modello di carico a lungo termine.
+La **Forma (TSB)**, o Training Stress Balance, è la differenza tra Fitness (CTL) e Fatica (ATL). Mostra dove si colloca il carico recente, più reattivo, rispetto al modello di carico di lungo periodo.
 
-TSB deriva da due curve di carico: non misura direttamente prontezza, recupero, salute o prestazione.
+«Forma» è un'etichetta leggibile dell'interfaccia. Il TSB deriva da due curve di carico modellate; non è una misura diretta di prontezza, recupero, salute o prestazione.
 
 <div className="my-6 max-w-sm w-full mx-auto">
-  <TsbStatPreviewCard value="-12" metricLabel="TSB"
+  <TsbStatPreviewCard
+    value="-12"
+    metricLabel="TSB"
     valuePopoverTitle="Valore TSB"
-    valuePopoverBody="Trainingload.ai sottrae la Fatica (ATL) di oggi dalla Forma fisica (CTL) di oggi."
+    valuePopoverBody="Trainingload.ai sottrae la Fatica (ATL) dello stesso giorno dalla Fitness (CTL) dello stesso giorno."
     rangePopoverTitle="Contesto TSB"
-    rangePopoverBody="Segno e valore descrivono una relazione di carico, non zone universali di prontezza."
-    helpTitle="Equilibrio del carico"
-    details="Confronta le curve, poi verifica attività, prestazioni e sensazioni." />
+    rangePopoverBody="Valori positivi e negativi descrivono il rapporto tra carico recente e di lungo periodo; non sono zone universali di prontezza."
+    helpTitle="Bilancio del carico"
+    details="Usa il TSB per confrontare le due curve di carico, poi verifica attività, prestazioni e stato soggettivo."
+  />
 </div>
+
+_I valori di esempio servono solo come anteprima dell'interfaccia._
+
+## Da dove proviene il valore
+
+Il TSB non ha un input di attività separato. Trainingload.ai calcola prima il CTL dello stesso giorno con una costante di tempo di 42 giorni e l'ATL dello stesso giorno con una costante di 7 giorni, a partire dalla stessa serie di carichi giornalieri. Qualsiasi variazione di attività, soglie o sorgenti di carico che incide su una delle due curve può modificare anche il TSB.
+
+Il TSB utilizza la stessa scala di carico modellato di CTL e ATL. Non è una percentuale né un'unità fisiologica.
+
+## Formula
+
+Trainingload.ai adotta la convenzione dello stesso giorno usata da Intervals.icu:
 
 ```text
 TSB_today = CTL_today − ATL_today
 ```
 
-Con CTL 50 e ATL 65, TSB è `−15`. Trainingload.ai segue la convenzione dello stesso giorno di Intervals.icu. TrainingPeaks descrive invece pubblicamente la Forma di oggi usando Fitness e Fatigue di ieri: prima di confrontare piattaforme verifica data, costanti e fonte del carico.
+Ad esempio, se il CTL di oggi è 50 e l'ATL è 65, il TSB è `50 − 65 = −15`.
 
-Negativa significa ATL sopra CTL; vicina a zero indica curve simili, non equilibrio fisiologico; positiva significa ATL sotto CTL. TSB spesso scende durante il carico e sale con riposo o tapering, ma il segno non impone come debba sentirsi l’atleta.
+Non tutte le piattaforme seguono la stessa convenzione di data. Intervals.icu utilizza CTL meno ATL dello stesso giorno, mentre TrainingPeaks descrive pubblicamente la Forma di oggi usando la Fitness di ieri meno la Fatica di ieri. Prima di confrontare piattaforme diverse, verifica sempre convenzione di data, costanti di tempo e sorgente del carico.
 
-Evita fasce universali di “picco”, “ottimale” o “rischio”. Usa TSB con [Forma fisica (CTL)](/it/docs/metrics/pmc/chronic-training-load), [Fatica (ATL)](/it/docs/metrics/pmc/acute-training-load), attività, prestazioni e stato soggettivo.
+## Come leggere la Forma
+
+- **TSB negativo:** l'ATL è superiore al CTL; il carico recente modellato supera il livello più lento di lungo periodo.
+- **TSB vicino a zero:** le due curve di carico sono vicine; ciò non dimostra un equilibrio fisiologico.
+- **TSB positivo:** l'ATL è inferiore al CTL; il carico recente modellato è sotto il livello di lungo periodo.
+
+Quando il carico aumenta, l'ATL sale di solito più in fretta del CTL e il TSB scende. Durante il riposo o il tapering, l'ATL decade più rapidamente e il TSB risale. Il segno descrive una relazione tra carichi, non come l'atleta debba necessariamente sentirsi.
+
+## Usi e limiti
+
+Il TSB ti aiuta a verificare se una fase di carico, una settimana di scarico o un tapering abbiano modificato il rapporto tra carico recente e di lungo periodo come previsto dal piano. Rende al meglio quando lo confronti con tuoi periodi storici analoghi.
+
+Da solo, il TSB non può stabilire se sei pronto per gareggiare, etichettare un valore negativo come pericoloso o un valore positivo come ottimale, prescrivere giorni di riposo o spiegare dolori e malesseri.
+
+Evita di inseguire fasce universali di «picco», «ottimale» o «alto rischio»: intervalli del genere dipendono dal metodo di carico, dallo sport, dallo storico di allenamento, dalla risposta individuale e dalla qualità dei dati. Usa sempre insieme [Fitness (CTL)](/it/docs/metrics/pmc/chronic-training-load), [Fatica (ATL)](/it/docs/metrics/pmc/acute-training-load), attività di origine, trend prestazionali e stato soggettivo.
 
 ## Riferimenti
 
-- [Intervals.icu: convenzione Form dello stesso giorno](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
-- [RUNALYZE: Training Stress Balance](https://runalyze.com/glossary/tsb)
+- [Intervals.icu developer explanation of the same-day Form convention](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE glossary: Training Stress Balance (TSB)](https://runalyze.com/glossary/tsb)
 - [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [GoldenCheetah source: PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Clarke and Skiba (2013): Mathematical modeling of athletic training and performance](https://doi.org/10.1152/advan.00078.2011)
+
+## Pagine correlate
+
+- [Fitness (CTL)](/it/docs/metrics/pmc/chronic-training-load)
+- [Fatica (ATL)](/it/docs/metrics/pmc/acute-training-load)
+- [Simula CTL, ATL e TSB dal TSS giornaliero](/it/training-load-calculator)
+- [Usare il PMC per adattare la preparazione maratona](/it/docs/guide/pmc-marathon-adjustment)
+- [Flusso di analisi dell'allenamento](/it/docs/guide/training-analysis-workflow)

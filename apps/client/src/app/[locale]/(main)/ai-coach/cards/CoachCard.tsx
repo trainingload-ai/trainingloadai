@@ -28,7 +28,11 @@ type CoachCardProps = {
   appearance?: "card" | "strip";
   collapsible?: boolean;
   defaultCollapsed?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   toggleAriaLabel?: string;
+  toggleClassName?: string;
+  toggleRef?: React.Ref<HTMLButtonElement>;
   /** Omit redundant headings when the Timeline row and body already label it. */
   hideDetailsHeader?: boolean;
   className?: string;
@@ -48,7 +52,11 @@ function CoachCardRoot({
   appearance = "card",
   collapsible = false,
   defaultCollapsed = false,
+  open,
+  onOpenChange,
   toggleAriaLabel,
+  toggleClassName,
+  toggleRef,
   hideDetailsHeader = false,
   className,
   contentClassName,
@@ -105,9 +113,15 @@ function CoachCardRoot({
     </>
   );
   const header = (
-    <header className="flex min-w-0 items-start gap-2">
+    <header className={cn("flex min-w-0 gap-2", collapsible ? "items-center" : "items-start")}>
       {collapsible ? (
-        <ToolHeader aria-label={toggleAriaLabel}>{titleBlock}</ToolHeader>
+        <ToolHeader
+          ref={toggleRef}
+          aria-label={toggleAriaLabel}
+          className={toggleClassName}
+        >
+          {titleBlock}
+        </ToolHeader>
       ) : (
         <div
           className={cn(
@@ -119,7 +133,10 @@ function CoachCardRoot({
         </div>
       )}
       {headerRight ? (
-        <div className="flex max-w-[40%] shrink-0 flex-wrap items-center justify-end gap-1.5 py-3 pr-3 text-xs">
+        <div className={cn(
+          "ms-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5 text-xs",
+          !collapsible && "max-w-[40%] py-3 pr-3",
+        )}>
           {headerRight}
         </div>
       ) : null}
@@ -152,7 +169,13 @@ function CoachCardRoot({
     );
   if (collapsible)
     return (
-      <Tool asChild defaultOpen={!defaultCollapsed} className={className}>
+      <Tool
+        asChild
+        defaultOpen={!defaultCollapsed}
+        open={open}
+        onOpenChange={onOpenChange}
+        className={className}
+      >
         <section data-coach-card="collapsible">
           {header}
           {hasPanel ? (

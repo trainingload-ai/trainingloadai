@@ -31,14 +31,14 @@ const OverviewEditor = dynamic(
   { loading: OverviewEditorFallback, ssr: false },
 );
 
-const Overview = React.memo(() => {
+const Overview = React.memo(({ embedded = false }: { embedded?: boolean }) => {
   const tDashboard = useTranslations("dashboard");
   const tFitness = useTranslations("dashboard.fitnessStatus");
   const tOverview = useTranslations("dashboard.overview");
   const { isEditing } = useDashboardEditMode();
   const { layout } = useDashboardOverviewConfig();
 
-  if (isEditing) return <OverviewEditor />;
+  if (isEditing && !embedded) return <OverviewEditor />;
 
   const renderChart = (item: DashboardOverviewLayoutItem) => {
     const chartStyle = getDashboardMetricChartStyle(item.key);
@@ -68,11 +68,11 @@ const Overview = React.memo(() => {
           {tOverview("recent30Days")}
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className={embedded ? "grid grid-cols-1 gap-3" : "grid grid-cols-1 gap-3 md:grid-cols-2"}>
         {layout.map((item) => (
           <div
             key={item.key}
-            className={getOverviewChartSpanClass(item.span)}
+            className={embedded ? "min-w-0" : getOverviewChartSpanClass(item.span)}
           >
             {renderChart(item)}
           </div>

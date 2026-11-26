@@ -1,4 +1,11 @@
 {
-  "title": "トレーニングプラン",
-  "pages": ["manual-workout-editor", "workout-dsl"]
+  "title": "トレーニングプランとワークアウト",
+  "pages": [
+    "index",
+    "plan-lifecycle",
+    "manual-workout-editor",
+    "strength-workouts",
+    "strength-workout-dsl",
+    "workout-dsl"
+  ]
 }

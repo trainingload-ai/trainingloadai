@@ -1,0 +1,271 @@
+---
+title: "Collegare Strava, Garmin, COROS: importa i tuoi allenamenti"
+description: "Collega Strava, Garmin, COROS, Polar, Suunto o Wahoo per importare gli allenamenti. Segui i passaggi OAuth, chiave API e storico Garmin, poi verifica la prima sincronizzazione."
+keywords:
+  [
+    "collegare Strava",
+    "collegare Garmin",
+    "collegare COROS",
+    "sincronizzazione Polar",
+    "importare allenamenti Wahoo",
+    "importazione storico Garmin",
+  ]
+---
+
+# Collegare Strava, Garmin, COROS: importa i tuoi allenamenti
+
+Collega una piattaforma di allenamento nel servizio Cloud, scegli cosa sincronizzare e verifica che arrivi la prima attività. Garmin OAuth riceve i nuovi dati; l'importazione da file fornisce lo storico precedente.
+
+Per il self-hosting usa le guide separate per le [impostazioni Intervals.icu](/it/docs/self-host/configuration#connect-intervalsicu) e la [Garmin Personal API](/it/docs/self-host/garmin-personal-api). Il self-hosting non include tutte le connessioni Cloud elencate qui sotto.
+
+## Prima di iniziare
+
+- Accedi all'account del provider che contiene gli allenamenti desiderati.
+- Scegli un unico percorso primario di importazione per ogni allenamento registrato. Ad esempio, non importare una registrazione COROS sia direttamente da COROS sia tramite Strava.
+- Annota l'attività più recente già visibile in Trainingload.ai.
+- Decidi dove mantenere profilo, zone e allenamenti pianificati prima di attivare le relative direzioni di sincronizzazione.
+- Inserisci chiavi API e link temporanei di download solo nella finestra di connessione dedicata di Trainingload.ai.
+
+## Aprire le Connessioni
+
+Sul web apri **Account** dal menu account in fondo alla barra laterale, poi seleziona la piattaforma in **Third Party Connections**.
+
+Su mobile apri **Profilo → Menu → Autorizzazione dati**. OAuth apre il provider nel browser di sistema e torna all'app dopo l'approvazione. Su mobile puoi gestire le connessioni OAuth di Strava, Polar, COROS, Suunto, Wahoo, Intervals.icu e Garmin. Dalle impostazioni Garmin su mobile sono disponibili anche le importazioni dello storico tramite file ZIP o link temporaneo.
+
+Se manca la scheda di un provider, il tuo account non può collegarlo direttamente al momento. Esporta un file FIT, TCX o GPX dalla piattaforma di origine e caricalo in Attività.
+
+<DocsScreenshot
+  id="integrations-connections"
+  title="Trova Third Party Connections"
+  description="In Account, scorri fino a Third Party Connections e apri il provider che vuoi configurare."
+  route="Menu account barra laterale → Account → Third Party Connections"
+/>
+
+| Provider              | Web | Mobile | Autorizzazione                                   | Azione iniziale tipica                                             |
+| --------------------- | --- | ------ | ------------------------------------------------ | ------------------------------------------------------------------ |
+| Strava                | Sì  | Sì     | OAuth                                            | Importa gli ultimi 60 giorni se selezionato                        |
+| Polar                 | Sì  | Sì     | OAuth                                            | Importa gli ultimi 30 giorni se selezionato                        |
+| COROS                 | Sì  | Sì     | OAuth                                            | Avvia separatamente sync attività e sync salute                    |
+| Intervals.icu         | Sì  | Sì     | OAuth o chiave API                               | Importa le attività recenti                                        |
+| Suunto                | Sì  | Sì     | OAuth                                            | Importazione iniziale degli allenamenti recenti                    |
+| Wahoo                 | Sì  | Sì     | OAuth                                            | Collega, salva le direzioni, poi sincronizza                       |
+| Garmin sync           | Sì  | Sì     | OAuth                                            | Ricevi nuove attività e dati salute autorizzati dopo il collegamento|
+| Storico Garmin        | Sì  | Sì     | ZIP export Garmin o link temporaneo di download  | Importa le registrazioni di attività precedenti                    |
+
+## Collegare Strava
+
+1. Apri **Connessioni → Strava**.
+2. Prima di autorizzare, scegli se importare subito gli ultimi 60 giorni.
+3. Scegli le direzioni continue dei dati:
+   - importare automaticamente le nuove attività Strava;
+   - caricare da Trainingload.ai a Strava le attività non provenienti da Strava;
+   - importare profilo atleta e zone da Strava;
+   - caricare profilo atleta e zone su Strava.
+4. Seleziona **Collega con Strava**, approva l'accesso richiesto e torna su Trainingload.ai.
+5. Riapri Strava, controlla le impostazioni salvate e usa **Sincronizza ora** se ti serve un passaggio di riconciliazione.
+
+Evita di attivare entrambe le direzioni per il profilo se non hai deciso con precisione quale lato deve prevalere. L'importazione automatica delle attività usa le notifiche Strava; l'azione manuale serve per riconciliare, non per reimportare ripetutamente lo stesso periodo.
+
+<DocsScreenshot
+  id="strava-oauth-settings"
+  title="Impostazioni di connessione Strava"
+  description="Scegli l'importazione iniziale e le direzioni continue prima di passare all'autorizzazione su Strava."
+  route="Account → Third Party Connections → Strava"
+/>
+
+Se Strava è anche il tuo unico metodo di accesso, l'app può impedire lo scollegamento finché non imposti una password o colleghi un altro metodo di login. Questo protegge l'accesso al tuo account Trainingload.ai.
+
+## Collegare Polar
+
+1. Apri **Connessioni → Polar**.
+2. Scegli se importare subito gli ultimi 30 giorni.
+3. Attiva la sincronizzazione automatica delle nuove attività se Polar resta una fonte continua.
+4. Attiva la sincronizzazione benessere solo se vuoi importare da Polar attività giornaliera, frequenza cardiaca continua e dati del sonno supportati.
+5. Seleziona **Collega con Polar**, approva l'accesso in Polar Flow e torna su Trainingload.ai.
+6. Riapri la finestra e usa **Sincronizza ora** una volta se la finestra recente non è ancora comparsa.
+
+La sincronizzazione manuale di Polar controlla la finestra recente supportata e non corrisponde a un'importazione completa dell'archivio. Come per Strava, un account Polar usato come unico metodo di accesso non può essere scollegato finché non aggiungi un altro metodo di login.
+
+## Collegare COROS
+
+1. Apri **Connessioni → COROS** e completa l'autorizzazione OAuth.
+2. Quando la scheda risulta collegata, seleziona **Sincronizza attività** per riconciliare gli allenamenti.
+3. Seleziona **Sincronizza dati giornalieri** sul web, oppure **Sincronizza salute ora** su mobile, per riconciliare i dati giornalieri o di salute supportati.
+4. Controlla lo stato dell'ultima sincronizzazione ed eventuali errori sulla scheda.
+
+COROS separa intenzionalmente l'azione per le attività da quella per i dati giornalieri. Una sincronizzazione attività riuscita non implica che sia stata eseguita anche la riconciliazione salute. Se la scheda COROS non è presente, usa il caricamento file di attività.
+
+## Collegare Intervals.icu [#connect-intervalsicu]
+
+Usa OAuth a meno che non ti serva specificamente l'autorizzazione con chiave API.
+
+### OAuth
+
+1. Apri **Connessioni → Intervals.icu → OAuth**.
+2. Autorizza Trainingload.ai in Intervals.icu e torna sullo stesso account.
+3. Seleziona le direzioni di sincronizzazione desiderate.
+4. Salva le impostazioni ed esegui una volta la sincronizzazione iniziale o manuale.
+
+### Chiave API
+
+1. Crea o copia una chiave API dal tuo account Intervals.icu.
+2. Apri **Connessioni → Intervals.icu → Chiave API**.
+3. Incolla la chiave nel campo protetto e avvia la connessione.
+4. Conferma la sostituzione se l'account utilizza già una chiave diversa.
+
+Trainingload.ai non mostra più in chiaro la chiave salvata; nelle schermate collegate compaiono solo gli ultimi quattro caratteri. Passare da OAuth a chiave API o viceversa mantiene lo storico già importato, cambiando solo le credenziali usate per le sincronizzazioni future.
+
+<DocsScreenshot
+  id="intervals-icu-auth-methods"
+  title="Metodi di autorizzazione Intervals.icu"
+  description="Scegli OAuth o chiave API, poi configura le direzioni di sincronizzazione supportate."
+  route="Account → Third Party Connections → Intervals.icu"
+/>
+
+In base alle funzionalità attive, la finestra può offrire:
+
+- sincronizzazione automatica giornaliera delle attività;
+- esportazione delle attività da Trainingload.ai;
+- importazione o esportazione di profilo atleta e zone;
+- importazione o esportazione degli allenamenti pianificati.
+
+Decidi quale piattaforma gestisce le tue zone e gli allenamenti pianificati. Attivare gli aggiornamenti automatici in entrambe le direzioni può sovrascrivere una modifica che volevi mantenere.
+
+L'importazione degli allenamenti pianificati include anche le sessioni ordinarie di calendario prive di blocchi a intervalli. Sono allenamenti indipendenti: non serve un piano di allenamento. Data, nome, sport, descrizione ed eventuale durata fornita compaiono nel calendario e tra gli allenamenti di oggi nella pagina Home; durata o intensità mancanti restano non definite. Puoi collegare manualmente un'attività completata e annullare il collegamento. Caricare un'attività non completa automaticamente questi allenamenti ordinari. Le modifiche locali su di essi non vengono esportate verso Intervals.icu e non viene generato alcun file di allenamento strutturato.
+
+## Collegare Suunto
+
+1. Apri **Connessioni → Suunto**.
+2. Scegli le direzioni continue che ti servono: importazione automatica allenamenti, dati benessere, esportazione attività completate ed esportazione allenamenti pianificati.
+3. Avvia la connessione OAuth e approva l'accesso agli allenamenti in Suunto.
+4. Torna su Trainingload.ai e attendi l'importazione iniziale degli allenamenti recenti.
+5. Riapri la finestra per salvare eventuali modifiche o eseguire **Sincronizza ora**.
+
+I nuovi allenamenti arrivano normalmente tramite notifiche Suunto, con una riconciliazione periodica di backup. I dati benessere possono includere frequenza cardiaca, passi, sonno e recupero supportati. Scollegare l'account interrompe gli scambi futuri ma non rimuove gli allenamenti già importati.
+
+## Collegare Wahoo
+
+1. Apri **Connessioni → Wahoo**.
+2. Scegli le direzioni desiderate: importazione automatica allenamenti, esportazione attività completate, esportazione allenamenti pianificati, importazione profilo o esportazione profilo.
+3. Avvia OAuth, approva l'accesso in Wahoo e torna su Trainingload.ai.
+4. Salva le impostazioni, poi usa **Sincronizza ora** una volta se manca un allenamento recente noto.
+
+Non attivare insieme importazione ed esportazione del profilo senza aver stabilito quale piattaforma ne è la fonte principale. Controlla i campi di ultima sincronizzazione e ultimo errore prima di ricollegare.
+
+## Gestire un provider su mobile
+
+La scheda di connessione mobile usa la stessa connessione salvata del web, quindi le modifiche hanno effetto su entrambi i client.
+
+1. Apri **Profilo → Menu → Autorizzazione dati** e seleziona il provider.
+2. Per Strava o Polar, scegli l'opzione di sincronizzazione iniziale prima di OAuth se visualizzata.
+3. Completa l'autorizzazione nel browser di sistema e consenti il ritorno all'app.
+4. Riapri il provider per impostare le direzioni supportate.
+5. Seleziona **Salva impostazioni**, poi esegui **Sincronizza ora** solo quando serve riconciliare.
+6. Per COROS esegui separatamente la sincronizzazione attività e quella salute.
+
+Intervals.icu dispone di una schermata dedicata su mobile. Le impostazioni Garmin includono anche l'importazione storica tramite ZIP o link temporaneo di download.
+
+<DocsScreenshot
+  id="mobile-provider-settings"
+  title="Impostazioni provider su mobile"
+  description="Una scheda provider collegata con direzioni di sincronizzazione, sincronizzazione manuale e controlli di scollegamento."
+  route="Profilo → Menu → Autorizzazione dati"
+  platformLabel="Mobile"
+  platform="mobile"
+/>
+
+## Collegare Garmin per i nuovi dati
+
+**Al momento Trainingload.ai non può recuperare tramite la connessione ufficiale Garmin OAuth le attività registrate prima dell'autorizzazione. Scollegare e ricollegare l'account non recupera lo storico precedente.** Importa uno ZIP di esportazione completa Garmin (o il suo link temporaneo di download), oppure carica singoli file FIT, TCX o GPX per quelle sessioni. Questa limitazione non riguarda la Garmin Personal API in self-hosting: segui la relativa guida dedicata.
+
+1. Apri **Account → Third Party Connections → Garmin**.
+2. Seleziona **OAuth**, approva l'accesso in Garmin e torna su Trainingload.ai.
+3. Verifica che la pagina indichi **Garmin collegato**.
+4. Attiva **Nuove attività** o **Salute e recupero** secondo necessità, poi salva le impostazioni.
+5. Dopo un nuovo allenamento, controlla fonte e dettagli in Attività.
+
+Questa connessione riceve solo i nuovi dati. Usa **Importazione da file** qui sotto per le attività più vecchie. Se OAuth non è offerto, usa l'importazione da file. Per il self-hosting segui la [guida Garmin Personal API](/it/docs/self-host/garmin-personal-api).
+
+<DocsScreenshot
+  id="garmin-oauth-settings"
+  title="Impostazioni Garmin per i nuovi dati"
+  description="Scegli nuove attività e riepiloghi salute nella scheda OAuth. Usa Importazione da file per i dati precedenti."
+  imageAlt="Area Account completa con impostazioni Garmin e schede OAuth e Importazione da file"
+  route="Account → Third Party Connections → Garmin → OAuth"
+/>
+
+## Importare lo storico Garmin
+
+L'importazione storica fornisce le attività precedenti e non attiva la sincronizzazione continua. Usa la connessione Garmin OAuth sopra per ricevere i nuovi allenamenti.
+
+1. Apri **Account → Third Party Connections → Garmin** sul web, oppure **Profilo → Menu → Autorizzazione dati → Garmin → Importazione storico** su mobile.
+2. Apri la [pagina ufficiale di esportazione dati di Garmin](https://www.garmin.com/account/datamanagement/exportdata/) dalla finestra e richiedi l'esportazione.
+3. Attendi l'email di Garmin. I tempi di invio del link dipendono da Garmin.
+4. Scegli un metodo di importazione: scarica e carica lo ZIP di esportazione completa Garmin, oppure copia l'URL associato al pulsante **Download** nell'email.
+5. Nella finestra di importazione storico Garmin seleziona **Carica file** o **Usa URL**, poi seleziona **Avvia importazione**. L'opzione URL è di solito più rapida per archivi molto grandi.
+6. Torna nella finestra per seguire gli stati: in coda, download, scansione, importazione, completato, errore parziale o errore.
+7. Al termine, confronta i conteggi di file rilevati, in coda, importati e duplicati con quanto ti aspettavi.
+
+<DocsScreenshot
+  id="garmin-history-import"
+  title="Importazione storico Garmin"
+  description="Carica lo ZIP esportato da Garmin o incolla il link temporaneo dell'email, avvia il job e monitora ogni fase dell'importazione."
+  route="Account → Third Party Connections → Garmin"
+/>
+
+L'URL di esportazione funziona come una credenziale temporanea di download. Non incollarlo mai in chat, nel Coach AI, in una segnalazione o in uno screenshot. Trainingload.ai accetta solo URL sicuri ospitati da Garmin, li cifra mentre il job è in attesa e li rimuove dopo il download dell'archivio. Anche uno ZIP caricato direttamente viene usato solo per l'importazione ed eliminato dopo la scansione.
+
+## Gli account di accesso sono un'altra cosa
+
+Google, Apple e GitHub in **Account di accesso (Login Accounts)** sono metodi di autenticazione. Collegarli ti consente di accedere, ma non importa allenamenti, dati salute, piani o zone del profilo. Il sistema può impedire la rimozione dell'ultimo metodo di accesso rimasto finché non imposti una password o colleghi un altro account.
+
+## Verificare ogni connessione
+
+Dopo aver collegato un provider:
+
+1. Controlla che la scheda mostri **Collegato**.
+2. Riaprila e verifica che le impostazioni selezionate siano state salvate.
+3. Esegui al massimo una riconciliazione iniziale o manuale.
+4. Apri **Attività** e cerca un allenamento recente noto con la fonte attesa.
+5. Apri Dettaglio attività e verifica che la fonte abbia fornito frequenza cardiaca, potenza, GPS o dislivello previsti.
+6. Per le funzioni bidirezionali, fai una piccola modifica di prova innocua e controlla che cambi solo la destinazione voluta.
+
+Non considerare un ritorno OAuth riuscito come prova che un'attività sia già stata importata. Autorizzazione, acquisizione ed elaborazione dell'attività sono tre fasi distinte.
+
+## Risoluzione dei problemi
+
+| Sintomo                                            | Cosa controllare                                                                                                                                                                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OAuth ritorna ma la scheda è scollegata            | Ripeti dalla scheda del provider, approva tutti i permessi richiesti e controlla che il browser sia tornato sullo stesso account Trainingload.ai. Non riutilizzare un vecchio URL di autorizzazione.                |
+| Collegato, ma non compare alcuna attività recente  | Verifica la finestra iniziale del provider, esegui una sincronizzazione manuale, attendi l'elaborazione e cerca in Attività per data e fonte. Sessioni più vecchie richiedono caricamento file o storico Garmin.    |
+| Lo stesso allenamento compare due volte            | Controlla l'etichetta della fonte su entrambi e disattiva un percorso di inoltro prima di importare altri dati.                                                                                                     |
+| Mancano FC, potenza, GPS o dislivello              | Apri l'attività originale sul provider. Trainingload.ai non può importare un flusso che il provider non espone.                                                                                                     |
+| Manca la scheda di un provider                     | La disponibilità di COROS può dipendere dall'approvazione del provider o dallo stato di rilascio. Nel frattempo usa il caricamento file.                                                                            |
+| Intervals.icu rifiuta la chiave sostitutiva        | Verifica che la nuova chiave appartenga all'account corretto, poi conferma esplicitamente la sostituzione delle credenziali.                                                                                        |
+| Garmin rifiuta il link                             | Carica invece lo ZIP scaricato, oppure copia l'URL del pulsante Download nell'email (non l'URL della pagina email) e verifica che sia ancora un link sicuro ospitato da Garmin.                                     |
+| Lo scollegamento non è disponibile                 | Aggiungi prima una password o un altro account di accesso se quel provider è anche il tuo unico metodo di login.                                                                                                    |
+
+## Domande frequenti
+
+### Come collego Strava a Trainingload.ai?
+
+Apri **Account → Third Party Connections → Strava**, scegli l'importazione degli ultimi 60 giorni e le direzioni dei dati, poi autorizza. Al rientro, riapri Strava e usa **Sincronizza ora** una volta se manca l'ultima uscita o corsa.
+
+### Posso collegare Garmin e mantenerlo sincronizzato?
+
+Sì. Una connessione Garmin **OAuth** riceve le nuove attività e i dati salute autorizzati in base alle impostazioni salvate. **Importazione da file storico** fornisce i record passati e non abilita la sincronizzazione continua. Puoi usare entrambi i metodi, evitando di importare ripetutamente le stesse attività.
+
+### Come collego COROS o Polar?
+
+Autorizza la scheda del provider, poi esegui la prima sincronizzazione. COROS separa **Sincronizza attività** e sincronizzazione giornaliera/salute: il successo di una non implica l'esecuzione dell'altra. Polar può importare gli ultimi 30 giorni e, facoltativamente, i dati benessere.
+
+### Perché lo stesso allenamento compare due volte?
+
+Due percorsi di importazione hanno inoltrato lo stesso file — ad esempio COROS diretto più Strava. Mantieni un unico percorso primario per ciascuna registrazione, poi disattiva il percorso extra prima di importare altro storico.
+
+## Prossimi passi
+
+- Confronta i provider in [Integrazioni app di allenamento](/it/docs/guide/integrations) prima di autorizzare un secondo percorso.
+- Leggi [Collegare i dati di allenamento](/it/docs/guide/connect-data) per capire elaborazione e identità della fonte.
+- Usa [Caricare file di attività](/it/docs/guide/upload-activity-files) per piattaforme non supportate o singoli file storici.
+- [Gestisci il carico di allenamento con CTL, ATL e TSB nel tuo piano](/it/training-load) dopo la prima settimana di sessioni importate.

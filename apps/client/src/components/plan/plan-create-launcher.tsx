@@ -16,8 +16,6 @@ import { usePlanStore } from "@/lib/plan-store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileAiPlanCreateSheet } from "@/components/plan/mobile-ai-plan-create-sheet";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
-import { useTranslations } from "next-intl";
-import { RollingPlanCreateDialog } from "./rolling-plan-create-dialog";
 
 type PlanCreateLauncherProps = {
   children: React.ReactNode;
@@ -44,8 +42,7 @@ export function PlanCreateLauncher({
   const clearPlanDraft = usePlanStore((s) => s.clear);
   const access = useFeatureAccess({ enabled: !publicDemo.active });
   const [modeOpen, setModeOpen] = useState(false);
-  const [mobileAiOpen, setMobileAiOpen] = useState(false);
-  const [rollingOpen, setRollingOpen] = useState(false);
+  const [aiMode, setAiMode] = useState<"ai" | "rolling" | null>(null);
   const [pricingDialogOpen, setPricingDialogOpen] = useState(false);
 
   const handleSelect = (mode: CreatePlanMode) => {
@@ -61,15 +58,11 @@ export function PlanCreateLauncher({
         setPricingDialogOpen(true);
         return;
       }
-      if (mode === "rolling") {
-        requestAnimationFrame(() => setRollingOpen(true));
-        return;
-      }
       if (isMobile) {
-        requestAnimationFrame(() => setMobileAiOpen(true));
+        requestAnimationFrame(() => setAiMode(mode));
         return;
       }
-      router.push("/plans/create");
+      router.push(mode === "rolling" ? "/plans/create?planMode=rolling" : "/plans/create");
       return;
     }
     setModeOpen(false);
@@ -99,18 +92,19 @@ export function PlanCreateLauncher({
       />
 
       <MobileAiPlanCreateSheet
-        open={mobileAiOpen}
-        onOpenChange={setMobileAiOpen}
+        key={aiMode ?? "closed"}
+        open={aiMode !== null}
+        rolling={aiMode === "rolling"}
+        onOpenChange={(open) => { if (!open) setAiMode(null); }}
         onBackToMode={() => {
-          setMobileAiOpen(false);
+          setAiMode(null);
           requestAnimationFrame(() => setModeOpen(true));
         }}
         onGenerate={(params) => {
-          setMobileAiOpen(false);
+          setAiMode(null);
           router.push(`/ai-coach?${params.toString()}`);
         }}
       />
-      <RollingPlanCreateDialog open={rollingOpen} onOpenChange={setRollingOpen} />
 
       <AccessOptionsDialog
         open={pricingDialogOpen}

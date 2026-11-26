@@ -1,6 +1,7 @@
 "use client";
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useContext, useMemo, useState } from "react";
+import { CalendarDays } from "lucide-react";
 import {
   coachPlanSaveErrorKind,
   type CoachPlanSaveErrorKind,
@@ -22,6 +23,7 @@ import { useCreateCoachPlanFromDraft } from "@/api/usePlanMutations";
 import { getPlanLibraryHref } from "@/lib/plan-navigation";
 import {
   COACH_PLAN_DRAFT_SAVED_KIND,
+  coachPlanDraftOpeningWeek,
   COACH_QUESTION_REPLY_KIND,
   COACH_QUESTION_SKIP_KIND,
   PLAN_WORKOUT_ADJUSTMENT_APPLIED_KIND,
@@ -45,8 +47,10 @@ import {
   type PlanWorkoutAdjustmentDraft,
 } from "@/lib/plan-workout-adjustment-draft";
 import { MutationAppliedCard } from "./cards/MutationAppliedCard";
+import { CoachPreviewCard } from "./cards/coach-preview-card";
 import { COACH_READ_TOOL_CARD_NAMES } from "./coach-conversation-items";
 import { CoachPlanDraftCalendarPreview } from "./coach-plan-draft-calendar-preview";
+import { CoachPlanDraftPreviewContext } from "./coach-preview-panel";
 import { CoachQuestionCard } from "./coach-question-card";
 import {
   CoachQuestionSurface,
@@ -54,9 +58,11 @@ import {
 } from "./coach-question-flow";
 import { CoachReadToolCard } from "./coach-read-tool-cards";
 import { CoachVolatileDecisionCards } from "./coach-decision-cards";
+import { CoachIndependentWorkoutDraftCard } from "./coach-independent-workout-draft";
 import { PlanWorkoutAdjustmentDraftCard } from "./plan-workout-adjustment-draft-card";
 import { CoachInvalidStructuredCard } from "./coach-invalid-structured-card";
 import { useCoachThreadReceipts } from "./coach-thread-receipts";
+import { getSportDisplayName } from "@/api/sports";
 import {
   buildQuestionAnswerMessage,
   dedupeCoachToolCards,
@@ -134,6 +140,9 @@ function CoachV2AssistantCardsInner({
   const locale = useLocale();
   const twa = useTranslations("AiCoachPage.workoutAdjustment");
   const td = useTranslations("AiCoachPage.decision");
+  const tPreview = useTranslations("AiCoachPage.workspace");
+  const sports = useTranslations("SportCatalog");
+  const openDraftPreview = useContext(CoachPlanDraftPreviewContext);
 
   const assistantMessageId = message?.id ?? "";
 
@@ -173,6 +182,7 @@ function CoachV2AssistantCardsInner({
         : null,
     [planDraftTool],
   );
+  const openingWeek = planDraft ? coachPlanDraftOpeningWeek(planDraft) : null;
 
   const workoutAdjustmentDraft = useMemo(() => {
     const tool = tools.find(
@@ -182,6 +192,8 @@ function CoachV2AssistantCardsInner({
       ? safeParsePlanWorkoutAdjustmentDraftToolUseInput(tool.input)
       : null;
   }, [tools]);
+  const independentWorkoutDraft = tools.find((tool) => tool.name === "PresentIndependentWorkoutDraft")
+    ?.input as { draftId?: unknown } | undefined;
 
   const invalidStructuredCardCount = useMemo(
     () =>
@@ -318,7 +330,11 @@ function CoachV2AssistantCardsInner({
             return;
           }
           toast.success(tpd("createSuccess"));
-          router.push(getPlanLibraryHref(isMobile));
+          router.push(
+            draft.planningMode === "ROLLING"
+              ? `/plans/${result.id}`
+              : getPlanLibraryHref(isMobile),
+          );
         },
         onError: (err) => {
           setPlanSaveError(coachPlanSaveErrorKind(err));
@@ -415,6 +431,7 @@ function CoachV2AssistantCardsInner({
               )}
               name={tool.name}
               input={tool.input}
+              chartRef={{ messageId: assistantMessageId, deliveryId: tool.toolCallId }}
               disabled={isRunning}
               onAction={(text, content) =>
                 appendCoachToolResult(thread, text, {
@@ -450,15 +467,43 @@ function CoachV2AssistantCardsInner({
       {planDraft ? (
         <Plan open>
           <PlanContent className="p-0">
-            <CoachPlanDraftCalendarPreview
-              draft={planDraft}
-              startDate={planDraft.qualityContract?.startDate}
-              calendarTimeZone={
-                planDraft.scheduleConstraints?.calendarTimeZone ?? "UTC"
-              }
-              scheduleConstraints={planDraft.scheduleConstraints}
-              className="rounded-none bg-transparent dark:bg-transparent"
-            />
+            {openDraftPreview && planDraftTool ? (
+              <CoachPreviewCard
+                title={planDraft.title}
+                subtitle={tpd("summary", { weeks: planDraft.periodWeeks, sessions: planDraft.workouts.length })}
+                icon={CalendarDays}
+                actionLabel={tPreview("openCalendar")}
+                onOpen={() => openDraftPreview(`${assistantMessageId}:tool:${planDraftTool.toolCallId}`)}
+              >
+                {planDraft.description ? <p className="line-clamp-2 text-sm leading-5 text-muted-foreground">
+                  {planDraft.description}
+                </p> : null}
+                {openingWeek?.workouts.length ? (
+                  <div className="space-y-1.5 border-t border-border/70 pt-2">
+                    <p className="text-xs text-muted-foreground">{tpd("weekLabel", { week: openingWeek.week })}</p>
+                    <ul className="flex flex-wrap gap-1.5">
+                      {openingWeek.workouts.map((workout, index) => (
+                        <li key={index} className="max-w-full rounded-control bg-background/70 px-2 py-1 text-xs [overflow-wrap:anywhere]">
+                          {workout.name?.trim() || getSportDisplayName([], {
+                            sportType: workout.sportType, sportDefinitionCode: workout.sportDefinitionCode,
+                          }, sports)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </CoachPreviewCard>
+            ) : (
+              <CoachPlanDraftCalendarPreview
+                draft={planDraft}
+                startDate={planDraft.qualityContract?.startDate}
+                calendarTimeZone={
+                  planDraft.scheduleConstraints?.calendarTimeZone ?? "UTC"
+                }
+                scheduleConstraints={planDraft.scheduleConstraints}
+                className="rounded-none bg-transparent dark:bg-transparent"
+              />
+            )}
           </PlanContent>
           <PlanFooter className="flex-col items-stretch gap-2 sm:items-end">
             {planSaveError ? (
@@ -507,6 +552,9 @@ function CoachV2AssistantCardsInner({
         </Plan>
       ) : null}
 
+      {typeof independentWorkoutDraft?.draftId === "string" && (
+        <CoachIndependentWorkoutDraftCard id={independentWorkoutDraft.draftId} />
+      )}
       {workoutAdjustmentDraft ? (
         <PlanWorkoutAdjustmentDraftCard
           draft={workoutAdjustmentDraft as PlanWorkoutAdjustmentDraft}

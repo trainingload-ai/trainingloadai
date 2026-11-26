@@ -1,4 +1,12 @@
 import { currentDecisionConfirmation } from './core/coach-workout-change';
+import {
+  CALENDAR_MOVE_EXPIRED_ERROR_CODE,
+  COACH_QUESTION_STALE_ERROR_CODE,
+} from '@shared/coach-turn-error';
+import {
+  isCalendarMoveSession,
+  PlanStartService,
+} from '../plan/application/plan-start.service';
 import { ConflictException } from '@nestjs/common';
 import {
   TodaySuggestionGuidanceService,
@@ -18,6 +26,7 @@ import {
   Patch,
   Query,
   ParseBoolPipe,
+  ParseUUIDPipe,
   UseGuards,
   Logger,
   MessageEvent,
@@ -41,6 +50,7 @@ import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { RequiresRuntimeCapability } from '@/runtime-capabilities/requires-runtime-capability.decorator';
 import { Session, UserSession } from '@thallesp/nestjs-better-auth';
 import { OAuthHybridAuthGuard } from '@/oauth/oauth-hybrid-auth.guard';
+import { SessionOnly } from '@/oauth/session-only.decorator';
 import { CurrentUserId } from '@/utils/decorators/current-user-id.decorator';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { BusinessException } from '@/filters/business-exception/business.exception';
@@ -315,6 +325,7 @@ export class AiController {
     private readonly coachRuns: CoachRunStore,
     private readonly assessmentCases: CoachAssessmentCaseService,
     private readonly todayGuidance: TodaySuggestionGuidanceService,
+    private readonly planStarts: PlanStartService,
   ) {}
 
   @Post('data-consent')
@@ -489,11 +500,13 @@ export class AiController {
     @Query('take') takeRaw?: string,
     @Query('kind') kindRaw?: string,
     @Query('reviewScope') reviewScopeRaw?: string,
+    @Query('q') query?: string,
   ) {
     const take = takeRaw ? Number(takeRaw) : undefined;
     const offset = offsetRaw ? Number(offsetRaw) : undefined;
     return this.aiService.listCoachSessionsPage({
       userId,
+      query,
       offset: Number.isFinite(offset) ? offset : undefined,
       take: Number.isFinite(take) ? take : undefined,
       kind: kindRaw === 'review' ? 'review' : 'chat',
@@ -573,13 +586,46 @@ export class AiController {
     return this.aiService.deleteCoachSession({ session, sid });
   }
 
-  /**
-   * 拉取指定会话的全部消息（用于前端恢复对话线程）
-   */
+  @Get('coach/sessions/:sid/calendar-move')
+  @RequiresRuntimeCapability('ai')
+  readCoachCalendarMove(
+    @CurrentUserId() userId: string,
+    @Param('sid') sid: string,
+  ) {
+    return this.planStarts.readCoachCalendarMove(userId, sid);
+  }
+
+  @Post('coach/sessions/:sid/calendar-move/refresh')
+  @RequiresRuntimeCapability('ai')
+  refreshCalendarMoveCoach(
+    @CurrentUserId() userId: string,
+    @Param('sid') sid: string,
+    @Body('previousConfirmationId', new ParseUUIDPipe({ version: '4', optional: true }))
+    previousConfirmationId?: string,
+  ) {
+    return this.planStarts.refreshCalendarMoveCoach(userId, sid, previousConfirmationId);
+  }
+
   @SkipThrottle({ default: true, ai: true })
   @Throttle({
     aiCoachRead: coachReadThrottle,
   })
+  @Get('coach/sessions/:sid/messages/:messageId/charts/:deliveryId')
+  @RequiresRuntimeCapability('ai')
+  @SessionOnly()
+  readCoachMetricChart(
+    @CurrentUserId() userId: string,
+    @Param('sid') sid: string,
+    @Param('messageId') messageId: string,
+    @Param('deliveryId') deliveryId: string,
+    @Query() options: { date?: string; hrvSource?: string; metricSource?: string; byActivity?: string },
+  ) {
+    return this.aiService.readCoachMetricChart(userId, sid, messageId, deliveryId, options);
+  }
+
+  /** Read the message history used to restore the conversation thread. */
+  @SkipThrottle({ default: true, ai: true })
+  @Throttle({ aiCoachRead: coachReadThrottle })
   @Get('coach/sessions/:sid/messages')
   @RequiresRuntimeCapability('ai')
   @AllowPublicDemo(PUBLIC_DEMO_CAPABILITIES.AI_HISTORY_READ)
@@ -880,14 +926,15 @@ export class AiController {
           )
         : false;
     if (platformFunded) await this.aiService.assertAthleteStateAccess(userId);
-    if (command && !body.branchId) {
-      const branchId = await this.coachRuns.existingRequestBranch(
+    const findMissingRequestBranch = command && !body.branchId;
+    const existingRequestBranch = findMissingRequestBranch
+      ? await this.coachRuns.existingRequestBranch(
         userId,
         String(body.sid ?? ''),
         command,
-      );
-      if (branchId) body = { ...body, branchId };
-    }
+        )
+      : null;
+    if (existingRequestBranch) body = { ...body, branchId: existingRequestBranch };
     if (command?.kind === 'answer' && !body.branchId) {
       const branchId = await this.coachRuns.answerBranch(
         userId,
@@ -991,13 +1038,16 @@ export class AiController {
           throw new Error(cancellation);
         }
       }
-      const chunks = runHandle.projector.finish(status);
+      let chunks = runHandle.projector.finish(status);
+      let terminalCancellation: CoachRunCancelledError | undefined;
       try {
         await this.coachRuns.checkpoint(runHandle, status, legacyMessage);
       } catch (error) {
-        if (error instanceof CoachRunCancelledError)
-          abort.abort('user_cancelled');
-        throw error;
+        if (!(error instanceof CoachRunCancelledError)) throw error;
+        abort.abort(error.message);
+        if (!error.terminalChunks) throw error;
+        chunks = error.terminalChunks;
+        terminalCancellation = error;
       }
       runFinished = true;
       for (const activity of lateActivities.splice(0))
@@ -1007,6 +1057,7 @@ export class AiController {
           runClosingChunks.push(chunk);
         else await rawSink.emit({ type: 'ui_chunk', chunk });
       }
+      if (terminalCancellation) throw terminalCancellation;
     };
     const reqId = randomUUID();
     const startedAt = Date.now();
@@ -1025,6 +1076,10 @@ export class AiController {
       });
     }
     const sessionId = String(body?.sid ?? '').trim();
+    const isCalendarConfirmation =
+      v2 &&
+      isCalendarMoveSession(sessionId) &&
+      Boolean(currentDecisionConfirmation(coachUserMessage));
     if (!sessionId) {
       this.logger.warn(
         `[AI][教练][${reqId}] 请求体未带 sid，落库将使用会话键 default，易与地址栏 UUID 会话不一致`,
@@ -1143,6 +1198,7 @@ export class AiController {
       .digest('hex');
 
     const persistCoachUsage = async (ensureModelCall = false) => {
+      if (isCalendarConfirmation) return;
       const hasReportedUsage =
         modelUsageEvents.length > 0 || lastUsage !== undefined;
       if (!hasReportedUsage && !ensureModelCall) return;
@@ -1326,6 +1382,34 @@ export class AiController {
         }
       }
 
+      const existingCalendarBranch =
+        isCalendarConfirmation && command && !findMissingRequestBranch
+          ? await this.coachRuns.existingRequestBranch(
+              userId,
+              coachSessionKey,
+              command,
+            )
+          : existingRequestBranch;
+      const calendarEdit = isCalendarMoveSession(coachSessionKey)
+        ? await this.planStarts.calendarCoachSession(
+            userId,
+            coachSessionKey,
+            undefined,
+            {
+              allowApplied: Boolean(existingCalendarBranch),
+              ...(v2 ? { reportExpired: true } : {}),
+            },
+          )
+        : null;
+      if (calendarEdit) {
+        if (!v2 || platformFunded)
+          throw new ConflictException('CALENDAR_EDIT_REQUIRES_DURABLE_COACH');
+        if (body?.planId && body.planId !== calendarEdit.planId)
+          throw new ConflictException('CALENDAR_EDIT_PLAN_MISMATCH');
+        body = { ...body, planId: calendarEdit.planId, contextId: undefined };
+        coachBranchId = existingCalendarBranch ?? calendarEdit.branchId ?? null;
+        intent = 'plan-followup';
+      }
       const startConversation = await this.prisma.aiCoachSession.findUnique({
         where: { userId_id: { userId, id: coachSessionKey } },
         select: {
@@ -1421,9 +1505,10 @@ export class AiController {
           );
           for (const chunk of replayChunks.slice(0, -2))
             await rawSink.emit({ type: 'ui_chunk', chunk });
-          const operation = platformFunded
-            ? null
-            : await this.operations.get(userId, begun.replay.operationId);
+          const operation =
+            platformFunded || isCalendarConfirmation
+              ? null
+              : await this.operations.get(userId, begun.replay.operationId);
           if (operation)
             await rawSink.emit({
               type: 'ui_chunk',
@@ -1518,10 +1603,46 @@ export class AiController {
         return;
       }
 
+      if (calendarEdit?.expired) {
+        await failTurn({
+          code: CALENDAR_MOVE_EXPIRED_ERROR_CODE,
+          message: 'The calendar move preview expired.',
+        });
+        return;
+      }
+
       // USER 必须在模型操作登记前落库。否则模型不可用会留下
       // 空壳 sid，用户发的「你好」无法从同一会话恢复。
-      if (!platformFunded && !isMetaOnlyToolResult) {
-        const admission = await this.operations.begin(operationAdmissionArgs);
+      if (!platformFunded && !isMetaOnlyToolResult && !isCalendarConfirmation) {
+        const admission = await this.operations
+          .begin(operationAdmissionArgs)
+          .catch(async (error: unknown) => {
+            const response =
+              error instanceof HttpException
+                ? asRecord(error.getResponse())
+                : null;
+            const blockingOperationId = asRecord(response?.data)?.operationId;
+            if (
+              response?.code !== 'AI_OPERATION_IN_PROGRESS' ||
+              typeof blockingOperationId !== 'string' ||
+              blockingOperationId === operationId ||
+              !(await this.coachRuns.recoverStaleOperation(
+                userId,
+                blockingOperationId,
+              ))
+            ) {
+              throw error;
+            }
+            await this.operations.fail({
+              userId,
+              operationId: blockingOperationId,
+              errorCode: 'COACH_RUN_LEASE_EXPIRED',
+            });
+            this.logger.warn(
+              `[AI][教练][${reqId}] 已处理心跳超时的阻塞操作 operationId=${blockingOperationId}`,
+            );
+            return this.operations.begin(operationAdmissionArgs);
+          });
         if (admission.replay) {
           await emitOperationReplay(admission.operation);
           return;
@@ -1551,6 +1672,7 @@ export class AiController {
         platformFunded,
         runtimeRunId: runHandle?.projector.run.runId,
         currentUserMessageId: runHandle?.inputMessageId,
+        calendarEdit: calendarEdit ?? undefined,
         activeSkillName: platformFunded ? 'athlete-state' : undefined,
         session,
         sid: coachSessionKey,
@@ -1564,6 +1686,9 @@ export class AiController {
         branchId: coachBranchId,
         caseId: body.caseId ?? null,
         signal: abort.signal,
+        onPlanValidationRejected: runHandle
+          ? (event) => this.coachRuns.recordPlanValidationRejection(runHandle, event)
+          : undefined,
         onActivity: v2
           ? async (activity) => {
               const reason = await this.coachRuns.heartbeat(runHandle);
@@ -1962,7 +2087,7 @@ export class AiController {
       if (!assistantResultPersisted) {
         throw new Error('AI_RESULT_NOT_PERSISTED');
       }
-      if (platformFunded) {
+      if (platformFunded || isCalendarConfirmation) {
         await sink.emit(
           terminalSuccessEvent ?? {
             type: 'result',
@@ -2049,6 +2174,15 @@ export class AiController {
           : null;
       const operationErrorCode = String(responseBody?.code ?? '');
       const elapsedMs = Date.now() - startedAt;
+      if (operationErrorCode === COACH_QUESTION_STALE_ERROR_CODE) {
+        await failTurn({
+          code: COACH_QUESTION_STALE_ERROR_CODE,
+          message:
+            this.i18n.t('common.error.conflict', { lang }) ??
+            'The question is no longer pending.',
+        });
+        return;
+      }
       if (operationErrorCode === 'AI_MODEL_PURPOSE_UNAVAILABLE') {
         this.logger.warn(
           `[AI][教练][${reqId}] 模型用途不可用 用户ID=${userId} 用途=${purpose} 服务商=${provider ?? 'none'} 模型=${model || 'none'} 耗时毫秒=${elapsedMs}`,
@@ -2156,7 +2290,7 @@ export class AiController {
           if (runHandle && !runFinished) {
             const reason = abort.signal.reason;
             await finishRun(
-              reason === 'user_cancelled'
+              reason === 'user_cancelled' || reason === 'facts_changed'
                 ? 'cancelled'
                 : reason === 'client_disconnected' ||
                     reason === 'ownership_lost'

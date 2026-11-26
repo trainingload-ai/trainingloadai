@@ -1,8 +1,11 @@
 import {
   IsIn,
   IsOptional,
+  IsInt,
   IsString,
+  IsUUID,
   Matches,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -40,4 +43,30 @@ export class CreateScheduledWorkoutDto {
 
   @IsOptional()
   blocks?: unknown;
+}
+
+export class CreateIndependentWorkoutDto extends CreateScheduledWorkoutDto {
+  @IsOptional()
+  @IsUUID('4')
+  idempotencyKey?: string;
+}
+
+export class UpdateIndependentWorkoutDto extends CreateScheduledWorkoutDto {
+  @IsInt()
+  @Min(1)
+  expectedRevision!: number;
+}
+
+export class TransitionIndependentWorkoutDraftDto {
+  @IsIn(['SAVE', 'CONFIRM', 'DISCARD'])
+  action!: 'SAVE' | 'CONFIRM' | 'DISCARD';
+
+  @IsInt()
+  @Min(1)
+  expectedRevision!: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateScheduledWorkoutDto)
+  workout?: CreateScheduledWorkoutDto;
 }

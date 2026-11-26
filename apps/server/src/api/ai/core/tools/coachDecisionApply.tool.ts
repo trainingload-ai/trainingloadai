@@ -5,6 +5,7 @@ import {
   type AiToolDef,
 } from '../tool.types';
 import { hasCurrentDecisionConfirmation } from '../coach-workout-change';
+import type { CoachBranchingService } from '../../coach-branching.service';
 
 type Input = {
   decisionId: string;
@@ -25,6 +26,28 @@ type Output = {
     currentHeadEventSeq: number;
   } | null;
 };
+
+export async function applyConfirmedCoachDecision(
+  branching: CoachBranchingService,
+  approval: Parameters<CoachBranchingService['approveDecision']>[0],
+  expectedBaseEventSeq?: number,
+): Promise<Output> {
+  await branching.approveDecision(approval);
+  const result = await branching.applyDecision({
+    userId: approval.userId,
+    decisionId: approval.decisionId,
+    expectedBaseEventSeq,
+  });
+  return {
+    kind: 'coach_decision_apply',
+    decisionId: approval.decisionId,
+    result: result.result,
+    commitId: 'commit' in result ? (result.commit?.id ?? null) : null,
+    branchId: result.branch.id,
+    conflict: 'conflict' in result ? result.conflict : null,
+    receipt: 'receipt' in result ? result.receipt : null,
+  };
+}
 
 export const coachDecisionApplyTool: AiToolDef<Input, Output> = buildAiTool({
   name: 'coach_decision_apply',
@@ -76,12 +99,13 @@ export const coachDecisionApplyTool: AiToolDef<Input, Output> = buildAiTool({
       return aiToolError('decisionId is required', 'INVALID_INPUT');
     }
     if (
-      ctx.confirmedDecisionId
+      (ctx.calendarScheduleOnly && !ctx.confirmedAssistantMessageId) ||
+      (ctx.confirmedDecisionId
         ? ctx.confirmedDecisionId !== input.decisionId
         : !hasCurrentDecisionConfirmation(
             ctx.currentUserPrompt,
             input?.userConfirmation ?? '',
-          )
+          ))
     ) {
       return aiToolError(
         'Explicit current-turn confirmation is required; do not fabricate consent',
@@ -106,51 +130,24 @@ export const coachDecisionApplyTool: AiToolDef<Input, Output> = buildAiTool({
       throw new Error('coach_decision_apply requires branch context');
     }
 
-    await ctx.coachBranching.approveDecision({
-      userId,
-      decisionId: input.decisionId,
-      selectedOptionKey: input.selectedOptionKey,
-      comment: input.userConfirmation,
-      branchId: ctx.branchId ?? undefined,
-      proposedBefore: ctx.currentTurnStartedAt,
-      confirmation:
-        ctx.sid && ctx.confirmedAssistantMessageId
-          ? {
-              sid: ctx.sid,
-              assistantMessageId: ctx.confirmedAssistantMessageId,
-            }
-          : undefined,
-    });
-    const result = await ctx.coachBranching.applyDecision({
-      userId,
-      decisionId: input.decisionId,
-      expectedBaseEventSeq: input.expectedBaseEventSeq,
-    });
-
-    const commit =
-      'commit' in result &&
-      result.commit &&
-      typeof result.commit.id === 'string'
-        ? result.commit
-        : null;
-    const conflict =
-      'conflict' in result &&
-      result.conflict &&
-      typeof result.conflict.expectedBaseEventSeq === 'number' &&
-      typeof result.conflict.currentHeadEventSeq === 'number'
-        ? {
-            expectedBaseEventSeq: result.conflict.expectedBaseEventSeq,
-            currentHeadEventSeq: result.conflict.currentHeadEventSeq,
-          }
-        : null;
-    return {
-      kind: 'coach_decision_apply' as const,
-      decisionId: input.decisionId,
-      result: result.result,
-      commitId: commit?.id ?? null,
-      branchId: result.branch.id,
-      conflict,
-      receipt: 'receipt' in result ? result.receipt : null,
-    };
+    return applyConfirmedCoachDecision(
+      ctx.coachBranching,
+      {
+        userId,
+        decisionId: input.decisionId,
+        selectedOptionKey: input.selectedOptionKey,
+        comment: input.userConfirmation,
+        branchId: ctx.branchId ?? undefined,
+        proposedBefore: ctx.currentTurnStartedAt,
+        confirmation:
+          ctx.sid && ctx.confirmedAssistantMessageId
+            ? {
+                sid: ctx.sid,
+                assistantMessageId: ctx.confirmedAssistantMessageId,
+              }
+            : undefined,
+      },
+      input.expectedBaseEventSeq,
+    );
   },
 });

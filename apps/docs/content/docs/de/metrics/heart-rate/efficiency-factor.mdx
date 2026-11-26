@@ -1,80 +1,80 @@
 ---
 title: Efficiency Factor (EF)
-description: Efficiency Factor compares output with average heart rate to track aerobic efficiency trends across similar endurance sessions.
-keywords: ["EF", "Efficiency Factor", "aerobic efficiency", "Aerobic Fitness", "Base Training", "heart rate efficiency"]
+description: Der Efficiency Factor setzt deinen Output ins Verhältnis zur durchschnittlichen Herzfrequenz, um Trends der aeroben Effizienz über vergleichbare Ausdauereinheiten zu verfolgen.
+keywords: ["EF", "Efficiency Factor", "aerobe Effizienz", "Aerobe Fitness", "Grundlagentraining", "Herzfrequenzeffizienz"]
 ---
 
 # Efficiency Factor (EF)
 
-**Efficiency Factor (EF)** links your **physiological input** to your **performance output**. In simple terms, it asks: how much pace or power did you produce per beat of heart rate?
+Der **Efficiency Factor (EF)** verknüpft deinen **physiologischen Input** mit deinem **sportlichen Output**. Einfach gesagt beantwortet er die Frage: Wie viel Pace oder Leistung hast du pro Herzschlag erzeugt?
 
-It is useful for tracking aerobic efficiency during similar endurance sessions, especially across a base period.
+Damit eignet er sich hervorragend, um die Entwicklung deiner aeroben Effizienz über vergleichbare Ausdauereinheiten hinweg zu verfolgen – vor allem in einer Grundlagenphase.
 
-## Core idea
+## Grundidee
 
-EF is simple: **output per unit heart rate**.
-As you get fitter, you can produce more output at the same HR, or you can maintain the same output at a lower HR.
+Das Prinzip hinter EF ist einfach: **Output pro Einheit Herzfrequenz**.
+Wenn deine Fitness steigt, kannst du bei gleicher Herzfrequenz mehr Output erzeugen – oder denselben Output bei niedrigerer Herzfrequenz halten.
 
-## Formula
+## Formel
 
-EF is computed as output divided by input:
+EF wird als Output geteilt durch Input berechnet:
 
-### Cycling
+### Radfahren
 
 $$
 EF = \frac{NP}{AvgHR}
 $$
-*Note: some tools use average power instead. Trainingload.ai uses **NP** by default to stay consistent with how Decoupling is computed.*
+*Hinweis: Manche Tools verwenden stattdessen die Durchschnittsleistung. Trainingload.ai nutzt standardmäßig **NP**, damit die Berechnung konsistent zur aeroben Entkopplung bleibt.*
 
-### Running
+### Laufen
 
 $$
 EF = \frac{NGP}{AvgHR}
 $$
-*Note: Trainingload.ai uses the speed derived from **NGP (Normalized Graded Pace)** (m/min or yd/min) to reduce terrain effects.*
+*Hinweis: Trainingload.ai nutzt die aus der **NGP (Normalized Graded Pace)** abgeleitete Geschwindigkeit (m/min oder yd/min), um Geländeeinflüsse zu reduzieren.*
 
-## Typical values
+## Typische Werte
 
-EF is a **relative metric**. You generally shouldn’t compare EF across athletes because resting HR, Max HR, body mass, and measurement devices differ.
--   **Compare to yourself**: compare to your own past EF.
--   **Typical trend**: across a solid 12–16 week base period, EF often rises gradually.
+EF ist eine **relative Metrik**. Du solltest deinen EF in der Regel nicht direkt mit anderen Athletinnen und Athleten vergleichen, weil Ruheherzfrequenz, maximale Herzfrequenz, Körpergewicht und Messgeräte individuell verschieden sind.
+-   **Mit dir selbst vergleichen**: Vergleiche deinen EF immer mit deinen eigenen früheren Werten.
+-   **Typischer Trend**: Über eine solide 12–16-wöchige Grundlagenphase steigt der EF häufig schrittweise an.
 
-## Typical applications
+## Typische Anwendungsfälle
 
-### 1. Track base training progress
-During long base periods, low-intensity endurance work can feel repetitive. A steadily rising EF trend across comparable sessions can be a sign that aerobic efficiency is improving.
+### 1. Fortschritte im Grundlagentraining verfolgen
+In langen Grundlagenphasen können lockere Ausdauereinheiten schnell eintönig wirken. Ein stetig steigender EF-Trend über vergleichbare Einheiten hinweg ist ein klares Zeichen dafür, dass deine aerobe Effizienz wächst.
 
--   **Rising**: training may be improving aerobic efficiency.
--   **Plateau**: if EF stops rising for several weeks, your base may be stabilizing, or you may be carrying fatigue.
--   **Decision point**: this can support adding more threshold or interval work, but it should be checked against fatigue, goals, and recent load.
+-   **Steigend**: Das Training verbessert deine aerobe Effizienz.
+-   **Plateau**: Wenn der EF über mehrere Wochen nicht weiter steigt, stabilisiert sich deine Grundlage möglicherweise – oder du trägst Ermüdung mit dir herum.
+-   **Entscheidungspunkt**: Ein Plateau kann dafür sprechen, gezielter Schwellen- oder Intervallarbeit einzubauen – allerdings immer im Abgleich mit Ermüdung, Zielen und jüngster Trainingsbelastung.
 
-### 2. Cross-check fatigue signals
-If EF changes abruptly, it is not always a fitness change. Unusually low heart rate, unusually high RPE, poor sleep, heat, or sensor issues can all distort EF. Cross-check with how the session felt and with recent training load.
+### 2. Ermüdungssignale gegenchecken
+Wenn sich der EF plötzlich stark verändert, steckt nicht immer eine Fitnessveränderung dahinter. Eine ungewöhnlich niedrige Herzfrequenz, ein auffällig hohes RPE, schlechter Schlaf, Hitze oder Sensorfehler können den EF verzerren. Gleiche den Wert deshalb immer mit deinem Körpergefühl und deiner jüngsten Trainingsbelastung ab.
 
-## EF vs. aerobic decoupling
+## EF vs. aerobe Entkopplung
 
-**EF** and **[Aerobic Decoupling](/docs/metrics/heart-rate/aerobic-decoupling)** complement each other:
+**EF** und **[aerobe Entkopplung](/de/docs/metrics/heart-rate/aerobic-decoupling)** ergänzen sich optimal:
 
-| Metric | Time horizon | Question |
+| Metrik | Zeithorizont | Fragestellung |
 | :--- | :--- | :--- |
-| **EF** | **Long-term trend** | “How much did I improve over the last month?” |
-| **Decoupling** | **Single-workout quality** | “Did I maintain efficiency during this long session?” |
+| **EF** | **Langfristiger Trend** | „Wie stark habe ich mich im letzten Monat verbessert?“ |
+| **Entkopplung** | **Qualität einer einzelnen Einheit** | „Konnte ich meine Effizienz während dieser langen Einheit halten?“ |
 
-EF shows the efficiency level of a session or trend. Decoupling shows whether that efficiency stayed stable later in a long steady effort.
+Der EF zeigt das Effizienzniveau einer Einheit oder eines Trends. Die Entkopplung zeigt, ob diese Effizienz auch im späteren Verlauf einer langen, gleichmäßigen Belastung stabil blieb.
 
-## How Trainingload.ai uses EF
+## Wie Trainingload.ai den EF nutzt
 
--   **Trend only comparable sessions**: EF is most useful when comparing similar routes, durations, terrain, and intensity.
--   **Filter noisy workouts**: Trainingload.ai emphasizes aerobic sessions (mostly Zone 1 / Zone 2) when looking at EF trends.
--   **Pair with decoupling**: EF can rise while late-session drift remains high, so both metrics tell a fuller story.
--   **Keep equipment consistent**: use the same HR strap and power meter when possible. Device differences can hide small real improvements.
+-   **Nur vergleichbare Einheiten im Trend auswerten**: Der EF ist am aussagekräftigsten, wenn Strecken, Dauer, Gelände und Intensität ähnlich sind.
+-   **Verrauschte Einheiten herausfiltern**: Für EF-Trends konzentriert sich Trainingload.ai vor allem auf aerobe Einheiten (überwiegend Zone 1 / Zone 2).
+-   **Mit der Entkopplung kombinieren**: Der EF kann bereits steigen, während die Drift am Ende langer Einheiten noch hoch ist – erst beide Metriken zusammen ergeben das vollständige Bild.
+-   **Ausrüstung konsistent halten**: Nutze möglichst denselben Brustgurt und denselben Powermeter. Geräteunterschiede können kleine, echte Fortschritte überdecken.
 
-## Related docs
+## Verwandte Seiten
 
-- [Aerobic Decoupling](/docs/metrics/heart-rate/aerobic-decoupling)
-- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
-- [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace)
+- [Aerobe Entkopplung](/de/docs/metrics/heart-rate/aerobic-decoupling)
+- [Herzfrequenzzonen](/de/docs/metrics/heart-rate/zones)
+- [Normalized Graded Pace](/de/docs/metrics/pace/normalized-graded-pace)
 
-## References
+## Quellen
 
 -   [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)

@@ -6,6 +6,15 @@ import { WorkoutDefinitionService } from '@/api/workout/workout-definition.servi
 import { WorkoutCodecRegistry } from '@/api/workout/workout-codec.registry';
 import { StrengthWorkoutCodec } from '@/api/workout/codecs/strength-workout.codec';
 import { FreeformWorkoutCodec } from '@/api/workout/codecs/freeform-workout.codec';
+import { PlanLoadEstimatorService } from '../application/plan-load-estimator.service';
+
+const planLoadEstimator = new PlanLoadEstimatorService(
+  {} as never,
+  { getComposedUserProfile: async () => ({}) } as never,
+  new WorkoutService({} as never),
+  {} as never,
+  {} as never,
+);
 
 function setup() {
   const service = Object.create(PlanWriteSupport.prototype) as PlanWriteSupport;
@@ -16,6 +25,7 @@ function setup() {
   );
   Object.assign(service, {
     prisma: { $transaction: transaction },
+    planLoadEstimator,
     logger: { error: jest.fn() },
     resolveWorkoutDefinitionInput: (w: { text: string }) => ({
       kind: 'ENDURANCE',
@@ -41,9 +51,25 @@ function setup() {
   return { service, create, transaction, dto };
 }
 describe('plan save server quality boundary', () => {
-  it('validates persisted mixed plans with the correct strength codec, not the endurance parser', () => {
+  it('rejects a 46-minute Wednesday before writing and preserves a valid 75-minute Saturday', async () => {
+    const s = setup();
+    const contract = { startDate: '2026-11-30', maxDailyMinutes: 90, maxMinutesByIsoWeekday: { 3: 45, 6: 90 } };
+    s.dto.generationMetadata = { qualityContract: contract };
+    s.dto.workouts = [{ weekIndex: 1, dayIndex: 3, sportType: 'RUN', text: 'warmup 10m\nrepeat 4 {\n  work 5m\n  recovery 2m\n}\ncooldown 8m' }];
+    await expect(s.service.createPlan('u', s.dto)).rejects.toMatchObject({ response: {
+      code: 'PLAN_QUALITY_INVALID', issues: expect.arrayContaining([expect.objectContaining({ code: 'DAILY_TIME_BUDGET' })]),
+    } });
+    expect(s.create).not.toHaveBeenCalled();
+    s.dto.workouts = [{ weekIndex: 1, dayIndex: 6, sportType: 'RUN', text: 'work 75m' }];
+    await s.service.createPlan('u', s.dto);
+    expect(s.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({
+      generationMetadata: expect.objectContaining({ qualityContract: contract }),
+    }) }), expect.anything());
+  });
+  it('validates persisted mixed plans with the correct strength codec, not the endurance parser', async () => {
     const service = Object.create(PlanWriteSupport.prototype);
     Object.assign(service, {
+      planLoadEstimator,
       normalizePlanRow: (p: unknown) => p,
       workoutDefinitionService: new WorkoutDefinitionService(
         new WorkoutCodecRegistry(
@@ -53,7 +79,7 @@ describe('plan save server quality boundary', () => {
         ),
       ),
     });
-    const report = service.validateStoredPlanQuality({
+    const report = await service.validateStoredPlanQuality('u', {
       periodWeeks: 1,
       workouts: [
         {
@@ -71,7 +97,7 @@ describe('plan save server quality boundary', () => {
           text: 'duration 45m\nsession rpe 6\nexercise "Squat" {\nwork 3x5 open rpe 7 rest 3m\n}',
         },
       ],
-    });
+    }, {});
     expect(report.valid).toBe(true);
     expect(report.weeks[0].totalDurationSeconds).toBe(4500);
   });
@@ -103,6 +129,48 @@ describe('plan save server quality boundary', () => {
     };
     await expect(s.service.createPlan('u', s.dto)).rejects.toThrow();
     expect(s.transaction).not.toHaveBeenCalled();
+  });
+  it('rechecks persisted week and phase targets before writing a draft', async () => {
+    const s = setup();
+    const planAssessment = {
+      assessmentId: 'ddf48599-cdcb-4d58-b44c-a3c6e37cdf35',
+      weekTargets: [1, 2].map((weekIndex) => ({
+        weekIndex, phase: 'BUILD', focus: 'Aerobic work',
+        trainingDays: { min: 1, max: 1 }, durationMinutes: { min: 20, max: 35 },
+      })),
+      phases: [{ name: 'Build', startWeek: 1, endWeek: 2, purpose: 'Build consistently', durationMinutes: { min: 40, max: 55 } }],
+    };
+    s.dto.generationMetadata = { planAssessment };
+
+    await expect(s.service.createPlan('u', s.dto)).rejects.toMatchObject({
+      response: { issues: [expect.objectContaining({
+        code: 'PHASE_TARGET_DURATION', target: { scope: 'BLOCK', firstWeek: 1, lastWeek: 2 },
+      })] },
+    });
+    expect(s.transaction).not.toHaveBeenCalled();
+    planAssessment.phases[0].durationMinutes.max = 65;
+    await expect(s.service.createPlan('u', s.dto)).resolves.toBeDefined();
+    expect(s.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ generationMetadata: expect.objectContaining({ planAssessment }) }),
+    }), expect.anything());
+  });
+  it('saves equal-duration recovery only when prescribed effort lowers the estimated load', async () => {
+    const s = setup();
+    s.dto.generationMetadata = { qualityContract: { weekPhases: ['BUILD', 'RECOVERY'] } };
+    s.dto.workouts[0].plannedSessionRpe = 6;
+    s.dto.workouts[1].plannedSessionRpe = 3;
+    await s.service.createPlan('u', s.dto);
+    expect(s.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({
+        generationMetadata: expect.objectContaining({ qualityReport: expect.objectContaining({
+          weeks: [
+            expect.objectContaining({ totalEstimatedLoad: 30 }),
+            expect.objectContaining({ totalEstimatedLoad: 15 }),
+          ],
+        }) }),
+      }) }),
+      expect.anything(),
+    );
   });
   it('recomputes the duration report and retains the agreed contract instead of trusting a client report', async () => {
     const s = setup();

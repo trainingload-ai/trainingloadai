@@ -1,0 +1,41 @@
+---
+title: Diagnostica problemas de actividad, carga y recuperación
+description: Parte del síntoma visible hasta el dato ausente o el estado de procesamiento antes de cambiar umbrales, fuentes de carga o decisiones de entrenamiento.
+seoTitle: "¿Falta una actividad o carga de entrenamiento? Guía de solución"
+seoDescription: "Diagnostica actividades ausentes, falta de carga de entrenamiento, métricas de recuperación vacías y errores de procesamiento rastreando cada síntoma hasta su origen."
+keywords:
+  [
+    "datos de actividad ausentes",
+    "falta carga de entrenamiento",
+    "problemas de sincronización de actividades",
+    "datos de recuperación",
+  ]
+---
+
+# Diagnostica problemas de actividad, carga y recuperación
+
+## Empieza por el síntoma
+
+| Síntoma | Qué comprobar primero | Próxima guía recomendada |
+| --- | --- | --- |
+| Falta una actividad | Conexión con el proveedor, rango de fechas de importación y estado del archivo | [Conectar datos](/es/docs/guide/connect-data) |
+| Una actividad aparece duplicada | Múltiples rutas de importación e identificadores de origen | [Integraciones](/es/docs/guide/integrations) |
+| La actividad existe pero no tiene carga | Estado de procesamiento, duración, frecuencia cardíaca, potencia, ritmo y umbrales del perfil | [Detalle de actividad](/es/docs/guide/activity-detail) |
+| Fallan las gráficas o las vueltas | Si el archivo original incluía registros de serie temporal y vueltas | [Subir archivos de actividad](/es/docs/guide/upload-activity-files) |
+| El sueño, la HRV o la FC en reposo están vacíos | Permisos de salud, cobertura del proveedor, fecha y zona horaria | [Cuenta, permisos y uso](/es/docs/guide/account-permissions-and-usage) |
+| El PMC parece inesperadamente bajo o alto | Duplicados, días faltantes, deporte seleccionado, fuente de carga y cambios de umbrales | [Flujo de análisis de entrenamiento](/es/docs/guide/training-analysis-workflow) |
+
+## Diagnostica en orden
+
+1. Confirma la fuente esperada y el rango temporal.
+2. Comprueba si la fuente suministró el flujo de sensores necesario.
+3. Revisa el estado de importación y procesamiento.
+4. Revisa los umbrales del perfil y la prioridad de fuentes de carga.
+5. Compara una actividad afectada con otra que funcione correctamente.
+6. Solo después modifica la configuración o contacta con soporte.
+
+## Reúne evidencia segura para soporte
+
+Incluye la fecha de la actividad, el deporte, la fuente, el estado visible, el resultado esperado frente al real y si el problema es reproducible. Elimina direcciones de correo, tokens OAuth, claves API, ubicaciones exactas de tu domicilio e identificadores privados del proveedor.
+
+No modifiques tus umbrales solo para forzar un valor concreto de carga de entrenamiento. Un cambio de configuración afecta a la interpretación posterior y puede alterar el historial derivado.

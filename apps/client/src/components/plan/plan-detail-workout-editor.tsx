@@ -35,6 +35,7 @@ export function PlanDetailWorkoutEditor({
       planId,
       workoutId: workout.id,
       dto: {
+        expectedRevision: workout.revision,
         weekIndex: workout.weekIndex,
         dayIndex: workout.dayIndex,
         sessionIndex: workout.sessionIndex,

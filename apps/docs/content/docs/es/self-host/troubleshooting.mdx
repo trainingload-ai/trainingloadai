@@ -1,0 +1,68 @@
+---
+title: Solución de problemas de autohospedaje
+description: Diagnostica fallos de instalación, disponibilidad, almacenamiento, IA, restauración y actualización sin saltarte los controles de ciclo de vida ni de seguridad de datos.
+---
+
+# Solución de problemas de autohospedaje
+
+Empieza por las comprobaciones de solo lectura oficiales. Conserva el primer código de error estable: es mucho más útil que ir cambiando cosas en el equipo hasta que desaparezca el síntoma.
+
+## Primera respuesta
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+Si Docker no está disponible, `doctor` igualmente informa de las comprobaciones que sí puede completar. Si falló una restauración o actualización, conserva su informe y el marcador incompleto. No elimines el marcador para forzar un arranque normal.
+
+## Problemas habituales
+
+| Síntoma | Qué revisar | Siguiente acción segura |
+| --- | --- | --- |
+| El instalador rechaza la versión | Suma de comprobación externa, identidad Cosign, versión exacta y archivos descargados completos | Vuelve a descargar todos los artefactos de la misma versión oficial |
+| El sitio no abre | `status`, registros del Cliente, dirección de enlace, conflicto de puerto y origen HTTPS | Corrige el ajuste declarado y ejecuta `start --dry-run` antes de `start` |
+| La base de datos no está disponible | Estado del servicio de base de datos, disco, permisos y resultado de migraciones en `doctor` | Recupera capacidad o permisos en el host; no expongas ni edites PostgreSQL directamente |
+| Falla la subida de archivos | Espacio en la raíz de datos, inodos disponibles, propietario y directorio `uploads` | Amplía el volumen dedicado de datos y vuelve a ejecutar `doctor` |
+| Los ajustes de IA están ocultos | Modo de despliegue, disponibilidad de la instancia e identidad Owner con sesión iniciada | Inicia sesión como el Owner reclamado; quienes no son Owner no pueden ver ni cambiar ajustes de proveedor |
+| Falla una petición de IA | Estado del proveedor, Base URL exacta, IDs de modelo, acceso de la clave y DNS/TLS saliente | Corrige la configuración gestionada por el Owner o desactiva la IA mientras el proveedor no esté disponible |
+| La IA falla tras restaurar | Si el destino usa un secreto de autenticación de instancia distinto | Introduce una clave nueva del proveedor; no intentes extraer la clave antigua en texto plano |
+| La restauración está bloqueada | Versión destino, estado de autoridad del destino, manifiesto de copia, suma de comprobación e informe | Usa un destino limpio de la misma versión exacta y conserva el destino fallido para diagnóstico |
+| La actualización está bloqueada | Versiones de origen admitidas, inventario de migraciones, copia de seguridad, disco y declaración de reversión | Sigue el informe de actualización; no cambies etiquetas de imagen ni registros de migración manualmente |
+
+## Recopilar diagnósticos
+
+Cuando `doctor` no sea suficiente:
+
+```bash
+./self-host diagnostics --output support-<yyyy-mm-dd> --tail 500 --service server --service client --json
+```
+
+Los diagnósticos aplican censura automática, pero esa censura no equivale a permiso para publicar el archivo. Ábrelo localmente y comprueba nombres de host, datos de usuario, detalles de actividades y registros de negocio antes de compartirlo por un canal privado aprobado por los mantenedores.
+
+No compartas nunca:
+
+- `.env.selfhost`;
+- contraseñas del Owner o el token de arranque (`bootstrap token`);
+- claves API de proveedores, cookies o claves privadas;
+- un volcado de base de datos o archivos de actividad subidos;
+- un paquete de diagnóstico sin revisar.
+
+## Acciones que debes evitar
+
+- No uses `docker compose down -v`.
+- No borres datos de PostgreSQL, archivos subidos, el marcador de la raíz de datos, bloqueos de operación ni marcadores de ciclo de vida incompletos.
+- No edites `_prisma_migrations`, manifiestos de versión, sumas de comprobación ni informes de actualización.
+- No uses `--skip-verify` ni etiquetas de imagen mutables.
+- No reintentes en paralelo comandos que modifiquen el estado.
+
+Estas acciones pueden convertir un fallo diagnosticable en una pérdida de datos irrecuperable o ambigua.
+
+## Escalar con evidencia útil
+
+Comparte únicamente la versión exacta, el sistema operativo y arquitectura del host, el `error.code` estable, el comando que falló y el SHA-256 de un paquete de diagnóstico revisado localmente. Mantén privado el archivo completo salvo que un mantenedor proporcione un canal de transferencia aprobado.
+
+## Próximo paso
+
+Vuelve a [Gestionar tu instancia](/es/docs/self-host/operations) cuando se haya resuelto la condición de bloqueo. Si la recuperación exige reemplazar los datos, restaura una copia de seguridad verificada en un destino limpio en lugar de sobrescribir la instancia fallida.

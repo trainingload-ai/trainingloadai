@@ -97,15 +97,15 @@
   },
   "nav": {
     "blog": "Blog",
-    "aiPlans": "AI Coach",
+    "aiPlans": "Treinador de IA",
     "features": "Recursos",
     "trainingLoad": "Carga de treino",
     "tools": "Ferramentas",
     "freeAiReview": "Análise IA grátis",
-    "pricing": "Precos",
+    "pricing": "Preços",
     "docsWorkflow": "Fluxo de treino",
     "metrics": "Métricas",
-    "docs": "Documentacao"
+    "docs": "Documentação"
   },
   "languageSuggestion": {
     "label": "Sugestão de idioma",
@@ -207,7 +207,7 @@
       "rpeScale": "Escala de esforço RPE",
       "appComparisons": "Comparativos de apps"
     },
-    "aiPlans": "AI Coach",
+    "aiPlans": "Treinador de IA",
     "blog": "Blog",
     "documentation": "Documentação",
     "alternatives": "Training load app alternatives",
@@ -217,22 +217,22 @@
     "features": "Recursos",
     "trainingLoad": "Carga de treino",
     "tools": "Ferramentas",
-    "pricing": "Precos",
+    "pricing": "Preços",
     "github": "GitHub",
     "company": "Empresa",
-    "privacyPolicy": "Politica de privacidade",
-    "termsAndConditions": "Termos e condicoes",
+    "privacyPolicy": "Política de privacidade",
+    "termsAndConditions": "Termos e condições",
     "copyright": "© {year} Trainingload.ai. Todos os direitos reservados.",
     "toolLinks": {
       "estimateCp": "Calculadora de FTP",
       "lactateThresholdCalculator": "Calculadora de limiar de lactato",
       "criticalPowerCalculator": "Calculadora de Critical Power",
-      "maxHeartRateCalculator": "Calculadora de frequencia cardiaca maxima",
-      "heartRateZonesCalculator": "Calculadora de zonas de frequencia cardiaca",
+      "maxHeartRateCalculator": "Calculadora de frequência cardíaca máxima",
+      "heartRateZonesCalculator": "Calculadora de zonas de frequência cardíaca",
       "vo2MaxCalculator": "Calculadora de VO₂max",
       "vdotCalculator": "Calculadora VDOT",
       "runningPaceCalculator": "Calculadora de ritmo",
-      "powerZonesCalculator": "Calculadora de zonas de potencia",
+      "powerZonesCalculator": "Calculadora de zonas de potência",
       "converter": "Conversor GPX / FIT / TCX",
       "fitCourseConverter": "Conversor de percurso FIT"
     },
@@ -3312,6 +3312,18 @@
           "description": "Código aberto e documentação completa reduzem dependência e permitem que a comunidade revise, melhore e contribua."
         }
       ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "Seus dados de treino não precisam ficar presos dentro do Trainingload.ai.",
+      "description": "Conecte uma vez para consultar seus planos, atividades, carga e provas do Trainingload.ai no ChatGPT, Codex, Claude, Cursor ou VS Code. A IA só pode ler os dados sem alterá-los, e cada consulta e resposta permanece visível.",
+      "primary": "Conhecer o MCP",
+      "secondary": "Guia de conexão",
+      "points": [
+        "24 ferramentas somente leitura",
+        "Chamadas de ferramentas visíveis",
+        "Acesso revogável"
+      ]
     }
   },
   "vo2MaxCalculator": {
@@ -5241,19 +5253,19 @@
       "items": [
         {
           "name": "Pacote inicial",
-          "credits": "5,000 créditos",
+          "credits": "5.000 créditos",
           "price": "$6.99",
           "note": "Para uso extra ocasional"
         },
         {
           "name": "Pacote avançado",
-          "credits": "15,000 créditos",
+          "credits": "15.000 créditos",
           "price": "$17.99",
           "note": "Para uso extra regular"
         },
         {
           "name": "Pacote profissional",
-          "credits": "40,000 créditos",
+          "credits": "40.000 créditos",
           "price": "$39.99",
           "note": "Para uso extra intenso"
         }

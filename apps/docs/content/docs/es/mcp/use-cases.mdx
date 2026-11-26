@@ -1,0 +1,72 @@
+---
+title: Casos de uso de MCP
+description: Prompts listos para copiar, ruta de herramientas esperada y evidencias que debe incluir una buena respuesta.
+---
+
+# Casos de uso de MCP
+
+Pega cualquiera de los prompts siguientes en un cliente de IA conectado a TrainingLoad. El cliente no necesita usar todas las herramientas enumeradas; debe elegir la combinación mínima que responda a la pregunta.
+
+## Estado actual y fatiga percibida
+
+> Usa TrainingLoad para resumir mi estado de entrenamiento a fecha de hoy. Compara los últimos 7 días con los 7 anteriores, incluye la forma y mis próximas tres sesiones planificadas, y separa los hechos de las inferencias.
+
+Ruta esperada: `get_training_snapshot` → `get_training_readiness` → `list_planned_workouts` cuando sea necesario.
+
+La respuesta debe indicar `asOf`, la zona horaria, la diferencia de carga de entrenamiento, si hay datos disponibles de ATL/CTL/TSB, y aclarar que el resultado de disposición es una señal observacional de carga y no un dictamen médico ni una confirmación de que sea «seguro entrenar».
+
+## Comparar dos bloques de entrenamiento
+
+> Compara del 1 al 28 de septiembre de 2026 con del 1 al 28 de octubre de 2026. Desglosa la carga de entrenamiento entre carrera, ciclismo y natación, e identifica solo los cambios respaldados por los datos.
+
+Ruta esperada: `compare_training_periods` + `get_training_breakdown`.
+
+Para una versión repetible, selecciona el prompt nativo `compare-training-blocks`. Añade `get_activity_statistics` cuando el número de sesiones, la duración o la distancia hayan cambiado de forma independiente a la carga, y `get_training_consistency` cuando importen la frecuencia, las rachas o la variabilidad.
+
+## Inspeccionar una actividad completada
+
+> Muestra la distribución del tiempo en zonas y el resumen de vueltas o parciales de esta actividad. Señala cualquier ritmo irregular usando solo los campos agregados almacenados; no solicites el recorrido bruto ni el flujo de sensores.
+
+Ruta esperada: `get_activity` → `get_activity_zones` + `get_activity_splits`.
+
+## Tendencias de estado de forma y marcas personales
+
+> Muestra la tendencia estimada de mi VO2_MAX en carrera durante este año, mis zonas de entrenamiento actuales y mis mejores marcas en 5 km y 10 km. No describas una estimación como una medición de laboratorio.
+
+Ruta esperada: `get_fitness_trends` + `get_training_zones` + `get_personal_bests`.
+
+## Ejecución del plan de entrenamiento
+
+> Resume la ejecución de mi plan de entrenamiento durante las últimas 8 semanas: sesiones completadas, omitidas y aún pendientes. Después lista las sesiones de la próxima semana y explica el denominador del porcentaje de cumplimiento.
+
+Ruta esperada: `get_plan_adherence` + `list_planned_workouts`.
+
+`get_plan_adherence` utiliza el estado de cada sesión en lugar de adivinar si una actividad coincide con el plan. Solo `DONE` cuenta como completada; las sesiones futuras en estado `PLANNED` siguen formando parte del denominador del rango seleccionado.
+
+Para un plan de entrenamiento completo, usa `list_training_plans` para descubrir su ID opaco y después `get_plan_summary` para ver cumplimiento, carga real frente a estimada, progreso semanal y reparto por deporte.
+
+## Preparación de carrera
+
+> Busca mi próxima competición y revisa el plan de entrenamiento correspondiente, las señales recientes de carga y forma y las próximas sesiones. Indica qué evidencias faltan y no conviertas la disposición en una decisión médica ni en un visto bueno para competir.
+
+Ruta esperada: `list_competitions` → `get_competition` → `list_training_plans` / `get_plan_summary` → `get_training_readiness` → `list_planned_workouts`.
+
+Los clientes compatibles con prompts MCP pueden seleccionar `race-preparation-check` en lugar de copiar la solicitud completa.
+
+## Diagnóstico de sincronización
+
+> Comprueba mi conexión con Strava. Dime si la importación y exportación de actividades completadas están disponibles y en modo automático, y si la última sincronización presenta algún error. No expongas identificadores de cuenta ni textos de error en bruto.
+
+Ruta esperada: `get_integration_status`.
+
+## Contexto de salud (consentimiento independiente)
+
+> Después de que autorice el acceso a salud, resume los cambios de bienestar disponibles de los últimos 14 días. Señala los valores ausentes y no emitas ningún diagnóstico.
+
+Ruta esperada: `get_health_summary`. Si aún no se ha concedido `health:read`, el cliente debe mostrar el flujo de consentimiento incremental en lugar de pedir un token.
+
+## Cómo hacer más verificable cualquier respuesta
+
+Añade esta frase al final de cualquier prompt:
+
+> Lista las herramientas de TrainingLoad que llamaste realmente, cada rango de fechas y los campos devueltos que respaldan la conclusión. No rellenes los valores ausentes.

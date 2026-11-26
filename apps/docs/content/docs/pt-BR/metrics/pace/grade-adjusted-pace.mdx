@@ -1,79 +1,79 @@
 ---
-title: Grade Adjusted Pace (GAP)
-description: Converts uphill and downhill running pace into an estimated flat-equivalent pace for comparing effort across rolling terrain.
-keywords: ["GAP", "Grade Adjusted Pace", "grade adjusted pace calculator", "Pace", "Running", "Elevation", "hill running pace"]
+title: Ritmo Ajustado à Inclinação (GAP)
+description: "Converte o ritmo de corrida em subidas e descidas em um ritmo equivalente no plano para comparar esforço em terrenos ondulados."
+keywords: ["GAP", "Ritmo Ajustado à Inclinação", "Grade Adjusted Pace", "calculadora de GAP", "Ritmo", "Corrida", "Altimetria", "ritmo em subidas"]
 ---
 
-# Grade Adjusted Pace (GAP)
+# Ritmo Ajustado à Inclinação (GAP)
 
-**Grade Adjusted Pace (GAP)** converts your actual pace on **uphill** or **downhill** terrain into an estimated flat-equivalent pace with similar energy cost, using a biomechanical/energetic model.
+O **Ritmo Ajustado à Inclinação (GAP — Grade Adjusted Pace)** converte o seu ritmo real em **subidas** ou **descidas** em um ritmo estimado equivalente no plano com custo energético semelhante, usando um modelo biomecânico/energético.
 
-It tries to answer the runner’s core question: “If I weren’t climbing this hill, what pace would I be running on flat ground at the same effort?”
+Ele busca responder à pergunta clássica de quem corre: “Se eu não estivesse subindo esta ladeira, em que ritmo estaria correndo no plano com o mesmo esforço?”
 
-## Core idea
+## Ideia central
 
-On rolling terrain, **actual pace** can be misleading:
--   **Uphill**: you do extra work against gravity; pace slows but physiological cost is high.
--   **Downhill**: gravity assists; pace speeds up but energy cost does not necessarily drop linearly (braking forces matter).
+Em terrenos ondulados, o **ritmo real** pode enganar:
+-   **Subida**: você faz trabalho extra contra a gravidade; o ritmo cai, mas o custo fisiológico é alto.
+-   **Descida**: a gravidade ajuda; o ritmo acelera, mas o custo energético não cai necessariamente de forma linear (as forças de frenagem contam).
 
-GAP reduces part of the terrain effect and provides a standardized pace so you can compare similar efforts across routes.
+O GAP reduz parte do efeito do terreno e oferece um ritmo padronizado para comparar esforços semelhantes entre diferentes percursos.
 
-## How it’s computed
+## Como é calculado
 
-Trainingload.ai computes GAP using an energy cost model based on **Minetti (2002)**, which quantifies **energy cost (EC)** across grades.
+O Trainingload.ai calcula o GAP com um modelo de custo energético baseado em **Minetti (2002)**, que quantifica o **custo energético (EC)** em função da inclinação.
 
-### Energy cost equation
+### Equação de custo energético
 
 $$
 C_r = 155.4 \times i^5 - 30.4 \times i^4 - 43.3 \times i^3 + 46.3 \times i^2 + 19.5 \times i + 3.6
 $$
 
-Where:
--   $C_r$: energy cost (J/kg/m)
--   $i$: grade (e.g., 5% grade is 0.05)
+Onde:
+-   $C_r$: custo energético (J/kg/m)
+-   $i$: inclinação (por exemplo, 5% de inclinação equivale a 0,05)
 
-### GAP equation
+### Equação do GAP
 
 ```text
 GAP = Pace_actual / (C_r / C_flat)
 ```
 
--   At 0% grade, $C_{flat} \approx 3.6$.
--   Uphill: $C_r > 3.6$, so GAP is faster than actual pace (a smaller time value).
--   Gentle downhill: $C_r < 3.6$, so GAP is slower than actual pace.
--   **Note**: on very steep downhills (often below -20%), heavy **eccentric braking** can increase energy cost again, making GAP “faster” again.
+-   Com 0% de inclinação, $C_{flat} \approx 3.6$.
+-   Subida: $C_r > 3.6$, então o GAP é mais rápido que o ritmo real (tempo menor por km).
+-   Descida leve: $C_r < 3.6$, então o GAP é mais lento que o ritmo real.
+-   **Observação**: em descidas muito íngremes (geralmente abaixo de -20%), a forte **frenagem excêntrica** pode voltar a aumentar o custo energético, deixando o GAP “mais rápido” novamente.
 
-## Typical applications
+## Aplicações típicas
 
-### 1. Trail and mountain running
-On steep terrain, actual pace can be hard to interpret.
--   **Example**: you climb a 15% grade and your pace drops to 12:00/km.
--   **GAP**: shows 5:00/km.
--   **Interpretation**: the metabolic intensity may be much higher than the raw pace suggests.
+### 1. Corrida em trilha e montanha
+Em terrenos muito inclinados, o ritmo real é difícil de interpretar.
+-   **Exemplo**: você encara uma subida de 15% e o ritmo cai para 12:00/km.
+-   **GAP**: marca 5:00/km.
+-   **Interpretação**: a intensidade metabólica pode ser muito maior do que o ritmo bruto sugere.
 
-### 2. Basis for rTSS
-Trainingload.ai uses **NGP (Normalized Graded Pace)** to compute running load (rTSS), and GAP is the foundation of NGP.
+### 2. Base para o rTSS
+O Trainingload.ai usa o **NGP (Normalized Graded Pace)** para calcular a carga de corrida (rTSS), e o GAP é a fundação do NGP.
 ```text
 Pace_actual  --(grade adjustment)-->  GAP  --(weighted smoothing)-->  NGP
 ```
 
-### 3. Race pacing strategy
-By analyzing course GPX data with GAP, you can plan what actual pace to run on different segments to keep effort more consistent.
+### 3. Estratégia de ritmo para provas
+Ao analisar o arquivo GPX do percurso com o GAP, você pode planejar qual ritmo real correr em cada trecho para manter o esforço mais uniforme.
 
-## How Trainingload.ai uses GAP
+## Como o Trainingload.ai usa o GAP
 
--   **Terrain context**: GAP helps explain why a slow uphill split may still be a high-intensity effort.
--   **Foundation for NGP**: Trainingload.ai uses GAP as the first step before computing NGP and rTSS.
--   **Do not chase it blindly**: GAP is a metabolic equivalence. It does not fully reflect musculoskeletal stress. Long, hard downhills may look manageable in GAP but still create high quad and knee load.
--   **Prefer trends over instant values**: GPS-grade estimates are noisy and delayed, which can make real-time GAP jumpy. Prefer lap averages or post-activity analysis.
+-   **Contexto de terreno**: o GAP ajuda a explicar por que uma parcial lenta em subida ainda pode representar um esforço intenso.
+-   **Base para o NGP**: o Trainingload.ai usa o GAP como primeira etapa antes de calcular NGP e rTSS.
+-   **Não persiga cegamente**: o GAP expressa equivalência metabólica e não captura integralmente o estresse musculoesquelético. Descidas longas e fortes podem parecer controladas no GAP, mas ainda impõem alta carga a quadríceps e joelhos.
+-   **Prefira tendências a valores instantâneos**: estimativas de inclinação via GPS têm ruído e atraso, tornando o GAP em tempo real instável. Prefira médias por volta ou análise pós-atividade.
 
-## Related docs
+## Documentos relacionados
 
-- [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace)
-- [Pace Zones](/docs/metrics/pace/zones)
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score)
+- [Ritmo Normalizado pela Inclinação (NGP)](/pt-BR/docs/metrics/pace/normalized-graded-pace)
+- [Zonas de Ritmo](/pt-BR/docs/metrics/pace/zones)
+- [Training Stress Score (TSS)](/pt-BR/docs/metrics/training-load/training-stress-score)
 
-## References
+## Referências
 
 -   Minetti, A. E., et al. (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *Journal of Applied Physiology*.
 -   Strava: [Grade Adjusted Pace (GAP)](https://support.strava.com/hc/en-us/articles/216917067-Grade-Adjusted-Pace-GAP)

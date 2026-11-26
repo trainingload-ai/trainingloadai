@@ -48,10 +48,10 @@
   "banner": {
     "betaWarning": "⚠️ Trainingload.ai 目前仍處於 beta 階段（v0.1.0），開發期間資料可能會被重置。",
     "release": {
-      "ariaLabel": "新用戶專屬權益",
-      "eyebrow": "新用戶禮遇",
-      "message": "完成帳戶設定，領取 {days} 天 PLUS 會員和 {credits} AI 積分。",
-      "mobileMessage": "完成設定，領取 {days} 天 PLUS + {credits} AI 積分。",
+      "ariaLabel": "新使用者專屬權益",
+      "eyebrow": "新使用者禮遇",
+      "message": "完成帳號設定，領取 {days} 天 PLUS 會員與 {credits} 積分。",
+      "mobileMessage": "完成設定，領取 {days} 天 PLUS + {credits} 積分。",
       "cta": "免費開始"
     }
   },
@@ -83,9 +83,9 @@
   "nav": {
     "features": "功能",
     "trainingLoad": "訓練負荷",
-    "aiPlans": "AI 教練",
+    "aiPlans": "智能教練",
     "tools": "工具",
-    "freeAiReview": "免費 AI 複盤",
+    "freeAiReview": "免費訓練回顧",
     "pricing": "定價",
     "docsWorkflow": "訓練流程",
     "metrics": "指標",
@@ -123,8 +123,8 @@
     "chooseTheme": "主題"
   },
   "header": {
-    "searchDocs": "搜尋文檔",
-    "openDocsMenu": "開啟文檔導覽",
+    "searchDocs": "搜尋文件",
+    "openDocsMenu": "開啟文件導覽",
     "login": "登入",
     "theme": "主題",
     "themeLight": "淺色",
@@ -197,28 +197,28 @@
     "alternatives": "訓練負荷應用替代方案",
     "features": "功能",
     "trainingLoad": "訓練負荷",
-    "aiPlans": "AI 教練",
+    "aiPlans": "智能教練",
     "blog": "部落格",
     "tools": "工具",
     "pricing": "定價",
     "toolLinks": {
-      "estimateCp": "FTP 計算器",
-      "lactateThresholdCalculator": "閾值計算器",
-      "criticalPowerCalculator": "Critical Power 計算器",
-      "maxHeartRateCalculator": "最大心率計算器",
-      "heartRateZonesCalculator": "心率區間計算器",
-      "vo2MaxCalculator": "VO2 Max 計算器",
-      "vdotCalculator": "VDOT 計算器",
-      "runningPaceCalculator": "跑步配速計算器",
+      "estimateCp": "FTP 計算機",
+      "lactateThresholdCalculator": "閾值計算機",
+      "criticalPowerCalculator": "Critical Power 計算機",
+      "maxHeartRateCalculator": "最大心率計算機",
+      "heartRateZonesCalculator": "心率區間計算機",
+      "vo2MaxCalculator": "VO₂max 計算機",
+      "vdotCalculator": "VDOT 計算機",
+      "runningPaceCalculator": "跑步配速計算機",
       "raceTimePredictor": "完賽時間預測",
-      "powerZonesCalculator": "功率區間計算器",
+      "powerZonesCalculator": "功率區間計算機",
       "converter": "GPX / FIT / TCX 轉換器",
       "fitFileViewer": "FIT 檔案查看",
       "fitCourseConverter": "FIT 路線檔案轉換器",
       "workoutEditor": "訓練編輯器",
       "tssCalculator": "TSS 計算",
       "trainingLoadCalculator": "訓練負荷計算機",
-      "zone2HeartRateCalculator": "二區心率計算器",
+      "zone2HeartRateCalculator": "二區心率計算機",
       "brickWorkout": "磚塊訓練",
       "olympicTriathlonTrainingPlan": "奧運距離鐵人三項訓練計畫",
       "cssCalculator": "臨界泳速計算機"
@@ -4199,7 +4199,7 @@
     "hero": {
       "title": "讓訓練計畫跟上你的真實狀態",
       "subtitle": "Trainingload.ai 是一款跑步與騎乘訓練應用，將訓練計畫、實際訓練、訓練負荷與恢復狀態放在一起，幫助你看清偏差並有依據地調整。會員還可透過智能教練取得基於這些資訊的個人化調整建議。",
-      "cta": "建立帳戶",
+      "cta": "建立帳號",
       "titleLines": ["讓訓練計畫跟上", "你的真實狀態"],
       "links": {
         "docs": "閱讀文件",
@@ -4348,7 +4348,7 @@
         },
         {
           "q": "Trainingload.ai 的跑步訓練計畫免費嗎？",
-          "a": "是。無需註冊即可完整查看 Trainingload.ai 官方發布的 12 套跑步訓練計畫。建立帳戶後即可將計畫加入日曆並按需調整。"
+          "a": "是。無需註冊即可完整查看 Trainingload.ai 官方發布的 12 套跑步訓練計畫。建立帳號後即可將計畫加入日曆並依需求調整。"
         },
         {
           "q": "如何比較訓練計畫與實際訓練？",
@@ -4402,9 +4402,9 @@
     },
     "bottomCta": {
       "title": "看看哪份計畫適合你",
-      "subtitle": "12 套 Trainingload.ai 官方跑步訓練計畫，無需註冊即可完整查看。選好後，建立帳戶即可加入訓練日曆。",
+      "subtitle": "12 套 Trainingload.ai 官方跑步訓練計畫，無需註冊即可完整查看。選好後，建立帳號即可加入訓練日曆。",
       "button": "查看 12 套免費計畫",
-      "secondaryButton": "建立帳戶"
+      "secondaryButton": "建立帳號"
     },
     "pricingPreview": {
       "eyebrow": "免費版與會員",
@@ -4500,7 +4500,7 @@
       "match": "完成匹配 92%",
       "adjustment": "保留有氧量，降低疲勞",
       "worksWith": {
-        "label": "兼容平台",
+        "label": "相容平台",
         "more": "等平台…"
       },
       "sportWords": ["跑步", "騎乘", "游泳", "鐵三"],
@@ -4510,12 +4510,12 @@
     "planSpotlight": {
       "eyebrow": "Trainingload.ai 官方免費跑步計畫",
       "title": "從適合你的跑步計畫開始，完整課表免費查看",
-      "subtitle": "依照目前基礎和目標選擇計畫。無需註冊即可查看 Trainingload.ai 官方發布的 12 套跑步訓練計畫，包括每週安排和每次訓練。建立帳戶後即可將計畫加入日曆並按需調整。",
+      "subtitle": "依照目前基礎和目標選擇計畫。無需註冊即可查看 Trainingload.ai 官方發布的 12 套跑步訓練計畫，包括每週安排和每次訓練。建立帳號後即可將計畫加入日曆並依需求調整。",
       "browseAll": "查看全部 12 套免費計畫",
       "planCta": "查看完整課表",
       "freeLabel": "免費",
       "freeTitle": "完整計畫，無需註冊即可查看",
-      "freeText": "從每週安排到每次訓練都公開可讀。建立帳戶後即可將計畫加入日曆並按需調整。",
+      "freeText": "從每週安排到每次訓練都完整公開，無需登入即可查看。建立帳號後即可將計畫加入日曆並依需求調整。",
       "aiLabel": "會員",
       "aiTitle": "訓練被打亂時，讓智能教練提出調整建議",
       "aiText": "智能教練會結合目前計畫、實際完成、訓練負荷等資訊產生調整建議；只有你確認後，調整才會套用到計畫。",
@@ -4626,7 +4626,7 @@
       ]
     },
     "docsCtaLabel": "查看文件",
-    "bottomTrialNote": "無需購買，新用戶完成帳號設定後即可自動領取 {days} 天 PLUS 會員。",
+    "bottomTrialNote": "無需購買，新使用者完成帳號設定後即可自動領取 {days} 天 PLUS 會員。",
     "expandDemoLabel": "放大示範",
     "featureMatrix": {
       "eyebrow": "訓練負荷分析",
@@ -4716,7 +4716,7 @@
       ]
     },
     "pageModules": {
-      "eyebrow": "完整訓練閉環",
+      "eyebrow": "完整訓練循環",
       "title": "計畫、執行、理解、調整，都在同一套訓練脈絡裡",
       "subtitle": "在計畫頁安排訓練週期，在日曆裡對照計畫與實際，在分析中看懂負荷與恢復，需要改變下一步時再使用智能教練。",
       "modules": [
@@ -4751,7 +4751,7 @@
     },
     "openSource": {
       "eyebrow": "開源 · 可自行託管",
-      "title": "你的訓練，始終由你掌控。",
+      "title": "你的訓練，始終由你掌控",
       "body": "Trainingload.ai 把訓練計畫、實際訓練、訓練負荷與恢復狀態放進一個開源系統。你可以直接使用官方雲端服務，也可以自行部署；訓練邏輯公開透明，資料與使用方式由你掌控。",
       "repositoryLabel": "公開儲存庫",
       "licenseLabel": "AGPL-3.0-only",
@@ -4770,6 +4770,18 @@
           "title": "不被單一平台鎖定",
           "description": "開放原始碼與完整自行託管文件讓你可以長期使用，也讓社群能夠審查、改進與貢獻。"
         }
+      ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "訓練資料，不必只留在 Trainingload.ai 裡",
+      "description": "連線一次後，就能在 ChatGPT、Codex、Claude、Cursor 或 VS Code 中查詢 Trainingload.ai 裡的計畫、活動、負荷與比賽資訊。AI 只能讀取，不能替你修改；每次查詢了什麼、回傳了什麼都清楚可見。",
+      "primary": "了解 MCP",
+      "secondary": "查看連線指南",
+      "points": [
+        "24 個唯讀工具",
+        "工具呼叫全程可見",
+        "授權隨時可撤銷"
       ]
     }
   },
@@ -6115,23 +6127,23 @@
     "docs": "文件",
     "openTrainingloadAi": "開啟 Trainingload.ai",
     "openApp": "開啟應用程式",
-    "ftpCalculator": "FTP 計算器",
+    "ftpCalculator": "FTP 計算機",
     "ftpCalculatorAction": "從檔案估算 FTP 訓練負荷",
-    "vdotCalculator": "VDOT 計算器",
+    "vdotCalculator": "VDOT 計算機",
     "vdotCalculatorAction": "計算跑步負荷目標所需的 VDOT",
-    "runningPaceCalculator": "跑步配速計算器",
+    "runningPaceCalculator": "跑步配速計算機",
     "runningPaceCalculatorAction": "用時間和距離計算跑步配速",
     "raceTimePredictor": "完賽時間預測",
     "raceTimePredictorAction": "用近期成績預測完賽時間",
-    "maxHeartRateCalculator": "最大心率計算器",
+    "maxHeartRateCalculator": "最大心率計算機",
     "maxHeartRateCalculatorAction": "估算負荷區間用的最大心率",
-    "powerZonesCalculator": "功率區間計算器",
+    "powerZonesCalculator": "功率區間計算機",
     "powerZonesCalculatorAction": "計算功率訓練負荷區間",
-    "heartRateZonesCalculator": "心率區間計算器",
+    "heartRateZonesCalculator": "心率區間計算機",
     "heartRateZonesCalculatorAction": "計算心率訓練負荷區間",
-    "criticalPowerCalculator": "Critical Power 計算器",
+    "criticalPowerCalculator": "Critical Power 計算機",
     "criticalPowerCalculatorAction": "擬合 Critical Power 以規劃負荷",
-    "lactateThresholdCalculator": "乳酸閾值計算器",
+    "lactateThresholdCalculator": "乳酸閾值計算機",
     "lactateThresholdCalculatorAction": "估算乳酸閾值以輔助負荷決策",
     "fitCourseConverter": "FIT Course 轉換器",
     "fitCourseConverterAction": "將路線檔轉成 FIT Course",
@@ -6139,7 +6151,7 @@
     "gpxFitTcxConverter": "GPX / FIT / TCX 轉換器",
     "gpxFitTcxConverterAction": "查看全部 GPX、FIT、TCX 轉換工具",
     "fitFileViewerAction": "在檢視器中開啟 FIT 檔案",
-    "vo2MaxCalculator": "VO₂max 計算器",
+    "vo2MaxCalculator": "VO₂max 計算機",
     "vo2MaxCalculatorAction": "估算 VO₂max 以判斷負荷準備度",
     "powerCurve": "功率曲線",
     "powerRankings": "功率排名",
@@ -6583,7 +6595,7 @@
     },
     "eyebrow": "會員方案",
     "title": "選擇適合你的訓練節奏",
-    "subtitle": "訂閱解鎖完整智能教練並按月獲得積分。標準模式為 1×，深度模式為 3×；實際消耗取決於上下文與回覆長度。",
+    "subtitle": "訂閱解鎖完整智能教練並按月獲得積分。標準模式為 1×，深度模式為 3×；實際消耗取決於對話脈絡與回覆長度。",
     "trialNote": "新使用者贈送權益與結帳細節以網頁端應用展示為準。",
     "inAppPlansHint": "三檔方案卡片與月／年付切換在網頁端應用內展示。",
     "inAppPlansLink": "開啟應用查看方案",
@@ -6595,12 +6607,12 @@
       "yearlySave": "約省 30%"
     },
     "ctaFree": "開始使用",
-    "ctaPlus": "開通 PLUS",
-    "ctaPro": "開通 PRO",
+    "ctaPlus": "訂閱 PLUS",
+    "ctaPro": "訂閱 PRO",
     "plans": {
       "free": {
         "name": "免費版",
-        "desc": "適合先體驗訓練紀錄、基礎分析，並完成帳號設定領取新使用者 PLUS 贈送權益的使用者。",
+        "desc": "適合想先體驗訓練紀錄、基礎分析，並完成帳號設定領取新使用者 PLUS 贈送權益的運動者。",
         "price": "免費",
         "items": [
           "活動上傳與基礎訓練分析",
@@ -6625,7 +6637,7 @@
         "items": [
           "包含免費版全部基礎能力",
           "每月發放 {credits} 訂閱積分",
-          "智能教練複盤：每日、每週、每月",
+          "智能教練回顧：每日、每週、每月",
           "智能教練陪伴訓練，動態提供調整建議",
           "智能教練解讀活動",
           "更完整的體能與區間分析"
@@ -6645,7 +6657,7 @@
           "包含 PLUS 全部能力",
           "每月發放 {credits} 訂閱積分",
           "標準（1×）與深度（3×）模式均可使用",
-          "適合賽季期密集複盤與計畫迭代"
+          "適合賽季期間密集回顧與計畫調整"
         ]
       }
     },
@@ -6804,7 +6816,7 @@
         }
       ]
     },
-    "creditNote": "積分按實際輸入、快取輸入和輸出計算；標準模式為 1×，深度模式為 3×。自動日、週、月複盤及匯入後的自動分析由平台承擔。",
+    "creditNote": "積分按實際輸入、快取輸入和輸出計算；標準模式為 1×，深度模式為 3×。自動每日、每週、每月回顧及匯入後的自動分析由平台承擔。",
     "creditPacks": {
       "title": "積分補充包",
       "subtitle": "需要時補充積分，不改變會員期限。",

@@ -1,77 +1,126 @@
 ---
 title: Dashboard
-description: Use the Trainingload.ai dashboard to review training trends, filter by time and sport, customize cards, and connect summary signals with deeper metric pages.
-keywords: ["Trainingload.ai dashboard", "training dashboard", "fitness status", "training load dashboard"]
+description: Usa la dashboard di Trainingload.ai per monitorare gli andamenti dell'allenamento, filtrare per periodo e sport, personalizzare le schede e collegare i segnali di sintesi alle pagine di analisi più approfondite.
+keywords:
+  [
+    "dashboard Trainingload.ai",
+    "dashboard allenamento",
+    "stato di fitness",
+    "dashboard carico di allenamento",
+  ]
 ---
 
 # Dashboard
 
-The dashboard is the fastest way to understand your recent training pattern. It combines summary cards, fitness status, and configurable overview metrics.
+La dashboard è il modo più rapido per cogliere l'andamento del tuo allenamento recente. Riunisce schede riepilogative, stato di fitness e metriche di panoramica configurabili.
 
-Use it when you want to answer:
+Usala quando vuoi rispondere a domande come:
 
-- How much have I trained recently?
-- Is my load rising, stable, or falling?
-- Which sport is driving the trend?
-- Do I need to look deeper at activities, PMC, power, pace, or heart rate?
+- Quanto mi sono allenato di recente?
+- Il mio carico di allenamento sta salendo, restando stabile o scendendo?
+- Quale sport sta guidando l'andamento?
+- Devo approfondire attività, PMC, potenza, passo o frequenza cardiaca?
 
-## Filters
+## Prima di iniziare
 
-The dashboard supports global filters:
+- Importa abbastanza attività recenti affinché l'intervallo temporale scelto sia significativo.
+- Configura soglie e priorità delle fonti di carico prima di confrontare metriche basate sull'intensità.
+- Analizza uno sport alla volta quando corsa, ciclismo e nuoto dipendono da soglie diverse.
 
-- **Time range**: switch between recent periods.
-- **Sport type**: focus on running, cycling, swimming, or all activity.
+## Flusso di analisi degli andamenti
 
-When you change filters, the cards and charts update to match the selected context.
+1. Seleziona l'intervallo temporale e lo sport desiderati.
+2. Leggi lo stato di fitness come una tendenza, non come una diagnosi o un verdetto definitivo sulla prontezza.
+3. Individua la scheda o il grafico che è cambiato.
+4. Apri le attività alla base di quel cambiamento.
+5. Passa alla pagina PMC, potenza, passo o frequenza cardiaca pertinente prima di modificare il piano.
 
-## Fitness status
+<DocsScreenshot
+  id="dashboard-trend-review"
+  title="Analisi degli andamenti nella dashboard"
+  description="Controlla i filtri di periodo e sport prima di confrontare stato di fitness e schede di panoramica con le attività sottostanti."
+  route="Home → Dashboard"
+/>
 
-Fitness status cards summarize the current training picture. They are meant for scanning, not final decisions.
+## Filtri
 
-Common signals include:
+La dashboard supporta filtri globali:
 
-- Long-term load and fitness trend.
-- Recent fatigue.
-- Readiness/form context.
-- Training consistency.
+- **Intervallo temporale**: passa tra diversi periodi recenti.
+- **Tipo di sport**: concentrati su corsa, ciclismo, nuoto o tutte le attività.
 
-For the underlying model, read:
+Quando cambi i filtri, schede e grafici si aggiornano per rispecchiare il contesto selezionato.
 
-- [Chronic Training Load](/docs/metrics/pmc/chronic-training-load)
-- [Acute Training Load](/docs/metrics/pmc/acute-training-load)
-- [Training Stress Balance](/docs/metrics/pmc/training-stress-balance)
+## Stato di fitness
 
-## Overview cards
+Le schede di stato di fitness riassumono il quadro attuale dell'allenamento. Servono per una lettura rapida, non per decisioni affrettate.
 
-Overview cards summarize activity volume and performance-related metrics. Depending on your data, they can include distance, duration, elevation, heart rate, power, cadence, and other training fields.
+Tra i segnali principali trovi:
 
-Use overview cards to spot changes, then open the relevant page for detail:
+- Carico di lungo periodo e andamento della fitness.
+- Fatica recente.
+- Contesto di forma e prontezza.
+- Costanza negli allenamenti.
 
-- **Activities** for the workouts behind the numbers.
-- **PMC** for load trend.
-- **Power** for FTP, CP, NP, VI, and power curve context.
-- **Pace** for running pace, GAP, NGP, and best-distance views.
-- **Heart Rate** for HR response, zones, EF, and decoupling.
+Per il modello sottostante leggi:
 
-## Edit layout
+- [Carico di allenamento cronico (CTL)](/it/docs/metrics/pmc/chronic-training-load)
+- [Carico di allenamento acuto (ATL)](/it/docs/metrics/pmc/acute-training-load)
+- [Bilancio dello stress di allenamento (TSB)](/it/docs/metrics/pmc/training-stress-balance)
 
-On desktop, the dashboard supports editing the layout of key sections. Use this when you want the dashboard to match your training focus.
+## Schede di panoramica
 
-Examples:
+Le schede di panoramica riassumono volume delle attività e metriche di prestazione. In base ai tuoi dati possono includere distanza, durata, dislivello, frequenza cardiaca, potenza, cadenza e altri campi di allenamento.
 
-- Put load and consistency first during base training.
-- Put power or pace metrics first during a race-specific block.
-- Keep recovery and fatigue visible when returning from a high-load week.
+Usa le schede di panoramica per individuare variazioni, poi apri la pagina corrispondente per approfondire:
 
-After editing, save the layout so the dashboard opens in the same structure next time.
+- **Attività** per gli allenamenti dietro ai numeri.
+- **PMC** per l'andamento del carico di allenamento.
+- **Potenza** per FTP, CP, NP, VI e curva di potenza.
+- **Passo** per passo di corsa, GAP, NGP e viste sulle migliori distanze.
+- **Frequenza cardiaca** per risposta cardiaca, zone, EF e disaccoppiamento aerobico.
 
-## How to interpret dashboard changes
+## Modificare il layout
 
-Do not overreact to one card changing for one day. A better workflow:
+Su desktop la dashboard permette di modificare il layout delle sezioni principali. Sfrutta questa opzione per allineare la dashboard al tuo focus del momento.
 
-1. Check whether the time range and sport filter are correct.
-2. Open recent activities behind the change.
-3. Compare load with subjective fatigue.
-4. Use AI Coach if you want a plan-aware interpretation.
+Esempi:
 
-The dashboard is your starting point. The decision should still consider the plan, recent workouts, and how you feel.
+- Metti in primo piano carico e costanza durante la preparazione di base.
+- Metti in evidenza potenza o passo durante un blocco specifico per una gara.
+- Tieni visibili recupero e fatica quando rientri da una settimana ad alto carico.
+
+Dopo la modifica salva il layout così che la dashboard si riapra sempre con la stessa disposizione.
+
+## Come interpretare i cambiamenti nella dashboard
+
+Non reagire eccessivamente a una singola scheda che cambia in un giorno solo. Un flusso più efficace prevede:
+
+1. Verificare che intervallo temporale e filtro sport siano corretti.
+2. Aprire le attività recenti che hanno generato la variazione.
+3. Confrontare il carico con la fatica percepita.
+4. Usare il Coach AI se desideri un'interpretazione che tenga conto del piano.
+
+La dashboard è il tuo punto di partenza. La decisione finale dovrebbe sempre considerare il piano, gli allenamenti recenti e come ti senti.
+
+## Verifica il risultato
+
+- I filtri attivi corrispondono alla domanda a cui vuoi rispondere.
+- Le attività visibili e i totali coprono lo stesso intervallo di date e lo stesso sport.
+- Ogni andamento è riconducibile a specifiche attività completate.
+- Le metriche dipendenti dalle soglie usano i valori attuali del profilo.
+- Un layout salvato su desktop viene mantenuto alla riapertura della dashboard.
+
+## Risoluzione dei problemi
+
+- **Le schede sono vuote:** amplia l'intervallo temporale, azzera il filtro sport e verifica che le attività siano in stato Ready.
+- **Un totale differisce dall'elenco attività:** confronta fuso orario, intervallo di date, filtro sport e stato di elaborazione.
+- **Carico o stato sono cambiati all'improvviso:** controlla lo storico delle soglie e la priorità delle fonti di carico prima di pensare che sia cambiato l'allenamento.
+- **Il layout non è stato salvato:** conferma il salvataggio e verifica di aver effettuato l'accesso prima di aggiornare.
+- **Una scheda mostra un valore estremo:** apri l'attività sottostante e controlla la qualità dei sensori prima di agire su un dato anomalo.
+
+## Prossimi passi
+
+- [Flusso di analisi dell'allenamento](/it/docs/guide/training-analysis-workflow)
+- [Dettaglio attività](/it/docs/guide/activity-detail)
+- [Carico di allenamento](/it/docs/metrics/training-load)

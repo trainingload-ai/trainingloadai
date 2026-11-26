@@ -1,5 +1,7 @@
 "use client";
 
+import { isOfficialPlanDraft } from "@shared/plan-calendar";
+
 import { isRollingPlan, generatedPlanThrough } from "@/lib/rolling-plan";
 
 import dayjs from "dayjs";
@@ -26,7 +28,7 @@ import { getPlanLibraryHref } from "@/lib/plan-navigation";
 import { cn } from "@/lib/utils";
 import { useMobileNavigation } from "@/components/mobile-app/components/MobileNavigationProvider";
 import { PlanStartConversationDialog } from "@/components/plan/plan-start-conversation-dialog";
-import { PlanShareCard } from "@/components/plan/plan-share-card";
+import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
 import { PlanDetailCycleProgress } from "@/components/plan/detail/plan-detail-cycle-progress";
 import {
   PlanDetailLoadingState,
@@ -189,7 +191,7 @@ export default function V2PlanDetailPage() {
   const { mutateAsync: cancelAsync, isPending: cancelling } =
     useCancelActivation();
   const { mutateAsync: deleteAsync, isPending: deleting } = useDeletePlan();
-  const managedProvider = useManagedPlanProviderActions(plan, t);
+  const managedProvider = useManagedPlanProviderActions(plan ?? undefined, t);
   const queryClient = useQueryClient();
   const [selectedWorkout, setSelectedWorkout] = useState<DerivedWorkout | null>(
     null,
@@ -291,13 +293,10 @@ export default function V2PlanDetailPage() {
               setPendingLifecycleAction(action);
             }}
           />
-          <div className="mt-4">
-            <PlanShareCard plan={plan} />
-          </div>
         </main>
       ) : (
         <>
-          <PlanDetailHeader plan={plan} t={t} backHref={planLibraryHref} />
+          <PlanDetailHeader plan={plan} t={t} />
 
           <div
             className={cn(
@@ -328,7 +327,6 @@ export default function V2PlanDetailPage() {
                   setPendingLifecycleAction(action);
                 }}
               />
-              <PlanShareCard plan={plan} />
               <PlanDetailExecutionSummary plan={plan} t={t} />
               <PlanDetailNextSteps plan={plan} t={t} />
               <PlanDetailCoachPanel plan={plan} t={t} />
@@ -364,9 +362,14 @@ export default function V2PlanDetailPage() {
                   locale={locale}
                 />
               ) : null}
-              <PlanDetailOverview plan={plan} t={t} />
+              {isRollingPlan(plan) ? (
+                <RollingPlanMonthDirection plan={plan} />
+              ) : (
+                <PlanDetailOverview plan={plan} t={t} />
+              )}
               <PlanDetailWeekBreakdown
                 weeks={weeks}
+                planStartDate={plan.startDate}
                 t={t}
                 onOpenWorkout={(workout) => setSelectedWorkout(workout)}
               />
@@ -408,6 +411,7 @@ export default function V2PlanDetailPage() {
       <PlanStartConversationDialog
         open={activateOpen}
         planId={plan.id}
+        officialTitle={isOfficialPlanDraft(plan) ? plan?.title : undefined}
         onOpenChange={setActivateOpen}
       />
       <AlertDialog

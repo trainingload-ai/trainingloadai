@@ -68,9 +68,67 @@ const workouts = Array.from({ length: 18 }, (_, index) => {
   };
 });
 
+const emptyCompetitionImpact = {
+  data: {
+    assessmentId: null,
+    status: "SUCCESS",
+    cacheHit: true,
+    assessedAt: "2026-10-09T03:00:00Z",
+    confidence: 1,
+    fallbackVersion: null,
+    events: [],
+    result: {
+      eventAssessments: [],
+      combinedImpact: {
+        overallLevel: "LOW",
+        conflicts: [],
+        strategySummary: "",
+      },
+    },
+  },
+};
+
+test("active plan menu offers completion without deletion", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop plan menu");
+  await page.clock.setFixedTime(new Date("2026-10-09T03:00:00Z"));
+  await openCoachFixture(page, undefined, { navigate: false });
+  await page.route("**/api/proxy/competition-impact/current*", (route) =>
+    route.fulfill({
+      json: { data: { result: { eventAssessments: [], combinedImpact: { conflicts: [] } } } },
+    }),
+  );
+  await page.route("**/api/proxy/plans/active", (route) =>
+    route.fulfill({
+      json: {
+        data: {
+          plan: {
+            id: planId,
+            title: "当前训练计划",
+            status: "ACTIVE",
+            periodWeeks: 6,
+            startDate: "2026-10-05",
+            endDate: "2026-11-15",
+            currentWeekIndex: 1,
+            currentDayIndex: 5,
+            capabilities: { delete: false },
+            workouts,
+          },
+        },
+      },
+    }),
+  );
+  await page.goto("/zh/plan", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "管理计划" }).click();
+  await expect(page.getByRole("menuitem", { name: "删除计划" })).toHaveCount(0);
+  await page.getByRole("menuitem", { name: "完成计划" }).click();
+  const dialog = page.getByRole("alertdialog", { name: "完成计划" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "取消" }).click();
+});
+
 async function openPlan(page: Page, status = "ACTIVE") {
   await page.clock.setFixedTime(new Date("2026-10-09T03:00:00Z"));
-  await openCoachFixture(page);
+  await openCoachFixture(page, undefined, { navigate: false });
   let mutations = 0;
   let lastMutation: unknown;
   const plan = {
@@ -92,27 +150,7 @@ async function openPlan(page: Page, status = "ACTIVE") {
       "",
     );
     if (path === "/competition-impact/current")
-      return route.fulfill({
-        json: {
-          data: {
-            assessmentId: null,
-            status: "SUCCESS",
-            cacheHit: true,
-            assessedAt: "2026-10-09T03:00:00Z",
-            confidence: 1,
-            fallbackVersion: null,
-            events: [],
-            result: {
-              eventAssessments: [],
-              combinedImpact: {
-                overallLevel: "LOW",
-                conflicts: [],
-                strategySummary: "",
-              },
-            },
-          },
-        },
-      });
+      return route.fulfill({ json: emptyCompetitionImpact });
     if (path === `/plans/${planId}`) {
       if (route.request().method() !== "GET") {
         mutations++;
@@ -181,6 +219,130 @@ async function openPlan(page: Page, status = "ACTIVE") {
   });
   return { mutations: () => mutations, lastMutation: () => lastMutation };
 }
+
+test("rolling plans use the active plan layout and calendar weeks", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-11-23T10:00:00Z"));
+  await openCoachFixture(page, undefined, { navigate: false, membershipPlan: "FREE" });
+  const plan = {
+    id: planId,
+    title: "持续跑步计划",
+    status: "ACTIVE",
+    planningMode: "ROLLING",
+    periodWeeks: null,
+    startDate: "2026-11-20",
+    endDate: null,
+    currentWeekIndex: 1,
+    currentDayIndex: 4,
+    generatedThrough: "2026-12-06",
+    monthDirections: [{
+      monthStart: "2026-11-01",
+      effectiveFrom: "2026-11-20",
+      strategy: {
+        objective: "稳步积累跑量",
+        loadRange: { unit: "NORMALIZED_LOAD", min: 90, max: 120 },
+        durationMinutesRange: { min: 185, max: 245 },
+        runningDistanceKmRange: { min: 24, max: 30 },
+        weekFocus: [],
+      },
+    }, {
+      monthStart: "2026-10-01",
+      effectiveFrom: "2026-10-01",
+      strategy: {
+        objective: "十月恢复跑步节奏",
+        loadRange: null,
+        durationMinutesRange: null,
+        weekFocus: [],
+      },
+    }],
+    generationCoverage: {
+      from: "2026-11-20",
+      through: "2026-12-06",
+      status: "GENERATED",
+      intervals: [
+        { weekStart: "2026-11-16", from: "2026-11-20", through: "2026-11-22" },
+        { weekStart: "2026-11-23", from: "2026-11-23", through: "2026-11-29" },
+        { weekStart: "2026-11-30", from: "2026-11-30", through: "2026-12-06" },
+      ],
+    },
+    workouts: [
+      { ...workouts[0], scheduledDate: "2026-11-20", name: "上周轻松跑" },
+      { ...workouts[2], dayOffset: 3, dayIndex: 4, scheduledDate: "2026-11-23", name: "今日长跑" },
+      { ...workouts[3], dayOffset: 11, dayIndex: 5, scheduledDate: "2026-12-01", name: "下月节奏跑" },
+    ],
+  };
+  await page.route("**/api/proxy/plans/active", (route) =>
+    route.fulfill({ json: { data: { plan } } }),
+  );
+  await page.route(`**/api/proxy/plans/${planId}`, (route) =>
+    route.fulfill({ json: { data: { plan } } }),
+  );
+  await page.route("**/api/access/features", (route) =>
+    route.fulfill({ json: { schemaVersion: 1, features: {} } }),
+  );
+  await page.route("**/api/proxy/competition-impact/current*", (route) =>
+    route.fulfill({ json: emptyCompetitionImpact }),
+  );
+  await page.route(`**/api/proxy/plans/${planId}/automation`, (route) =>
+    route.fulfill({
+      json: { data: { enabled: true, revision: 1, hasAuthorization: true, jobs: [] } },
+    }),
+  );
+  await page.route(`**/api/proxy/plans/${planId}/workouts/*`, (route) =>
+    route.fulfill({
+      json: { data: { workout: plan.workouts.find(({ id }) => route.request().url().endsWith(id)) } },
+    }),
+  );
+  await page.goto("/zh/plan");
+  const today = page.getByRole("heading", { name: "今日训练" });
+  await expect(today).toBeVisible();
+  await expect(page.getByRole("heading", { name: /月度方向|自动管理/ })).toHaveCount(0);
+
+  const desktop = (page.viewportSize()?.width ?? 0) >= 1024;
+  if (desktop) {
+    const topPlanLink = page.locator("header").getByRole("link", { name: "查看计划", exact: true });
+    await expect(topPlanLink).toHaveAttribute("href", `/zh/plans/${planId}`);
+    await expect(page.getByRole("link", { name: "查看计划", exact: true })).toHaveCount(1);
+    await expect(page.getByRole("link", { name: "全部计划", exact: true })).toHaveCount(0);
+    const progress = page.getByRole("group", { name: "周期进度" });
+    await expect(progress.getByText("当前 · 11/23 – 11/29")).toBeVisible();
+    await expect(progress.getByRole("button", { pressed: true })).toHaveText(/11\/23 – 11\/29/);
+    await progress.getByRole("button", { name: "查看第 3 周", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "下月节奏跑", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "今日长跑", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "下月节奏跑", exact: true }).click();
+    await expect(page.getByRole("dialog", { name: "查看训练 · 第 3 周 · 周二" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await topPlanLink.click();
+  } else {
+    await expect(page.getByRole("button", { name: "今日长跑", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "查看计划", exact: true }).click();
+    await expect(page.getByRole("dialog").getByText(/已生成至 2026-12-06/).first()).toBeVisible();
+  }
+
+  const monthlyDirection = page.getByText("当月方向", { selector: "summary" });
+  await expect(monthlyDirection).toBeVisible();
+  await expect(page.getByText("稳步积累跑量")).not.toBeVisible();
+  await expect(page.getByText("分享计划", { exact: true })).toHaveCount(0);
+  if (desktop) {
+    await expect(page.getByText("2026-11-20 – 2026-11-22", { exact: true })).toBeVisible();
+    await expect(page.getByText("11/16", { exact: true })).toHaveCount(0);
+  }
+  await monthlyDirection.click();
+  const monthlyTargets = page.locator("details").filter({ has: monthlyDirection });
+  await expect(monthlyTargets.getByText("稳步积累跑量")).toBeVisible();
+  await expect(monthlyTargets.getByText("计划跑量", { exact: true })).toBeVisible();
+  await expect(monthlyTargets.getByText(/24–30\s*公里/)).toBeVisible();
+  await expect(monthlyTargets.getByText(/185–245\s*分钟/)).toBeVisible();
+  await expect(monthlyTargets.getByText("计划负荷", { exact: true })).toBeVisible();
+  await expect(monthlyTargets.getByText(/实际完成|剩余课程预计|未生成部分预测/)).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "自动管理", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "关闭自动管理", exact: true })).toHaveCount(0);
+  await expect(page.getByText("十月恢复跑步节奏")).toHaveCount(0);
+  await page.getByRole("button", { name: "历史方向", exact: true }).click();
+  const history = page.getByRole("dialog", { name: "历史方向", exact: true });
+  await history.getByText("2026-10 月度方向", { selector: "summary" }).click();
+  await expect(history.getByText("十月恢复跑步节奏")).toBeVisible();
+});
 
 test("plan detail uses shared progress and confirmed workout actions", async ({
   page,

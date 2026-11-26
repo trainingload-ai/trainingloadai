@@ -1,71 +1,74 @@
 ---
-title: Normalized Power (NP)
-description: Normalized Power estimates the steady-power equivalent of a variable ride, helping calculate TSS, IF, and pacing variability.
-keywords: ["Normalized Power", "NP", "normalized power cycling", "TSS", "IF", "Training Stress Score", "Variability Index", "VI"]
+title: "Potência Normalizada (NP)"
+description: "A Potência Normalizada estima a potência constante equivalente de um treino variável, ajudando a calcular TSS, IF e a variabilidade do ritmo."
+keywords: ["Potência Normalizada", "NP", "potência normalizada ciclismo", "TSS", "IF", "Training Stress Score", "Índice de Variabilidade", "VI"]
 ---
 
-# Normalized Power (NP)
+# Potência Normalizada (NP)
 
-Normalized Power (NP) converts a variable power profile into a single equivalent steady intensity. Intuitively, it tries to answer:
+A **Potência Normalizada (NP)** (*Normalized Power*) converte um perfil de potência variável em uma única intensidade constante equivalente. De forma intuitiva, ela busca responder:
 
-- If I rode at a constant power with the same physiological cost, what constant power would that be?
+- Se eu tivesse pedalado em potência constante com o mesmo custo fisiológico, qual teria sido essa potência?
 
-Compared to average power, NP is more sensitive to high-intensity surges, making it useful for estimating training load (e.g., power-based TSS).
+Em comparação com a potência média, a NP é mais sensível a picos de alta intensidade, o que a torna muito útil para estimar carga de treino (por exemplo, TSS baseado em potência).
 
-## Why NP exists
+## Por que a NP existe
 
-Physiology shows that intensity and physiological cost (glycogen use, lactate accumulation, hormonal stress) are not linear; the cost rises disproportionately at higher intensities.
+A fisiologia mostra que a relação entre intensidade e custo fisiológico (consumo de glicogênio, acúmulo de lactato, estresse hormonal) não é linear; o custo sobe de maneira desproporcional em intensidades mais altas.
 
-### Linear vs. exponential
-- **Linear view (average power)**: riding 1 hour at 200 W has the same average as “30 min at 100 W + 30 min at 300 W” (both average to 200 W).
-- **Physiological view (NP)**: 300 W causes much more stress than 100 W “gives back”. The latter often feels closer to a steady ~260–270 W effort.
+### Linear vs. exponencial
 
-NP amplifies high-power segments via a **fourth-power weighting**, which is intended to better approximate metabolic cost than a simple average.
+- **Visão linear (potência média)**: pedalar 1 hora a 200 W tem a mesma média que "30 min a 100 W + 30 min a 300 W" (ambos têm média de 200 W).
+- **Visão fisiológica (NP)**: 300 W geram muito mais estresse do que 100 W conseguem "devolver". O segundo cenário costuma parecer mais próximo de um esforço constante de ~260–270 W.
 
-## How Trainingload.ai computes NP
+A NP amplifica os trechos de alta potência por meio de uma **ponderação à quarta potência**, projetada para aproximar o custo metabólico melhor do que uma média simples.
 
-Trainingload.ai follows the common NP definition: compute a 30-second rolling average, raise to the 4th power, average, then take the 4th root.
+## Como o Trainingload.ai calcula a NP
+
+O Trainingload.ai segue a definição padrão de NP: calcula uma média móvel de 30 segundos, eleva à 4ª potência, tira a média e, em seguida, extrai a raiz quarta.
 
 ```text
 P_smooth(t) = (1/30) * sum_{i=0..29} P(t-i)
 NP = 4th_root( (1/N) * sum_{j=1..N} (P_smooth(j))^4 )
 ```
 
-Where:
-- $P(t)$ is instantaneous power at time $t$
-- $P_{smooth}(t)$ is the 30-second rolling average at time $t$
-- $N$ is the number of samples
+Onde:
+- $P(t)$ é a potência instantânea no instante $t$
+- $P_{smooth}(t)$ é a média móvel de 30 segundos no instante $t$
+- $N$ é o número de amostras
 
-## Typical Use Cases
+## Casos de uso típicos
 
-### 1. Race analysis
-- **Criterium**: frequent accelerations often make NP much higher than average power. NP better reflects how hard the race was.
-- **Time trial / triathlon**: NP should be close to average power due to steadier pacing. If NP is much higher, pacing was likely too variable.
+### 1. Análise de prova
 
-### 2. Training load (TSS)
-NP is a key input to [TSS (Training Stress Score)](/docs/metrics/training-load/training-stress-score).
+- **Criterium / circuito**: acelerações frequentes costumam deixar a NP muito acima da potência média. A NP reflete melhor o quão dura foi a prova.
+- **Contrarrelógio / triatlo**: a NP deve ficar próxima da potência média por causa do ritmo mais constante. Se a NP estiver muito mais alta, provavelmente houve variação excessiva no ritmo.
+
+### 2. Carga de treino (TSS)
+
+A NP é uma entrada central para o [TSS (Training Stress Score)](/pt-BR/docs/metrics/training-load/training-stress-score).
 
 ```text
 IF = NP / FTP
 TSS ∝ Duration_sec * NP * IF
 ```
 
-Using NP helps TSS capture the load of variable workouts (intervals) more realistically than average power alone.
+Usar a NP permite que o TSS capture a carga de treinos variáveis (como intervalos) de forma mais realista do que a potência média isolada.
 
-> **Trainingload.ai advice**:
+> **Recomendação do Trainingload.ai**:
 >
-> 1. **Less meaningful for short durations**: below ~20 minutes, NP can be noisy because physiology may not reach a steady state. For sprint sessions, use max power, average power, and interval-level metrics instead.
-> 2. **Don’t “game” NP**: on recovery rides, don’t add sprints just to inflate NP. The goal is low intensity; NP should match the purpose of the session.
-> 3. **Check VI**: view it alongside [VI (Variability Index)](./variability-index): `VI = NP / Avg Power`. Higher VI means a more variable effort.
+> 1. **Menos confiável em durações curtas**: abaixo de ~20 minutos, a NP pode ficar ruidosa porque a fisiologia pode não atingir estado estável. Para sessões de sprint, use potência máxima, potência média e métricas por intervalo.
+> 2. **Não "force" a NP**: em pedais regenerativos, não faça sprints apenas para inflar a NP. O objetivo é baixa intensidade; a NP deve refletir o propósito da sessão.
+> 3. **Confira o VI**: analise-a junto com o [VI (Índice de Variabilidade)](./variability-index): `VI = NP / Potência Média`. Um VI mais alto indica um esforço mais variável.
 
-## Limitations
+## Limitações
 
-- Depends on reliable power data: dropouts and device errors affect results.
-- Sensitive to windowing and sampling: different sampling rates/interpolation can slightly change NP.
-- Captures “cost intensity”, not fatigue directly: NP doesn’t directly equal recovery needs or muscle damage.
+- Depende de dados confiáveis de potência: quedas de sinal (*dropouts*) e erros de sensor distorcem o resultado.
+- Sensível a janelamento e amostragem: taxas de amostragem ou interpolações diferentes podem alterar levemente a NP.
+- Captura "intensidade de custo", não fadiga diretamente: a NP não equivale diretamente à necessidade de recuperação ou dano muscular.
 
-## Related docs
+## Documentos relacionados
 
-- [Variability Index](/docs/metrics/power/variability-index)
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score)
-- [Intensity Factor](/docs/metrics/training-load/intensity-factor)
+- [Índice de Variabilidade (VI)](/pt-BR/docs/metrics/power/variability-index)
+- [Training Stress Score (TSS)](/pt-BR/docs/metrics/training-load/training-stress-score)
+- [Fator de Intensidade (IF)](/pt-BR/docs/metrics/training-load/intensity-factor)

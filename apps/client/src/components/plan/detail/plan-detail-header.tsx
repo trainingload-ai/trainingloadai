@@ -1,12 +1,8 @@
-import { RollingPlanLoadSummary } from "@/components/plan/rolling-plan-load-summary";
 import { isRollingPlan } from "@/lib/rolling-plan";
 import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
-import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
-import { RollingPlanAutomation } from "@/components/plan/rolling-plan-automation";
 
 import dayjs from "dayjs";
 import {
-  ArrowLeft,
   CalendarClock,
   CalendarDays,
   CheckCircle2,
@@ -14,7 +10,6 @@ import {
   TrendingUp,
   type LucideIcon,
 } from "lucide-react";
-import { Link } from "@/i18n/navigation";
 import type { TrainingPlanDetail } from "@/api/plans";
 import { PlanDescriptionRich } from "@/components/plan/plan-description-rich";
 import {
@@ -48,11 +43,9 @@ export function getPlanGoalLabel(t: TranslateFn, goal: string) {
 export function PlanDetailHeader({
   plan,
   t,
-  backHref,
 }: {
   plan: TrainingPlanDetail;
   t: TranslateFn;
-  backHref: "/plans" | "/plan?openLibrary=1";
 }) {
   const StatusIcon = getPlanStatusIcon(plan.status);
   const goalTrim = plan.goal?.trim();
@@ -62,43 +55,27 @@ export function PlanDetailHeader({
 
   return (
     <header className="shrink-0">
-      <div className="mb-2">
-        <Link
-          href={backHref}
-          className="inline-flex items-center gap-1 text-mobile-caption pc:text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          {t("header.backToPlans")}
-        </Link>
-      </div>
-      <section className="relative rounded-md bg-neutral-100 p-2.5 dark:bg-muted/45">
-        <span
-          className={`absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-md px-2 py-1 text-mobile-caption pc:text-[11px] ${getPlanStatusClass(
-            plan.status,
-          )}`}
-        >
-          <StatusIcon className="h-3.5 w-3.5" />
-          {getPlanStatusLabel(t, plan.status)}
-        </span>
-        <div className="min-w-0 pr-20">
-          <div className="flex items-center gap-2 text-mobile-caption pc:text-xs text-muted-foreground">
-            <CalendarDays className="h-3.5 w-3.5" />
-            <span>
-              {plan.startDate
-                ? t("header.startOn", {
-                    date: dayjs(plan.startDate).format("YYYY-MM-DD"),
-                  })
-                : t("header.notActivated")}
-            </span>
+      <section className="space-y-2 rounded-surface bg-neutral-100 p-3 dark:bg-muted/45">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
+            <h1 className="break-words text-base font-semibold text-foreground">
+              {plan.title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays className="size-3.5" aria-hidden="true" />
+                {plan.startDate
+                  ? t("header.startOn", { date: dayjs(plan.startDate).format("YYYY-MM-DD") })
+                  : t("header.notActivated")}
+              </span>
+              {isRollingPlan(plan) ? <RollingPlanCoverage plan={plan} /> : null}
+            </div>
           </div>
-          <h1 className="mt-1 truncate text-base font-semibold tracking-normal text-foreground">
-            {plan.title}
-          </h1>
+          <span className={`inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs ${getPlanStatusClass(plan.status)}`}>
+            <StatusIcon className="size-3.5" aria-hidden="true" />
+            {getPlanStatusLabel(t, plan.status)}
+          </span>
         </div>
-        {isRollingPlan(plan) ? <div className="mt-2"><RollingPlanCoverage plan={plan} /></div> : null}
-        {isRollingPlan(plan) ? <div className="mt-2"><RollingPlanMonthDirection plan={plan} /></div> : null}
-        {isRollingPlan(plan) ? <div className="mt-3"><RollingPlanAutomation plan={plan} /></div> : null}
-        <RollingPlanLoadSummary plan={plan} />
         {hasGoalOrDescription ? (
           <div className="mt-2 space-y-3">
             {goalTrim ? (
@@ -112,14 +89,14 @@ export function PlanDetailHeader({
               </div>
             ) : null}
             {descTrim ? (
-              <div>
-                <div className="text-mobile-unit pc:text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <details>
+                <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
                   {t("notes.descriptionLabel")}
-                </div>
-                <div className="mt-1 text-mobile-caption pc:text-xs">
+                </summary>
+                <div className="mt-2 max-w-prose text-sm">
                   <PlanDescriptionRich markdown={descTrim} variant="detail" />
                 </div>
-              </div>
+              </details>
             ) : null}
           </div>
         ) : (

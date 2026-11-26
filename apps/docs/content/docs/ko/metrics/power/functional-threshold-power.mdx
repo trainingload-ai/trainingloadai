@@ -1,77 +1,77 @@
 ---
-title: Functional Threshold Power (FTP)
-description: Functional Threshold Power (FTP) is a practical threshold benchmark used to set power zones, estimate training load, and guide cycling workouts.
-keywords: ["FTP", "Functional Threshold Power", "FTP test", "FTP calculator", "Lactate Threshold", "20-minute test", "CP60", "Power benchmark"]
+title: 기능적 역치 파워 (FTP)
+description: 기능적 역치 파워(FTP)는 파워 존 설정, 훈련 부하 추정, 사이클링 워크아웃 가이드에 쓰이는 실용적인 역치 기준점입니다.
+keywords: ["FTP", "기능적 역치 파워", "Functional Threshold Power", "FTP 테스트", "FTP 계산기", "젖산 역치", "20분 테스트", "CP60", "파워 기준"]
 ---
 
-# Functional Threshold Power (FTP)
+# 기능적 역치 파워 (FTP)
 
-In endurance sports, **functional threshold** is a practical benchmark near the boundary between steady and increasingly fatiguing work. It is widely used to set training zones, estimate training load, and track whether threshold-level performance is improving.
+지구력 스포츠에서 **기능적 역치(Functional Threshold)**는 안정적으로 지속 가능한 강도와 피로가 급격히 누적되는 강도의 경계 부근에 위치한 실용적 기준점입니다. 훈련 존 설정, 훈련 부하 추정, 역치 수준 경기력 향상 추적에 널리 쓰입니다.
 
-Two common terms are **FTP** for cycling and **rFTP** for running.
+대표적으로 사이클링에서는 **FTP**, 러닝에서는 **rFTP**라는 용어를 사용합니다.
 
-## Functional Threshold Power (FTP)
+## 기능적 역치 파워 (FTP)
 
-**FTP** usually refers to cycling threshold power. It is commonly described as the **highest average power you can sustain for roughly 60 minutes**, though in practice it is an estimate that depends on testing method, pacing, fatigue, and recent training.
+**FTP**는 주로 사이클링의 역치 파워를 뜻합니다. 흔히 **약 60분 동안 유지할 수 있는 최고 평균 파워**로 설명하지만, 실제 현장에서는 테스트 방식, 페이싱, 피로 상태, 최근 훈련에 따라 달라지는 실용적 추정치입니다.
 
-### Why it matters
--   **Physiological anchor**: FTP roughly aligns with the threshold range around [Lactate Threshold (LT)](/docs/metrics/physiology/lactate-threshold). Below it, many athletes can work for much longer; above it, fatigue accumulates faster.
--   **Relative-intensity reference**: whether your FTP is 400 W or 150 W, percentages of FTP make workouts more comparable within an athlete’s own fitness context. Most power-based training plans use FTP percentages (for example, Zone 2 ≈ 55–75% FTP).
+### 중요한 이유
+- **생리학적 기준점**: FTP는 대체로 [젖산 역치(LT)](/ko/docs/metrics/physiology/lactate-threshold) 부근의 강도 영역과 맞물립니다. 이 아래에서는 훨씬 오래 버틸 수 있지만, 이 위에서는 피로가 빠르게 쌓입니다.
+- **상대 강도 기준**: FTP가 400 W이든 150 W이든 FTP 대비 백분율을 쓰면 선수 개인의 체력 맥락 안에서 훈련 강도를 일관되게 비교할 수 있습니다. 대부분의 파워 기반 훈련 플랜은 FTP 백분율을 기준으로 합니다(예: 존 2 ≈ FTP의 55–75%).
 
-### How to estimate FTP
-1.  **20-minute test (classic)**: ride all-out for 20 minutes, then take 95% of the average power.
-2.  **Ramp test**: increase load each minute to exhaustion, then use ~75% of the final minute’s power.
-3.  **CP model estimate**: Trainingload.ai can estimate from your Power Duration Curve (PDC), often using `FTP ≈ 0.95 * CP`.
+### FTP 추정 방법
+1. **20분 테스트 (표준 방식)**: 20분간 전력 주행한 뒤 평균 파워의 95%를 취합니다.
+2. **램프 테스트 (Ramp test)**: 매 분 부하를 올려 탈진 시점까지 진행한 뒤 마지막 1분 평균 파워의 약 75%를 취합니다.
+3. **CP 모델 추정**: Trainingload.ai는 파워-지속시간 곡선(PDC)을 바탕으로 주로 `FTP ≈ 0.95 * CP` 공식으로 추정할 수 있습니다.
 
-If you want a file-based estimate, use the [estimate FTP training load from an activity file](/ftp-calculator). If you already have maximal efforts across durations, use the [fit Critical Power and W' for training load planning](/critical-power-calculator) to fit CP and W'.
+활동 파일로 바로 추정하고 싶다면 [활동 파일로 FTP 추정하기](/ko/ftp-calculator)를 이용해 보세요. 여러 지속시간의 최대 기록이 이미 있다면 [임계 파워(CP)와 W' 피팅 계산기](/ko/critical-power-calculator)로 CP와 W'를 함께 계산할 수 있습니다.
 
 ---
 
-## Running Functional Threshold Power (rFTP)
+## 러닝 기능적 역치 파워 (rFTP)
 
-**Running Functional Threshold Power (rFTP)** became popular with the rise of running power meters (Stryd, Garmin, COROS, etc.).
+**러닝 기능적 역치 파워(Running Functional Threshold Power, rFTP)**는 러닝 파워미터(Stryd, Garmin, COROS 등)가 보급되면서 널리 쓰이게 되었습니다.
 
-It is commonly defined as the **highest average running power you can sustain for roughly 60 minutes**.
+보통 **약 60분 동안 유지할 수 있는 최고 평균 러닝 파워**로 정의합니다.
 
-### rFTP vs. FTP
-Even though the definitions are similar, the numbers are usually **not interchangeable**:
--   **Different magnitude**: many athletes have higher rFTP than cycling FTP. Running includes elastic energy storage/release (spring-like behavior), recruits more muscle groups, and typically yields higher heart rates.
--   **Test separately**: don’t use cycling FTP to guide running training, and vice versa.
+### rFTP vs FTP
+정의는 비슷하지만 두 수치는 **서로 바꿔 쓸 수 없습니다**.
+- **수치 크기의 차이**: 많은 선수가 사이클링 FTP보다 더 높은 rFTP를 기록합니다. 러닝은 탄성 에너지의 저장과 방출(스프링 작용)이 포함되고 더 많은 근육군을 동원하며 심박수도 더 높게 나오는 경향이 있습니다.
+- **종목별 별도 측정**: 사이클링 FTP를 러닝 훈련에 쓰거나 그 반대로 적용해서는 안 됩니다.
 
-### rFTP vs. threshold pace
--   **rFTP (power)**: measured in watts. Less affected by hills and wind (depending on the device/model), and often closer to physiological output.
--   **Threshold pace**: measured in min/km. Strongly affected by terrain (pace slows uphill even when intensity is high).
-    -   *Note: on flat, calm terrain, the pace corresponding to rFTP approximates threshold pace. On rolling trails, rFTP can be more stable.*
+### rFTP vs 역치 페이스
+- **rFTP (파워)**: 와트(W) 단위입니다. 기기·모델에 따라 차이가 있지만 언덕과 바람의 영향을 덜 받으며 실제 생리적 출력에 더 가깝습니다.
+- **역치 페이스**: 분/km 단위입니다. 지형 영향을 크게 받습니다(오르막에서는 강도가 높아도 페이스가 느려짐).
+  - *참고: 바람 없는 평지에서는 rFTP에 해당하는 페이스가 역치 페이스와 거의 일치합니다. 기복이 있는 트레일에서는 rFTP가 더 안정적인 기준이 될 수 있습니다.*
 
-### How to estimate rFTP
-Common running power tests (e.g. Stryd protocols):
--   **3/9 test**: 3 minutes all-out (then 30 minutes recovery) + 9 minutes all-out.
--   **CP model**: fit Critical Power from maximal efforts of different durations (e.g. 30s, 2min, 10min); CP is often used directly as rFTP.
+### rFTP 추정 방법
+대표적인 러닝 파워 테스트(예: Stryd 프로토콜)는 다음과 같습니다.
+- **3/9 테스트**: 3분 전력 질주(이후 30분 회복) + 9분 전력 질주.
+- **CP 모델**: 서로 다른 지속시간(예: 30초, 2분, 10분)의 최대 노력 기록으로 임계 파워(CP)를 피팅하며, 러닝에서는 CP를 rFTP로 직접 사용하는 경우도 많습니다.
 
-## How Trainingload.ai uses FTP
+## Trainingload.ai의 FTP 활용 방식
 
-Trainingload.ai uses FTP as a threshold reference for power zones, Intensity Factor, and Training Stress Score. If FTP is too low, hard workouts can look more stressful than they really were; if FTP is too high, training load and zone targets can be understated.
+Trainingload.ai는 파워 존, 강도 계수(IF), 훈련 스트레스 점수(TSS)의 역치 기준점으로 FTP를 사용합니다. FTP가 너무 낮게 설정되어 있으면 고강도 훈련의 부하가 실제보다 과장되고, 너무 높게 설정되어 있으면 훈련 부하와 존 목표가 과소평가됩니다.
 
-For plan review, FTP is most useful when it answers:
+훈련 플랜 리뷰에서 FTP는 다음 질문에 답할 때 가장 유용합니다.
 
--   Did the completed workout match the intended zone?
--   Are TSS and IF being calculated from a current threshold?
--   Has threshold fitness changed enough to update future workouts?
+- 완료한 훈련이 의도한 파워 존에 맞게 수행되었는가?
+- TSS와 IF가 현재 체력에 맞는 최신 역치로 계산되고 있는가?
+- 향후 훈련 목표를 조정할 만큼 역치 체력이 유의미하게 변했는가?
 
-## Summary
+## 요약
 
-| Metric | Full Name | Sport | Unit | Meaning |
+| 지표 | 정식 명칭 | 종목 | 단위 | 의미 |
 | :--- | :--- | :--- | :--- | :--- |
-| **FTP** | Functional Threshold Power | Cycling | Watts | Highest ~1-hour cycling power |
-| **rFTP** | Running Functional Threshold Power | Running | Watts | Highest ~1-hour running power |
+| **FTP** | Functional Threshold Power | 사이클링 | Watts | 약 1시간 유지 가능한 최고 사이클링 파워 |
+| **rFTP** | Running Functional Threshold Power | 러닝 | Watts | 약 1시간 유지 가능한 최고 러닝 파워 |
 {/* | **FTPa** | Functional Threshold Pace | Running | min/km | Highest ~1-hour running pace (typically flat) | */}
 
-> **Trainingload.ai advice**:
-> Update your threshold settings regularly (every 4–8 weeks) so TSS calculations and training zones stay useful.
+> **Trainingload.ai 권장 사항**:
+> TSS 계산과 훈련 존이 계속 정확하게 유지되도록 4–8주마다 역치 설정을 주기적으로 업데이트하시기 바랍니다.
 
-## Related tools and docs
+## 관련 도구 및 문서
 
--   [Estimate FTP training load from an activity file](/ftp-calculator)
--   [Calculate Critical Power and W' for training load planning](/critical-power-calculator)
--   [Power Zones](/docs/metrics/power/zones)
--   [Critical Power (CP)](/docs/metrics/power/critical-power)
+- [활동 파일로 FTP 훈련 부하 추정하기](/ko/ftp-calculator)
+- [훈련 부하 계획을 위한 임계 파워(CP)와 W' 계산하기](/ko/critical-power-calculator)
+- [파워 존](/ko/docs/metrics/power/zones)
+- [임계 파워 (CP)](/ko/docs/metrics/power/critical-power)

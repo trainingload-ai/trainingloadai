@@ -14,8 +14,10 @@ import { FitnessAssessmentApplyService } from './fitness-assessment-apply.servic
 import { FitnessAssessmentFollowupService } from './fitness-assessment-followup.service';
 import { NotificationDomainModule } from '@/notification/notification-domain.module';
 import { HealthDataModule } from '@/health-data/health-data.module';
+import { PowerModule } from '@/power/power.module';
 import { Module } from '@nestjs/common';
 import { AiService } from './ai.service';
+import { TrainingCoachAgent } from './agents/training-coach-agent.service';
 import { AiController } from './ai.controller';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { ActivityModule } from '../activity/activity.module';
@@ -71,6 +73,7 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
 @Module({
   imports: [
     HealthDataModule,
+    PowerModule,
     AthleteStateUpdatesModule,
     PrismaModule,
     FitnessCalculationModule,
@@ -106,6 +109,7 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
     CoachRunStore,
     TrainingDataCoverageQueryService,
     AiService,
+    TrainingCoachAgent,
     FitnessAssessmentApplyService,
     FitnessAssessmentFollowupService,
     CoachToolsService,
@@ -146,6 +150,7 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
   exports: [
     FitnessAssessmentFollowupService,
     AiService,
+    TrainingCoachAgent,
     AiUsageModule,
     CoachBranchingService,
     CuratedCoachConversationWriterService,

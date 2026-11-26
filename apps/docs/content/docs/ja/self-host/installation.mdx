@@ -1,0 +1,158 @@
+---
+title: セルフホスト クイックスタート
+description: 署名済みの Trainingload.ai リリースを検証し、ローカルインスタンスをインストールして Owner アカウントを作成し、最初の検証済みバックアップを作成する手順です。
+seoTitle: "Trainingload.ai セルフホスト版の署名検証とインストール手順"
+seoDescription: "Linux・macOS・Windows 向けに、公式署名済みリリースの検証、安全なインストール、Owner アカウント作成、初回バックアップまでのクイックスタート手順を解説します。"
+keywords:
+  [
+    "Trainingload.ai インストール",
+    "セルフホスト クイックスタート",
+    "署名済みリリースバンドル",
+    "Docker Compose セルフホスト",
+  ]
+---
+
+# セルフホスト クイックスタート
+
+## 到達目標
+
+ローカルで動作する Trainingload.ai インスタンス、作成済みの Owner アカウント1つ、ヘルスチェック成功状態、そして検証済みの初回バックアップがそろった状態を完了とします。
+
+## 始める前に
+
+以下のサポート対象ホストのいずれかを用意してください。
+
+- Ubuntu 24.04（`amd64` または `arm64`）
+- Apple Silicon 搭載 macOS（Docker Desktop 利用）
+- Windows 11（`amd64`、WSL2 および Linux コンテナ有効の Docker Desktop 利用）
+
+さらにホスト側で以下が必要です。
+
+- Node.js 22 以降
+- Docker Engine および Docker Compose v2
+- `verify-blob --bundle` に対応した Cosign
+- Core Local 向けに 2 CPU 以上、メモリ 2 GiB 以上、ディスク空き容量 5 GiB 以上
+
+公式の [GitHub Releases](https://github.com/trainingload-ai/trainingloadai/releases) ページから、厳密なバージョン指定のリリースアーカイブ、チェックサムファイル、チェックサム署名バンドルの3点をダウンロードしてください。本番運用にはソースコードのチェックアウトやバージョン未指定のアーカイブを使わないでください。
+
+デフォルトのデータディレクトリは展開したリリース内の `./data` です。専用ディスクや別パスを使いたい場合は、インストーラーを実行する前に[ローカルのデータ保存先を選ぶ](/ja/docs/self-host/configuration#choose-the-local-data-path)を確認してください。
+
+## Linux・macOS・WSL2 へのインストール
+
+### 1. ダウンロードしたアーカイブを検証する
+
+ダウンロードした3つのファイルがあるディレクトリで、以下のコマンドを実行します。
+
+```bash
+version='<exact-version>'
+archive="trainingload-selfhost-$version.tar.gz"
+identity="https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$version"
+
+cosign verify-blob \
+  --bundle "$archive.sha256.bundle.json" \
+  --certificate-identity "$identity" \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  "$archive.sha256"
+```
+
+続いて、お使いのホストに応じたコマンドでアーカイブのチェックサムを検証します。
+
+```bash
+# Linux または WSL2
+sha256sum -c "$archive.sha256"
+
+# macOS
+shasum -a 256 -c "$archive.sha256"
+```
+
+署名検証とチェックサム検証の両方が成功した場合にのみ次へ進んでください。
+
+### 2. 展開してインストール計画を確認する
+
+```bash
+tar -xzf "$archive"
+cd "trainingload-selfhost-$version"
+./install.sh --dry-run --json
+```
+
+ドライランでは、内部バンドル署名、ホスト要件、厳密なリリースバージョン、設定、データパス、ライフサイクル計画を検証します。JSON 出力に `"ok": true` が含まれていることを確認してから次へ進んでください。
+
+### 3. インスタンスをインストールする
+
+```bash
+./install.sh --json
+```
+
+インストーラーは保護されたローカルシークレットを生成し、指定されたデータディレクトリを準備し、ダイジェスト固定のイメージを起動してデータベースマイグレーションを実行し、必須サービスの起動完了まで待機します。
+
+## Windows 11 へのインストール
+
+ダウンロードしたファイルがあるディレクトリで PowerShell を開き、以下を実行します。
+
+```powershell
+$Version = '<exact-version>'
+$Archive = "trainingload-selfhost-$Version.tar.gz"
+$Identity = "https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$Version"
+
+cosign verify-blob `
+  --bundle "$Archive.sha256.bundle.json" `
+  --certificate-identity $Identity `
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' `
+  "$Archive.sha256"
+
+$Expected = ((Get-Content "$Archive.sha256" -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+$Actual = (Get-FileHash $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($Actual -ne $Expected) { throw 'Release archive checksum mismatch' }
+
+tar.exe -xzf $Archive
+Set-Location "trainingload-selfhost-$Version"
+.\install.ps1 --dry-run --json
+.\install.ps1 --json
+```
+
+PowerShell でも、ドライラン結果に `"ok": true` が返ったことを確認してから本実行してください。
+
+## ローカルアカウントを作成する
+
+デフォルトのインストールでは `127.0.0.1` のみで待ち受けます。サービスの準備ができたら、同じパソコンで `http://localhost:43210` を開きます。初回画面で入力するのはユーザー名だけで、メールアドレスやパスワードは不要です。送信すると唯一の Owner が作成され、ローカルセッションが確立されてそのままオンボーディングへ進みます。後からセッションが期限切れになった場合も、アプリを開けば同じ Owner のセッションが復元されます。
+
+パスワードレスアクセスが有効になるのは、サイトオリジン・Client のバインド先・信頼済みクライアントアドレスがすべてループバックであり、かつ同一オリジンのブラウザからのリクエストである場合に限られます。データベースに空のパスワードが保存されることはありません。
+
+別のパソコンからアクセスしたい場合は、インスタンスはループバックにバインドしたままにし、`localhost:43210` への SSH ポートフォワードを使用してください。公開版アプリケーションが提供するのはユーザー名設定とローカルセッション復元のみであり、クラウド版のメール・パスワード・サインアップ・OAuth 画面は含まれません。パスワードレスのインスタンスをインターネットへ直接公開しないでください。
+
+## インストール後の構成
+
+デフォルトのサイトは `http://localhost:43210` で開きます。PostgreSQL データ、アップロードファイル、キャッシュ、バックアップ、操作履歴はすべて指定されたデータルート配下に保存されます。公開されるサービスは Client のみで、ドキュメント（Docs）は別途デプロイされます。初回利用時に AI キーやトレーニングプラットフォームのキーは不要です。唯一の Owner が後から BYOK AI、Intervals.icu 個人 API キー、Garmin Personal API を設定できます。
+
+## 動作確認と初回バックアップ
+
+読み取り専用チェックを実行したあと、最初の検証済みバックアップを作成します。
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host backup --output first-verified-backup --dry-run --json
+./self-host backup --output first-verified-backup --json
+```
+
+以下のすべてを満たせば導入完了です。
+
+- `status` と `doctor` が `"ok": true` を返す。
+- 設定したサイトアドレスからインスタンスへアクセスできる。
+- バックアップに成功状態の `backup-result.json` が含まれ、検証ステップを通過している。
+
+検証済みのバックアップは、障害ドメインが異なる暗号化ストレージへ移動して保管してください。同じディスク上だけに残したバックアップでは十分な復旧対策になりません。
+
+## トラブルシューティング
+
+- **インストーラーがホストを拒否する：** プラットフォームチェックを回避せず、サポート対象のホスト構成を使用してください。
+- **署名またはチェックサム検証に失敗する：** 作業を中断し、同じ厳密バージョンのリリースファイルを一式ダウンロードし直してください。
+- **Docker が利用できない：** Docker が起動しており、Compose v2 と Linux コンテナバックエンドが有効になっているか確認してください。
+- **ポートがすでに使用されている：** インスタンス起動前に、サポートされた別のバインド設定・ポート番号へ変更してください。
+- **起動完了（Readiness）チェックに失敗する：** `./self-host doctor --json` を実行してください。ライフサイクルコマンドの代わりに手書きの `docker compose` コマンドを実行しないでください。
+
+固定エラーコードと安全な復旧手順は、[セルフホストのトラブルシューティング](/ja/docs/self-host/troubleshooting)で確認してください。
+
+## 次のステップ
+
+続いて[設定](/ja/docs/self-host/configuration)に進み、ネットワーク公開範囲の調整や任意の BYOK AI プロバイダー設定を行ってください。大切なデータを取り込む前に、[インスタンスの運用管理](/ja/docs/self-host/operations)にも目を通しておくことをおすすめします。

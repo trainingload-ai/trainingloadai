@@ -74,6 +74,7 @@ export default function FitnessMetricPage() {
         <Button
           variant="ghost"
           size={"xs"}
+          className="tablet:hidden"
           onClick={() => router.back()}
           aria-label={t("backButton")}
         >

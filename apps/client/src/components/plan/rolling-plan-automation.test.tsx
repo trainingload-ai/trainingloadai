@@ -72,13 +72,14 @@ afterEach(() => {
   network.apiFetch.mockReset();
 });
 
-describe("continuous plan automatic management", () => {
+describe("continuous plan scheduling status", () => {
   it("reads the real job state without requesting another weekly confirmation or writing on mount", async () => {
     network.apiFetch.mockResolvedValue(initial());
-    show();
-    expect(await screen.findByText("等待生成")).toBeVisible();
-    expect(screen.getByText("2026-11-23")).toBeVisible();
-    expect(screen.getByRole("button", { name: "关闭自动管理" })).toBeEnabled();
+    const { client, container } = show();
+    await waitFor(() =>
+      expect(client.getQueryData(queryKeys.plans.automation(plan.id))).toEqual(initial()),
+    );
+    expect(container).toBeEmptyDOMElement();
     expect(network.apiFetch).toHaveBeenCalledWith(
       "/plans/continuous-plan/automation",
       expect.objectContaining({ method: "GET" }),
@@ -90,8 +91,8 @@ describe("continuous plan automatic management", () => {
     ).toBe(true);
   });
 
-  it("waits for authoritative state and can restore automation after disabling it", async () => {
-    let snapshot = initial();
+  it("restores scheduling only on request for a legacy plan with scheduling disabled", async () => {
+    let snapshot = { ...initial(), enabled: false };
     let finish: () => void = () => undefined;
     const pending = new Promise<void>((resolve) => {
       finish = resolve;
@@ -111,42 +112,39 @@ describe("continuous plan automatic management", () => {
       return snapshot;
     });
     show();
-    const disable = await screen.findByRole("button", { name: "关闭自动管理" });
+    const resume = await screen.findByRole("button", { name: "恢复排课" });
     act(() => {
-      disable.click();
-      disable.click();
+      resume.click();
+      resume.click();
     });
     await waitFor(() => expect(writes).toBe(1));
-    expect(screen.getByText("自动管理已开启")).toBeVisible();
-    expect(disable).toBeDisabled();
+    expect(screen.getByText("后续排课已关闭")).toBeVisible();
+    expect(resume).toBeDisabled();
     await act(async () => {
       finish();
       await pending;
     });
-    const enable = await screen.findByRole("button", { name: "恢复自动管理" });
-    expect(screen.getByText("自动管理已关闭")).toBeVisible();
-    fireEvent.click(enable);
-    await screen.findByRole("button", { name: "关闭自动管理" });
-    expect(writes).toBe(2);
-    expect(snapshot.hasAuthorization).toBe(true);
+    await waitFor(() => expect(screen.queryByRole("button")).not.toBeInTheDocument());
+    expect(writes).toBe(1);
+    expect(snapshot.enabled).toBe(true);
   });
 
   it("keeps the server state and offers retry when an update cannot be confirmed", async () => {
     network.apiFetch.mockImplementation(async (_path, options) => {
       if (options.method === "PUT") throw new Error("Uncertain network result");
-      return initial();
+      return { ...initial(), enabled: false };
     });
     show();
     fireEvent.click(
-      await screen.findByRole("button", { name: "关闭自动管理" }),
+      await screen.findByRole("button", { name: "恢复排课" }),
     );
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "未能确认操作结果",
     );
-    expect(screen.getByText("自动管理已开启")).toBeVisible();
+    expect(screen.getByText("后续排课已关闭")).toBeVisible();
     await waitFor(() =>
       expect(
-        screen.getByRole("button", { name: "关闭自动管理" }),
+        screen.getByRole("button", { name: "恢复排课" }),
       ).toBeEnabled(),
     );
   });
@@ -203,7 +201,9 @@ describe("continuous plan automatic management", () => {
       );
     }
     const { client } = show({}, <CalendarFact />);
-    await screen.findByText("正在规划");
+    await waitFor(() =>
+      expect(client.getQueryData(queryKeys.plans.automation(plan.id))).toEqual(snapshot),
+    );
     expect(screen.getByLabelText("Calendar course date")).toHaveTextContent(
       "2026-11-25",
     );
@@ -234,17 +234,6 @@ describe("continuous plan automatic management", () => {
     expect(reads()).toBe(1);
   });
 
-  it("keeps paused training distinct from enabled automatic management", async () => {
-    network.apiFetch.mockResolvedValue(initial());
-    show({ status: "PAUSED" });
-    expect(
-      await screen.findByRole("button", { name: "关闭自动管理" }),
-    ).toBeEnabled();
-    expect(
-      screen.getByText("训练计划已暂停；恢复训练后才会自动安排新课表。"),
-    ).toBeVisible();
-  });
-
   it("reports unavailable AI access even before a job can be queued", async () => {
     network.apiFetch.mockResolvedValue({
       ...initial(),
@@ -257,29 +246,17 @@ describe("continuous plan automatic management", () => {
         "请检查 AI 教练功能和数据授权，自动安排暂时无法继续。",
       ),
     ).toBeVisible();
-    expect(screen.getByText("自动管理已开启")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "恢复排课" })).not.toBeInTheDocument();
     expect(
       screen.queryByText("后续课表会按设置自动安排，无需逐次确认。"),
     ).not.toBeInTheDocument();
   });
 
-  it("does not promise automatic scheduling after disabling an idle plan", async () => {
-    let snapshot = { ...initial(), jobs: [] };
-    network.apiFetch.mockImplementation(async (_path, options) => {
-      if (options.method === "PUT") {
-        snapshot = { ...snapshot, enabled: false, revision: 2 };
-        return { enabled: false, revision: 2 };
-      }
-      return snapshot;
-    });
+  it("does not offer to restore a plan without initial authorization", async () => {
+    network.apiFetch.mockResolvedValue({ ...initial(), enabled: false, hasAuthorization: false });
     show();
-    fireEvent.click(
-      await screen.findByRole("button", { name: "关闭自动管理" }),
-    );
-    await screen.findByText("自动管理已关闭");
-    expect(
-      screen.queryByText("后续课表会按设置自动安排，无需逐次确认。"),
-    ).not.toBeInTheDocument();
+    expect(await screen.findByText("请先与教练确认持续计划的自动管理设置。")).toBeVisible();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("can reload an unavailable state without guessing whether automation is enabled", async () => {
@@ -288,15 +265,21 @@ describe("continuous plan automatic management", () => {
       .mockResolvedValue(initial());
     show();
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "暂时无法读取自动管理状态",
+      "暂时无法读取排课状态",
     );
-    expect(screen.queryByText("自动管理已关闭")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "恢复排课" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "重新读取状态" }));
-    expect(await screen.findByText("自动管理已开启")).toBeVisible();
+    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
   });
 
-  it.each([{ planningMode: "FIXED" as const }, { status: "DRAFT" as const }])(
-    "does not bypass first-start authorization for %o",
+  it.each([
+    { planningMode: "FIXED" as const },
+    { status: "DRAFT" as const },
+    { status: "PAUSED" as const },
+    { status: "CANCELLED" as const },
+    { status: "COMPLETED" as const },
+  ])(
+    "only observes rolling plans while active (%o)",
     (overrides) => {
       show(overrides);
       expect(screen.queryByRole("button")).not.toBeInTheDocument();

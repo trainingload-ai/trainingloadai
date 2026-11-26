@@ -1,127 +1,172 @@
 ---
-title: AI Coach
-description: Use AI Coach in Trainingload.ai to review activities, follow up on training plans, generate plan drafts, and turn workout data into practical training decisions.
-keywords: ["AI coach", "AI workout review", "AI training plan", "Trainingload.ai coach"]
+title: AI 코치
+description: Trainingload.ai의 AI 코치로 활동을 리뷰하고 훈련 플랜을 점검하며 플랜 초안을 생성해 워크아웃 데이터를 실전 훈련 의사결정으로 연결합니다.
+keywords:
+  ["AI 코치", "AI 워크아웃 리뷰", "AI 훈련 플랜", "Trainingload.ai 코치"]
 ---
 
-# AI Coach
+# AI 코치
 
-AI Coach is the conversational layer of Trainingload.ai. It helps interpret your training data, review plan execution, and draft next steps when the numbers alone are not enough.
+AI 코치에게 활동 분석 설명, 플랜 이행 리뷰 또는 다음 워크아웃 조정 여부를 질문할 수 있습니다. AI 코치는 확보된 훈련 기록을 근거로 답변합니다. 제안을 적용하기 전에는 인용된 기록과 변경 내용을 반드시 직접 확인하세요.
 
-Use it for:
+주요 활용 분야:
 
-- Activity interpretation.
-- Daily, weekly, or monthly training review.
-- Plan follow-up.
-- AI-assisted plan creation.
-- Workout adjustment ideas.
-- Questions about load, recovery, pace, heart rate, and power.
+- 단일 활동 해석
+- 일간·주간·월간 훈련 리뷰
+- 훈련 플랜 후속 점검
+- AI 지원 플랜 초안 생성
+- 워크아웃 조정 아이디어 논의
+- 훈련 부하, 회복, 페이스, 심박수, 파워 관련 질문
 
-## Start a conversation
+## 시작하기 전에
 
-Open **AI Coach** from the main navigation, mobile coach button, an activity detail page, a plan page, or a review notification.
+- 관련 활동의 분석 처리가 완료될 때까지 기다립니다.
+- 프로필의 역치, 훈련 존, 현재 상태 정보를 최신으로 유지합니다.
+- 플랜 실행 조언을 받고 싶다면 완료된 활동을 예정된 워크아웃에 연결해 둡니다.
+- "모든 것을 분석해 줘"처럼 막연한 요청 대신 구체적인 의사결정이나 질문 하나를 정합니다.
 
-You can start a new chat or continue an existing session. Existing sessions keep the previous messages and context for that conversation.
+## 대화 시작하기
 
-## What context AI Coach can use
+웹 또는 Personal 사이드바에서 **Coach(AI 코치)**를 선택합니다. 모바일 앱, 활동 상세 페이지, 플랜 페이지 또는 리뷰 알림에서도 바로 코치를 열 수 있습니다.
 
-Depending on the entry point and available data, AI Coach may use:
+새 대화를 시작하거나 사이드바에서 기존 대화를 선택해 이전 메시지와 맥락을 이어갈 수 있습니다.
 
-- Recent activities.
-- Activity detail and time-series analysis.
-- Current training plan.
-- Plan workouts and completion status.
-- Linked activities.
-- Training load metrics.
-- Profile, thresholds, and zones.
-- Daily, weekly, or monthly review summaries.
+웹의 **Coach** 페이지에서는 진행 중인 플랜, 오늘의 워크아웃, 주간 진행 현황, 최근 활동, 대화 목록을 한눈에 볼 수 있습니다. 관련 항목을 선택해 대화를 열 수 있으며, 기록(히스토리)에서 일간·주간·월간 리뷰를 찾고 추천을 적용하기 전에 참조된 원본 기록을 직접 열어 확인할 수 있습니다.
 
-AI Coach works best when your data is current. If activities are still processing, or thresholds are missing, its suggestions may be more general.
+<DocsScreenshot
+  id="ai-coach-contextual-review"
+  title="맥락 기반 AI 코치 리뷰"
+  description="대화 창에 표시된 훈련 리뷰와 사이드바에 저장된 대화 목록 예시입니다."
+  route="AI Coach"
+/>
 
-## Activity review
+## AI 코치가 활용하는 맥락
 
-For a single activity, ask questions such as:
+진입 지점과 보유 데이터에 따라 AI 코치는 다음 정보를 참고할 수 있습니다.
 
-- "Did this workout match the planned target?"
-- "Was the late heart-rate drift a problem?"
-- "How should I interpret this climb-heavy ride?"
-- "What should I watch before the next hard session?"
+- 최근 활동 목록
+- 활동 상세 및 시계열 분석
+- 현재 진행 중인 훈련 플랜
+- 플랜 워크아웃 및 완료 상태
+- 연결된 활동 기록
+- 훈련 부하 지표
+- 프로필, 역치, 훈련 존
+- 일간·주간·월간 리뷰 요약
 
-Good activity review combines the raw metrics with the purpose of the workout.
+AI 코치는 데이터가 최신일 때 가장 정확합니다. 활동이 아직 처리 중이거나 역치가 비어 있으면 답변이 다소 일반적일 수 있습니다.
 
-## Plan follow-up
+## 활동 리뷰
 
-From a plan detail page, use AI Coach to review plan progress with plan context.
+단일 활동에 대해서는 다음과 같이 질문해 보세요.
 
-Useful questions:
+- "이 워크아웃이 계획했던 강도 목표에 맞았나요?"
+- "후반부 심박수 상승(드리프트)을 문제로 봐야 할까요?"
+- "오르막이 많았던 이번 라이딩을 어떻게 해석하면 좋을까요?"
+- "다음 고강도 세션 전에 주의해야 할 점은 무엇인가요?"
 
-- "How is this plan going so far?"
-- "Which missed workouts matter most?"
-- "Should I move the next workout?"
-- "Is my actual load too far above the expected load?"
-- "How should the next week change after today's session?"
+좋은 활동 리뷰는 원시 지표와 원래 워크아웃의 목적을 함께 연결해 해석합니다.
 
-When AI Coach suggests schedule changes, review them before treating them as final.
+## 플랜 후속 점검
 
-## AI plan drafts
+플랜 상세 페이지에서 AI 코치를 열면 플랜 맥락이 포함된 상태로 진행 상황을 리뷰할 수 있습니다.
 
-When creating an AI-assisted plan, the plan brief is passed into AI Coach. AI Coach can ask follow-up questions when important information is missing, then present a plan draft.
+유용한 질문 예시:
 
-Review the draft carefully:
+- "지금까지 이 플랜이 잘 진행되고 있나요?"
+- "놓친 워크아웃 중에서 가장 중요한 건 어떤 세션인가요?"
+- "다음 워크아웃 날짜를 옮기는 게 좋을까요?"
+- "실제 부하가 예상 부하보다 너무 높은 상태인가요?"
+- "오늘 세션을 고려했을 때 다음 주 일정을 어떻게 조정하면 좋을까요?"
 
-- Weekly structure.
-- Hard/easy rhythm.
-- Workout descriptions.
-- Sport types.
-- Recovery placement.
-- Total workload.
+AI 코치가 일정 변경을 제안하면 **View workout calendar(워크아웃 캘린더 보기)**를 선택해 같은 대화 안에서 기존 워크아웃과 제안된 워크아웃을 비교할 수 있습니다. 날짜와 내용을 확인한 뒤 **Confirm plan changes(플랜 변경 확정)**를 누르세요. 일정 편집 방법은 [훈련 캘린더](/ko/docs/guide/calendar#adjust-upcoming-workouts)를 참고하세요.
 
-Saving the draft creates a plan; it does not remove your responsibility to check whether the schedule fits your real life.
+## AI 플랜 초안
 
-## Questions and confirmations
+AI 지원 플랜을 만들 때는 입력한 플랜 브리프가 AI 코치로 전달됩니다. 중요한 정보가 빠져 있다면 AI 코치가 추가 질문을 한 뒤 플랜 초안을 제시합니다.
 
-AI Coach may ask you to choose between options when a missing detail would materially change the recommendation.
+초안을 저장하기 전에 아래 항목을 꼼꼼히 검토하세요.
 
-Examples:
+- 주간 구조
+- 고강도/저강도 리듬
+- 워크아웃 상세 설명
+- 종목 구성
+- 회복일 배치
+- 전체 훈련량
 
-- Preferred long-workout day.
-- Race date or target distance.
-- Current injury concern.
-- Whether to prioritize recovery or maintain volume.
+초안을 저장하면 플랜이 생성되지만, 일정이 실제 생활 패턴에 맞는지 확인하는 최종 책임은 여전히 사용자에게 있습니다.
 
-Answering these questions keeps the recommendation grounded in your constraints.
+## 추가 질문과 확정 절차
 
-## Changes and undo
+빠진 세부 사항이 추천 방향을 크게 바꿀 수 있을 때 AI 코치가 선택지를 제시하며 질문할 수 있습니다.
 
-Some AI Coach actions can apply changes to your training data, such as a workout adjustment. Higher-risk changes are presented for confirmation before they are applied.
+예시:
 
-When an applied action supports undo, use the undo button promptly. Undo availability may be time-limited.
+- 선호하는 장거리 훈련 요일
+- 대회 날짜 또는 목표 거리
+- 현재 통증이나 부상 우려
+- 회복 우선 vs 훈련량 유지 여부
 
-## Session history
+이러한 질문에 답하면 제안이 본인의 실제 제약 조건에 훨씬 단단히 맞춰집니다.
 
-Use history to:
+## 변경 적용 및 실행 취소(Undo)
 
-- Continue a previous chat.
-- Reopen review sessions.
-- Rename or pin useful sessions.
-- Delete sessions you no longer need.
+일부 AI 코치 작업은 워크아웃 조정처럼 훈련 데이터를 직접 수정할 수 있습니다. 영향이 큰 변경은 적용하기 전에 반드시 사용자 확인 단계를 거칩니다.
 
-If you edit an earlier user message, later context may be replaced so the conversation stays consistent with the edited request.
+적용된 작업이 실행 취소(Undo)를 지원할 때 되돌리고 싶다면 즉시 Undo 버튼을 누르세요. 실행 취소 가능 시간은 제한되어 있을 수 있습니다.
 
-## Better prompts
+## 대화 기록 관리
 
-Be specific about the decision you need to make.
+대화 기록(Session history)에서 할 수 있는 작업:
 
-Helpful:
+- 이전 대화 이어가기
+- 리뷰 세션 다시 열기
+- 유용한 세션 이름 변경 또는 고정(Pin)
+- 더 이상 필요 없는 세션 삭제
 
-- "I have a long run tomorrow, but today's workout was harder than planned. Should I adjust?"
-- "Compare this week's actual load with the plan and suggest one conservative change."
-- "I missed two easy sessions. Should I make them up or move on?"
+리뷰 알림에서 전체 세션 보기를 열 때는 대화 스레드를 고르기 전에 선택된 일간·주간·월간 필터가 맞는지 확인하세요.
 
-Less helpful:
+이전 사용자 메시지를 수정하면 대화 일관성을 유지하기 위해 그 이후의 맥락이 새로 대체될 수 있습니다.
 
-- "What do you think?"
-- "Analyze everything."
-- "Make me faster."
+## 더 나은 질문(프롬프트) 작성법
 
-AI Coach is most useful when the question is tied to a real training decision.
+내려야 할 구체적인 결정을 중심으로 질문하세요.
+
+도움이 되는 질문:
+
+- "내일 장거리 러닝이 예정되어 있는데 오늘 훈련이 계획보다 힘들었어요. 조정하는 게 좋을까요?"
+- "이번 주 실제 부하와 계획 부하를 비교해서 보수적인 조정안 하나만 제안해 주세요."
+- "쉬운 훈련 두 개를 건너뛰었는데 보충해야 할까요, 그냥 다음 일정으로 넘어갈까요?"
+
+덜 효과적인 질문:
+
+- "어떻게 생각해?"
+- "전부 분석해 줘."
+- "빨라지게 해 줘."
+
+AI 코치는 질문이 실제 훈련 의사결정과 맞닿아 있을 때 가장 큰 가치를 발휘합니다.
+
+## 좋은 답변인지 검증하는 기준
+
+유용한 답변은 다음 특징을 갖춰야 합니다.
+
+- 올바른 활동, 플랜, 기간, 지표 맥락을 정확히 참조함
+- 관측된 데이터와 해석·불확실성을 구분함
+- 왜 그 제안을 하는지 근거와 연결해 설명함
+- 설명 없는 전면 개편보다 보수적인 다음 행동 하나를 우선함
+- 중요한 데이터나 일정 변경 전 반드시 확인을 요청함
+
+응답이 잘못된 맥락을 참고하고 있다면 변경을 확정하지 마세요. 대상 활동이나 플랜, 날짜를 다시 명시하고 코치가 먼저 확인하도록 요청하세요.
+
+## 문제 해결
+
+- **답변이 너무 일반적임:** 활동 처리 완료를 기다리고 빠진 역치를 입력한 뒤, 해당하는 활동 상세나 플랜 상세 페이지에서 직접 질문하세요.
+- **다른 플랜이나 활동 이야기를 함:** 올바른 상세 페이지에서 대화를 시작하거나 대상 이름과 날짜를 정확히 적어 주세요.
+- **도구 기반 작업이 실패함:** 원본 페이지를 새로고침해 해당 기록이 여전히 존재하는지 확인한 뒤 가장 작은 단위 작업부터 다시 시도하세요.
+- **제안된 플랜이 비현실적임:** 주간 가능 시간, 장비, 최근 기준선, 대회 정보와 함께 부상·통증 제약 조건을 알려 주세요(의학적 진단을 요청하지는 마세요).
+- **실수로 변경이 적용됨:** Undo가 보이면 즉시 실행 취소하고, 불가능하다면 해당 플랜이나 워크아웃을 직접 열어 수정합니다.
+
+## 다음 단계
+
+- [알림 및 자동 리뷰](/ko/docs/guide/notifications-and-reviews)
+- [진행 중인 플랜 관리](/ko/docs/guide/manage-active-plan)
+- [훈련 플랜 만들기](/ko/docs/guide/create-training-plan)

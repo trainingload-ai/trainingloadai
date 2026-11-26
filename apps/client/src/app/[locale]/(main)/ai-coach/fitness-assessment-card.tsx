@@ -11,6 +11,8 @@ import {
   fitnessDateTime,
   fitnessEvidenceSummary,
   fitnessMetricLabel,
+  canRecomputeFitnessResult,
+  isFitnessApplyOptionExpired,
 } from "@shared/fitness-assessment";
 export function FitnessAssessmentCard({
   input,
@@ -29,7 +31,7 @@ export function FitnessAssessmentCard({
   const [busy, setBusy] = useState(false),
     [sent, setSent] = useState(false),
     [error, setError] = useState(false),
-    [renderedAt] = useState(Date.now);
+    [checkedAt, setCheckedAt] = useState(Date.now);
   if (!isFitnessResult(input)) return null;
   const r = input;
   if (
@@ -53,13 +55,7 @@ export function FitnessAssessmentCard({
     }
   };
   const locked = !!disabled || busy || sent || !onAction;
-  const canRecompute =
-    (r.preparationStatus !== "READY" ||
-      r.candidates.some((c) => c.metric === "VDOT")) &&
-    r.reasonCode !== "AMBIGUOUS_SCOPE" &&
-    r.reasonCode !== "PROTOCOL_UNKNOWN" &&
-    r.reasonCode !== "METHOD_UNAVAILABLE" &&
-    r.reasonCode !== "SCOPE_UNSUPPORTED";
+  const canRecompute = canRecomputeFitnessResult(r, checkedAt);
   const canOfferWorkout = r.nextActions.includes("OFFER_WORKOUT");
   const hasActions =
     r.applyOptions.length > 0 || canRecompute || canOfferWorkout;
@@ -150,16 +146,21 @@ export function FitnessAssessmentCard({
                   locked ||
                   !!r.application ||
                   o.changes.some((c) => c.metric === "VDOT") ||
-                  Date.parse(o.expiresAt) <= renderedAt
+                  isFitnessApplyOptionExpired(o, checkedAt)
                 }
-                onClick={() =>
+                onClick={() => {
+                  const now = Date.now();
+                  if (isFitnessApplyOptionExpired(o, now)) {
+                    setCheckedAt(now);
+                    return;
+                  }
                   void send(t("apply"), {
                     kind: "fitness_apply_confirmation",
                     calculationId: r.calculationId,
                     applyOptionId: o.id,
                     proposalDigest: o.proposalDigest,
-                  })
-                }
+                  });
+                }}
               >
                 {t("apply")}
               </Button>

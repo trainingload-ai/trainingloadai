@@ -1,0 +1,283 @@
+---
+title: DSL de sesiones de fuerza
+description: Crea y valida una sesión completa de fuerza en Trainingload.ai en modo Reglas con ejercicios, grupos de series, carga, RPE o RIR y descanso.
+keywords:
+  [
+    "DSL de fuerza Trainingload.ai",
+    "reglas de sesión de fuerza",
+    "sintaxis de series y ejercicios",
+  ]
+---
+
+# DSL de sesiones de fuerza
+
+El DSL de fuerza es la representación textual del constructor de sesiones de fuerza. Úsalo cuando copies una sesión de un entrenador, edites varios grupos de series con rapidez o quieras revisar la estructura exacta que guardará Trainingload.ai. Describe una sesión estática; cada ejercicio contiene uno o más grupos de series de calentamiento (`warmup`) o trabajo (`work`).
+
+## Antes de empezar
+
+- Abre una sesión editable y elige **Strength Training** (Entrenamiento de fuerza) como deporte.
+- Selecciona la pestaña **Rules** (Reglas). La pestaña **Manual** edita visualmente la misma estructura.
+- Decide qué cargas conoces. Usa `open` en lugar de inventar pesos o porcentajes.
+- Guarda las explicaciones de entrenamiento en las notas de la sesión. El DSL contiene la prescripción, no prosa libre.
+
+## Empieza por la sesión válida mínima
+
+Pega esto en **Rules**:
+
+```text
+exercise "Goblet Squat" equipment dumbbell {
+  work 3x8 open rir 3 rest 90s
+}
+```
+
+Luego selecciona **Validate Input** (Validar entrada). Este ejemplo significa:
+
+- un ejercicio llamado «Goblet Squat»;
+- equipamiento con mancuerna (`dumbbell`);
+- tres series de trabajo de ocho repeticiones;
+- sin carga fija (`open`);
+- tres repeticiones en reserva (`rir 3`);
+- 90 segundos de descanso tras cada serie.
+
+Toda sesión válida necesita al menos un ejercicio. Cada ejercicio necesita un nombre no vacío entre comillas dobles y al menos una línea `work`.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Abre el editor desde el calendario del plan"
+  description="En el Constructor de plan manual, avanza hasta Selección de fechas y selecciona + Sesión en el día deseado."
+  route="Planes → Constructor de plan manual → Selección de fechas → + Sesión"
+/>
+
+<DocsScreenshot
+  id="strength-dsl-rules-input"
+  title="DSL de fuerza en modo Reglas"
+  description="Una sesión válida de dos ejercicios tras la validación, con la estructura guardada visible en la vista previa de fuerza."
+  route="Planes → Sesión manual → Entrenamiento de fuerza → Reglas"
+/>
+
+## Comprende la estructura del documento
+
+Una sesión completa tiene tres niveles:
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+```
+
+1. `duration` y `session rpe` describen toda la sesión. Ambos son opcionales y solo pueden aparecer una vez.
+2. `exercise "…" {` abre un bloque de ejercicio. La llave de cierre `}` lo termina.
+3. Las líneas `warmup` y `work` describen grupos de series dentro de ese ejercicio.
+
+Se permiten líneas en blanco. Los comentarios y la prosa normal no forman parte de la gramática.
+
+## Añade ajustes de sesión
+
+Usa estas líneas antes del primer ejercicio:
+
+```text
+duration 50m
+session rpe 6
+```
+
+`duration` acepta segundos, minutos u horas, como `45s`, `50m` o `1.5h`. Corresponde a la duración planificada de toda la sesión, no de una sola serie.
+
+`session rpe` acepta un número del 1 al 10. Representa la dificultad global prevista para la sesión. Es distinto de `rpe` en una línea de grupo de series, que indica el esfuerzo objetivo de esas series concretas.
+
+## Añade un ejercicio
+
+La forma básica es:
+
+```text
+exercise "Romanian Deadlift" {
+  work 3x8 open rir 2 rest 2m
+}
+```
+
+El nombre del ejercicio debe ir entre comillas dobles y no puede estar vacío. Los nombres pueden estar en el idioma del atleta. Escapa una comilla doble dentro del nombre como `\"` y una barra invertida literal como `\\`.
+
+El equipamiento es opcional:
+
+```text
+exercise "Romanian Deadlift" equipment barbell {
+```
+
+El código de equipamiento puede incluir letras mayúsculas o minúsculas, dígitos, guiones y guiones bajos. El DSL guardado normaliza el código a minúsculas. Conviene usar códigos estables como `barbell`, `dumbbell`, `bodyweight`, `cable` o `machine`.
+
+## Escribe un grupo de series
+
+Usa el siguiente orden para un DSL legible y canónico:
+
+```text
+work PRESCRIPTION LOAD EFFORT rest DURATION
+```
+
+Solo son obligatorios `warmup` o `work` y la prescripción. Si se omite la carga, se asume `open`, aunque escribir `open` deja clara la intención. El esfuerzo y el descanso son opcionales.
+
+| Parte | Forma aceptada | Ejemplo |
+| --- | --- | --- |
+| Tipo de serie | `warmup` o `work` | `work` |
+| Prescripción | repeticiones fijas, rango, AMRAP o tiempo | `3x5`, `3x8-12`, `1x5+`, `3x45s` |
+| Carga | abierta, peso, porcentaje de 1RM o peso corporal | `open`, `weight 80kg`, `weight 75%1rm`, `bodyweight` |
+| Esfuerzo | RPE o RIR | `rpe 7`, `rir 2` |
+| Descanso | tiempo después de `rest` | `rest 90s`, `rest 3m` |
+
+Un ejercicio puede contener varios grupos de series:
+
+```text
+exercise "Back Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+```
+
+Los grupos de calentamiento son opcionales. Hace falta al menos un grupo de trabajo, por lo que un ejercicio que solo contenga líneas `warmup` no pasará la validación.
+
+## Elige una prescripción por repeticiones o tiempo
+
+| Objetivo | Sintaxis | Significado |
+| --- | --- | --- |
+| Repeticiones fijas | `3x5` | 3 series de 5 |
+| Rango de repeticiones | `3x8-12` | 3 series, de 8 a 12 repeticiones cada una |
+| AMRAP | `1x5+` | 1 serie con indicador AMRAP y base de 5 repeticiones |
+| Serie por tiempo | `3x45s` | 3 series de 45 segundos |
+| Serie por tiempo en minutos | `2x1.5m` | 2 series de 90 segundos |
+
+El número de series y los valores de repeticiones deben ser positivos. En un rango, escribe primero el valor menor.
+
+## Elige una carga
+
+### Carga abierta (`open`)
+
+```text
+work 3x10 open rir 3 rest 90s
+```
+
+Usa `open` cuando debas elegir el peso el mismo día o cuando no haya un historial de cargas fiable.
+
+### Peso fijo
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x5 weight 175lb rpe 7 rest 3m
+```
+
+Escribe el número y `kg` o `lb` sin espacio entre ambos.
+
+### Porcentaje de 1RM
+
+```text
+work 4x4 weight 80%1rm rest 3m
+```
+
+Úsalo únicamente cuando el ejercicio tenga un 1RM conocido y actualizado. El porcentaje aceptado debe ser mayor que 0 y como máximo 100.
+
+### Peso corporal y compensación de peso corporal
+
+```text
+work 3x8 bodyweight rir 2 rest 90s
+work 3x6 bodyweight +10kg rpe 8 rest 2m
+work 3x8 bodyweight -20kg rir 2 rest 2m
+```
+
+`+10kg` indica lastre añadido. `-20kg` indica asistencia que reduce la carga efectiva del peso corporal.
+
+## Elige RPE o RIR
+
+Usa un solo modelo de esfuerzo por línea de grupo de series:
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x8 open rir 2 rest 2m
+```
+
+- `rpe` acepta valores de 1 a 10.
+- `rir` acepta valores de 0 a 10.
+- No pongas ambos en la misma línea.
+
+RPE y RIR son referencias de esfuerzo, no cálculos automáticos de carga. Escribir `rpe 7` no hace que Trainingload.ai invente o ajuste un peso.
+
+## Construye una sesión completa en tu idioma
+
+Los nombres de los ejercicios son contenido del usuario, así que no tienen que estar en inglés. Las palabras clave del DSL sí se mantienen en inglés porque forman parte de la gramática.
+
+```text
+duration 45m
+session rpe 6
+
+exercise "Sentadilla con barra" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+
+exercise "Flexiones" equipment bodyweight {
+  work 3x8-12 bodyweight rir 2 rest 90s
+}
+
+exercise "Plancha" equipment bodyweight {
+  work 3x45s bodyweight rest 60s
+}
+```
+
+Esto genera tres ejercicios: uno de repeticiones con carga, un rango de repeticiones con peso corporal y un isométrico cronometrado con peso corporal.
+
+## Valida, compara y guarda
+
+1. Selecciona **Validate Input** (Validar entrada).
+2. Lee el primer error de línea notificado antes de cambiar otras líneas.
+3. Compara la vista previa de fuerza con el número de ejercicios y de series de trabajo previsto.
+4. Cambia a **Manual** si quieres inspeccionar visualmente los campos interpretados.
+5. Vuelve a **Rules** y confirma que el DSL normalizado conserva el mismo significado.
+6. Selecciona **Save Draft** (Guardar borrador), vuelve a abrir la sesión y compruébala de nuevo.
+
+La normalización puede pasar a minúsculas palabras clave, códigos de equipamiento y unidades, o insertar un `open` explícito. Esos cambios no alteran la sesión; en cambio, sí la alteraría un cambio en el ejercicio, el número de series, la prescripción, la carga, el esfuerzo o el descanso.
+
+## Qué no admite el DSL
+
+El DSL de fuerza es una prescripción estática de una sesión. No incluyas en el texto:
+
+- `if/else` ni lógica ejecutable;
+- reglas de progresión semanal o descarga;
+- bloques de ejercicios anidados;
+- atributos separados por comas;
+- scripts de progresión ejecutables;
+- notas o párrafos de explicación.
+
+Coloca las indicaciones humanas en las notas de la sesión. Mantén los scripts externos no compatibles en su sistema original en lugar de traducirlos a una prescripción distinta.
+
+## Verifica la sesión
+
+- La sesión usa **Strength Training** (Entrenamiento de fuerza), no un deporte de resistencia.
+- Cada ejercicio tiene un nombre no vacío entre comillas.
+- Cada ejercicio incluye al menos un grupo `work`.
+- Los rangos de repeticiones van de menor a mayor.
+- Cada grupo de series utiliza como máximo una carga y un modelo de esfuerzo.
+- La vista previa muestra los ejercicios y series de trabajo previstos.
+- Al volver a abrir la sesión guardada se conserva exactamente el mismo significado.
+
+## Solución de problemas
+
+| Error o síntoma | Solución |
+| --- | --- |
+| El nombre del ejercicio no puede estar vacío | Escribe un nombre no vacío entre comillas dobles, por ejemplo `exercise "Back Squat" {`. |
+| La sesión de fuerza requiere al menos un ejercicio | Añade un bloque `exercise` completo. |
+| El ejercicio requiere al menos una serie de trabajo | Añade una línea `work`; los grupos de calentamiento solos no forman un ejercicio válido. |
+| Prescripción de series no válida | Usa `3x5`, `3x8-12`, `1x5+` o una forma cronometrada como `3x45s`. |
+| Las repeticiones máximas deben ser mayores o iguales que las mínimas | Cambia `3x12-8` a `3x8-12`. |
+| Usa RPE o RIR, no ambos | Elimina uno de los objetivos de esfuerzo de la línea del grupo de series. |
+| Peso no válido | Escribe `weight 80kg`, `weight 175lb` o `weight 80%1rm`; no insertes espacios dentro del valor. |
+| Atributo de serie no compatible | Elimina prosa, comas, palabras clave desconocidas o lógica dinámica de la línea. |
+| Falta una llave de cierre en el ejercicio | Añade una `}` después del último grupo de series de ese ejercicio. |
+| Cambiar de deporte limpia o sustituye el editor | Copia o guarda el DSL antes de cambiar, ya que resistencia y fuerza usan estructuras distintas. |
+
+## Próximos pasos
+
+- Usa [Sesiones de fuerza](/es/docs/planning/strength-workouts) para el constructor visual y las decisiones de programación.
+- Lee [Editor manual de sesiones](/es/docs/planning/manual-workout-editor) para comparar los modos Reglas y Manual.
+- Añade la sesión a un plan mediante [Crear un plan de entrenamiento](/es/docs/guide/create-training-plan).

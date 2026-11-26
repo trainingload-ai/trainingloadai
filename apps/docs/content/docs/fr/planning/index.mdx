@@ -1,0 +1,70 @@
+---
+title: Plans et séances
+description: Découvrez comment Trainingload.ai représente les plans d’entraînement, les séances programmées, les structures d’endurance et de renforcement musculaire, la charge attendue et les activités réalisées associées.
+keywords:
+  ["plans Trainingload.ai", "séances structurées", "cycle de vie plan d’entraînement"]
+---
+
+# Plans et séances
+
+Trainingload.ai considère le plan d’entraînement comme un espace de travail vivant, et non comme un PDF figé. Un plan regroupe des séances datées ou relatives ; chaque séance peut contenir une structure exploitable par l’application, des notes humaines, une charge attendue, un statut d’exécution et un lien vers les activités réalisées.
+
+## Le modèle de planification
+
+<Mermaid
+  chart={`flowchart TD
+  Goal["Objectif et contraintes"] --> Plan["Plan d’entraînement"]
+  Plan --> Workout["Séance planifiée"]
+  Workout --> Structure["Structure endurance ou renforcement"]
+  Structure --> Expected["Charge attendue"]
+  Workout --> Activity["Lien vers l’activité réalisée"]
+  Activity --> Actual["Charge réelle et exécution"]
+  Expected --> Review["Bilan du plan"]
+  Actual --> Review
+  Review --> Adjustment["Ajustement confirmé"]
+  Adjustment --> Plan`}
+/>
+
+## États d’un plan
+
+- **Brouillon** — plan modifiable en cours de construction. Utilisez cet état pour le relire avant de le suivre.
+- **Actif** — plan en cours avec une date de début et un contexte d’exécution quotidien.
+- **En pause** — mis en veille temporairement tout en conservant le plan et son historique.
+- **Terminé** — plan mené intentionnellement à son terme.
+- **Annulé** — plan interrompu sans avoir été terminé comme prévu.
+
+Lisez [Gérer l’état d’un plan](/fr/docs/planning/plan-lifecycle) avant de changer le statut d’un plan déjà lié à des activités réalisées.
+
+## Types de structure de séance
+
+### Endurance
+
+Les séances d’endurance se composent d’étapes d’échauffement, de travail, de récupération, de répétitions et d’étapes associées, prescrites en temps ou en distance, avec des cibles facultatives telles que zones, allure, vitesse, puissance, cadence ou fréquence cardiaque.
+
+Utilisez le [guide de l’éditeur manuel de séances](/fr/docs/planning/manual-workout-editor) pour l’édition visuelle dans l’application, l’[Éditeur et créateur de séances](/fr/workout-editor) pour rédiger une séance publique en brouillon, ou le [DSL de séance d’endurance](/fr/docs/planning/workout-dsl) pour une syntaxe texte compacte.
+
+### Renforcement musculaire
+
+Les séances de renforcement musculaire regroupent des exercices et des blocs de séries. Le travail peut être prescrit en répétitions ou en temps, avec charge libre, poids fixe, pourcentage de 1RM, poids du corps, effort perçu et temps de repos selon les options prises en charge.
+
+Utilisez [Séances de renforcement musculaire](/fr/docs/planning/strength-workouts) pour l’éditeur visuel ou [DSL de séance de renforcement](/fr/docs/planning/strength-workout-dsl) pour le mode Règles étape par étape.
+
+## Charge attendue vs charge réelle
+
+La charge attendue n’est calculée que lorsque la structure de la séance, vos seuils et les cibles définies apportent suffisamment d’informations. La charge réelle provient de l’activité réalisée et de l’ordre de priorité des sources de charge configuré.
+
+Ces deux valeurs répondent à des questions différentes :
+
+- Charge attendue : « Quel stress ce plan cherchait-il à produire ? »
+- Charge réelle : « Quel stress la séance effectivement réalisée a-t-elle généré ? »
+
+Ne forcez jamais une charge attendue en inventant un seuil ou une cible. Une valeur explicitement inconnue vaut mieux qu’une fausse précision.
+
+## Ordre de lecture recommandé
+
+1. [Créer un plan d’entraînement](/fr/docs/guide/create-training-plan)
+2. [Guide de l’éditeur manuel de séances](/fr/docs/planning/manual-workout-editor)
+3. [DSL de séance de renforcement](/fr/docs/planning/strength-workout-dsl), si vous programmez des séances de musculation ou de renforcement
+4. [Gérer l’état d’un plan](/fr/docs/planning/plan-lifecycle)
+5. [Gérer un plan actif](/fr/docs/guide/manage-active-plan)
+6. [Coach IA](/fr/docs/guide/ai-coach)

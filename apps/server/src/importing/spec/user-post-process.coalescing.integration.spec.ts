@@ -35,6 +35,7 @@ type Scheduler = {
 };
 type ItemCompletion = {
   activeLeaseTokens: Map<string, string>;
+  claimBatch(limit: number): Promise<Array<{ id: string }>>;
   completeActivityItem(jobId: string, batchJobId: string): Promise<void>;
 };
 const at = (time: Date, delta: number) => new Date(time.getTime() + delta);
@@ -234,10 +235,10 @@ describe('durable user post-process coalescing', () => {
     };
   }
 
-  function completion() {
+  function completion(database: Prisma.TransactionClient = db) {
     const service = new ImportItemWorkerService(
-      db as never,
-      {} as never,
+      database as never,
+      { get: () => undefined } as never,
       {} as never,
       {} as never,
       {} as never,
@@ -258,6 +259,70 @@ describe('durable user post-process coalescing', () => {
     );
     return service as unknown as ItemCompletion;
   }
+
+  it.each(['UTC', 'Asia/Shanghai', 'America/Los_Angeles'])(
+    'keeps active import leases and retry times in UTC in database timezone %s',
+    async (timezone) => {
+      const now = new Date();
+      const inline = await seed({ createdAt: now, pendingItem: true });
+      const expired = await seed({ createdAt: now, pendingItem: true });
+      const retry = await seed({ createdAt: now, pendingItem: true });
+      await db.importItemJob.update({
+        where: { id: inline.item.id },
+        data: {
+          status: 'MATERIALIZING',
+          lockToken: 'draft-inline:active',
+          leaseExpiresAt: at(now, 15 * 60_000),
+        },
+      });
+      await db.importItemJob.update({
+        where: { id: expired.item.id },
+        data: { leaseExpiresAt: at(now, -60_000) },
+      });
+      await db.importItemJob.update({
+        where: { id: retry.item.id },
+        data: { status: 'FAILED', availableAt: at(now, 60_000) },
+      });
+
+      await db.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT set_config('TimeZone', ${timezone}, true)`;
+        const queuedItem = {
+          batchJobId: inline.batch.id,
+          userId: inline.batch.userId,
+          sourceObjectId: inline.item.sourceObjectId,
+          sourceKind: 'FILE' as const,
+          sourceUid: inline.item.sourceUid,
+        };
+        const queued = await tx.importItemJob.create({
+          data: { ...queuedItem, position: 1 },
+        });
+        const bulkItemId = 'bulk-queued-item';
+        await tx.importItemJob.createMany({
+          data: [{ ...queuedItem, id: bulkItemId, position: 2 }],
+        });
+
+        const claimStartedAt = Date.now();
+        const claims = await completion(tx).claimBatch(10);
+        const claimFinishedAt = Date.now();
+        expect(claims.map(({ id }) => id).sort()).toEqual(
+          [expired.item.id, queued.id, bulkItemId].sort(),
+        );
+        const claimed = await tx.importItemJob.findUniqueOrThrow({
+          where: { id: expired.item.id },
+        });
+        expect(claimed.startedAt).toEqual(claimed.updatedAt);
+        expect(claimed.updatedAt.getTime()).toBeGreaterThanOrEqual(
+          claimStartedAt,
+        );
+        expect(claimed.updatedAt.getTime()).toBeLessThanOrEqual(
+          claimFinishedAt,
+        );
+        expect(claimed.leaseExpiresAt).toEqual(
+          at(claimed.updatedAt, 15 * 60_000),
+        );
+      });
+    },
+  );
 
   it.each(['UTC', 'Asia/Shanghai', 'America/Los_Angeles'])(
     'waits for quiet and unfinished imports in database timezone %s',

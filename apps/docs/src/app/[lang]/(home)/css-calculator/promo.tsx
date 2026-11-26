@@ -1,5 +1,6 @@
 "use client";
 
+import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import { useEffect } from "react";
 import Image from "next/image";
 import { ArrowRight, Target } from "lucide-react";
@@ -100,7 +101,7 @@ export function CssAppPromo({ lang }: { lang: string }) {
                 <span />
               </div>
               <Image
-                src={`/css-calculator/web-plan-dark-${imageLang}.webp`}
+                src={productScreenshotUrl(`/css-calculator/web-plan-dark-${imageLang}.webp`)}
                 alt={t("collage.webAlt")}
                 width={1200}
                 height={960}

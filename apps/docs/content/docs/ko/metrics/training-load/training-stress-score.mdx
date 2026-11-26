@@ -1,116 +1,141 @@
 ---
-title: Training Stress Score (TSS)
-description: Training Stress Score (TSS) estimates single-session training load by combining duration and relative intensity.
-keywords: ["TSS", "Training Stress Score", "rTSS", "sTSS", "hrTSS", "tTSS", "training stress score", "single session training load", "training load"]
+title: "훈련 스트레스 점수 (TSS)란 무엇이며 어떻게 계산하나요?"
+description: "훈련 스트레스 점수(TSS)는 운동 시간과 강도를 하나의 세션 부하로 통합합니다. TSS 공식, rTSS·hrTSS 변형, 대표 범위, FTP 설정 실수를 알아보세요."
+keywords:
+  [
+    "훈련 스트레스 점수",
+    "TSS",
+    "TSS 계산 방법",
+    "rTSS",
+    "hrTSS",
+    "훈련 부하 점수",
+  ]
 ---
 
-# Training Stress Score (TSS)
+# 훈련 스트레스 점수 (TSS)란 무엇이며 어떻게 계산하나요?
 
-**Training Stress Score (TSS)** is a widely used way to estimate the **training stress** of a single workout. It combines **duration** and **relative intensity** into one number so you can compare load across different session types and lengths.
+**훈련 스트레스 점수(Training Stress Score, TSS)**는 **운동 시간**과 **상대 강도**를 결합해 단일 훈련이 신체에 준 스트레스를 추정하는 지표입니다. 사이클링의 표준 기준은 “FTP 강도로 1시간 주행 = 100 TSS”입니다. 이 단일 수치 덕분에 장시간 이지 라이딩과 짧은 고강도 인터벌 세션을 객관적으로 비교할 수 있습니다.
 
-It answers the key question: **“How much stress did today’s workout place on my body?”**
+TSS가 답하려는 핵심 질문은 **“오늘의 훈련이 내 몸에 어느 정도의 스트레스를 주었는가?”**입니다.
 
-## Core Concept
+## 핵심 개념
 
-TSS rests on one baseline:
+TSS는 다음 하나의 기준점 위에 세워집니다.
 
-> **One hour all-out at functional threshold (FTP) produces 100 TSS.**
+> **기능적 역치(FTP) 강도로 1시간 전력 수행 = 100 TSS**
 
-This means:
--   **100 TSS** = 1 hour @ FTP (all-out)
--   **50 TSS** = 1 hour easy (~70% FTP) or 30 minutes @ FTP
--   **150 TSS** = a very hard session, usually taking more than 2–3 hours of cycling
+이를 기준으로 보면 다음과 같습니다.
+- **100 TSS** = FTP 강도로 1시간 (전력)
+- **50 TSS** = 이지 강도(약 70% FTP)로 1시간, 또는 FTP 강도로 30분
+- **150 TSS** = 매우 고된 세션으로, 보통 2–3시간 이상의 사이클링이 필요한 수준
 
-With TSS, you can compare the stress of “a 2-hour easy run” vs. “a 30-minute interval run.”
+TSS를 활용하면 “2시간 이지 러닝”과 “30분 고강도 인터벌 러닝”의 부담을 비교할 수 있습니다.
 
-## Calculation Formula
+## 계산 공식
 
-The standard TSS formula (for cycling) is:
+사이클링 표준 TSS 공식은 다음과 같습니다.
 
 $$
 TSS = \frac{t \times NP \times IF}{FTP \times 3600} \times 100
 $$
 
-Where:
--   $t$ = exercise duration (seconds)
--   $NP$ = [Normalized Power (NP)](/docs/metrics/power/normalized-power)
--   $IF$ = [Intensity Factor (IF)](/docs/metrics/training-load/intensity-factor)
--   $FTP$ = [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power)
--   $3600$ = seconds in one hour
+각 기호의 의미는 다음과 같습니다.
+- $t$ = 운동 시간 (초)
+- $NP$ = [정규화 파워 (NP)](/ko/docs/metrics/power/normalized-power)
+- $IF$ = [강도 계수 (IF)](/ko/docs/metrics/training-load/intensity-factor)
+- $FTP$ = [기능적 역치 파워 (FTP)](/ko/docs/metrics/power/functional-threshold-power)
+- $3600$ = 1시간의 초 수
 
-In essence, this computes: **duration (hours) $\times$ squared intensity factor ($IF^2$) $\times$ 100**. Stress from intensity rises much faster than linearly—not proportionally with intensity alone.
+본질적으로 이 공식은 **운동 시간(시간) $\times$ 강도 계수의 제곱($IF^2$) $\times$ 100**을 계산합니다. 즉, 강도가 올라갈수록 훈련 스트레스는 단순 비례가 아니라 훨씬 가파르게 증가합니다.
 
-## TSS Variants and Priority
+## TSS 변형과 우선순위
 
-Different sports use different sensors (power meter vs. GPS vs. heart rate strap), so several TSS variants exist. Trainingload.ai selects the calculation method **according to the priority you set in preferences** (default: **power > heart rate > pace > RPE**):
+종목마다 사용하는 센서(파워미터, GPS, 심박 스트랩)가 다르므로 여러 TSS 변형이 존재합니다. Trainingload.ai는 **사용자가 환경설정에서 지정한 우선순위**에 따라 계산 방식을 선택합니다(기본값: **파워 > 심박수 > 페이스 > RPE**).
 
-| Variant | Full name | Sport | Accuracy | Core of calculation | Notes |
+| 변형 | 정식 명칭 | 적용 종목 | 정확도 | 핵심 신호 | 비고 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **TSS** | **Power TSS** | Cycling/rowing | ⭐⭐⭐⭐⭐ | **Power** | Most direct when power data and FTP are reliable; based on NP and FTP. |
-| **hrTSS** | **Heart Rate TSS** | All sports | ⭐⭐ | **Heart rate (TRIMP)** | Based on time in HR zones ([TRIMP](/docs/metrics/training-load/training-impulse)). **Cardiac lag** underestimates short-interval load. |
-| **rTSS** | **Running TSS** | Running | ⭐⭐⭐⭐ | **Pace** | Based on [NGP](/docs/metrics/pace/normalized-graded-pace) and threshold pace (rFTPa). Terrain-corrected; useful when threshold pace and route data are reliable. |
-| **sTSS** | **Swim TSS** | Swimming | ⭐⭐⭐ | **Speed** | Based on CSS (critical swim speed) and distance/time. |
-| **tTSS** | **Time TSS** | Fallback | ⭐ | **Average heart rate** | Rough estimate when only average HR is available; higher error. |
+| **TSS** | **Power TSS** | 사이클링 / 로잉 | ⭐⭐⭐⭐⭐ | **파워** | 파워 데이터와 FTP가 정확할 때 가장 직접적이며 NP와 FTP를 기반으로 계산합니다. |
+| **hrTSS** | **Heart Rate TSS** | 전 종목 | ⭐⭐ | **심박수 (TRIMP)** | 심박수 존 체류 시간([TRIMP](/ko/docs/metrics/training-load/training-impulse)) 기반. **심박 지연** 때문에 짧은 인터벌 부하를 과소평가할 수 있습니다. |
+| **rTSS** | **Running TSS** | 러닝 | ⭐⭐⭐⭐ | **페이스** | [NGP](/ko/docs/metrics/pace/normalized-graded-pace)와 역치 페이스(rFTPa) 기반. 지형 보정이 반영되며 역치 페이스와 경로 데이터가 정확할 때 유용합니다. |
+| **sTSS** | **Swim TSS** | 수영 | ⭐⭐⭐ | **속도** | CSS(임계 수영 속도)와 거리·시간을 기반으로 계산합니다. |
+| **tTSS** | **Time TSS** | 대체(Fallback) | ⭐ | **평균 심박수** | 평균 심박수만 있을 때 사용하는 개략 추정치로 오차가 큽니다. |
 
-## Typical Reference Ranges
+## 대표적인 참고 범위
 
-Understanding TSS ranges helps you judge a session’s impact and recovery needs:
+TSS 구간별 특성을 이해하면 세션의 충격량과 회복 필요성을 가늠하는 데 도움이 됩니다.
 
-| TSS range | Fatigue level | Recovery suggestion | Typical examples |
+| TSS 범위 | 피로 수준 | 회복 가이드 | 대표적인 예시 |
 | :--- | :--- | :--- | :--- |
-| **< 150** | **Low** | Usually fully recovered the next day | 1–2 h aerobic endurance ride; 45 min easy run. |
-| **150 - 300** | **Medium** | Residual fatigue may remain the next day | 3–4 h long ride; high-intensity interval workout. |
-| **300 - 450** | **High** | Fatigue may still be present after two days | Half-distance triathlon; Grand Tour–style stage; ultra-long endurance workout. |
-| **> 450** | **Epic** | May need several days to recover; can affect immunity | Ironman; extreme endurance challenge. |
+| **< 150** | **낮음** | 보통 다음 날 완전히 회복됨 | 1–2시간 유산소 지구력 라이딩, 45분 이지 러닝 |
+| **150 - 300** | **중간** | 다음 날까지 잔여 피로가 남을 수 있음 | 3–4시간 장거리 라이딩, 고강도 인터벌 훈련 |
+| **300 - 450** | **높음** | 이틀 뒤에도 피로가 남아 있을 수 있음 | 하프 아이언맨, 그랜드 투어급 스테이지, 초장거리 지구력 훈련 |
+| **> 450** | **매우 높음 (Epic)** | 수일간 회복이 필요하며 면역력에 영향을 줄 수 있음 | 아이언맨 풀코스, 극한 지구력 챌린지 |
 
-## Recommendations
+## 권장 활용법
 
-### How Trainingload.ai uses TSS
+### Trainingload.ai의 TSS 활용 방식
 
-Trainingload.ai treats TSS as one input, not as a verdict. A workout with high TSS may justify easier follow-up training, but the decision should also consider sport type, recent ATL, current CTL, subjective feedback, and whether the workout matched the plan.
+Trainingload.ai는 TSS를 최종 판정이 아니라 핵심 입력 중 하나로 다룹니다. 높은 TSS 세션 뒤에 가벼운 훈련을 배치할 근거는 될 수 있지만, 실제 판단에는 종목, 최근 ATL, 현재 CTL, 주관적 피드백, 훈련 플랜과의 일치 여부를 함께 고려해야 합니다.
 
-In practice, TSS is most useful when it is connected to the plan:
+실전에서는 훈련 플랜과 연결할 때 TSS의 가치가 가장 커집니다.
 
--   Compare **planned TSS vs. completed TSS** after each workout.
--   Watch weekly load progression before increasing volume or intensity.
--   Use TSS together with [ATL](/docs/metrics/pmc/acute-training-load), [CTL](/docs/metrics/pmc/chronic-training-load), and [TSB](/docs/metrics/pmc/training-stress-balance), rather than treating a single workout score in isolation.
+- 매 훈련 후 **계획 TSS vs 실제 TSS**를 비교하세요.
+- 훈련량이나 강도를 늘리기 전에 주간 부하 상승 폭을 점검하세요.
+- 단일 훈련 점수만 따로 보지 말고 [ATL](/ko/docs/metrics/pmc/acute-training-load), [CTL](/ko/docs/metrics/pmc/chronic-training-load), [TSB](/ko/docs/metrics/pmc/training-stress-balance)와 함께 해석하세요.
 
-### 1. Watch out for “inflated” TSS
-If you often see single-session TSS above 200 or even 300, first check whether your **FTP/threshold is set too low**.
--   For most amateurs, 300 TSS in one session is a rare physiological challenge.
--   If FTP is set too low, IF is inflated, and TSS rises disproportionately.
+### 1. “부풀려진” TSS 주의하기
+단일 세션에서 200이나 300을 넘는 TSS가 자주 나온다면 가장 먼저 **FTP/역치가 너무 낮게 설정되어 있지 않은지** 확인하세요.
+- 대부분의 아마추어 선수에게 단일 세션 300 TSS는 드문 수준의 생리적 도전입니다.
+- FTP가 실제보다 낮게 입력되어 있으면 IF가 과도하게 올라가고, $IF^2$ 효과로 TSS가 크게 부풀려집니다.
 
-### 2. No data? Manual estimation
-If your device died or you did strength training, use **RPE (rating of perceived exertion)** to estimate load and keep your [PMC chart](/docs/metrics/pmc/chronic-training-load) continuous:
+### 2. 센서 데이터가 없을 때의 수동 추정
+기기 배터리가 방전되었거나 근력 운동을 했다면 **RPE(운동자각도)**로 부하를 추정해 [PMC 차트](/ko/docs/metrics/pmc/chronic-training-load)의 연속성을 유지할 수 있습니다.
 
 $$
 TSS \approx \frac{\text{duration (min)} \times \text{RPE}(1-10)}{60} \times 10
 $$
 
-*Note: this is a rough heuristic. RPE 10 corresponds to ~100 TSS per hour.*
+*참고: 개략적인 경험 공식이며, RPE 10이 시간당 약 100 TSS에 해당합니다.*
 
-## Limitations
+## 한계점
 
-1.  **Cross-sport trap**: although TSS aims to standardize, **100 TSS of running** usually causes more mechanical damage (musculoskeletal impact) than **100 TSS of cycling**. Don’t treat them as fully interchangeable.
-2.  **Non-physiological stress**: TSS does not include environmental stress (heat, altitude) or life stress (poor sleep, work anxiety), which also raise true recovery cost.
+1. **종목 간 함정**: TSS가 부하를 표준화하려 하지만, **러닝 100 TSS**는 대개 **사이클링 100 TSS**보다 훨씬 큰 기계적 충격(근골격계 손상)을 유발합니다. 두 점수를 완전히 동일한 부담으로 취급해서는 안 됩니다.
+2. **비운동성 스트레스 누락**: TSS에는 환경 스트레스(더위, 고지대)나 생활 스트레스(수면 부족, 업무 스트레스)가 반영되지 않으며, 이들 역시 실제 회복 비용을 높입니다.
 
-## FAQ
+## 자주 묻는 질문
 
-### Is higher TSS always better?
+### TSS가 높을수록 무조건 좋은 훈련인가요?
 
-No. Higher TSS means higher modeled stress, not automatically better training. Productive training depends on the goal of the session, the phase of the plan, and whether you can recover before the next key workout.
+아닙니다. 높은 TSS는 모델링된 스트레스가 컸다는 뜻이지 자동으로 좋은 훈련이라는 의미가 아닙니다. 효과적인 훈련은 세션의 목적, 플랜 단계, 그리고 다음 핵심 훈련 전까지 회복할 수 있는지 여부에 달려 있습니다.
 
-### Can TSS compare running and cycling directly?
+### 러닝과 사이클링의 TSS를 직접 비교할 수 있나요?
 
-Only cautiously. TSS helps normalize workload, but running usually adds more musculoskeletal stress than cycling at the same score.
+주의해서 비교해야 합니다. TSS는 작업량을 표준화하는 데 도움이 되지만, 같은 점수라도 러닝이 사이클링보다 근골격계 스트레스를 더 크게 주는 경우가 많습니다.
 
-### Why does an incorrect FTP distort TSS?
+### 부정확한 FTP가 TSS를 왜곡하는 이유는 무엇인가요?
 
-TSS depends on intensity relative to threshold. If FTP is set too low, IF becomes too high and TSS can be inflated; if FTP is too high, training stress can be understated.
+TSS는 역치 대비 상대 강도에 따라 계산됩니다. FTP가 너무 낮으면 IF가 과대 계산되어 TSS가 크게 부풀려지고, FTP가 너무 높으면 실제보다 훈련 스트레스가 과소평가됩니다.
 
-## References
+### TSS는 어떻게 계산하나요?
 
--   [TrainingPeaks: Training Stress Scores (TSS) Explained](https://help.trainingpeaks.com/hc/en-us/articles/204071944-Training-Stress-Scores-TSS-Explained)
--   [Joe Friel: The Triathlete's Training Bible](https://joefrieltraining.com/)
+사이클링에서는 `TSS = (초 × NP × IF) / (FTP × 3600) × 100`, 즉 `시간(h) × IF² × 100`으로 계산합니다. 러닝은 NGP와 역치 페이스를 이용한 rTSS를, 심박 기반 세션은 [TRIMP](/ko/docs/metrics/training-load/training-impulse) 기반의 hrTSS를 사용할 수 있습니다.
 
-> Normalized Power (NP), Intensity Factor (IF), and Training Stress Score (TSS) are registered trademarks of [Peaksware, LLC](https://trainingpeaks.com/).
+### 단일 훈련의 일반적인 TSS 범위는 어느 정도인가요?
+
+150 미만은 보통 피로 부담이 낮은 훈련, 150–300은 다음 날까지 잔여 피로가 남는 훈련입니다. 대부분의 아마추어에게 300 이상은 매우 큰 지구력 도전이므로, 지나치게 높은 점수가 나오면 먼저 FTP 설정을 점검해 보세요.
+
+## 다음 단계
+
+- [시간, NP, FTP로 TSS 계산하기](/ko/tss-calculator)
+- [일일 TSS로 CTL, ATL, TSB 시뮬레이션하기](/ko/training-load-calculator)
+- [훈련 플랜에서 CTL, ATL, TSB로 훈련 부하 관리하기](/ko/training-load)
+- TSS 안에서 IF가 제곱으로 작용하는 원리를 [강도 계수 (IF)](/ko/docs/metrics/training-load/intensity-factor)에서 확인하기
+- [활동 파일로 FTP 추정하기](/ko/ftp-calculator)
+- [AI 코치 리뷰로 안전하게 훈련 부하 조정하기](/ko/ai-training-plan)
+
+## 참고 자료
+
+- [TrainingPeaks: Training Stress Scores (TSS) Explained](https://help.trainingpeaks.com/hc/en-us/articles/204071944-Training-Stress-Scores-TSS-Explained)
+- [Joe Friel: The Triathlete's Training Bible](https://joefrieltraining.com/)
+
+> Normalized Power (NP), Intensity Factor (IF), Training Stress Score (TSS)는 [Peaksware, LLC](https://trainingpeaks.com/)의 등록 상표입니다.

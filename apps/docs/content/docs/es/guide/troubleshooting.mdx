@@ -1,0 +1,95 @@
+---
+title: Solución de problemas
+description: Diagnostica problemas frecuentes en Trainingload.ai relacionados con inicio de sesión, sincronización, procesamiento de actividades, planes, grabación móvil, Entrenador con IA y métricas faltantes.
+keywords:
+  [
+    "solución de problemas de Trainingload.ai",
+    "fallo de sincronización de actividad",
+    "error de plan de entrenamiento",
+  ]
+---
+
+# Solución de problemas
+
+Empieza por el síntoma observable. Evita reconectar plataformas, borrar actividades o recrear planes hasta saber con certeza qué fase falló.
+
+## Bucles de inicio de sesión o autorización
+
+1. Confirma que el navegador o la app móvil tienen conexión con el servicio.
+2. Completa el flujo OAuth en la misma sesión del navegador donde lo iniciaste.
+3. Comprueba que la cuenta conserva otro método de inicio de sesión disponible antes de desconectar uno.
+4. Reintenta una vez después de recargar la página de inicio de sesión.
+
+Si la autorización de una plataforma termina bien pero Trainingload.ai sigue mostrando estado desconectado, vuelve a abrir el diálogo de la plataforma y busca un error de retorno o de permisos.
+
+## Falta una actividad sincronizada
+
+1. Confirma que la sesión existe en la plataforma de origen.
+2. Comprueba el estado de conexión de la plataforma.
+3. Ejecuta una vez la sincronización manual o conciliación si está disponible.
+4. Espera a que finalice el lote de importación.
+5. Busca en Actividades por fecha y deporte.
+
+No desconectes y reconectes repetidamente; eso puede crear trabajos de importación solapados sin resolver un problema de permisos en el origen.
+
+## La actividad aparece pero el análisis está incompleto
+
+Una actividad puede quedar visible antes de que terminen todas las gráficas derivadas. Actualiza cuando finalice el procesamiento. Si solo falta una familia de métricas, inspecciona las series de origen:
+
+- El análisis de frecuencia cardíaca necesita muestras de pulso.
+- El análisis de potencia necesita muestras de potencia y un contexto adecuado de deporte/perfil.
+- Las vistas de ruta y desnivel necesitan datos de GPS y altimetría.
+- El análisis de ritmo y distancia necesita datos utilizables de distancia y tiempo.
+
+## Una métrica parece incorrecta
+
+Revisa, en este orden:
+
+1. Tipo de deporte y definición del deporte.
+2. Unidades y zona horaria.
+3. Valor del umbral y fecha efectiva.
+4. Modelo de zonas y límites personalizados.
+5. Prioridad seleccionada de fuentes de carga.
+6. Series brutas de la actividad.
+
+Cambiar un umbral puede afectar a la interpretación de cálculos posteriores. Anota el motivo del cambio en lugar de ajustarlo hasta que una sola sesión «salga ideal».
+
+## No se puede guardar una sesión
+
+En sesiones de resistencia, comprueba que cada paso estructurado tiene una duración o distancia válida y un objetivo compatible. En sesiones de fuerza, comprueba que:
+
+- Existe al menos un ejercicio.
+- Cada ejercicio tiene nombre.
+- Cada ejercicio tiene al menos un grupo de series.
+- Cada ejercicio incluye al menos una serie de trabajo.
+
+El editor muestra un mensaje de validación traducido y mantiene abierto el borrador para que puedas corregirlo.
+
+## El plan se modificó desde otro lugar
+
+Si la aplicación informa de un conflicto de versión o de estado, otra solicitud modificó el plan después de cargarse en tu pantalla. Actualiza el plan, verifica el estado más reciente y vuelve a aplicar la edición. No reintentes a ciegas una acción destructiva desactualizada.
+
+## Una grabación móvil no terminó de sincronizarse
+
+Mantén la app instalada y evita borrar el almacenamiento local mientras la recuperación sea posible. Vuelve a abrir la pantalla de grabación, deja que la app restaure la sesión y reconecta la red. Consulta [Grabación móvil](/es/docs/guide/mobile-recording).
+
+## El Entrenador con IA no puede completar una solicitud
+
+- Acorta solicitudes muy extensas o divídelas en pasos.
+- Confirma que el plan o la actividad siguen existiendo y son accesibles.
+- Revisa tus límites de uso.
+- Si una acción estructurada falla la validación, describe el cambio deseado en lenguaje natural y vuelve a intentarlo.
+- Nunca apliques un ajuste que no puedas verificar en la vista previa de antes y después.
+
+## Reúne evidencia útil
+
+Al informar de un problema, incluye:
+
+- Hora aproximada y zona horaria.
+- Web o móvil, sistema operativo y versión de la app o del navegador.
+- La página o flujo de trabajo, nunca credenciales.
+- Identificador hash de la actividad, ID del plan o nombre de la plataforma cuando sea seguro compartirlo.
+- Texto exacto del error mostrado.
+- Una captura de pantalla con los datos personales ocultos.
+
+No incluyas contraseñas, tokens OAuth, claves API ni coordenadas exactas de tu domicilio.

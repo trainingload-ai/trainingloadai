@@ -1,0 +1,138 @@
+---
+title: Analise um treino com a Linha do tempo
+description: Use a linha do tempo de atividades na Web em desktop do Trainingload.ai para examinar gráficos sincronizados, selecionar um segmento de treino, comparar estatísticas do intervalo e localizar o esforço no trajeto.
+seoTitle: "Linha do Tempo da Atividade e Análise de Segmentos | Trainingload.ai"
+seoDescription: "Siga o fluxo da linha do tempo para corrida e ciclismo: selecione um esforço, examine estatísticas e trajeto, configure gráficos e salve segmentos de análise."
+keywords: ["linha do tempo da atividade", "análise de segmentos de treino", "análise de intervalos na corrida", "gráficos de ciclismo", "linha do tempo Trainingload.ai"]
+---
+
+# Analise um treino com a Linha do tempo
+
+A Linha do tempo alinha os fluxos gravados de uma atividade em um eixo horizontal compartilhado. Use-a para examinar um instante específico ou comparar ritmo, potência, frequência cardíaca, cadência e trajeto de um esforço selecionado. As estatísticas do intervalo e a leitura pontual respondem a perguntas diferentes.
+
+Este guia cobre a **Web em desktop** para corrida e ciclismo. Os gráficos disponíveis dependem dos dados gravados na atividade. Para o fluxo geral de revisão, comece por [Detalhes da atividade](/pt-BR/docs/guide/activity-detail).
+
+## Abra o exemplo
+
+[Abra a atividade de demonstração da prova de 10 km](https://demo.trainingload.ai/en/activities/17921623926005309429) e selecione **Linha do tempo** abaixo do trajeto. A atividade abre primeiro em Visão geral. A conta de demonstração é somente leitura, portanto a edição de segmentos salvos fica desabilitada.
+
+Na sua própria atividade, aguarde o processamento terminar e confirme se há amostras gravadas. Atividades somente com resumo não oferecem linha do tempo sincronizada. Sessões indoor podem ter gráficos utilizáveis mesmo sem GPS. Confira esporte, limiares e unidades antes de interpretar os dados.
+
+## 1. Leia a atividade inteira
+
+Depois de selecionar **Linha do tempo**, identifique os cabeçalhos de segmentos no topo, os controles de métricas e estatísticas do intervalo à esquerda e os gráficos alinhados à direita. O eixo horizontal inicia no modo de tempo. O trajeto permanece acima das abas quando a atividade tem dados de localização.
+
+Atividades longas ultrapassam a largura visível do gráfico. Role horizontalmente para ver trechos posteriores. As estatísticas do intervalo continuam descrevendo a atividade completa até que você selecione um trecho.
+
+Inicialmente, os valores de **Média**, **Mín.** e **Máx.** à esquerda representam a atividade inteira. Uma métrica sem amostras utilizáveis pode não aparecer, e lacunas dentro de um fluxo aparecem como interrupções no gráfico.
+
+<DocsScreenshot
+  id="activity-timeline-full"
+  title="Comece pela atividade inteira e pelos gráficos alinhados"
+  description="A coluna à esquerda resume o intervalo atual. Cada gráfico compartilha a mesma posição horizontal, permitindo comparar o esforço entre ritmo, frequência cardíaca e cadência."
+  imageAlt="Linha do tempo completa da prova com gráficos alinhados e estatísticas da atividade inteira"
+  route="Detalhes da atividade → Linha do tempo"
+  demoLabel="Abrir este exemplo de linha do tempo"
+/>
+
+## 2. Examine um instante
+
+Mova o ponteiro sobre um gráfico. Leia o valor flutuante dentro de cada gráfico na mesma posição horizontal. Quando há GPS disponível, o mapa indica a posição correspondente.
+
+Clique para manter um ponto selecionado. Tirar o ponteiro dos gráficos oculta as leituras temporárias de hover. As estatísticas de intervalo à esquerda permanecem vinculadas à atividade inteira ou ao trecho selecionado.
+
+Você pode focar o controle de posicionamento da linha do tempo e usar as setas esquerda e direita para inspecionar amostras, ou **Home** e **End** para ir até as extremidades. As leituras por teclado desaparecem quando o controle perde o foco.
+
+| Pergunta | Onde olhar |
+| --- | --- |
+| O que foi gravado nesse instante? | A leitura pontual dentro de cada gráfico. |
+| Qual foi o valor típico ao longo desse esforço? | A média nas estatísticas de intervalo à esquerda. |
+| Quais foram os extremos válidos gravados? | O mínimo e o máximo desse mesmo intervalo. |
+
+## 3. Selecione um esforço e compare
+
+Você pode selecionar uma volta gravada ou desenhar seu próprio intervalo.
+
+1. Selecione o cabeçalho de um segmento para destacá-lo e atualizar as estatísticas. Selecione novamente para limpar a seleção.
+2. Para inspecionar outro trecho, arraste horizontalmente sobre um gráfico e solte. O intervalo compartilhado dos gráficos dá zoom na seleção.
+3. Compare média, mínimo e máximo do trecho selecionado com o esforço visível. Mova o ponteiro para examinar amostras individuais dentro dele.
+4. Confira o trecho destacado no trajeto quando houver dados de localização. Use o mapa ao redor para entender onde o esforço ocorreu.
+
+<DocsScreenshot
+  id="activity-timeline-selection"
+  title="Compare um esforço selecionado com o trajeto"
+  description="Selecionar um segmento atualiza as estatísticas do intervalo e destaca o trecho correspondente nos gráficos e no trajeto. As leituras de hover continuam separadas do resumo do intervalo."
+  imageAlt="Segmento selecionado da prova com estatísticas atualizadas e trecho destacado no trajeto"
+  route="Detalhes da atividade → Linha do tempo → Selecionar segmento"
+  demoLabel="Inspecionar a mesma atividade de demonstração"
+/>
+
+Em um esforço longo e contínuo, verifique se ritmo ou potência se mantêm estáveis enquanto a frequência cardíaca muda. Em intervalos repetidos, compare os blocos de estímulo e recuperação com o objetivo da sessão. Explique o padrão usando duração, terreno, paradas e dados de sensores disponíveis.
+
+## 4. Volte para a atividade inteira ou altere o eixo
+
+Abra **Opções da linha do tempo** ao lado de **Segmentos** e escolha **Mostrar atividade inteira** para limpar o intervalo e restaurar a visão completa. Dar duplo clique em um gráfico ou pressionar **Escape** na linha do tempo também redefine seleção e zoom.
+
+No mesmo menu, alterne **Eixo horizontal** entre **Tempo** e **Distância**. O modo Distância exige um registro válido de distância acumulada. O esforço selecionado mantém seus limites originais de tempo quando o eixo muda.
+
+## 5. Configure os gráficos
+
+Selecione o nome de uma métrica, como **Ritmo** ou **Frequência cardíaca**, para abrir as configurações. Você pode escolher a métrica disponível, cor da linha, altura do gráfico e suavização. Use **Mover para cima**, **Mover para baixo** ou **Remover gráfico** para organizar as linhas visíveis.
+
+Use **Adicionar gráfico** na parte inferior para incluir outro fluxo disponível. Você pode adicionar a mesma métrica mais de uma vez — por exemplo, para comparar a exibição bruta com a suavizada. **Expandir** abre uma visualização ampliada de um gráfico individual.
+
+A suavização altera a curva desenhada. Leituras pontuais e estatísticas do intervalo preservam o significado dos dados gravados. O layout dos gráficos fica salvo nas preferências deste navegador e não modifica a atividade original.
+
+## 6. Edite segmentos de análise na sua conta
+
+Use **Editar segmentos** quando quiser intervalos de análise diferentes das voltas do dispositivo. Isso exige uma conta autenticada com permissão para editar a atividade.
+
+1. Abra **Editar segmentos** e revise nome, início e fim de cada segmento.
+2. Renomeie um segmento ou ajuste seus limites. O editor também oferece **Adicionar segmento em lacuna**, **Dividir ao meio**, **Mesclar com o próximo** e **Remover** quando aplicável.
+3. Mantenha os limites dentro da atividade, com cada início antes do fim e sem sobreposição entre segmentos.
+4. Selecione **Salvar segmentos** e confira as estatísticas atualizadas. **Cancelar** fecha o rascunho sem salvar.
+
+Segmentos de análise salvos preservam intactos o arquivo original, as voltas do dispositivo e a carga da atividade inteira. Limites modificados usam os fluxos gravados para recalcular as estatísticas daquele trecho. **Restaurar voltas do dispositivo** devolve ao editor os intervalos originais de volta, que você pode então salvar.
+
+Se outra janela tiver alterado as definições, feche e reabra o editor para carregar a versão mais recente antes de editar novamente. Se o salvamento falhar, o rascunho permanece disponível para nova tentativa. A demonstração pública desabilita esse fluxo de edição.
+
+## Confira o resultado
+
+Após selecionar um esforço, confirme que os limites, as estatísticas do intervalo e o trecho do trajeto se referem à mesma parte da atividade. Restaure a visão completa e verifique se as estatísticas voltam a refletir a atividade inteira. Se salvou segmentos de análise na sua conta, reabra a atividade e confirme que as definições continuam disponíveis.
+
+## Perguntas frequentes
+
+### Por que os números à esquerda não mudam quando movo o ponteiro?
+
+Eles resumem a atividade inteira ou o intervalo selecionado. Use as leituras flutuantes nos gráficos para o ponto sob o cursor.
+
+### Por que há lacunas ou traços?
+
+Um fluxo ausente, uma falha de amostragem ou um valor inválido podem gerar lacuna ou traço. Zero gravado para velocidade, cadência ou potência pode ser válido. Uma amostra parado não tem ritmo utilizável, e amostras ausentes de frequência cardíaca não são substituídas por zero.
+
+### Por que uma volta muda depois que edito seus limites?
+
+Uma volta inalterada do dispositivo pode usar o resumo importado. Um segmento de análise modificado ou personalizado é recalculado a partir das amostras válidas gravadas naquele intervalo. Cobertura ausente e os limites escolhidos influenciam o resultado.
+
+### Por que um valor de potência aparece como Estimada?
+
+Esse fluxo utiliza potência estimada. Leve essa origem em conta ao comparar com um medidor de potência ou interpretar intensidade.
+
+### Por que o trajeto não destaca o trecho selecionado?
+
+A atividade pode não ter GPS válido nesses instantes ou o mapa pode estar indisponível. Continue com os gráficos gravados e verifique o estado do mapa separadamente.
+
+### Por que não consigo ver a Linha do tempo no celular?
+
+Esse fluxo está disponível na Web em desktop. No celular, use os detalhes e gráficos de dados compatíveis com o app e o esporte, ou abra a atividade no computador.
+
+### E se um gráfico falhar ao carregar?
+
+Use a ação de tentar novamente quando exibida. Os demais gráficos carregados podem continuar utilizáveis. Se uma atualização falhar, a página pode manter o resultado anterior e exibir esse aviso. Diferencie dados ausentes de uma falha de carregamento.
+
+## Continue
+
+- [Detalhes da atividade](/pt-BR/docs/guide/activity-detail)
+- [Desacoplamento aeróbico](/pt-BR/docs/metrics/heart-rate/aerobic-decoupling)
+- [Perfil, limiares e zonas](/pt-BR/docs/guide/profile-thresholds-zones)
+- [Revisão semanal de treino](/pt-BR/docs/workflow/weekly-review)

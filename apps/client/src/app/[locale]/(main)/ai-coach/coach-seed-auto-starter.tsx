@@ -46,6 +46,7 @@ export function CoachSeedAutoStarter({
   const locale = useLocale();
   const tHome = useTranslations("V2HomePage");
   const tPlanCreate = useTranslations("V2PlanCreatePage");
+  const rollingT = useTranslations("RollingPlan");
   const tEquipment = useTranslations("StrengthCatalog.equipment");
   const pathname = usePathname();
   const router = useRouter();
@@ -144,11 +145,14 @@ export function CoachSeedAutoStarter({
         tPlanCreate("brief.intent", {
           value: tPlanCreate(`intent.${planPayload.intent}.title`),
         }),
-        tPlanCreate("brief.cycle", {
-          weeks: planPayload.cycleWeeks,
-          weeklyDays: planPayload.weeklyDays,
-          dailyMinutes: planPayload.dailyMinutes,
-        }),
+        ...(planPayload.planningMode === "ROLLING"
+          ? [rollingT("title"), rollingT("availability", {
+              weeklyDays: planPayload.weeklyDays, dailyMinutes: planPayload.dailyMinutes,
+            })]
+          : [tPlanCreate("brief.cycle", {
+              weeks: planPayload.cycleWeeks ?? 8,
+              weeklyDays: planPayload.weeklyDays, dailyMinutes: planPayload.dailyMinutes,
+            })]),
         tPlanCreate("brief.strength", {
           value: tPlanCreate(
             `strength.preference.${planPayload.strength.preference}`,

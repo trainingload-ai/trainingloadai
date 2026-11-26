@@ -27,7 +27,6 @@ import { RoutesModule } from './routes/routes.module';
 import { AnalyzeModule } from './analyze/analyze.module';
 import { PaceModule } from './api/pace/pace.module';
 import { PublicModule } from './api/public/public.module';
-import { CalendarModule } from './api/calendar/calendar.module';
 import * as path from 'path';
 import { existsSync } from 'fs';
 import { APP_GUARD } from '@nestjs/core';
@@ -176,7 +175,6 @@ const envFilePath = [
     AnalyzeModule,
     PaceModule,
     PublicModule,
-    CalendarModule,
     CompetitionModule,
     ReviewModule,
     RollingPlanRuntimeModule,

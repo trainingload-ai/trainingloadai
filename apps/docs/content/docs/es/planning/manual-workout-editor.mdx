@@ -1,0 +1,146 @@
+---
+title: "Guía del editor manual de sesiones: Edita sesiones en Trainingload"
+description: "Documentación de producto para editar sesiones planificadas en Trainingload. Aprende a editar manualmente sesiones de resistencia y fuerza en el editor integrado, distinto del constructor público."
+keywords:
+  [
+    "editor manual de sesiones",
+    "cómo editar sesiones",
+    "editar sesiones manualmente",
+    "guía del editor de sesiones Trainingload",
+    "editar sesión estructurada",
+    "editor de sesiones integrado",
+  ]
+---
+
+# Cómo editar sesiones manualmente en Trainingload
+
+Esta es la **guía de producto del editor manual de sesiones dentro de Trainingload.ai**. Explica cómo editar una sesión planificada al abrir un plan: elegir el deporte, añadir pasos de resistencia o series de fuerza, previsualizar la sesión y guardar un borrador válido.
+
+No es un **editor de sesiones** ni un **constructor de sesiones** independiente. Si buscas una herramienta gratuita en el navegador para redactar pasos y copiar el DSL de sesiones, utiliza el [Editor y constructor de sesiones](/es/workout-editor). Vuelve aquí cuando necesites guardar en la app, usar el editor de fuerza o trabajar en el flujo diario del plan.
+
+## Antes de empezar
+
+- Abre un plan manual o una sesión editable dentro de un plan.
+- Confirma los umbrales del atleta que utiliza cualquier objetivo por zona o porcentaje.
+- Decide si la sesión es de resistencia o de fuerza.
+- Si primero solo necesitas un borrador público, [crea la sesión en el editor de sesiones](/es/workout-editor) y luego pégala o reconstrúyela aquí.
+
+## 1. Elige el deporte
+
+El editor manual ofrece deliberadamente una lista acotada para planificación:
+
+- Carrera: Carrera, Trail running, Cinta de correr.
+- Ciclismo: Ciclismo, Ciclismo de montaña, Ciclismo indoor.
+- Natación: Natación en piscina, Natación en aguas abiertas.
+- Otros: Entrenamiento de fuerza.
+
+El deporte seleccionado cambia las unidades de objetivo disponibles y puede cambiar el tipo de estructura de la sesión. Cambiar entre resistencia y fuerza reinicia una estructura de borrador incompatible, así que elige el deporte antes de introducir pasos detallados.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Abre el editor desde el calendario del plan"
+  description="En el Constructor de plan manual, avanza hasta Selección de fechas y selecciona + Sesión en el día deseado."
+  route="Planes → Constructor de plan manual → Selección de fechas → + Sesión"
+/>
+
+<DocsScreenshot
+  id="manual-workout-editor"
+  title="Editor manual de sesiones"
+  description="Elige el deporte, construye el trabajo estructurado, añade notas de entrenamiento y compara la vista previa antes de guardar."
+  route="Planes → Plan manual → Añadir sesión"
+/>
+
+## 2. Añade un nombre y notas
+
+Usa el nombre para identificar brevemente la sesión, como «Intervalos aeróbicos» o «Fuerza de tren inferior». Usa las notas para indicaciones humanas que no deben convertirse en estructura de máquina:
+
+- Indicaciones técnicas.
+- Recordatorios de material.
+- Pautas de avituallamiento e hidratación.
+- Notas de ruta o terreno.
+- Condiciones para detener o acortar la sesión.
+
+No escribas prosa dentro de un campo DSL. Los pasos de la sesión van en modo Manual o Reglas; el contexto del entrenador va en las notas.
+
+## 3. Construye una sesión de resistencia
+
+En modo manual, añade un paso o un módulo de repetición. Para cada paso:
+
+1. Elige el tipo de paso, como calentamiento, trabajo o recuperación.
+2. Define la duración o la distancia.
+3. Añade un objetivo solo cuando dispongas de un valor de referencia fiable.
+4. Para intervalos, usa un módulo de repetición en lugar de copiar muchas veces pares idénticos de trabajo y recuperación.
+5. Revisa la gráfica a medida que cambia la estructura.
+
+Una estructura de resistencia válida necesita al menos un paso con sentido. En un objetivo por rango, el valor inicial no puede ser mayor que el valor final.
+
+## 4. Construye una sesión de fuerza
+
+Elige **Strength Training** (Entrenamiento de fuerza) para abrir el constructor de fuerza. Añade ejercicios y series de trabajo siguiendo [Sesiones de fuerza](/es/docs/planning/strength-workouts). Para introducirlo en texto, sigue [DSL de sesiones de fuerza](/es/docs/planning/strength-workout-dsl).
+
+## 5. Usa el modo Reglas cuando convenga
+
+El modo Reglas acepta el DSL de sesiones compatible. Resulta útil para escribir de forma compacta y reutilizable, pero no es un campo libre de notas de entrenamiento.
+
+Antes de guardar en modo Reglas:
+
+- Mantén una instrucción por cada expresión DSL compatible.
+- Coloca las explicaciones en lenguaje natural dentro de las notas.
+- Valida el resultado e inspecciona la estructura generada.
+- Consulta el [DSL de sesiones de resistencia](/es/docs/planning/workout-dsl) o el [DSL de sesiones de fuerza](/es/docs/planning/strength-workout-dsl) para la sintaxis correspondiente.
+- También puedes [redactar el mismo DSL en el editor público de sesiones](/es/workout-editor) primero y pegarlo aquí.
+
+## 6. Guarda
+
+Selecciona **Save Draft** (Guardar borrador). Trainingload.ai valida la sesión antes de añadirla al borrador del plan.
+
+## Verifica la sesión guardada
+
+Confirma que:
+
+- La etiqueta del deporte es correcta.
+- La vista previa coincide con la secuencia de trabajo/recuperación o con las series de fuerza previstas.
+- Las notas permanecen separadas de la estructura.
+- La sesión guardada aparece en la semana, el día y el orden correctos.
+- La carga esperada aparece solo cuando hay información suficiente.
+
+## Solución de problemas
+
+- **La lista de deportes muestra un elemento inesperado:** asegúrate de estar usando el editor manual de sesiones del plan. Su lista de creación se limita a los nueve deportes documentados arriba; las pantallas de clasificación de actividades tienen un catálogo más amplio.
+- **Cambiar de deporte borra el borrador:** las estructuras de resistencia y fuerza son incompatibles. Elige el deporte primero y copia cualquier nota o regla reutilizable antes de cambiar.
+- **La vista previa de resistencia está vacía:** añade un paso válido y confirma que su duración/distancia y los valores de objetivo son correctos.
+- **Se rechaza un rango de objetivo:** escribe el valor inferior antes del superior y verifica la unidad correspondiente al deporte seleccionado.
+- **«Enter a name for every exercise»:** rellena el nombre de cada ejercicio de fuerza; el texto de marcador de posición no cuenta como contenido guardado.
+- **Un ejercicio de fuerza no se guarda:** añade al menos un grupo de series y al menos una serie de trabajo (`work`) en cada ejercicio.
+- **Un error de Reglas aparece todavía en inglés:** no copies el mensaje bruto del servidor en las notas. Anota la alerta localizada, el deporte seleccionado y la línea DSL que falla para soporte.
+- **La sesión guardada aparece en otro día:** comprueba la fecha de inicio del plan, el desplazamiento de semana/día, el orden de sesiones y la zona horaria de tu cuenta.
+
+## Preguntas frecuentes
+
+### ¿Qué es el editor manual de sesiones?
+
+Es la pantalla integrada en la app para editar una sesión planificada en Trainingload. Eliges un deporte, añades pasos de resistencia o ejercicios de fuerza, adjuntas notas de entrenamiento, previsualizas la sesión y la guardas en una semana y un día concretos. El [editor y constructor de sesiones](/es/workout-editor) público es una herramienta independiente de borrador.
+
+### ¿Cómo edito manualmente una sesión en Trainingload?
+
+Abre una sesión editable del plan, elige primero el deporte y añade pasos o un módulo de repetición. Define la duración o la distancia, añade un objetivo solo si el umbral es fiable y utiliza un módulo de repetición para los intervalos en lugar de duplicar el mismo par varias veces.
+
+### ¿El editor integrado permite crear sesiones de fuerza?
+
+Sí. Elige **Strength Training** (Entrenamiento de fuerza) para abrir el constructor de fuerza. Añade ejercicios con nombre y al menos una serie de trabajo por ejercicio. Para introducirlos en texto, usa el [DSL de sesiones de fuerza](/es/docs/planning/strength-workout-dsl).
+
+### ¿Modo Manual o modo Reglas?
+
+Usa el modo Manual cuando prefieras montar pasos haciendo clic. Usa el modo Reglas cuando quieras un DSL compacto y repetible. No metas prosa de entrenamiento en un campo DSL: eso pertenece a las notas. Consulta el [DSL de sesiones de resistencia](/es/docs/planning/workout-dsl).
+
+### ¿Por qué cambiar de deporte reinició el borrador?
+
+Las estructuras de resistencia y fuerza son incompatibles. Elige el deporte antes de construir pasos detallados y copia las notas o reglas reutilizables antes de cambiar.
+
+## Próximos pasos
+
+- [Redacta una sesión estructurada en el editor de sesiones](/es/workout-editor) si prefieres usar primero el constructor público.
+- Continúa con [Gestionar el estado y las importaciones del plan](/es/docs/planning/plan-lifecycle) y activa el plan cuando el calendario completo esté listo.
+- Usa el [DSL de sesiones de resistencia](/es/docs/planning/workout-dsl) para edición basada en texto y reglas.
+- Usa [Sesiones de fuerza](/es/docs/planning/strength-workouts) para el constructor visual.
+- [Usa la revisión del Entrenador con IA para ajustar la carga de entrenamiento de forma segura](/es/ai-training-plan) tras completar la sesión.

@@ -1,0 +1,148 @@
+---
+title: Ressources et prompts MCP
+description: Ressources de référence natives et prompts réutilisables d’analyse d’entraînement pour TrainingLoad MCP.
+---
+
+# Ressources et prompts MCP
+
+Cette page est générée à partir du catalogue de contenu MCP du serveur. Ne la modifiez pas directement ; exécutez `pnpm --dir apps/server mcp:reference`.
+
+Les ressources fournissent aux clients IA des repères stables sur les métriques, les limites de sécurité et les capacités autorisées, sans lire de données athlète supplémentaires. Les prompts génèrent des modèles de questions structurés ; les données réelles proviennent toujours des outils encadrés par les portées (scopes) OAuth.
+
+## Ressources
+
+| URI | Nom | Objectif |
+| --- | --- | --- |
+| `trainingload://guide/training-metrics` | Guide d’interprétation des métriques TrainingLoad | Définitions et limites d’interprétation pour la charge d’entraînement, l’ATL, la CTL, la TSB, les plages de disponibilité (readiness), la couverture et les données manquantes. |
+| `trainingload://guide/privacy-and-safety` | Guide de confidentialité et de sécurité TrainingLoad | Limites en lecture seule, traitement du texte non fiable, cadre des données de santé et catégories de données exclues. |
+| `trainingload://catalog/capabilities` | Catalogue des capacités TrainingLoad autorisées | Noms des outils en lecture seule actuellement autorisés, descriptions et portées (scopes) OAuth. |
+
+## Prompts
+
+## `weekly-training-review`
+
+Construire un bilan étayé par les données sur la charge d’entraînement récente, la régularité, les activités réalisées et les séances planifiées à venir.
+
+<details>
+<summary>Schéma JSON des arguments</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "days": {
+      "default": "7",
+      "type": "string",
+      "enum": [
+        "7",
+        "14",
+        "28"
+      ]
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "days"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `compare-training-blocks`
+
+Comparer deux périodes bornées à partir de la charge d’entraînement, de la répartition par sport, des totaux d’activités et de la régularité.
+
+<details>
+<summary>Schéma JSON des arguments</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "periodAFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodATo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBTo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "periodAFrom",
+    "periodATo",
+    "periodBFrom",
+    "periodBTo"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `race-preparation-check`
+
+Examiner une compétition, la réalisation du plan d’entraînement, la charge récente et les séances planifiées à venir sans formuler de conclusion médicale.
+
+<details>
+<summary>Schéma JSON des arguments</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "horizonDays": {
+      "default": "28",
+      "type": "string",
+      "enum": [
+        "14",
+        "28",
+        "56"
+      ]
+    }
+  },
+  "required": [
+    "horizonDays"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>

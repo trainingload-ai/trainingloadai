@@ -1,156 +1,152 @@
 ---
-title: "VO2 Max Levels"
-description: "VO2 Max levels chart: understand what VO2 Max levels mean, what is a good VO2 Max level, and how VO2 Max levels vary by age and gender. Includes Garmin VO2 Max levels notes, average vs elite ranges, and blood oxygen vs VO2 Max FAQs."
+title: "VO2 Max 등급"
+description: "VO2 Max 등급표 안내: VO2 Max 등급의 의미, 좋은 VO2 Max 기준, 연령·성별에 따른 차이를 설명합니다. Garmin VO2 Max 등급 해석, 일반인 vs 엘리트 범위, 혈중 산소포화도(SpO₂)와의 차이 FAQ도 포함합니다."
 keywords:
-  - "vo2 max levels"
-  - "vo2 max levels chart"
-  - "vo2 max levels by age"
-  - "vo2 max levels by age and gender"
-  - "vo2 max level by age"
-  - "vo2 max levels men"
-  - "vo2 max levels women"
-  - "vo2 max levels by age female"
-  - "what is a good vo2 max level"
-  - "vo2 max fitness level"
-  - "normal vo2 max by age"
-  - "healthy cardio fitness level vo2 max"
-  - "average vo2 max levels"
-  - "elite level vo2 max"
-  - "garmin vo2 max levels"
-  - "blood oxygen level vs vo2 max"
-  - "how to increase vo2 max"
+  - "VO2 max 등급"
+  - "VO2 max 등급표"
+  - "연령별 VO2 max"
+  - "성별 연령별 VO2 max"
+  - "남성 VO2 max 기준"
+  - "여성 VO2 max 기준"
+  - "좋은 VO2 max 수준"
+  - "심폐 체력 등급"
+  - "평균 VO2 max"
+  - "엘리트 VO2 max"
+  - "가민 VO2 max 등급"
+  - "혈중 산소포화도 VO2 max 차이"
+  - "VO2 max 높이는 법"
 ---
 
 import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
 
-# VO2 Max Levels
+# VO2 Max 등급
 
-> All VO2 Max values on this page are **estimates**, not lab-measured VO2 Max. For simplicity, we refer to them as VO2 Max (estimated VO2 Max).
+> 이 페이지의 모든 VO2 Max 수치는 실험실 직접 측정값이 아니라 **추정치**입니다. 편의상 VO2 Max(추정 VO2 Max)로 표기합니다.
 
-Trainingload.ai maps your **estimated VO2 Max** into 5 levels so you can quickly interpret your current aerobic fitness.
+Trainingload.ai는 현재 유산소 체력을 직관적으로 파악할 수 있도록 **추정 VO2 Max**를 5개 등급으로 매핑합니다.
 
-| Level | Description | Color |
+| 등급 | 설명 | 색상 |
 | :-- | :-- | :-- |
-| Excellent | Top tier | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#8b5cf6", verticalAlign: "middle", marginRight: 6 }} /> |
-| Very Good | Strong | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#0ea5e9", verticalAlign: "middle", marginRight: 6 }} /> |
-| Good | Solid | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#10b981", verticalAlign: "middle", marginRight: 6 }} /> |
-| Fair | Needs improvement | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#f59e0b", verticalAlign: "middle", marginRight: 6 }} /> |
-| Poor | Significant opportunity | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#f87171", verticalAlign: "middle", marginRight: 6 }} /> |
+| Excellent (최상) | 최상위 수준 | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#8b5cf6", verticalAlign: "middle", marginRight: 6 }} /> |
+| Very Good (매우 우수) | 우수한 수준 | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#0ea5e9", verticalAlign: "middle", marginRight: 6 }} /> |
+| Good (우수) | 탄탄한 수준 | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#10b981", verticalAlign: "middle", marginRight: 6 }} /> |
+| Fair (보통) | 개선 여지 있음 | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#f59e0b", verticalAlign: "middle", marginRight: 6 }} /> |
+| Poor (미흡) | 성장 잠재력이 큰 구간 | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#f87171", verticalAlign: "middle", marginRight: 6 }} /> |
 
-## What are VO2 Max levels (and why they’re useful)?
+## VO2 Max 등급이란 무엇이며 왜 유용한가요?
 
-VO2 Max levels are a practical way to turn a continuous number (VO2 Max in `ml·kg⁻¹·min⁻¹`) into a **fitness level**. They’re most useful for:
+VO2 Max 등급은 연속적인 수치(`ml·kg⁻¹·min⁻¹`)를 이해하기 쉬운 **체력 수준**으로 바꿔 주는 실용적인 기준입니다. 주로 다음과 같은 상황에 유용합니다.
 
-- Quick interpretation (where you roughly sit right now)
-- Tracking trends over time (same device/algorithm)
-- Interpreting VO2 Max levels by age and gender (more fair comparisons)
+- 빠른 상태 파악(현재 대략 어느 위치에 있는지 확인)
+- 시간 경과에 따른 추세 추적(동일한 기기·알고리즘 기준)
+- 연령 및 성별을 고려한 공정한 비교
 
-If you want to estimate your VO2 Max first:
+먼저 본인의 VO2 Max를 추정해 보고 싶다면 아래 도구를 이용해 보세요.
 
-- [Estimate VO2 Max to interpret training load readiness](/vo2-max-calculator)
+- [VO2 Max를 추정하여 훈련 부하 준비도 해석하기](/ko/vo2-max-calculator)
 
-And for a broader overview of what VO2 Max means and how it’s estimated:
+VO2 Max의 개념과 추정 원리를 더 자세히 알고 싶다면 아래 가이드를 참고하세요.
 
-- [VO2 Max (Maximal Oxygen Uptake)](/docs/metrics/maximal-oxygen-uptake)
+- [VO2 Max (최대산소섭취량)](/ko/docs/metrics/maximal-oxygen-uptake)
 
-## What is a good VO2 Max level?
+## 좋은 VO2 Max 등급은 어느 정도인가요?
 
-“Good” depends on **age, sex, sport, and training history**. A practical approach:
+“좋은 수준”은 **연령, 성별, 종목, 훈련 경력**에 따라 달라집니다. 실전에서는 다음 기준을 권장합니다.
 
-- Use the **age + sex thresholds** below when you have that info
-- Focus on **your own trend** rather than a single reading
+- 연령과 성별 정보가 있다면 아래 **연령 + 성별 기준표**를 활용하세요.
+- 단발성 수치 하나보다 **본인의 장기 추세**에 집중하세요.
 
-There are two ways to determine the level (the system uses the more specific option when available):
+등급은 두 가지 방식으로 판정되며, 시스템은 정보가 충분할 때 더 구체적인 기준을 자동으로 적용합니다.
 
-## Option 1: Age or sex not available — generic thresholds
+## 기준 1: 연령 또는 성별 정보가 없는 경우 — 일반 기준표
 
-When age or sex is missing, generic thresholds are used:
+연령이나 성별 정보가 없으면 아래의 일반 기준을 사용합니다.
 
-| Level | VO2 Max (ml·kg⁻¹·min⁻¹) |
+| 등급 | VO2 Max (ml·kg⁻¹·min⁻¹) |
 | :-- | :-- |
-| Excellent | ≥ 50 |
-| Very Good | ≥ 40 and < 50 |
-| Good | ≥ 35 and < 40 |
-| Fair | ≥ 30 and < 35 |
-| Poor | < 30 |
+| Excellent (최상) | ≥ 50 |
+| Very Good (매우 우수) | ≥ 40 및 < 50 |
+| Good (우수) | ≥ 35 및 < 40 |
+| Fair (보통) | ≥ 30 및 < 35 |
+| Poor (미흡) | < 30 |
 
-## Option 2: Age and sex available
+## 기준 2: 연령과 성별 정보가 모두 있는 경우
 
-When both age and sex are available, thresholds are determined by sex and age bracket.
+연령과 성별 정보가 모두 있으면 성별 및 연령대별 구간 기준이 적용됩니다.
 
-### Men
+### 남성
 
-| Level | 20–29 | 30–39 | 40–49 | 50–59 | 60–69 | 70–79 |
+| 등급 | 20–29세 | 30–39세 | 40–49세 | 50–59세 | 60–69세 | 70–79세 |
 | :-- | --: | --: | --: | --: | --: | --: |
-| Excellent | 55.4 | 54.0 | 52.5 | 48.9 | 45.7 | 42.1 |
-| Very Good | 51.1 | 48.3 | 46.4 | 43.4 | 39.5 | 36.7 |
-| Good | 45.4 | 44.0 | 42.4 | 39.2 | 35.5 | 32.3 |
-| Fair | 41.7 | 40.5 | 38.5 | 35.6 | 32.3 | 29.4 |
-| Poor | < 41.7 | < 40.5 | < 38.5 | < 35.6 | < 32.3 | < 29.4 |
+| Excellent (최상) | 55.4 | 54.0 | 52.5 | 48.9 | 45.7 | 42.1 |
+| Very Good (매우 우수) | 51.1 | 48.3 | 46.4 | 43.4 | 39.5 | 36.7 |
+| Good (우수) | 45.4 | 44.0 | 42.4 | 39.2 | 35.5 | 32.3 |
+| Fair (보통) | 41.7 | 40.5 | 38.5 | 35.6 | 32.3 | 29.4 |
+| Poor (미흡) | < 41.7 | < 40.5 | < 38.5 | < 35.6 | < 32.3 | < 29.4 |
 
-### Women
+### 여성
 
-| Level | 20–29 | 30–39 | 40–49 | 50–59 | 60–69 | 70–79 |
+| 등급 | 20–29세 | 30–39세 | 40–49세 | 50–59세 | 60–69세 | 70–79세 |
 | :-- | --: | --: | --: | --: | --: | --: |
-| Excellent | 49.6 | 47.4 | 45.3 | 41.1 | 37.8 | 36.7 |
-| Very Good | 43.9 | 42.4 | 39.7 | 36.7 | 33.0 | 30.9 |
-| Good | 39.5 | 37.8 | 36.3 | 33.0 | 30.0 | 28.1 |
-| Fair | 36.1 | 34.4 | 33.0 | 30.1 | 27.5 | 25.9 |
-| Poor | < 36.1 | < 34.4 | < 33.0 | < 30.1 | < 27.5 | < 25.9 |
+| Excellent (최상) | 49.6 | 47.4 | 45.3 | 41.1 | 37.8 | 36.7 |
+| Very Good (매우 우수) | 43.9 | 42.4 | 39.7 | 36.7 | 33.0 | 30.9 |
+| Good (우수) | 39.5 | 37.8 | 36.3 | 33.0 | 30.0 | 28.1 |
+| Fair (보통) | 36.1 | 34.4 | 33.0 | 30.1 | 27.5 | 25.9 |
+| Poor (미흡) | < 36.1 | < 34.4 | < 33.0 | < 30.1 | < 27.5 | < 25.9 |
 
-## Garmin VO2 Max levels: are they reliable?
+## Garmin VO2 Max 등급은 믿을 수 있나요?
 
-Garmin shows an estimated VO2 Max and an associated level. Treat it as a model output, not a lab measurement.
+Garmin에 표시되는 VO2 Max와 등급은 실험실 측정치가 아니라 모델 기반 추정치입니다.
 
-Best practice:
+권장 활용법은 다음과 같습니다.
 
-- Compare **within the same device/ecosystem** (great for trends)
-- Don’t compare raw numbers across brands/algorithms
-- For a more repeatable baseline, use a standard effort (e.g., a recent 5K/10K) and track progress with the same protocol
+- **동일한 기기·생태계 내에서 비교**하세요(추세 파악에 매우 유용합니다).
+- 서로 다른 브랜드나 알고리즘의 원시 수치를 직접 비교하지 마세요.
+- 반복 가능성이 높은 기준선이 필요하다면 표준화된 노력(예: 최근 5K/10K 기록)을 같은 방식으로 정기 추적하세요.
 
-## Average vs elite VO2 Max levels
+## 일반 평균 vs 엘리트 VO2 Max 등급
 
-“Average” and “elite” vary by sport and event. For training, it’s usually more useful to:
+“평균”과 “엘리트”의 기준은 종목과 세부 이벤트마다 크게 다릅니다. 실제 훈련에서는 다음 접근이 더 실용적입니다.
 
-- Improve into a healthier range for your profile
-- Also develop threshold ability, economy/efficiency, durability, and pacing/fueling (which strongly affect performance)
+- 본인의 프로필 기준으로 더 건강한 구간으로 꾸준히 끌어올리는 데 집중하세요.
+- 실제 경기력에 큰 영향을 미치는 역치 능력, 경제성/효율성, 내구성, 페이싱 및 보급 전략을 함께 발전시키세요.
 
-## Blood oxygen vs VO2 Max: are they the same?
+## 혈중 산소포화도(SpO₂)와 VO2 Max는 같은가요?
 
-- **Blood oxygen (SpO₂)**: oxygen saturation in the blood right now (affected by altitude, breathing, illness, etc.)
-- **VO2 Max**: maximal capacity of the full oxygen pathway during intense exercise (a performance capacity ceiling)
+- **혈중 산소포화도(SpO₂)**: 현재 혈액 속에 산소가 얼마나 포화되어 있는지를 나타냅니다(고도, 호흡 상태, 질환 등의 영향을 받음).
+- **VO2 Max**: 고강도 운동 시 전체 산소 전달·소비 경로의 최대 수용 능력(수행 능력의 상한선)을 나타냅니다.
 
-They’re related in some contexts (e.g., altitude), but **not the same metric**.
+고지대처럼 일부 상황에서는 서로 연관되지만 **같은 지표가 아닙니다**.
 
-## How to increase VO2 Max levels
+## VO2 Max 등급을 높이는 방법
 
-Most athletes improve VO2 Max levels through a combination of:
+대부분의 선수는 아래 세 가지 요소를 조합해 VO2 Max 등급을 끌어올립니다.
 
-- A consistent aerobic base (easy/Zone 2 volume)
-- Periodic VO2-intensity intervals (e.g., 3–8 min repeats, quality-first)
-- Progressive overload with adequate recovery
+- 꾸준한 유산소 기반 구축(이지 / 존 2 훈련량)
+- 주기적인 VO2 강도 인터벌(예: 3–8분 반복, 품질 우선)
+- 충분한 회복이 뒷받침된 점진적 과부하
 
-## FAQ: VO2 Max levels
+## 자주 묻는 질문: VO2 Max 등급
 
-### Where is the VO2 Max levels chart?
-This page includes a VO2 Max levels chart: generic thresholds plus sex- and age-bracket thresholds.
+### VO2 Max 등급표는 어디에서 볼 수 있나요?
+이 페이지에 일반 기준표와 성별·연령대별 VO2 Max 등급표가 모두 포함되어 있습니다.
 
-### VO2 Max levels by age female / women / men — how do I read it?
-Use the Men/Women table and pick your age bracket column.
+### 남성·여성 연령별 VO2 Max 표는 어떻게 읽나요?
+위의 남성 또는 여성 표에서 본인의 연령대 열을 선택해 수치를 비교하시면 됩니다.
 
-### What is a normal / healthy cardio fitness level by age VO2 Max?
-Use the age + sex thresholds as a starting point, then focus on long-term trend and consistency rather than one-off readings.
+### 연령별 정상·건강한 심폐 체력 VO2 Max 기준은 무엇인가요?
+연령 + 성별 기준표를 출발점으로 삼되, 단발성 측정값보다는 장기적인 추세와 훈련 일관성에 초점을 맞추는 것이 좋습니다.
 
 <DocsToolCtaCard
-  title="Go to the tool: estimate VO2 Max and see your VO2 Max level"
+  title="도구 바로가기: VO2 Max를 추정하고 등급을 확인해 보세요"
   description={
     <>
-      If you haven’t estimated your VO2 Max yet, start with the tool page. The
-      results will also show your <b>VO2 Max level</b> and a short explanation,
-      so you can interpret your number as a practical range (Fair / Good / Very
-      Good / Excellent).
+      아직 본인의 VO2 Max를 추정해 보지 않으셨다면 계산기 페이지에서 바로
+      시작해 보세요. 결과와 함께 <b>VO2 Max 등급</b> 및 간단한 해석이 제공되어
+      현재 수치를 실용적인 구간(Fair / Good / Very Good / Excellent)으로 바로
+      이해할 수 있습니다.
     </>
   }
-  primary={{ href: "/vo2-max-calculator", label: "Open the VO2 Max Calculator →" }}
-  secondary={{ href: "/docs/metrics/maximal-oxygen-uptake", label: "Read the VO2 Max guide first" }}
+  primary={{ href: "/ko/vo2-max-calculator", label: "VO2 Max 계산기 열기 →" }}
+  secondary={{ href: "/ko/docs/metrics/maximal-oxygen-uptake", label: "VO2 Max 가이드 먼저 읽기" }}
 />

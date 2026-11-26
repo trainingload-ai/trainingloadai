@@ -1,92 +1,136 @@
 ---
-title: Create a training plan with the workout DSL
-description: Plain-language guide to writing the workout DSL in Trainingload.ai—what each line means, repeats, pace, power, all in everyday words.
+title: 지구력 워크아웃 DSL
+description: Trainingload.ai 텍스트/규칙(Rules) 모드에서 지구력 워크아웃의 단계, 목표, 반복 블록, 종목별 구간을 작성하고 검증하는 방법을 안내합니다.
 ---
 
-# Create a training plan with the workout DSL
+# 지구력 워크아웃 DSL
 
-When you edit a day in **text / rules** mode, this is the deal: **one line = one chunk** of the session. Read top to bottom, that’s the order you’ll do it. If something’s wrong, the app complains—fix it until it saves.
+이 DSL은 **규칙(Rules)** 모드에서 구조화된 지구력 워크아웃 하나를 작성할 때 사용합니다. 하나의 훈련 플랜에는 여러 워크아웃이 포함될 수 있으며, 각 워크아웃은 개별적으로 파싱되고 검증됩니다. **한 줄이 하나의 단계(Step)**를 나타내며 위에서 아래 순서대로 실행됩니다.
+
+이 페이지는 러닝, 사이클링, 수영의 지구력 단계를 다룹니다. 운동 종목과 세트 기반 구성은 [근력 워크아웃](/ko/docs/planning/strength-workouts) 구조를 사용하세요.
+
+## 시작하기 전에
+
+- 워크아웃을 작성하기 전에 정확한 종목을 먼저 선택합니다. 종목에 따라 구간(Zone)과 단위 해석이 달라집니다.
+- `z1`, `z2` 같은 구간 참조를 사용하기 전에 선수의 페이스, 파워 또는 심박수 구간을 먼저 설정해 둡니다.
+- 각 단계가 시간, 거리, 에너지, 센서 조건 중 무엇으로 끝날지 결정합니다.
+- 텍스트 기반 편집이 필요하지 않다면 시각적 빌더를 사용하세요.
 
 ---
 
-## What goes on each line (left to right)
+## 각 줄은 왼쪽에서 오른쪽으로 작성합니다
 
-Don’t jumble tokens. Three chunks, separated by spaces:
+각 줄은 공백으로 구분된 최대 세 부분으로 이루어집니다.
 
-| Bit | In plain English | Examples |
+| 순서 | 역할 | 예시 |
 | --- | --- | --- |
-| ① What this chunk is | Warmup, main work, easy spin, rest, cooldown… | `warmup`, `work`, `recovery`, `rest`, `cooldown` |
-| ② How long / how it ends | **Only one** “number + unit” first: time, distance, kJ, or HR rule | `5m`, `3km`, `500kj`, `hr<150bpm` |
-| ③ What to aim for (optional) | Pace, power, HR, cadence… | `pace …`, `pwr …`, `hr …` |
+| ① 단계 유형 | 웜업, 본 운동, 가벼운 회복, 휴식, 쿨다운 등 | `warmup`, `work`, `recovery`, `rest`, `cooldown` |
+| ② 길이 / 종료 조건 | 가장 앞에 **하나의** “숫자 + 단위”만 작성: 시간, 거리, kJ 또는 심박 조건 | `5m`, `3km`, `500kj`, `hr<150bpm` |
+| ③ 목표(선택 사항) | 페이스, 파워, 심박수, 케이던스 등 | `pace …`, `power …`, `hr …` |
 
-You can stack several things in ③—they all apply to **the same** chunk of time or distance.
-`work: 20m` and `work 20m` are the same; the colon is optional.
+③ 목표는 **최대 1개**만 사용할 수 있습니다. 한 단계에서 페이스, 파워, 심박수, 케이던스, 경사도 중 하나만 목표로 지정할 수 있으며 여러 목표를 동시에 넣을 수 없습니다. 목표가 여러 개라면 단계를 나누거나 보조 가이드를 워크아웃 메모에 작성하세요. `work: 20m`과 `work 20m`은 동일하며 콜론(`:`)은 생략할 수 있습니다.
 
 ---
 
-## ① Words at the start of the line
+## ① 단계 유형 선택하기
 
-Stick these **first** (case usually doesn’t matter):
+줄 맨 앞에 아래 키워드 중 하나를 적습니다. 키워드는 대소문자를 구분하지 않습니다.
 
-| Word | Basically |
+| 키워드 | 의미 |
 | --- | --- |
-| `warmup` / `wu` | Ease in at the start |
-| `work` | The hard / main bit |
-| `recovery` / `rec` | Easy jog or spin between reps |
-| `rest` | Lighter than recovery—more “stop” |
-| `cooldown` / `cd` | Wind down at the end |
-| `other` | Rare, special label |
+| `warmup` / `wu` | 시작 웜업 |
+| `work` | 본 운동 |
+| `recovery` / `rec` | 본 운동 사이의 능동 회복(Active recovery) |
+| `rest` | 휴식 단계 |
+| `cooldown` / `cd` | 마무리 쿨다운 |
+| `other` | 표준 라벨에 해당하지 않는 기타 단계 |
 
-`recovery` vs `rest` is fuzzy—**use whichever matches how you coach it**.
+가볍게 움직이는 능동 회복 구간에는 `recovery`를, 정지하거나 쉬는 지침에는 `rest`를 사용합니다. 저장된 단계 유형은 화면 표시와 외부 내보내기에서 이 구분을 그대로 유지합니다.
 
 ---
 
-## ② The first number after that word
+## ② 종료 조건 추가하기
 
-That’s **how this chunk ends**—by time, distance, energy, or HR. **Only one primary measure per line.** Anything like `pwr` or `hr` after it is **intensity**, not a second “length”.
+이 항목은 **해당 단계가 언제 끝나는지**—시간, 거리, 에너지, 센서 조건 중 하나—를 정합니다. 한 줄에는 주요 종료 조건을 하나만 작성해야 합니다. 그 뒤에 오는 `power`나 `hr` 값은 또 다른 길이가 아니라 강도 목표입니다.
 
-| Form | Basically |
+| 형식 | 의미 |
 | --- | --- |
-| `30s`, `5m`, `1h` | Clock time |
-| `5km`, `400m` | Distance (`3km` is three km, not three seconds) |
-| `500kj` | Kilojoules on the bike |
-| `hr<150bpm`, etc. | End this part when HR hits a rule |
+| `30s`, `5m`, `25min`, `1h` | 시간 |
+| `5km`, `400m` | 거리(`3km`는 3초가 아니라 3km를 의미) |
+| `500kj` | 자전거 에너지 소비량(킬로줄) |
+| `hr<150bpm`, `power>250W` 등 | 심박수나 파워가 조건에 도달하면 단계 종료 |
 
 ---
 
-## ③ Targets after that
+## ③ 선택적 목표 추가하기
 
-All after the first measure, space-separated:
+첫 번째 종료 조건 뒤에 공백으로 구분해 작성합니다.
 
-| Keyword | For |
+| 키워드 | 용도 |
 | --- | --- |
-| `pace` | Run pace |
-| `speed` | Speed (app shows pace or km/h) |
-| `pwr` / `power` | Power: prefer **watts** (`250W`); a bare number like `250` is parsed as **watts**; legacy `%FTP` (`85%`) still works |
-| `cad`, `cadence`, `rpm` | Cadence |
-| `hr` | Heart rate: **bpm only** (`150bpm`, `150-160bpm`, or a bare number like `150`) |
-| `grade` | Slope |
+| `pace` | 러닝 페이스 |
+| `speed` | 속도(앱에서 페이스 또는 km/h로 표시) |
+| `power` | 파워: **와트**(`250W`) 권장. 단위 없는 숫자 `250`도 **와트**로 해석되며, 기존 `%FTP`(`85%`) 표기도 계속 지원 |
+| `cadence` | 케이던스 |
+| `hr` | 심박수: **bpm**(`150bpm`, `150-160bpm`, `<150bpm`, 단위 없는 숫자 `150`) 또는 `hr z2` 같은 구간 참조 |
+| `grade` | 경사도 |
 
-`pwr` + `cad` on one line means you’re trying to hold **both** during that chunk.
+이전 별칭인 `pwr`, `cad`, `rpm`도 여전히 파싱되지만, 새로 생성되는 DSL은 전체 단어를 사용합니다.
+
+DSL 키워드, 단위, 구간 토큰은 대소문자를 구분하지 않습니다. `WORK 25M HR Z2`는 `work 25m hr z2`와 동일하게 파싱되며, 저장되거나 재생성된 텍스트는 소문자 키워드로 정규화됩니다.
+
+정확한 수치를 고정하는 대신 선수의 현재 구간 설정을 참조하려면 다음과 같이 작성합니다.
+
+```text
+work 25m hr z2
+work 10m power z4
+work 20m pace z2
+```
+
+이는 “선수의 현재 Z2 / Z4 범위에 맞춰 수행한다”는 뜻입니다. 나중에 구간이 바뀌면 시스템이 새 범위에 맞춰 워크아웃을 해석할 수 있습니다. 수치를 고정하고 싶다면 `hr 140-150bpm`, `power 220-250W`, `pace 4:30-4:45`처럼 명시적 값을 사용하세요.
+
+첫 번째 종료 조건 규칙과 목표를 혼동하지 마세요.
+
+```text
+work hr<150bpm
+work 25m hr <150bpm
+```
+
+첫 번째 줄은 심박수가 조건을 넘으면 종료되는 단계이므로 추가 목표를 붙일 수 없습니다. 두 번째 줄은 25분 동안 진행하면서 심박수 150 bpm을 상한 목표로 사용합니다.
 
 ---
 
-## `repeat`: same mini-block, many times
+## `repeat`: 같은 미니 블록 여러 번 반복하기
 
 ```text
 repeat 4 {
-  work 4m pwr 270W
+  work 4m power 270W
   recovery 2m
 }
 ```
 
-- `repeat 4` = run the stuff inside **four times**.
-- Inside the braces: line 1, then line 2 = **one round**. Here it’s four rounds of “4 min hard @ ~90% power + 2 min easy”.
-Some builds also let you close with `end` / `endrepeat` instead of `}`—whatever your UI accepts.
+- `repeat 4`는 중괄호 안의 단계를 **4회** 반복합니다.
+- 중괄호 안의 두 줄이 1세트를 이룹니다. 위 예제는 270 W 4분 본 운동과 2분 회복을 4회 반복합니다. 일부 빌드에서는 `}` 대신 `end` / `endrepeat`로 닫을 수도 있지만, 현재 편집기에서 지원하는 형식을 사용하세요.
+
+특정 조건에 도달할 때까지 반복할 수도 있습니다.
+
+```text
+repeat until 30m {
+  work 4m power 270W
+  recovery 2m
+}
+
+repeat until cadence<80rpm {
+  work 30s power 300W
+  recovery 30s
+}
+```
+
+`repeat until`은 시간, 거리, 칼로리, 심박수, 파워, 케이던스 조건을 지원합니다. 중첩된 반복(`repeat` 안의 `repeat`)은 의도적으로 거부됩니다. 특정 조건을 표현할 수 없는 외부 연동 플랫폼은 워크아웃을 몰래 바꾸지 않고 미지원 또는 명시적 축소(degraded) 상태로 알려야 합니다.
 
 ---
 
-## Example 1: run
+## 예제 1: 러닝
 
 ```text
 warmup 5m
@@ -96,52 +140,86 @@ work 3km
 cooldown 5m
 ```
 
-- `warmup 5m`: five easy minutes.
-- `work 20m pace …`: twenty minutes main work, ~7:20–8:20 / km.
-- `recovery 90s`: ninety seconds easy.
-- `work 3km`: three **km** of work, not another 20 minutes.
-- `cooldown 5m`: five minutes easy to finish.
+- `warmup 5m`: 가볍게 5분 웜업
+- `work 20m pace …`: 약 7:20–8:20/km 페이스로 20분 본 운동
+- `recovery 90s`: 90초 가볍게 회복
+- `work 3km`: 20분이 아니라 **3km** 거리 기준 본 운동
+- `cooldown 5m`: 마무리 5분 쿨다운
 
-Top to bottom = session order.
+위에서 아래로 읽는 순서가 곧 세션 진행 순서입니다.
 
 ---
 
-## Example 2: bike
+## 예제 2: 사이클링
 
 ```text
-work 8m pwr 220-250W cad 85rpm
+work 8m power 220-250W
 recovery 2m
-work 5m pwr 250W hr 150-160bpm
+work 5m hr 150-160bpm
 ```
 
-- Line 1: eight minutes, 220–250 W, ~85 rpm.
-- Line 2: two minutes easy, nothing else.
-- Line 3: five minutes, 250 W, HR 150–160.
+- 1행: 220–250 W 파워로 8분
+- 2행: 별도 목표 없이 2분 회복
+- 3행: 심박수 150–160 bpm으로 5분
 
 ---
 
-## Example 3: four intervals
+## 예제 3: 4회 인터벌
 
 ```text
 repeat 4 {
-  work 4m pwr 270W
+  work 4m power 270W
   recovery 2m
 }
 ```
 
-Four times: hard 4 min @ ~270 W, then easy 2 min. Without `repeat` you’d paste those two lines four times.
+약 270 W로 4분 강하게 수행한 뒤 2분 가볍게 회복하는 구성을 4회 반복합니다. `repeat`가 없다면 두 줄을 네 번 붙여넣어야 합니다.
 
 ---
 
-## Saves keep failing?
+## 검증하고 저장하기
 
-Usually order: **keyword → one measure → then targets**.
-Whether `m` is meters or minutes depends on **position**—the **first** number+unit right after the keyword is the chunk’s main measure.
+1. 워크아웃 편집기에서 **규칙(Rules)**을 선택합니다.
+2. DSL을 입력하거나 붙여넣습니다.
+3. 파싱/미리보기 기능이 제공된다면 저장 전에 먼저 실행합니다.
+4. 정규화된 텍스트와 시각적 미리보기가 의도한 단계 순서와 일치하는지 비교합니다.
+5. 워크아웃을 저장한 뒤 다시 열어 종목, 시간, 반복 횟수, 목표를 확인합니다.
+
+저장된 텍스트는 소문자 키워드와 표준 단위로 정규화될 수 있습니다. 정규화는 정상 동작이지만, 워크아웃의 의미가 달라져서는 안 됩니다.
 
 ---
 
-## Three rules
+## 종목과 DSL 지원 범위
 
-1. One line = one piece; read down.
-2. What kind → how it ends → how hard (optional).
-3. Use `repeat` instead of copy-paste.
+예정된 워크아웃은 로드 러닝, 트레일 러닝, 트레드밀 러닝, 로드 사이클링, 산악자전거, 실내 사이클링, 수영장 수영, 오픈워터 수영 같은 세부 종목을 정확하게 보존합니다. 관련 세부 종목들은 러닝·사이클링·수영 구간과 훈련 부하 분석을 공유하며, Suunto, Intervals.icu, COROS로 내보낼 때는 정확한 세부 종목 매핑을 우선 적용합니다.
+
+API에서는 `sportType`이 러닝·사이클링·수영 같은 상위 종목군을 나타내고, `subSportType`이 `TRAIL_RUNNING`이나 `INDOOR_CYCLING` 같은 표준 세부 종목을 나타냅니다.
+
+종목 선택기에서 비활성화된 종목은 구조화된 편집기가 의미 손실 없이 표현할 수 없는 종목이라는 뜻입니다. 해당 종목은 활동 유형으로는 계속 사용할 수 있으며, 앱은 지원되지 않는 구조를 임의로 다른 워크아웃으로 변환하지 않습니다.
+
+---
+
+## 워크아웃 검증하기
+
+- 입력한 순서대로 모든 단계가 미리보기에 표시됩니다.
+- 각 줄에 주요 종료 조건이 1개 있고 목표는 최대 1개만 지정되어 있습니다.
+- 구간 참조가 의도한 종목 및 선수 프로필 기준으로 해석됩니다.
+- 반복 블록에 의도한 단계와 반복 횟수 또는 종료 조건이 정확히 들어 있습니다.
+- 저장된 워크아웃을 다시 열어도 동일한 구조와 세부 종목이 유지됩니다.
+
+## 문제 해결
+
+- **줄에서 알 수 없는 키워드 오류가 발생함:** 지원되는 단계 유형 또는 목표 키워드를 사용하고 문법에 없는 문장부호를 제거합니다.
+- **시간이나 거리가 잘못 해석됨:** 단위와 위치를 확인합니다. 단계 유형 바로 다음에 오는 첫 번째 수치가 종료 조건입니다.
+- **파서가 다중 목표를 거부함:** 한 줄에는 목표를 하나만 두고 보조 지침은 메모나 별도 단계로 분리합니다.
+- **임계 조건 기반 종료 줄에서 목표가 거부됨:** `work hr<150bpm`은 이미 심박수를 종료 조건으로 사용하고 있습니다. 고정 시간 동안 심박수 상한을 두려면 `work 25m hr <150bpm`처럼 작성합니다.
+- **반복 블록이 실패함:** 중괄호가 올바르게 닫혔는지, 중첩 반복이 없는지, `repeat until` 조건이 유효한지 확인합니다.
+- **종목을 바꾼 뒤 미리보기가 달라짐:** 구간과 단위 의미는 종목에 따라 달라집니다. 올바른 종목을 다시 선택하고 모든 목표를 검토하세요.
+- **내보내기 시 구조 축소 또는 미지원 경고가 표시됨:** 플랫폼 경고 내용을 먼저 읽고 필요할 때만 단순화하세요. 모든 기기가 조건부 반복을 지원하는 것은 아닙니다.
+
+## 다음 단계
+
+- 먼저 [워크아웃 편집기에서 구조화된 워크아웃 초안 작성하기](/ko/workout-editor)로 DSL을 만든 뒤 여기에 붙여넣을 수 있습니다.
+- 앱 내 시각적·텍스트 편집 흐름은 [수동 워크아웃 편집기 가이드](/ko/docs/planning/manual-workout-editor)를 참고하세요.
+- 운동 종목과 세트 기반 세션은 [근력 워크아웃](/ko/docs/planning/strength-workouts)에서 작성하세요.
+- 저장한 워크아웃을 플랜에 추가하려면 [훈련 플랜 만들기](/ko/docs/guide/create-training-plan)로 이동하세요.

@@ -22,7 +22,7 @@ export function RollingPlanAutomation({ plan }: { plan: AutomationPlan }) {
   if (
     plan.planningMode !== "ROLLING" ||
     !plan.startDate ||
-    !["ACTIVE", "PAUSED"].includes(plan.status)
+    plan.status !== "ACTIVE"
   )
     return null;
   return <AutomaticManagement key={plan.id} plan={plan} />;
@@ -47,8 +47,7 @@ function AutomaticManagement({ plan }: { plan: AutomationPlan }) {
         : false,
   });
   const update = useMutation({
-    mutationFn: (enabled: boolean) =>
-      setPlanAutomationEnabled(plan.id, enabled),
+    mutationFn: () => setPlanAutomationEnabled(plan.id, true),
     onSettled: async () => {
       try {
         await invalidateAfterPlanMutation(client);
@@ -66,55 +65,44 @@ function AutomaticManagement({ plan }: { plan: AutomationPlan }) {
     }
     if (changed) void invalidateAfterPlanMutation(client);
   }, [state.data, client, plan.id]);
+
   const latest = state.data?.jobs[0];
+  const interrupted = latest?.state === "BLOCKED" || latest?.state === "FAILED";
+  const blockedReason = state.data?.blockedReason;
+  const canRestore = state.data?.hasAuthorization && !state.data.enabled;
+  const needsAuthorization = state.data?.hasAuthorization === false;
+  if (!interrupted && !blockedReason && !canRestore && !needsAuthorization && !state.isError) {
+    return null;
+  }
+
   return (
-    <section className="flex flex-col gap-2" aria-label={t("title")}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold">{t("title")}</h2>
-        {state.data?.hasAuthorization ? (
+    <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+      {canRestore ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p role="status">{t("disabled")}</p>
           <Button
             type="button"
             variant="outline"
             size="sm"
             disabled={update.isPending || state.isError}
             onClick={() => {
-              if (submitting.current || !state.data) return;
+              if (submitting.current) return;
               submitting.current = true;
-              update.mutate(!state.data.enabled);
+              update.mutate();
             }}
           >
-            {t(state.data.enabled ? "disable" : "enable")}
+            {t("enable")}
           </Button>
-        ) : null}
-      </div>
-      {state.isPending || state.data ? (
-        <p className="text-sm text-muted-foreground" role="status">
-          {state.isPending
-            ? t("loading")
-            : state.isError
-              ? t("lastKnown", {
-                  state: t(state.data!.enabled ? "enabled" : "disabled"),
-                })
-              : t(state.data!.enabled ? "enabled" : "disabled")}
-        </p>
+        </div>
       ) : null}
-      {plan.status === "PAUSED" ? (
-        <p className="text-sm text-muted-foreground">{t("pausedHint")}</p>
+      {needsAuthorization ? (
+        <p role="status">{t("needsAuthorization")}</p>
       ) : null}
-      {state.data &&
-      !latest &&
-      !state.data.blockedReason &&
-      (!state.data.hasAuthorization ||
-        (state.data.enabled && plan.status === "ACTIVE")) ? (
-        <p className="text-sm text-muted-foreground">
-          {t(state.data.hasAuthorization ? "noTasks" : "needsAuthorization")}
-        </p>
-      ) : null}
-      {state.data?.blockedReason ? (
-        <div className="flex flex-col gap-2 text-sm">
+      {blockedReason ? (
+        <div className="space-y-2">
           <p role="status">
             {t(
-              state.data.blockedReason === "ROLLING_AI_ACCESS_REQUIRED"
+              blockedReason === "ROLLING_AI_ACCESS_REQUIRED"
                 ? "accessRequired"
                 : "blockedHint",
             )}
@@ -133,13 +121,13 @@ function AutomaticManagement({ plan }: { plan: AutomationPlan }) {
         </div>
       ) : null}
       {update.isError ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-destructive" role="alert">
           {t("updateError")}
         </p>
       ) : null}
       {state.isError ? (
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm text-destructive" role="alert">
+          <p className="text-destructive" role="alert">
             {t("loadError")}
           </p>
           <Button
@@ -153,18 +141,9 @@ function AutomaticManagement({ plan }: { plan: AutomationPlan }) {
           </Button>
         </div>
       ) : null}
-      {latest &&
-      !state.data?.blockedReason &&
-      ["BLOCKED", "FAILED"].includes(latest.state) ? (
-        <p className="text-sm text-muted-foreground">{t("blockedHint")}</p>
+      {interrupted && !blockedReason && state.data?.enabled ? (
+        <p role="status">{t("blockedHint")}</p>
       ) : null}
-      {latest ? (
-        <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
-          <span>{t(`kind.${latest.kind}`)}</span>
-          <span>{latest.windowStart}</span>
-          <span>{t(`state.${latest.state}`)}</span>
-        </div>
-      ) : null}
-    </section>
+    </div>
   );
 }

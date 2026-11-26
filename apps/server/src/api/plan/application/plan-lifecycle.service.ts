@@ -89,7 +89,7 @@ export class PlanLifecycleService {
     return this.write.cancelPlan(userId, planId, reason, meta, options);
   }
 
-  deletePlan(userId: string, planId: string) {
-    return this.write.deletePlan(userId, planId);
+  deletePlan(...args: Parameters<PlanWriteSupport['deletePlan']>) {
+    return this.write.deletePlan(...args);
   }
 }

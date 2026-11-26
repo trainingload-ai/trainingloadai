@@ -1,110 +1,166 @@
 ---
-title: Create a Training Plan
-description: Create a manual or AI-assisted training plan in Trainingload.ai, review the draft, and activate it when the schedule is ready.
-keywords: ["create training plan", "AI training plan", "manual training plan", "Trainingload.ai plan"]
+title: Creare un piano di allenamento
+description: Crea un piano da un modello ufficiale, con il Coach AI o manualmente in Trainingload.ai; rivedi la bozza e attivalo quando sei pronto.
+keywords:
+  [
+    "creare piano di allenamento",
+    "piano di allenamento AI",
+    "piano di allenamento manuale",
+    "piano Trainingload.ai",
+  ]
 ---
 
-# Create a Training Plan
+# Creare un piano di allenamento
 
-Trainingload.ai supports two plan creation paths:
+Trainingload.ai supporta quattro modalità di creazione di un piano di allenamento:
 
-- **Manual plan**: you build the plan week by week.
-- **AI-assisted plan**: you provide a brief, then AI Coach drafts a plan for review.
+- **Piano di allenamento continuo**: definisci una direzione di lungo periodo e genera il programma imminente per fasi successive.
+- **Modello ufficiale**: guarda l'anteprima di un piano verificato, adattalo al tuo calendario e crea una bozza senza consumare crediti AI.
+- **Piano manuale**: costruisci il piano settimana per settimana.
+- **Piano assistito da AI**: fornisci un brief e il Coach AI prepara una bozza di piano da revisionare.
 
-Both paths produce the same core object: a structured training plan with weeks, days, workouts, sport types, planned workout text, and optional notes.
+Ogni percorso salva una bozza di piano di allenamento. Controlla sempre distribuzione settimanale, sport delle sessioni, contenuti e note prima di decidere se attivarlo.
 
-## Before you create a plan
+## Prima di creare un piano
 
-Check these items first:
+Controlla prima questi elementi:
 
-- Your profile and thresholds are up to date.
-- Your recent activities have finished processing.
-- Your training goal is specific enough to guide scheduling.
-- Your available training days and session duration are realistic.
+- Profilo e soglie sono aggiornati.
+- Le attività recenti hanno terminato l'elaborazione.
+- Il tuo obiettivo di allenamento è abbastanza specifico da guidare la programmazione.
+- Giorni disponibili e durata delle sessioni sono realistici.
 
-Thresholds and recent activity history help Trainingload.ai estimate plan load and give AI Coach better context. If those inputs are missing, the plan can still be created, but load estimates and recommendations may be less precise.
+Soglie e storico recente aiutano Trainingload.ai a stimare il carico del piano e offrono al Coach AI un contesto più preciso. Se questi dati mancano, puoi comunque creare il piano, ma stime di carico e suggerimenti potrebbero essere meno accurati.
 
-## Manual plan
+## Scegli un percorso di creazione
 
-Use the manual flow when you already know the structure you want.
+1. Apri **Piani** e seleziona l'azione di creazione.
+2. Scegli Modelli ufficiali quando un piano già verificato rispecchia obiettivo e livello attuale.
+3. Scegli Manuale quando conosci già il programma da seguire.
+4. Scegli Assistito da AI quando hai chiari obiettivo e vincoli ma vuoi una bozza di struttura settimanale.
+5. Scegli Piano continuo se vuoi allenarti per blocchi successivi.
+6. Rivedi la bozza prima di [avviare il piano](/it/docs/planning/plan-lifecycle#activate).
 
-The manual flow usually has three steps:
+<DocsScreenshot
+  id="plan-create-paths"
+  title="Descrivi un obiettivo di allenamento al Coach AI"
+  description="Il modulo del piano AI raccoglie sport, obiettivo, ciclo e preferenze di forza prima che il Coach generi una bozza."
+  route="Piano → Crea → AI"
+/>
 
-- Enter the plan name, duration, and description.
-- Add workouts to the weekly calendar.
-- Review the plan preview and save it.
+## Piano di allenamento continuo
 
-Each workout can include:
+Scegli un piano continuo quando punti a un obiettivo di lungo periodo e vuoi generare il programma imminente per fasi. Rivedi sempre la finestra di allenamento attuale prima di aprire la successiva.
 
-- Sport type.
-- Week, day, and session order.
-- Workout text.
-- Workout name.
-- Notes.
+## Modelli ufficiali
 
-Manual plans are useful when a coach has already written the training, or when you are copying a plan from another source and want Trainingload.ai to track execution.
+Usa un modello ufficiale quando i requisiti di ingresso e la frequenza settimanale corrispondono già al risultato che cerchi. La libreria di corsa include tre piani 5K e piani Finish, Improve e Target per [10K](/it/10k-training-plan), [mezza maratona](/it/half-marathon-training-plan) e [maratona](/it/marathon-training-plan), per un totale di 12 modelli verificati.
 
-## AI-assisted plan
+L'anteprima completa del modello è gratuita. Scegli data di inizio e giorni di allenamento prima di creare la bozza; per crearla è richiesto un piano PLUS o PRO. Anteprima e creazione non invocano alcun modello AI e non consumano crediti AI.
 
-Use the AI flow when you want Trainingload.ai to help draft the structure.
+Quando usi un modello ufficiale:
 
-The plan brief can include:
+1. I modelli ufficiali sono preparati e verificati prima della pubblicazione: visualizzi in anteprima un piano consolidato anziché chiedere all'AI di generarne uno da zero.
+2. L'anteprima distribuisce le sessioni in base a data di inizio e giorni scelti, utilizzando corse recenti, metriche di fitness salvate ed eventuale risultato di gara per impostare target di passo quando possibile. I piani Finish e Improve usano RPE e talk test se mancano dati di passo affidabili. I piani Target richiedono anche una gara obiettivo salvata e un riferimento affidabile della tua capacità attuale.
+3. Dopo la creazione, il Coach AI può confrontare lavoro pianificato e svolto, spiegare carico e recupero e proporre modifiche verificabili. Rivedi sempre quelle proposte prima di applicarle al piano.
 
-- Main sport or sports.
-- Training intent, such as race preparation, fitness build, skill focus, return to training, or health and fat loss.
-- Plan duration.
-- Weekly training days.
-- Typical daily training time.
-- Race discipline and distance when relevant.
+## Piano manuale
 
-After you submit the brief, AI Coach receives the plan request and can generate a draft. Review the draft before saving it as a plan.
+Usa il flusso manuale quando conosci già la struttura che desideri.
 
-## Review the draft
+Di norma prevede tre passaggi:
 
-Before saving or activating a plan, check:
+- Inserire nome, durata e descrizione del piano.
+- Aggiungere gli allenamenti al calendario settimanale.
+- Controllare l'anteprima del piano e salvarlo.
 
-- Does the weekly rhythm match your real schedule?
-- Are hard days separated well enough from other hard days?
-- Are easy or recovery days actually easy?
-- Does the plan start from your current fitness rather than your target fitness?
-- Are sport types and workout descriptions correct?
-- Is the total volume plausible for the next few weeks?
+Ogni allenamento può includere:
 
-If something is off, edit the plan before you activate it.
+- Tipo di sport.
+- Settimana, giorno e ordine della sessione.
+- Testo/struttura dell'allenamento.
+- Nome dell'allenamento.
+- Note.
 
-## Save vs activate
+I piani manuali sono ideali quando un allenatore ha già scritto la tabella oppure quando trasferisci un piano da un'altra fonte per tracciarne l'esecuzione in Trainingload.ai.
 
-A saved plan may still be a draft. A draft is useful for review, editing, or comparison.
+## Piano assistito da AI
 
-Activate the plan when you are ready to execute it. Activation gives the plan a start date and lets Trainingload.ai treat its workouts as the current schedule.
+Usa il flusso AI quando vuoi che Trainingload.ai ti aiuti a impostare la struttura iniziale.
 
-After activation, the plan can be connected to:
+Il brief del piano può includere:
 
-- Calendar and current plan views.
-- Completed activities.
-- Expected vs actual load.
-- AI Coach follow-up.
+- Sport principale o sport praticati.
+- Intento dell'allenamento, come preparazione gara, costruzione fitness, focus tecnico, ripresa dell'allenamento o salute e dimagrimento.
+- Durata del piano.
+- Giorni di allenamento a settimana.
+- Tempo tipico disponibile al giorno.
+- Disciplina e distanza della gara quando pertinente.
 
-## Expected load
+Dopo l'invio del brief, il Coach AI riceve la richiesta e può generare una bozza. Esamina sempre la bozza prima di salvarla come piano.
 
-Trainingload.ai can estimate the expected load of planned workouts when the workout structure and your thresholds provide enough signal.
+## Rivedi la bozza
 
-In general:
+Prima di salvare o attivare un piano, verifica:
 
-- Draft plans may not have final expected-load snapshots.
-- Active or paused plans can use expected load during execution review.
-- Expected load is an estimate, not a promise of how the workout will feel.
+- Il ritmo settimanale è compatibile con i tuoi impegni reali?
+- Le giornate impegnative sono abbastanza distanziate tra loro?
+- I giorni facili o di recupero sono davvero leggeri?
+- Il piano parte dalla tua fitness attuale e non da quella obiettivo?
+- Sport e descrizioni degli allenamenti sono corretti?
+- Il volume totale è realistico per le prossime settimane?
 
-Read [Training Load](/docs/metrics/training-load) for the metric background.
+Se qualcosa non torna, modifica il piano prima di attivarlo.
 
-## After creating the plan
+## Salvare vs attivare
 
-Open the plan detail page and confirm:
+Un piano salvato può restare in stato Bozza, utile per revisioni, modifiche o confronti.
 
-- Plan status.
-- Start date.
-- Week-by-week structure.
-- Workout count.
-- Completion and load summary.
+Attiva il piano quando sei pronto a seguirlo. L'attivazione assegna al piano una data di inizio e permette a Trainingload.ai di considerare i suoi allenamenti come il programma attuale.
 
-Then use [Manage an Active Plan](/docs/guide/manage-active-plan) to execute the plan day by day.
+Dopo l'attivazione, il piano si collega a:
+
+- Calendario e viste del piano corrente.
+- Attività completate.
+- Confronto tra carico previsto e carico effettivo.
+- Follow-up del Coach AI.
+
+## Carico previsto
+
+Trainingload.ai può stimare il carico previsto degli allenamenti pianificati quando la struttura della sessione e le tue soglie forniscono informazioni sufficienti.
+
+In generale:
+
+- I piani in bozza possono non avere istantanee definitive del carico previsto.
+- I piani attivi o in pausa possono usare il carico previsto durante la revisione dell'esecuzione.
+- Il carico previsto è una stima, non una garanzia di come percepirai la sessione.
+
+Leggi [Carico di allenamento](/it/docs/metrics/training-load) per il contesto della metrica.
+
+## Verifica il piano
+
+Apri la pagina di dettaglio del piano e controlla:
+
+- Stato del piano.
+- Data di inizio.
+- Struttura settimana per settimana.
+- Numero di allenamenti.
+- Riepilogo di completamento e carico.
+
+Poi usa [Gestire un piano attivo](/it/docs/guide/manage-active-plan) per seguire il piano giorno per giorno.
+
+## Risoluzione dei problemi
+
+- **Manca il carico previsto:** controlla che l'allenamento abbia una struttura supportata e che l'atleta disponga della soglia richiesta; non inventare una soglia solo per ottenere una stima.
+- **Un allenamento è nel giorno sbagliato:** controlla settimana, giorno, ordine della sessione, durata del piano ed eventuale data di inizio dell'attivazione.
+- **La bozza AI è troppo generica:** fornisci baseline recente, disponibilità, attrezzatura, dati della gara e vincoli, poi chiedi una bozza rivista anziché salvarla così com'è.
+- **Un'anteprima Improve non mostra target di passo:** salva una gara recente affidabile o una metrica supportata della capacità di corsa. Senza un riferimento idoneo, il modello usa intenzionalmente RPE e talk test invece di inventare un passo.
+- **Impossibile creare un'anteprima Target:** verifica che sia salvata una gara di corsa corrispondente con tempo obiettivo, che il giorno di gara rientri nei giorni di allenamento scelti, che l'intera durata del piano preceda la gara e che la capacità attuale supporti l'obiettivo.
+- **Il piano non si salva:** risolvi il primo messaggio di validazione, inclusi allenamenti vuoti, strutture non valide o sessioni fuori dalla durata del piano.
+- **L'attivazione assegna date inattese:** annulla la conferma, correggi data di inizio o fuso orario e ricontrolla la mappatura.
+
+## Prossimi passi
+
+- [Guida all'editor manuale degli allenamenti](/it/docs/planning/manual-workout-editor)
+- [Gestire lo stato del piano](/it/docs/planning/plan-lifecycle)
+- [Gestire un piano attivo](/it/docs/guide/manage-active-plan)

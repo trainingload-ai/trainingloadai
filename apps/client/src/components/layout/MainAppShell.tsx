@@ -2,7 +2,8 @@
 
 import { useGuestAccessText } from "@deployment/managed-ui";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useSyncExternalStore } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
@@ -11,9 +12,14 @@ import { useRuntimeEnvironment } from "@/hooks/use-runtime-environment";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { MainAppFooter } from "@/components/MainAppFooter";
 import SettingsBootstrap from "@/components/bootstrap/SettingsBootstrap";
-import { TopBar } from "@/components/TopBar";
+import { Button } from "@/components/ui/button";
+import { useWorkspaceSidebarCollapsed } from "@/hooks/use-workspace-sidebar-collapsed";
+import { useMobileViewport } from "@/hooks/use-mobile";
+import { SIDEBAR_WIDTH_LIMITS } from "@/hooks/use-persisted-sidebar-width";
 import { MainContentContainer } from "@/components/layout/MainContentContainer";
+import { DesktopWorkspaceTitleBar } from "@/components/layout/DesktopWindowFrame";
 import { MainScrollRecovery } from "@/components/layout/MainScrollRecovery";
+import { SidebarToggleIcon } from "@/components/layout/SidebarToggleIcon";
 import { MobileNavigationHeader } from "@/components/mobile-app/components/MobileNavigationHeader";
 import { MobileNavigationProvider } from "@/components/mobile-app/components/MobileNavigationProvider";
 import { MobileRouteTransition } from "@/components/mobile-app/components/MobileRouteTransition";
@@ -32,14 +38,89 @@ import { usePublicDemo } from "@/public-demo/public-demo-provider";
 function MainSidebarFallback() {
   return (
     <div
-      className="hidden h-full w-56 border-r border-sidebar-border bg-sidebar tablet:block"
+      className="hidden h-full tablet:block"
+      style={{ width: SIDEBAR_WIDTH_LIMITS.default }}
       aria-hidden="true"
     />
   );
 }
 
+function getBrowserNavigation() {
+  return (
+    window as Window & {
+      navigation?: EventTarget & { canGoBack: boolean; canGoForward: boolean };
+    }
+  ).navigation;
+}
+
+function subscribeToNavigation(callback: () => void) {
+  const navigation = getBrowserNavigation();
+  navigation?.addEventListener("currententrychange", callback);
+  return () => navigation?.removeEventListener("currententrychange", callback);
+}
+
+function WorkspaceToolbar() {
+  const { collapsed, toggleCollapsed } = useWorkspaceSidebarCollapsed();
+  const t = useTranslations("sidebar");
+  const desktopT = useTranslations("desktopChrome");
+  const canGoBack = useSyncExternalStore(
+    subscribeToNavigation,
+    () => getBrowserNavigation()?.canGoBack ?? false,
+    () => false,
+  );
+  const canGoForward = useSyncExternalStore(
+    subscribeToNavigation,
+    () => getBrowserNavigation()?.canGoForward ?? false,
+    () => false,
+  );
+  const label = collapsed ? t("expand") : t("collapse");
+
+  return (
+    <nav
+      aria-label={desktopT("navigation")}
+      className="hidden h-9 shrink-0 items-center gap-0.5 border-b border-border/45 px-1.5 tablet:flex"
+    >
+      <Button
+        variant="ghost"
+        size="icon-compact"
+        aria-label={label}
+        title={label}
+        aria-controls="workspace-sidebar"
+        aria-expanded={!collapsed}
+        onClick={toggleCollapsed}
+      >
+        <SidebarToggleIcon collapsed={collapsed} />
+      </Button>
+      <span aria-hidden="true" className="mx-1 h-3.5 w-px bg-border/60" />
+      <Button
+        variant="ghost"
+        size="icon-compact"
+        aria-label={desktopT("back")}
+        title={desktopT("back")}
+        disabled={!canGoBack}
+        onClick={() => window.history.back()}
+      >
+        <ArrowLeft aria-hidden="true" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-compact"
+        aria-label={desktopT("forward")}
+        title={desktopT("forward")}
+        disabled={!canGoForward}
+        onClick={() => window.history.forward()}
+      >
+        <ArrowRight aria-hidden="true" />
+      </Button>
+    </nav>
+  );
+}
+
 export function MainAppShell({ children }: { children: React.ReactNode }) {
   const { isDesktopSelfHost, desktop } = useRuntimeEnvironment();
+  const usesDesktopTitleBar = isDesktopSelfHost && Boolean(desktop?.windowChrome);
+  const isMobileViewport = useMobileViewport();
+  const usesDesktopWorkspaceTitleBar = usesDesktopTitleBar && isMobileViewport === false;
   const [mobileSidePageOpen, setMobileSidePageOpen] = useState(false);
   const publicDemo = usePublicDemo();
   const demoText = useGuestAccessText();
@@ -63,14 +144,17 @@ export function MainAppShell({ children }: { children: React.ReactNode }) {
       <div
         className={cn(
           "flex flex-col overflow-x-clip bg-background",
-          isDesktopSelfHost && desktop?.windowChrome
+          usesDesktopTitleBar
             ? "h-full min-h-0"
             : "h-dvh-safe min-h-dvh-safe",
         )}
       >
         <a
           href="#main-content"
-          className="sr-only z-[100] rounded-md bg-background px-4 py-2 focus:not-sr-only focus:absolute focus:left-2 focus:top-2"
+          className={cn(
+            "sr-only z-[100] rounded-md bg-background px-4 py-2 focus:not-sr-only focus:absolute focus:left-2",
+            usesDesktopTitleBar ? "focus:top-10" : "focus:top-2",
+          )}
         >
           Skip to content
         </a>
@@ -90,11 +174,6 @@ export function MainAppShell({ children }: { children: React.ReactNode }) {
             </a>
           </div>
         ) : null}
-        {!isDesktopSelfHost ? (
-          <div className="hidden tablet:block">
-            <TopBar />
-          </div>
-        ) : null}
         <div
           className={cn(
             "relative flex min-h-0 w-full flex-1 flex-col transition-transform motion-reduce:transition-none pc:contents",
@@ -109,31 +188,42 @@ export function MainAppShell({ children }: { children: React.ReactNode }) {
           <MobileNavigationHeader />
           <div
             className={cn(
-              "flex min-h-0 w-full flex-1 overflow-hidden",
+              "flex min-h-0 w-full flex-1 overflow-hidden tablet:bg-muted/75 dark:tablet:bg-muted/65",
               isDesktopSelfHost && "desktop-workspace-row",
             )}
           >
-            <div className="shrink-0">
+            <div
+              id="workspace-sidebar"
+              className={cn(
+                "hidden shrink-0 tablet:block",
+                usesDesktopWorkspaceTitleBar && "desktop-workspace-sidebar",
+              )}
+            >
               <Suspense fallback={<MainSidebarFallback />}>
                 <Sidebar />
               </Suspense>
             </div>
             <div
-              className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden",
-                isDesktopSelfHost && "desktop-content",
-              )}
+              className={
+                usesDesktopWorkspaceTitleBar
+                  ? "flex min-h-0 min-w-0 flex-1 flex-col"
+                  : "contents"
+              }
             >
-              <MobileTopBarContent
-                id="main-content"
-                tabIndex={-1}
-                className={publicDemo.active ? "overscroll-y-auto" : undefined}
-              >
-                <MobileRouteTransition>
-                  <MainContentContainer>{children}</MainContentContainer>
-                </MobileRouteTransition>
-              </MobileTopBarContent>
-              <MainAppFooter />
+              {usesDesktopWorkspaceTitleBar ? <DesktopWorkspaceTitleBar /> : null}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background tablet:my-1.5 tablet:me-1.5 tablet:rounded-surface tablet:border tablet:border-border/45">
+                {!usesDesktopTitleBar ? <WorkspaceToolbar /> : null}
+                <MobileTopBarContent
+                  id="main-content"
+                  tabIndex={-1}
+                  className={publicDemo.active ? "overscroll-y-auto" : undefined}
+                >
+                  <MobileRouteTransition>
+                    <MainContentContainer>{children}</MainContentContainer>
+                  </MobileRouteTransition>
+                </MobileTopBarContent>
+                <MainAppFooter />
+              </div>
             </div>
           </div>
           <MobileTabBar />

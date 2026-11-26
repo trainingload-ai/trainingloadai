@@ -1,0 +1,2 @@
+ALTER TABLE "t_import_item_job"
+    ALTER COLUMN "available_at" SET DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC');

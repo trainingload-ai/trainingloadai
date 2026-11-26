@@ -7,9 +7,9 @@ import { formatter } from "@/lib/utils";
 export type ActivityZoneTableRow = {
   id: string;
   label: string;
-  range: string;
-  percent: number;
-  duration: number;
+  range?: string;
+  percent: number | null;
+  duration: number | null;
   color: string;
   average?: string;
 };
@@ -18,7 +18,7 @@ type ActivityZoneTableProps = {
   rows: ActivityZoneTableRow[];
   isLoading?: boolean;
   zoneLabel: string;
-  rangeLabel: string;
+  rangeLabel?: string;
   distributionLabel: string;
   durationLabel: string;
   averageLabel?: string;
@@ -41,8 +41,11 @@ export function ActivityZoneTable({
   action,
   emptyLabel,
 }: ActivityZoneTableProps) {
-  const showAverage = Boolean(averageLabel);
-  const gridClass = showAverage
+  const showRange = rangeLabel !== undefined;
+  const showAverage = showRange && Boolean(averageLabel);
+  const gridClass = !showRange
+    ? "grid-cols-[minmax(2.5rem,0.45fr)_minmax(0,1fr)_4rem]"
+    : showAverage
     ? "grid-cols-[minmax(110px,150px)_150px_minmax(240px,1fr)_82px_104px]"
     : "grid-cols-[minmax(110px,150px)_150px_minmax(240px,1fr)_82px]";
 
@@ -50,7 +53,7 @@ export function ActivityZoneTable({
     <section className="relative overflow-hidden border border-border/60 bg-card">
       {isLoading ? <CardLoader /> : null}
       <div className="overflow-x-auto no-scrollbar">
-        <div className={showAverage ? "min-w-[740px]" : "min-w-[640px]"}>
+        <div className={!showRange ? "min-w-0" : showAverage ? "min-w-[740px]" : "min-w-[640px]"}>
           <div
             className={`grid ${gridClass} items-center border-b border-border/60 bg-muted/55 px-3 py-2 text-mobile-caption font-medium text-muted-foreground pc:text-xs dark:bg-muted/35`}
           >
@@ -58,7 +61,7 @@ export function ActivityZoneTable({
               <span>{zoneLabel}</span>
               {action}
             </div>
-            <div>{rangeLabel}</div>
+            {showRange ? <div>{rangeLabel}</div> : null}
             <div>{distributionLabel}</div>
             <div className="text-right">{durationLabel}</div>
             {showAverage ? (
@@ -69,7 +72,7 @@ export function ActivityZoneTable({
           {rows.length > 0 ? (
             <div>
               {rows.map((row) => {
-                const safePercent = Math.min(100, Math.max(0, row.percent));
+                const safePercent = row.percent === null ? null : Math.min(100, Math.max(0, row.percent));
                 return (
                   <div
                     key={row.id}
@@ -90,9 +93,9 @@ export function ActivityZoneTable({
                         {row.label}
                       </div>
                     </div>
-                    <div className="relative z-[1] truncate pr-4 tabular-nums text-foreground/75">
+                    {showRange ? <div className="relative z-[1] truncate pr-4 tabular-nums text-foreground/75">
                       {row.range}
-                    </div>
+                    </div> : null}
                     <div className="relative z-[1] pr-4">
                       <div className="relative h-[22px] w-full overflow-hidden rounded-xs">
                         <span
@@ -100,7 +103,7 @@ export function ActivityZoneTable({
                           className="absolute inset-0 opacity-10 dark:opacity-[0.16]"
                           style={{ backgroundColor: row.color }}
                         />
-                        <div
+                        {safePercent !== null ? <div
                           aria-label={`${row.label} ${safePercent.toFixed(1)}%`}
                           className="absolute inset-y-0 left-0 overflow-hidden rounded-xs transition-[width] duration-300"
                           role="img"
@@ -118,14 +121,14 @@ export function ActivityZoneTable({
                               backgroundImage: `repeating-linear-gradient(118deg, transparent 0, transparent 9px, ${row.color} 9px, ${row.color} 11px)`,
                             }}
                           />
-                        </div>
+                        </div> : null}
                         <div className="pointer-events-none absolute inset-0 flex items-center justify-end px-2.5 text-[11px] font-semibold tabular-nums text-zinc-600 dark:text-zinc-300">
-                          {safePercent.toFixed(1)}%
+                          {safePercent === null ? "–" : `${safePercent.toFixed(1)}%`}
                         </div>
                       </div>
                     </div>
                     <div className="relative z-[1] text-right tabular-nums text-foreground/80">
-                      {formatter("elTimeS", row.duration)}
+                      {row.duration === null ? "–" : formatter("elTimeS", row.duration)}
                     </div>
                     {showAverage ? (
                       <div className="relative z-[1] text-right tabular-nums text-foreground/80">

@@ -49,15 +49,15 @@ describe("NotificationDrawer", () => {
       screen.getByRole("button", { name: "notifications:title" }),
     );
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("dialog", { name: "notifications:title" });
     expect(dialog).toHaveClass(
       "flex",
-      "h-dvh",
+      "h-[min(80dvh,50rem)]",
       "flex-col",
       "overflow-hidden",
     );
 
-    const scrollViewport = dialog.querySelector(".overflow-y-auto");
+    const scrollViewport = screen.getByRole("tabpanel", { name: "notifications:tabs.unread" });
     expect(scrollViewport).toHaveClass(
       "min-h-0",
       "flex-1",

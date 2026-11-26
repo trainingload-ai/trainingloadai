@@ -70,7 +70,7 @@ describe('TodaySuggestionAgentService', () => {
       'Every TRAIN recommendation requires trainingBasis',
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
-      'The reason and summary may use different wording',
+      'copy that exact sentence into reason',
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
       'use todayExecution and individual statuses',

@@ -1,80 +1,80 @@
 ---
-title: Efficiency Factor (EF)
-description: Efficiency Factor compares output with average heart rate to track aerobic efficiency trends across similar endurance sessions.
-keywords: ["EF", "Efficiency Factor", "aerobic efficiency", "Aerobic Fitness", "Base Training", "heart rate efficiency"]
+title: Facteur d’efficience (EF)
+description: Le facteur d’efficience (EF) compare votre production (puissance ou allure) à votre fréquence cardiaque moyenne pour suivre l’évolution de votre efficience aérobie sur des séances comparables.
+keywords: ["EF", "Facteur d'efficience", "Efficiency Factor", "efficience aérobie", "forme aérobie", "travail foncier", "efficience cardiaque"]
 ---
 
-# Efficiency Factor (EF)
+# Facteur d’efficience (EF)
 
-**Efficiency Factor (EF)** links your **physiological input** to your **performance output**. In simple terms, it asks: how much pace or power did you produce per beat of heart rate?
+Le **facteur d’efficience (EF — Efficiency Factor)** met en relation votre **coût physiologique** et votre **rendement mécanique**. Plus simplement, il répond à une question directe : quelle puissance ou quelle vitesse produisez-vous par battement cardiaque ?
 
-It is useful for tracking aerobic efficiency during similar endurance sessions, especially across a base period.
+Il est particulièrement utile pour suivre l’évolution de votre efficience aérobie sur des séances d’endurance comparables, notamment durant une phase de travail foncier.
 
-## Core idea
+## Principe fondamental
 
-EF is simple: **output per unit heart rate**.
-As you get fitter, you can produce more output at the same HR, or you can maintain the same output at a lower HR.
+L’EF repose sur une idée simple : **la production par unité de fréquence cardiaque**.
+À mesure que votre forme aérobie progresse, vous produisez davantage de puissance ou d’allure à fréquence cardiaque égale, ou vous tenez le même rendement à une fréquence cardiaque plus basse.
 
-## Formula
+## Formule
 
-EF is computed as output divided by input:
+L’EF correspond au rapport entre la production et la réponse cardiaque :
 
-### Cycling
+### Cyclisme
 
 $$
 EF = \frac{NP}{AvgHR}
 $$
-*Note: some tools use average power instead. Trainingload.ai uses **NP** by default to stay consistent with how Decoupling is computed.*
+*Remarque : certains outils utilisent la puissance moyenne. Trainingload.ai utilise **NP** par défaut afin de rester cohérent avec le calcul du découplage aérobie.*
 
-### Running
+### Course à pied
 
 $$
 EF = \frac{NGP}{AvgHR}
 $$
-*Note: Trainingload.ai uses the speed derived from **NGP (Normalized Graded Pace)** (m/min or yd/min) to reduce terrain effects.*
+*Remarque : Trainingload.ai utilise la vitesse issue de la **NGP (Normalized Graded Pace)** (en m/min ou yd/min) afin de limiter l’influence du relief.*
 
-## Typical values
+## Valeurs typiques
 
-EF is a **relative metric**. You generally shouldn’t compare EF across athletes because resting HR, Max HR, body mass, and measurement devices differ.
--   **Compare to yourself**: compare to your own past EF.
--   **Typical trend**: across a solid 12–16 week base period, EF often rises gradually.
+L’EF est une **métrique relative**. Il n’a généralement pas de sens de comparer votre EF à celui d’un autre athlète, car la fréquence cardiaque de repos, la FC max, le poids corporel et les capteurs diffèrent.
+- **Comparez-vous à vous-même** : observez l’évolution par rapport à votre propre historique d’EF.
+- **Tendance typique** : au fil d’un cycle foncier bien mené de 12 à 16 semaines, l’EF progresse généralement de façon graduelle.
 
-## Typical applications
+## Cas d’usage typiques
 
-### 1. Track base training progress
-During long base periods, low-intensity endurance work can feel repetitive. A steadily rising EF trend across comparable sessions can be a sign that aerobic efficiency is improving.
+### 1. Suivre les progrès du travail foncier
+Pendant de longues phases de base aérobie, les séances à basse intensité peuvent sembler répétitives. Une hausse régulière de l’EF sur des sorties comparables constitue un bon indice d’amélioration de votre efficience aérobie.
 
--   **Rising**: training may be improving aerobic efficiency.
--   **Plateau**: if EF stops rising for several weeks, your base may be stabilizing, or you may be carrying fatigue.
--   **Decision point**: this can support adding more threshold or interval work, but it should be checked against fatigue, goals, and recent load.
+- **En hausse** : l’entraînement semble améliorer l’efficience aérobie.
+- **En plateau** : si l’EF stagne plusieurs semaines, votre base se stabilise peut-être, ou vous accumulez de la fatigue.
+- **Point de décision** : un plateau peut justifier d’introduire davantage de travail au seuil ou d’intervalles, à condition de le recouper avec la fatigue, les objectifs et la charge récente.
 
-### 2. Cross-check fatigue signals
-If EF changes abruptly, it is not always a fitness change. Unusually low heart rate, unusually high RPE, poor sleep, heat, or sensor issues can all distort EF. Cross-check with how the session felt and with recent training load.
+### 2. Recouper les signaux de fatigue
+Une variation brutale de l’EF ne signifie pas toujours un gain ou une perte de forme. Une fréquence cardiaque anormalement basse, un RPE inhabituellement élevé, un mauvais sommeil, la chaleur ou un souci de capteur peuvent fausser l’EF. Croisez toujours le chiffre avec vos sensations et votre charge d’entraînement récente.
 
-## EF vs. aerobic decoupling
+## EF vs découplage aérobie
 
-**EF** and **[Aerobic Decoupling](/docs/metrics/heart-rate/aerobic-decoupling)** complement each other:
+L’**EF** et le **[découplage aérobie](/fr/docs/metrics/heart-rate/aerobic-decoupling)** se complètent :
 
-| Metric | Time horizon | Question |
+| Métrique | Horizon temporel | Question posée |
 | :--- | :--- | :--- |
-| **EF** | **Long-term trend** | “How much did I improve over the last month?” |
-| **Decoupling** | **Single-workout quality** | “Did I maintain efficiency during this long session?” |
+| **EF** | **Tendance à long terme** | « Ai-je progressé en efficience au cours du dernier mois ? » |
+| **Découplage** | **Qualité d’une séance** | « Ai-je maintenu mon efficience jusqu’au bout de cette sortie longue ? » |
 
-EF shows the efficiency level of a session or trend. Decoupling shows whether that efficiency stayed stable later in a long steady effort.
+L’EF indique le niveau d’efficience d’une séance ou d’une tendance. Le découplage montre si cette efficience est restée stable en fin d’effort long et régulier.
 
-## How Trainingload.ai uses EF
+## Comment Trainingload.ai utilise l’EF
 
--   **Trend only comparable sessions**: EF is most useful when comparing similar routes, durations, terrain, and intensity.
--   **Filter noisy workouts**: Trainingload.ai emphasizes aerobic sessions (mostly Zone 1 / Zone 2) when looking at EF trends.
--   **Pair with decoupling**: EF can rise while late-session drift remains high, so both metrics tell a fuller story.
--   **Keep equipment consistent**: use the same HR strap and power meter when possible. Device differences can hide small real improvements.
+- **Comparer des séances comparables** : l’EF est surtout pertinent lorsque le parcours, la durée, le relief et l’intensité sont proches.
+- **Filtrer les séances bruitées** : Trainingload.ai privilégie les séances aérobies régulières (principalement Zone 1 / Zone 2) pour lire les tendances d’EF.
+- **Associer au découplage** : l’EF peut augmenter alors que la dérive de fin de sortie reste élevée ; ensemble, ces deux métriques donnent une image plus complète.
+- **Garder un équipement constant** : utilisez autant que possible la même ceinture cardio et le même capteur de puissance. Un changement de matériel peut masquer de petits progrès réels.
 
-## Related docs
+## Documentation associée
 
-- [Aerobic Decoupling](/docs/metrics/heart-rate/aerobic-decoupling)
-- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
-- [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace)
+- [Découplage aérobie](/fr/docs/metrics/heart-rate/aerobic-decoupling)
+- [Zones de fréquence cardiaque](/fr/docs/metrics/heart-rate/zones)
+- [Allure normalisée ajustée à la pente (NGP)](/fr/docs/metrics/pace/normalized-graded-pace)
 
-## References
+## Références
 
--   [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)
+- [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)

@@ -7,6 +7,18 @@ import type {
 import { mapTrackSwapActivityToCanonicalPayload } from './trackswap-canonical.mapper';
 import { decodeTrackFile } from '../trackswap-file';
 
+export function selectPrimaryFileActivity(
+  payloads: SourceNormalizeResult['payloads'],
+) {
+  const score = ({ summary }: SourceNormalizeResult['payloads'][number]) =>
+    (summary.timerTime ?? summary.elapsedTime ?? 0) * 1000 +
+    (summary.distance ?? 0);
+
+  return payloads.reduce((best, payload) =>
+    score(payload) > score(best) ? payload : best,
+  );
+}
+
 @Injectable()
 export class FileSourceAdapter implements ImportSourceAdapter {
   readonly kind = 'FILE' as const;

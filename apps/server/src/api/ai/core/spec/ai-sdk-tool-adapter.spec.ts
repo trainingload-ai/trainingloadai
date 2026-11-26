@@ -49,6 +49,37 @@ function baseTool(overrides: Partial<AiToolDef> = {}): AiToolDef {
 }
 
 describe('createAiSdkCoachTools', () => {
+  it('rejects an out-of-scope draft before validation or rejection auditing', async () => {
+    const validateInput = jest.fn(() => ({ ok: true as const }));
+    const execute = jest.fn(async () => ({}));
+    const onPlanValidationRejected = jest.fn();
+    const tools = createAiSdkCoachTools({
+      tools: [
+        baseTool({
+          name: 'present_coach_plan_draft',
+          applicableSkills: ['plan-builder'],
+          requiresActiveSkill: true,
+          validateInput,
+          execute,
+        }),
+      ],
+      ctx: { ...createCtx(), onPlanValidationRejected },
+    });
+    const options = { toolCallId: 'draft-1', messages: [] };
+
+    for (const input of [{}, { title: 'Plan' }]) {
+      await expect(
+        tools.present_coach_plan_draft.execute?.(input, options),
+      ).resolves.toMatchObject({
+        code: 'ACTIVE_SKILL_REQUIRED',
+        stage: 'check_permissions',
+      });
+    }
+    expect(validateInput).not.toHaveBeenCalled();
+    expect(execute).not.toHaveBeenCalled();
+    expect(onPlanValidationRejected).not.toHaveBeenCalled();
+  });
+
   it('publishes only the canonical skill identity at every lifecycle state', async () => {
     const events: CoachActivityEvent[] = [];
     const ctx = {
@@ -230,6 +261,70 @@ describe('createAiSdkCoachTools', () => {
       type: 'text',
       value: JSON.stringify({ compact: true }),
     });
+  });
+
+  it('defers plan_stage_phase schema checks to validateInput so rejections are audited and actionable', async () => {
+    const onPlanValidationRejected = jest.fn();
+    const execute = jest.fn(async () => ({ kind: 'plan_phase_staged' }));
+    const tools = createAiSdkCoachTools({
+      tools: [
+        baseTool({
+          name: 'plan.stage_phase',
+          applicableSkills: ['plan-builder'],
+          requiresActiveSkill: true,
+          parameters: {
+            type: 'object',
+            required: ['assessmentId', 'startWeek', 'endWeek'],
+            additionalProperties: false,
+            properties: {
+              assessmentId: { type: 'string' },
+              startWeek: { type: 'integer' },
+              endWeek: { type: 'integer' },
+            },
+          },
+          validateInput: () => ({
+            ok: false,
+            code: 'INVALID_INPUT',
+            message: 'Provide the complete schedule for this window.',
+          }),
+          execute,
+        }),
+      ],
+      ctx: {
+        ...createCtx(),
+        activeSkillName: 'plan-builder',
+        onPlanValidationRejected,
+      },
+    });
+
+    const schema = tools.plan_stage_phase.inputSchema as {
+      validate?: (value: unknown) => { success: boolean };
+    };
+    expect(schema.validate?.({ unexpected: true })).toMatchObject({
+      success: true,
+    });
+    await expect(
+      tools.plan_stage_phase.execute?.(
+        { unexpected: true },
+        { toolCallId: 'stage-1', messages: [] },
+      ),
+    ).resolves.toMatchObject({
+      code: 'INVALID_INPUT',
+      stage: 'validate_input',
+      issues: expect.arrayContaining([
+        expect.objectContaining({ path: '/assessmentId' }),
+        expect.objectContaining({ path: '/unexpected' }),
+      ]),
+    });
+    expect(execute).not.toHaveBeenCalled();
+    expect(onPlanValidationRejected).toHaveBeenCalledWith(
+      expect.objectContaining({
+        toolCallId: 'stage-1',
+        toolName: 'plan_stage_phase',
+        stage: 'validate_input',
+        code: 'INVALID_INPUT',
+      }),
+    );
   });
 
   it('serializes tools that are not concurrency safe', async () => {

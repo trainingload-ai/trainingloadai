@@ -1,0 +1,86 @@
+---
+title: Self-Hosting
+description: Nutze Trainingload.ai auf deinem eigenen Computer oder Server, speichere deine Trainingsdaten lokal, importiere Aktivitäten und richte optional den KI-Coach ein.
+seoTitle: "Trainingload.ai Self-Hosting: Lokal installieren & betreiben"
+seoDescription: "Installiere ein signiertes Trainingload.ai Self-Hosting-Release, speichere Uploads lokal, richte deinen eigenen KI-Anbieter ein und verwalte Backups sicher."
+keywords:
+  [
+    "Trainingload.ai Self-Hosting",
+    "Trainings-App selbst hosten",
+    "lokale Trainingsdaten",
+    "Docker Compose Deployment",
+  ]
+---
+
+# Self-Hosting
+
+Mit Self-Hosting betreibst du Trainingload.ai auf deinem eigenen Computer oder Server. Deine Aktivitäten, Trainingspläne und hochgeladenen Dateien bleiben auf deinem Gerät, und du steuerst sowie analysierst dein Training direkt im Browser.
+
+Eine selbst gehostete Instanz ist für genau eine Person ausgelegt. Du kümmerst dich selbst um Gerät, Software-Updates und Backups. Wenn du die App lieber direkt öffnen und sofort loslegen möchtest, lies zuerst [Self-Hosting vs. Cloud](/de/docs/self-host/self-host-vs-cloud).
+
+## Was du damit machen kannst
+
+- Aktivitäten importieren und Details, Verlauf sowie Trainingsbelastung auswerten.
+- Dein Training im Trainingskalender planen und geplante mit absolvierten Einheiten vergleichen.
+- FIT-, GPX- oder TCX-Dateien hochladen oder Intervals.icu und die Garmin Personal API mit persönlichen Schlüsseln verbinden.
+- Einen eigenen KI-Dienst für den KI-Coach einrichten – oder KI komplett ausgeschaltet lassen.
+
+## Wo du starten kannst
+
+<Cards>
+  <Card
+    title="Self-Hosting vs. Cloud"
+    href="/de/docs/self-host/self-host-vs-cloud"
+    description="Vergleiche Einrichtung, Datenspeicherung, Aktivitätsimporte und KI-Kosten."
+  />
+  <Card
+    title="Schnellstart"
+    href="/de/docs/self-host/installation"
+    description="Release herunterladen, App installieren, lokales Konto anlegen und das erste Backup sichern."
+  />
+  <Card
+    title="Konfiguration"
+    href="/de/docs/self-host/configuration"
+    description="Lokalen Datenpfad wählen und OpenAI, DeepSeek oder einen anderen kompatiblen KI-Anbieter einrichten."
+  />
+  <Card
+    title="Instanz verwalten"
+    href="/de/docs/self-host/operations"
+    description="Status prüfen, Logs einsehen sowie Backups, Wiederherstellungen, Upgrades und das Stoppen sicher durchführen."
+  />
+  <Card
+    title="Fehlerbehebung"
+    href="/de/docs/self-host/troubleshooting"
+    description="Häufige Start-, Verbindungs- und Synchronisierungsprobleme beheben."
+  />
+</Cards>
+
+## Garmin verbinden
+
+Wenn du einen Garmin Personal API-Schlüssel besitzt, kannst du Garmin verbinden, um absolvierte Aktivitäten zu importieren und verfügbare Erholungsdaten auszulesen. Die folgende Anleitung erklärt alle Schritte und unterstützten Daten.
+
+<Cards>
+  <Card
+    title="Garmin Personal API"
+    href="/de/docs/self-host/garmin-personal-api"
+    description="Garmin Personal API-Schlüssel verbinden, Aktivitäten synchronisieren und verfügbare Erholungsdaten auslesen."
+  />
+</Cards>
+
+## Was du vor der Installation vorbereiten solltest
+
+- Ein Gerät, das die [Installationsvoraussetzungen](/de/docs/self-host/installation) erfüllt und auf dem Docker Compose installiert ist.
+- Ausreichend Speicherplatz für deine Trainingsdaten und hochgeladenen Dateien.
+- Einen getrennten Speicherort für Backups, damit du deine Daten bei einem Geräteausfall wiederherstellen kannst.
+
+Verwende ausschließlich ein offizielles, versioniertes und signiertes Release-Paket und prüfe es vor der Installation gemäß Anleitung. Du musst weder Quellcode kompilieren noch Container selbst bauen. Docker Compose ist derzeit die einzige unterstützte Installationsmethode.
+
+## Wohin deine Daten fließen
+
+Aktivitäten, Trainingspläne und hochgeladene Dateien werden auf deinem Gerät gespeichert. Wenn du eine Trainingsplattform verbindest, werden Daten entsprechend deiner gewählten Synchronisierungsoptionen gesendet oder abgerufen. Wenn du einen externen KI-Dienst aktivierst, werden die für die jeweilige Anfrage benötigten Trainingsdaten an den gewählten Anbieter übermittelt.
+
+KI ist standardmäßig deaktiviert. Um sie zu aktivieren, folge der [Konfigurationsanleitung](/de/docs/self-host/configuration) und hinterlege deinen eigenen API-Schlüssel. Die API-Nutzung wird direkt über diesen Anbieter abgerechnet.
+
+## Nächster Schritt
+
+Bereit für die Installation? Folge dem [Installations-Schnellstart](/de/docs/self-host/installation). Wenn du noch abwägst, welche Variante besser zu dir passt, starte mit [Self-Hosting vs. Cloud](/de/docs/self-host/self-host-vs-cloud).

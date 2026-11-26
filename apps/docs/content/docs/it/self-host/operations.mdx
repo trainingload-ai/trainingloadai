@@ -1,0 +1,96 @@
+---
+title: Gestire un'istanza self-host
+description: Usa il comando di gestione supportato per controlli di salute, log, backup, ripristino, aggiornamento, rollback e arresto.
+---
+
+# Gestire un'istanza self-host
+
+Gestisci l'istanza tramite `./self-host <command> --json` su Linux, macOS e WSL2, oppure `.\self-host.ps1 <command> --json` in Windows PowerShell. Il comando di gestione preserva le regole di validazione, locking, audit e sicurezza dei dati della release.
+
+## Prima di iniziare
+
+- Mantieni riservati la directory della release installata e il file `.env.selfhost`.
+- Valuta le automazioni in base ai campi JSON `ok`, `exitCode`, `error.code` e `details`, non ai messaggi leggibili da persona.
+- Esegui lo stesso comando con `--dry-run` prima di ogni operazione che modifica lo stato.
+- Non usare mai `docker compose down -v`, non eliminare i marcatori del ciclo di vita e non eseguire downgrade manuali del database.
+
+## Controlla stato, salute e log
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+`status` fornisce un'istantanea delimitata del runtime. `doctor` controlla configurazione attendibile, risorse dell'host, percorsi dati, stato del database, disponibilità e provider abilitati. I log sono oscurati e limitati, ma possono comunque contenere dati operativi: esaminali prima di condividerli.
+
+## Avvio e arresto
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+
+./self-host stop --dry-run --json
+./self-host stop --json
+```
+
+L'arresto preserva container, configurazione e dati persistenti. Per rimuovere le risorse di runtime conservando i dati, usa il flusso `uninstall` documentato; non rimuovere i volumi manualmente.
+
+## Crea un backup verificato
+
+```bash
+./self-host backup --output weekly-<yyyy-mm-dd> --dry-run --json
+./self-host backup --output weekly-<yyyy-mm-dd> --json
+```
+
+Un backup contiene un dump logico di PostgreSQL e i file caricati autorevoli. Esclude cache, diagnostica, bootstrap token, stato privato TLS, dati di elevazione locale e valori secret. Conserva il pacchetto completato su storage cifrato fuori dall'host e verificalo periodicamente su una destinazione pulita e isolata.
+
+## Ripristina in sicurezza
+
+Ripristina solo su una destinazione appena inizializzata, della stessa versione esatta, con database e caricamenti autorevoli vuoti:
+
+```bash
+./self-host restore /secure/path/to/backup --dry-run --json
+./self-host restore /secure/path/to/backup --json
+./self-host doctor --json
+```
+
+Non sovrascrivere l'istanza corrente. Un ripristino fallito lascia un marcatore bloccante e un report affinché una destinazione incompleta non possa essere avviata come se fosse sana.
+
+## Aggiornamento
+
+Un aggiornamento richiede la directory completa della release di destinazione firmata. Mantieni l'istanza corrente, il pacchetto di destinazione e un backup verificato fuori dall'host. Esegui i dry-run di compatibilità sia dal controller corrente sia da quello di destinazione prima di avviare l'aggiornamento controllato dalla destinazione:
+
+```bash
+instance='/absolute/path/to/current-instance'
+target='/absolute/path/to/trainingload-selfhost-<target-version>'
+
+"$instance/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --json
+"$target/self-host" doctor --directory "$instance" --json
+```
+
+Le migrazioni del database sono solo in avanti. Il rollback applicativo è disponibile solo quando il report di aggiornamento lo dichiara esplicitamente e le vecchie immagini restano verificabili; non esegue mai il downgrade del database.
+
+## Routine consigliata
+
+- Ogni giorno: controlla `status` e lo spazio su disco.
+- Ogni settimana: esegui `doctor` e crea un backup verificato fuori dall'host.
+- Prima di ogni aggiornamento: leggi le note della release di destinazione, verifica il pacchetto, testa il backup e controlla la dichiarazione di rollback.
+- Periodicamente: ripristina un backup su una destinazione isolata e verifica Owner, attività e file caricati.
+
+## Verifica
+
+- Ogni operazione di modifica è stata preceduta dallo stesso comando e dagli stessi parametri con `--dry-run`.
+- `doctor` restituisce `"ok": true` dopo un avvio, un ripristino o un aggiornamento.
+- Esiste almeno un backup verificato recente fuori dall'host dell'istanza.
+- Una prova di ripristino ha confermato che il backup è utilizzabile e non solo presente.
+
+## Risoluzione dei problemi
+
+Se un'operazione fallisce, conserva il codice di errore stabile ed esegui `doctor`. Genera una diagnostica solo quando serve, controllala in locale e non pubblicare mai `.env.selfhost` in chiaro, dump del database, file caricati, password, token o chiavi dei provider. Non rilanciare una modifica in parallelo mentre un'altra operazione detiene il lock dell'istanza.
+
+## Prossimo passo
+
+Tieni a portata di mano [Risoluzione dei problemi](/it/docs/self-host/troubleshooting) nel tuo manuale operativo. Consulta [Configurazione](/it/docs/self-host/configuration) prima di modificare le impostazioni di rete o del provider.

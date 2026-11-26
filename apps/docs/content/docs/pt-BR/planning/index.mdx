@@ -1,0 +1,70 @@
+---
+title: Planos e Treinos
+description: Saiba como o Trainingload.ai representa planos de treino, treinos agendados, estrutura de resistência, estrutura de força, carga esperada e vínculos com atividades concluídas.
+keywords:
+  ["planos Trainingload.ai", "treinos estruturados", "ciclo de vida do plano de treino"]
+---
+
+# Planos e Treinos
+
+O Trainingload.ai trata o plano de treino como um espaço de trabalho ativo, não como um PDF estático. Um plano contém treinos com datas fixas ou relativas; cada treino pode incluir estrutura legível por máquina, notas humanas, carga esperada, status de execução e vínculos com atividades concluídas.
+
+## O modelo de planejamento
+
+<Mermaid
+  chart={`flowchart TD
+  Goal["Objetivo e restrições"] --> Plan["Plano"]
+  Plan --> Workout["Treino agendado"]
+  Workout --> Structure["Estrutura de resistência ou força"]
+  Structure --> Expected["Carga esperada"]
+  Workout --> Activity["Vínculo com atividade concluída"]
+  Activity --> Actual["Carga real e execução"]
+  Expected --> Review["Revisão do plano"]
+  Actual --> Review
+  Review --> Adjustment["Ajuste confirmado"]
+  Adjustment --> Plan`}
+/>
+
+## Estados do plano
+
+- **Rascunho** — plano editável em construção. Use-o para revisão antes da execução.
+- **Ativo** — plano atual com data de início e contexto diário de execução.
+- **Pausado** — interrompido temporariamente, preservando o plano e seu histórico.
+- **Concluído** — plano encerrado intencionalmente ao fim do ciclo.
+- **Cancelado** — plano encerrado sem ter sido concluído como previsto.
+
+Leia [Gerenciar Status do Plano](/pt-BR/docs/planning/plan-lifecycle) antes de alterar o estado de um plano que já possui vínculos com atividades concluídas.
+
+## Tipos de estrutura de treino
+
+### Resistência
+
+Treinos de resistência contêm aquecimento, parte principal, recuperação, blocos de repetição e etapas relacionadas com prescrições por tempo ou distância e metas opcionais como zonas, ritmo, velocidade, potência, cadência ou frequência cardíaca.
+
+Use o [guia do editor manual de treinos](/pt-BR/docs/planning/manual-workout-editor) para edição visual dentro do aplicativo, o [Editor e Construtor de Treinos](/pt-BR/workout-editor) para rascunhar uma sessão pública ou a [DSL de Treinos de Resistência](/pt-BR/docs/planning/workout-dsl) para regras compactas em texto.
+
+### Força
+
+Treinos de força contêm exercícios e grupos de séries. O trabalho pode ser prescrito por repetições ou tempo, com carga aberta, peso fixo, percentual de 1RM, peso corporal, esforço e descanso onde houver suporte.
+
+Use [Treinos de Força](/pt-BR/docs/planning/strength-workouts) para o fluxo visual ou [DSL de Treinos de Força](/pt-BR/docs/planning/strength-workout-dsl) para o modo Regras passo a passo.
+
+## Carga esperada versus carga real
+
+A carga esperada só é calculada quando a estrutura do treino, os limiares e as metas fornecem sinal suficiente. A carga real vem da atividade concluída e da prioridade de fonte de carga configurada.
+
+Os dois valores respondem a perguntas diferentes:
+
+- Esperada: “Qual estresse este plano pretendia gerar?”
+- Real: “Qual estresse a sessão concluída efetivamente produziu?”
+
+Não force um valor de carga esperada inventando um limiar ou uma meta. Um dado explicitamente desconhecido é mais seguro do que uma falsa precisão.
+
+## Ordem recomendada de leitura
+
+1. [Criar um Plano de Treino](/pt-BR/docs/guide/create-training-plan)
+2. [Guia do editor manual de treinos](/pt-BR/docs/planning/manual-workout-editor)
+3. [DSL de Treinos de Força](/pt-BR/docs/planning/strength-workout-dsl), quando você programar sessões de força
+4. [Gerenciar Status do Plano](/pt-BR/docs/planning/plan-lifecycle)
+5. [Gerenciar um Plano Ativo](/pt-BR/docs/guide/manage-active-plan)
+6. [Treinador de IA](/pt-BR/docs/guide/ai-coach)

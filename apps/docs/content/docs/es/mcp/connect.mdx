@@ -1,0 +1,50 @@
+---
+title: Conectar un cliente de IA
+description: Elige la guía de conexión para ChatGPT, Codex, Claude Code, Claude Desktop, Cursor, VS Code u opencode.
+---
+
+# Conectar un cliente de IA
+
+Todos los clientes utilizan el mismo punto de conexión remoto Streamable HTTP:
+
+```text
+https://api.trainingload.ai/mcp
+```
+
+TrainingLoad utiliza descubrimiento OAuth 2.1, PKCE S256, rotación de tokens de actualización y tokens de acceso vinculados al recurso. Nunca introduzcas una clave de API ni un token de acceso en un archivo de configuración.
+
+## Elige tu cliente
+
+| Cliente | Camino más corto | Guía completa |
+| --- | --- | --- |
+| ChatGPT | Añade un servidor MCP personalizado desde Plugins | [ChatGPT](/es/docs/mcp/clients/chatgpt) |
+| Codex | `codex mcp add trainingload --url https://api.trainingload.ai/mcp` | [Codex](/es/docs/mcp/clients/codex) |
+| Claude Code | `claude mcp add --transport http --scope user trainingload https://api.trainingload.ai/mcp` | [Claude Code](/es/docs/mcp/clients/claude-code) |
+| Claude Desktop | Customize → Connectors → Add custom connector | [Claude Desktop](/es/docs/mcp/clients/claude-desktop) |
+| Cursor | Añade el servidor remoto en `~/.cursor/mcp.json` | [Cursor](/es/docs/mcp/clients/cursor) |
+| VS Code | MCP: Add Server → HTTP | [VS Code](/es/docs/mcp/clients/vscode) |
+| opencode | Añade una entrada `remote` en `opencode.json` | [opencode](/es/docs/mcp/clients/opencode) |
+
+## Permisos predeterminados
+
+Autorización inicial recomendada:
+
+```text
+openid profile email offline_access profile:read activity:read training:read plan:read competition:read
+```
+
+`health:read` queda deliberadamente excluido. Añádelo solo cuando quieras que el cliente lea el resumen diario reducido de salud.
+
+## Prueba de funcionamiento para cada cliente
+
+1. El catálogo debe mostrar 24 herramientas, 3 recursos y 3 prompts. Sin `health:read`, la herramienta de salud puede seguir visible como punto de entrada para el consentimiento incremental.
+2. Pregunta: «Usa TrainingLoad para resumir mi estado de entrenamiento actual e indica la fecha y la zona horaria utilizadas.»
+3. El cliente debe ejecutar una llamada de herramienta a `get_training_snapshot` y no debe pedirte que pegues ningún token.
+4. El resultado debe distinguir entre valores ausentes y cero, y mostrar la llamada de herramienta a TrainingLoad.
+5. Haz una pregunta de comparación de períodos y confirma que el cliente puede llamar a `compare_training_periods`.
+
+## Revocar o volver a conectar
+
+Abre la página de autorizaciones de tu cuenta de TrainingLoad para revisar los alcances (scopes) y el uso reciente o para revocar el cliente. Si tras revocar el acceso el cliente sigue mostrando un estado obsoleto, desconecta o borra la sesión OAuth de ese servidor MCP en el cliente y vuelve a conectarlo.
+
+Consulta [Solución de problemas](/es/docs/mcp/troubleshooting) si falla la conexión o la autorización.

@@ -30,6 +30,13 @@ export type PlanWorkoutSummary = {
 };
 
 export type PlanSnapshotToolOutput = {
+  pendingCalendarAdjustments?: Array<{
+    id: string;
+    versionId: string;
+    state: string;
+    range?: { from: string; to: string };
+    workouts: Array<{ name: string; from?: string | null; to?: string | null }>;
+  }>;
   asOf: string;
   plan: null | {
     id: string;

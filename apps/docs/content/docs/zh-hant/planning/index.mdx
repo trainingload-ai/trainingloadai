@@ -1,0 +1,70 @@
+---
+title: 計畫與訓練課表
+description: 了解 Trainingload.ai 如何呈現訓練計畫、排程課表、耐力與肌力結構、預期負荷，以及已完成活動的連結。
+keywords:
+  ["Trainingload.ai 訓練計畫", "結構化訓練課表", "訓練計畫生命週期"]
+---
+
+# 計畫與訓練課表
+
+Trainingload.ai 將訓練計畫視為可持續運作的工作區，而非靜態的 PDF 檔案。計畫包含指定日期或相對天數的訓練課表；每場課表皆可包含機器可讀的結構、人工備註、預期負荷、執行狀態，以及已完成活動的關聯紀錄。
+
+## 規劃模型
+
+<Mermaid
+  chart={`flowchart TD
+  Goal[目標與限制條件] --> Plan[訓練計畫]
+  Plan --> Workout[排程課表]
+  Workout --> Structure[耐力或肌力結構]
+  Structure --> Expected[預期負荷]
+  Workout --> Activity[已完成活動連結]
+  Activity --> Actual[實際負荷與執行情況]
+  Expected --> Review[計畫回顧]
+  Actual --> Review
+  Review --> Adjustment[已確認的調整]
+  Adjustment --> Plan`}
+/>
+
+## 計畫狀態
+
+- **草稿（Draft）** — 仍在建置中的可編輯計畫，適合在執行前進行檢視。
+- **進行中（Active）** — 目前執行中的計畫，具備開始日期與每日執行脈絡。
+- **已暫停（Paused）** — 暫時停止執行，同時完整保留計畫與歷史紀錄。
+- **已完成（Completed）** — 按預期結束的訓練計畫。
+- **已取消（Canceled）** — 未按原定目標完成而提前終止的計畫。
+
+在變更已關聯已完成活動的計畫狀態之前，請先閱讀[管理計畫狀態](/zh-hant/docs/planning/plan-lifecycle)。
+
+## 課表結構類型
+
+### 耐力訓練
+
+耐力課表包含暖身、主課表、恢復、重複與相關步驟，支援以時間或距離設定，並可選擇搭配區間、配速、速度、功率、踏頻（步頻）或心率目標。
+
+若要使用應用程式內的視覺化編輯器，請參考[手動課表編輯器指南](/zh-hant/docs/planning/manual-workout-editor)；若想先在公開頁面草擬課表，請前往[課表編輯與建構器](/zh-hant/workout-editor)；若偏好精簡文字規則，請參閱[耐力課表 DSL](/zh-hant/docs/planning/workout-dsl)。
+
+### 肌力訓練
+
+肌力課表由訓練動作與組數群組構成。正式組可依次數或時間規劃，並依支援情況設定未指定負重、固定重量、1RM 百分比、自身體重、自覺強度與組間休息。
+
+若要使用視覺化流程，請參閱[肌力訓練課表](/zh-hant/docs/planning/strength-workouts)；若要以規則模式逐步撰寫，請參閱[肌力課表 DSL](/zh-hant/docs/planning/strength-workout-dsl)。
+
+## 預期負荷與實際負荷
+
+只有在課表結構、閾值與目標資訊提供足夠訊號時，系統才會計算預期負荷。實際負荷則來自已完成的活動紀錄，並遵循設定的負荷來源優先順序。
+
+這兩個數值回答不同的問題：
+
+- 預期負荷：「這份計畫原本希望施加多少訓練壓力？」
+- 實際負荷：「實際完成的課表產生了多少訓練壓力？」
+
+切勿為了算出預期負荷而憑空設定閾值或目標。明確標示為未知，遠比虛假的精確數值更安全可靠。
+
+## 建議學習順序
+
+1. [建立訓練計畫](/zh-hant/docs/guide/create-training-plan)
+2. [手動課表編輯器指南](/zh-hant/docs/planning/manual-workout-editor)
+3. [肌力課表 DSL](/zh-hant/docs/planning/strength-workout-dsl)（規劃肌力課表時閱讀）
+4. [管理計畫狀態](/zh-hant/docs/planning/plan-lifecycle)
+5. [管理進行中的計畫](/zh-hant/docs/guide/manage-active-plan)
+6. [智能教練](/zh-hant/docs/guide/ai-coach)

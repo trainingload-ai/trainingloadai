@@ -13,6 +13,12 @@ A training session the athlete intends to perform on a date. It may contain stru
 **Independent workout**:
 A planned workout that does not belong to a training plan. It remains a complete training session with its own schedule, completion state, and relationship to a completed activity.
 
+**Calendar adjustment**:
+An athlete's proposed set of changes to one or more planned workouts on their calendar, reviewed and confirmed together.
+
+**Calendar adjustment revision**:
+A reviewable version of a calendar adjustment evaluated against a particular calendar baseline.
+
 **Activity**:
 A record of training that actually took place. An activity can exist without a planned workout.
 

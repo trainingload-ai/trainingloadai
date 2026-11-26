@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { useActivityId } from "@/hooks/useActivityId";
 import { useGetActivity } from "@/hooks/useActivities";
 import { useMobileViewport } from "@/hooks/use-mobile";
@@ -11,10 +10,9 @@ import {
   SportType,
   type Activity,
 } from "@/api/activities";
-import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import React, { useEffect } from "react";
-import { AlertCircle, ArrowLeft, BellRing, Loader2 } from "lucide-react";
+import { AlertCircle, BellRing, Loader2 } from "lucide-react";
 import { getActivityDetailState } from "@shared/activity-detail";
 import { ActivityHeader } from "./components/ActivityHeader";
 import { useMobileNavigation } from "@/components/mobile-app/components/MobileNavigationProvider";
@@ -68,17 +66,9 @@ function ProcessingPlaceholder({
   activity: Activity;
   failed?: boolean;
 }) {
-  const router = useRouter();
-
   return (
     <div className="mx-auto flex min-h-[70vh] w-full max-w-2xl items-center justify-center px-4">
       <div className="w-full space-y-4 rounded-2xl border bg-card p-6 md:p-8">
-        <div className="mb-6 flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => router.push("/activities")}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </div>
-
         <ActivityHeader activity={activity} />
 
         <div className="space-y-4 border-t pt-4">

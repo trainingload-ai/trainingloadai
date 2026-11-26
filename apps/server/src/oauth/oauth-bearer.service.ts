@@ -19,6 +19,8 @@ export type OAuthBearerIdentity = {
 export type OAuthBearerVerificationOptions = {
   requiredScopes?: string[];
   resourcePath?: `/${string}`;
+  /** Trusted key transport for callers that verify tokens issued by this service. */
+  jwksUrl?: string;
 };
 
 export type OAuthChallengeOptions = {
@@ -94,7 +96,7 @@ export class OAuthBearerService {
     let payload: Awaited<ReturnType<typeof verifyBearerToken>>;
     try {
       payload = await verifyBearerToken(token, {
-        jwksUrl: `${baseUrl}/auth/jwks`,
+        jwksUrl: normalizedOptions.jwksUrl ?? `${baseUrl}/auth/jwks`,
         verifyOptions: {
           issuer: `${baseUrl}/auth`,
           audience: resourceUrl,

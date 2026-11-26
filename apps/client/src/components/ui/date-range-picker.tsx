@@ -9,7 +9,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { ResponsiveDatePickerCalendar } from "@/components/ui/calendar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Popover,
@@ -33,7 +33,7 @@ interface DatePickerWithRangeProps {
   popoverModal?: boolean;
   startNewRangeOnOpen?: boolean;
   calendarProps?: Omit<
-    React.ComponentProps<typeof Calendar>,
+    React.ComponentProps<typeof ResponsiveDatePickerCalendar>,
     "mode" | "selected" | "onSelect"
   >;
 }
@@ -146,15 +146,13 @@ export function DatePickerWithRange({
               </AdaptiveDialogTitle>
             </AdaptiveDialogHeader>
             <div className="px-2 pb-4">
-              <Calendar
+              <ResponsiveDatePickerCalendar
                 {...calendarProps}
                 mode="range"
                 defaultMonth={date?.from}
                 selected={selectedDate}
                 onSelect={handleSelect}
-                numberOfMonths={1}
                 locale={dateLocale}
-                className="w-full"
               />
             </div>
           </AdaptiveDialogContent>
@@ -168,13 +166,12 @@ export function DatePickerWithRange({
       <Popover modal={popoverModal} open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>{triggerNode}</PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
+          <ResponsiveDatePickerCalendar
             {...calendarProps}
             mode="range"
             defaultMonth={date?.from}
             selected={selectedDate}
             onSelect={handleSelect}
-            numberOfMonths={2}
             locale={dateLocale}
             className="w-[500px]"
           />

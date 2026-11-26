@@ -1,6 +1,6 @@
 ---
-title: 連接 Strava、Garmin 與 COROS：同步訓練分步指南
-description: 連接 Strava、Garmin、COROS、Polar、Suunto 或 Wahoo 匯入訓練。按 OAuth、API Key 和 Garmin 歷史匯入步驟操作，核對第一次同步結果，並避免同一條訓練重複匯入。
+title: "連接 Strava、Garmin、COROS：匯入您的訓練紀錄"
+description: "連接 Strava、Garmin、COROS、Polar、Suunto 或 Wahoo 匯入訓練紀錄。依步驟完成 OAuth、API 金鑰與 Garmin 歷史資料匯入，並驗證首次同步結果。"
 keywords:
   [
     "連接 Strava",
@@ -8,98 +8,264 @@ keywords:
     "連接 COROS",
     "Polar 同步",
     "匯入 Wahoo 訓練",
-    "Garmin 歷史匯入",
+    "Garmin 歷史資料匯入",
   ]
 ---
 
-# 連接 Strava、Garmin 與 COROS：同步訓練分步指南
+# 連接 Strava、Garmin、COROS：匯入您的訓練紀錄
 
-本頁介紹 Strava、Garmin、COROS、Polar、Suunto、Wahoo 與 Intervals.icu 的操作：在哪裡授權、保留哪些同步選項，以及如何確認第一條活動已匯入。Garmin OAuth 用於接收新資料，歷史檔案匯入則用於補充舊活動。
+在雲端服務中連接您的訓練平台、設定要同步的資料方向，並確認第一筆活動已順利匯入。Garmin OAuth 用於接收授權後的新資料；若需補齊更早的歷史紀錄，請使用檔案匯入。
 
-**目前，Trainingload.ai 的 Garmin 官方 OAuth 連接無法取得授權之前已有的活動；解除後重新連接也不會回填歷史。** 請匯入 Garmin 完整匯出 ZIP（或其暫時下載連結），或上傳個別 FIT、TCX、GPX 檔案來補充記錄。自架版的 Garmin Personal API 是另一項功能，請依其專屬文件操作。
+若您使用自架版（Self-host），請改閱獨立的 [Intervals.icu 設定](/zh-hant/docs/self-host/configuration#connect-intervalsicu)與 [Garmin Personal API 指南](/zh-hant/docs/self-host/garmin-personal-api)。自架版並不包含下方列出的所有雲端連線功能。
 
-## 開始前
+## 開始之前
 
-- 登入真正保存目標訓練的平台帳號。
-- 為每條裝置訓練只選一條主要匯入路徑。例如不要同時透過 COROS 直連和 Strava 轉發同一條 COROS 記錄。
-- 記住 Trainingload.ai 目前最新的一條活動。
-- 決定個人檔、區間、匯出與計畫課以哪一邊為準。
-- API Key 與暫時下載連結只在對應的連接彈窗輸入。
+- 先登入擁有目標訓練紀錄的第三方平台帳號。
+- 為每筆記錄的訓練選定單一主要匯入路徑。例如，不要同時從 COROS 直連又透過 Strava 重複匯入同一筆 COROS 活動。
+- 先記下目前 Trainingload.ai 中最新一筆活動，方便後續驗證。
+- 在開啟同步方向前，先決定要在哪個平台維護個人檔案、訓練區間與計畫課表。
+- 僅在對應的 Trainingload.ai 連線對話框中輸入 API 金鑰與臨時下載連結。
 
-## 打開連接
+## 開啟第三方平台連線
 
-網頁打開 **帳號 → 第三方平台連接**，再選平台卡片。行動端打開 **我的 → 選單 → 資料授權**。OAuth 會在系統瀏覽器授權後回到 App。Garmin 的 OAuth 連接、歷史 ZIP 和暫時下載連結匯入均可在行動端 Garmin 設定中管理。
+在網頁版中，點擊側邊欄底部的帳號選單開啟**帳號（Account）**，接著在**第三方平台連線（Third Party Connections）**選擇目標平台。
 
-| 平台          | 網頁 | 行動端 | 授權                | 典型首次動作               |
-| ------------- | ---- | ------ | ------------------- | -------------------------- |
-| Strava        | 是   | 是     | OAuth               | 若選取則匯入最近 60 天     |
-| Polar         | 是   | 是     | OAuth               | 若選取則匯入最近 30 天     |
-| COROS         | 是   | 是     | OAuth               | 活動與健康同步分開執行     |
-| Intervals.icu | 是   | 是     | OAuth 或 API Key    | 匯入近期活動               |
-| Suunto        | 是   | 是     | OAuth               | 首次匯入近期課表           |
-| Wahoo         | 是   | 是     | OAuth               | 連接、儲存方向、再同步     |
-| Garmin OAuth  | 是   | 是     | OAuth               | 接收新活動與授權的健康資料 |
-| Garmin 歷史   | 是   | 是     | 匯出 ZIP 或暫時連結 | 補充授權前的活動記錄       |
+在行動 App 中，開啟**我的 → 選單 → 資料授權（Me → Menu → Data authorization）**。OAuth 會於系統瀏覽器中開啟該平台頁面，核准後再返回 App。Strava、Polar、COROS、Suunto、Wahoo、Intervals.icu 與 Garmin OAuth 連線皆可在手機端管理；行動版的 Garmin 設定中同樣支援透過 ZIP 檔或臨時下載連結進行歷史資料匯入。
+
+如果畫面上沒有出現某個平台卡片，代表您目前的帳號暫無法直接連接該平台。請改從來源平台匯出 FIT、TCX 或 GPX 檔案，再到「活動」頁面手動上傳。
+
+<DocsScreenshot
+  id="integrations-connections"
+  title="找到第三方平台連線區塊"
+  description="在「帳號」頁面中捲動至「第三方平台連線」，點選欲設定的平台。"
+  route="側邊欄帳號選單 → 帳號 → 第三方平台連線"
+/>
+
+| 平台 | 網頁版 | 行動版 | 授權方式 | 常見初始操作 |
+| --- | --- | --- | --- | --- |
+| Strava | 支援 | 支援 | OAuth | 勾選後匯入最近 60 天活動 |
+| Polar | 支援 | 支援 | OAuth | 勾選後匯入最近 30 天活動 |
+| COROS | 支援 | 支援 | OAuth | 分開執行活動同步與健康資料同步 |
+| Intervals.icu | 支援 | 支援 | OAuth 或 API 金鑰 | 匯入近期活動 |
+| Suunto | 支援 | 支援 | OAuth | 首次匯入近期訓練紀錄 |
+| Wahoo | 支援 | 支援 | OAuth | 完成連線、儲存同步方向後執行同步 |
+| Garmin 同步 | 支援 | 支援 | OAuth | 連線後接收新活動與已授權的健康資料 |
+| Garmin 歷史匯入 | 支援 | 支援 | Garmin 匯出 ZIP 或臨時下載連結 | 匯入較早期的歷史活動紀錄 |
 
 ## 連接 Strava
 
-1. 打開 **Connections → Strava**。
-2. 授權前選擇是否立即匯入最近 60 天。
-3. 選擇後續方向：自動匯入新的 Strava 活動、把非 Strava 活動上傳到 Strava、匯入或寫出個人檔與區間。
-4. 選擇 **Connect with Strava**，批准後返回。
-5. 重新打開 Strava，確認設定；缺課時用一次 **Sync now**。
+1. 開啟**第三方平台連線 → Strava**。
+2. 授權前，先決定是否立即匯入最近 60 天的活動。
+3. 勾選後續持續同步的資料方向：
+   - 自動匯入新的 Strava 活動；
+   - 將非 Strava 來源的活動從 Trainingload.ai 上傳至 Strava；
+   - 從 Strava 匯入運動員檔案與訓練區間；
+   - 將運動員檔案與訓練區間上傳至 Strava。
+4. 點選**連接 Strava（Connect with Strava）**，核准請求的權限後返回 Trainingload.ai。
+5. 重新開啟 Strava 卡片確認設定已儲存；若需手動補齊一次，可點選**立即同步（Sync now）**。
 
-不要同時開啟兩個個人檔方向，除非你已決定哪一邊勝出。自動匯入靠 Strava 通知；手動同步用來對帳，不是反覆匯入同一區間。
+除非您已明確決定以哪一端資料為準，否則請避免同時開啟雙向的個人檔案同步。自動匯入新活動仰賴 Strava 推播通知，手動同步適合用來對帳補漏，不建議反覆對同一段日期重複執行。
 
 <DocsScreenshot
   id="strava-oauth-settings"
-  title="Strava 連接設定"
-  description="離開去授權前，先選好首次匯入與持續資料方向。"
-  route="Account → Third Party Connections → Strava"
+  title="Strava 連線設定"
+  description="前往 Strava 授權頁面之前，先選擇初始匯入範圍與後續持續同步的資料方向。"
+  route="帳號 → 第三方平台連線 → Strava"
 />
 
-## Polar、COROS、Suunto、Wahoo
+如果 Strava 同時是您唯一的登入方式，系統可能會在您設定密碼或綁定其他登入方式前，防止中斷 Strava 連線，以確保您不會失去 Trainingload.ai 帳號存取權。
 
-Polar 可選最近 30 天與健康資料，並在 Polar Flow 批准。COROS 授權後分別執行 **Sync activities** 與每日/健康同步，一邊成功不代表另一邊也跑過。Suunto 與 Wahoo 完成 OAuth 後儲存方向，缺課再 **Sync now** 一次。未決定正本前，不要同時開啟個人檔匯入與匯出。
+## 連接 Polar
 
-## Intervals.icu
+1. 開啟**第三方平台連線 → Polar**。
+2. 選擇是否立即匯入最近 30 天的活動。
+3. 若希望 Polar 持續作為活動來源，請開啟自動同步新活動。
+4. 若需要同步 Polar 支援的每日活動、連續心率與睡眠資料，再開啟健康（Wellness）同步。
+5. 點選**連接 Polar（Connect with Polar）**，於 Polar Flow 核准存取後返回 Trainingload.ai。
+6. 若近期活動尚未出現，重新開啟設定視窗並執行一次**立即同步（Sync now）**。
 
-一般用 OAuth。只有需要時才用 API Key。已儲存的金鑰不會再顯示，畫面只見末四碼。用金鑰取代 OAuth（或相反）會保留已匯入歷史，但之後的同步改用新憑證。
+Polar 的手動同步僅檢查支援的近期時間窗口，並非全帳號歷史封存匯入。與 Strava 相同，若 Polar 是您唯一的登入方式，須先新增其他登入方式才能解除連線。
 
-## 匯入 Garmin 歷史
+## 連接 COROS
 
-歷史匯入用於補充舊活動，不會開啟後續同步。需要接收新資料時，請在 Garmin 設定中選擇 OAuth 授權並儲存同步設定。
+1. 開啟**第三方平台連線 → COROS**並完成 OAuth 授權。
+2. 卡片顯示已連線後，點選**同步活動（Sync activities）**以同步訓練紀錄。
+3. 在網頁版點選**同步每日資料（Sync daily）**（或於行動版點選**立即同步健康資料（Sync health now）**），以同步支援的日常與健康資料。
+4. 檢查卡片上顯示的最後同步狀態與任何錯誤提示。
 
-1. 在網頁打開 **Account → Third Party Connections → Garmin**。
-2. 從對話框開啟 [Garmin 官方資料匯出](https://www.garmin.com/account/datamanagement/exportdata/) 並申請。
-3. 等待郵件，常約 48 小時。
-4. 上傳完整匯出 ZIP，或貼上郵件 **Download** 按鈕後方的網址。
-5. 選擇 **Start import**，追蹤佇列、下載、掃描、匯入與完成狀態。
+COROS 刻意將活動同步與日常健康資料同步分開操作。活動同步成功並不代表健康資料也已完成同步。若畫面上未顯示 COROS 卡片，請改用手動上傳活動檔案。
 
-匯出網址等同暫時憑證。不要貼到聊天、AI Coach、工單或截圖。
+## 連接 Intervals.icu [#connect-intervalsicu]
+
+除非有明確需要使用 API 金鑰授權，否則建議優先使用 OAuth。
+
+### 使用 OAuth
+
+1. 開啟**第三方平台連線 → Intervals.icu → OAuth**。
+2. 在 Intervals.icu 中授權 Trainingload.ai，並返回同一個帳號。
+3. 勾選所需的同步方向。
+4. 儲存設定並執行一次初始同步或手動同步。
+
+### 使用 API 金鑰
+
+1. 從您自己的 Intervals.icu 帳號建立或複製一組 API 金鑰。
+2. 開啟**第三方平台連線 → Intervals.icu → API Key**。
+3. 將金鑰貼入受保護的欄位中並建立連線。
+4. 若帳號原本已使用另一組金鑰，請確認取代。
+
+Trainingload.ai 不會再次明文顯示已儲存的金鑰，已連線畫面只會顯示末四碼。以金鑰取代 OAuth（或反過來）都會保留先前已匯入的歷史紀錄，只會變更後續同步所使用的憑證。
+
+<DocsScreenshot
+  id="intervals-icu-auth-methods"
+  title="Intervals.icu 授權方式"
+  description="選擇 OAuth 或 API 金鑰，接著設定支援的資料同步方向。"
+  route="帳號 → 第三方平台連線 → Intervals.icu"
+/>
+
+依目前啟用的功能而定，設定視窗可能提供以下項目：
+
+- 每日自動同步活動；
+- 從 Trainingload.ai 匯出活動；
+- 匯入或匯出運動員檔案與訓練區間；
+- 匯入或匯出計畫課表。
+
+請先選定由哪一個平台維護您的訓練區間與計畫課表。若同時開啟雙向自動更新，可能會把您想保留的修改意外覆蓋掉。
+
+計畫課表匯入也包含不含間歇步驟的一般日曆課表。這類課表屬於獨立課表，不需要先建立訓練計畫；其日期、名稱、運動類型、說明與已提供的持續時間會顯示於訓練日曆及首頁的今日課表中，缺少的持續時間與強度則保持未知。您可以手動關聯已完成活動並隨時解除關聯；上傳活動不會自動將這類一般課表標記為完成。您在本機對這些課表做的編輯不會回傳至 Intervals.icu，也不會產生結構化課表檔案。
+
+## 連接 Suunto
+
+1. 開啟**第三方平台連線 → Suunto**。
+2. 選擇所需的持續同步方向：自動匯入訓練、健康資料、匯出已完成活動與匯出計畫課表。
+3. 點選 OAuth 連線按鈕，並在 Suunto 中核准訓練資料存取權。
+4. 返回 Trainingload.ai，等待首次近期訓練匯入完成。
+5. 重新開啟對話框以儲存變更設定或點擊**立即同步（Sync now）**。
+
+新訓練通常會透過 Suunto 推播通知自動抵達，並由排程對帳作為備援機制。健康資料可包含支援的心率、步數、睡眠與恢復資訊。中斷連線只會停止後續資料交換，不會刪除已匯入的訓練紀錄。
+
+## 連接 Wahoo
+
+1. 開啟**第三方平台連線 → Wahoo**。
+2. 勾選所需同步方向：自動匯入訓練、匯出已完成活動、匯出計畫課表、匯入個人檔案或匯出個人檔案。
+3. 啟動 OAuth，在 Wahoo 核准授權後返回 Trainingload.ai。
+4. 儲存設定；若某筆近期已知訓練尚未出現，執行一次**立即同步（Sync now）**。
+
+在確認哪一端負責維護個人檔案數值之前，切勿同時開啟個人檔案的匯入與匯出。重新連線前，請先檢視對話框中的最後同步時間與最後錯誤訊息。
+
+## 在行動 App 管理第三方平台
+
+行動版連線設定與網頁版共用同一份伺服器連線資料，因此在任一端修改都會同步影響兩邊。
+
+1. 開啟**我的 → 選單 → 資料授權（Me → Menu → Data authorization）**並選擇目標平台。
+2. 若為 Strava 或 Polar 且畫面提供初始同步選項，請於 OAuth 前先勾選。
+3. 在系統瀏覽器完成授權，並允許跳轉返回 App。
+4. 重新開啟該平台設定頁，勾選支援的同步方向。
+5. 點選**儲存設定（Save settings）**，僅在需要對帳補漏時點擊**立即同步（Sync now）**。
+6. 若為 COROS，請分開執行活動同步與健康同步。
+
+Intervals.icu 在行動版中具備專屬設定頁；Garmin 設定頁亦包含以 ZIP 檔或臨時下載連結匯入歷史資料的功能。
+
+<DocsScreenshot
+  id="mobile-provider-settings"
+  title="行動版第三方平台設定"
+  description="已連線平台的設定面板，提供同步方向、手動同步與中斷連線控制項。"
+  route="我的 → 選單 → 資料授權"
+  platformLabel="行動版"
+  platform="mobile"
+/>
+
+## 連接 Garmin 以接收新資料
+
+**Trainingload.ai 目前無法透過官方 Garmin OAuth 連線取得授權日期之前所記錄的歷史活動；中斷並重新連線也不會回補舊資料。**若要匯入過往紀錄，請使用 Garmin 完整匯出 ZIP（或其臨時下載連結），或手動上傳個別 FIT、TCX、GPX 檔案。此限制不適用於自架版的 Garmin Personal API，自架使用者請參閱該專屬指南。
+
+1. 開啟**帳號 → 第三方平台連線 → Garmin**。
+2. 選擇 **OAuth**，在 Garmin 核准存取後返回 Trainingload.ai。
+3. 確認頁面顯示**已連接 Garmin（Garmin connected）**。
+4. 依需求開啟**新活動（New activities）**或**健康與恢復（Health and recovery）**，然後儲存設定。
+5. 完成一次新訓練後，前往「活動」檢查其資料來源與詳情。
+
+此連線僅接收授權後的新資料；較早期的活動請使用下方的**檔案匯入（File import）**。若帳號介面未提供 OAuth，請直接使用檔案匯入。自架版請參考 [Garmin Personal API 指南](/zh-hant/docs/self-host/garmin-personal-api)。
+
+<DocsScreenshot
+  id="garmin-oauth-settings"
+  title="接收新資料的 Garmin 設定"
+  description="在 OAuth 分頁中選擇同步新活動與健康摘要；較早期的歷史紀錄請切換至「檔案匯入」分頁。"
+  imageAlt="完整帳號工作區中的 Garmin 設定畫面，包含 OAuth 與檔案匯入兩個分頁"
+  route="帳號 → 第三方平台連線 → Garmin → OAuth"
+/>
+
+## 匯入 Garmin 歷史資料
+
+歷史資料匯入用於補齊過往活動，本身不會開啟後續自動同步；接收未來的新訓練仍需使用上方的 Garmin OAuth 連線。
+
+1. 在網頁版開啟**帳號 → 第三方平台連線 → Garmin**，或在行動 App 開啟**我的 → 選單 → 資料授權 → Garmin → 歷史匯入（History import）**。
+2. 從視窗中開啟 [Garmin 官方資料匯出頁面](https://www.garmin.com/account/datamanagement/exportdata/) 並申請匯出資料。
+3. 等待 Garmin 寄發下載通知郵件（等待時間視 Garmin 端處理速度而定）。
+4. 選擇匯入方式：下載並上傳完整的 Garmin 匯出 ZIP 檔，或複製郵件中**下載（Download）**按鈕背後的連結 URL。
+5. 在 Garmin 歷史匯入視窗中選擇**上傳檔案（Upload file）**或**使用連結（Use URL）**，然後點選**開始匯入（Start import）**。對於體積非常大的匯出封存檔，使用連結通常會更快速。
+6. 回到視窗持續追蹤排隊中、下載中、掃描中、匯入中、已完成、部分失敗或失敗等階段狀態。
+7. 完成後，比對偵測數量、排隊數量、已匯入數量與重複略過數量是否符合預期。
 
 <DocsScreenshot
   id="garmin-history-import"
-  title="Garmin 歷史匯入"
-  description="上傳 Garmin 匯出 ZIP 或貼上暫時郵件連結，啟動工作並監看各階段。"
-  route="Account → Third Party Connections → Garmin"
+  title="Garmin 歷史資料匯入"
+  description="上傳 Garmin 匯出 ZIP 檔或貼上郵件中的臨時下載連結，啟動任務並監控各匯入階段進度。"
+  route="帳號 → 第三方平台連線 → Garmin"
 />
 
-## 常見問題
+匯出連結等同於臨時下載憑證，切勿將其貼到聊天視窗、智能教練、問題回報單或螢幕截圖中。Trainingload.ai 僅接受安全的 Garmin 官方託管 URL，任務排隊期間會進行加密保護，封存檔下載完成後即會刪除該連結。直接上傳的 ZIP 檔同樣僅供該次匯入使用，掃描處理完畢後即予刪除。
 
-### 怎樣連接 Strava？
+## 登入帳號與資料同步平台不同
 
-打開 **帳號 → 第三方平台連接 → Strava**，選擇是否立即匯入最近 60 天與後續資料方向，再完成授權。返回後重新打開 Strava，如最新訓練未出現，執行一次 **立即同步**。
+位於**登入帳號（Login Accounts）**底下的 Google、Apple 與 GitHub 僅作為身分驗證方式。綁定後能讓您用來登入，但不會匯入訓練活動、健康資料、訓練計畫或個人檔案區間。若某個登入方式是您目前唯一可用的登入途徑，系統在您設定密碼或綁定其他帳號前會限制移除。
 
-### 連接 Garmin 之後會持續同步嗎？
+## 驗證每一項平台連線
 
-Garmin OAuth 連接會依儲存的設定接收新資料。授權前的活動無法透過此連接取得，請使用歷史檔案匯入補充；解除後重新連接也不會回填歷史。
+完成任一平台連線後，請依序核對：
 
-### 為什麼同一條訓練出現兩次？
+1. 確認該平台卡片顯示**已連線（Connected）**。
+2. 重新開啟設定視窗，確認勾選的選項確實已儲存。
+3. 最多執行一次初始同步或手動對帳。
+4. 開啟**活動（Activities）**，確認找得到一筆來源標籤正確的近期已知訓練。
+5. 點開活動詳情頁，核對來源平台確實有提供預期的心率、功率、GPS 或海拔資料。
+6. 若啟用雙向同步功能，建議先做一項無害的小幅測試變更，確認只有預期的目標端隨之更新。
 
-兩條匯入路徑轉發了同一條記錄，例如 COROS 直連再加 Strava。每條裝置訓練只留一條主路徑，再繼續回填歷史。
+切勿把 OAuth 成功跳轉返回當成「活動已經匯入完成」的證明。授權、資料擷取與活動分析處理屬於三個獨立階段。
+
+## 疑難排解
+
+| 異常狀況 | 檢查方向 |
+| --- | --- |
+| OAuth 返回後卡片仍顯示未連線 | 從平台卡片重新發起授權、核准所有請求的權限，並確認瀏覽器導回的是同一個 Trainingload.ai 帳號；切勿重複使用舊的授權網址。 |
+| 顯示已連線，但沒有出現近期活動 | 確認該平台的初始回溯天數、執行一次手動同步、等待處理完成，並在「活動」中依日期與來源搜尋。較早的紀錄可能需要手動上傳或 Garmin 歷史匯入。 |
+| 同一筆訓練出現兩次 | 辨識兩筆紀錄的來源標籤，接著停用其中一條轉發路徑，再繼續匯入更多資料。 |
+| 缺少心率、功率、GPS 或海拔資料 | 開啟原始來源平台的該筆活動檢查；Trainingload.ai 無法匯入來源平台本身未提供或未開放的感測資料流。 |
+| 畫面上看不到某個平台卡片 | COROS 等平台的可用性可能受供應商審核或推出進度影響，暫時無法直連時請改用活動檔案上傳。 |
+| Intervals.icu 拒絕新取代的金鑰 | 確認新金鑰屬於正確的目標帳號，並在提示畫面明確核准憑證取代。 |
+| Garmin 拒絕貼上的下載連結 | 改為直接上傳下載好的 ZIP 檔，或確認複製的是郵件中「下載」按鈕背後的連結（而非郵件網頁本身的網址），且仍為安全的 Garmin 官方託管位址。 |
+| 無法點擊中斷連線 | 若該平台同時是您唯一的登入方式，請先設定密碼或綁定另一個登入帳號。 |
+
+## 常見問答
+
+### 如何將 Strava 連接到 Trainingload.ai？
+
+開啟**帳號 → 第三方平台連線 → Strava**，選好 60 天初始匯入與資料同步方向後進行授權。返回後重新開啟 Strava，若最新一次騎乘或跑步尚未出現，點選一次**立即同步（Sync now）**即可。
+
+### 可以連接 Garmin 並持續保持自動同步嗎？
+
+可以。Garmin **OAuth** 連線會依您儲存的設定，持續接收新活動與已授權的健康資料；**歷史檔案匯入**則用來補齊較早期的紀錄，不會開啟後續自動同步。兩種方式可搭配使用，但請避免反覆匯入相同活動。
+
+### 如何連接 COROS 或 Polar？
+
+先於平台卡片完成授權，再執行首次同步。COROS 將**同步活動**與每日／健康同步分開執行，其中一項成功不代表另一項也已跑完。Polar 則支援匯入最近 30 天活動，並可依需求開啟健康資料同步。
+
+### 為什麼同一堂訓練會出現兩次？
+
+通常是兩條匯入路徑同時轉發了同一份檔案（例如 COROS 直連加上 Strava）。請為每筆記錄的訓練保留單一主要匯入路徑，並在匯入更多歷史資料前先停用多餘的那一條。
 
 ## 下一步
 
-- 先在[訓練平台串接](/zh-hant/docs/guide/integrations)比較路徑，再授權第二條連接。
-- 匯入滿一週後，[在計畫中管理訓練負荷](/zh-hant/training-load)。
+- 授權第二條同步路徑前，先在[整合平台總覽](/zh-hant/docs/guide/integrations)比較各平台差異。
+- 閱讀[連接訓練資料](/zh-hant/docs/guide/connect-data)，深入了解處理流程與資料來源辨識。
+- 針對不支援直連的平台或單筆歷史檔案，請使用[上傳活動檔案](/zh-hant/docs/guide/upload-activity-files)。
+- 匯入第一週的訓練紀錄後，前往了解[如何在計畫中以 CTL、ATL 與 TSB 管理訓練負荷](/zh-hant/training-load)。

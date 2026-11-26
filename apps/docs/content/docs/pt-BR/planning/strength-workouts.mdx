@@ -1,0 +1,139 @@
+---
+title: Treinos de Força
+description: Crie treinos de força estruturados com exercícios, séries de aquecimento e trabalho, repetições ou tempo, carga, esforço e descanso no Trainingload.ai.
+keywords: ["construtor de treino de força", "plano de treino de força"]
+---
+
+# Treinos de Força
+
+Treinos de força precisam de exercícios, séries, repetições, carga, esforço e descanso, em vez de etapas de resistência baseadas em tempo e distância. O Trainingload.ai oferece um editor dedicado para força e exibe a prescrição planejada ao lado da atividade de força concluída.
+
+## Antes de começar
+
+- Abra um rascunho de plano ou um treino futuro editável. Não reescreva uma atividade concluída como uma nova prescrição.
+- Escolha **Treino de Força** como modalidade para abrir o editor de força.
+- Decida se vai usar o modo **Manual** ou **Regras**. Ambos geram a mesma estrutura de treino.
+- Separe os nomes dos exercícios, equipamentos, cargas ou valores de 1RM confiáveis e o RPE/RIR desejado. Escolha **Carga Aberta** quando não houver uma carga numérica definida.
+
+## Visão geral da estrutura
+
+<Mermaid
+  chart={`flowchart TD
+  Session["Sessão de força"] --> Exercise["Exercício"]
+  Exercise --> Warmup["Grupo de séries de aquecimento"]
+  Exercise --> Work["Grupo de séries de trabalho"]
+  Work --> Prescription["Repetições ou tempo"]
+  Work --> Load["Aberta, peso, % de 1RM ou peso corporal"]
+  Work --> Effort["RPE ou RIR"]
+  Work --> Rest["Tempo de descanso"]`}
+/>
+
+## 1. Escolha Treino de Força
+
+Abra o editor manual de treinos e selecione **Treino de Força**. O editor alterna das etapas de resistência para o construtor de força.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Abra o editor pelo cronograma do plano"
+  description="No Criador de Plano Manual, avance para Seleção de Datas e clique em + Sessão no dia desejado."
+  route="Planos → Criador de Plano Manual → Seleção de Datas → + Sessão"
+/>
+
+<DocsScreenshot
+  id="strength-workout-builder"
+  title="Construtor de treinos de força"
+  description="Um exercício completo inclui nome e pelo menos um grupo de séries de trabalho; séries de aquecimento são opcionais."
+  route="Planos → Treino manual → Treino de Força"
+/>
+
+## 2. Defina orientações da sessão
+
+Adicione duração planejada e RPE da sessão apenas quando forem úteis para o plano. O RPE da sessão descreve a dificuldade geral prevista, e não a meta de esforço de cada série isolada.
+
+## 3. Adicione um exercício
+
+Todo exercício precisa ter um nome não vazio. Use nomes consistentes e fáceis de reconhecer para que o planejado e a sessão concluída possam ser comparados depois. O equipamento é opcional e deve descrever o que você precisa, sem repetir o nome do exercício.
+
+Exemplos:
+
+- Agachamento Livre — Barra
+- Levantamento Terra Romeno — Barra
+- Barra Fixa — Peso Corporal
+- Agachamento Búlgaro — Halteres
+
+## 4. Adicione grupos de séries
+
+Um grupo de séries descreve séries repetidas com a mesma prescrição.
+
+- **Aquecimento** — séries preparatórias; opcionais.
+- **Trabalho** — séries que definem a prescrição principal do treino; obrigatórias em todo exercício.
+
+Escolha repetições para exercícios baseados em contagem ou tempo para séries isométricas/cronometradas. Em uma faixa de repetições, mantenha o mínimo menor ou igual ao máximo.
+
+## 5. Escolha a carga
+
+- **Carga aberta** — nenhuma carga numérica é prescrita. Use quando o equipamento ou a força atual forem desconhecidos.
+- **Peso fixo** — um peso numérico com unidade suportada.
+- **Percentual de 1RM** — indicado apenas quando o 1RM correspondente é conhecido e atual.
+- **Peso corporal** — o peso corporal do atleta.
+- **Peso corporal com ajuste** — peso corporal acrescido ou reduzido de uma carga externa onde houver suporte.
+
+Planos de força gerados por IA não devem inventar quilos, libras ou percentuais de 1RM quando você não tem histórico confirmado ou 1RM conhecido. Carga aberta combinada com uma referência de RPE/RIR é o padrão mais seguro.
+
+## 6. Adicione esforço e descanso
+
+Use RPE para descrever o esforço percebido ou RIR para indicar repetições deixadas na reserva. Mantenha a indicação internamente coerente; evite prescrever uma carga agressiva junto com uma meta de esforço muito fácil, salvo se esse contraste for intencional.
+
+O descanso é salvo por grupo de séries. Defina tempo suficiente para manter a qualidade desejada, em vez de aplicar o mesmo intervalo a todos os exercícios.
+
+## 7. Escreva o mesmo treino com a DSL de Força
+
+No modo **Regras**, uma sessão de força pode ser escrita assim:
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+
+exercise "Pull Up" equipment bodyweight {
+  work 3x8 bodyweight rir 2 rest 90s
+}
+```
+
+Siga a [DSL de Treinos de Força](/pt-BR/docs/planning/strength-workout-dsl) para conferir a gramática completa, nomes de exercícios localizados, formatos de carga, fluxo de validação e correção de erros. A DSL de Força é uma prescrição estática: ela não executa `if/else`, progressão semanal, scripts de deload, blocos aninhados nem scripts arbitrários.
+
+## Verifique o treino
+
+Antes de salvar, confirme:
+
+- Existe pelo menos um exercício.
+- Cada exercício possui um nome.
+- Cada exercício possui pelo menos um grupo de séries.
+- Cada exercício inclui pelo menos um grupo de séries de trabalho.
+- Séries, repetições, segundos, esforço e carga estão dentro das faixas suportadas.
+- A prévia reflete a sessão desejada.
+
+Depois de salvar, reabra o treino e confirme se a mesma estrutura aparece no construtor visual ou na DSL de Força normalizada. O resumo da prévia deve contabilizar os exercícios e séries de trabalho esperados.
+
+## Solução de problemas
+
+- **“Informe um nome para cada exercício”:** adicione um nome não vazio entre aspas na DSL ou preencha o campo Exercício no construtor visual.
+- **“Cada exercício precisa de pelo menos um grupo de séries”:** adicione um grupo de aquecimento ou de trabalho antes de fechar o exercício.
+- **“Cada exercício precisa de pelo menos uma série de trabalho”:** um exercício apenas com aquecimento é inválido; inclua pelo menos uma linha `work`.
+- **Uma faixa de repetições falha:** escreva o menor valor primeiro, como `3x8-12`.
+- **Carga ou esforço falham na validação:** use um formato de carga suportado e escolha RPE ou RIR, nunca ambos.
+- **A chave de fechamento é rejeitada:** feche cada exercício uma única vez e não aninhe blocos de exercício.
+- **Trocar de força para resistência limpa o editor:** as estruturas são intencionalmente diferentes. Salve ou copie o texto desejado antes de trocar a modalidade.
+
+## Sessões de força concluídas
+
+Atividades de força podem registrar exercícios, conclusão de séries e conclusão da sessão. Após o treino, abra os detalhes da atividade de força e confira os nomes dos exercícios, séries concluídas, carga, repetições/tempo e o contexto geral da sessão antes de usar os dados na revisão.
+
+## Próximos passos
+
+- Siga [DSL de Treinos de Força](/pt-BR/docs/planning/strength-workout-dsl) para um tutorial completo do modo texto.
+- Adicione o treino a um plano e continue em [Gerenciar Status do Plano](/pt-BR/docs/planning/plan-lifecycle) ou [Gerenciar um Plano Ativo](/pt-BR/docs/guide/manage-active-plan).

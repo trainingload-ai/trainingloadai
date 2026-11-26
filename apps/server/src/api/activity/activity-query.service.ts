@@ -342,6 +342,33 @@ export class ActivityQueryService {
       : date.toISOString().slice(0, 10);
   }
 
+  private findActivityListTimezone(userId: string) {
+    return this.users.bodyMetrics().findFirst({
+      where: { userId, type: BodyMetricType.TIMEZONE },
+      orderBy: [{ effectiveDate: 'desc' }, { createdAt: 'desc' }],
+      select: { value: true },
+    });
+  }
+
+  async getActivityCards(userId: string, hashIds: string[]) {
+    this.assertUserId(userId);
+    const [activities, activePlanRow, userTzMetric] = await Promise.all([
+      this.prisma.activity.findMany({
+        where: readyActivityWhere({ userId, hashId: { in: hashIds } }),
+        include: ACTIVITY_LIST_INCLUDE,
+      }),
+      this.planQuery.findActiveDateRange(userId),
+      this.findActivityListTimezone(userId),
+    ]);
+    return this.mapActivityListRows({
+      activities,
+      userId,
+      activePlanRow,
+      userTzFallback: userTzMetric?.value ?? null,
+      readOnly: true,
+    });
+  }
+
   private buildActivityWhere(
     userId: string,
     filters: ActivityFilters,
@@ -491,11 +518,7 @@ export class ActivityQueryService {
         take: args.limit + 1,
       }),
       this.planQuery.findActiveDateRange(args.userId),
-      this.users.bodyMetrics().findFirst({
-        where: { userId: args.userId, type: BodyMetricType.TIMEZONE },
-        orderBy: [{ effectiveDate: 'desc' }, { createdAt: 'desc' }],
-        select: { value: true },
-      }),
+      this.findActivityListTimezone(args.userId),
       includeMirrors
         ? this.externalActivityMirrors.listTimelineCandidates({
             userId: args.userId,
@@ -530,7 +553,6 @@ export class ActivityQueryService {
     const mappedActivities = await this.mapActivityListRows({
       activities: selectedActivities,
       userId: args.userId,
-      filters,
       activePlanRow,
       userTzFallback: userTzMetric?.value ?? null,
       readOnly: args.readOnly,
@@ -573,7 +595,6 @@ export class ActivityQueryService {
   private async mapActivityListRows(args: {
     activities: ActivityListDbRow[];
     userId: string;
-    filters: ActivityFilters;
     activePlanRow: { startDate: Date | null; endDate: Date | null } | null;
     userTzFallback: string | null;
     readOnly?: boolean;
@@ -788,11 +809,7 @@ export class ActivityQueryService {
           take,
         }),
         this.planQuery.findActiveDateRange(userId),
-        this.users.bodyMetrics().findFirst({
-          where: { userId, type: BodyMetricType.TIMEZONE },
-          orderBy: [{ effectiveDate: 'desc' }, { createdAt: 'desc' }],
-          select: { value: true },
-        }),
+        this.findActivityListTimezone(userId),
         includeMirrors
           ? // 影子是并列的只读时间线投影，不能混入 Activity DTO 或活动统计。
             this.externalActivityMirrors.listForUser({
@@ -810,7 +827,6 @@ export class ActivityQueryService {
       const filteredActivities = await this.mapActivityListRows({
         activities,
         userId,
-        filters,
         activePlanRow,
         userTzFallback,
         readOnly: options.readOnly,

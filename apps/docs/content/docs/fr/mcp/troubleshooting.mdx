@@ -1,0 +1,43 @@
+---
+title: Dépannage MCP
+description: Diagnostiquer les problèmes de découverte, d’OAuth, de portée (scope), d’outils, de délai d’attente et de cache client sur TrainingLoad MCP.
+---
+
+# Dépannage MCP
+
+## Le client ne parvient pas à découvrir le serveur
+
+Vérifiez que l’URL est exactement `https://api.trainingload.ai/mcp`, y compris le suffixe `/mcp`. Le client IA doit prendre en charge le transport distant Streamable HTTP. Sur un réseau d’entreprise, vérifiez que le trafic HTTPS est autorisé vers `api.trainingload.ai` ainsi que vers les pages d’autorisation TrainingLoad.
+
+## OAuth ne s’ouvre pas ou renvoie une erreur au client
+
+- Lancez toujours le flux depuis l’action de connexion du client plutôt qu’en réutilisant une ancienne URL d’autorisation.
+- Vérifiez que le client prend en charge la découverte OAuth et PKCE S256.
+- Assurez-vous que le retour (callback) revient vers la même instance du client ayant initié l’autorisation.
+- Si le vérificateur d’autorisation est temporairement indisponible, patientez le délai indiqué par `Retry-After` avant de réessayer.
+
+## Un outil est manquant
+
+Le serveur filtre `tools/list` selon les droits de votre compte et les drapeaux de déploiement. `get_health_summary` reste visible avant l’octroi de `health:read` afin que son appel puisse déclencher le consentement incrémental. Si un autre outil n’apparaît pas, reconnectez-vous après avoir vérifié l’éligibilité de votre compte ; n’ajoutez jamais de jeton bearer manuellement.
+
+## `INSUFFICIENT_SCOPE`
+
+Utilisez l’action de reconnexion ou d’autorisation du client et approuvez la portée (scope) demandée. Si le client ignore le défi MCP `mcp/www_authenticate`, supprimez puis ajoutez de nouveau la connexion afin qu’il demande l’ensemble complet des portées (scopes) en lecture seule souhaitées.
+
+## Résultats vides
+
+Un résultat vide signifie qu’aucune donnée enregistrée ne correspond à cette plage de dates. Cela ne signifie ni charge nulle, ni absence d’entraînement, ni état normal ou sain. Vérifiez le fuseau horaire et la plage interrogée retournés par l’outil, puis élargissez la période dans les limites documentées si nécessaire.
+
+## `CAPABILITY_TIMEOUT`, annulation ou limite de débit
+
+- `CAPABILITY_TIMEOUT` : réduisez la plage de dates ou diminuez `limit`, puis réessayez une fois.
+- `CAPABILITY_CANCELLED` : le client a annulé la requête ou s’est déconnecté ; lancez une nouvelle demande.
+- Limite de débit : attendez le délai de réessai indiqué. Ne relancez pas de requêtes en boucle rapide.
+
+## Le client affiche encore d’anciens outils
+
+Actualisez ou réinitialisez le cache d’outils MCP du client. Dans ChatGPT, une application d’espace de travail publiée peut conserver un instantané figé des outils tant qu’un administrateur ne la met pas à jour. Dans VS Code, exécutez **MCP: Reset Cached Tools**. Si besoin, supprimez puis reconnectez le serveur.
+
+## Les données semblent suspectes ou semblent appartenir à un autre compte
+
+Cessez immédiatement d’utiliser la connexion et révoquez-la depuis TrainingLoad. Notez le nom du client, l’heure approximative et l’identifiant de requête, puis contactez le support. Ne partagez ni le jeton d’accès ni la charge utile complète.

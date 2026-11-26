@@ -1,0 +1,158 @@
+---
+title: Self-Hosting-Instanz konfigurieren
+description: Lokalen Datenpfad festlegen, Netzwerkzugriff steuern und einen vom Owner verwalteten OpenAI-kompatiblen KI-Anbieter konfigurieren.
+---
+
+# Self-Hosting-Instanz konfigurieren
+
+Lege Speicherort und lokalen Port vor der Installation fest. Nach der Installation kannst du deinen KI-Anbieter direkt in den Anwendungseinstellungen auswählen oder wechseln.
+
+## Bevor du startest
+
+- Verwende ausschließlich Einstellungen, die in der `.env.example` und im Instanz-Schema des Release-Pakets definiert sind.
+- Führe vor jeder zustandsändernden Lifecycle-Aktion den passenden `--dry-run --json`-Befehl aus.
+- Füge niemals `.env.selfhost`, Passwörter, API-Schlüssel oder Tokens in Chats, Issues oder geteilte Terminal-Mitschnitte ein.
+- Das bestehende Datenverzeichnis enthält deine Trainingsdaten. Ersetze oder leere es niemals manuell.
+
+## Lokalen Datenpfad festlegen [#choose-the-local-data-path]
+
+Standardmäßig liegt das Datenverzeichnis unter `./data` im Release-Ordner. Dort befinden sich PostgreSQL-Daten, Uploads, Betriebsprotokolle, Backups und Caches. Die Anwendung bindet Uploads direkt aus diesem Host-Pfad nach `/data/uploads` ein; ein separater Object-Storage-Dienst ist nicht nötig.
+
+Um vor der ersten Installation einen anderen Pfad festzulegen:
+
+1. Erstelle im entpackten, verifizierten Release-Verzeichnis aus der mitgelieferten Vorlage eine private Instanzkonfiguration:
+
+   ```bash
+   umask 077
+   cp .env.example .env.selfhost
+   chmod 600 .env.selfhost
+   ```
+
+2. Erzeuge lokal drei unterschiedliche 32-Byte-Werte mit `openssl rand -hex 32` und ersetze damit die drei Secret-Platzhalter in `.env.selfhost`. Der reguläre Installer erledigt diesen Schritt automatisch.
+3. Entferne das Kommentarzeichen vor `SELF_HOST_DATA_ROOT` und setze einen dedizierten Pfad, zum Beispiel:
+
+   ```dotenv
+   SELF_HOST_DATA_ROOT=/srv/trainingload-data
+   ```
+
+4. Führe den regulären Installer-Dry-Run aus und fahre nur fort, wenn er `"ok": true` liefert:
+
+   ```bash
+   ./install.sh --dry-run --json
+   ./install.sh --json
+   ```
+
+Das Zielverzeichnis darf noch nicht existieren oder muss ausschließlich für diese Instanz bestimmt sein. Die Management-CLI lehnt Dateisystem-Wurzeln, übergeordnete Release-Verzeichnisse, signierte Release-Unterbäume, unsichere Symlinks und fremde Bestandsdateien ab.
+
+Ändere `SELF_HOST_DATA_ROOT` niemals bei einer laufenden Instanz als Abkürzung zum Verschieben von Dateien. Der Umzug einer bestehenden Instanz erfordert ein verifiziertes Backup und eine Wiederherstellung in ein frisch initialisiertes Ziel.
+
+## Netzwerkzugriff steuern
+
+Standardmäßig wird nur der HTTP-Port des Clients auf Loopback veröffentlicht:
+
+```dotenv
+SELF_HOST_SITE_ADDRESS=http://localhost:43210
+SELF_HOST_HTTP_BIND=127.0.0.1
+SELF_HOST_HTTP_PORT=43210
+```
+
+Für einen anderen freien Port passe sowohl die Site-Adresse als auch den HTTP-Port an. Belasse PostgreSQL und den Server im privaten Compose-Netzwerk. Für den Zugriff von einem anderen Computer nutze einen SSH-Tunnel und behalte den lokalen Browser-Origin bei. Das Anwendungspaket enthält kein Caddy, keinen HTTPS-Port und kein Docs-Profil.
+
+Prüfe Host-Änderungen immer über den Lifecycle-Einstiegspunkt:
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+./self-host doctor --json
+```
+
+### Lokaler Zugriffspfad
+
+Rufe die Anwendung im Browser unter der konfigurierten lokalen Adresse auf. Datenbank und interne Anwendungsdienste benötigen keine öffentlichen Ports. Gib sie niemals im Internet frei, um ein Verbindungsproblem zu umgehen.
+
+## Dein persönliches Konto
+
+Gib beim ersten Öffnen einen Benutzernamen ein und folge dem Setup. Eine Instanz ist für eine Person gedacht; öffentliche Registrierungen oder mehrere Konten werden nicht unterstützt.
+
+Self-Hosting verwendet ein lokales Konto statt Cloud-Registrierung oder Social-Login. Eine abgelaufene lokale Sitzung wird automatisch wiederhergestellt. Bestätigst du die Kontolöschung, werden die Daten dieses Kontos entfernt und die Instanz kehrt zur Benutzernamen-Einrichtung zurück. Backups und Instanzkonfiguration verwaltest du separat; beim Löschen des Kontos werden diese Dateien nicht entfernt.
+
+## Intervals.icu verbinden [#connect-intervalsicu]
+
+Beim Self-Hosting verbindest du Intervals.icu über den **persönlichen API-Schlüssel** des Owners. Ein Intervals.icu-OAuth-Client, eine Redirect-URI und Webhooks sind weder erforderlich noch unterstützt.
+
+Self-Hosting unterstützt außerdem die [Garmin Personal API](/de/docs/self-host/garmin-personal-api). COROS MCP ist nicht aktiviert. Für keine der beiden persönlichen Verbindungen ist ein zusätzliches Host-Secret erforderlich.
+
+So verbindest du Intervals.icu:
+
+1. Öffne die [Intervals.icu-Einstellungen](https://intervals.icu/settings) und kopiere deinen persönlichen API-Schlüssel ganz unten auf der Seite. Über die Schaltfläche **API-Schlüssel abrufen** im Verbindungsdialog des Clients öffnest du diese Seite direkt.
+2. Wähle **Intervals.icu** beim Onboarding im Schritt „Aktivität importieren“ oder später unter **Konto → Drittanbieter-Verbindungen → Intervals.icu**.
+3. Gib den API-Schlüssel ein, wähle die gewünschten Synchronisierungsrichtungen für Aktivitäten, geplante Einheiten, Wellness-Daten und Sporteinstellungen und speichere.
+4. Starte eine manuelle Synchronisierung und prüfe den letzten Synchronisierungszeitpunkt sowie das importierte Ergebnis.
+
+Laut der [Open-API-Dokumentation von Intervals.icu](https://www.intervals.icu/features/open-api/) kann jeder Nutzer die REST-API mit einem persönlichen API-Schlüssel aufrufen – inklusive Upload/Download von Aktivitäten, Wellness-Daten und geplanten Einheiten. Der Schlüssel wird ausschließlich an deinen lokalen Server gesendet. Dort wird er mit AES-256-GCM und einem bei der Installation erzeugten Integrations-Secret verschlüsselt, als Chiffretext in PostgreSQL abgelegt und in späteren API-Antworten niemals wieder im Klartext ausgegeben.
+
+Dies ist keine Offline-Funktion. Sobald sie aktiv ist, verbindet sich der lokale Server direkt mit `intervals.icu` und liest oder sendet Daten gemäß deinen gewählten Synchronisierungsrichtungen. Der Schlüssel gehört einem einzelnen Intervals.icu-Konto; speichere ihn nicht in geteilten Umgebungsvariablen und füge ihn niemals in Logs, Issues oder Chats ein.
+
+Backups enthalten den verschlüsselten API-Schlüssel, doch die Instanz-Secrets müssen getrennt an einem sicheren Ort aufbewahrt werden. Stelle bei einem Restore die ursprünglichen Authentifizierungs- und Integrations-Secrets zusammen mit der Datenbank wieder her, damit gespeicherte Zugangsdaten entschlüsselbar bleiben. Die Management-Tools geben diese Secrets weder aus noch exportieren sie sie. Das vollständige Verfahren findest du in der Datei `BACKUP_RESTORE.md` des Release-Pakets.
+
+## KI im Client konfigurieren [#configure-ai-in-the-client]
+
+KI ist standardmäßig deaktiviert. Der letzte Schritt des Onboardings bietet direkt die Konfiguration eines eigenen KI-Anbieters (BYOK) statt eines Trainingload.ai-Cloud-Zustimmungsdialogs; du kannst diesen Schritt auch überspringen und KI später einrichten:
+
+1. Öffne den lokalen Client.
+2. Wähle im Onboarding **KI-Dienst konfigurieren** oder später **Einstellungen → Self-Hosted KI**.
+3. Wähle OpenAI, DeepSeek, OpenRouter, DashScope oder **Benutzerdefiniert (OpenAI-kompatibel)**.
+4. Gib beim Einrichten oder Anbieterwechsel den API-Schlüssel des Anbieters ein und trage sowohl das Standard- als auch das Reasoning-Modell ein. Die Base URL kann bei integrierten Anbietern leer bleiben, um deren Standard-Endpunkt zu verwenden; bei einem benutzerdefinierten OpenAI-kompatiblen Anbieter ist sie Pflicht.
+5. Speichere, öffne eine KI-Funktion und prüfe eine Testanfrage.
+
+Verwende Modell-IDs, die dein Anbieter unterstützt. Externe Base URLs sollten HTTPS verwenden. Ein lokaler Modell-Endpunkt im eigenen LAN darf HTTP nur nutzen, wenn du diesen Netzwerkpfad genau kennst und kontrollierst.
+
+Ein OpenAI-API-Schlüssel ist unabhängig von einem ChatGPT-Plus- oder Pro-Abo. Ein ChatGPT-Abonnement lässt sich nicht als API-Schlüssel eintragen und beinhaltet keine API-Nutzung für diese Instanz.
+
+### Wie der Schlüssel gespeichert wird
+
+- Der Browser sendet den Schlüssel ausschließlich an deinen lokalen `server`.
+- Der Server leitet einen Verschlüsselungsschlüssel aus dem Instanz-Auth-Secret ab und speichert den Anbieter-Schlüssel mit AES-256-GCM in PostgreSQL.
+- Spätere API-Antworten zeigen nur noch an, ob ein Schlüssel konfiguriert ist – niemals den Klartext.
+- In der Anwendung gespeicherte KI-Einstellungen greifen sofort und haben Vorrang vor Umgebungsvariablen.
+- Die Auswahl **Keine** löscht die gespeicherten Anbieter-Zugangsdaten und deaktiviert KI.
+
+Stelle das ursprüngliche Instanz-Auth-Secret zusammen mit der Datenbank wieder her. Ein abweichendes Secret kann bestehende KI-Zugangsdaten oder den Authentifizierungsstatus nicht entschlüsseln; prüfe die Originalkonfiguration vor dem Neustart.
+
+### Daten, die den Host verlassen
+
+Aktivitäten, Trainingspläne und Analysen funktionieren auch mit deaktivierter KI vollständig. Wenn du einen externen KI-Anbieter aktivierst, werden deine Frage und die für die Antwort nötigen Trainingsinformationen an diesen Anbieter übermittelt. Prüfe vorher dessen Datenschutz-, Aufbewahrungs-, Standort- und Abrechnungsbedingungen.
+
+Self-Hosting nutzt weder Trainingload.ai-Cloud-Mitgliedschaften noch Cloud-KI-Guthaben. Unter **KI-Nutzung** wird erklärt, wie die Abrechnung über deinen eigenen Anbieter funktioniert. Tatsächlichen API-Verbrauch, Guthaben und Rechnungen prüfst du im Dashboard deines Anbieters.
+
+## Optionale Diagnose für öffentliche Datei-Tools
+
+Setze `PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED=true` in `.env.selfhost`, wenn bei einem Serverfehler in einem öffentlichen Datei-Tool die Originaldateien zu Analysezwecken aufbewahrt werden sollen. Standardmäßig ist diese Option `false`. Solche Mitschnitte können GPS- oder andere personenbezogene Daten enthalten. Sie liegen unter `data/operations/public-upload-failures`, werden von Backups ausgeschlossen und nach 72 Stunden – oder früher bei Erreichen des Größen- bzw. Mengenlimits – automatisch gelöscht.
+
+## Umgebungs-Fallback für automatisierte Bereitstellung
+
+Für unbeaufsichtigte Bereitstellungen akzeptiert das Release-Schema weiterhin vollständige Anbieter-Gruppen in `.env.selfhost`. Dies ist ein Fallback, nicht der bevorzugte interaktive Weg. Der Client legt keinen über Umgebungsvariablen gesetzten Schlüssel offen, und beim Wechsel von einer umgebungsbasierten zu einer im Client verwalteten Konfiguration muss der Owner einen neuen Schlüssel eintragen.
+
+## Konfiguration überprüfen
+
+- `./self-host doctor --json` liefert nach Änderungen am Host `"ok": true`.
+- Das Datenverzeichnis enthält die Instanzmarkierung und die erwarteten Unterverzeichnisse ohne fremde Dateien.
+- Die KI-Einstellungsseite ist nur für den Owner der Instanz sichtbar.
+- Nach dem Speichern der KI-Einstellungen wird das Eingabefeld geleert und die Seite zeigt nur an, dass ein Schlüssel hinterlegt ist.
+- Die Drittanbieter-Seite beim Self-Hosting zeigt Intervals.icu und Garmin Personal API (per API-Schlüssel, ohne OAuth). COROS MCP wird nicht als verfügbar angezeigt.
+- Die Seite **KI-Nutzung** zeigt weder Mitgliedschafts-Checkout noch Guthabenstand oder Pakete und ruft keine `/billing/*`-Endpunkte auf.
+- Nach dem Speichern eines Intervals.icu-Schlüssels wird das Feld geleert, nur die letzten vier Zeichen bleiben sichtbar und eine manuelle Synchronisierung gelingt.
+- Das Deaktivieren von KI verhindert neue Anbieter-Aufrufe, ohne Funktionen ohne KI zu beeinträchtigen.
+
+## Fehlerbehebung
+
+- **Der Datenpfad wird abgelehnt:** Wähle einen leeren, dedizierten Pfad außerhalb des Release-Verzeichnisbaums; umgehe weder Marker- noch Symlink-Prüfungen.
+- **Der Abschnitt für KI-Einstellungen fehlt:** Prüfe, ob die Instanz im Self-Hosting-Modus läuft und du als eingerichteter Owner angemeldet bist.
+- **Ein neuer Anbieter verlangt den Schlüssel erneut:** Ein Anbieterwechsel erfordert bewusst neue Zugangsdaten.
+- **KI funktioniert nach einem Restore nicht mehr:** Stelle das ursprüngliche Instanz-Auth-Secret vor dem Neustart wieder her.
+- **Intervals.icu funktioniert nach einem Restore nicht mehr:** Prüfe, ob das ursprüngliche Integrations-Secret zusammen mit der Datenbank wiederhergestellt wurde.
+- **Das Modell wird vom Anbieter abgelehnt:** Kopiere die exakte Modell-ID aus deinem Anbieterkonto und prüfe, ob dein API-Schlüssel Zugriff darauf hat.
+
+## Nächster Schritt
+
+Lies [Instanz verwalten](/de/docs/self-host/operations) und plane ein regelmäßiges, verifiziertes Backup ein. Bei Problemen hilft [Fehlerbehebung](/de/docs/self-host/troubleshooting).

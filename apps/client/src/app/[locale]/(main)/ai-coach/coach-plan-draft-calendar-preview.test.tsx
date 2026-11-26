@@ -104,7 +104,9 @@ describe("CoachPlanDraftCalendarPreview workout selection", () => {
     expect(
       within(mobile).queryByRole("button", { name: /Easy run/ }),
     ).not.toBeInTheDocument();
-    fireEvent.click(within(mobile).getByRole("button", { name: "2026-11-23" }));
+    expect(screen.getAllByText("weekLabel 1")).toHaveLength(2);
+    expect(screen.getAllByText("weekLabel 2")).toHaveLength(2);
+    fireEvent.click(within(mobile).getByRole("button", { name: "weekLabel 2" }));
     const workout = within(mobile).getByRole("button", {
       name: /Easy run · S1/,
     });
@@ -154,5 +156,34 @@ describe("CoachPlanDraftCalendarPreview workout selection", () => {
     expect(
       screen.getByTestId("workout-dialog-selection"),
     ).not.toHaveTextContent("Easy run");
+  });
+
+  it("restores an embedded workout by its plan position across calendar layouts", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <CoachPlanDraftCalendarPreview
+        draft={draft}
+        startDate="2026-11-22"
+        workoutSelection={{ key: "1-5-2", onChange }}
+      />,
+    );
+    expect(screen.getByTestId("workout-dialog-selection")).toHaveTextContent(
+      "Strength B",
+    );
+    rerender(
+      <CoachPlanDraftCalendarPreview
+        draft={draft}
+        startDate="2026-11-22"
+        firstDayOfWeek={7}
+        variant="embedded"
+        workoutSelection={{ key: "1-5-2", onChange }}
+      />,
+    );
+    expect(screen.getByTestId("workout-dialog-selection")).toHaveTextContent(
+      "Strength B",
+    );
+    const mobile = screen.getByTestId("coach-plan-draft-mobile-calendar");
+    fireEvent.click(within(mobile).getByRole("button", { name: /Easy run · S1/ }));
+    expect(onChange).toHaveBeenCalledWith("1-5-1");
   });
 });

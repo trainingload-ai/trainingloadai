@@ -214,34 +214,9 @@ export class ReviewWorkerService implements OnModuleInit, OnModuleDestroy {
         job.type,
       );
 
-      // Digest 通知走 AI_REVIEW_MODE；Coach Runtime 由功能权限控制，不受通知开关影响。
-      if (notifyDigest) {
-        await this.notificationDomain.ensureNotification({
-          userId: job.userId,
-          kind: 'REVIEW_DIGEST',
-          dedupeKey: `review:${digestId}`,
-          title: this.i18n.t(
-            job.type === 'DAILY'
-              ? 'common.notification.reviewDigest.titleDailyReady'
-              : job.type === 'WEEKLY'
-                ? 'common.notification.reviewDigest.titleWeeklyReady'
-                : 'common.notification.reviewDigest.titleMonthlyReady',
-            { lang },
-          ),
-          bodyMarkdown: this.i18n.t(
-            'common.notification.reviewDigest.bodyGenerating',
-            { lang },
-          ),
-          digestId,
-          data: {
-            type: job.type,
-            periodStart: job.periodStart.toISOString(),
-            periodEnd: job.periodEnd.toISOString(),
-            timezone,
-          },
-        });
-
-        await this.digestService.finalizeDigestContent({
+      // Digest delivery follows the notification preference. Coach Runtime has independent access.
+      const markdown = notifyDigest
+        ? await this.digestService.finalizeDigestContent({
           digestId,
           userId: job.userId,
           type: job.type,
@@ -249,8 +224,8 @@ export class ReviewWorkerService implements OnModuleInit, OnModuleDestroy {
           periodStart: job.periodStart,
           periodEnd: job.periodEnd,
           timezone,
-        });
-      }
+        })
+        : null;
       if (job.type === 'DAILY') {
         try {
           // Digest 写完后再想计划执行。失败只 warn，digest 仍标记 DONE。
@@ -292,6 +267,27 @@ export class ReviewWorkerService implements OnModuleInit, OnModuleDestroy {
           digestId,
           type: job.type,
           lang,
+        });
+        await this.notificationDomain.ensureNotification({
+          userId: job.userId,
+          kind: 'REVIEW_DIGEST',
+          dedupeKey: `review:${digestId}`,
+          title: this.i18n.t(
+            job.type === 'DAILY'
+              ? 'common.notification.reviewDigest.titleDailyReady'
+              : job.type === 'WEEKLY'
+                ? 'common.notification.reviewDigest.titleWeeklyReady'
+                : 'common.notification.reviewDigest.titleMonthlyReady',
+            { lang },
+          ),
+          bodyMarkdown: markdown,
+          digestId,
+          data: {
+            type: job.type,
+            periodStart: job.periodStart.toISOString(),
+            periodEnd: job.periodEnd.toISOString(),
+            timezone,
+          },
         });
       }
 

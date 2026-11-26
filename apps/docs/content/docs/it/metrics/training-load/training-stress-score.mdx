@@ -1,116 +1,141 @@
 ---
-title: Training Stress Score (TSS)
-description: Training Stress Score (TSS) estimates single-session training load by combining duration and relative intensity.
-keywords: ["TSS", "Training Stress Score", "rTSS", "sTSS", "hrTSS", "tTSS", "training stress score", "single session training load", "training load"]
+title: "Cos'è il Training Stress Score (TSS) e come si calcola"
+description: "Il Training Stress Score (TSS) combina durata e intensità in un unico punteggio di carico per sessione. Scopri formula del TSS, rTSS, hrTSS, intervalli tipici ed errori sull'FTP."
+keywords:
+  [
+    "Training Stress Score",
+    "TSS",
+    "come calcolare il TSS",
+    "rTSS",
+    "hrTSS",
+    "punteggio carico di allenamento",
+  ]
 ---
 
-# Training Stress Score (TSS)
+# Cos'è il Training Stress Score (TSS) e come si calcola
 
-**Training Stress Score (TSS)** is a widely used way to estimate the **training stress** of a single workout. It combines **duration** and **relative intensity** into one number so you can compare load across different session types and lengths.
+Il **Training Stress Score (TSS)** stima lo stress di allenamento di una singola sessione combinando **durata** e **intensità relativa**. Il riferimento classico nel ciclismo è: un'ora all'FTP = 100 TSS. Questo singolo numero ti permette di confrontare un lungo facile in bici con una breve seduta di ripetute.
 
-It answers the key question: **“How much stress did today’s workout place on my body?”**
+Risponde alla domanda chiave: **«Quanto stress ha imposto al mio organismo l'allenamento di oggi?»**
 
-## Core Concept
+## Concetto chiave
 
-TSS rests on one baseline:
+Il TSS poggia su un unico punto di riferimento:
 
-> **One hour all-out at functional threshold (FTP) produces 100 TSS.**
+> **Un'ora a tutta alla soglia funzionale (FTP) produce 100 TSS.**
 
-This means:
--   **100 TSS** = 1 hour @ FTP (all-out)
--   **50 TSS** = 1 hour easy (~70% FTP) or 30 minutes @ FTP
--   **150 TSS** = a very hard session, usually taking more than 2–3 hours of cycling
+Ciò significa:
+-   **100 TSS** = 1 ora all'FTP (sforzo massimale)
+-   **50 TSS** = 1 ora facile (~70% FTP) oppure 30 minuti all'FTP
+-   **150 TSS** = una sessione molto impegnativa, che di solito richiede oltre 2–3 ore di ciclismo
 
-With TSS, you can compare the stress of “a 2-hour easy run” vs. “a 30-minute interval run.”
+Grazie al TSS puoi confrontare lo stress di «una corsa facile di 2 ore» con quello di «30 minuti di ripetute».
 
-## Calculation Formula
+## Formula di calcolo
 
-The standard TSS formula (for cycling) is:
+La formula standard del TSS (nel ciclismo) è:
 
 $$
 TSS = \frac{t \times NP \times IF}{FTP \times 3600} \times 100
 $$
 
-Where:
--   $t$ = exercise duration (seconds)
--   $NP$ = [Normalized Power (NP)](/docs/metrics/power/normalized-power)
--   $IF$ = [Intensity Factor (IF)](/docs/metrics/training-load/intensity-factor)
--   $FTP$ = [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power)
--   $3600$ = seconds in one hour
+Dove:
+-   $t$ = durata dell'esercizio (in secondi)
+-   $NP$ = [Normalized Power (NP)](/it/docs/metrics/power/normalized-power)
+-   $IF$ = [Intensity Factor (IF)](/it/docs/metrics/training-load/intensity-factor)
+-   $FTP$ = [Functional Threshold Power (FTP)](/it/docs/metrics/power/functional-threshold-power)
+-   $3600$ = secondi in un'ora
 
-In essence, this computes: **duration (hours) $\times$ squared intensity factor ($IF^2$) $\times$ 100**. Stress from intensity rises much faster than linearly—not proportionally with intensity alone.
+In sostanza si calcola: **durata (ore) $\times$ quadrato dell'intensity factor ($IF^2$) $\times$ 100**. Lo stress legato all'intensità cresce molto più rapidamente di una proporzione lineare.
 
-## TSS Variants and Priority
+## Varianti del TSS e priorità
 
-Different sports use different sensors (power meter vs. GPS vs. heart rate strap), so several TSS variants exist. Trainingload.ai selects the calculation method **according to the priority you set in preferences** (default: **power > heart rate > pace > RPE**):
+Discipline diverse utilizzano sensori diversi (misuratore di potenza, GPS, fascia cardio), perciò esistono diverse varianti del TSS. Trainingload.ai seleziona il metodo di calcolo **in base alla priorità che imposti nelle preferenze** (predefinita: **potenza > frequenza cardiaca > passo > RPE**):
 
-| Variant | Full name | Sport | Accuracy | Core of calculation | Notes |
+| Variante | Nome completo | Sport | Accuratezza | Base del calcolo | Note |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **TSS** | **Power TSS** | Cycling/rowing | ⭐⭐⭐⭐⭐ | **Power** | Most direct when power data and FTP are reliable; based on NP and FTP. |
-| **hrTSS** | **Heart Rate TSS** | All sports | ⭐⭐ | **Heart rate (TRIMP)** | Based on time in HR zones ([TRIMP](/docs/metrics/training-load/training-impulse)). **Cardiac lag** underestimates short-interval load. |
-| **rTSS** | **Running TSS** | Running | ⭐⭐⭐⭐ | **Pace** | Based on [NGP](/docs/metrics/pace/normalized-graded-pace) and threshold pace (rFTPa). Terrain-corrected; useful when threshold pace and route data are reliable. |
-| **sTSS** | **Swim TSS** | Swimming | ⭐⭐⭐ | **Speed** | Based on CSS (critical swim speed) and distance/time. |
-| **tTSS** | **Time TSS** | Fallback | ⭐ | **Average heart rate** | Rough estimate when only average HR is available; higher error. |
+| **TSS** | **Power TSS** | Ciclismo/canottaggio | ⭐⭐⭐⭐⭐ | **Potenza** | La più diretta quando potenza e FTP sono affidabili; basata su NP e FTP. |
+| **hrTSS** | **Heart Rate TSS** | Tutti gli sport | ⭐⭐ | **Frequenza cardiaca (TRIMP)** | Basata sul tempo nelle zone FC ([TRIMP](/it/docs/metrics/training-load/training-impulse)). Il **ritardo cardiaco** sottostima le ripetute brevi. |
+| **rTSS** | **Running TSS** | Corsa | ⭐⭐⭐⭐ | **Passo** | Basata su [NGP](/it/docs/metrics/pace/normalized-graded-pace) e passo di soglia (rFTPa). Corretta per il terreno; utile con soglia e tracce affidabili. |
+| **sTSS** | **Swim TSS** | Nuoto | ⭐⭐⭐ | **Velocità** | Basata su CSS (velocità critica di nuoto) e distanza/tempo. |
+| **tTSS** | **Time TSS** | Riserva | ⭐ | **Frequenza cardiaca media** | Stima approssimativa quando è disponibile solo la FC media; margine d'errore più alto. |
 
-## Typical Reference Ranges
+## Intervalli di riferimento tipici
 
-Understanding TSS ranges helps you judge a session’s impact and recovery needs:
+Conoscere gli intervalli del TSS aiuta a valutare l'impatto della sessione e il fabbisogno di recupero:
 
-| TSS range | Fatigue level | Recovery suggestion | Typical examples |
+| Fascia TSS | Livello di fatica | Indicazione di recupero | Esempi tipici |
 | :--- | :--- | :--- | :--- |
-| **< 150** | **Low** | Usually fully recovered the next day | 1–2 h aerobic endurance ride; 45 min easy run. |
-| **150 - 300** | **Medium** | Residual fatigue may remain the next day | 3–4 h long ride; high-intensity interval workout. |
-| **300 - 450** | **High** | Fatigue may still be present after two days | Half-distance triathlon; Grand Tour–style stage; ultra-long endurance workout. |
-| **> 450** | **Epic** | May need several days to recover; can affect immunity | Ironman; extreme endurance challenge. |
+| **< 150** | **Basso** | Di solito recupero completo entro il giorno seguente | Uscita aerobica di 1–2 h in bici; corsa facile di 45 min. |
+| **150 - 300** | **Medio** | Può restare fatica residua il giorno seguente | Lungo in bici di 3–4 h; sessione di ripetute ad alta intensità. |
+| **300 - 450** | **Alto** | La fatica può persistere anche dopo due giorni | Triathlon medio (70.3); tappa da Grande Giro; lungo estremo di endurance. |
+| **> 450** | **Epico** | Può richiedere diversi giorni di recupero; può incidere sulle difese immunitarie | Ironman; sfida di ultra-endurance. |
 
-## Recommendations
+## Raccomandazioni
 
-### How Trainingload.ai uses TSS
+### Come Trainingload.ai utilizza il TSS
 
-Trainingload.ai treats TSS as one input, not as a verdict. A workout with high TSS may justify easier follow-up training, but the decision should also consider sport type, recent ATL, current CTL, subjective feedback, and whether the workout matched the plan.
+Trainingload.ai considera il TSS un dato di ingresso, non un verdetto automatico. Una sessione con TSS alto può giustificare giorni successivi più leggeri, ma la decisione deve tenere conto anche dello sport, dell'ATL recente, del CTL attuale, delle sensazioni soggettive e dell'aderenza al piano di allenamento.
 
-In practice, TSS is most useful when it is connected to the plan:
+In pratica, il TSS rende al massimo quando è collegato al piano:
 
--   Compare **planned TSS vs. completed TSS** after each workout.
--   Watch weekly load progression before increasing volume or intensity.
--   Use TSS together with [ATL](/docs/metrics/pmc/acute-training-load), [CTL](/docs/metrics/pmc/chronic-training-load), and [TSB](/docs/metrics/pmc/training-stress-balance), rather than treating a single workout score in isolation.
+-   Confronta **TSS pianificato vs. TSS completato** dopo ogni allenamento.
+-   Osserva la progressione del carico settimanale prima di aumentare volume o intensità.
+-   Usa il TSS insieme ad [ATL](/it/docs/metrics/pmc/acute-training-load), [CTL](/it/docs/metrics/pmc/chronic-training-load) e [TSB](/it/docs/metrics/pmc/training-stress-balance), invece di giudicare il singolo punteggio in isolamento.
 
-### 1. Watch out for “inflated” TSS
-If you often see single-session TSS above 200 or even 300, first check whether your **FTP/threshold is set too low**.
--   For most amateurs, 300 TSS in one session is a rare physiological challenge.
--   If FTP is set too low, IF is inflated, and TSS rises disproportionately.
+### 1. Attenzione al TSS «gonfiato»
+Se vedi spesso singole sessioni oltre 200 o persino 300 TSS, controlla subito se la tua **FTP o soglia è impostata troppo bassa**.
+-   Per la maggior parte degli amatori, 300 TSS in un solo allenamento sono una sfida fisiologica rara.
+-   Con un'FTP sottostimata, l'IF sale artificialmente e il TSS aumenta in modo sproporzionato.
 
-### 2. No data? Manual estimation
-If your device died or you did strength training, use **RPE (rating of perceived exertion)** to estimate load and keep your [PMC chart](/docs/metrics/pmc/chronic-training-load) continuous:
+### 2. Niente dati? Stima manuale
+Se il dispositivo si è scaricato o hai svolto una seduta di forza, usa l'**RPE (scala dello sforzo percepito)** per stimare il carico e mantenere continuo il tuo [grafico PMC](/it/docs/metrics/pmc/chronic-training-load):
 
 $$
-TSS \approx \frac{\text{duration (min)} \times \text{RPE}(1-10)}{60} \times 10
+TSS \approx \frac{\text{durata (min)} \times \text{RPE}(1-10)}{60} \times 10
 $$
 
-*Note: this is a rough heuristic. RPE 10 corresponds to ~100 TSS per hour.*
+*Nota: è un'euristica approssimativa. Un RPE 10 corrisponde a ~100 TSS all'ora.*
 
-## Limitations
+## Limiti
 
-1.  **Cross-sport trap**: although TSS aims to standardize, **100 TSS of running** usually causes more mechanical damage (musculoskeletal impact) than **100 TSS of cycling**. Don’t treat them as fully interchangeable.
-2.  **Non-physiological stress**: TSS does not include environmental stress (heat, altitude) or life stress (poor sleep, work anxiety), which also raise true recovery cost.
+1.  **Trappola del confronto tra sport**: per quanto il TSS cerchi di normalizzare lo sforzo, **100 TSS di corsa** causano di solito molto più danno meccanico (impatto muscolo-scheletrico) rispetto a **100 TSS di ciclismo**. Non trattarli come perfettamente intercambiabili.
+2.  **Stress non fisiologici**: il TSS non include lo stress ambientale (caldo, altitudine) né lo stress quotidiano (poco sonno, pressione lavorativa), che aumentano comunque il costo reale del recupero.
 
 ## FAQ
 
-### Is higher TSS always better?
+### Un TSS più alto è sempre meglio?
 
-No. Higher TSS means higher modeled stress, not automatically better training. Productive training depends on the goal of the session, the phase of the plan, and whether you can recover before the next key workout.
+No. Un TSS più alto indica uno stress modellato maggiore, non automaticamente un allenamento migliore. L'efficacia dipende dall'obiettivo della sessione, dalla fase del piano e dalla tua capacità di recuperare prima del lavoro chiave successivo.
 
-### Can TSS compare running and cycling directly?
+### Il TSS permette di confrontare direttamente corsa e ciclismo?
 
-Only cautiously. TSS helps normalize workload, but running usually adds more musculoskeletal stress than cycling at the same score.
+Solo con cautela. Il TSS aiuta a normalizzare il carico complessivo, ma a parità di punteggio la corsa impone generalmente uno stress muscolo-scheletrico superiore rispetto al ciclismo.
 
-### Why does an incorrect FTP distort TSS?
+### Perché un'FTP errata falsa il TSS?
 
-TSS depends on intensity relative to threshold. If FTP is set too low, IF becomes too high and TSS can be inflated; if FTP is too high, training stress can be understated.
+Il TSS dipende dall'intensità relativa alla soglia. Se l'FTP è troppo bassa, l'IF diventa eccessivo e il TSS viene gonfiato; se l'FTP è troppo alta, lo stress di allenamento viene sottostimato.
 
-## References
+### Come si calcola il TSS?
+
+Nel ciclismo, TSS = (secondi × NP × IF) / (FTP × 3600) × 100, ovvero durata in ore × IF² × 100. La corsa usa l'rTSS da NGP e passo di soglia; le sessioni con sola frequenza cardiaca possono usare l'hrTSS derivato dal [TRIMP](/it/docs/metrics/training-load/training-impulse).
+
+### Qual è un TSS tipico per un singolo allenamento?
+
+Sotto 150 è di solito una giornata a bassa fatica. Tra 150 e 300 lascia spesso fatica residua. Oltre 300 è una giornata di endurance molto dura per la maggior parte degli amatori: verifica l'FTP prima di fidarti di un valore enorme.
+
+## Passi successivi
+
+- [Calcola il TSS da durata, NP e FTP](/it/tss-calculator)
+- [Simula CTL, ATL e TSB dal TSS giornaliero](/it/training-load-calculator)
+- [Gestisci il carico di allenamento con CTL, ATL e TSB nel tuo piano](/it/training-load)
+- Leggi [Intensity Factor](/it/docs/metrics/training-load/intensity-factor) per capire come l'IF elevato al quadrato incide sul TSS
+- [Stima l'FTP da un file di attività](/it/ftp-calculator)
+- [Usa la revisione del Coach AI per adattare il carico di allenamento in sicurezza](/it/ai-training-plan)
+
+## Riferimenti
 
 -   [TrainingPeaks: Training Stress Scores (TSS) Explained](https://help.trainingpeaks.com/hc/en-us/articles/204071944-Training-Stress-Scores-TSS-Explained)
 -   [Joe Friel: The Triathlete's Training Bible](https://joefrieltraining.com/)
 
-> Normalized Power (NP), Intensity Factor (IF), and Training Stress Score (TSS) are registered trademarks of [Peaksware, LLC](https://trainingpeaks.com/).
+> Normalized Power (NP), Intensity Factor (IF) e Training Stress Score (TSS) sono marchi registrati di [Peaksware, LLC](https://trainingpeaks.com/).

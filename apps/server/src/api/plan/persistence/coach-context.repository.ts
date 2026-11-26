@@ -98,13 +98,16 @@ export class CoachContextRepository {
                   in: [
                     'PLAN_WORKOUT_UPDATE',
                     'PLAN_WORKOUT_POSTPONE',
+                    'PLAN_WORKOUT_RESCHEDULE',
                     'PLAN_WORKOUT_STATUS',
                   ],
                 },
                 payload: { path: ['workoutId'], equals: args.workoutId },
               },
               {
-                decisionType: 'PLAN_WORKOUT_BATCH_UPDATE',
+                decisionType: {
+                  in: ['PLAN_WORKOUT_BATCH_UPDATE', 'PLAN_WORKOUT_SCHEDULE'],
+                },
                 payload: {
                   path: ['changes'],
                   array_contains: [{ workoutId: args.workoutId }],
@@ -129,6 +132,7 @@ export class CoachContextRepository {
         sourcePlanId: args.planId,
         mode: { in: ['START', 'SCHEDULE'] },
         appliedAt: null,
+        calendarAdjustmentId: null,
         ...(args.appliedDecisionId
           ? {
               OR: [
@@ -152,6 +156,52 @@ export class CoachContextRepository {
         state: { in: ['DRAFT', 'PROPOSED', 'APPROVED'] },
       },
       data: { state: 'SUPERSEDED' },
+    });
+  }
+
+  /**
+   * Close open branches, supersede pending decisions, and expire unapplied
+   * previews when a plan context transitions to FINALIZED or SUPERSEDED.
+   */
+  async retireContextOpenWork(
+    args: {
+      userId: string;
+      contextId: string;
+      planId: string;
+      closedAt: Date;
+      excludeDecisionId?: string | null;
+    },
+    tx?: PlanDb,
+  ) {
+    const db = this.db(tx);
+    await db.coachBranch.updateMany({
+      where: {
+        contextId: args.contextId,
+        status: { in: ['OPEN', 'SQUASHED', 'REBASE_REQUIRED'] },
+      },
+      data: {
+        status: 'CLOSED',
+        closedAt: args.closedAt,
+      },
+    });
+    await db.coachDecision.updateMany({
+      where: {
+        contextId: args.contextId,
+        ...(args.excludeDecisionId
+          ? { id: { not: args.excludeDecisionId } }
+          : {}),
+        state: { in: ['DRAFT', 'PROPOSED', 'APPROVED'] },
+      },
+      data: { state: 'SUPERSEDED' },
+    });
+    await db.planProposalPreview.updateMany({
+      where: {
+        userId: args.userId,
+        sourcePlanId: args.planId,
+        appliedAt: null,
+        expiresAt: { gt: args.closedAt },
+      },
+      data: { expiresAt: args.closedAt },
     });
   }
 

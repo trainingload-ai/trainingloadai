@@ -15,7 +15,7 @@ export default async function AccountDataExportPage() {
     <MainScrollPageShell maxWidthClass="max-w-3xl">
       <AccountPageTitle title={t("title")} />
       <header className="mb-4 flex items-start gap-2">
-        <Button asChild variant="ghost" size="icon-sm">
+        <Button asChild variant="ghost" size="icon-sm" className="tablet:hidden">
           <Link href="/account" aria-label={t("backToAccount")}>
             <ArrowLeft aria-hidden="true" />
           </Link>

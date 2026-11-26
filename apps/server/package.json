@@ -74,7 +74,7 @@
     "rxjs": "^7.8.2",
     "saxes": "6.0.0",
     "sharp": "0.35.5",
-    "trackswap": "0.2.7",
+    "trackswap": "0.2.8",
     "tz-lookup": "^6.1.25",
     "uuid": "^11.1.0",
     "yauzl": "^3.3.2",
@@ -274,6 +274,10 @@
     "./api/plan/application/plan-lifecycle.service": {
       "types": "./src/api/plan/application/plan-lifecycle.service.ts",
       "default": "./src/api/plan/application/plan-lifecycle.service.ts"
+    },
+    "./api/plan/plan-execution-context.service": {
+      "types": "./src/api/plan/plan-execution-context.service.ts",
+      "default": "./src/api/plan/plan-execution-context.service.ts"
     },
     "./api/plan/application/plan-query.service": {
       "types": "./src/api/plan/application/plan-query.service.ts",

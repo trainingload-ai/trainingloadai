@@ -60,6 +60,16 @@ function setup() {
     CoachBranchingService.prototype,
   ) as CoachBranchingService;
   const db = {
+    planProposalPreview: {
+      findUnique: async () => ({
+        id: 'preview',
+        userId: 'user',
+        sourcePlanId: 'plan',
+        expiresAt: new Date(Date.now() + 60_000),
+        appliedAt: decision.state === 'APPLIED' ? new Date() : null,
+        discardedAt: null,
+      }),
+    },
     aiCoachSession: { findUnique: async () => session },
     aiCoachMessage: {
       findFirst: async ({ where }: { where: { role?: string } }) =>
@@ -67,12 +77,19 @@ function setup() {
     },
     coachDecision: {
       update: async ({ data }: { data: object }) => ({ ...decision, ...data }),
-      updateMany: async ({ data }: { data: object }) => {
-        if (decision.state === 'APPLIED') return { count: 0 };
+      updateMany: async ({
+        data,
+        where,
+      }: {
+        data: object;
+        where: { state: { in: string[] } };
+      }) => {
+        if (!where.state.in.includes(decision.state)) return { count: 0 };
         Object.assign(decision, data);
         return { count: 1 };
       },
       findUnique: async () => decision,
+      findUniqueOrThrow: async () => decision,
     },
   };
   Object.assign(service, {
@@ -91,6 +108,27 @@ function setup() {
   };
   return { service, decision, session, assistant, user, confirm, db };
 }
+
+describe('schedule draft rejection', () => {
+  it('discards a proposal idempotently without changing a committed decision', async () => {
+    const s = setup();
+    s.decision.decisionType = 'PLAN_SCHEDULE';
+    const args = {
+      userId: 'user',
+      decisionId: s.decision.id,
+      reason: 'user_cancelled_plan_proposal',
+    };
+    await expect(s.service.rejectDecision(args)).resolves.toMatchObject({
+      decision: { state: 'REJECTED', rationale: '[rejected] user_cancelled_plan_proposal' },
+    });
+    await expect(s.service.rejectDecision(args)).resolves.toMatchObject({
+      decision: { state: 'REJECTED', rationale: '[rejected] user_cancelled_plan_proposal' },
+    });
+    s.decision.state = 'APPLIED';
+    await expect(s.service.rejectDecision(args)).rejects.toThrow('DECISION_STATE_CHANGED');
+    expect(s.decision.state).toBe('APPLIED');
+  });
+});
 
 describe('saved draft start confirmation', () => {
   it('rejects direct approval without a persisted conversation card reference', async () => {

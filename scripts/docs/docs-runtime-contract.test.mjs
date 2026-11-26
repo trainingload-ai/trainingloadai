@@ -32,13 +32,4 @@ test("standalone docs tools keep a restricted server-side proxy", async () => {
     assert.ok(source.includes("DOCS_BROWSER_API_BASE_URL"), path);
     assert.doesNotMatch(source, /process\.env\.NEXT_PUBLIC_API_URL/, path);
   }
-
-  const planSharePage = await readFile(
-    resolve(
-      repositoryRoot,
-      "apps/docs/src/app/[lang]/(home)/share/plans/[publicId]/page.tsx",
-    ),
-    "utf8",
-  );
-  assert.ok(planSharePage.includes('from "@/lib/plan-share-server"'));
 });

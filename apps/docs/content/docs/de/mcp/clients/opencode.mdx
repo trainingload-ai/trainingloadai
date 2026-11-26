@@ -1,0 +1,34 @@
+---
+title: opencode verbinden
+description: Verbinde TrainingLoad MCP über die opencode-Konfiguration und OAuth-Befehle.
+---
+
+# opencode verbinden
+
+Füge den Remote-Server in `opencode.json` hinzu:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "trainingload": {
+      "type": "remote",
+      "url": "https://api.trainingload.ai/mcp",
+      "enabled": true
+    }
+  }
+}
+```
+
+Führe anschließend folgende Befehle aus:
+
+```bash
+opencode mcp auth trainingload
+opencode mcp list
+```
+
+Frage nach OAuth: „Prüfe meine Verbindungen zu Drittanbieter-Trainingsplattformen und erkläre, welche Synchronisierungsrichtungen derzeit verfügbar sind.“ Dabei sollte `get_integration_status` aufgerufen werden.
+
+Falls sich die Authentifizierung nicht automatisch öffnet, führe `opencode mcp auth trainingload` erneut aus. Hinterlege kein Zugriffstoken in der Konfigurationsdatei.
+
+[Offizielle opencode-MCP-Anleitung](https://opencode.ai/docs/mcp-servers/)

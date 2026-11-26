@@ -923,6 +923,40 @@ scenarios('Today advice generation across instances on PostgreSQL', () => {
       await db.aiTodaySuggestion.count({ where: { userId: input.userId } }),
     ).toBe(1);
   });
+
+  it('opens an expired advice link with current facts and without the obsolete advice', async () => {
+    const input = await scope();
+    const [service] = services(input, { run: jest.fn(async () => run()) });
+    const result = await service.get({ ...input, allowAi: true });
+    expect(result.delivery.state).toBe('GENERATED');
+    await db.aiTodaySuggestion.update({
+      where: { generationToken: result.suggestionId },
+      data: { validUntil: new Date(0) },
+    });
+    const resolver = new TodaySuggestionGuidanceService(
+      other as never,
+      { project: async () => ({
+        ...input,
+        factHash: 'facts-v1',
+        constraintHash: 'constraints',
+        timezone: 'UTC',
+        allowAi: true,
+        featureAllowed: true,
+        aiState: 'configured',
+        lightContext: {},
+        todayWorkouts: [],
+        tomorrowWorkouts: [],
+      }) } as never,
+      new TodaySuggestionGuidanceLifecycle(new CoachRunStore(other as never)),
+    );
+    await expect(resolver.resolve(input.userId, result.suggestionId)).resolves.toMatchObject({
+      status: 'UPDATED',
+      context: {
+        headline: '', summary: '', guidanceStatus: 'UPDATED',
+        currentFacts: { date: input.date, topic: `today:${input.date}` },
+      },
+    });
+  });
   it('retries one semantic revision then publishes current fallback during continuous change', async () => {
     const input = await scope();
     let revision = 1;

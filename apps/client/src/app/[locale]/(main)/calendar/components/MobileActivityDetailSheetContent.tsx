@@ -373,8 +373,10 @@ function ActivitySplits({ activity }: { activity: Activity }) {
 
 export function MobileActivityDetailSheetContent({
   previewActivity,
+  showAnalysis = true,
 }: {
   previewActivity: Activity;
+  showAnalysis?: boolean;
 }) {
   const locale = useLocale();
   const t = useTranslations();
@@ -590,7 +592,7 @@ export function MobileActivityDetailSheetContent({
   const { availableMetrics, isLoading: chartsLoading } =
     useActivityMetricAvailability(
       activityId,
-      chartCandidates.map((chart) => chart.metric),
+      showAnalysis ? chartCandidates.map((chart) => chart.metric) : [],
     );
   const visibleCharts = chartCandidates.filter((chart) =>
     availableMetrics.has(chart.metric),
@@ -604,7 +606,7 @@ export function MobileActivityDetailSheetContent({
         activity={activity}
         activityId={activityId}
         meta={heroMeta}
-        showMap={detailPolicy.showMap}
+        showMap={showAnalysis && detailPolicy.showMap}
         title={title}
       />
 
@@ -636,7 +638,7 @@ export function MobileActivityDetailSheetContent({
 
         <ActivityStrengthSection activity={activity} />
 
-        {activityId && (chartsLoading || visibleCharts.length > 0) ? (
+        {showAnalysis && activityId && (chartsLoading || visibleCharts.length > 0) ? (
           <section className="space-y-3">
             <div className="px-1">
               <h2 className="text-base font-semibold text-foreground">
@@ -666,7 +668,7 @@ export function MobileActivityDetailSheetContent({
           </section>
         ) : null}
 
-        {detailPolicy.tabIds.has("lap") ? (
+        {showAnalysis && detailPolicy.tabIds.has("lap") ? (
           <ActivitySplits activity={activity} />
         ) : null}
 

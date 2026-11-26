@@ -1,12 +1,19 @@
 ---
-title: Fitness (CTL)
-description: Trainingload.ai zeigt CTL mit einem blauen Fortschrittsbalken und einer blauen Linie im PMC-Diagramm an.
-keywords: ["chronische Trainingsbelastung", "Fitness", "CTL", "CTL-Formel", "Trainingsbelastungstrend", "CTL verstehen"]
+title: "Chronic Training Load (CTL): So wird Fitness modelliert"
+description: "Chronic Training Load (CTL) ist der langsamere PMC-Fitnesstrend aus deiner täglichen Belastung. Erfahre die 42-Tage-Formel, wie du steigende oder fallende CTL liest und wo ihre Grenzen liegen."
+keywords:
+  [
+    "Chronic Training Load",
+    "CTL",
+    "CTL Fitness",
+    "Chronic Training Load Formel",
+    "PMC Fitness",
+  ]
 ---
 
-# Was ist Fitness (CTL)?
+# Chronic Training Load (CTL): So wird Fitness modelliert
 
-Die **Fitness (CTL)** beziehungsweise Chronic Training Load kombiniert Trainingsdauer und Trainingsbelastung (TSS), um den Trainingsverlauf eines Benutzers zusammenzufassen. Trainingload.ai verwendet standardmäßig eine Zeitkonstante von 42 Tagen und zeigt den aktuellen Prozentsatz relativ zum historischen CTL-Höchstwert des Benutzers an. CTL beschreibt die modellierte Belastungshistorie; sie misst Fitness, Anpassung, Gesundheit oder Wettkampfleistung nicht direkt.
+Die **Chronic Training Load (CTL)** ist die langsamere Fitness-Linie im PMC. Sie ist ein exponentieller Mittelwert deiner täglichen Trainingsbelastung – meist TSS – mit einer Standard-Zeitkonstante von 42 Tagen. Trainingload.ai zeigt deine heutige CTL außerdem als Prozentsatz deines historischen Höchstwerts an. CTL fasst deine modellierte Belastungshistorie zusammen; sie misst Fitness, Anpassung, Gesundheit oder Wettkampfleistung nicht direkt.
 
 <div className="my-6 max-w-sm w-full mx-auto">
   <CtlStatPreviewCard
@@ -14,71 +21,94 @@ Die **Fitness (CTL)** beziehungsweise Chronic Training Load kombiniert Trainings
     percent={58}
     metricLabel="CTL"
     valuePopoverTitle="CTL-Wert"
-    valuePopoverBody="Ein langsamer exponentieller Durchschnitt der anhand deiner Belastungsquellen-Einstellungen ausgewählten Tagesbelastung."
-    percentPopoverTitle="CTL-Prozentsatz"
-    percentPopoverBody="Der aktuelle CTL-Wert relativ zu deinem historischen CTL-Höchstwert."
+    valuePopoverBody="Ein langsamer exponentieller Mittelwert der täglichen Belastung gemäß deiner eingestellten Belastungsquelle."
+    percentPopoverTitle="CTL in Prozent"
+    percentPopoverBody="Deine aktuelle CTL im Verhältnis zu deinem historischen CTL-Höchstwert."
     helpTitle="Langfristige Belastung"
-    details="Nutze CTL, um Richtung und Beständigkeit der modellierten Belastung über mehrere Wochen zu beurteilen."
+    details="Nutze CTL, um Richtung und Beständigkeit deiner modellierten Belastung über mehrere Wochen zu prüfen."
   />
 </div>
 
-_Die Beispielwerte dienen nur der UI-Vorschau._
+_Die Beispielwerte dienen nur der Vorschau der Oberfläche._
 
 ## Woher der Fitness-(CTL)-Wert stammt
 
-Trainingload.ai ermittelt zuerst die Belastung jeder Aktivität anhand der verfügbaren Messwerte und deiner konfigurierten Priorität der Belastungsquellen. Je nach Aktivität und Einstellungen kann die Quelle Leistung, Herzfrequenz, Tempo oder Session-RPE sein.
+Trainingload.ai bestimmt zuerst für jede Aktivität die Belastung anhand der verfügbaren Messdaten und deiner eingestellten Priorität der Belastungsquellen. Je nach Aktivität und Einstellung kann die Quelle Leistung, Herzfrequenz, Pace oder Session-RPE sein.
 
 Das bedeutet:
 
-- Fehlende oder geänderte Aktivitätsdaten können Fitness (CTL) verändern.
-- Änderungen an Schwellenwerten oder der Quellenpriorität können die abgeleitete Aktivitätsbelastung und spätere PMC-Werte verändern.
-- Trainingload.ai wählt entsprechend der Priorität pro Aktivität eine verfügbare Belastung aus; uneinheitlich skalierte Quellen verringern die Vergleichbarkeit zwischen Zeiträumen.
-- An einem Tag ohne aufgezeichnete Aktivitätsbelastung ist die Tageseingabe null und der vorherige CTL-Wert fällt allmählich ab.
+- Fehlende oder geänderte Aktivitätsdaten können deine Fitness (CTL) verändern.
+- Änderungen an Schwellenwerten oder an der Quellenpriorität können die berechnete Aktivitätsbelastung und spätere PMC-Werte verändern.
+- Trainingload.ai wählt pro Aktivität einen verfügbaren Belastungswert gemäß deiner Priorität; das Mischen unterschiedlich skalierter Quellen verringert die Vergleichbarkeit zwischen Zeiträumen.
+- An einem Tag ohne aufgezeichnete Aktivitätsbelastung ist die Tageseingabe null und die vorherige CTL klingt allmählich ab.
 
 ## Formel
 
-Trainingload.ai verwendet einen exponentiellen Abfall mit einer standardmäßigen CTL-Zeitkonstante von 42 Tagen:
+Trainingload.ai nutzt einen exponentiellen Zeitkonstanten-Verlauf mit einer Standard-CTL-Zeitkonstante von 42 Tagen:
 
 ```text
 decay_CTL = exp(-1 / 42)
 CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
 ```
 
-`exp` ist die natürliche Exponentialfunktion. Bei der Standardzeitkonstante gilt `decay_CTL ≈ 0.976472`; die heutige Belastung erhält somit ein Gewicht von ungefähr `0.023528`.
+Dabei ist `exp` die natürliche Exponentialfunktion. Bei der Standard-Zeitkonstante gilt `decay_CTL ≈ 0.976472`, sodass die heutige Belastung ein Gewicht von rund `0.023528` erhält.
 
 ## Den Fitness-(CTL)-Trend verstehen
 
-- **CTL steigt**: Die jüngste Tagesbelastung liegt im Allgemeinen über dem aktuellen CTL-Niveau.
-- **CTL bleibt stabil**: Die jüngste Belastung hält das modellierte Niveau ungefähr aufrecht.
-- **CTL fällt**: Die jüngste Belastung liegt im Allgemeinen darunter, etwa bei reduziertem Training oder im Tapering.
+- **CTL steigt**: Deine jüngste tägliche Belastung liegt überwiegend über dem aktuellen CTL-Niveau.
+- **CTL bleibt stabil**: Deine jüngste Belastung hält das modellierte Niveau ungefähr.
+- **CTL fällt**: Deine jüngste Belastung liegt überwiegend darunter – etwa bei reduziertem Training oder beim Tapering.
 
-## Geeignete Fragen
+## Sinnvolle Fragen
 
-CTL kann helfen zu beantworten:
+CTL hilft dir zu beantworten:
 
-- Steigt, hält oder fällt die aktuelle Fitness (CTL)?
+- Steigt, hält oder fällt deine aktuelle Fitness (CTL)?
 - Haben ausgelassene Einheiten oder eine Erholungsphase den längerfristigen Trend verändert?
-- Erzeugt der aktuelle Plan die beabsichtigte Belastungsrichtung?
-- Hat eine Änderung von Schwellenwert oder Quelle die Vergleichbarkeit verringert?
+- Erzeugt dein aktueller Trainingsplan die gewünschte Belastungsrichtung?
+- Hat eine Änderung von Schwellenwert oder Belastungsquelle die Vergleichbarkeit beeinträchtigt?
 
 CTL kann allein nicht beantworten:
 
-- Hat sich der Benutzer erfolgreich angepasst?
+- Hast du dich erfolgreich an das Training angepasst?
 - Ist die harte Einheit morgen sicher?
-- Ist der Benutzer erholt, gesund oder wettkampfbereit?
-- Ist ein Benutzer fitter als ein anderer?
+- Bist du erholt, gesund oder wettkampfbereit?
+- Ist eine Person fitter als eine andere?
 
-Berücksichtige vor einer Entscheidung außerdem Leistungstrends, Ausführungsqualität, subjektives Befinden, [Ermüdung (ATL)](/docs/metrics/pmc/acute-training-load) und [Form (TSB)](/docs/metrics/pmc/training-stress-balance).
+Berücksichtige vor einer Entscheidung immer auch Leistungstrends, Einheitenqualität, dein subjektives Befinden, [Ermüdung (ATL)](/de/docs/metrics/pmc/acute-training-load) und [Form (TSB)](/de/docs/metrics/pmc/training-stress-balance).
 
-## Referenzen
+## Quellen
 
-- [Intervals.icu: Formeln für Fitness, Ermüdung und Form](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [Intervals.icu: Entwicklererklärung der Formeln für Fitness, Ermüdung und Form](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
 - [RUNALYZE-Glossar: Chronic Training Load (CTL)](https://runalyze.com/glossary/ctl)
 - [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
 
+## FAQ
+
+### Was ist Chronic Training Load?
+
+Chronic Training Load (CTL) ist der langsamere PMC-Fitnesstrend: ein exponentieller Mittelwert deiner täglichen Trainingsbelastung mit einer Standard-Zeitkonstante von 42 Tagen. Er steigt, wenn jüngste Tage über deiner aktuellen CTL liegen, und fällt, wenn sie darunter liegen.
+
+### Wie wird CTL berechnet?
+
+`CTL_today = CTL_yesterday × e^(−1/42) + daily_load × (1 − e^(−1/42))`. Mit der Standardkonstante wiegt der heutige Tag etwa 2,35 % und die gestrige CTL etwa 97,65 %. Auch an Ruhetagen klingt die Kurve weiter ab.
+
+### Bedeutet eine höhere CTL, dass ich fitter bin?
+
+Nicht automatisch. Eine steigende CTL zeigt, dass die modellierte Belastung hoch genug war, um den Langzeitmittelwert anzuheben. Sie beweist jedoch weder Anpassung noch Gesundheit oder Wettkampfbereitschaft. Lies sie immer zusammen mit Leistung, Körpergefühl, [ATL](/de/docs/metrics/pmc/acute-training-load) und [TSB](/de/docs/metrics/pmc/training-stress-balance).
+
+### Warum ist meine CTL gesprungen, nachdem ich meine FTP geändert habe?
+
+CTL entsteht aus deiner täglichen Trainingsbelastung. Wenn du FTP, Zonen oder die Priorität deiner Belastungsquellen änderst, werden vergangene TSS-/TRIMP-Werte neu berechnet – dadurch kann sich die Fitness-Linie verschieben, ohne dass du neu trainiert hast.
+
 ## Verwandte Seiten
 
-- [Ermüdung (ATL)](/docs/metrics/pmc/acute-training-load)
-- [Form (TSB)](/docs/metrics/pmc/training-stress-balance)
-- [Workflow zur Trainingsanalyse](/docs/guide/training-analysis-workflow)
-- [PMC für Marathon-Anpassungen verwenden](/docs/guide/pmc-marathon-adjustment)
+- [Was ist Trainingsbelastung?](/de/docs/metrics/training-load)
+- [Ermüdung (ATL)](/de/docs/metrics/pmc/acute-training-load)
+- [Form (TSB)](/de/docs/metrics/pmc/training-stress-balance)
+- [CTL, ATL und TSB aus täglichem TSS vorausberechnen](/de/training-load-calculator)
+- [TSS aus Dauer, NP und FTP berechnen](/de/tss-calculator)
+- [Trainingsbelastung mit CTL, ATL und TSB im Trainingsplan steuern](/de/training-load)
+- [Mit dem KI-Coach die Trainingsbelastung sicher anpassen](/de/ai-training-plan)
+- [Workflow zur Trainingsanalyse](/de/docs/guide/training-analysis-workflow)
+- [PMC für Marathon-Anpassungen nutzen](/de/docs/guide/pmc-marathon-adjustment)

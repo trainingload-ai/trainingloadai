@@ -1,0 +1,120 @@
+---
+title: Web e mobile
+description: Scopri come l'app web e l'app mobile di Trainingload.ai condividono i dati e scegli la superficie migliore per pianificazione, registrazione, analisi ed esecuzione quotidiana.
+keywords:
+  ["Trainingload.ai mobile", "app web Trainingload.ai", "sincronizzazione web e mobile"]
+---
+
+# Web e mobile
+
+L'app web Cloud e l'app iPhone usano lo stesso account. Dopo aver salvato e sincronizzato, puoi continuare a consultare piani, attività, dati del profilo, conversazioni con il Coach AI e notifiche da un altro dispositivo.
+
+Questa pagina riguarda la versione Cloud. Per il self-hosting, segui la [guida all'installazione](/it/docs/self-host/installation) per accedere all'app dal browser. Il supporto per l'app Apple Watch non è attualmente disponibile.
+
+## Prima di cambiare dispositivo
+
+- Accedi allo stesso account Trainingload.ai su entrambi i dispositivi.
+- Verifica fuso orario e unità di misura nel profilo: date del calendario e valori mostrati dipendono da essi.
+- Salva la modifica in corso prima di aprire lo stesso piano o campo del profilo su un altro dispositivo.
+- Mantieni una connessione di rete attiva per piani, Coach AI, importazioni e analisi elaborate.
+
+## Usa il web quando
+
+- Stai costruendo o rivedendo un piano su più settimane.
+- Modifichi allenamenti strutturati di endurance o di forza.
+- Confronti grafici dettagliati, mappe, potenza, passo, frequenza cardiaca o andamenti PMC.
+- Gestisci connessioni a provider e importazioni storiche.
+- Esamini un feed di attività ampio o cerchi allenamenti meno recenti.
+
+## Usa il mobile quando
+
+- Controlli Oggi, Calendario, Coach, Piano o Profilo durante la giornata di allenamento.
+- Registri una sessione outdoor direttamente dal telefono.
+- Controlli un'attività completata subito dopo averla salvata.
+- Colleghi un'attività completata a un allenamento pianificato.
+- Aggiorni lo stato attuale, leggi le notifiche o segui l'esecuzione del piano lontano dal computer.
+
+<DocsScreenshot
+  id="web-mobile-navigation"
+  title="Navigazione mobile"
+  description="Oggi, Calendario, Coach, Piano e Profilo coprono il flusso quotidiano dell'account su mobile."
+  route="Schede principali"
+  platform="mobile"
+/>
+
+## Cosa rimane sincronizzato
+
+| Dati                      | Web                         | Mobile                                     | Note                                                                   |
+| ------------------------- | --------------------------- | ------------------------------------------ | ---------------------------------------------------------------------- |
+| Profilo, unità, fuso      | Lettura e modifica          | Lettura e modifica                         | Le date del calendario dipendono dal fuso orario.                      |
+| Attività e analisi        | Dettaglio completo          | Viste giornaliere e di dettaglio           | L'elaborazione può completarsi dopo la comparsa iniziale dell'attività.|
+| Piani e allenamenti       | Creazione e modifica totale | Visualizzazione, creazione, esecuzione     | Le modifiche complesse sono in genere più comode sul web.              |
+| Coach AI                  | Sessioni e azioni           | Sessioni e azioni                          | Le modifiche applicate aggiornano lo stesso piano.                     |
+| Notifiche e revisioni     | Disponibili                 | Disponibili                                | L'automazione delle revisioni usa le preferenze dell'account.          |
+| Connessioni ai provider   | Gestione completa           | Flussi selezionati di connessione/permessi | La disponibilità dipende da provider e piattaforma.                    |
+
+## Regole di aggiornamento e conflitti
+
+Se modifichi lo stesso piano o campo del profilo su due dispositivi, il salvataggio andato a buon fine più recente prevale. Prima di applicare una seconda modifica:
+
+1. Torna alla schermata elenco o dettaglio.
+2. Trascina verso il basso per aggiornare su mobile oppure ricarica i dati sul web.
+3. Verifica che sia visibile il valore più recente.
+4. Applica la modifica successiva.
+
+Gli aggiornamenti di un piano possono rifiutare una modifica basata su una versione obsoleta quando un'altra richiesta ha già cambiato lo stesso record. Ricarica il piano e riapplica la modifica voluta invece di inviare ripetutamente la versione vecchia.
+
+## Continuare il lavoro su un altro dispositivo
+
+1. Concludi e salva l'azione corrente sul primo dispositivo.
+2. Apri la schermata elenco o dettaglio corrispondente sul secondo dispositivo.
+3. Aggiorna con pull-to-refresh su mobile o ricarica sul web.
+4. Controlla data/ora dell'attività, versione del piano o campo del profilo appena modificato.
+5. Prosegui con le modifiche solo dopo che compare il valore aggiornato dal server.
+
+## Comportamento offline
+
+La registrazione mobile è progettata per preservare la sessione localmente mentre è in corso e recuperare le registrazioni interrotte quando possibile. Le schermate supportate dal server richiedono comunque connessione di rete per recuperare piani aggiornati, risposte AI e analisi elaborate.
+
+Una volta tornato online:
+
+- Lascia che la registrazione o l'importazione termini il caricamento.
+- Evita di avviare un caricamento duplicato per la stessa sessione.
+- Verifica che l'attività compaia una sola volta in Attività.
+- Apri l'attività e attendi se l'analisi è ancora in elaborazione.
+
+## Verifica della sincronizzazione
+
+- Entrambe le superfici mostrano le stesse unità di misura e lo stesso fuso orario del profilo.
+- Un'attività completata compare una sola volta con lo stesso orario di inizio e la stessa fonte.
+- Il piano attivo e la prossima sessione mostrano lo stesso stato e l'ultima modifica.
+- Un'azione del Coach AI applicata su una superficie si riflette sullo stesso piano anche sull'altra.
+- Notifiche e revisioni completate non tornano come non lette dopo l'aggiornamento.
+
+## Risoluzione dei problemi
+
+### Un dispositivo mostra dati più vecchi
+
+Torna alla lista o alla schermata di dettaglio e aggiorna. Verifica la connessione di rete e controlla che entrambi i dispositivi usino lo stesso account. Non modificare la copia obsoleta finché non compare il valore aggiornato dal server.
+
+### Una modifica al piano segnala un conflitto di versione
+
+Un'altra richiesta ha modificato il piano per prima. Ricarica il piano, confronta la sessione attuale con la modifica che vuoi fare e applicala sulla nuova versione.
+
+### Una registrazione mobile non compare sul web
+
+Lascia aperta l'app mobile finché il caricamento non termina, poi aggiorna Attività sul web. Se l'attività è già visibile ma i grafici sono incompleti, l'elaborazione è ancora in corso: non caricare una seconda copia.
+
+### Le impostazioni dei provider cambiano tra web e mobile
+
+Usa **Account → Third Party Connections** sul web per la gestione completa. Su mobile possono essere disponibili solo alcuni flussi di autorizzazione o permessi.
+
+### Le date sul calendario non coincidono
+
+Confronta il fuso orario dell'account su entrambi i dispositivi e l'orario di inizio registrato dell'attività. Correggi il profilo prima di spostare o ricreare una sessione.
+
+## Prossimi passi
+
+- Registra dal telefono con [Registrazione mobile](/it/docs/guide/mobile-recording).
+- Crea ed esegui piani con [Piani e forza su mobile](/it/docs/guide/mobile-plans-and-strength).
+- Segui la configurazione iniziale in [Importa la tua prima attività](/it/docs/guide/getting-started).

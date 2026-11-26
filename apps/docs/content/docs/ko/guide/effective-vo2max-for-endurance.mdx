@@ -1,44 +1,123 @@
 ---
-title: Effective VO2max for Endurance Decisions
-description: How to interpret effective VO2max trends with training load and plan execution context.
-keywords: ["effective VO2max", "training analysis", "endurance decisions", "training load response"]
+title: 지구력 훈련에서 유효 VO2max 이해하기
+description: VO2Max 상세 화면을 열어 활동 추정치와 기록을 살펴보고, 현재 수치와 4주 예측치를 구분하며 표시된 불확실성 범위를 올바르게 해석합니다.
+seoTitle: "VO2Max 기록 및 예측 가이드 | Trainingload.ai"
+seoDescription: "VO2Max 상세 화면에서 기간별 기록 탭, 활동 추정치, 4주 전망과 참고 범위를 읽고 예측 데이터가 없거나 오래된 경우를 해석하는 방법을 안내합니다."
+keywords: ["유효 VO2max", "VO2max 예측", "VO2max 기록", "러닝 퍼포먼스 추세", "Trainingload.ai 가이드"]
 ---
 
-# Effective VO2max for Endurance Decisions
+# 지구력 훈련에서 유효 VO2max 이해하기
 
-effective VO2max is most useful as a trend signal.
-Use it to validate whether current training stress is producing useful adaptation.
+Trainingload.ai는 확보된 활동 근거를 바탕으로 유효 VO2max / VDOT 수치를 추정합니다. 상세 화면에서는 과거 추이를 점검할 수 있으며, 비교 가능한 러닝 기록이 충분히 쌓여 있다면 조건부 미래 전망도 함께 확인할 수 있습니다. 이 수치는 실험실 측정값이나 보장된 미래 결과가 아니라 모델에 의한 추정치입니다.
 
-## What it does well
+[데모에서 대시보드 열기](https://demo.trainingload.ai/en/dashboard)를 연 뒤 **VO2Max** 카드를 선택해 보세요. 데모에 현재 저장된 기록에 따라 예측 표시 여부가 달라질 수 있으며, 아래 예측 스크린샷은 앱에서 렌더링한 샘플 데이터를 사용했습니다.
 
-- Flags medium-term changes in performance response.
-- Helps detect stagnation earlier than race-day feedback.
-- Improves context for load adjustments.
+## 시작하기 전에
 
-## What it cannot do alone
+- 최근 러닝 활동을 가져오고 분석 처리가 끝날 때까지 기다립니다.
+- 프로필에 설정된 최대 심박수, 선택한 추정 소스, 보정 계수(correction factor)를 확인합니다.
+- 신뢰할 수 있는 입력값이 기록되었고 목적이 서로 비교 가능한 활동을 기준으로 판단합니다. 센서, 지형 또는 추정 설정이 바뀐 시점은 따로 메모해 두세요.
+- 결론을 기록할 때는 개별 활동 추정치, 현재 수치, 미래 예측치를 항상 구분해 적습니다.
 
-- It cannot explain execution quality by itself.
-- It cannot replace pacing, power, and heart-rate analysis.
-- It should not be treated as a single-score verdict.
+예측 기능은 조건을 충족하는 러닝 관측값을 기반으로 동작합니다. 대시보드의 종목 필터를 바꾼다고 해서 사이클링이나 수영 예측이 생성되지는 않습니다.
 
-## How to use it with load metrics
+## 1. VO2Max 상세 화면 열기
 
-Pair effective VO2max with:
+대시보드에서 **VO2Max** 카드를 찾아 선택합니다. 상세 화면에는 현재 수치, 가용한 4주 전망, 차트, 기록 기간 탭, 설명 텍스트, 그리고 **Ask Coach(AI 코치에게 묻기)** 버튼이 표시됩니다.
 
-- [ATL](/docs/metrics/pmc/acute-training-load) for recent stress.
-- [TSB](/docs/metrics/pmc/training-stress-balance) for freshness.
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score) for session load.
+예측을 제공할 수 없는 상태라도 현재 수치는 계속 표시될 수 있습니다. 화면에 표시된 안내 메시지와 차트에 미래 추정 구간이 실제로 그려져 있는지 함께 확인하세요.
 
-If effective VO2max stalls while ATL stays high, reduce intensity before increasing volume.
+## 2. 기록 기간 선택하기
 
-## Suggested review cadence
+**7일**, **14일**, **30일**, **60일** 탭을 사용해 살펴볼 과거 기록 기간을 고릅니다. 처음에는 비교 가능한 활동이 여러 개 포함되는 기간부터 확인하는 것이 좋습니다.
 
-- Daily: scan for abrupt drift and obvious recovery issues.
-- Weekly: compare trend direction with plan completion.
-- Block-end: confirm whether adaptation matched objective.
+예측이 제공되는 경우, 차트는 선택한 탭 길이에 맞춰 최대 30일까지의 미래 구간도 함께 표시합니다. 예를 들어 7일 탭은 30일 탭보다 짧은 미래 구간을 보여 줍니다. 다만 상단 요약의 **In four weeks(4주 후)** 수치는 탭과 무관하게 항상 4주 시점의 전망값을 가리킵니다.
 
-## Where to apply this in Trainingload.ai
+<DocsScreenshot
+  id="effective-vo2max-trend"
+  title="현재 수치, 과거 기록, 미래 추정치를 구분해서 읽기"
+  description="샘플 러닝 예시입니다. 상세 화면 상단에 현재 수치, 4주 추정치 및 참고 범위가 표시되고, 아래에 60일 기록 구간과 가용한 미래 곡선이 나타납니다."
+  imageSrc="/docs/analysis/en/effective-vo2max-trend.webp"
+  imageAlt="현재 수치, 4주 추정치, 참고 범위, 과거 활동 포인트 및 미래 곡선이 표시된 VO2Max 상세 예시"
+  route="Dashboard → VO2Max → 60 days"
+/>
 
-- [Training load page](/training-load)
-- [AI coach review page](/ai-training-plan)
-- [Training analysis landing](/training-analysis)
+## 3. 읽고 있는 수치의 의미 구분하기
+
+| 표시 항목 | 의미 |
+| --- | --- |
+| Current VO2Max(현재 VO2Max) | 제품에서 현재 값으로 표시하는 수치입니다. |
+| 과거 값 및 활동 포인트 | 선택한 기록 기간 안의 날짜별 추정치 또는 기록입니다. |
+| 현재 추정 수준(Current estimated level) | 차트가 해당 읽기 값을 제공할 때, 과거 기준 시점에서의 모델 추정 수준입니다. |
+| In four weeks(4주 후) | 가용한 4주 예측의 종료 시점 값입니다. |
+| 참고 범위(Reference range) 또는 80% 예측 구간(80% prediction interval) | 예측과 함께 제공되는 불확실성 범위로, 사용 중인 모델에 따라 라벨이 표시됩니다. |
+
+제품에 표시되는 현재 수치와 모델이 추정한 수준은 다를 수 있습니다. 두 값을 비교하기 전에 라벨과 날짜를 먼저 확인하세요. 미래 지점은 완료된 워크아웃이 아닙니다.
+
+과거 또는 미래 포인트 위로 포인터를 옮기면 차트가 제공하는 세부 값을 확인할 수 있습니다. 유독 튀는 과거 포인트가 보인다면 해당 날짜로 **활동(Activities)** 목록에서 원본 활동을 찾아보세요. 체력이 실제로 변했다고 결론 내리기 전에 기록 품질과 추정 소스부터 점검하는 것이 좋습니다.
+
+## 4. 예측치와 범위 해석하기
+
+전망이 제공되면 요약 영역에 **In four weeks(4주 후)** 값, 현재 수치 대비 변화 방향, 관련 범위, 그리고 과거 데이터 기준일이 표시됩니다. 이 요소들은 반드시 함께 읽으세요.
+
+**참고 범위(Reference range)**는 보정된 **80% 예측 구간(80% prediction interval)**과 같지 않습니다. 페이지에 **80% 예측 구간**이라고 명시되어 있다면 정리할 때도 그 라벨을 그대로 유지하세요. 어느 라벨이든 미래 수치가 반드시 그 구간 안에 들어온다는 보장은 아닙니다.
+
+이 예측은 과거 관측 기록과 모델 가정에 따라 산출되며, 예정된 일정에 기반하는 PMC 부하 전망과는 별개입니다. 미래 워크아웃을 일정에 추가한다고 해서 VO2Max가 표시된 수치만큼 자동으로 향상된다는 뜻은 아닙니다.
+
+추정치는 훈련 리뷰의 맥락 자료로 활용하고, 실제 기록된 워크아웃 수행 결과 및 훈련 부하와 대조해 보세요. 훈련 부하 해석 절차는 [PMC 기록 및 예측 읽기](/ko/docs/guide/pmc-forecast)를 참고하세요.
+
+## 5. 예측이 제공되지 않을 때 대응하기
+
+설정을 바꾸기 전에 먼저 화면에 표시된 상태 메시지를 확인하세요.
+
+| 메시지 | 다음 조치 |
+| --- | --- |
+| 더 많은 러닝 기록이 필요함(More running history is needed) | 조건을 충족하고 처리가 완료된 러닝 기록을 계속 쌓아 주세요. 현재 수치 하나만으로는 예측 근거가 부족합니다. |
+| 새로운 러닝 기록이 필요함(New running records are needed) | 가장 최근의 유효 관측값이 너무 오래되지 않았는지 확인하고 최근 활동을 가져옵니다. |
+| 계산 방식이 변경됨(The calculation method changed) | 추정 소스와 보정 설정을 확인하세요. 비교 가능한 새 관측 데이터가 더 필요할 수 있습니다. |
+| 예측 불가(Forecast unavailable) | 확보된 과거 기록을 계속 활용하면서 요청 상태나 데이터 상태를 점검합니다. |
+
+과거 차트가 비어 있다면 선택한 7일 구간에 관측 기록이 없는 것일 수도 있습니다. 모든 기록이 사라졌다고 단정하기 전에 더 긴 기간 탭을 먼저 열어 보세요. 누락된 추정치는 0이 아닙니다.
+
+원하는 예측치를 얻기 위해 최대 심박수나 보정 계수를 임의로 바꾸지 마세요. 설정을 변경하면 표시 수치뿐 아니라 기간 간 비교 가능성도 달라집니다.
+
+## 6. 근거 데이터를 바탕으로 AI 코치에게 질문하기
+
+상세 화면에서 **Ask Coach(AI 코치에게 묻기)**를 선택하면 현재 수준, 과거 변화, 가용한 4주 전망에 대해 묻는 질문이 미리 준비됩니다. 궁금한 내용과 맞는지 확인한 뒤 전송하세요.
+
+설명을 듣고 싶은 날짜와 활동을 함께 적어 주고, 실제 기록된 근거와 모델 추정치를 구분해 설명하며 누락된 맥락이 있다면 짚어 달라고 요청해 보세요. 이 버튼을 연다고 해서 질문이 자동 전송되거나 플랜 변경이 적용되지는 않습니다.
+
+제안된 변경을 확정하기 전에는 활동 근거, 플랜 맥락, 그리고 일반 [AI 코치 확인 절차](/ko/docs/guide/ai-coach)를 반드시 거치세요.
+
+## 결과 확인
+
+기록 기간, 입력 소스, 관련 날짜, 현재 수치, 예측 가능 여부, 표시된 범위 라벨을 함께 정리해 둡니다. 어떤 관측 기록이 추세를 뒷받침하고 어느 부분이 여전히 추정 영역인지 스스로 설명할 수 있어야 합니다.
+
+## 자주 묻는 질문
+
+### 7일 탭을 선택했는데도 4주 요약 수치가 그대로인 이유는?
+
+기간 탭은 차트에 표시되는 구간을 바꿉니다. 요약은 계속 4주 후 종료 시점을 설명하며, 차트는 선택한 탭 길이에 맞춰 가용 전망의 앞부분만 더 짧게 보여 줄 수 있습니다.
+
+### 현재 수치는 있는데 예측이 표시되지 않는 이유는?
+
+현재 수치 표시와 미래 예측은 필요한 근거 기준이 다릅니다. 러닝 관측 데이터가 부족하거나, 너무 오래되었거나, 서로 비교하기 어렵거나, 모델에서 사용할 수 없는 상태라면 예측이 제공되지 않을 수 있습니다.
+
+### 단일 활동 추정치가 전체 추세와 다르게 나오는 이유는?
+
+개별 활동 추정치와 모델의 현재 추정 수준은 서로 다른 범위의 근거를 요약합니다. 해당 활동의 소스, 센서 품질, 지형, 훈련 목적을 확인하세요. 포인트 하나를 훈련 블록 전체의 성과로 보기보다 조건이 비슷한 여러 기록을 함께 비교하는 편이 정확합니다.
+
+### 예정된 워크아웃을 추가하면 이 예측도 바뀌나요?
+
+PMC는 적용 가능한 예정 일정과 훈련 습관을 바탕으로 미래 부하를 추정합니다. 반면 VO2Max 전망은 과거 관측 모델에 기반합니다. 두 예측을 같은 계산 방식으로 보지 마세요.
+
+### 워치 표시값이나 실험실 검사 결과와 다른 이유는?
+
+계산 방식, 입력 데이터, 측정 시점이 서로 다를 수 있습니다. 각 지표는 같은 계열 안에서 일관되게 추적하세요. 측정 및 추정 개념은 [최대산소섭취량(VO2 Max)](/ko/docs/metrics/maximal-oxygen-uptake) 문서를 참고하세요.
+
+## 이어서 보기
+
+- [PMC 기록 및 예측 읽기](/ko/docs/guide/pmc-forecast)
+- [활동 상세 분석](/ko/docs/guide/activity-detail)
+- [프로필, 역치 및 훈련 존](/ko/docs/guide/profile-thresholds-zones)
+- [주간 훈련 리뷰](/ko/docs/workflow/weekly-review)

@@ -1,80 +1,81 @@
 ---
-title: Efficiency Factor (EF)
-description: Efficiency Factor compares output with average heart rate to track aerobic efficiency trends across similar endurance sessions.
-keywords: ["EF", "Efficiency Factor", "aerobic efficiency", "Aerobic Fitness", "Base Training", "heart rate efficiency"]
+title: 효율성 계수 (EF)
+description: 효율성 계수(Efficiency Factor)는 출력과 평균 심박수를 비교하여 유사한 지구력 훈련 전반에서 유산소 효율의 변화 추세를 추적하는 지표입니다.
+keywords: ["EF", "효율성 계수", "Efficiency Factor", "유산소 효율", "유산소 체력", "기반 훈련", "심박 효율"]
 ---
 
-# Efficiency Factor (EF)
+# 효율성 계수 (EF)
 
-**Efficiency Factor (EF)** links your **physiological input** to your **performance output**. In simple terms, it asks: how much pace or power did you produce per beat of heart rate?
+**효율성 계수(Efficiency Factor, EF)**는 **생리학적 입력**(심박수)과 **수행 출력**(파워 또는 페이스)을 연결해 주는 지표입니다. 쉽게 말해 “심박 1회당 얼마나 많은 파워나 페이스를 만들어 냈는가”를 묻습니다.
 
-It is useful for tracking aerobic efficiency during similar endurance sessions, especially across a base period.
+특히 기반 훈련(Base period) 기간 동안 유사한 지구력 훈련을 반복하면서 유산소 효율이 개선되고 있는지 추적할 때 매우 유용합니다.
 
-## Core idea
+## 핵심 개념
 
-EF is simple: **output per unit heart rate**.
-As you get fitter, you can produce more output at the same HR, or you can maintain the same output at a lower HR.
+EF의 원리는 단순합니다. **단위 심박수당 출력**입니다.
+유산소 체력이 좋아지면 같은 심박수에서 더 높은 출력을 낼 수 있고, 같은 출력을 더 낮은 심박수로 유지할 수 있습니다.
 
-## Formula
+## 계산 공식
 
-EF is computed as output divided by input:
+EF는 출력을 입력(평균 심박수)으로 나누어 계산합니다.
 
-### Cycling
+### 사이클링
 
 $$
 EF = \frac{NP}{AvgHR}
 $$
-*Note: some tools use average power instead. Trainingload.ai uses **NP** by default to stay consistent with how Decoupling is computed.*
+*참고: 일부 도구는 평균 파워를 사용하지만, Trainingload.ai는 유산소 디커플링 계산과의 일관성을 위해 기본적으로 **NP(정규화 파워)**를 사용합니다.*
 
-### Running
+### 러닝
 
 $$
 EF = \frac{NGP}{AvgHR}
 $$
-*Note: Trainingload.ai uses the speed derived from **NGP (Normalized Graded Pace)** (m/min or yd/min) to reduce terrain effects.*
+*참고: Trainingload.ai는 지형 영향을 줄이기 위해 **NGP(정규화 경사도 페이스)**에서 환산한 속도(m/min 또는 yd/min)를 사용합니다.*
 
-## Typical values
+## 일반적인 수치 해석
 
-EF is a **relative metric**. You generally shouldn’t compare EF across athletes because resting HR, Max HR, body mass, and measurement devices differ.
--   **Compare to yourself**: compare to your own past EF.
--   **Typical trend**: across a solid 12–16 week base period, EF often rises gradually.
+EF는 **상대 지표**입니다. 안정시 심박수, 최대 심박수, 체중, 측정 장비가 사람마다 다르므로 다른 선수와 EF 절댓값을 직접 비교하는 것은 적절하지 않습니다.
 
-## Typical applications
+- **자기 자신과 비교하세요**: 과거 본인의 EF 추세와 비교하는 것이 핵심입니다.
+- **전형적인 추세**: 탄탄한 12–16주 기반 훈련 기간 동안 EF는 대개 완만하게 상승하는 흐름을 보입니다.
 
-### 1. Track base training progress
-During long base periods, low-intensity endurance work can feel repetitive. A steadily rising EF trend across comparable sessions can be a sign that aerobic efficiency is improving.
+## 주요 활용 사례
 
--   **Rising**: training may be improving aerobic efficiency.
--   **Plateau**: if EF stops rising for several weeks, your base may be stabilizing, or you may be carrying fatigue.
--   **Decision point**: this can support adding more threshold or interval work, but it should be checked against fatigue, goals, and recent load.
+### 1. 기반 훈련 진행 상황 추적
+긴 기반 훈련 기간에는 저강도 지구력 훈련이 단조롭게 느껴지기 쉽습니다. 비교 가능한 세션 전반에서 EF가 꾸준히 상승한다면 유산소 효율이 실제로 좋아지고 있다는 신호입니다.
 
-### 2. Cross-check fatigue signals
-If EF changes abruptly, it is not always a fitness change. Unusually low heart rate, unusually high RPE, poor sleep, heat, or sensor issues can all distort EF. Cross-check with how the session felt and with recent training load.
+- **상승 추세**: 훈련이 유산소 효율을 효과적으로 개선하고 있을 가능성이 높습니다.
+- **정체 구간**: 몇 주 동안 EF가 더 이상 오르지 않는다면 기반 체력이 안정화되었거나 피로가 누적되었을 수 있습니다.
+- **전환 판단**: 역치 훈련이나 인터벌 비중을 늘릴 근거가 될 수 있지만, 피로도·목표·최근 훈련 부하와 함께 검토해야 합니다.
 
-## EF vs. aerobic decoupling
+### 2. 피로 신호 교차 확인
+EF가 갑자기 변했다고 해서 항상 체력이 변한 것은 아닙니다. 평소보다 유난히 낮은 심박수, 높은 RPE(체감 강도), 수면 부족, 더위, 센서 오작동 모두 EF를 왜곡할 수 있습니다. 훈련 당시의 체감과 최근 훈련 부하를 함께 교차 확인하세요.
 
-**EF** and **[Aerobic Decoupling](/docs/metrics/heart-rate/aerobic-decoupling)** complement each other:
+## EF vs 유산소 디커플링
 
-| Metric | Time horizon | Question |
+**EF**와 **[유산소 디커플링](/ko/docs/metrics/heart-rate/aerobic-decoupling)**은 서로를 보완하는 관계입니다.
+
+| 지표 | 시간 범위 | 핵심 질문 |
 | :--- | :--- | :--- |
-| **EF** | **Long-term trend** | “How much did I improve over the last month?” |
-| **Decoupling** | **Single-workout quality** | “Did I maintain efficiency during this long session?” |
+| **EF** | **장기 추세** | “지난 한 달 동안 유산소 효율이 얼마나 좋아졌는가?” |
+| **유산소 디커플링** | **단일 세션 품질** | “이번 장거리 훈련 끝까지 효율을 안정적으로 유지했는가?” |
 
-EF shows the efficiency level of a session or trend. Decoupling shows whether that efficiency stayed stable later in a long steady effort.
+EF는 개별 세션의 효율 수준과 장기 추세를 보여 주고, 디커플링은 그 효율이 장시간 일정 강도 훈련 후반부까지 무너지지 않고 유지되었는지를 보여 줍니다.
 
-## How Trainingload.ai uses EF
+## Trainingload.ai의 EF 활용 방식
 
--   **Trend only comparable sessions**: EF is most useful when comparing similar routes, durations, terrain, and intensity.
--   **Filter noisy workouts**: Trainingload.ai emphasizes aerobic sessions (mostly Zone 1 / Zone 2) when looking at EF trends.
--   **Pair with decoupling**: EF can rise while late-session drift remains high, so both metrics tell a fuller story.
--   **Keep equipment consistent**: use the same HR strap and power meter when possible. Device differences can hide small real improvements.
+- **비교 가능한 세션만 추세 분석**: 코스, 시간, 지형, 강도가 비슷한 세션끼리 비교할 때 가장 정확합니다.
+- **노이즈가 큰 세션 필터링**: Trainingload.ai는 EF 추세를 살필 때 주로 유산소 세션(대부분 존 1 / 존 2)에 중점을 둡니다.
+- **디커플링과 함께 해석**: EF가 오르더라도 장거리 후반부 드리프트가 여전히 클 수 있으므로 두 지표를 함께 보면 전체 그림이 선명해집니다.
+- **장비 일관성 유지**: 가능하면 동일한 심박 스트랩과 파워미터를 사용하세요. 장비 차이 때문에 실제 미세한 발전이 가려질 수 있습니다.
 
-## Related docs
+## 관련 문서
 
-- [Aerobic Decoupling](/docs/metrics/heart-rate/aerobic-decoupling)
-- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
-- [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace)
+- [유산소 디커플링](/ko/docs/metrics/heart-rate/aerobic-decoupling)
+- [심박수 존](/ko/docs/metrics/heart-rate/zones)
+- [정규화 경사도 페이스 (NGP)](/ko/docs/metrics/pace/normalized-graded-pace)
 
-## References
+## 참고 자료
 
--   [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)
+- [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)

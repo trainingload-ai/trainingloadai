@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import dayjs from "dayjs";
 import type { PlanWorkout, TrainingPlanDetail } from "@/api/plans";
 import {
+  buildWeekGroups,
   canMutatePlanWorkoutSchedule,
   formatPlanLoadDisplay,
   getPlanWorkoutDisplayKind,
@@ -10,6 +11,7 @@ import {
   getWeekWorkoutCardChrome,
   getWeekWorkoutStatusLabelClass,
   rollupPlanDetailExecution,
+  toDerivedWorkout,
 } from "./plan-detail-utils";
 
 describe("formatPlanLoadDisplay", () => {
@@ -288,6 +290,23 @@ describe("rollupPlanDetailExecution", () => {
       skipped: 1,
       moved: 1,
     });
+  });
+
+  it("uses calendar weekdays for both workout and rest days in a Wednesday start", () => {
+    const started = {
+      ...plan,
+      startDate: "2026-11-25",
+      workouts: [workout({ dayIndex: 1, scheduledDate: "2026-11-25" })],
+    };
+    const t = (key: string) => key;
+    expect(toDerivedWorkout(t, started, started.workouts[0]).dayLabel).toBe("weekday.wed");
+    expect(buildWeekGroups(t, started)[0].days.slice(0, 2).map(({ dayLabel, dateKey }) => ({
+      dayLabel,
+      dateKey,
+    }))).toEqual([
+      { dayLabel: "weekday.wed", dateKey: "2026-11-25" },
+      { dayLabel: "weekday.thu", dateKey: "2026-11-26" },
+    ]);
   });
 
   it("falls back to plan day when scheduledDate is missing", () => {

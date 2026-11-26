@@ -7,6 +7,7 @@ import {
 
 type Input = {
   sportType?: string;
+  showOverview?: boolean;
 };
 
 type Output = {
@@ -77,6 +78,7 @@ export const profileCurrentTool: AiToolDef<Input, Output> = buildAiTool({
         description:
           'Optional sport type for sport-specific profile values: RUN, CYCLING, SWIM.',
       },
+      showOverview: { type: 'boolean', description: 'Attach the signed-in athlete overview.' },
     },
   },
   checkPermissions: async (ctx) => requireSignedInUser(ctx),

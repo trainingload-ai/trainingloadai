@@ -1,0 +1,44 @@
+.tabGrid {
+  --tab-shoulder: 0.5rem;
+  padding-inline: var(--tab-shoulder);
+}
+
+.tab[aria-selected="true"] {
+  position: relative;
+  z-index: 1;
+}
+
+.tab[aria-selected="true"]::before,
+.tab[aria-selected="true"]::after {
+  position: absolute;
+  bottom: 0;
+  width: var(--tab-shoulder);
+  height: var(--tab-shoulder);
+  content: "";
+  pointer-events: none;
+}
+
+.tab[aria-selected="true"]::before {
+  right: 100%;
+  background: radial-gradient(
+    circle at top left,
+    transparent calc(var(--tab-shoulder) - 0.5px),
+    var(--background) var(--tab-shoulder)
+  );
+}
+
+.tab[aria-selected="true"]::after {
+  left: 100%;
+  background: radial-gradient(
+    circle at top right,
+    transparent calc(var(--tab-shoulder) - 0.5px),
+    var(--background) var(--tab-shoulder)
+  );
+}
+
+@media (forced-colors: active) {
+  .tab[aria-selected="true"] {
+    outline: 1px solid Highlight;
+    outline-offset: -2px;
+  }
+}

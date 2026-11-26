@@ -7,6 +7,7 @@ import {
   timelineDistanceIndex,
   timelineValueAt,
   timelineTimeAtDistance,
+  recordedTimelineFocus,
   coordinateAtTrackTime,
   sliceTrackByTime,
   downsampleTimeline,
@@ -88,6 +89,19 @@ describe("activity timeline alignment", () => {
       150,
     );
     expect(laps[0].range).toEqual([10, 110]);
+  });
+
+  it("opens a measured lap or final distance and leaves unresolved segments unset", () => {
+    const model = {
+      laps: [{ index: 3, range: [80, 100] as const }],
+      distance: [{ time: 70, value: 1200 }, { time: 85, value: 1500 }, { time: 100, value: 1800 }],
+      distanceGap: 20,
+    };
+    expect(recordedTimelineFocus({ lap: 3 }, model)).toEqual([80, 100]);
+    expect(recordedTimelineFocus({ lap: 1 }, model)).toBeNull();
+    expect(recordedTimelineFocus({ lastMeters: 450 }, model)).toEqual([77.5, 100]);
+    expect(recordedTimelineFocus({ lastMeters: 1000 }, model)).toBeNull();
+    expect(recordedTimelineFocus({ lastMeters: 450 }, { ...model, distanceGap: 5 })).toBeNull();
   });
 
   it("preserves a short spike and a missing sample when downsampling", () => {

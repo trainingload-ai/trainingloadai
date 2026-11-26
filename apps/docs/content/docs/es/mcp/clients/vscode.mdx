@@ -1,0 +1,32 @@
+---
+title: Conectar VS Code
+description: "Conecta TrainingLoad mediante MCP: Add Server o con un archivo .mcp.json portátil."
+---
+
+# Conectar VS Code
+
+El camino guiado es **MCP: Add Server** desde la paleta de comandos:
+
+1. Selecciona **HTTP**.
+2. Introduce `https://api.trainingload.ai/mcp`.
+3. Usa `trainingload` como ID del servidor.
+4. Elige configuración de usuario o de espacio de trabajo.
+
+O crea un archivo portátil `.mcp.json` en la raíz del espacio de trabajo:
+
+```json
+{
+  "mcpServers": {
+    "trainingload": {
+      "type": "http",
+      "url": "https://api.trainingload.ai/mcp"
+    }
+  }
+}
+```
+
+Abre el chat en modo Agent, activa TrainingLoad en el selector de herramientas y completa OAuth en el navegador. Verifícalo con: «Resume el cumplimiento de mi plan de entrenamiento durante las últimas 8 semanas y lista las sesiones de la próxima semana.»
+
+Si aparecen errores, ejecuta **MCP: List Servers** para inspeccionar los registros, reiniciar el servidor o restablecer la confianza. Nunca guardes credenciales en un archivo `.mcp.json` compartido.
+
+[Guía oficial de MCP para VS Code](https://code.visualstudio.com/docs/agent-customization/mcp-servers)

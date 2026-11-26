@@ -18,6 +18,7 @@ import {
 import { formatWorkoutDuration } from "@/lib/workout-display-utils";
 import { MobileActivityDetailSheetContent } from "./MobileActivityDetailSheetContent";
 import { MobileCalendarDayContent } from "./MobileCalendarSessionCards";
+import { canMoveCalendarWorkout } from "./calendar-move-model";
 
 export type MobileCalendarSheetPage =
   | { kind: "day" }
@@ -34,22 +35,22 @@ const ViewWorkoutDialog = dynamic(
 );
 
 export function MobileCalendarDaySheet({
-  notGenerated,
   activities,
   date,
   events,
   onOpenChange,
   onPageChange,
+  onMoveWorkout,
   open,
   page,
   workouts,
 }: {
-  notGenerated?: boolean;
   activities: Activity[];
   date: Dayjs;
   events: CompetitionEvent[];
   onOpenChange: (open: boolean) => void;
   onPageChange: (page: MobileCalendarSheetPage) => void;
+  onMoveWorkout?: (workout: PlanWorkout) => void;
   open: boolean;
   page: MobileCalendarSheetPage;
   workouts: PlanWorkout[];
@@ -141,7 +142,6 @@ export function MobileCalendarDaySheet({
       {page.kind === "day" ? (
         <div className="space-y-2">
           <MobileCalendarDayContent
-            notGenerated={notGenerated}
             activities={activities}
             events={events}
             workouts={workouts}
@@ -173,6 +173,9 @@ export function MobileCalendarDaySheet({
           text={page.workout.text}
           sportType={page.workout.sportType as SportType}
           workout={page.workout}
+          onMoveWorkout={
+            canMoveCalendarWorkout(page.workout) ? onMoveWorkout : undefined
+          }
         />
       ) : (
         <div className="px-4 pb-safe-or-8 pt-4">

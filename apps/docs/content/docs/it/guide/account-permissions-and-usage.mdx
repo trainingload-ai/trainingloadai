@@ -1,0 +1,209 @@
+---
+title: Account, permessi, esportazioni e utilizzo AI
+description: Verifica la sicurezza dell'account, gestisci permessi e connessioni, esporta i dati dell'account, controlla abbonamento e utilizzo AI ed elimina un account in modo sicuro.
+keywords:
+  [
+    "account Trainingload.ai",
+    "permessi mobile",
+    "utilizzo AI",
+    "cambiare password",
+    "aggiornamento automatico soglie",
+    "esportare dati Trainingload",
+    "eliminare account Trainingload",
+  ]
+---
+
+# Account, permessi, esportazioni e utilizzo AI
+
+Le impostazioni dell'account controllano identità e accesso; i permessi stabiliscono quali dati di dispositivi e provider possono entrare in Trainingload.ai; la sezione Utilizzo spiega abbonamento e consumo AI. Controllale insieme quando configuri un nuovo dispositivo o indaghi su una funzionalità mancante.
+
+Questa pagina riguarda gli account Cloud. Il self-hosting utilizza un account personale locale: consulta la [configurazione self-host](/it/docs/self-host/configuration) per le relative impostazioni.
+
+## Prima di iniziare
+
+- Accedi allo stesso account Trainingload.ai su web e mobile.
+- Tieni accesso all'email dell'account per ricevere i codici di verifica.
+- Su mobile verifica se il sistema operativo ha già negato l'accesso a Salute o Posizione.
+- Decidi quali soglie possono aggiornarsi automaticamente prima di attivare qualsiasi interruttore.
+- Non condividere codici di verifica, password, credenziali di connessione o screenshot contenenti identificativi privati dell'account.
+
+## 1. Verifica identità e stato della password
+
+Sul web apri **Account**. Su mobile apri **Profilo → Menu → Account**.
+
+Puoi verificare:
+
+- Nome visualizzato.
+- Email dell'account e stato di verifica.
+- Se è stata impostata una password.
+
+Il campo email attuale è di sola lettura. Se l'account non è verificato, richiedi un codice di verifica a sei cifre e inseriscilo prima che scada. Sul web un codice inviato resta valido per cinque minuti e non può essere reinviato mentre il conto alla rovescia è attivo.
+
+Usa **Imposta password** quando l'account non ha ancora una password, oppure **Cambia password** quando ne esiste già una. Un account creato via OAuth può mostrare correttamente che non è impostata alcuna password: usa l'azione mostrata invece di pensare che l'account abbia un problema.
+
+### Recuperare l'accesso e completare il login
+
+Dalla pagina di login usa **Password dimenticata** per richiedere un'email di ripristino. Apri sempre e solo il link più recente, controlla che riporti alla schermata di ripristino di Trainingload.ai e imposta lì la nuova password. Un token scaduto, malformato o già usato va sostituito con una nuova richiesta.
+
+Il login OAuth può passare da una schermata di completamento o di errore prima di tornare all'app. Se il completamento non reindirizza, torna al Login e riprova una volta; se compare una pagina di errore, annota il testo visibile senza condividere token o l'URL completo di callback.
+
+Quando un'altra applicazione chiede di accedere a Trainingload.ai, la pagina di consenso OAuth mostra applicazione richiedente, account connesso, ambiti (scope) richiesti e destinazione di ritorno. Approva solo quando tutti e quattro corrispondono a ciò che volevi. Negare il consenso restituisce il controllo senza concedere l'accesso richiesto.
+
+<DocsScreenshot
+  id="account-security-status"
+  title="Identità e stato di sicurezza dell'account"
+  description="Controlla email dell'account, badge di verifica e stato della password prima di modificare connessioni o abbonamento."
+  route="Account → Identità e sicurezza"
+/>
+
+## 2. Controlla permessi mobile e fonti dati [#2-review-mobile-permissions-and-data-sources]
+
+Apri **Profilo → Menu → Autorizzazione dati** oppure la pagina **Permessi** su mobile. Le fonti sono separate in fonti locali del dispositivo e servizi di terze parti.
+
+Le fonti locali includono:
+
+- **Salute**: autorizza la lettura supportata di dati salute e allenamenti, verifica lo stato concesso o parziale, richiedi una sincronizzazione storica, gestisci i dispositivi collegati o apri le impostazioni di sistema di Salute.
+- **Posizione**: consenti la registrazione del percorso, oppure apri le impostazioni di sistema se il permesso era già stato negato.
+
+Le fonti di terze parti possono includere Strava, Polar, COROS, Suunto, Wahoo e Intervals.icu. Ogni riga mostra lo stato attuale. Apri una fonte per collegarla, rivedere le impostazioni specifiche del provider o aprire la pagina connessioni.
+
+<DocsScreenshot
+  id="mobile-permission-sources"
+  title="Permessi mobile e fonti di connessione"
+  description="Permessi del dispositivo e connessioni ai provider sono gestiti separatamente. Questo esempio mostra Posizione e provider di allenamento: apri una fonte per vedere le azioni disponibili."
+  route="Profilo → Menu → Autorizzazione dati"
+  platform="mobile"
+/>
+
+Permesso sul dispositivo e connessione lato server sono due stati separati. Salute può risultare autorizzato nel sistema operativo mentre la connessione del dispositivo a Trainingload.ai deve ancora essere ricollegata. Riapri il dettaglio della fonte al rientro dalle impostazioni di sistema così che l'app aggiorni entrambi gli stati.
+
+## 3. Controlla gli aggiornamenti automatici delle metriche
+
+Apri **Account → Aggiornamento automatico** sul web o su mobile. Ogni interruttore autorizza l'aggiornamento di una singola metrica:
+
+| Gruppo             | Metriche          |
+| ------------------ | ----------------- |
+| Potenza            | FTP, CP, W′, Pmax |
+| Passo              | TP, CS            |
+| Frequenza cardiaca | LTHR, FC max      |
+
+Attiva solo le metriche che vuoi far aggiornare a Trainingload.ai sulla base di dati qualificanti. Attivare un interruttore non garantisce la comparsa immediata di un nuovo valore: il sistema ha comunque bisogno di dati di attività supportati sufficienti.
+
+Gli aggiornamenti automatici possono cambiare le soglie usate da zone, grafici, allenamenti strutturati e interpretazione del carico di allenamento. Dopo un aggiornamento, controlla lo storico delle metriche e rivedi un'attività recente prima di confrontare periodi vecchi e nuovi.
+
+## 4. Controlla abbonamento e utilizzo AI
+
+La scheda abbonamento in Account mostra:
+
+- Piano attuale e stato attivo.
+- Periodo di abbonamento o contesto di scadenza.
+- Canale di fatturazione.
+- Se è programmata la disdetta a fine periodo.
+
+Solo un abbonamento attivo dal canale di fatturazione supportato mostra l'azione di gestione diretta in app. Altre fonti di accesso possono mostrare lo stato dell'abbonamento senza gli stessi controlli di gestione.
+
+Apri **Utilizzo** dalla scheda abbonamento o dall'area account mobile. La pagina mostra:
+
+- Piano corrente.
+- Crediti disponibili, incluso un saldo negativo se l'ultima operazione completata ha superato il saldo precedente.
+- Crediti mensili dell'abbonamento usati, residui e scadenza.
+- Saldo dei pacchetti crediti disponibili o vincolati all'abbonamento e relativa scadenza più vicina.
+- Debito residuo, andamento dei consumi, numero di operazioni e singole voci del registro.
+
+Puoi selezionare 1 giorno, 7 giorni, 30 giorni, mese in corso o mese scorso. Le voci del registro distinguono operazioni Standard (1×), Deep (3×), modalità mista, accrediti da abbonamento, pacchetti crediti, omaggi, rimborsi e compensazioni di debito. Un credito corrisponde a 1.000 token equivalenti dopo l'applicazione dei moltiplicatori di input in cache, input non in cache, output, modalità e globali; non rappresenta un numero fisso di messaggi.
+
+<DocsScreenshot
+  id="ai-usage-ledger"
+  title="Riepilogo e registro utilizzo AI"
+  description="Confronta piano, accrediti residui, consumo del periodo, andamento nell'intervallo selezionato e registro eventi firmato."
+  route="Account → Utilizzo"
+/>
+
+## 5. Imposta le preferenze dell'applicazione
+
+Apri **Impostazioni** sul web per scegliere:
+
+- tema chiaro, scuro o di sistema;
+- unità metriche o imperiali;
+- comportamento dell'asse X nei grafici;
+- formato orario a 12 o 24 ore;
+- lingua preferita dell'interfaccia.
+
+Questi controlli mantengono un valore temporaneo finché non premi **Salva**. Cambiare lingua sposta anche il percorso corrente sulla lingua selezionata e memorizza la preferenza per le visite successive. Unità e formato orario influiscono solo sulla visualizzazione e non riscrivono i record originali delle attività.
+
+## 6. Esporta i dati del tuo account
+
+Sul web apri **Account → Esportazione dati**. Scegli il formato adatto a ciò che devi fare:
+
+- **Analisi AI** crea un pacchetto compatto pensato per l'analisi e non include i file originali caricati.
+- **Backup completo** crea un archivio più ampio e può includere i file originali quando vengono mantenute le coordinate esatte.
+
+Scegli come gestire le posizioni dei percorsi prima di avviare la richiesta:
+
+- oscura le posizioni visitate di frequente;
+- rimuovi i dati GPS;
+- mantieni le posizioni esatte.
+
+Includere i file originali impone il mantenimento delle posizioni esatte perché quei file possono contenere proprie coordinate. Tratta un'esportazione con posizioni esatte come dato sensibile e non caricarla su servizi AI né condividerla con altri se non sai esattamente cosa contiene l'archivio.
+
+La generazione dell'esportazione è asincrona. Tieni aperta la pagina o torna più tardi, aggiorna l'ultimo job e scarica l'archivio solo quando il suo stato è **Pronto (Ready)**. La pagina indica dimensione dell'archivio e scadenza. Un job pronto, non riuscito o scaduto può essere rimosso dall'elenco.
+
+## 7. Eliminare un account in modo sicuro
+
+L'eliminazione dell'account è permanente e asincrona. Prima di avviarla su mobile:
+
+1. Esporta tutto ciò che desideri conservare.
+2. Controlla l'abbonamento e il provider di fatturazione mostrati.
+3. Disattiva il rinnovo quando il flusso lo richiede.
+4. Leggi e seleziona ogni conferma finale.
+5. Invia la richiesta di eliminazione e attendi la schermata di conferma prima di uscire dal flusso.
+
+La richiesta disconnette l'account e rimuove subito l'accesso attivo mentre l'eliminazione prosegue in background. Il completamento richiede normalmente fino a 24 ore e può arrivare fino a 7 giorni. La schermata di accettazione riporta al Login e non implica che il vecchio account possa essere ripristinato.
+
+La gestione dell'abbonamento dipende dal canale di fatturazione attivo. Un rinnovo fatturato via web può dover essere annullato prima di poter procedere. Il rinnovo tramite Apple è gestito da Apple e può proseguire anche dopo l'eliminazione dell'account Trainingload.ai se non lo annulli separatamente. L'eliminazione non garantisce un rimborso e un successivo acquisto di abbonamento non ripristina i dati eliminati.
+
+## 8. Verifica le impostazioni tra dispositivi
+
+Dopo aver modificato impostazioni di account, connessioni, permessi o aggiornamento automatico:
+
+1. Salva o completa l'azione sul dispositivo corrente.
+2. Torna all'elenco delle fonti e controlla lo stato visualizzato.
+3. Aggiorna l'altro dispositivo.
+4. Verifica la stessa email dell'account e le impostazioni salvate lato server.
+5. Per i permessi locali, controlla lo stato nel sistema operativo del dispositivo su cui il permesso è stato concesso: i permessi locali non si trasferiscono su un altro telefono.
+
+## Verifica della configurazione
+
+- Web e mobile mostrano la stessa email dell'account.
+- Stato di verifica email e password corrispondono al metodo di accesso previsto.
+- Salute e Posizione mostrano lo stato atteso a livello di dispositivo.
+- I provider di terze parti mostrano lo stato atteso di connessione lato server.
+- Sono attivi solo gli interruttori desiderati di aggiornamento automatico delle metriche.
+- Stato dell'abbonamento e registro Utilizzo sono coerenti con accrediti e operazioni AI recenti.
+- Un'esportazione richiesta raggiunge lo stato Ready, si scarica correttamente prima della scadenza e rispecchia l'opzione scelta sulla privacy della posizione.
+- Tema, unità, grafici, formato orario e lingua persistono alla riapertura delle Impostazioni.
+
+## Risoluzione dei problemi
+
+- **Il codice di verifica non funziona:** inserisci tutte e sei le cifre, verifica l'email, controlla la scadenza e richiedi un nuovo codice solo quando si riattiva il pulsante di reinvio.
+- **L'email non è modificabile:** la modifica dell'email non è esposta nell'attuale interfaccia Account; il campo è volutamente di sola lettura.
+- **Salute è autorizzato ma non connesso:** riapri Salute, verifica lo stato della connessione app/server/dispositivo e usa Ricollega se disponibile.
+- **Posizione resta negata:** apri le impostazioni dell'app nel sistema operativo; un permesso già negato potrebbe non mostrare un secondo avviso di sistema.
+- **Un provider risulta scollegato dopo OAuth:** aggiorna lo stato della fonte, verifica che l'account Trainingload.ai sia lo stesso e controlla le impostazioni del provider.
+- **Una metrica automatica non è cambiata:** verifica che l'interruttore sia attivo e che le attività recenti qualificanti contengano dati supportati sufficienti.
+- **La sezione Utilizzo sembra vuota:** seleziona un intervallo più ampio e verifica che l'account abbia accrediti o consumi AI.
+- **L'abbonamento non si gestisce dall'app:** la gestione in app è disponibile solo per i canali di abbonamento supportati; verifica il canale di fatturazione indicato.
+- **Impossibile avviare una nuova esportazione:** attendi la conclusione del job di esportazione corrente, poi aggiorna la pagina e riprova.
+- **Un'esportazione è scaduta:** rimuovi il job scaduto e richiedi un nuovo archivio con le opzioni di privacy desiderate.
+- **L'eliminazione account è bloccata da un abbonamento:** segui il passaggio di rinnovo specifico del provider mostrato nel flusso, poi aggiorna lo stato. Per fatturazione Apple, annulla separatamente il rinnovo tramite Apple.
+- **Un link di ripristino password viene rifiutato:** richiedi una nuova email e usa solo il link più recente; non riutilizzare token già usati o scaduti.
+- **Una richiesta di consenso OAuth non sembra familiare:** nega la richiesta e verifica app richiedente, ambiti, account e destinazione di ritorno prima di riprovare.
+- **Una preferenza sembra non essere cambiata:** premi Salva e riapri Impostazioni; preferenze locali di visualizzazione e lingua salvata sul server possono aggiornarsi in momenti diversi.
+
+## Prossimi passi
+
+- [Collegare i dati di allenamento](/it/docs/guide/connect-data)
+- [Integrazioni](/it/docs/guide/integrations)
+- [Profilo, soglie e zone](/it/docs/guide/profile-thresholds-zones)
+- [Registrazione mobile](/it/docs/guide/mobile-recording)
+- [Notifiche e revisioni automatiche](/it/docs/guide/notifications-and-reviews)

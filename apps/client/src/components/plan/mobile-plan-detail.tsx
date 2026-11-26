@@ -1,6 +1,7 @@
 "use client";
 
-import { RollingPlanLoadSummary } from "./rolling-plan-load-summary";
+import { isOfficialPlanDraft } from "@shared/plan-calendar";
+
 import { isRollingPlan, isPlanDateNotGenerated } from "@/lib/rolling-plan";
 import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
@@ -41,13 +42,13 @@ import {
 import { MobileSheet } from "@/components/mobile-app/components/MobileSheet";
 import { MobileTopBarAction } from "@/components/mobile-app/components/MobileTopBar";
 import {
+  getLifecycleActions,
   getLifecycleDialogCopy,
   getPlanStatusLabel,
   rollupPlanDetailExecution,
   type PlanLifecycleAction,
 } from "@/components/plan/detail/plan-detail-utils";
 import { MobilePlanLoadChart } from "@/components/plan/mobile-plan-load-chart";
-import { PlanShareCard } from "@/components/plan/plan-share-card";
 import { PlanDetailWorkoutEditor } from "@/components/plan/plan-detail-workout-editor";
 import { getPlanFocusWorkouts, localDateKey, normalizeDay } from "@/components/plan/mobile-plan-load-model";
 import { MobilePlanWorkoutRow } from "@/components/plan/mobile-plan-workout-row";
@@ -63,13 +64,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { LoadErrorState } from "@/components/ui/load-error-state";
 import { cn } from "@/lib/utils";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
-
-type LifecycleActionModel = {
-  action: PlanLifecycleAction;
-  tone: "primary" | "neutral" | "destructive";
-};
 
 function getMobilePlanStatusClass(status: PlanStatus, dark: boolean) {
   switch (status) {
@@ -100,39 +97,6 @@ function getMobilePlanStatusClass(status: PlanStatus, dark: boolean) {
         ? "bg-visual-recording-background/70 text-zinc-300"
         : "bg-neutral-200 text-zinc-700";
   }
-}
-
-function getLifecycleActions(
-  status: PlanStatus,
-  capabilities?: { delete?: boolean } | null,
-): LifecycleActionModel[] {
-  if (status === "DRAFT") {
-    return [
-      { action: "activate", tone: "primary" },
-      { action: "delete", tone: "destructive" },
-    ];
-  }
-  if (status === "ACTIVE") {
-    return [
-      { action: "pause", tone: "neutral" },
-      { action: "complete", tone: "neutral" },
-      { action: "cancel", tone: "destructive" },
-    ];
-  }
-  if (status === "SCHEDULED") {
-    return [{ action: "cancel", tone: "destructive" }];
-  }
-  if (status === "PAUSED") {
-    return [
-      { action: "resume", tone: "primary" },
-      { action: "complete", tone: "neutral" },
-      { action: "cancel", tone: "destructive" },
-    ];
-  }
-  if (status === "COMPLETED" && capabilities?.delete) {
-    return [{ action: "delete", tone: "destructive" }];
-  }
-  return [];
 }
 
 function LifecycleIcon({ action }: { action: PlanLifecycleAction }) {
@@ -307,16 +271,19 @@ export function MobilePlanDetailContent({
         <h1 className="min-w-0 text-[30px] font-semibold leading-tight tracking-tight text-foreground">
           {plan.title}
         </h1>
-        {plan.description || plan.goal ? (
-          <p className="text-base leading-6 text-muted-foreground">
-            {plan.description || plan.goal}
-          </p>
+        {isRollingPlan(plan) ? <RollingPlanCoverage plan={plan} /> : null}
+        {plan.goal ? <p className="text-sm text-muted-foreground">{plan.goal}</p> : null}
+        {plan.description && plan.description !== plan.goal ? (
+          <details>
+            <summary className="cursor-pointer text-sm text-muted-foreground">
+              {t("notes.descriptionLabel")}
+            </summary>
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+              {plan.description}
+            </p>
+          </details>
         ) : null}
       </section>
-
-      <RollingPlanMonthDirection plan={plan} />
-      <RollingPlanAutomation plan={plan} />
-        <RollingPlanLoadSummary plan={plan} />
 
       <section className="grid grid-cols-2 gap-3">
         <PlanMetric
@@ -337,7 +304,7 @@ export function MobilePlanDetailContent({
         <PlanMetric label={mobileT("openSessions")} value={String(openCount)} />
       </section>
 
-      {isRollingPlan(plan) ? <RollingPlanCoverage plan={plan} /> : <MobilePlanLoadChart plan={plan} />}
+      {!isRollingPlan(plan) ? <MobilePlanLoadChart plan={plan} /> : null}
 
       <section className="space-y-2">
         <h2 className="px-1 text-sm font-semibold text-foreground">
@@ -387,6 +354,8 @@ export function MobilePlanDetailContent({
           </div>
         )}
       </section>
+      <RollingPlanMonthDirection plan={plan} />
+      <RollingPlanAutomation plan={plan} />
     </div>
   );
 }
@@ -446,8 +415,10 @@ export function MobilePlanDetailSheet({
   open,
   onOpenChange,
   onPlanChanged,
+  embedded = false,
 }: {
-  plan: TrainingPlanSummary | null;
+  plan: TrainingPlanSummary | Pick<TrainingPlanSummary, "id"> | null;
+  embedded?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onPlanChanged?: () => void;
@@ -456,7 +427,7 @@ export function MobilePlanDetailSheet({
   const publicDemo = usePublicDemo();
   const plansT = useTranslations("V2PlansPage");
   const navigationT = useTranslations("MobileApp.planNavigation");
-  const detail = usePlanDetail(plan?.id, open && Boolean(plan));
+  const detail = usePlanDetail(plan?.id, open && Boolean(plan), { errorSurface: "inline" });
   const activate = useActivatePlan();
   const pause = usePausePlan();
   const complete = useCompletePlan();
@@ -513,7 +484,7 @@ export function MobilePlanDetailSheet({
       } else {
         await deletePlan.mutateAsync({ planId: current.id });
       }
-      onOpenChange(false);
+      if (!embedded || action === "delete") onOpenChange(false);
       if (action !== "delete") onPlanChanged?.();
     } catch {
       // Mutation hooks own the localized error toast; keep the sheet open.
@@ -543,16 +514,69 @@ export function MobilePlanDetailSheet({
   );
   const viewingWorkout = Boolean(selectedWorkout) && !editingWorkout;
 
+  const content = (
+    <>
+        {viewingWorkout && selectedWorkout ? (
+          <ViewWorkoutDialog
+            open
+            mobile
+            mobileEmbedded
+            planId={selectedWorkout.planId ?? undefined}
+            workoutId={selectedWorkout.id}
+            workout={selectedWorkout}
+            onOpenChange={(next) => {
+              if (!next) setSelectedWorkout(null);
+            }}
+          />
+        ) : detail.isLoading ? (
+          <p className="py-12 text-center text-sm text-muted-foreground">
+            {navigationT("loading")}
+          </p>
+        ) : detail.isError ? (
+          <LoadErrorState retrying={detail.isFetching}
+            onRetry={() => void detail.refetch({ cancelRefetch: false })} />
+        ) : detail.data ? (
+          <div className="space-y-4">
+            <MobilePlanDetailContent
+              plan={detail.data}
+              onWorkoutClick={setSelectedWorkout}
+            />
+            <MobilePlanLifecycleActions
+              capabilities={detail.data.capabilities}
+              status={detail.data.status}
+              pendingAction={pendingAction}
+              onAction={requestAction}
+            />
+          </div>
+        ) : (
+          <p className="py-12 text-center text-sm text-muted-foreground">
+            {t("notFound.title")}
+          </p>
+        )}
+    </>
+  );
+
   return (
     <>
       <PlanStartConversationDialog
         open={startOpen}
         planId={plan?.id ?? null}
+        officialTitle={isOfficialPlanDraft(detail.data) ? detail.data?.title : undefined}
         onOpenChange={setStartOpen}
       />
-      <MobileSheet
+      {embedded ? (
+        <div className="min-w-0 space-y-2">
+          {viewingWorkout ? (
+            <MobileTopBarAction onClick={() => setSelectedWorkout(null)} aria-label={navigationT("title")}>
+              <ChevronLeft className="size-5" aria-hidden="true" />
+            </MobileTopBarAction>
+          ) : null}
+          {content}
+        </div>
+      ) : (<MobileSheet
         open={open && Boolean(plan) && !startOpen}
         onOpenChange={onOpenChange}
+        viewportScope="below-pc"
         title={
           viewingWorkout && selectedWorkout
             ? buildWorkoutListTitle(t, selectedWorkout)
@@ -561,7 +585,7 @@ export function MobilePlanDetailSheet({
         description={
           viewingWorkout
             ? undefined
-            : plan
+            : plan && "periodWeeks" in plan
               ? isRollingPlan(plan) ? undefined : plansT("recent.itemMeta", {
                   weeks: plan.periodWeeks ?? 1,
                   sessions: plan.workoutCount,
@@ -584,46 +608,8 @@ export function MobilePlanDetailSheet({
           viewingWorkout ? "flex overflow-hidden p-0" : undefined
         }
       >
-        {viewingWorkout && selectedWorkout ? (
-          <ViewWorkoutDialog
-            open
-            mobile
-            mobileEmbedded
-            planId={selectedWorkout.planId ?? undefined}
-            workoutId={selectedWorkout.id}
-            workout={selectedWorkout}
-            onOpenChange={(next) => {
-              if (!next) setSelectedWorkout(null);
-            }}
-          />
-        ) : detail.isLoading ? (
-          <p className="py-12 text-center text-sm text-muted-foreground">
-            {navigationT("loading")}
-          </p>
-        ) : detail.error ? (
-          <p className="py-12 text-center text-sm text-destructive">
-            {navigationT("failed")}
-          </p>
-        ) : detail.data ? (
-          <div className="space-y-4">
-            <MobilePlanDetailContent
-              plan={detail.data}
-              onWorkoutClick={setSelectedWorkout}
-            />
-            <MobilePlanLifecycleActions
-              capabilities={detail.data.capabilities}
-              status={detail.data.status}
-              pendingAction={pendingAction}
-              onAction={requestAction}
-            />
-            <PlanShareCard plan={detail.data} />
-          </div>
-        ) : (
-          <p className="py-12 text-center text-sm text-muted-foreground">
-            {t("notFound.title")}
-          </p>
-        )}
-      </MobileSheet>
+        {content}
+      </MobileSheet>)}
 
       {editingWorkout && selectedWorkout && detail.data ? (
         <PlanDetailWorkoutEditor

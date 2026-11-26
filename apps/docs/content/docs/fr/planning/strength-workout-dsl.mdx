@@ -1,0 +1,283 @@
+---
+title: DSL de séance de renforcement
+description: Construisez et validez une séance complète de renforcement musculaire Trainingload.ai en mode Règles avec exercices, groupes de séries, charge, RPE ou RIR et récupération.
+keywords:
+  [
+    "DSL renforcement Trainingload.ai",
+    "règles séance musculation",
+    "syntaxe séries exercices",
+  ]
+---
+
+# DSL de séance de renforcement
+
+Le DSL de renforcement est la forme textuelle de l’éditeur de séances de renforcement musculaire. Utilisez-le pour recopier une séance reçue d’un entraîneur, modifier rapidement plusieurs groupes de séries ou vérifier la structure exacte que Trainingload.ai va enregistrer. Il décrit une séance statique unique ; chaque exercice contient un ou plusieurs groupes de séries d’échauffement ou de travail.
+
+## Avant de commencer
+
+- Ouvrez une séance modifiable et choisissez **Renforcement musculaire** comme sport.
+- Sélectionnez l’onglet **Règles**. L’onglet **Manuel** édite exactement la même structure de manière visuelle.
+- Déterminez quelles charges sont connues. Utilisez `open` au lieu d’inventer un poids ou un pourcentage.
+- Gardez vos consignes de coaching dans les notes de la séance. Le DSL décrit la prescription, pas de la prose libre.
+
+## Commencer par la plus petite séance valide
+
+Collez ceci dans **Règles** :
+
+```text
+exercise "Goblet Squat" equipment dumbbell {
+  work 3x8 open rir 3 rest 90s
+}
+```
+
+Cliquez ensuite sur **Valider la saisie**. Cet exemple signifie :
+
+- un exercice nommé « Goblet Squat » ;
+- un équipement haltère (`dumbbell`) ;
+- trois séries de travail de huit répétitions ;
+- pas de charge imposée (`open`) ;
+- trois répétitions en réserve (`rir 3`) ;
+- 90 secondes de récupération après chaque série.
+
+Toute séance valide requiert au moins un exercice. Chaque exercice exige un nom non vide entre guillemets et au moins une ligne `work`.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Ouvrir l’éditeur depuis le calendrier du plan"
+  description="Dans le créateur de plan manuel, passez à la sélection des dates, puis cliquez sur + Séance le jour souhaité."
+  route="Plans → Créateur de plan manuel → Sélection des dates → + Séance"
+/>
+
+<DocsScreenshot
+  id="strength-dsl-rules-input"
+  title="DSL de renforcement en mode Règles"
+  description="Une séance valide de deux exercices après validation, avec la structure enregistrée visible dans l’aperçu renforcement."
+  route="Plans → Séance manuelle → Renforcement musculaire → Règles"
+/>
+
+## Comprendre la structure du document
+
+Une séance complète comporte trois niveaux :
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+```
+
+1. `duration` et `session rpe` décrivent l’ensemble de la séance. Tous deux sont facultatifs et ne peuvent apparaître qu’une seule fois.
+2. `exercise "…" {` ouvre un bloc d’exercice. L’accolade fermante `}` le termine.
+3. Les lignes `warmup` et `work` décrivent les groupes de séries à l’intérieur de cet exercice.
+
+Les lignes vides sont autorisées. Les commentaires et le texte ordinaire ne font pas partie de la grammaire.
+
+## Ajouter les paramètres de séance
+
+Placez ces lignes avant le premier exercice :
+
+```text
+duration 50m
+session rpe 6
+```
+
+`duration` accepte les secondes, les minutes ou les heures, par exemple `45s`, `50m` ou `1.5h`. Il s’agit de la durée totale prévue de la séance, et non d’une série.
+
+`session rpe` accepte un nombre compris entre 1 et 10. Il indique la difficulté globale prévue de la séance, à distinguer de `rpe` sur une ligne de groupe de séries, qui fixe l’effort cible pour ces séries précises.
+
+## Ajouter un exercice
+
+La forme de base est :
+
+```text
+exercise "Romanian Deadlift" {
+  work 3x8 open rir 2 rest 2m
+}
+```
+
+Le nom de l’exercice doit figurer entre guillemets doubles et ne peut pas être vide. Vous pouvez l’écrire dans la langue de l’athlète. Échappez un guillemet double interne par `\"` et un antislash littéral par `\\`.
+
+L’équipement est facultatif :
+
+```text
+exercise "Romanian Deadlift" equipment barbell {
+```
+
+Un code d’équipement peut contenir des lettres minuscules ou majuscules, des chiffres, des tirets et des underscores. Le DSL enregistré normalise ce code en minuscules. Privilégiez des codes stables comme `barbell`, `dumbbell`, `bodyweight`, `cable` ou `machine`.
+
+## Écrire un groupe de séries
+
+Respectez l’ordre suivant pour obtenir un DSL lisible et canonique :
+
+```text
+work PRESCRIPTION LOAD EFFORT rest DURATION
+```
+
+Seuls `warmup` ou `work` ainsi que la prescription sont obligatoires. La charge vaut `open` par défaut lorsqu’elle est omise, mais écrire `open` rend l’intention explicite. L’effort et le repos sont facultatifs.
+
+| Élément | Forme acceptée | Exemple |
+| --- | --- | --- |
+| Type de série | `warmup` ou `work` | `work` |
+| Prescription | répétitions fixes, plage, AMRAP ou temps | `3x5`, `3x8-12`, `1x5+`, `3x45s` |
+| Charge | libre, poids fixe, % de 1RM ou poids du corps | `open`, `weight 80kg`, `weight 75%1rm`, `bodyweight` |
+| Effort | RPE ou RIR | `rpe 7`, `rir 2` |
+| Repos | durée après `rest` | `rest 90s`, `rest 3m` |
+
+Un exercice peut contenir plusieurs groupes de séries :
+
+```text
+exercise "Back Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+```
+
+Les séries d’échauffement (`warmup`) sont facultatives. Au moins un groupe `work` est obligatoire : un exercice ne contenant que des lignes `warmup` ne sera pas validé.
+
+## Choisir une prescription en répétitions ou en temps
+
+| Objectif | Syntaxe | Signification |
+| --- | --- | --- |
+| Répétitions fixes | `3x5` | 3 séries de 5 répétitions |
+| Plage de répétitions | `3x8-12` | 3 séries de 8 à 12 répétitions chacune |
+| AMRAP | `1x5+` | 1 série avec indicateur AMRAP sur une base de 5 répétitions |
+| Série chronométrée | `3x45s` | 3 séries de 45 secondes |
+| Série chronométrée en minutes | `2x1.5m` | 2 séries de 90 secondes |
+
+Le nombre de séries et les valeurs de répétitions doivent être positifs. Pour une plage, placez toujours la valeur la plus petite en premier.
+
+## Choisir une charge
+
+### Charge libre (`open`)
+
+```text
+work 3x10 open rir 3 rest 90s
+```
+
+Utilisez `open` lorsque l’athlète choisit la charge le jour même, ou qu’aucun historique fiable de charges n’est disponible.
+
+### Poids fixe
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x5 weight 175lb rpe 7 rest 3m
+```
+
+Écrivez le nombre suivi directement de `kg` ou `lb`, sans espace.
+
+### Pourcentage de 1RM
+
+```text
+work 4x4 weight 80%1rm rest 3m
+```
+
+N’utilisez cette forme que lorsque l’exercice dispose d’un 1RM connu et à jour. Le pourcentage accepté doit être strictement supérieur à 0 et au plus égal à 100.
+
+### Poids du corps et décalage de charge
+
+```text
+work 3x8 bodyweight rir 2 rest 90s
+work 3x6 bodyweight +10kg rpe 8 rest 2m
+work 3x8 bodyweight -20kg rir 2 rest 2m
+```
+
+`+10kg` correspond à un lest additionnel. `-20kg` correspond à une assistance réduisant la charge effective au poids du corps.
+
+## Choisir RPE ou RIR
+
+N’utilisez qu’un seul modèle d’effort sur une même ligne de groupe de séries :
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x8 open rir 2 rest 2m
+```
+
+- `rpe` accepte les valeurs de 1 à 10.
+- `rir` accepte les valeurs de 0 à 10.
+- Ne mettez jamais les deux sur la même ligne.
+
+Le RPE et le RIR servent de repères d’effort, pas de calcul automatique de poids. Écrire `rpe 7` ne conduit pas Trainingload.ai à inventer ou ajuster un poids.
+
+## Construire une séance complète en français
+
+Les noms d’exercices sont du contenu utilisateur : ils n’ont pas à être rédigés en anglais. En revanche, les mots-clés du DSL restent en anglais car ils constituent la grammaire.
+
+```text
+duration 45m
+session rpe 6
+
+exercise "Squat barre" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+
+exercise "Pompes" equipment bodyweight {
+  work 3x8-12 bodyweight rir 2 rest 90s
+}
+
+exercise "Planche" equipment bodyweight {
+  work 3x45s bodyweight rest 60s
+}
+```
+
+Cette séance produit trois exercices : un exercice chargé en répétitions, une plage de répétitions au poids du corps et un gainage chronométré au poids du corps.
+
+## Valider, comparer et enregistrer
+
+1. Sélectionnez **Valider la saisie**.
+2. Corrigez la première erreur de ligne signalée avant de retoucher le reste.
+3. Comparez l’aperçu renforcement avec le nombre d’exercices et de séries de travail attendu.
+4. Basculez sur **Manuel** si vous souhaitez vérifier visuellement les champs interprétés.
+5. Revenez dans **Règles** et vérifiez que le DSL normalisé conserve exactement le même sens.
+6. Sélectionnez **Enregistrer le brouillon**, rouvrez la séance et contrôlez-la à nouveau.
+
+La normalisation peut passer en minuscules les mots-clés, codes d’équipement et unités, ou insérer un `open` explicite. Ces ajustements ne changent pas le sens de la séance. Une modification d’exercice, de nombre de séries, de prescription, de charge, d’effort ou de repos, en revanche, le modifie.
+
+## Ce que le DSL ne prend pas en charge
+
+Le DSL de renforcement décrit une prescription de séance statique. N’y placez pas :
+
+- de conditions `if/else` ni de logique exécutable ;
+- de règles de progression hebdomadaire ou de décharge ;
+- de blocs d’exercices imbriqués ;
+- d’attributs séparés par des virgules ;
+- de scripts de progression exécutables ;
+- de notes ou paragraphes de coaching.
+
+Mettez vos indications humaines dans les notes de séance. Conservez les scripts externes non pris en charge dans leur outil d’origine plutôt que de les traduire en une prescription différente.
+
+## Vérifier la séance
+
+- Le sport sélectionné est bien **Renforcement musculaire**, et non un sport d’endurance.
+- Chaque exercice possède un nom non vide entre guillemets.
+- Chaque exercice comporte au moins un groupe `work`.
+- Les plages de répétitions vont du plus petit au plus grand nombre.
+- Chaque groupe de séries utilise au plus une charge et un modèle d’effort.
+- L’aperçu affiche bien les exercices et les séries de travail prévus.
+- La réouverture de la séance enregistrée préserve exactement le même sens.
+
+## Dépannage
+
+| Erreur ou symptôme | Solution |
+| --- | --- |
+| Le nom de l’exercice ne peut pas être vide | Placez un nom non vide entre guillemets doubles, par exemple `exercise "Squat barre" {`. |
+| La séance de renforcement exige au moins un exercice | Ajoutez un bloc `exercise` complet. |
+| L’exercice exige au moins une série de travail | Ajoutez une ligne `work` ; des séries d’échauffement seules ne suffisent pas. |
+| Prescription de série invalide | Utilisez `3x5`, `3x8-12`, `1x5+` ou une forme chronométrée comme `3x45s`. |
+| Les répétitions max doivent être supérieures ou égales aux min | Remplacez `3x12-8` par `3x8-12`. |
+| Utilisez RPE ou RIR, pas les deux | Supprimez l’une des deux cibles d’effort sur la ligne concernée. |
+| Poids invalide | Écrivez `weight 80kg`, `weight 175lb` ou `weight 80%1rm` sans espace dans la valeur. |
+| Attribut de série non pris en charge | Retirez la prose, les virgules, les mots-clés inconnus ou la logique dynamique de la ligne. |
+| Accolade fermante manquante sur un exercice | Ajoutez une accolade `}` après le dernier groupe de séries de cet exercice. |
+| Changer de sport vide ou remplace l’éditeur | Copiez ou enregistrez le DSL avant de changer, car endurance et renforcement utilisent des structures différentes. |
+
+## Étapes suivantes
+
+- Consultez [Séances de renforcement musculaire](/fr/docs/planning/strength-workouts) pour l’éditeur visuel et les choix de programmation.
+- Lisez [Éditeur manuel de séances](/fr/docs/planning/manual-workout-editor) pour comparer les modes Règles et Manuel.
+- Ajoutez la séance à un plan via [Créer un plan d’entraînement](/fr/docs/guide/create-training-plan).

@@ -1,44 +1,123 @@
 ---
-title: Effective VO2max for Endurance Decisions
-description: How to interpret effective VO2max trends with training load and plan execution context.
-keywords: ["effective VO2max", "training analysis", "endurance decisions", "training load response"]
+title: Comprende el VO2max efectivo en deportes de resistencia
+description: Abre el detalle de VO2Max, inspecciona estimaciones por actividad e historial, distingue el valor actual de la proyección a cuatro semanas y lee la incertidumbre mostrada.
+seoTitle: "Historial y proyección de VO2Max | Trainingload.ai"
+seoDescription: "Aprende a usar las pestañas de historial de VO2Max, las estimaciones por actividad, la proyección a cuatro semanas y su rango de referencia."
+keywords: ["VO2max efectivo", "proyección de VO2max", "historial de VO2max", "tendencia de rendimiento en carrera", "guía de Trainingload.ai"]
 ---
 
-# Effective VO2max for Endurance Decisions
+# Comprende el VO2max efectivo en deportes de resistencia
 
-effective VO2max is most useful as a trend signal.
-Use it to validate whether current training stress is producing useful adaptation.
+Trainingload.ai utiliza la evidencia disponible de tus actividades para estimar un valor de VO2max efectivo / VDOT. La vista de detalle te permite revisar su historial y, cuando existe suficiente historial comparable de carrera, una proyección condicional. Son estimaciones de un modelo, no mediciones de laboratorio ni resultados futuros garantizados.
 
-## What it does well
+[Abre el panel de control en la Demo](https://demo.trainingload.ai/en/dashboard) y selecciona la tarjeta **VO2Max**. Los registros actuales de la Demo determinan si hay proyección disponible. La captura de proyección de abajo utiliza datos de ejemplo renderizados por la aplicación.
 
-- Flags medium-term changes in performance response.
-- Helps detect stagnation earlier than race-day feedback.
-- Improves context for load adjustments.
+## Antes de empezar
 
-## What it cannot do alone
+- Importa actividades recientes de carrera y espera a que finalice su procesamiento.
+- Comprueba tu frecuencia cardíaca máxima, la fuente de estimación elegida y cualquier factor de corrección usado en tu perfil.
+- Usa actividades con entradas fiables y propósitos comparables. Anota cambios en sensores, terreno o ajustes de estimación.
+- Mantén diferenciados las estimaciones por actividad, el valor actual y la proyección al sacar conclusiones.
 
-- It cannot explain execution quality by itself.
-- It cannot replace pacing, power, and heart-rate analysis.
-- It should not be treated as a single-score verdict.
+La proyección utiliza observaciones válidas de carrera. Cambiar el filtro de deporte del panel de control no genera una proyección para ciclismo ni natación.
 
-## How to use it with load metrics
+## 1. Abre la vista de detalle de VO2Max
 
-Pair effective VO2max with:
+En el panel de control, busca **VO2Max** y selecciona su tarjeta. La vista de detalle contiene el valor actual, la proyección a cuatro semanas si está disponible, la gráfica, las pestañas de rango histórico, el texto explicativo y **Preguntar al Entrenador**.
 
-- [ATL](/docs/metrics/pmc/acute-training-load) for recent stress.
-- [TSB](/docs/metrics/pmc/training-stress-balance) for freshness.
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score) for session load.
+El valor actual puede seguir visible aunque no haya proyección disponible. Comprueba el mensaje de disponibilidad y si la gráfica muestra realmente estimaciones futuras.
 
-If effective VO2max stalls while ATL stays high, reduce intensity before increasing volume.
+## 2. Elige una ventana histórica
 
-## Suggested review cadence
+Usa las pestañas de **7**, **14**, **30** o **60** días para elegir el historial grabado que quieres inspeccionar. Empieza con una ventana que incluya varias actividades comparables.
 
-- Daily: scan for abrupt drift and obvious recovery issues.
-- Weekly: compare trend direction with plan completion.
-- Block-end: confirm whether adaptation matched objective.
+Cuando la proyección está disponible, la gráfica también muestra una ventana futura acorde con la pestaña elegida, con un límite máximo de 30 días. Por ejemplo, la pestaña de 7 días muestra un tramo futuro más corto que la de 30 días. El valor **En cuatro semanas** del resumen sigue refiriéndose siempre al horizonte de cuatro semanas.
 
-## Where to apply this in Trainingload.ai
+<DocsScreenshot
+  id="effective-vo2max-trend"
+  title="Lee por separado el valor actual, el historial y las estimaciones futuras"
+  description="Ejemplo sintético de carrera. La vista de detalle muestra el valor actual, una estimación a cuatro semanas y un rango de referencia, con una ventana histórica de 60 días y la curva futura disponible debajo."
+  imageSrc="/docs/analysis/en/effective-vo2max-trend.webp"
+  imageAlt="Ejemplo de detalle de VO2Max mostrando el valor actual, la estimación a cuatro semanas, el rango de referencia, puntos históricos por actividad y curva futura"
+  route="Panel de control → VO2Max → 60 días"
+/>
 
-- [Training load page](/training-load)
-- [AI coach review page](/ai-training-plan)
-- [Training analysis landing](/training-analysis)
+## 3. Identifica qué valor estás leyendo
+
+| Elemento mostrado | Qué representa |
+| --- | --- |
+| VO2Max actual | El valor actual mostrado por el producto. |
+| Valores históricos y puntos de actividad | Las estimaciones o registros disponibles para las fechas de la ventana histórica seleccionada. |
+| Nivel estimado actual | El nivel estimado por un modelo en su fecha de corte histórica cuando la gráfica ofrece esa lectura. |
+| En cuatro semanas | El punto final de la proyección disponible a cuatro semanas. |
+| Rango de referencia o intervalo de predicción del 80 % | El rango asociado a la proyección, etiquetado según el modelo en uso. |
+
+El valor actual del producto y el nivel estimado por el modelo pueden diferir. Lee siempre la etiqueta y la fecha antes de compararlos. Un punto futuro no representa una sesión completada.
+
+Pasa el cursor sobre un punto histórico o futuro para revisar las lecturas disponibles en la gráfica. Ante un punto histórico llamativo, usa su fecha para localizar la actividad original en **Actividades**. Revisa la grabación y la fuente de estimación antes de concluir que cambió tu fitness.
+
+## 4. Interpreta la proyección y su rango
+
+Cuando la proyección está disponible, el resumen muestra **En cuatro semanas**, una dirección respecto al valor actual, el rango asociado y la fecha de corte histórica. Lee todos estos elementos juntos.
+
+Un **rango de referencia** no equivale a un intervalo de predicción calibrado del 80 %. Si la página indica explícitamente un **intervalo de predicción del 80 %**, conserva esa etiqueta al citarlo. Ninguna de las dos etiquetas garantiza que tu valor futuro vaya a caer dentro de la banda.
+
+La proyección se basa en observaciones históricas y en los supuestos del modelo. Es independiente de la proyección de carga basada en calendario del PMC. Añadir una sesión futura no demuestra por sí solo que el VO2Max vaya a mejorar en la cifra mostrada.
+
+Usa la estimación como contexto para tu revisión y contrástala con la ejecución real de tus sesiones y la carga de entrenamiento. Sigue [Historial y proyecciones de PMC](/es/docs/guide/pmc-forecast) para el flujo de carga.
+
+## 5. Cómo actuar si la proyección no está disponible
+
+Lee el estado mostrado antes de cambiar ningún ajuste.
+
+| Mensaje | Próximo paso |
+| --- | --- |
+| Se necesita más historial de carrera | Sigue acumulando registros de carrera válidos y procesados. Un valor actual por sí solo no aporta suficiente evidencia para proyectar. |
+| Se necesitan registros de carrera más recientes | Comprueba si las observaciones válidas más recientes están desactualizadas e importa actividades nuevas. |
+| Cambió el método de cálculo | Revisa los ajustes de fuente y corrección. Puede hacer falta acumular nuevas observaciones comparables. |
+| Proyección no disponible | Sigue usando el historial disponible e inspecciona el estado de la solicitud o de los datos. |
+
+Una gráfica histórica en blanco también puede indicar que la ventana elegida de 7 días no contiene observaciones. Prueba una ventana histórica más amplia antes de concluir que faltan todos los registros. Las estimaciones ausentes no equivalen a cero.
+
+Evita modificar tu frecuencia cardíaca máxima o el factor de corrección solo para obtener una proyección más favorable. Cambiar esos ajustes altera tanto la comparabilidad como los valores mostrados.
+
+## 6. Pregunta al Entrenador sobre la evidencia
+
+Selecciona **Preguntar al Entrenador** en la vista de detalle. La pregunta preparada consulta por el nivel actual, los cambios históricos y la proyección a cuatro semanas disponible. Revísala y envíala si encaja con tu duda.
+
+Añade las fechas y actividades que quieres explicar. Pide al entrenador que separe evidencia grabada de estimaciones y que señale qué contexto falta. Abrir este enlace no envía ninguna pregunta automáticamente ni aplica cambios al plan.
+
+Antes de confirmar una propuesta de cambio, comprueba la evidencia de las actividades, el contexto del plan y el flujo habitual de confirmación del [Entrenador con IA](/es/docs/guide/ai-coach).
+
+## Comprueba el resultado
+
+Anota la ventana histórica, la fuente de entrada, las fechas relevantes, el valor actual, la disponibilidad de proyección y la etiqueta del rango. Deberías poder explicar qué observaciones respaldan una tendencia y qué parte sigue siendo una proyección.
+
+## Preguntas frecuentes
+
+### ¿Por qué el resumen a cuatro semanas no cambia cuando elijo 7 días?
+
+La pestaña cambia la ventana de la gráfica. El resumen sigue describiendo el horizonte a cuatro semanas, mientras la gráfica muestra un tramo más corto de la proyección disponible.
+
+### ¿Por qué tengo un valor actual pero ninguna proyección?
+
+El valor actual y la proyección exigen niveles distintos de evidencia. La proyección puede no estar disponible porque las observaciones de carrera sean insuficientes, antiguas, no comparables o no aptas para el modelo.
+
+### ¿Por qué una sola actividad difiere de la tendencia?
+
+La estimación de una actividad y el nivel actual del modelo resumen evidencias distintas. Revisa el origen, la calidad de sensores, el terreno y el objetivo de esa sesión. Compara varios registros adecuados antes de tomar un único punto como balance de un bloque de entrenamiento.
+
+### ¿Cambiará esta predicción si añado una sesión planificada?
+
+El PMC estima la carga futura a partir de sesiones programadas y hábitos aplicables. La proyección de VO2Max se apoya en su modelo de observaciones históricas. No trates ambas proyecciones como el mismo cálculo.
+
+### ¿Por qué difiere de mi reloj o de una prueba de laboratorio?
+
+Pueden utilizar métodos, entradas y fechas diferentes. Mantén cada serie coherente consigo misma. Consulta [VO2 Max](/es/docs/metrics/maximal-oxygen-uptake) para profundizar en conceptos de medición y estimación.
+
+## Continúa
+
+- [Historial y proyecciones de PMC](/es/docs/guide/pmc-forecast)
+- [Detalle de actividad](/es/docs/guide/activity-detail)
+- [Perfil, umbrales y zonas](/es/docs/guide/profile-thresholds-zones)
+- [Revisión semanal de entrenamiento](/es/docs/workflow/weekly-review)

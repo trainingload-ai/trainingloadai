@@ -1,39 +1,127 @@
 ---
-title: 훈련 단조도(Monotony)
-description: Trainingload.ai가 최근 7일의 일일 부하로 훈련 단조도와 Training Strain을 계산하는 방법과 Foster 고전 지표와의 차이를 설명합니다.
-keywords: ["훈련 단조도", "Monotony", "Training Strain", "부하 변동", "Carl Foster"]
+title: "훈련 단조로움 (Monotony): Foster 공식 vs 범위 제한 점수"
+description: "훈련 단조로움(Monotony)은 최근 7일간 일일 훈련 부하가 얼마나 비슷한지 측정합니다. 고전 Foster 공식과 Trainingload.ai의 범위 제한 점수 및 Training Strain을 비교해 보세요."
+keywords:
+  [
+    "훈련 단조로움",
+    "훈련 단조도",
+    "Foster monotony",
+    "훈련 스트레인",
+    "일일 부하 변동성",
+    "단조로움 공식",
+  ]
 ---
 
-# 훈련 단조도란?
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
 
-**훈련 단조도**는 오늘을 포함한 최근 7일의 일일 부하가 얼마나 비슷한지 나타냅니다. 매일 비슷하면 값이 높아지고, 높은 날·낮은 날·부하 0인 날이 뚜렷하면 대체로 낮아집니다.
+# 훈련 단조로움 (Monotony): Foster 공식 vs 범위 제한 점수
 
-Trainingload.ai는 0~1 범위로 정규화한 값을 표시하며, Foster의 고전 지표와는 다릅니다. 피로, 회복, 오버트레이닝 또는 부상 확률을 직접 측정하지 않습니다.
+**훈련 단조로움(Training Monotony)**은 오늘을 포함한 최근 7일(달력 기준) 동안 일일 훈련 부하가 서로 얼마나 비슷한지를 나타냅니다. 매일 비슷한 부하를 반복하면 값이 높아지고, 고부하·저부하·휴식일(부하 0)이 뚜렷하게 섞여 있으면 대체로 값이 낮아집니다.
+
+Trainingload.ai는 고전 Foster 수치가 아니라 **0과 1 사이로 정규화된 범위 제한 버전**을 표시합니다. 이 지표는 부하 숫자의 분포 특성을 설명할 뿐, 피로·회복·오버트레이닝·부상 확률·훈련 품질을 직접 측정하지 않습니다.
 
 <div className="my-6 max-w-sm w-full mx-auto">
-  <MonotonyStatPreviewCard value="0.72" metricLabel="Monotony"
-    valuePopoverTitle="단조도 값"
-    valuePopoverBody="7일 일일 부하의 평균과 모표준편차로 계산하며, 활동이 없는 날은 0입니다."
+  <MonotonyStatPreviewCard
+    value="0.72"
+    metricLabel="Monotony"
+    valuePopoverTitle="단조로움 값"
+    valuePopoverBody="최근 7일간 일일 부하의 평균과 모표준편차로 계산하며, 활동이 없는 날은 0으로 집계합니다."
     rangePopoverTitle="화면 구간"
-    rangePopoverBody="<0.6, 0.6–0.8, >0.8은 검토용 구간이지 건강 또는 부상 기준이 아닙니다."
+    rangePopoverBody="UI의 <0.6, 0.6–0.8, >0.8 구간은 검토용 신호이며 건강이나 부상 위험 경계가 아닙니다."
     helpTitle="부하 변동"
-    details="7일의 개별 값과 총부하를 함께 확인하세요." />
+    details="수치를 해석할 때는 7일 개별 일일 부하와 주간 총부하를 모두 함께 확인하세요."
+  />
 </div>
+
+_예시 값은 화면 미리보기용입니다._
+
+## 데이터와 공식
+
+Trainingload.ai는 오늘과 직전 6일을 포함한 7일을 계산 창으로 사용합니다. 같은 날 여러 활동이 있으면 합산하며, 기록된 부하가 없는 날은 0으로 들어갑니다.
 
 ```text
 mean_load = sum(loads) / 7
 sd_load = sqrt(sum((load − mean_load)²) / 7)
 monotony = mean_load / (sd_load + mean_load)
-training_strain = sum(loads) × monotony / 0.5
 ```
 
-7일이 모두 0이면 Monotony와 Strain은 0입니다. 고전 공식은 `foster_monotony = mean_load / sd_load`이며 상한이 없습니다. 따라서 Trainingload.ai의 `0.8`을 Foster의 `2.0`과 직접 비교할 수 없습니다.
+만약 `sd_load + mean_load = 0`이면 7일 모두 부하가 0이라는 뜻이며, 이때는 `monotony = 0`을 반환합니다.
 
-7일 모두 부하 0이면 0, 하루만 부하가 있으면 약 0.29, 7일의 양수 부하가 모두 같으면 1입니다. 낮다고 항상 좋은 것은 아닙니다. 한 번의 큰 부하와 여섯 번의 0도 낮은 단조도를 만듭니다.
+훈련 스트레인(Training Strain)도 동일한 7일 구간을 사용합니다.
+
+```text
+total_load = sum(loads)
+training_strain = total_load × monotony / 0.5
+```
+
+## 고전 Foster 지표와의 차이점
+
+```text
+foster_monotony = mean_load / sd_load
+foster_strain = total_load × foster_monotony
+```
+
+고전 Foster 공식에는 상한이 없어서 7일 부하가 모두 동일하면 값이 무한대로 발산합니다. 반면 Trainingload.ai는 `mean_load / (sd_load + mean_load)` 공식을 사용하여, 부하가 존재하는 주의 값을 항상 0과 1 사이로 유지합니다.
+
+평균과 표준편차가 모두 양수일 때 두 지표는 다음 관계를 가집니다.
+
+```text
+trainingload_monotony = foster_monotony / (1 + foster_monotony)
+```
+
+따라서 Trainingload.ai의 `0.8`은 고전 Foster 값 `2.0`과 직접 비교할 수 없으며, 두 시스템의 Training Strain 공식 역시 서로 다릅니다.
+
+## 수치 해석 방법
+
+- 7일 모두 부하가 0이면 `0`이 됩니다.
+- 하루만 부하가 있고 나머지 6일이 0이면 약 `0.29`가 됩니다.
+- 7일 모두 동일한 양수 부하이면 `1`이 됩니다.
+- 그 사이에서는 값이 높을수록 매일의 훈련 부하가 더 비슷하다는 뜻입니다.
+
+낮은 값이 무조건 더 좋은 것은 아닙니다. 하루에 극단적으로 큰 부하가 몰리고 나머지 6일을 쉰 경우에도 단조로움은 낮게 나옵니다. 반대로 높은 값이 곧바로 부상이나 오버트레이닝을 진단하는 것도 아니며, 단지 7일간의 부하 수치가 서로 비슷하다는 사실만 알려 줍니다.
+
+화면 구간인 `<0.6`, `0.6–0.8`, `>0.8`은 검증된 안전 임계치가 아니라 화면 표시 규칙입니다. 7일 내내 휴식했을 때 나오는 `0` 역시 “완벽한 훈련 구조”를 의미하지 않습니다.
+
+## 실전 점검 방법
+
+7일 개별 일일 부하와 7일 총부하를 나란히 확인하세요. 현재 패턴이 계획된 훈련 구조 때문인지, 실제 휴식일 때문인지, 하루의 급격한 스파이크 때문인지, 활동 누락 때문인지, 아니면 역치·부하 소스 변경 때문인지 먼저 구분해야 합니다. 그 위에 종목, 훈련 내용, 경기력, 수면, 통증, 질병, 주관적 피로도를 더해 판단하세요.
+
+<DocsToolCtaCard
+  title="일일 훈련 부하 분포 점검하기"
+  description="7일 총부하, 일별 변동, 그리고 원본 활동을 한 번에 비교해 보세요."
+  primary={{ href: "/ko/training-load", label: "훈련 플랜에서 CTL, ATL, TSB로 훈련 부하 관리하기" }}
+  secondary={{ href: "/ko/docs/metrics/training-load/training-stress-score", label: "TSS가 일일 부하로 집계되는 원리 보기" }}
+/>
 
 ## 참고 자료
 
-- [Foster(1998)](https://doi.org/10.1097/00005768-199807000-00023)
-- [Haddad 외(2017): session-RPE](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
-- [Jones 외(2017): 체계적 문헌고찰](https://doi.org/10.1007/s40279-016-0619-5)
-- [Fellrnr: Training Monotony](https://fellrnr.com/wiki/Training_Monotony)
+- [Foster (1998): Monitoring training with reference to overtraining syndrome](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad et al. (2017): Review of the session-RPE method](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones et al. (2017): Systematic review of training load, fatigue markers, injury, and illness](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr: Training Monotony and the bounded modification](https://fellrnr.com/wiki/Training_Monotony)
+
+## 자주 묻는 질문
+
+### 훈련 단조로움이란 무엇인가요?
+
+훈련 단조로움은 최근 7일간 일일 훈련 부하가 얼마나 비슷한지를 나타내는 유사도 점수입니다. 매일 비슷한 부하를 반복하면 올라가고, 고강도·저강도·휴식일이 섞이면 보통 내려갑니다. 부상 위험 자체가 아니라 숫자의 분포를 설명하는 지표입니다.
+
+### Foster 단조로움 공식과 어떻게 다른가요?
+
+고전 Foster 단조로움은 `평균 부하 ÷ 표준편차`로 계산하며 상한이 없어 매일 부하가 같으면 무한대로 커집니다. Trainingload.ai는 `mean / (sd + mean)`을 사용해 부하가 있는 주가 항상 0~1 범위에 머물도록 합니다. 따라서 제품 내 `0.8`은 Foster `2.0`과 같은 값이 아닙니다.
+
+### 훈련 스트레인(Training Strain)이란 무엇인가요?
+
+훈련 스트레인은 7일 총부하에 단조로움을 곱한 값입니다(본 제품에서는 0.5로 나누어 스케일링). 총부하가 크면서 매일 부하까지 비슷하면 스트레인이 높아집니다. 단독 경고등으로 보기보다 7일 개별 수치와 함께 읽으세요.
+
+### 단조로움이 낮을수록 항상 좋은가요?
+
+아닙니다. 하루에 초대형 부하 스파이크가 생기고 6일간 부하가 0이어도 단조로움은 낮게 계산됩니다. 이 점수는 한 주가 지나치게 평탄한지 눈치채는 용도로 활용하시고, 실제 판단은 훈련 플랜, 누락된 파일 여부, 세션 체감과 함께 내리세요.
+
+## 관련 페이지
+
+- [훈련 부하란 무엇인가요?](/ko/docs/metrics/training-load)
+- [만성 훈련 부하 (CTL)](/ko/docs/metrics/pmc/chronic-training-load)
+- [피로 (ATL)](/ko/docs/metrics/pmc/acute-training-load)
+- [ACWR](/ko/docs/metrics/pmc/acute-to-chronic-workload-ratio)
+- [AI 코치 리뷰로 안전하게 훈련 부하 조정하기](/ko/ai-training-plan)

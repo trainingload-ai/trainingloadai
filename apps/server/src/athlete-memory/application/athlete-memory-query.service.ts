@@ -99,6 +99,7 @@ export class AthleteMemoryQueryService {
     userId: string;
     asOf: Date;
     timezone: string;
+    excludeSourceMessageId?: string;
   }) {
     const snapshot = await this.ambient.build({
       ...input,
@@ -108,7 +109,10 @@ export class AthleteMemoryQueryService {
     if (snapshot.disabled || snapshot.unavailable)
       return { snapshot, extraction: [] };
     const extraction =
-      (await this.store.contextInputStatus?.(input.userId)) ?? [];
+      (await this.store.contextInputStatus?.(
+        input.userId,
+        input.excludeSourceMessageId,
+      )) ?? [];
     return { snapshot, extraction };
   }
 

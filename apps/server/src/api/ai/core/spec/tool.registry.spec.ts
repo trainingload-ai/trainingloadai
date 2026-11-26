@@ -1,7 +1,12 @@
 import { describe, expect, it } from '@jest/globals';
-import { scopeToolsByActiveSkill } from '../tool.registry';
+import { COACH_TOOL_DEFINITIONS, scopeToolsByActiveSkill } from '../tool.registry';
+import { isAuditedPlanTool } from '../ai-sdk-tool-adapter';
 import type { ActiveCoachSkill } from '../skill.types';
 import type { AiToolDef } from '../tool.types';
+import { planSuitabilityAssessTool } from '../tools/planSuitabilityAssess.tool';
+import { planProposalPreviewTool } from '../tools/planProposalPreview.tool';
+import { presentCoachPlanDraftTool } from '../tools/presentCoachPlanDraft.tool';
+import { skillActivateTool } from '../tools/skillActivate.tool';
 
 function tool(name: string, extra: Partial<AiToolDef> = {}): AiToolDef {
   return {
@@ -29,6 +34,37 @@ function activeSkill(
 }
 
 describe('coach tool scoping', () => {
+  it('registers phase generation as an audited capability of the new-plan workflow', () => {
+    const phase = COACH_TOOL_DEFINITIONS.find(t => t.name === 'plan.stage_phase');
+    expect(phase).toBeDefined();
+    expect(scopeToolsByActiveSkill(COACH_TOOL_DEFINITIONS.slice(), activeSkill('plan-builder'))).toContain(phase);
+    expect(scopeToolsByActiveSkill(COACH_TOOL_DEFINITIONS.slice(), activeSkill('plan-start'))).not.toContain(phase);
+    expect(isAuditedPlanTool('plan_stage_phase')).toBe(true);
+  });
+  it('exposes saved-plan previews to start and revision workflows and keeps them out of new-plan generation', () => {
+    const available = (skill: string) =>
+      scopeToolsByActiveSkill([skillActivateTool, planProposalPreviewTool], activeSkill(skill));
+    expect(available('plan-builder')).not.toContain(planProposalPreviewTool);
+    for (const owner of ['plan-start', 'plan-followup', 'plan-cycle-review', 'workout-management']) {
+      expect(available(owner)).toContain(planProposalPreviewTool);
+    }
+  });
+
+  it('requires plan-builder for new drafts and leaves feasibility available in plan-cycle-review', () => {
+    const planTools: AiToolDef[] = [skillActivateTool, planSuitabilityAssessTool, presentCoachPlanDraftTool];
+    const names = (skill: ActiveCoachSkill | null) =>
+      scopeToolsByActiveSkill(planTools, skill).map((item) => item.name);
+
+    expect(names(null)).toEqual(['skill.activate']);
+    expect(names(activeSkill('plan-cycle-review'))).toEqual([
+      'skill.activate', 'plan.suitability_assess',
+    ]);
+    expect(names(activeSkill('plan-builder'))).toEqual([
+      'skill.activate', 'plan.suitability_assess', 'present_coach_plan_draft',
+    ]);
+    expect(names(activeSkill('plan-start'))).toEqual(['skill.activate']);
+  });
+
   const tools = [
     tool('skill.activate'),
     tool('ask_user_question'),

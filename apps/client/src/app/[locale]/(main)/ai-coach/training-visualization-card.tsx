@@ -4,8 +4,12 @@ import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 
 import { BarChart3, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { useFormatter, useTranslations } from "next-intl";
+import { useContext, useId, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { CoachActivityPreviewContext, CoachChartPreviewContext, CoachLocalPreviewContext, type CoachChartView } from "./coach-preview-panel";
+import { readCoachActivityView } from "@shared/ai-coach-schema";
+import { Link } from "@/i18n/navigation";
 import {
   Area,
   AreaChart,
@@ -33,6 +37,7 @@ import { getMetricColor, getMetricColorRule } from "@/lib/chart-data-utils";
 import { CoachCard } from "./cards/CoachCard";
 import { isTrainingVisualizationV2 } from "@shared/training-exploration";
 import { TrainingExplorationCard } from "./training-exploration-card";
+import { CoachPreviewCard, CoachPreviewMetrics } from "./cards/coach-preview-card";
 
 const TRAINING_MEASURE_METRIC_KEYS: Record<
   Exclude<
@@ -45,6 +50,9 @@ const TRAINING_MEASURE_METRIC_KEYS: Record<
   DURATION_MIN: "duration",
   DISTANCE_KM: "distance",
   AVG_SPEED_KMH: "speed",
+  AVG_PACE_SEC_PER_KM: "pace",
+  AVG_DISTANCE_KM: "distance",
+  AVG_DURATION_MIN: "duration",
   AVG_HEART_RATE: "heartRate",
   AVG_POWER: "power",
   DAILY_LOAD: "atl",
@@ -129,60 +137,42 @@ function toChartRows(rows: TrainingVisualizationV1["rows"]) {
   }));
 }
 
-function formatValue(value: unknown, unit: string) {
+function formatValue(value: unknown, unit: string, swimmingPace = false) {
   if (typeof value !== "number" || !Number.isFinite(value)) return "—";
+  if (unit === "s/km") {
+    const seconds = Math.round(swimmingPace ? value / 10 : value);
+    const distance = swimmingPace ? "100m" : "km";
+    return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}/${distance}`;
+  }
   const digits = Number.isInteger(value) ? 0 : value < 10 ? 2 : 1;
   return `${value.toLocaleString(undefined, { maximumFractionDigits: digits })}${
     unit === "count" || unit === "load" ? "" : ` ${unit}`
   }`;
 }
 
+function trainingMeasureLabel(
+  measure: TrainingAnalysisMeasure,
+  t: ReturnType<typeof useTranslations<"AiCoachPage.trainingVisualization">>,
+) {
+  return measure === "ATL" || measure === "CTL" || measure === "TSB" ? measure : t(`measures.${measure}`);
+}
+
 export function TrainingVisualizationContent({
   value,
+  onOpenMeasure,
 }: {
   value: TrainingVisualizationV1;
+  onOpenMeasure?: (measure: TrainingAnalysisMeasure) => void;
 }) {
   const t = useTranslations("AiCoachPage.trainingVisualization");
+  const format = useFormatter();
+  const swimmingPace = value.provenance.sportTypes.length === 1 && value.provenance.sportTypes[0] === "SWIM";
   const reduceMotion = useReducedMotion();
   const animateCharts = !reduceMotion && process.env.NODE_ENV !== "test";
   const areaGradientPrefix = `training-area-${useId().replace(/:/g, "")}`;
-  const measureLabel = (measure: TrainingAnalysisMeasure) => {
-    switch (measure) {
-      case "ACTIVITY_COUNT":
-        return t("measures.ACTIVITY_COUNT");
-      case "DURATION_MIN":
-        return t("measures.DURATION_MIN");
-      case "DISTANCE_KM":
-        return t("measures.DISTANCE_KM");
-      case "AVG_SPEED_KMH":
-        return t("measures.AVG_SPEED_KMH");
-      case "AVG_HEART_RATE":
-        return t("measures.AVG_HEART_RATE");
-      case "AVG_POWER":
-        return t("measures.AVG_POWER");
-      case "DAILY_LOAD":
-        return t("measures.DAILY_LOAD");
-      case "ATL":
-        return "ATL";
-      case "CTL":
-        return "CTL";
-      case "TSB":
-        return "TSB";
-      case "RUNNING_LOAD":
-        return t("measures.RUNNING_LOAD");
-      case "CYCLING_LOAD":
-        return t("measures.CYCLING_LOAD");
-      case "SWIMMING_LOAD":
-        return t("measures.SWIMMING_LOAD");
-      case "OTHER_LOAD":
-        return t("measures.OTHER_LOAD");
-      default:
-        return t(`measures.${measure}`);
-    }
-  };
   const series = value.series.map((item) => ({
     ...item,
-    label: item.label || measureLabel(item.key),
+    label: item.label || trainingMeasureLabel(item.key, t),
   }));
   const config = Object.fromEntries(
     series.map((item) => [
@@ -244,7 +234,7 @@ export function TrainingVisualizationContent({
         />
         <span className="text-muted-foreground">{label}</span>
         <span className="ml-auto pl-3 font-mono font-medium tabular-nums text-foreground">
-          {formatValue(Number(raw), matchedSeries?.unit ?? "")}
+          {formatValue(Number(raw), matchedSeries?.unit ?? "", swimmingPace)}
         </span>
       </div>
     );
@@ -253,10 +243,32 @@ export function TrainingVisualizationContent({
   if (value.view === "METRIC_STRIP") {
     return (
       <CoachCard.StatGrid
-        items={series.map((item) => ({
-          label: item.label,
-          value: formatValue(value.summary[item.key], item.unit),
-        }))}
+        items={series.map((item) => {
+          const detail = value.provenance.coverageDetails?.[item.key];
+          const coverage = value.provenance.coverage[item.key];
+          const displayValue = formatValue(value.summary[item.key], item.unit, swimmingPace);
+          return {
+            label: item.label,
+            value: (
+              <>
+                {onOpenMeasure && value.summary[item.key] != null ? (
+                  <Button size="auto" variant="link" onClick={() => onOpenMeasure(item.key)}
+                    aria-label={`${t("openChart")} · ${item.label}`}>
+                    {displayValue}
+                  </Button>
+                ) : displayValue}
+                {value.observedAt && coverage != null && coverage < 1 ? (
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {detail && detail.total > 0
+                      ? `${format.number(detail.known)}/${format.number(detail.total, detail.unit === "min" ? { style: "unit", unit: "minute" } : {})} · `
+                      : null}
+                    {t("coverageValue", { value: Math.round(coverage * 100) })}
+                  </span>
+                ) : null}
+              </>
+            ),
+          };
+        })}
       />
     );
   }
@@ -632,6 +644,8 @@ function TrainingVisualizationTable({
 }) {
   const t = useTranslations("AiCoachPage.trainingVisualization");
   const pageSize = 20;
+  const openActivity = useContext(CoachActivityPreviewContext);
+  const swimmingPace = value.provenance.sportTypes.length === 1 && value.provenance.sportTypes[0] === "SWIM";
   const [page, setPage] = useState(0);
   const pageCount = Math.max(1, Math.ceil(value.rows.length / pageSize));
   const safePage = Math.min(page, pageCount - 1);
@@ -659,21 +673,31 @@ function TrainingVisualizationTable({
             </tr>
           </thead>
           <tbody>
-            {visibleRows.map((row) => (
+            {visibleRows.map((row) => {
+              const target = readCoachActivityView({ kind: "activity_detail", hashId: row.activityHashId, section: "overview" });
+              return (
               <tr key={row.key} className="even:bg-muted/40">
                 <td className="max-w-[220px] truncate px-2.5 py-2">
-                  {row.label}
+                  {target && openActivity ? (
+                    <Button size="auto" variant="link" className="inline-block truncate" onClick={() => openActivity(target, row.label)}>
+                      {row.label}
+                    </Button>
+                  ) : target ? (
+                    <Link className="underline" href={`/activities/${target.hashId}`}>{row.label}</Link>
+                  ) : row.label}
+                  {target && row.start ? <span className="block text-muted-foreground">{row.start}</span> : null}
                 </td>
                 {series.map((item) => (
                   <td
                     key={item.key}
                     className="px-2.5 py-2 text-right tabular-nums"
                   >
-                    {formatValue(row.values[item.key], item.unit)}
+                    {formatValue(row.values[item.key], item.unit, swimmingPace || row.sportType === "SWIM")}
                   </td>
                 ))}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -726,8 +750,78 @@ function TrainingVisualizationCoverageNote({
   );
 }
 
-export function TrainingVisualizationCard({ payload }: { payload: unknown }) {
+export function TrainingVisualizationCard({
+  payload,
+  chartRef,
+  summary = false,
+}: {
+  payload: unknown;
+  chartRef?: Pick<CoachChartView, "messageId" | "deliveryId">;
+  summary?: boolean;
+}) {
   const t = useTranslations("AiCoachPage.trainingVisualization");
+  const openChart = useContext(CoachChartPreviewContext);
+  const openLocal = useContext(CoachLocalPreviewContext);
+  const id = useId();
+  if (summary && openLocal) {
+    const v2 = isTrainingVisualizationV2(payload) ? payload : null;
+    const v1 = isTrainingVisualizationV1(payload) ? payload : null;
+    const value = v2 ?? v1;
+    if (!value) return null;
+    const range = v2?.provenance.query ?? v1?.provenance;
+    const dated = range && "from" in range && range.from && range.to ? `${range.from} – ${range.to}` : undefined;
+    const metrics = v2?.highlights?.slice(0, 4).map(({ label, value, unit }) => ({
+      label, value: formatValue(value, unit ?? ""),
+    })) ?? v1?.series.filter(({ key }) => v1.summary[key] != null).slice(0, 4).map(({ key, label, unit }) => ({
+      label: label || trainingMeasureLabel(key, t), value: formatValue(v1.summary[key], unit),
+    })) ?? [];
+    const requiresFetch = value.detail && chartRef && openChart;
+    const hasData = v2 ? v2.panels.length > 0 || metrics.length > 0 : Boolean(v1?.rows.length || metrics.length);
+    return (
+      <CoachPreviewCard icon={BarChart3} title={value.title}
+        subtitle={[v1?.observationDate ?? dated ?? value.subtitle, v1?.provenance.metricSource
+          ? t(`sources.${v1.provenance.metricSource}`) : undefined].filter(Boolean).join(" · ")}
+        actionLabel={t("openChart")}
+        onOpen={requiresFetch
+          ? () => openChart({ ...chartRef, fingerprint: value.provenance.fingerprint }, value.title)
+          : hasData ? () => openLocal(id, value.title, <TrainingVisualizationCard payload={value} />) : undefined}
+        actions={requiresFetch && v1?.view === "METRIC_STRIP" ? (
+          <div className="flex flex-wrap gap-1">
+            {v1.series.filter(({ key }) => v1.summary[key] != null).slice(0, 4).map(({ key, label }) => (
+              <Button key={key} size="sm" variant="ghost" onClick={() => openChart({
+                ...chartRef, fingerprint: value.provenance.fingerprint, measure: key,
+              }, value.title)}>{t("openChart")} · {label || trainingMeasureLabel(key, t)}</Button>
+            ))}
+          </div>
+        ) : undefined}>
+        <CoachPreviewMetrics items={metrics} />
+        {!hasData ? <p role="status" className="text-xs text-muted-foreground">{t("exploration.notes.NO_DATA")}</p> : null}
+        {v2 && !metrics.length && v2.provenance.matchedCount > 0
+          ? <p className="text-xs text-muted-foreground">{t("exploration.records")}: {v2.provenance.matchedCount} · {t("exploration.missing")}: {v2.provenance.missingCount}</p> : null}
+      </CoachPreviewCard>
+    );
+  }
+  if (isTrainingVisualizationV2(payload) && payload.highlights) {
+    const { from, to } = payload.provenance.query;
+    return (
+      <CoachCard tone="neutral" dense title={payload.title}
+        subtitle={from && to ? `${from} – ${to}` : payload.subtitle}>
+        <div className="space-y-2">
+          <CoachCard.StatGrid items={payload.highlights.map(({ label, value, unit }) => ({
+            label, value: formatValue(value, unit ?? ""),
+          }))} />
+          {payload.notes.map((note) => (
+            <p key={note} className="text-xs text-muted-foreground">{t(`exploration.notes.${note}`)}</p>
+          ))}
+          {payload.detail && chartRef?.messageId && openChart ? (
+            <Button size="sm" variant="secondary" onClick={() => openChart({
+              ...chartRef, fingerprint: payload.provenance.fingerprint,
+            }, payload.title)}>{t("openChart")}</Button>
+          ) : null}
+        </div>
+      </CoachCard>
+    );
+  }
   if (isTrainingVisualizationV2(payload))
     return <TrainingExplorationCard value={payload} />;
   if (!isTrainingVisualizationV1(payload)) return null;
@@ -735,19 +829,33 @@ export function TrainingVisualizationCard({ payload }: { payload: unknown }) {
   const sourceLabel = payload.provenance.metricSource
     ? t(`sources.${payload.provenance.metricSource}`)
     : undefined;
+  const noValue = payload.series.every(({ key }) => payload.summary[key] == null);
   return (
     <CoachCard
       tone="neutral"
       icon={<BarChart3 className="h-4 w-4" />}
       title={payload.title}
-      subtitle={[payload.subtitle, range, sourceLabel]
+      subtitle={[payload.subtitle, payload.observationDate ?? range, sourceLabel]
         .filter(Boolean)
         .join(" · ")}
       dense
       showAccent={false}
       className="w-full min-w-0 max-w-full"
     >
-      <TrainingVisualizationContent value={payload} />
+      <TrainingVisualizationContent
+        value={payload}
+        onOpenMeasure={payload.detail && chartRef?.messageId && openChart
+          ? (measure) => openChart({ ...chartRef, fingerprint: payload.provenance.fingerprint, measure }, payload.title)
+          : undefined}
+      />
+      {payload.observedAt && (payload.summary.ACTIVITY_COUNT === 0 || noValue) ? (
+        <p role="status" className="text-xs text-muted-foreground">{t("exploration.notes.NO_DATA")}</p>
+      ) : null}
+      {noValue && payload.detail && chartRef?.messageId && openChart ? (
+        <Button size="sm" variant="secondary" onClick={() => openChart({
+          ...chartRef, fingerprint: payload.provenance.fingerprint,
+        }, payload.title)}>{t("openChart")}</Button>
+      ) : null}
       <TrainingVisualizationCoverageNote value={payload} />
     </CoachCard>
   );

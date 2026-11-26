@@ -18,7 +18,7 @@ import { useTranslations } from "next-intl";
 import { ActivityUploadCard } from "@/components/activities/ActivityUploadCard";
 import { ActivitiesEmptyState } from "@/components/activities/ActivitiesEmptyState";
 import { useSetPageTitle } from "@/hooks/useSetPageTitle";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile, usePcViewport } from "@/hooks/use-mobile";
 import { ActivityFeedCard } from "./components/ActivityFeedCard";
 import { ExternalActivityMirrorCard } from "./components/ExternalActivityMirrorCard";
 import { ActivityStatsPreviewCard } from "./components/ActivitiesStats/ActivityStatsPreviewCard";
@@ -69,13 +69,10 @@ function Panel({
 
 function getPageScrollElement() {
   if (typeof document === "undefined") return null;
-  const mainScrollElement = Array.from(
-    document.querySelectorAll<HTMLElement>("main"),
-  ).find((element) => element.classList.contains("overflow-y-auto"));
-  return mainScrollElement ?? document.documentElement;
+  return document.getElementById("main-content");
 }
 
-function isNearBottom(element: HTMLElement, threshold = 80) {
+function isNearBottom(element: HTMLElement, threshold: number) {
   return (
     element.scrollTop + element.clientHeight >= element.scrollHeight - threshold
   );
@@ -173,6 +170,7 @@ export function ActivitiesPageClient({
   useSetPageTitle(t("feed.title"));
   const router = useRouter();
   const isMobile = useIsMobile();
+  const isDesktopFeed = usePcViewport() === true;
   const { data: sportCatalog = [] } = useSportCatalog();
   const [items, setItems] = React.useState<ActivityTimelineItem[]>(() =>
     injectDevelopmentTimelineFixture(initialItems),
@@ -188,7 +186,12 @@ export function ActivitiesPageClient({
   const searchPrefetchedRef = React.useRef(false);
   const statsPrefetchedRef = React.useRef(false);
 
-  const activityListRef = React.useRef<HTMLDivElement>(null);
+  const feedScrollRef = React.useRef<HTMLDivElement>(null);
+  const getFeedScrollElement = React.useCallback(
+    () => (isDesktopFeed ? feedScrollRef.current : getPageScrollElement()),
+    [isDesktopFeed],
+  );
+
   const statsPreviewParams = React.useMemo(
     () => ({
       start: statsPreviewRange.start,
@@ -204,13 +207,6 @@ export function ActivitiesPageClient({
   const statsPreviewDays = React.useMemo(
     () => buildActivityStatsPreviewDays(statsPreviewData?.rows),
     [statsPreviewData?.rows],
-  );
-  const handleOpenActivity = React.useCallback(
-    (hashId: string) => {
-      if (!hashId) return;
-      router.push(`/activities/${hashId}`);
-    },
-    [router],
   );
   const handleDeletedActivity = React.useCallback(
     (hashId: string) => {
@@ -240,8 +236,9 @@ export function ActivitiesPageClient({
     [],
   );
   const virtualizer = useVirtualizer({
+    enabled: isDesktopFeed,
     count: items.length,
-    getScrollElement: () => activityListRef.current,
+    getScrollElement: () => feedScrollRef.current,
     estimateSize: () => 162,
     overscan: 8,
     measureElement:
@@ -266,15 +263,11 @@ export function ActivitiesPageClient({
       ]);
       setItems(injectDevelopmentTimelineFixture(res.items));
       setNextCursor(res.nextCursor);
-      if (isMobile) {
-        getPageScrollElement()?.scrollTo({ top: 0 });
-      } else {
-        activityListRef.current?.scrollTo({ top: 0 });
-      }
+      getFeedScrollElement()?.scrollTo({ top: 0 });
     } finally {
       setIsRefreshing(false);
     }
-  }, [isMobile, isRefreshing, refetchStatsPreview]);
+  }, [getFeedScrollElement, isRefreshing, refetchStatsPreview]);
 
   const loadMore = React.useCallback(async () => {
     if (!nextCursor || isFetchingMore) return;
@@ -302,21 +295,13 @@ export function ActivitiesPageClient({
 
   const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
     if (!isMobile) return;
-    const container = activityListRef.current;
-    const scrollTop = isMobile
-      ? (getPageScrollElement()?.scrollTop ?? 0)
-      : (container?.scrollTop ?? 0);
-    if (!container || scrollTop > 0 || isRefreshing) return;
+    if ((getPageScrollElement()?.scrollTop ?? 0) > 0 || isRefreshing) return;
     touchStartYRef.current = event.touches[0]?.clientY ?? null;
   };
 
   const handleTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
     if (!isMobile) return;
-    const container = activityListRef.current;
-    const scrollTop = isMobile
-      ? (getPageScrollElement()?.scrollTop ?? 0)
-      : (container?.scrollTop ?? 0);
-    if (!container || scrollTop > 0) return;
+    if ((getPageScrollElement()?.scrollTop ?? 0) > 0) return;
     const startY = touchStartYRef.current;
     if (startY == null) return;
     const currentY = event.touches[0]?.clientY ?? startY;
@@ -343,29 +328,21 @@ export function ActivitiesPageClient({
     }
   };
 
-  const handleListScroll = () => {
-    const container = activityListRef.current;
-    if (!container || !nextCursor || isFetchingMore) return;
-    if (isNearBottom(container)) {
-      void loadMore();
-    }
-  };
-
   React.useEffect(() => {
-    if (!isMobile || !nextCursor || isFetchingMore) return;
-    const scrollElement = getPageScrollElement();
+    if (!nextCursor || isFetchingMore || isRefreshing) return;
+    const scrollElement = getFeedScrollElement();
     if (!scrollElement) return;
-    const handlePageScroll = () => {
+    const handleFeedScroll = () => {
       if (isNearBottom(scrollElement, 240)) {
         void loadMore();
       }
     };
-    scrollElement.addEventListener("scroll", handlePageScroll, {
+    scrollElement.addEventListener("scroll", handleFeedScroll, {
       passive: true,
     });
-    handlePageScroll();
-    return () => scrollElement.removeEventListener("scroll", handlePageScroll);
-  }, [isFetchingMore, isMobile, loadMore, nextCursor]);
+    handleFeedScroll();
+    return () => scrollElement.removeEventListener("scroll", handleFeedScroll);
+  }, [getFeedScrollElement, isFetchingMore, isRefreshing, loadMore, nextCursor]);
 
   const prefetchSearchPage = React.useCallback(() => {
     if (searchPrefetchedRef.current) return;
@@ -404,10 +381,10 @@ export function ActivitiesPageClient({
   }, [prefetchSearchPage]);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 pb-3">
+    <div className="mx-auto flex w-full max-w-6xl flex-col pb-3 pc:min-h-0 pc:flex-1 pc:pb-0">
       <div
         className={cn(
-          "flex flex-col gap-3 pc:grid pc:grid-cols-[minmax(0,1fr)_320px] pc:items-start",
+          "flex flex-col gap-3 pc:grid pc:min-h-0 pc:flex-1 pc:grid-cols-[minmax(0,1fr)_320px] pc:grid-rows-[minmax(0,1fr)]",
           // 显式命名区域，避免「先占 col-2 再占 col-1」时主栏被排到第二行
           "pc:[grid-template-areas:'main_aside']",
         )}
@@ -415,7 +392,7 @@ export function ActivitiesPageClient({
         {/* 桌面端：右侧一栏内纵向堆叠（地图 + 导入卡片），只占 grid 一列，避免多格 row 错位 */}
         <aside
           className={cn(
-            "order-1 flex min-w-0 flex-col gap-3 pc:order-none",
+            "order-1 flex min-w-0 flex-col gap-3 pc:order-none pc:min-h-0 pc:overflow-y-auto pc:overscroll-y-contain pc:[scrollbar-width:thin] pc:[&>*]:shrink-0",
             "pc:[grid-area:aside]",
           )}
         >
@@ -465,7 +442,7 @@ export function ActivitiesPageClient({
             "pc:[grid-area:main] pc:min-h-0",
           )}
         >
-          <Panel>
+          <Panel className="pc:shrink-0">
             <Link
               href="/activities/search"
               onMouseEnter={prefetchSearchPage}
@@ -479,97 +456,56 @@ export function ActivitiesPageClient({
             </Link>
           </Panel>
 
-          <Panel>
+          <Panel className="pc:flex pc:min-h-0 pc:flex-1 pc:flex-col">
             <SectionTitle
               title={t("feed.title")}
               action={t("feed.filter")}
               onActionHover={prefetchSearchPage}
-              className="pb-2"
+              className="shrink-0 pb-2"
             />
-            {items.length === 0 ? (
-              <ActivitiesEmptyState
-                title={t("empty.title")}
-                description={t("empty.description")}
-                uploadCardTitle={t("import.cardTitle")}
-                uploadDescription={t("import.description")}
-                uploadButtonLabel={t("import.selectFile")}
-                onUploaded={() => void refreshFeed()}
-              />
-            ) : (
-              <div
-                ref={activityListRef}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onScroll={isMobile ? undefined : handleListScroll}
-                className={cn(
-                  isMobile ? "space-y-2" : "h-[640px] overflow-y-auto pr-1",
-                )}
-              >
-                <div
-                  className="flex h-0 items-end justify-center text-mobile-caption pc:text-[11px] text-muted-foreground transition-all"
-                  style={{ height: pullDistance > 0 ? `${pullDistance}px` : 0 }}
-                >
-                  {isRefreshing
-                    ? t("feed.refreshing")
-                    : pullReady
-                      ? t("feed.releaseToRefresh")
-                      : t("feed.pullToRefresh")}
-                </div>
-                {isMobile ? (
-                  <div className="space-y-2">
-                    {items.map((item) =>
-                      item.kind === "external_activity_mirror" ? (
-                        <ExternalActivityMirrorCard
-                          key={`mirror-${item.mirror.id}`}
-                          mirror={item.mirror}
-                          t={t}
-                          onRetried={() => void refreshFeed()}
-                        />
-                      ) : (
-                        <div key={`activity-${item.activity.id}`}>
-                          <ActivityFeedCard
-                            sportCatalog={sportCatalog}
-                            activity={item.activity}
-                            t={t}
-                            previewOnly={isDevActivityFeedFixture(
-                              item.activity,
-                            )}
-                            onOpen={handleOpenActivity}
-                            onDeleted={handleDeletedActivity}
-                            onPlanLinkChange={handlePlanLinkChange}
-                          />
-                        </div>
-                      ),
-                    )}
-                  </div>
-                ) : (
+            <div
+              ref={feedScrollRef}
+              role={isDesktopFeed ? "region" : undefined}
+              aria-label={isDesktopFeed ? t("feed.title") : undefined}
+              tabIndex={isDesktopFeed ? 0 : undefined}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className="pc:min-h-0 pc:flex-1 pc:overflow-y-auto pc:overscroll-y-contain pc:[scrollbar-width:thin]"
+            >
+              {items.length === 0 ? (
+                <ActivitiesEmptyState
+                  title={t("empty.title")}
+                  description={t("empty.description")}
+                  uploadCardTitle={t("import.cardTitle")}
+                  uploadDescription={t("import.description")}
+                  uploadButtonLabel={t("import.selectFile")}
+                  onUploaded={() => void refreshFeed()}
+                />
+              ) : (
+                <div className="space-y-2 pc:space-y-0">
                   <div
-                    className="relative w-full"
-                    style={{ height: `${virtualizer.getTotalSize()}px` }}
+                    className="flex h-0 items-end justify-center overflow-clip text-mobile-caption pc:text-[11px] text-muted-foreground transition-all"
+                    style={{ height: pullDistance > 0 ? `${pullDistance}px` : 0 }}
                   >
-                    {virtualItems.map((vi) => {
-                      const item = items[vi.index];
-                      if (!item) return null;
-                      return (
-                        <div
-                          key={
-                            item.kind === "activity"
-                              ? `activity-${item.activity.id}`
-                              : `mirror-${item.mirror.id}`
-                          }
-                          data-index={vi.index}
-                          ref={virtualizer.measureElement}
-                          className="absolute left-0 top-0 w-full pb-2"
-                          style={{ transform: `translateY(${vi.start}px)` }}
-                        >
-                          {item.kind === "external_activity_mirror" ? (
-                            <ExternalActivityMirrorCard
-                              mirror={item.mirror}
-                              t={t}
-                              onRetried={() => void refreshFeed()}
-                            />
-                          ) : (
+                    {isRefreshing
+                      ? t("feed.refreshing")
+                      : pullReady
+                        ? t("feed.releaseToRefresh")
+                        : t("feed.pullToRefresh")}
+                  </div>
+                  {!isDesktopFeed ? (
+                    <div className="space-y-2">
+                      {items.map((item) =>
+                        item.kind === "external_activity_mirror" ? (
+                          <ExternalActivityMirrorCard
+                            key={`mirror-${item.mirror.id}`}
+                            mirror={item.mirror}
+                            t={t}
+                            onRetried={() => void refreshFeed()}
+                          />
+                        ) : (
+                          <div key={`activity-${item.activity.id}`}>
                             <ActivityFeedCard
                               sportCatalog={sportCatalog}
                               activity={item.activity}
@@ -577,27 +513,68 @@ export function ActivitiesPageClient({
                               previewOnly={isDevActivityFeedFixture(
                                 item.activity,
                               )}
-                              onOpen={handleOpenActivity}
                               onDeleted={handleDeletedActivity}
                               onPlanLinkChange={handlePlanLinkChange}
                             />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {isFetchingMore ? (
-                  <div className="py-3 text-center text-mobile-caption pc:text-[11px] text-muted-foreground">
-                    {t("feed.loadingMore")}
-                  </div>
-                ) : !nextCursor && items.length > 0 ? (
-                  <div className="py-3 text-center text-mobile-caption pc:text-[11px] text-muted-foreground">
-                    {t("feed.noMore")}
-                  </div>
-                ) : null}
-              </div>
-            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      className="relative w-full"
+                      style={{ height: `${virtualizer.getTotalSize()}px` }}
+                    >
+                      {virtualItems.map((vi) => {
+                        const item = items[vi.index];
+                        if (!item) return null;
+                        return (
+                          <div
+                            key={
+                              item.kind === "activity"
+                                ? `activity-${item.activity.id}`
+                                : `mirror-${item.mirror.id}`
+                            }
+                            data-index={vi.index}
+                            ref={virtualizer.measureElement}
+                            className="absolute left-0 top-0 w-full pb-2"
+                            style={{ transform: `translateY(${vi.start}px)` }}
+                          >
+                            {item.kind === "external_activity_mirror" ? (
+                              <ExternalActivityMirrorCard
+                                mirror={item.mirror}
+                                t={t}
+                                onRetried={() => void refreshFeed()}
+                              />
+                            ) : (
+                              <ActivityFeedCard
+                                sportCatalog={sportCatalog}
+                                activity={item.activity}
+                                t={t}
+                                previewOnly={isDevActivityFeedFixture(
+                                  item.activity,
+                                )}
+                                onDeleted={handleDeletedActivity}
+                                onPlanLinkChange={handlePlanLinkChange}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {isFetchingMore ? (
+                    <div className="py-3 text-center text-mobile-caption pc:text-[11px] text-muted-foreground">
+                      {t("feed.loadingMore")}
+                    </div>
+                  ) : !nextCursor && items.length > 0 ? (
+                    <div className="py-3 text-center text-mobile-caption pc:text-[11px] text-muted-foreground">
+                      {t("feed.noMore")}
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
           </Panel>
         </main>
       </div>

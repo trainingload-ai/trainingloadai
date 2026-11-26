@@ -1,0 +1,40 @@
+---
+title: Segurança e privacidade do MCP
+description: OAuth, minimização de dados, isolamento de contas, higienização, limites, auditoria e fronteiras de dados de saúde no TrainingLoad MCP.
+---
+
+# Segurança e privacidade do MCP
+
+Quando você conecta o TrainingLoad MCP, o cliente de IA autorizado pode ler resumos de treino e responder às suas perguntas. O MCP é somente leitura: ele não pode alterar atividades, planos de treino, competições, valores de perfil ou configurações da conta.
+
+## Você escolhe as permissões
+
+Durante a conexão, o cliente abre a página de autorização do TrainingLoad. Verifique o nome do cliente e as permissões de dados solicitadas antes de aprovar. Você não precisa fornecer sua senha do TrainingLoad nem uma chave de API ao cliente.
+
+Cada requisição verifica a autorização atual da conta. Um cliente só pode ler os dados que você autorizou. Permissões ausentes, acesso expirado ou um problema temporário do serviço geram um erro correspondente.
+
+Dados de saúde exigem a permissão separada `health:read`, que não é incluída por padrão. Você pode revogar o acesso de um cliente na sua conta.
+
+## O que o cliente pode ler
+
+As ferramentas retornam os resumos necessários para perguntas de treino, como duração da atividade, carga de treino, conclusão do plano e tendências de métricas. Consultas de atividades e planos de treino ficam restritas aos registros pertencentes à sua conta autorizada.
+
+O MCP não retorna endereços de e-mail, IDs internos de usuário, GPS preciso, fluxos brutos de sensores, credenciais de terceiros nem arquivos FIT completos. Listas e intervalos de datas possuem limites, então um cliente pode precisar de várias requisições para consultar um histórico de treino mais longo.
+
+## Observações de atividades são dados, não instruções
+
+Nomes de atividades, descrições, nomes de treinos e notas de competições são tratados como registros de treino. O serviço higieniza textos inseguros e instrui os clientes a não seguirem comandos nem links embutidos nessas anotações.
+
+## Como os dados de saúde devem ser usados
+
+A ferramenta de saúde fornece um resumo diário reduzido de bem-estar para apoiar a análise de treino. Ela não constitui um diagnóstico médico nem substitui a avaliação de um profissional qualificado.
+
+## Limites de requisição e registros de diagnóstico
+
+O serviço pode limitar requisições frequentes demais ou que peçam dados excessivos de uma só vez. O cliente deve seguir a orientação do erro, reduzir o intervalo de datas ou aguardar antes de tentar novamente.
+
+O serviço mantém informações para solução de problemas, como nome da ferramenta, status do resultado, código de erro, duração e ID da requisição. Os identificadores de usuário e cliente são pseudonimizados. Esses registros não contêm tokens de acesso nem o conteúdo completo de requisições ou respostas.
+
+## Se você suspeitar de acesso indevido
+
+Revogue o acesso do cliente imediatamente na sua conta TrainingLoad e relate o ocorrido pelo canal de suporte do site. Inclua o horário aproximado, o nome do cliente e o ID da requisição, se tiver sido exibido. Não envie tokens de acesso nem registros completos de saúde.

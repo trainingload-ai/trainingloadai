@@ -4,6 +4,13 @@ import { asRecord, dayDiffByYmd } from './core/ai-common.util';
 import { ATHLETE_STATE_POLICY_VERSION } from '@/athlete-state/athlete-state-policy';
 import { isOptionalRecoveryEvidence } from '@/athlete-state/domain/optional-evidence';
 
+export const PREVIEW_BACKED_PLAN_DECISION_TYPES = [
+  'PLAN_START',
+  'PLAN_SCHEDULE',
+  'PLAN_ADAPTATION',
+  'PLAN_SUPERSESSION',
+];
+
 export type TodayAdviceCoachDecision = {
   id: string;
   state: string;
@@ -137,6 +144,12 @@ export class CoachStateContextService {
           where: {
             contextId: args.contextId,
             context: { userId: args.userId },
+            // Draft plan previews belong to the confirmation workflow. The
+            // committed calendar supplies schedule facts for passive advice.
+            NOT: {
+              decisionType: { in: PREVIEW_BACKED_PLAN_DECISION_TYPES },
+              state: { in: ['DRAFT', 'PROPOSED', 'APPROVED', 'SUPERSEDED'] },
+            },
           },
           orderBy: { createdAt: 'desc' },
           take: 8,

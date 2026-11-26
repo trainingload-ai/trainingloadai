@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PlanWriteSupport } from './plan-write.support';
-import type { CreateScheduledWorkoutDto } from '../dto/create-scheduled-workout.dto';
 
 @Injectable()
 export class PlanWorkoutCommandService {
@@ -14,8 +13,24 @@ export class PlanWorkoutCommandService {
     return this.write.listScheduledWorkouts(userId, start, end);
   }
 
-  createIndependentWorkout(userId: string, dto: CreateScheduledWorkoutDto) {
-    return this.write.createIndependentWorkout(userId, dto);
+  createIndependentWorkout(...args: Parameters<PlanWriteSupport['createIndependentWorkout']>) {
+    return this.write.createIndependentWorkout(...args);
+  }
+
+  createIndependentWorkoutDraft(...args: Parameters<PlanWriteSupport['createIndependentWorkoutDraft']>) {
+    return this.write.createIndependentWorkoutDraft(...args);
+  }
+
+  getIndependentWorkoutDraft(...args: Parameters<PlanWriteSupport['getIndependentWorkoutDraft']>) {
+    return this.write.getIndependentWorkoutDraft(...args);
+  }
+
+  transitionIndependentWorkoutDraft(...args: Parameters<PlanWriteSupport['transitionIndependentWorkoutDraft']>) {
+    return this.write.transitionIndependentWorkoutDraft(...args);
+  }
+
+  updateIndependentWorkout(...args: Parameters<PlanWriteSupport['updateIndependentWorkout']>) {
+    return this.write.updateIndependentWorkout(...args);
   }
 
   createIndependentWorkoutInTransaction(

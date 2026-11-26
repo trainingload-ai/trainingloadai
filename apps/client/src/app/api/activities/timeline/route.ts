@@ -9,7 +9,7 @@ import { buildBffServiceHeaders } from "@/lib/bff-upstream-headers";
 import {
   mapV2ActivityListItem,
   mapV2ExternalActivityMirror,
-} from "../../v2/activities/activity-feed-mapper";
+} from "@/api/activity-feed-mapper";
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 100;

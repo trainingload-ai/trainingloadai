@@ -1,19 +1,19 @@
 ---
-title: "VO2 Max (Maximal Oxygen Uptake)"
-description: "VO2 Max is one of the key metrics for aerobic capacity and cardiorespiratory fitness. This guide explains what it means, common estimation methods (watch/platform/VDOT/power), typical error sources, and how to use VO2 Max for trends and training intensity."
+title: "VO2 Max (최대산소섭취량)"
+description: "VO2 Max는 유산소 능력과 심폐 체력을 나타내는 핵심 지표입니다. 이 문서에서는 VO2 Max의 의미, 대표적인 추정 방식(워치/플랫폼/VDOT/파워), 주요 오차 요인, 그리고 추세 분석과 훈련 강도 설정에 활용하는 방법을 설명합니다."
 keywords:
   - "VO2 Max"
-  - "VO2 max calculator"
-  - "estimate VO2 max"
-  - "estimate VO2 max calculator"
-  - "what is VO2 max"
-  - "VO2 max for runners"
-  - "VO2 max for cyclists"
+  - "최대산소섭취량"
+  - "VO2 max 계산기"
+  - "VO2 max 추정"
+  - "VO2 max란"
+  - "러닝 VO2 max"
+  - "사이클링 VO2 max"
   - "VDOT"
   - "vVO2max"
-  - "estimated VO2 max"
-  - "watch VO2 max"
-  - "cycling VO2 max from power"
+  - "추정 VO2 max"
+  - "워치 VO2 max"
+  - "파워 기반 사이클링 VO2 max"
 ---
 
 import {
@@ -23,37 +23,37 @@ import {
 } from "@/lib/vo2-methods-compare-classes";
 import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
 
-# VO2 Max (Maximal Oxygen Uptake)
+# VO2 Max (최대산소섭취량)
 
-> Note on terminology: this doc uses **VO2 Max** (instead of VO2 max / eVO2 Max / estimated VO2 Max) as a single umbrella term for readability and search intent. When precision matters, we’ll explicitly say **lab-measured VO2 Max** vs **estimated VO2 Max**.
+> 용어 안내: 이 문서에서는 가독성과 일관성을 위해 `VO2 max` / `eVO2 Max` / `estimated VO2 Max` 대신 **VO2 Max**를 통합 용어로 사용합니다. 구분이 필요한 경우에는 **실험실 측정 VO2 Max**와 **추정 VO2 Max**로 명확히 구분하여 표기합니다.
 
-**VO2 Max** is the maximum rate your body can **take in, transport, and use oxygen** during intense exercise. It’s usually expressed as `ml · kg⁻¹ · min⁻¹`.
+**VO2 Max**는 고강도 운동 중에 신체가 **산소를 흡입하고, 운반하며, 소비할 수 있는 최대 속도**를 의미합니다. 일반적으로 `ml · kg⁻¹ · min⁻¹` 단위로 표기합니다.
 
-It matters because in endurance sports it acts like an **aerobic ceiling**: the higher the ceiling, the more room you have to sustain higher intensities. But performance is not determined by VO2 Max alone—**threshold ability, efficiency/economy, durability, fueling, terrain, and pacing** can be equally (or more) decisive.
+지구력 스포츠에서 VO2 Max는 **유산소 상한선(ceiling)** 역할을 합니다. 상한선이 높을수록 더 높은 강도를 유지할 수 있는 잠재 여력이 커집니다. 다만 실제 경기력은 VO2 Max만으로 결정되지 않으며, **역치 능력, 효율성/러닝 이코노미, 내구성(durability), 보급 전략, 지형, 페이싱** 역시 동일하거나 그 이상으로 결정적인 영향을 미칩니다.
 
-## What kind of “VO2 Max” are you seeing?
+## 지금 보고 있는 “VO2 Max”는 어떤 종류인가요?
 
-- **Lab-measured VO2 Max (gas analysis)**: tested on a treadmill or cycling ergometer with a metabolic cart. This is the closest to a direct physiological VO2 Max measurement.
-- **Estimated VO2 Max (watch/platform)**: a model output inferred from your **pace/speed, heart rate, and context** (and often smoothed across recent sessions).
+- **실험실 측정 VO2 Max (호흡 가스 분석)**: 트레드밀이나 사이클 에르고미터 위에서 대사 분석 장비를 착용하고 측정합니다. 직접적인 생리학적 VO2 Max 측정에 가장 가깝습니다.
+- **추정 VO2 Max (워치/플랫폼)**: **페이스/속도, 심박수, 운동 맥락**으로부터 추론한 모델 출력값이며, 대개 최근 여러 훈련에 걸쳐 평활화(smoothing)되어 표시됩니다.
 
-In day-to-day training, your watch/platform value can drift due to **sensor noise, heat, altitude, wind, hills, fatigue, poor sleep, and fueling**. Treat it primarily as a **trend metric**, not a medical-grade measurement.
+일상적인 훈련에서는 **센서 노이즈, 더위, 고도, 바람, 언덕, 피로, 수면 부족, 영양 보급 상태**에 따라 워치나 플랫폼 수치가 흔들릴 수 있습니다. 따라서 의료 등급의 측정치가 아니라 주로 **추세 지표(trend metric)**로 해석하는 것이 적절합니다.
 
-## Why VO2 Max is useful
+## VO2 Max가 유용한 이유
 
-Think of VO2 Max as the “ceiling,” but your results often depend on **how high you can sustainably operate below that ceiling**.
+VO2 Max를 “상한선”으로 생각한다면, 실제 경기 기록은 **그 상한선 아래에서 얼마나 높은 비율로 오래 버틸 수 있는지**에 크게 좌우됩니다.
 
-- **VO2 Max helps**: explain aerobic fitness trends, set training intensities (especially VO2 intervals), and contextualize performance changes.
-- **VO2 Max doesn’t replace**: threshold markers, economy, durability, or sport-specific strength. Two athletes with the same lab VO2 Max can race very differently.
+- **VO2 Max가 도움이 되는 영역**: 유산소 체력 추세 파악, 훈련 강도(특히 VO2 인터벌) 설정, 경기력 변화의 맥락 해석.
+- **VO2 Max가 대체할 수 없는 영역**: 역치 지표, 운동 경제성(이코노미), 내구성, 종목 특이적 근력. 실험실 VO2 Max가 동일한 두 선수라도 실제 레이스 결과는 크게 다를 수 있습니다.
 
-## How to estimate VO2 Max
+## VO2 Max 추정 방법
 
-Trainingload.ai may use different data sources and models depending on the sport and the quality of your inputs. The core idea is converting **performance capability** (how fast you can run / how much power you can hold) into `ml · kg⁻¹ · min⁻¹`.
+Trainingload.ai는 종목과 입력 데이터의 품질에 따라 서로 다른 데이터 소스와 모델을 활용할 수 있습니다. 핵심 원리는 **수행 능력**(얼마나 빠르게 달릴 수 있는지 / 얼마나 높은 파워를 유지할 수 있는지)을 `ml · kg⁻¹ · min⁻¹` 단위로 환산하는 것입니다.
 
-### Running: heart rate → speed model
+### 러닝: 심박수 → 속도 모델
 
-For running, an estimate can be framed as: **heart-rate intensity → equivalent vVO2max → oxygen cost model**.
+러닝에서는 **심박수 강도 → 등가 vVO2max → 산소 소비 모델**의 흐름으로 추정할 수 있습니다.
 
-Here’s the core formula (where `v` is `m/min`, and `r = HR / HRmax`; see [Running Math](http://www.simpsonassociatesinc.com/runningmath2.htm) for a practical implementation reference):
+핵심 공식은 다음과 같습니다(`v`는 `m/min`, `r = HR / HRmax`이며, 실무 구현 참고 자료는 [Running Math](http://www.simpsonassociatesinc.com/runningmath2.htm)를 확인하세요).
 
 $$
 X = v / exp((r - 1.00466) / 0.68725)
@@ -63,149 +63,211 @@ $$
 VO2max = -4.6 + 0.182258 * X + 0.000104 * X^2
 $$
 
-### Cycling: power → weight model
+### Trainingload.ai의 러닝 VO2 Max 데이터 소스 및 우선순위
 
-With reliable cycling power + body weight, a VO2 Max estimate can be derived from FRIEND-style cycle ergometry relationships (see [Kokkinos P, et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29692203/)). Internally we may estimate maximal aerobic power using `MAP = MMP(5min) * 0.92`, then combine it as:
+유효한 모든 러닝 활동에 대해 Trainingload.ai는 하나의 값으로 바로 합치지 않고 세 가지 활동 단위 추정치를 함께 보존합니다.
+
+- **심박수 기반 (HEARTRATE)**: 위 심박수–페이스 모델을 사용해 평균 페이스, 평균 심박수, 최대 심박수로 계산합니다.
+- **보정값 (FACTOR)**: `심박수 기반 추정치 × 개인 보정 계수`로 계산합니다. 보정 계수를 변경하면 과거 기록도 이전 계수에 묶이지 않고 현재 계수가 즉시 반영되어 표시됩니다.
+- **레이스 기록 기반 (STANDARD / Race VDOT)**: 4분에서 4시간 사이의 가장 우수한 유효 수행 구간을 사용하며, 적합한 구간이 없으면 유효 거리와 경과 시간으로 대체 계산합니다.
+
+원시 심박수 추정치는 최종 VO2 Max 값이 아니라 중간 진단값입니다. 제품 내 기능은 항상 선수의 현재 보정 계수를 먼저 적용합니다. 선택 가능한 유효값 우선순위는 다음과 같습니다.
+
+> **보정값(Corrected) → 레이스 기록(Race result)**
+
+앞선 소스를 사용할 수 없을 때만 다음 소스가 적용됩니다. 러닝 프로필에서 보정값 또는 레이스 기록 중 선호 소스를 선택할 수 있으며, 선택하지 않은 나머지 추정치가 자동으로 대체(fallback) 소스가 됩니다. 예를 들어 레이스 기록을 우선 소스로 선택하면 `레이스 기록 → 보정값` 순서로 적용됩니다. 기존 `Heart rate` 설정은 `보정값(Corrected)`으로 처리됩니다.
+
+현재 상태(Current Status)의 러닝 VO2 Max는 먼저 최근 180일 이내의 모든 러닝 활동에 이 규칙을 적용해 값을 산출한 뒤, 시간 감쇠 평활화(40일 감쇠 스케일로 오래된 활동일수록 가중치가 낮아짐)를 적용합니다. 덕분에 단발성 특이 기록이 평활화 없는 최신값 표시보다 훨씬 적은 영향을 미칩니다.
+
+#### 보정 계수 설정 방법
+
+기본 보정 계수는 `1.00`입니다. 심박수 기반 추정치가 `50`이고 보정 계수가 `0.94`라면 보정값은 `47`이 됩니다. 보정 계수는 신뢰할 수 있는 심박수 데이터와 최대치에 가까운 실전 기록을 비교해 안정적인 개인 편차를 맞출 때 사용하시기 바랍니다. 더위, 피로, 심박 센서 오차로 인한 일시적 변동에 맞춰 수시로 바꾸는 것은 권장하지 않습니다.
+
+### 사이클링: 파워 → 체중 모델
+
+신뢰할 수 있는 사이클링 파워와 체중 데이터가 있으면 FRIEND 사이클 에르고미터 관계식([Kokkinos P, et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29692203/) 참고)을 바탕으로 VO2 Max를 추정할 수 있습니다. 내부적으로 최대 유산소 파워를 `MAP = MMP(5min) * 0.92`로 추정한 뒤 다음 공식으로 결합합니다.
 
 $$
 VO2max = 1.74 * ((0.92 * MMP_5 * 6.12) / Weight_kg) + 3.5
 $$
 
-## Different VO2 Max methods (quick comparison)
+## VO2 Max 측정·추정 방식 비교
 
-Below is a practical comparison across **accuracy, cost, repeatability, and use-cases**. For training decisions, the most useful method is usually the one you can **repeat consistently**.
+아래 표는 **정확도, 비용, 반복 가능성, 활용 목적** 관점에서 각 방식을 비교한 것입니다. 실제 훈련 의사결정에서는 **일관되게 반복할 수 있는 방식**이 가장 실용적입니다.
 
 <div className={VO2_METHODS_COMPARE_SHELL}>
-<table>
-  <colgroup>
-    <col style={{ width: "18%" }} />
-    <col style={{ width: "18%" }} />
-    <col style={{ width: "18%" }} />
-    <col style={{ width: "26%" }} />
-    <col style={{ width: "20%" }} />
-  </colgroup>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>What you need</th>
-      <th>Pros</th>
-      <th>Cons / error sources</th>
-      <th>Best for</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr className="vo2-mt-row-a">
-      <td><strong>Lab gas analysis (treadmill/erg)</strong></td>
-      <td>Lab equipment + staff</td>
-      <td><strong className={VO2_MT_STRONG_EM}>Closest to direct VO2 Max measurement</strong>; can also identify thresholds</td>
-      <td>Expensive; protocol differences; hard to repeat often</td>
-      <td>One-time benchmark; research; detailed assessment</td>
-    </tr>
-    <tr className="vo2-mt-row-b">
-      <td><strong>Race/time-trial → VDOT / performance VO2</strong></td>
-      <td>A near-all-out result (3K/5K/10K/half)</td>
-      <td><strong className={VO2_MT_STRONG_BL}>Repeatable and low-cost</strong>; tightly linked to performance</td>
-      <td>Weather/route/pacing strategy matter; different distances produce different values (normal)</td>
-      <td>Track progress; set paces; predict races</td>
-    </tr>
-    <tr className="vo2-mt-row-n">
-      <td><strong>Running HR–pace model (training estimate)</strong></td>
-      <td>Good HR data (strap preferred) + stable conditions</td>
-      <td>No need to test all-out frequently; closer to daily training</td>
-      <td>Wrong HRmax, drift, hills/heat, fatigue distort HR–speed relationship</td>
-      <td>Trend tracking; “same HR faster / same pace easier”</td>
-    </tr>
-    <tr className="vo2-mt-row-n">
-      <td><strong>Cycling power–weight estimate (FTP/MAP)</strong></td>
-      <td>Power meter + body weight</td>
-      <td>Strongly linked to cycling performance; high-quality training data</td>
-      <td>Calibration/data quality matter; weight fluctuations change relative value</td>
-      <td>Monitor aerobic changes; guide intensity</td>
-    </tr>
-    <tr className="vo2-mt-row-n">
-      <td><strong>HR ratio method (HRmax/HRrest)</strong></td>
-      <td>HRmax + resting HR (multi-day average)</td>
-      <td>Low equipment barrier; rough starting point</td>
-      <td>High variability; sensitive to stress/sleep/training status; larger error</td>
-      <td>Only for a coarse reference</td>
-    </tr>
-    <tr className="vo2-mt-row-n">
-      <td><strong>Watch/platform VO2 Max</strong></td>
-      <td>Wearable device (black-box model)</td>
-      <td>Convenient; continuous tracking</td>
-      <td>Brand-to-brand values aren’t comparable; environment and workout type can skew</td>
-      <td>Same-device trend; cross-check with other methods</td>
-    </tr>
-  </tbody>
-</table>
+  <table>
+    <colgroup>
+      <col style={{ width: "18%" }} />
+      <col style={{ width: "18%" }} />
+      <col style={{ width: "18%" }} />
+      <col style={{ width: "26%" }} />
+      <col style={{ width: "20%" }} />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>방식</th>
+        <th>필요 조건</th>
+        <th>장점</th>
+        <th>단점 / 오차 요인</th>
+        <th>적합한 용도</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="vo2-mt-row-a">
+        <td>
+          <strong>실험실 호흡 가스 분석 (트레드밀/에르고미터)</strong>
+        </td>
+        <td>실험실 장비 + 전문 인력</td>
+        <td>
+          <strong className={VO2_MT_STRONG_EM}>
+            직접적인 VO2 Max 측정에 가장 가까움
+          </strong>
+          . 역치 판별도 함께 가능
+        </td>
+        <td>비용이 높고 프로토콜 차이가 있으며 자주 반복하기 어려움</td>
+        <td>일회성 기준 측정, 연구, 정밀 평가</td>
+      </tr>
+      <tr className="vo2-mt-row-b">
+        <td>
+          <strong>레이스/타임트라이얼 → VDOT / 수행 VO2</strong>
+        </td>
+        <td>최대치에 가까운 기록 (3K/5K/10K/하프)</td>
+        <td>
+          <strong className={VO2_MT_STRONG_BL}>반복 가능하고 저비용</strong>
+          이며 실제 경기력과 밀접하게 연동됨
+        </td>
+        <td>
+          날씨/코스/페이싱 전략의 영향을 받으며 거리별로 수치가 달라질 수 있음(정상)
+        </td>
+        <td>발전 추세 추적, 훈련 페이스 설정, 레이스 기록 예측</td>
+      </tr>
+      <tr className="vo2-mt-row-n">
+        <td>
+          <strong>러닝 심박수–페이스 모델 (훈련 추정)</strong>
+        </td>
+        <td>정확한 심박 데이터(가슴 스트랩 권장) + 안정된 환경</td>
+        <td>자주 전력 테스트를 하지 않아도 되며 일상 훈련에 밀착됨</td>
+        <td>
+          부정확한 최대 심박수, 심박 드리프트, 언덕/더위, 피로가 심박–속도 관계를 왜곡함
+        </td>
+        <td>추세 추적 (“같은 심박에서 더 빠르게 / 같은 페이스에서 더 편하게”)</td>
+      </tr>
+      <tr className="vo2-mt-row-n">
+        <td>
+          <strong>사이클링 파워–체중 추정 (FTP/MAP)</strong>
+        </td>
+        <td>파워미터 + 체중 데이터</td>
+        <td>
+          사이클링 경기력과 높은 상관관계를 가지며 훈련 데이터 품질이 우수함
+        </td>
+        <td>
+          파워미터 보정/데이터 품질이 중요하며 체중 변동에 따라 상대값이 변함
+        </td>
+        <td>유산소 변화 모니터링, 훈련 강도 가이드</td>
+      </tr>
+      <tr className="vo2-mt-row-n">
+        <td>
+          <strong>심박수 비율 방식 (HRmax/HRrest)</strong>
+        </td>
+        <td>최대 심박수 + 안정시 심박수(다일 평균)</td>
+        <td>장비 진입장벽이 낮고 대략적인 출발점으로 활용 가능</td>
+        <td>
+          변동성이 크고 스트레스/수면/훈련 상태에 민감하며 오차가 큼
+        </td>
+        <td>매우 개략적인 참고 용도</td>
+      </tr>
+      <tr className="vo2-mt-row-n">
+        <td>
+          <strong>워치/플랫폼 VO2 Max</strong>
+        </td>
+        <td>웨어러블 기기 (블랙박스 모델)</td>
+        <td>편리하고 지속적인 자동 추적 가능</td>
+        <td>
+          브랜드 간 수치 직접 비교가 어렵고 환경이나 훈련 유형에 따라 왜곡될 수 있음
+        </td>
+        <td>동일 기기 내 추세 확인, 다른 방식과 교차 검증</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
-Practical shortcut: for training (paces/zones/progress), prefer **repeatable race-based estimates (VDOT)** or **fixed-condition training estimates (HR–pace / power)**. For a direct physiological measurement, use a lab test.
+실전 요약: 훈련(페이스/존/발전 추적) 목적이라면 **반복 가능한 레이스 기반 추정(VDOT)**이나 **일정한 조건에서의 훈련 추정(심박–페이스 / 파워)**을 우선 활용하세요. 직접적인 생리학적 측정이 필요하다면 실험실 검사가 가장 정확합니다.
 
-## Lab VO2 Max vs estimated VO2 Max
+## 실험실 VO2 Max vs 추정 VO2 Max
 
-Even with the same lab VO2 Max, two athletes can race very differently because performance also depends on **economy/efficiency**, technique, muscular endurance, durability, fueling, and pacing.
+실험실 VO2 Max가 동일한 두 선수라도 실제 경기력은 크게 달라질 수 있습니다. 경기력에는 **경제성/효율성**, 동작 기술, 근지구력, 내구성, 보급, 페이싱이 함께 작용하기 때문입니다.
 
-That’s why in running you’ll often see “performance VO2” concepts (VDOT / equivalent VO2): it’s not trying to replicate lab physiology; it’s optimizing for training utility by mapping “**how fast you can run**” into a VO2-like scale to:
+러닝에서 “수행 VO2”(VDOT / 등가 VO2) 개념이 널리 쓰이는 이유도 여기에 있습니다. 실험실 생리 수치를 그대로 복제하려는 것이 아니라, “**실제로 얼마나 빠르게 달릴 수 있는가**”를 VO2 유사 스케일로 매핑해 훈련 활용도를 극대화하는 데 목적이 있습니다.
 
-- **Predict race performance** across distances
-- **Set training paces** (Easy, Marathon, Threshold, Interval often described as % of vVO2max)
+- 거리별 **레이스 기록 예측**
+- **훈련 페이스 설정** (이지, 마라톤, 역치, 인터벌 페이스를 vVO2max 비율로 산출)
 
-## How to interpret and use VO2 Max in training
+## 훈련에서 VO2 Max 해석 및 활용 방법
 
-- **Focus on trend, not daily noise**: weekly/monthly views are more reliable.
-- **Validate the inputs**: wrong HRmax, HR strap drift, pauses, strong heat/wind, and heavy fatigue can break HR–pace relationships.
-- **Read it alongside load and recovery**: VO2 Max is a background marker—pair it with **[Fatigue | Acute Training Load (ATL)](/docs/metrics/pmc/acute-training-load)**, **[Fitness | Chronic Training Load (CTL)](/docs/metrics/pmc/chronic-training-load)**, and **[Form | Training Stress Balance (TSB)](/docs/metrics/pmc/training-stress-balance)**.
-- **Use it to guide training, not chase a number**: rising estimated VO2 Max often reflects “faster at the same HR” or “same pace feels easier.”
+- **일일 노이즈가 아닌 추세에 집중하세요**: 주간·월간 단위 추세가 훨씬 신뢰할 수 있습니다.
+- **입력 데이터를 검증하세요**: 잘못된 최대 심박수, 심박 스트랩 드리프트, 중간 정지, 심한 더위·바람, 누적 피로는 심박–페이스 관계를 무너뜨릴 수 있습니다.
+- **훈련 부하 및 선수 맥락과 함께 읽으세요**: VO2 Max는 배경 지표입니다. [ATL](/ko/docs/metrics/pmc/acute-training-load), [CTL](/ko/docs/metrics/pmc/chronic-training-load), [TSB](/ko/docs/metrics/pmc/training-stress-balance), 훈련의 질, 주관적 피로도, 수면, 통증 신호와 함께 해석해야 합니다.
+- **숫자 자체를 쫓지 말고 훈련 가이드로 활용하세요**: 추정 VO2 Max가 올라가는 흐름은 대개 “같은 심박수에서 더 빠르게” 혹은 “같은 페이스가 더 수월하게” 느껴지는 변화를 반영합니다.
 
-## For runners: what does VO2 Max mean in practice?
+## 러너에게 VO2 Max가 실전에서 의미하는 바
 
-VO2 Max intervals are often used to improve high-aerobic output and can also contribute to economy/technique. Its “importance weight” varies by event: shorter races depend more on VO2-intensity ability, while in marathon training VO2 work isn’t the main course—but periodic blocks can help maintain speed and running mechanics.
+VO2 Max 인터벌은 고강도 유산소 출력을 끌어올리는 데 자주 활용되며, 러닝 이코노미와 주법 효율 개선에도 기여할 수 있습니다. 다만 종목별 비중은 다릅니다. 단거리·중거리 레이스일수록 VO2 강도 능력의 비중이 크고, 마라톤 훈련에서는 VO2 훈련이 주력은 아니지만 주기적인 블록 훈련을 통해 스피드와 러닝 메커니즘을 유지하는 데 도움이 됩니다.
 
-## Common mistakes
+## 흔한 실수
 
-- **Treating an estimate like a medical report**: platform VO2 Max is a model output—use it as a trend.
-- **Ignoring threshold and durability**: many athletes plateau due to threshold, durability, fueling, or strategy rather than VO2 Max.
+- **추정치를 의학적 검사 결과처럼 받아들이기**: 플랫폼 VO2 Max는 모델 출력값이므로 추세 지표로 보아야 합니다.
+- **역치와 내구성을 간과하기**: 많은 선수가 정체기를 겪는 이유는 VO2 Max 부족보다 역치 능력, 내구성, 보급, 레이스 전략 때문인 경우가 많습니다.
 
-## VO2 Max levels
+## VO2 Max 등급
 
-To make VO2 Max easier to read, we map it into 5 levels and color-code them. Two approaches are supported:
+VO2 Max를 한눈에 이해할 수 있도록 5개 등급과 색상으로 구분해 제공합니다. 두 가지 기준을 지원합니다.
 
-- **Without age/sex**: a general threshold set.
-- **With age/sex**: thresholds by sex and age group.
+- **연령/성별 정보 없음**: 일반 기준표 적용.
+- **연령/성별 정보 있음**: 성별 및 연령대별 세분화 기준표 적용.
 
-See **[VO2 Max levels](/docs/metrics/maximal-oxygen-uptake/levels)**.
+자세한 내용은 **[VO2 Max 등급](/ko/docs/metrics/maximal-oxygen-uptake/levels)** 문서를 참고하세요.
 
-## FAQ (VO2 Max)
+## 자주 묻는 질문 (VO2 Max)
 
-### What is a good VO2 Max?
-It depends on age and sex, and the most useful baseline is your **own trend** over time. If you want a categorical view, use our **[VO2 Max levels](/docs/metrics/maximal-oxygen-uptake/levels)**.
+### 좋은 VO2 Max 수치는 어느 정도인가요?
 
-### Why did my watch VO2 Max drop suddenly?
-Common reasons include heat, hills/wind, fatigue, wrong HRmax, poor HR signal, or unusual pacing. Look at weekly averages and cross-check with perceived effort and training load.
+연령과 성별에 따라 다르며, 가장 유용한 기준선은 결국 **시간에 따른 본인의 추세**입니다. 구간별 기준이 궁금하다면 **[VO2 Max 등급](/ko/docs/metrics/maximal-oxygen-uptake/levels)** 문서를 확인해 보세요.
 
-### Can VO2 Max predict race time?
-Not by itself. Race performance also depends on threshold ability, economy, durability, and pacing/fueling. VO2 Max is a useful “ceiling,” not the whole story.
+### 워치 VO2 Max가 갑자기 떨어진 이유는 무엇인가요?
 
-### How can I improve VO2 Max?
-Most athletes benefit from consistent aerobic volume, plus periodic blocks of VO2-intensity intervals (with adequate recovery). Improvements are easiest to see when your inputs are stable and you track trends.
+더위, 언덕·바람, 누적 피로, 부정확한 최대 심박수, 불안정한 심박 신호, 평소와 다른 페이싱 등이 흔한 원인입니다. 주간 평균을 보고 체감 강도(RPE) 및 훈련 부하와 교차 확인해 보세요.
 
-## References
+### VO2 Max만으로 레이스 기록을 예측할 수 있나요?
+
+VO2 Max 단독으로는 어렵습니다. 실제 기록에는 역치 능력, 이코노미, 내구성, 페이싱 및 보급 전략이 모두 영향을 미칩니다. VO2 Max는 전체 이야기가 아니라 유용한 “상한선” 지표입니다.
+
+### VO2 Max를 높이려면 어떻게 해야 하나요?
+
+대부분의 선수는 꾸준한 유산소 훈련량에 더해, 충분한 회복을 동반한 주기적인 VO2 강도 인터벌 블록을 병행할 때 효과를 봅니다. 입력 조건을 안정적으로 유지하며 추세를 추적하면 변화를 가장 명확하게 확인할 수 있습니다.
+
+## 참고 자료
 
 - [RunnersConnect: VO2 Max for Runners](https://runnersconnect.net/vo2-max-for-runners/)
 - [Simpson Associates: Running Math](http://www.simpsonassociatesinc.com/runningmath2.htm)
 - [Kokkinos P, et al. FRIEND cycle ergometry VO2max equation (2018)](https://pubmed.ncbi.nlm.nih.gov/29692203/)
 
 <DocsToolCtaCard
-  title="Go to the tool: estimate VO2 Max and see your VO2 Max level"
+  title="도구 바로가기: VO2 Max를 추정하고 등급을 확인해 보세요"
   description={
     <>
-      If you haven’t estimated your VO2 Max yet, start with the tool page. The
-      results will also show your <b>VO2 Max level</b> and a short explanation,
-      so you can interpret your number as a practical range (Fair / Good / Very
-      Good / Excellent).
+      아직 본인의 VO2 Max를 추정해 보지 않으셨다면 계산기 페이지에서 바로
+      시작해 보세요. 결과와 함께 <b>VO2 Max 등급</b> 및 간단한 해석이 제공되어
+      현재 수치를 실용적인 구간(Fair / Good / Very Good / Excellent)으로 바로
+      이해할 수 있습니다.
     </>
   }
-  primary={{ href: "/vo2-max-calculator", label: "Open the VO2 Max Calculator →" }}
-  secondary={{ href: "/docs/metrics/maximal-oxygen-uptake", label: "Read the VO2 Max guide first" }}
+  primary={{
+    href: "/ko/vo2-max-calculator",
+    label: "VO2 Max 계산기 열기 →",
+  }}
+  secondary={{
+    href: "/ko/docs/metrics/maximal-oxygen-uptake",
+    label: "VO2 Max 가이드 먼저 읽기",
+  }}
 />

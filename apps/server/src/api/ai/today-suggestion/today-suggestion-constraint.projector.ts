@@ -19,7 +19,10 @@ import { WeatherContextService } from '@/weather/weather-context.service';
 import type { TodayWeatherLocation } from '@/weather/weather.types';
 import { RuntimeCapabilityService } from '@/runtime-capabilities/runtime-capability.service';
 import { TodaySuggestionEngagementService } from './today-suggestion-engagement.service';
-import { TODAY_SUGGESTION_POLICY_VERSION } from './today-suggestion.types';
+import {
+  isRelevantTodaySuggestionDecision,
+  TODAY_SUGGESTION_POLICY_VERSION,
+} from './today-suggestion.types';
 import type {
   TodaySuggestionConstraintCode,
   TodaySuggestionConstraintProjection,
@@ -78,6 +81,7 @@ export class TodaySuggestionConstraintProjector {
     location?: TodayWeatherLocation | null;
     allowAi: boolean;
     allowWithoutConsent?: boolean;
+    excludeMemorySourceMessageId?: string;
   }): Promise<TodaySuggestionConstraintProjection> {
     const execution = await this.planExecution.buildContext({
       userId: args.userId,
@@ -157,6 +161,7 @@ export class TodaySuggestionConstraintProjector {
           timezone: timezone || 'UTC',
           allowAi: args.allowAi && featureAllowedForUser,
           allowWithoutConsent: args.allowWithoutConsent,
+          excludeMemorySourceMessageId: args.excludeMemorySourceMessageId,
         })
       : null;
     const coachState = sharedFacts
@@ -236,10 +241,13 @@ export class TodaySuggestionConstraintProjector {
     if (pendingInquiry) constraints.push('WAITING_FOR_USER');
     if (coverageDiagnosis?.signals.syncInProgress)
       constraints.push('WAITING_FOR_DATA');
+    const relevantDecisions = coachState.decisions.filter(
+      isRelevantTodaySuggestionDecision,
+    );
     const highConcern =
       String(coachState.athleteState?.state ?? '').toUpperCase() ===
         'HIGH_CONCERN' ||
-      coachState.decisions.some(
+      relevantDecisions.some(
         (decision) =>
           decision.riskTier === 'HIGH' &&
           decision.basisCoverage !== 'UNVERIFIED' &&
@@ -257,10 +265,8 @@ export class TodaySuggestionConstraintProjector {
       String(right.startTime ?? '').localeCompare(String(left.startTime ?? '')),
     );
     const latestActivity = dayActivities[0] ?? null;
-    const activeDecision = coachState.decisions.find(
-      (decision) =>
-        decision.stateRole === 'ACTIVE_PROPOSAL' &&
-        ['TODAY', 'TOMORROW', 'UNKNOWN'].includes(decision.relevance),
+    const activeDecision = relevantDecisions.find(
+      (decision) => decision.stateRole === 'ACTIVE_PROPOSAL',
     );
     const factProjection = {
       policyVersion: TODAY_SUGGESTION_POLICY_VERSION,
@@ -300,7 +306,7 @@ export class TodaySuggestionConstraintProjector {
         updatedAt: workout.updatedAt,
       })),
       coachState: coachingSemanticValue(coachState.athleteState),
-      decisions: coachState.decisions.map((decision) => ({
+      decisions: relevantDecisions.map((decision) => ({
         id: decision.id,
         state: decision.state,
         relevance: decision.relevance,
@@ -495,9 +501,7 @@ export class TodaySuggestionConstraintProjector {
           ? { caseId: pendingInquiry.caseId }
           : null,
         userFeedback,
-        relevantDecisions: coachState.decisions.filter((decision) =>
-          ['TODAY', 'TOMORROW', 'UNKNOWN'].includes(decision.relevance),
-        ),
+        relevantDecisions,
         coachDecisionReadStatus: coachState.decisionReadStatus,
         recentReviews: coachState.recentReviews,
         competition: execution.competitionContext,

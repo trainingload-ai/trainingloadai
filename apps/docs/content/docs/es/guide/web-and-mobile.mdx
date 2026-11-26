@@ -1,0 +1,124 @@
+---
+title: Web y móvil
+description: Descubre cómo comparten datos la app web y la app móvil de Trainingload.ai, y elige la mejor superficie para planificar, grabar, analizar y ejecutar el día a día.
+keywords:
+  [
+    "Trainingload.ai móvil",
+    "app web de Trainingload.ai",
+    "sincronizar web y móvil",
+  ]
+---
+
+# Web y móvil
+
+La app web en Cloud y la app para iPhone comparten la misma cuenta. Después de guardar y sincronizar, puedes seguir consultando planes, actividades, valores de perfil, conversaciones con el Entrenador y notificaciones en otro dispositivo.
+
+Esta página trata sobre Cloud. Para despliegue en servidor propio, sigue la [guía de instalación](/es/docs/self-host/installation) para acceder a la aplicación desde el navegador. Actualmente no hay soporte para la app de Apple Watch.
+
+## Antes de cambiar de dispositivo
+
+- Inicia sesión con la misma cuenta de Trainingload.ai en ambos dispositivos.
+- Comprueba la zona horaria y las unidades en tu perfil; las fechas del calendario y los valores mostrados dependen de ellas.
+- Guarda la edición actual antes de abrir el mismo plan o campo de perfil en otro dispositivo.
+- Mantén conexión a internet para consultar planes, Entrenador con IA, importaciones y análisis procesados.
+
+## Usa la web cuando quieras
+
+- Crear o revisar un plan de varias semanas.
+- Editar sesiones estructuradas de resistencia o fuerza.
+- Comparar gráficas detalladas, mapas, potencia, ritmo, frecuencia cardíaca o tendencias PMC.
+- Gestionar conexiones con plataformas e importaciones históricas.
+- Revisar un listado extenso de actividades o buscar entrenamientos antiguos.
+
+## Usa el móvil cuando quieras
+
+- Consultar Hoy, Calendario, Entrenador, Plan o Yo durante la jornada de entrenamiento.
+- Grabar una sesión al aire libre desde el teléfono.
+- Revisar una sesión completada justo después de guardarla.
+- Vincular una actividad completada con una sesión planificada.
+- Actualizar el estado actual, revisar notificaciones o consultar la ejecución del plan lejos del ordenador.
+
+<DocsScreenshot
+  id="web-mobile-navigation"
+  title="Navegación móvil"
+  description="Hoy, Calendario, Entrenador, Plan y Yo ofrecen el flujo diario de la cuenta en el móvil."
+  route="Pestañas principales"
+  platform="mobile"
+/>
+
+## Qué se sincroniza
+
+| Datos | Web | Móvil | Notas |
+| --- | --- | --- | --- |
+| Perfil, unidades, zona horaria | Lectura y edición | Lectura y edición | Las fechas del calendario dependen de la zona horaria. |
+| Actividades y análisis | Detalle completo | Vistas diarias y detalladas | El procesamiento puede terminar después de que aparezca la actividad inicial. |
+| Planes y sesiones | Creación y edición completas | Ver, crear, ejecutar y vincular | Las ediciones complejas suelen ser más cómodas en la web. |
+| Entrenador con IA | Sesiones y acciones | Sesiones y acciones | Los cambios aplicados afectan al mismo plan. |
+| Notificaciones y revisiones | Disponibles | Disponibles | La automatización de revisiones sigue las preferencias de la cuenta. |
+| Conexiones de plataformas | Gestión completa | Flujos seleccionados de conexión y permisos | La disponibilidad depende del proveedor y de la plataforma. |
+
+## Reglas de actualización y conflictos
+
+Si modificas el mismo plan o campo de perfil en dos dispositivos, el último guardado completado prevalece. Antes de hacer una segunda edición:
+
+1. Vuelve a la pantalla de listado o de detalle.
+2. Desliza hacia abajo para actualizar en el móvil o recarga la página en la web.
+3. Confirma que se muestra el último valor.
+4. Aplica el siguiente cambio.
+
+Las actualizaciones de planes pueden rechazar una edición desactualizada si otra solicitud modificó antes el mismo registro. Recarga el plan y vuelve a aplicar el cambio previsto en lugar de reenviar la versión antigua.
+
+## Continuar el trabajo en otro dispositivo
+
+1. Termina y guarda la acción actual en el primer dispositivo.
+2. Abre la pantalla de listado o de detalle correspondiente en el segundo dispositivo.
+3. Desliza para actualizar en el móvil o recarga en la web.
+4. Confirma la marca temporal de la actividad, la versión del plan o el valor de perfil que acabas de cambiar.
+5. Sigue editando solo cuando ya sea visible el valor actual del servidor.
+
+## Comportamiento sin conexión
+
+La grabación móvil está diseñada para conservar la grabación local mientras está en curso y recuperar sesiones interrumpidas siempre que sea posible. Las pantallas respaldadas por servidor siguen necesitando acceso a la red para obtener planes actuales, respuestas de IA y análisis procesados.
+
+Al recuperar la conexión:
+
+- Deja que la grabación o importación termine de subirse.
+- Evita iniciar una subida duplicada para la misma sesión.
+- Confirma que la actividad aparece una sola vez en Actividades.
+- Abre la actividad y espera si el análisis aún se está procesando.
+
+## Verificar la sincronización
+
+- Ambas superficies muestran las mismas unidades y zona horaria de perfil.
+- Una actividad completada aparece una única vez con la misma hora de inicio y origen.
+- El plan activo y la próxima sesión muestran el mismo estado y la última edición.
+- Una acción del Entrenador con IA aplicada en una superficie se refleja en el plan subyacente en la otra.
+- Las notificaciones y revisiones completadas no vuelven a aparecer como no leídas tras actualizar.
+
+## Solución de problemas
+
+### Un dispositivo muestra datos antiguos
+
+Vuelve al listado o a la pantalla de detalle y actualiza. Confirma que hay conexión a internet y que ambos dispositivos usan la misma cuenta. No edites la copia desactualizada hasta que se muestre el último valor del servidor.
+
+### Una edición del plan indica conflicto de versión
+
+Otra solicitud completada modificó el plan antes. Recarga el plan, compara la sesión actual con el cambio previsto y vuelve a aplicarlo sobre la nueva versión.
+
+### Una grabación móvil no aparece en la web
+
+Mantén la app móvil disponible hasta que finalice la subida y después actualiza Actividades en la web. Si la actividad aparece pero las gráficas están incompletas, el procesamiento sigue en marcha; no subas una segunda copia.
+
+### Los ajustes de plataformas varían entre superficies
+
+Usa **Cuenta → Conexiones de terceros** en la web para acceder a la gestión completa. El móvil puede mostrar solo determinados flujos de autorización o permisos.
+
+### Las fechas del calendario no coinciden
+
+Compara la zona horaria de la cuenta en ambos dispositivos y la hora de inicio registrada de la actividad. Corrige el ajuste del perfil antes de mover o volver a crear una sesión.
+
+## Próximos pasos
+
+- Graba con el teléfono siguiendo [Grabación móvil](/es/docs/guide/mobile-recording).
+- Crea y ejecuta planes con [Planes y fuerza en el móvil](/es/docs/guide/mobile-plans-and-strength).
+- Sigue la configuración completa de la cuenta en [Importa tu primera actividad](/es/docs/guide/getting-started).

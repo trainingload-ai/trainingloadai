@@ -1,5 +1,7 @@
 "use client";
 
+import { isOfficialPlanDraft } from "@shared/plan-calendar";
+
 import { isRollingPlan } from "@/lib/rolling-plan";
 import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 
@@ -653,6 +655,7 @@ export default function PlansDesktopPage() {
       <PlanStartConversationDialog
         open={planPendingStart !== null}
         planId={planPendingStart?.id ?? null}
+        officialTitle={isOfficialPlanDraft(planPendingStart) ? planPendingStart?.title : undefined}
         onOpenChange={(open) => {
           if (!open) setPlanPendingStart(null);
         }}

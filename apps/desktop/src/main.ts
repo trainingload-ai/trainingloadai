@@ -481,7 +481,8 @@ function createMainWindow() {
     icon: applicationIcon,
     width: 1280,
     height: 820,
-    minWidth: 960,
+    // Keep the desktop calendar and its schedule controls available at minimum width.
+    minWidth: 1024,
     minHeight: 640,
     backgroundColor: startupBackground(usesDarkAppearance()),
     ...(process.platform === "darwin"

@@ -54,6 +54,49 @@ export class PlanStartRepository {
           : sourceInclude,
     });
   }
+  findPlan<T extends Prisma.PlanFindFirstArgs>(
+    tx: PlanDb,
+    args: Prisma.SelectSubset<T, Prisma.PlanFindFirstArgs>,
+  ) {
+    return tx.plan.findFirst(args);
+  }
+
+  updatePlan<T extends Prisma.PlanUpdateArgs>(
+    tx: PlanDb,
+    args: Prisma.SelectSubset<T, Prisma.PlanUpdateArgs>,
+  ) {
+    return tx.plan.update(args);
+  }
+
+  findWorkout<T extends Prisma.PlanWorkoutFindFirstArgs>(
+    tx: PlanDb,
+    args: Prisma.SelectSubset<T, Prisma.PlanWorkoutFindFirstArgs>,
+  ) {
+    return tx.planWorkout.findFirst(args);
+  }
+
+  findWorkouts<T extends Prisma.PlanWorkoutFindManyArgs>(
+    tx: PlanDb,
+    args: Prisma.SelectSubset<T, Prisma.PlanWorkoutFindManyArgs>,
+  ) {
+    return tx.planWorkout.findMany(args);
+  }
+
+  countWorkouts<T extends Prisma.PlanWorkoutCountArgs>(
+    tx: PlanDb,
+    args: Prisma.Subset<T, Prisma.PlanWorkoutCountArgs>,
+  ) {
+    return tx.planWorkout.count(args);
+  }
+
+  async lastSessionIndex(tx: PlanDb, planId: string, userId: string, dayOffset: number) {
+    const { _max } = await tx.planWorkout.aggregate({
+      where: { planId, userId, dayOffset },
+      _max: { sessionIndex: true },
+    });
+    return _max.sessionIndex ?? 0;
+  }
+
   async readback(
     planId: string,
     tx: PlanDb,

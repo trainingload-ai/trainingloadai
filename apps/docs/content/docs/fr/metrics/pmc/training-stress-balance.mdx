@@ -1,49 +1,77 @@
 ---
-title: Forme (TSB)
-description: Découvrez comment Trainingload.ai calcule la Forme (TSB) à partir de la Condition physique et de la Fatigue du même jour, sans l’assimiler à l’état de préparation.
-keywords: ["forme", "Training Stress Balance", "TSB", "formule TSB", "équilibre de charge"]
+title: Fraîcheur (TSB)
+description: Découvrez comment Trainingload.ai calcule la fraîcheur (TSB) à partir de la forme et de la fatigue du même jour, et comment utiliser cet équilibre de charge sans le confondre avec la disponibilité en course.
+keywords: ["fraîcheur", "training stress balance", "TSB", "formule TSB", "équilibre de charge", "comment lire le TSB"]
 ---
 
-# Qu’est-ce que la Forme (TSB) ?
+# Qu’est-ce que la fraîcheur (TSB) ?
 
-La **Forme (TSB)** est la différence entre la Condition physique (CTL) et la Fatigue (ATL). Elle situe la charge récente, plus réactive, par rapport au modèle de charge à long terme.
+La **fraîcheur (TSB)**, ou Training Stress Balance, est la différence entre la forme (CTL) et la fatigue (ATL). Elle indique où se situe la charge récente, rapide à évoluer, par rapport au modèle plus lent de charge à long terme.
 
-La TSB est dérivée de deux courbes de charge ; elle ne mesure directement ni la préparation, ni la récupération, la santé ou la performance.
+« Fraîcheur » est un libellé lisible dans l’interface. Le TSB découle de deux courbes de charge modélisées ; il ne constitue pas une mesure directe de la disponibilité, de la récupération, de la santé ou de la performance.
 
 <div className="my-6 max-w-sm w-full mx-auto">
   <TsbStatPreviewCard
     value="-12"
     metricLabel="TSB"
     valuePopoverTitle="Valeur TSB"
-    valuePopoverBody="Trainingload.ai soustrait la Fatigue (ATL) du jour à la Condition physique (CTL) du même jour."
-    rangePopoverTitle="Contexte TSB"
-    rangePopoverBody="Les valeurs positives et négatives décrivent une relation de charge, pas des zones universelles de préparation."
+    valuePopoverBody="Trainingload.ai soustrait la fatigue (ATL) du jour à la forme (CTL) du même jour."
+    rangePopoverTitle="Contexte du TSB"
+    rangePopoverBody="Les valeurs positives et négatives décrivent l’écart entre charge modélisée récente et charge à long terme ; ce ne sont pas des zones universelles de fraîcheur."
     helpTitle="Équilibre de charge"
-    details="Comparez les deux courbes, puis examinez activités, performance et ressenti."
+    details="Utilisez le TSB pour comparer les deux courbes de charge, puis examinez les activités, les performances et l’état subjectif."
   />
 </div>
 
+_Les valeurs d’exemple servent uniquement à l’aperçu de l’interface._
+
+## D’où vient la valeur
+
+Le TSB n’a pas d’entrée d’activité propre. Trainingload.ai calcule d’abord la CTL du jour avec une constante de temps de 42 jours et l’ATL du jour avec une constante de temps de 7 jours, à partir de la même série de charge quotidienne. Toute modification d’activité, de seuil ou de source de charge qui affecte l’une des deux courbes peut donc modifier le TSB.
+
+Le TSB utilise la même échelle de charge modélisée que la CTL et l’ATL. Il ne s’agit ni d’un pourcentage ni d’une unité physiologique.
+
 ## Formule
+
+Trainingload.ai suit la convention du même jour utilisée par Intervals.icu :
 
 ```text
 TSB_today = CTL_today − ATL_today
 ```
 
-Avec une CTL de 50 et une ATL de 65, la TSB vaut `−15`. Trainingload.ai suit la convention du jour même utilisée par Intervals.icu. TrainingPeaks décrit publiquement la Forme du jour à partir du Fitness et de la Fatigue de la veille ; vérifiez donc convention de date, constantes et source avant toute comparaison.
+Par exemple, si la CTL du jour vaut 50 et l’ATL vaut 65, le TSB est de `50 − 65 = −15`.
 
-## Lecture et limites
+Toutes les plateformes n’appliquent pas la même convention de date. Intervals.icu utilise CTL moins ATL du même jour, tandis que TrainingPeaks décrit publiquement la fraîcheur (Form) du jour comme la forme (Fitness) de la veille moins la fatigue (Fatigue) de la veille. Avant de comparer deux plateformes, vérifiez la convention de date, les constantes de temps et la source de charge.
 
-- **Négative :** l’ATL dépasse la CTL.
-- **Proche de zéro :** les courbes sont proches, sans prouver un équilibre physiologique.
-- **Positive :** l’ATL est inférieure à la CTL.
+## Lire la fraîcheur
 
-La TSB baisse souvent en phase de charge et remonte avec le repos ou l’affûtage. Son signe n’impose pas un ressenti. Les zones universelles de « pic », d’« optimum » ou de « risque » ne sont pas des seuils de sécurité.
+- **TSB négatif :** l’ATL dépasse la CTL ; la charge récente modélisée est supérieure au niveau plus lent à long terme.
+- **TSB proche de zéro :** les deux courbes de charge sont proches ; cela ne prouve pas un équilibre physiologique.
+- **TSB positif :** l’ATL est inférieure à la CTL ; la charge récente modélisée est en dessous du niveau à long terme.
 
-Interprétez-la avec la [Condition physique (CTL)](/fr/docs/metrics/pmc/chronic-training-load), la [Fatigue (ATL)](/fr/docs/metrics/pmc/acute-training-load), les activités sources, les tendances de performance et le ressenti.
+Lorsque la charge augmente, l’ATL grimpe généralement plus vite que la CTL et le TSB baisse. Pendant le repos ou l’affûtage, l’ATL décroît plus vite et le TSB remonte. Le signe décrit une relation entre deux charges — pas ce que l’athlète doit ressentir.
+
+## Usages et limites
+
+Le TSB permet de vérifier si un bloc de charge, une semaine de récupération ou un affûtage a modifié l’équilibre entre charge récente et charge à long terme comme prévu. Il est particulièrement utile lorsqu’on le compare aux périodes historiques similaires du même athlète.
+
+À lui seul, le TSB ne permet pas d’établir l’état de forme en course, de qualifier une valeur négative de dangereuse ou une valeur positive d’optimale, de prescrire des jours de repos ni d’expliquer des douleurs ou une maladie.
+
+Évitez de courir après des plages universelles de « pic », « zone optimale » ou « haut risque ». Ces plages dépendent de la méthode de calcul de la charge, du sport, de l’historique d’entraînement, de la réponse individuelle et de la qualité des données. Analysez ensemble la [forme (CTL)](/fr/docs/metrics/pmc/chronic-training-load), la [fatigue (ATL)](/fr/docs/metrics/pmc/acute-training-load), les activités sources, les tendances de performance et l’état subjectif.
 
 ## Références
 
-- [Intervals.icu : convention de Form du jour même](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
-- [RUNALYZE : Training Stress Balance](https://runalyze.com/glossary/tsb)
-- [TrainingPeaks : Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
-- [Code GoldenCheetah : PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
+- [Intervals.icu developer explanation of the same-day Form convention](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE glossary: Training Stress Balance (TSB)](https://runalyze.com/glossary/tsb)
+- [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [GoldenCheetah source: PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Clarke and Skiba (2013): Mathematical modeling of athletic training and performance](https://doi.org/10.1152/advan.00078.2011)
+
+## Pages associées
+
+- [Forme (CTL)](/fr/docs/metrics/pmc/chronic-training-load)
+- [Fatigue (ATL)](/fr/docs/metrics/pmc/acute-training-load)
+- [Projeter CTL, ATL et TSB à partir du TSS quotidien](/fr/training-load-calculator)
+- [Utiliser le PMC pour ajuster un plan marathon](/fr/docs/guide/pmc-marathon-adjustment)
+- [Workflow d’analyse de l’entraînement](/fr/docs/guide/training-analysis-workflow)

@@ -1,113 +1,165 @@
 ---
-title: Manage an Active Plan
-description: Execute an active training plan in Trainingload.ai, update workout status, link activities, compare expected and actual load, and ask AI Coach for follow-up.
-keywords: ["active training plan", "plan execution", "workout status", "training plan compliance"]
+title: Gestionar un plan activo
+description: Ejecuta un plan de entrenamiento activo en Trainingload.ai, actualiza el estado de las sesiones, vincula actividades, compara carga estimada y real y pide seguimiento al Entrenador con IA.
+keywords:
+  [
+    "plan de entrenamiento activo",
+    "ejecución del plan",
+    "estado de sesión",
+    "cumplimiento del plan de entrenamiento",
+  ]
 ---
 
-# Manage an Active Plan
+# Gestionar un plan activo
 
-An active plan is the plan Trainingload.ai treats as your current schedule. It connects planned workouts, completed activities, training load, and AI Coach follow-up.
+Tu plan activo es el calendario que has activado y estás siguiendo. Úsalo para consultar sesiones, vincular actividades completadas, comparar la carga de entrenamiento y continuar una conversación con el Entrenador con IA.
 
-Open it from the main **Plan** area, or open a specific plan from the plan list.
+Ábrelo desde el área principal de **Plan** o selecciona un plan concreto en la lista de planes.
 
-## Plan status
+## Antes de empezar
 
-Plans can have these statuses:
+- Activa el plan previsto con la fecha de inicio correcta.
+- Confirma la zona horaria del perfil y tus umbrales actuales.
+- Deja que las actividades completadas terminen de procesarse antes de vincularlas.
+- Revisa la semana en curso en lugar de dar por hecho que el borrador original sigue reflejando tu realidad.
 
-- **Draft**: saved, but not started.
-- **Active**: currently being executed.
-- **Paused**: temporarily stopped, but still available for schedule changes.
-- **Completed**: finished.
-- **Cancelled**: ended before completion.
+## Flujo diario de ejecución
 
-Only one plan is usually treated as the current active schedule. Draft and completed plans remain useful for review, but they are not the current execution surface.
+1. Abre el plan actual y localiza la sesión planificada para hoy.
+2. Lee su estructura y notas antes de entrenar.
+3. Después de entrenar, abre la actividad completada y confirma su identidad.
+4. Vincúlala a la sesión planificada y actualiza su estado con honestidad.
+5. Compara la carga prevista y la real en contexto, y decide si conviene ajustar alguna sesión futura.
 
-## Workout status
+<DocsScreenshot
+  id="active-plan-execution"
+  title="Ejecución de un plan activo"
+  description="Mantén juntos el estado de la sesión, la actividad vinculada y la carga prevista frente a la real antes de modificar el resto del calendario."
+  route="Planes → Plan actual"
+/>
 
-Each planned workout has its own status:
+## Estado del plan
 
-- **Planned**: scheduled but not started.
-- **In progress**: currently being worked through or partially handled.
-- **Done**: completed.
-- **Skipped**: intentionally missed.
-- **Moved**: rescheduled.
+Los planes pueden tener estos estados:
 
-Use status changes to keep the plan honest. A skipped workout is different from a completed workout with low load, and both should be visible.
+- **Borrador**: guardado, pero aún no iniciado.
+- **Activo**: en ejecución actualmente.
+- **En pausa**: detenido temporalmente, pero aún disponible para ajustes de calendario.
+- **Completado**: finalizado.
+- **Cancelado**: terminado antes de completarse.
 
-## Link completed activities
+Por lo general, solo un plan funciona como calendario activo vigente. Los planes en borrador y completados siguen siendo útiles para consulta, pero no son la vista de ejecución actual.
 
-Link real activities to planned workouts when they belong together.
+## Estado de la sesión
 
-Activity links make these comparisons possible:
+Cada sesión planificada tiene su propio estado:
 
-- Planned session vs completed session.
-- Expected load vs actual load.
-- Session completion rate.
-- Load compliance.
-- AI Coach plan follow-up.
+- **Planificada**: programada pero sin iniciar.
+- **En curso**: actualmente en realización o completada parcialmente.
+- **Hecha**: completada.
+- **Omitida**: no realizada de forma intencionada.
+- **Movida**: reprogramada.
 
-Trainingload.ai may suggest or create links automatically in some cases, but you can also link or unlink manually when the wrong activity is connected.
+Usa los cambios de estado para mantener un registro fiel. Una sesión omitida es distinta de una sesión completada con poca carga, y ambas deben reflejarse claramente.
 
-## Expected vs actual load
+## Vincula actividades completadas
 
-The plan view can compare:
+Vincula las actividades reales con las sesiones planificadas cuando correspondan entre sí.
 
-- **Expected load**: the planned workload estimate for the workout.
-- **Actual load**: the load from the completed primary activity.
+Los vínculos con actividades permiten comparar:
 
-This comparison is most useful when the expected and actual load are based on compatible signals. For example, power-based planned load and power-based activity load are easier to compare than mixed-source estimates.
+- Sesión planificada frente a sesión completada.
+- Carga estimada frente a carga real.
+- Tasa de cumplimiento de sesiones.
+- Cumplimiento de carga.
+- Seguimiento del plan con el Entrenador con IA.
 
-Use the comparison as a planning signal, not a scorecard. One workout can be intentionally lighter or harder than planned; the pattern across days and weeks matters more.
+Trainingload.ai puede sugerir o crear vínculos automáticamente en algunos casos, pero siempre puedes vincular o desvincular manualmente si se enlazó la actividad equivocada.
 
-## Current plan view
+## Carga estimada frente a carga real
 
-The current plan view is designed for daily execution. Use it to:
+La vista del plan puede comparar:
 
-- See today's scheduled workouts.
-- Review the current week.
-- Open workout details.
-- Link completed activities.
-- Mark a workout done or skipped.
-- Move workouts when the schedule changes.
-- Compare weekly planned and completed load.
+- **Carga estimada**: estimación de trabajo planificado para la sesión.
+- **Carga real**: carga obtenida de la actividad principal completada.
 
-Use [Calendar](/docs/guide/calendar) when you want the same plan and activity data in a broader date-based view.
+Esta comparación resulta más útil cuando la carga estimada y la real se basan en señales compatibles. Por ejemplo, una carga planificada por potencia y una carga real por potencia se comparan mejor que estimaciones de fuentes distintas.
 
-When the plan is active or paused, schedule changes can be applied to unfinished workouts. Completed or skipped workouts should generally stay as historical records.
+Usa esta comparación como señal de planificación, no como una nota. Una sesión puede ser intencionadamente más ligera o más dura de lo previsto; lo importante es el patrón a lo largo de días y semanas.
 
-## Plan detail view
+## Vista de plan actual
 
-The plan detail page is better for reviewing the whole cycle. Use it to:
+La vista de plan actual está pensada para el día a día. Úsala para:
 
-- Check plan metadata and status.
-- Activate a draft.
-- Review week-by-week structure.
-- Inspect workout charts or descriptions.
-- See execution summaries.
-- Ask AI Coach to review remaining work.
+- Ver las sesiones programadas para hoy.
+- Revisar la semana actual.
+- Abrir el detalle de cada sesión.
+- Vincular actividades completadas.
+- Marcar una sesión como hecha u omitida.
+- Mover sesiones cuando cambie tu agenda.
+- Comparar la carga semanal planificada y completada.
 
-From a plan detail page, the AI Coach follow-up includes plan context and the number of unfinished workouts.
+Usa el [Calendario](/es/docs/guide/calendar) cuando quieras ver los mismos datos de plan y actividades en una vista más amplia por fechas.
 
-## When to adjust the plan
+Cuando el plan está activo o en pausa, puedes aplicar cambios de calendario a sesiones no finalizadas. Las sesiones completadas u omitidas conviene conservarlas como registro histórico.
 
-Adjust the plan when the schedule and reality have clearly diverged.
+Para cambiar varias sesiones próximas a la vez, abre **Calendario**, haz clic derecho en una fecha y elige **Ajustar calendario**. Revisa los cambios en un solo borrador antes de confirmar. Consulta los [pasos de ajuste en el calendario](/es/docs/guide/calendar#adjust-upcoming-workouts).
 
-Common reasons:
+## Vista de detalle del plan
 
-- Missed workouts are accumulating.
-- Actual load is repeatedly higher than planned.
-- Fatigue is rising faster than fitness.
-- A race, travel day, or recovery need changes the next week.
-- A key workout was completed, but the response was very different from expected.
+La página de detalle del plan es mejor para revisar todo el ciclo. Úsala para:
 
-Avoid changing the plan after every small fluctuation. The goal is to keep the plan aligned with reality without losing the training intent.
+- Comprobar los metadatos y el estado del plan.
+- Activar un borrador.
+- Revisar la estructura semana a semana.
+- Inspeccionar gráficas o descripciones de las sesiones.
+- Ver resúmenes de ejecución.
+- Pedir al Entrenador con IA que revise el trabajo restante.
 
-## Ask AI Coach
+Desde la página de detalle del plan, el seguimiento con el Entrenador con IA incluye el contexto del plan y el número de sesiones aún pendientes.
 
-Helpful prompts:
+## Cuándo ajustar el plan
 
-- "Review my current plan progress and load."
-- "Which unfinished workouts matter most this week?"
-- "Should I move tomorrow's workout after today's hard session?"
-- "My actual load is above plan for two weeks. What should change?"
-- "Help me adjust the next seven days without losing the main goal."
+Ajusta el plan cuando la programación y la realidad se hayan separado con claridad.
+
+Motivos habituales:
+
+- Se acumulan sesiones omitidas.
+- La carga real supera repetidamente lo planificado.
+- La fatiga sube más rápido que el fitness.
+- Una carrera, un viaje o una necesidad de recuperación cambian la próxima semana.
+- Completaste una sesión clave, pero la respuesta fue muy distinta a la esperada.
+
+Evita modificar el plan ante cada pequeña variación. El objetivo es mantener el plan alineado con tu realidad sin perder el propósito del entrenamiento.
+
+## Pregunta al Entrenador con IA
+
+Preguntas útiles:
+
+- «Revisa el progreso y la carga de mi plan actual.»
+- «¿Qué sesiones pendientes importan más esta semana?»
+- «¿Debería mover la sesión de mañana tras el entrenamiento duro de hoy?»
+- «Mi carga real lleva dos semanas por encima del plan. ¿Qué debería cambiar?»
+- «Ayúdame a ajustar los próximos siete días sin perder el objetivo principal.»
+
+## Verifica el estado actual
+
+- La fecha de inicio del plan sitúa las sesiones en los días previstos del calendario.
+- La sesión de hoy tiene el estado y las notas correctos.
+- La actividad vinculada es realmente la grabación que cumplió la sesión.
+- La carga estimada y la carga real conservan sus orígenes y significados por separado.
+- El historial completado u omitido permanece intacto cuando mueves sesiones pendientes.
+
+## Solución de problemas
+
+- **No aparece ningún plan actual:** confirma que el plan previsto está en estado Activo y no en Borrador, En pausa, Completado o Cancelado.
+- **Una actividad no se puede vincular:** comprueba el rango de fechas, la compatibilidad del deporte, el estado de procesamiento y si ya está vinculada a otra sesión.
+- **Se vinculó automáticamente la actividad equivocada:** desvincúlala y elige manualmente la actividad correcta tras verificar hora de inicio y deporte.
+- **Conflicto al editar el plan:** otro dispositivo o una acción de IA modificó la versión; actualiza y revisa el plan más reciente antes de reintentarlo.
+- **No está disponible la carga real:** revisa la actividad completada y su fuente de carga en lugar de editar la estimación planificada.
+
+## Próximos pasos
+
+- [Calendario](/es/docs/guide/calendar)
+- [Detalle de actividad](/es/docs/guide/activity-detail)
+- [Entrenador con IA](/es/docs/guide/ai-coach)

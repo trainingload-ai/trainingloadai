@@ -1,48 +1,88 @@
 ---
-title: Akut-zu-chronisch-Belastungsverhältnis (ACWR)
-description: So berechnet Trainingload.ai das ACWR aus Ermüdung und Fitness desselben Tages – als Prüfgröße für Belastung, nicht als Verletzungsprognose.
-keywords: ["ACWR", "A:C-Verhältnis", "akute chronische Belastung", "ATL geteilt durch CTL", "gekoppeltes ACWR"]
+title: Acute:Chronic Workload Ratio (ACWR)
+description: Erfahre, wie Trainingload.ai das ACWR aus Ermüdung und Fitness desselben Tages berechnet – und warum das Verhältnis eine Prüfhilfe für die Belastung ist, aber keine Verletzungsprognose.
+keywords: ["ACWR", "Acute Chronic Workload Ratio", "A:C-Verhältnis", "ATL geteilt durch CTL", "gekoppeltes ACWR", "Veränderung der Trainingsbelastung"]
 ---
 
-# Was ist das ACWR?
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
 
-Das **Acute:Chronic Workload Ratio (ACWR)** vergleicht die modellierte kurzfristige mit der langfristigen Belastung. In Trainingload.ai ist A:C die [Ermüdung (ATL)](/de/docs/metrics/pmc/acute-training-load) desselben Tages geteilt durch die [Fitness (CTL)](/de/docs/metrics/pmc/chronic-training-load) desselben Tages.
+# Was ist das Acute:Chronic Workload Ratio (ACWR)?
 
-Das Verhältnis kann Veränderungen sichtbar machen, ist aber keine Prognose für Verletzung oder Trainingsbereitschaft.
+Das **ACWR** vergleicht die modellierte kurzfristige Trainingsbelastung mit der modellierten langfristigen Trainingsbelastung. In Trainingload.ai ist A:C die [Ermüdung (ATL)](/de/docs/metrics/pmc/acute-training-load) desselben Tages geteilt durch die [Fitness (CTL)](/de/docs/metrics/pmc/chronic-training-load) desselben Tages.
+
+Das Verhältnis kann Veränderungen im Belastungskontext sichtbar machen, ist aber keine Prognose für Verletzungen oder Trainingsbereitschaft. Es misst weder Anpassung, Ermüdung und Erholung noch medizinisches Risiko direkt.
 
 <div className="my-6 max-w-sm w-full mx-auto">
   <AcRatioStatPreviewCard
     value="1.12"
     metricLabel="A:C"
     valuePopoverTitle="A:C-Wert"
-    valuePopoverBody="ATL des aktuellen Tages geteilt durch CTL desselben Tages."
-    rangePopoverTitle="Anzeigeabschnitte"
-    rangePopoverBody="<0,8, 0,8–1,3, 1,3–1,5 und ≥1,5 sind Prüfhilfen der Oberfläche, keine Sicherheitsgrenzen."
+    valuePopoverBody="Trainingload.ai teilt die Ermüdung (ATL) desselben Tages durch die Fitness (CTL) desselben Tages."
+    rangePopoverTitle="Anzeigebereiche"
+    rangePopoverBody="Die Oberfläche nutzt <0,8, 0,8–1,3, 1,3–1,5 und ≥1,5 als Prüfhilfen – nicht als Sicherheitsgrenzen oder Verletzungswahrscheinlichkeiten."
     helpTitle="Relative Belastung"
-    details="Beurteile immer auch ATL, CTL und die auslösenden Aktivitäten."
+    details="Prüfe ATL, CTL und die zugrunde liegenden Aktivitäten, bevor du das Verhältnis bewertest."
   />
 </div>
 
-## Formel und Variante
+_Die Beispielwerte dienen nur der Vorschau der Oberfläche._
+
+## Formel und Datenquelle
+
+ATL und CTL verwenden dieselbe Reihe täglicher Trainingsbelastungen:
 
 ```text
+decay_ATL = exp(-1 / 7)
+decay_CTL = exp(-1 / 42)
+ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
+CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
+
 ACWR_today = ATL_today / CTL_today
 ```
 
-Bei ATL 60 und CTL 50 ergibt sich `1.20`. Ist CTL null, gibt das Produkt `0` zurück.
+Liegt deine heutige ATL bei 60 und deine CTL bei 50, beträgt das ACWR `1.20`. Ist die CTL null, gibt das Produkt `0` zurück, um eine Division durch null zu vermeiden.
 
-Trainingload.ai verwendet ein **gekoppeltes exponentielles PMC-Verhältnis**: Die heutige Belastung fließt sowohl in die ATL mit sieben Tagen als auch in die CTL mit 42 Tagen Zeitkonstante ein. Dies ist weder ein einfacher 7-/28-Tage-Quotient noch eine entkoppelte Forschungsvariante.
+Aktivitäten, Schwellenwerte und Einstellungen zu Belastungsquellen können sowohl Zähler als auch Nenner verändern. Das ACWR ist einheitenlos und blendet das absolute Belastungsniveau aus.
 
-## Richtig einordnen
+## Welche ACWR-Variante wird hier genutzt?
 
-Über 1 liegt ATL über CTL, nahe 1 liegen beide Kurven beieinander, unter 1 liegt ATL darunter. Der Quotient verliert jedoch die absolute Größe: `12 / 10` und `120 / 100` ergeben beide 1,20. Bei sehr kleiner CTL kann eine einzelne Einheit einen hohen Wert erzeugen.
+Es gibt nicht den einen ACWR-Algorithmus. Trainingload.ai nutzt ein **gekoppeltes exponentielles PMC-Verhältnis**: Die heutige Belastung fließt sowohl in ATL als auch in CTL ein, und beide Kurven arbeiten mit exponentiellen Zeitkonstanten.
 
-Die Bereiche `<0.8`, `0.8–<1.3`, `1.3–<1.5` und `≥1.5` sind reine Anzeigeregeln. Sie belegen weder einen optimalen noch einen sicheren oder gefährlichen Zustand. Prüfe absolute Werte, Aktivitäten, Einstellungen, Schlaf, Schmerzen, Krankheitssignale und subjektive Ermüdung gemeinsam.
+Es handelt sich weder um ein einfaches „letzte 7 Tage ÷ 28-Tage-Wochendurchschnitt“ noch um eine entkoppelte Variante, die das kurzfristige Fenster aus dem chronischen Fenster herausrechnet. Grenzwerte aus einem anderen Algorithmus, einer anderen Sportart, Population oder Belastungsquelle lassen sich daher nicht direkt übertragen.
+
+## Das Verhältnis richtig lesen
+
+- **Über 1:** ATL liegt über CTL.
+- **Nahe 1:** ATL und CTL liegen eng beieinander; das bedeutet nicht automatisch, dass dein Training optimal ist.
+- **Unter 1:** ATL liegt unter CTL.
+
+Schau dir immer Zähler und Nenner an. `ATL 12 / CTL 10` und `ATL 120 / CTL 100` ergeben beide 1,20 – bei völlig unterschiedlichem absolutem Belastungsniveau. Auch ein neues Konto oder eine sehr niedrige CTL kann schon nach einer einzelnen Einheit ein hohes Verhältnis erzeugen.
+
+Die Oberfläche zeigt aktuell vier Bereiche an: `<0.8`, `0.8–<1.3`, `1.3–<1.5` und `≥1.5`. Das sind reine Anzeigeregeln zur Prüfung relativer Belastungsveränderungen – kein Nachweis für „optimale“, „sichere“, „gefährliche“, „unterforderte“ oder „übertrainierte“ Zustände.
+
+## Praxisnahe Prüfung
+
+Vergewissere dich, dass ACWR, ATL und CTL sich auf dasselbe Datum beziehen. Prüfe die absoluten Werte, führe Veränderungen auf konkrete Aktivitäten zurück und kontrolliere deine Schwellenwerte sowie die Priorität der Belastungsquellen. Ziehe anschließend Einheitenqualität, Schlaf, Schmerzen, Krankheitssignale, subjektive Ermüdung und Verletzungshistorie hinzu, bevor du deinen Trainingsplan änderst.
+
+<DocsToolCtaCard
+  title="Eine A:C-Veränderung in Trainingload.ai nachvollziehen"
+  description="Geh vom Verhältnis direkt zurück zu Ermüdung, Fitness und den auslösenden Aktivitäten."
+  primary={{ href: "/de/features", label: "Trainingsbelastungs-Analyse entdecken →" }}
+  secondary={{ href: "/de/docs/metrics/pmc/chronic-training-load", label: "Mehr über Fitness (CTL) erfahren" }}
+/>
 
 ## Quellen
 
-- [Intervals.icu: Fitness- und Ermüdungsformeln](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
-- [Windt und Gabbett (2019): mathematische Kopplung](https://doi.org/10.1136/bjsports-2017-098925)
-- [Maupin et al. (2020): systematische Übersichtsarbeit](https://doi.org/10.2147/OAJSM.S231405)
-- [Impellizzeri et al. (2020): konzeptionelle Probleme](https://doi.org/10.1123/ijspp.2019-0864)
-- [Wang et al. (2020): Lehren aus dem ACWR](https://doi.org/10.1007/s40279-020-01280-1)
+- [Intervals.icu: Entwicklererklärung der Fitness- und Ermüdungsformeln](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [Gabbett (2016): The training—injury prevention paradox](https://doi.org/10.1136/bjsports-2015-095788)
+- [Windt und Gabbett (2019): Mathematical coupling in ACWR](https://doi.org/10.1136/bjsports-2017-098925)
+- [Maupin et al. (2020): Systematic review of ACWR and injury risk](https://doi.org/10.2147/OAJSM.S231405)
+- [Impellizzeri et al. (2020): Conceptual issues and fundamental pitfalls](https://doi.org/10.1123/ijspp.2019-0864)
+- [Wang et al. (2020): Lessons learned from ACWR](https://doi.org/10.1007/s40279-020-01280-1)
+
+## Verwandte Seiten
+
+- [Ermüdung (ATL)](/de/docs/metrics/pmc/acute-training-load)
+- [Fitness (CTL)](/de/docs/metrics/pmc/chronic-training-load)
+- [Form (TSB)](/de/docs/metrics/pmc/training-stress-balance)
+- [Trainingsbelastung](/de/docs/metrics/training-load)

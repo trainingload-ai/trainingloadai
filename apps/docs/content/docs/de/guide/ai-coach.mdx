@@ -1,127 +1,172 @@
 ---
-title: AI Coach
-description: Use AI Coach in Trainingload.ai to review activities, follow up on training plans, generate plan drafts, and turn workout data into practical training decisions.
-keywords: ["AI coach", "AI workout review", "AI training plan", "Trainingload.ai coach"]
+title: KI-Coach
+description: Nutze den KI-Coach in Trainingload.ai, um Aktivitäten auszuwerten, Trainingspläne zu begleiten, Planentwürfe zu erstellen und Trainingsdaten in fundierte Entscheidungen zu übersetzen.
+keywords:
+  ["KI-Coach", "KI-Aktivitätsauswertung", "KI-Trainingsplan", "Trainingload.ai Coach"]
 ---
 
-# AI Coach
+# KI-Coach
 
-AI Coach is the conversational layer of Trainingload.ai. It helps interpret your training data, review plan execution, and draft next steps when the numbers alone are not enough.
+Bitte den KI-Coach, eine Aktivität einzuordnen, den Fortschritt deines Trainingsplans zu prüfen oder zu besprechen, ob deine nächste Einheit angepasst werden sollte. Er stützt seine Antworten auf deine verfügbaren Trainingsdaten. Prüfe die herangezogenen Aufzeichnungen und vorgeschlagenen Änderungen immer sorgfältig, bevor du einen Vorschlag übernimmst.
 
-Use it for:
+Typische Einsatzbereiche:
 
-- Activity interpretation.
-- Daily, weekly, or monthly training review.
-- Plan follow-up.
-- AI-assisted plan creation.
-- Workout adjustment ideas.
-- Questions about load, recovery, pace, heart rate, and power.
+- Einordnung einzelner Aktivitäten.
+- Täglicher, wöchentlicher oder monatlicher Trainingsrückblick.
+- Begleitung deines laufenden Trainingsplans.
+- KI-gestützte Erstellung eines Trainingsplans.
+- Ideen zur Anpassung kommender Einheiten.
+- Fragen zu Trainingsbelastung, Erholung, Pace, Herzfrequenz und Leistung.
 
-## Start a conversation
+## Bevor du beginnst
 
-Open **AI Coach** from the main navigation, mobile coach button, an activity detail page, a plan page, or a review notification.
+- Warte, bis relevante Aktivitäten vollständig verarbeitet sind.
+- Halte Schwellenwerte, Zonen und Angaben zu deinem aktuellen Zustand im Profil aktuell.
+- Verknüpfe absolvierte Aktivitäten mit geplanten Einheiten, wenn du Rückmeldung zur Planumsetzung möchtest.
+- Lege dich auf eine konkrete Entscheidung oder Fragestellung fest – vermeide offene Anfragen nach einer allgemeinen Gesamtanalyse.
 
-You can start a new chat or continue an existing session. Existing sessions keep the previous messages and context for that conversation.
+## Ein Gespräch starten
 
-## What context AI Coach can use
+Wähle **Coach** in der Seitenleiste der Web-App oder von Personal. Du kannst den Coach auch aus der mobilen App, einer Aktivitätsdetailseite, einer Planseite oder einer Auswertungsbenachrichtigung heraus öffnen.
 
-Depending on the entry point and available data, AI Coach may use:
+Starte einen neuen Chat oder wähle in der Seitenleiste ein bestehendes Gespräch aus, um Nachrichten und Kontext fortzuführen.
 
-- Recent activities.
-- Activity detail and time-series analysis.
-- Current training plan.
-- Plan workouts and completion status.
-- Linked activities.
-- Training load metrics.
-- Profile, thresholds, and zones.
-- Daily, weekly, or monthly review summaries.
+Auf der Web-Seite **Coach** findest du deinen aktiven Plan, die heutige Einheit, den Wochenfortschritt, die letzten Aktivitäten sowie deine Gespräche. Wähle den relevanten Eintrag aus, um gezielt ein Gespräch zu eröffnen. Tages-, Wochen- und Monatsauswertungen findest du im Verlauf – öffne immer die referenzierten Datensätze, bevor du eine Empfehlung anwendest.
 
-AI Coach works best when your data is current. If activities are still processing, or thresholds are missing, its suggestions may be more general.
+<DocsScreenshot
+  id="ai-coach-contextual-review"
+  title="Kontextbezogene Auswertung im KI-Coach"
+  description="Das Beispiel zeigt einen Trainingsrückblick direkt im Gespräch mit den gespeicherten Chats in der Seitenleiste."
+  route="KI-Coach"
+/>
 
-## Activity review
+## Welchen Kontext der KI-Coach nutzen kann
 
-For a single activity, ask questions such as:
+Je nach Einstiegspunkt und Datenlage kann der KI-Coach folgende Informationen einbeziehen:
 
-- "Did this workout match the planned target?"
-- "Was the late heart-rate drift a problem?"
-- "How should I interpret this climb-heavy ride?"
-- "What should I watch before the next hard session?"
+- Jüngste Aktivitäten.
+- Aktivitätsdetails und Zeitreihenanalysen.
+- Aktueller Trainingsplan.
+- Geplante Einheiten und Ausführungsstatus.
+- Verknüpfte Aktivitäten.
+- Kennzahlen zur Trainingsbelastung.
+- Profil, Schwellenwerte und Zonen.
+- Zusammenfassungen von Tages-, Wochen- oder Monatsauswertungen.
 
-Good activity review combines the raw metrics with the purpose of the workout.
+Der KI-Coach arbeitet am zuverlässigsten mit aktuellen Daten. Wenn Aktivitäten noch verarbeitet werden oder Schwellenwerte fehlen, fallen seine Empfehlungen allgemeiner aus.
 
-## Plan follow-up
+## Aktivitätsauswertung
 
-From a plan detail page, use AI Coach to review plan progress with plan context.
+Für eine einzelne Aktivität eignen sich Fragen wie:
 
-Useful questions:
+- „Hat diese Einheit das geplante Ziel getroffen?“
+- „War der Herzfrequenzdrift gegen Ende problematisch?“
+- „Wie sollte ich diese höhenmeterlastige Ausfahrt einordnen?“
+- „Worauf sollte ich vor der nächsten intensiven Einheit achten?“
 
-- "How is this plan going so far?"
-- "Which missed workouts matter most?"
-- "Should I move the next workout?"
-- "Is my actual load too far above the expected load?"
-- "How should the next week change after today's session?"
+Eine gute Aktivitätsauswertung verbindet immer die reinen Kennzahlen mit dem Trainingsziel der Einheit.
 
-When AI Coach suggests schedule changes, review them before treating them as final.
+## Planbegleitung
 
-## AI plan drafts
+Öffne den KI-Coach direkt aus einer Plandetailseite, um den Fortschritt im richtigen Plankontext auszuwerten.
 
-When creating an AI-assisted plan, the plan brief is passed into AI Coach. AI Coach can ask follow-up questions when important information is missing, then present a plan draft.
+Hilfreiche Fragen:
 
-Review the draft carefully:
+- „Wie läuft dieser Trainingsplan bisher?“
+- „Welche verpassten Einheiten fallen am stärksten ins Gewicht?“
+- „Sollte ich die nächste Einheit verschieben?“
+- „Liegt meine tatsächliche Belastung zu deutlich über der erwarteten Belastung?“
+- „Wie sollte die nächste Woche nach der heutigen Einheit aussehen?“
 
-- Weekly structure.
-- Hard/easy rhythm.
-- Workout descriptions.
-- Sport types.
-- Recovery placement.
-- Total workload.
+Wenn der KI-Coach eine Zeitplanänderung vorschlägt, klicke auf **Trainingskalender ansehen**, um ursprüngliche und vorgeschlagene Einheiten im selben Gespräch zu vergleichen. Prüfe Termine und Inhalte sorgfältig, bevor du auf **Planänderungen bestätigen** klickst. Weitere Details zum Bearbeiten findest du unter [Kalender](/de/docs/guide/calendar#adjust-upcoming-workouts).
 
-Saving the draft creates a plan; it does not remove your responsibility to check whether the schedule fits your real life.
+## KI-Planentwürfe
 
-## Questions and confirmations
+Wenn du einen KI-gestützten Trainingsplan erstellst, wird dein Briefing direkt an den KI-Coach übergeben. Fehlen wichtige Angaben, stellt der KI-Coach Rückfragen und präsentiert anschließend einen Planentwurf.
 
-AI Coach may ask you to choose between options when a missing detail would materially change the recommendation.
+Prüfe den Entwurf gründlich:
 
-Examples:
+- Wochenstruktur.
+- Wechsel zwischen intensiven und lockeren Tagen.
+- Beschreibungen der einzelnen Einheiten.
+- Sportarten.
+- Platzierung der Erholungstage.
+- Gesamtumfang und Belastung.
 
-- Preferred long-workout day.
-- Race date or target distance.
-- Current injury concern.
-- Whether to prioritize recovery or maintain volume.
+Das Speichern des Entwurfs legt zwar den Plan an, nimmt dir aber nicht die Prüfung ab, ob der Zeitplan realistisch in deinen Alltag passt.
 
-Answering these questions keeps the recommendation grounded in your constraints.
+## Rückfragen und Bestätigungen
 
-## Changes and undo
+Der KI-Coach bittet dich um eine Auswahl zwischen Optionen, wenn ein fehlendes Detail die Empfehlung wesentlich verändern würde.
 
-Some AI Coach actions can apply changes to your training data, such as a workout adjustment. Higher-risk changes are presented for confirmation before they are applied.
+Beispiele:
 
-When an applied action supports undo, use the undo button promptly. Undo availability may be time-limited.
+- Bevorzugter Tag für die lange Einheit.
+- Wettkampfdatum oder Zieldistanz.
+- Aktuelle Beschwerden oder Verletzungsbedenken.
+- Ob Erholung Vorrang hat oder der Umfang gehalten werden soll.
 
-## Session history
+Deine Antworten sorgen dafür, dass die Empfehlung zuverlässig zu deinen realen Rahmenbedingungen passt.
 
-Use history to:
+## Änderungen und Rückgängigmachen
 
-- Continue a previous chat.
-- Reopen review sessions.
-- Rename or pin useful sessions.
-- Delete sessions you no longer need.
+Bestimmte Aktionen des KI-Coachs können Änderungen direkt auf deine Trainingsdaten anwenden, etwa eine Anpassung geplanter Einheiten. Änderungen mit größerer Auswirkung werden vor der Ausführung zur Bestätigung vorgelegt.
 
-If you edit an earlier user message, later context may be replaced so the conversation stays consistent with the edited request.
+Wenn eine ausgeführte Aktion ein Rückgängigmachen unterstützt, nutze die Schaltfläche **Rückgängig** zügig – diese Option kann zeitlich begrenzt sein.
 
-## Better prompts
+## Gesprächsverlauf
 
-Be specific about the decision you need to make.
+Nutze den Verlauf, um:
 
-Helpful:
+- Ein früheres Gespräch fortzusetzen.
+- Frühere Auswertungen erneut zu öffnen.
+- Nützliche Gespräche umzubenennen oder anzupinnen.
+- Nicht mehr benötigte Gespräche zu löschen.
 
-- "I have a long run tomorrow, but today's workout was harder than planned. Should I adjust?"
-- "Compare this week's actual load with the plan and suggest one conservative change."
-- "I missed two easy sessions. Should I make them up or move on?"
+Wenn du die Übersicht aller Gespräche über eine Auswertungsbenachrichtigung öffnest, prüfe zuerst den gewählten Tages-, Wochen- oder Monatsfilter, bevor du einen Verlauf auswählst.
 
-Less helpful:
+Bearbeitest du eine frühere eigene Nachricht, kann nachfolgender Kontext ersetzt werden, damit das Gespräch konsistent zur geänderten Anfrage bleibt.
 
-- "What do you think?"
-- "Analyze everything."
-- "Make me faster."
+## Bessere Eingaben formulieren
 
-AI Coach is most useful when the question is tied to a real training decision.
+Formuliere möglichst genau, welche Entscheidung ansteht.
+
+Hilfreich:
+
+- „Morgen steht mein langer Lauf an, aber die heutige Einheit war härter als geplant. Sollte ich anpassen?“
+- „Vergleiche die tatsächliche Belastung dieser Woche mit dem Plan und schlage eine konservative Anpassung vor.“
+- „Ich habe zwei lockere Einheiten verpasst. Soll ich sie nachholen oder einfach weitermachen?“
+
+Weniger hilfreich:
+
+- „Was denkst du?“
+- „Analysiere alles.“
+- „Mach mich schneller.“
+
+Der KI-Coach ist dann am stärksten, wenn deine Frage an eine konkrete Trainingsentscheidung geknüpft ist.
+
+## Eine gute Antwort überprüfen
+
+Eine hilfreiche Antwort sollte:
+
+- Auf die richtige Aktivität, den richtigen Plan, den passenden Zeitraum oder den korrekten Kennzahlenkontext Bezug nehmen.
+- Beobachtete Daten klar von Interpretation und Unsicherheit trennen.
+- Nachvollziehbar begründen, warum die Empfehlung aus den Daten folgt.
+- Eine einzelne, konservative nächste Maßnahme gegenüber einem großen, unbegründeten Umbau bevorzugen.
+- Vor einer wesentlichen Daten- oder Zeitplanänderung ausdrücklich um Bestätigung bitten.
+
+Scheint die Antwort den falschen Kontext zu verwenden, bestätige die Aktion nicht. Nenne die gewünschte Aktivität oder den Plan erneut und lass den Coach den Bezug zuerst verifizieren.
+
+## Fehlerbehebung
+
+- **Die Antwort ist zu allgemein:** Warte die Verarbeitung ab, ergänze fehlende Schwellenwerte und stelle deine Frage direkt von der passenden Aktivitäts- oder Planseite aus.
+- **Es wird über den falschen Plan oder die falsche Aktivität gesprochen:** Starte direkt von der richtigen Detailseite oder nenne Zielobjekt und Datum exakt.
+- **Eine werkzeuggestützte Aktion schlägt fehl:** Lade die Quellseite neu, prüfe, ob der Eintrag noch existiert, und versuche die kleinstmögliche Aktion erneut.
+- **Ein vorgeschlagener Plan wirkt unrealistisch:** Gib wöchentliche Verfügbarkeit, Ausrüstung, aktuelle Ausgangsbasis, Wettkampfdaten sowie Schmerz- oder Verletzungsgrenzen an – ohne vom Coach eine medizinische Diagnose zu erwarten.
+- **Eine Änderung wurde versehentlich angewendet:** Nutze sofort **Rückgängig**, sofern verfügbar; prüfe und korrigiere andernfalls den betroffenen Plan oder die Einheit direkt.
+
+## Nächste Schritte
+
+- [Benachrichtigungen und automatische Auswertungen](/de/docs/guide/notifications-and-reviews)
+- [Aktiven Plan verwalten](/de/docs/guide/manage-active-plan)
+- [Trainingsplan erstellen](/de/docs/guide/create-training-plan)

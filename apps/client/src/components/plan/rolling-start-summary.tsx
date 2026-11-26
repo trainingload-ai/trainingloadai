@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import type { PlanProposalPresentation } from "@shared/plan-proposal";
+import { RollingMonthTargets } from "./rolling-month-targets";
 
 export function RollingStartSummary({
   rolling,
@@ -43,12 +44,11 @@ export function RollingStartSummary({
           <h4 className="font-medium">
             {t("monthDirection", { month: month.monthStart.slice(0, 7) })}
           </h4>
-          <p>{month.objective}</p>
-          {month.weekFocus.map((week) => (
-            <p key={week.weekStart} className="text-muted-foreground">
-              {week.weekStart} · {week.focus}
-            </p>
-          ))}
+          <RollingMonthTargets
+            month={month}
+            effectiveFrom={rolling.generatedFrom}
+            showWeeklyTargets
+          />
         </div>
       ))}
     </section>

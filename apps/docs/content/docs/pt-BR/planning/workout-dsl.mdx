@@ -1,92 +1,136 @@
 ---
-title: Create a training plan with the workout DSL
-description: Plain-language guide to writing the workout DSL in Trainingload.ai—what each line means, repeats, pace, power, all in everyday words.
+title: DSL de Treinos de Resistência
+description: Escreva e valide etapas, metas, repetições e zonas específicas por modalidade em treinos de resistência no modo texto/regras do Trainingload.ai.
 ---
 
-# Create a training plan with the workout DSL
+# DSL de Treinos de Resistência
 
-When you edit a day in **text / rules** mode, this is the deal: **one line = one chunk** of the session. Read top to bottom, that’s the order you’ll do it. If something’s wrong, the app complains—fix it until it saves.
+Use esta DSL para descrever um treino estruturado de resistência no modo **Regras**. Um plano de treino pode conter vários treinos; cada treino é interpretado e validado separadamente. **Cada linha representa uma etapa**, e as etapas são executadas de cima para baixo.
 
----
+Esta página cobre etapas de resistência para corrida, ciclismo e natação. Para exercícios e séries, use a estrutura de [Treinos de Força](/pt-BR/docs/planning/strength-workouts).
 
-## What goes on each line (left to right)
+## Antes de começar
 
-Don’t jumble tokens. Three chunks, separated by spaces:
-
-| Bit | In plain English | Examples |
-| --- | --- | --- |
-| ① What this chunk is | Warmup, main work, easy spin, rest, cooldown… | `warmup`, `work`, `recovery`, `rest`, `cooldown` |
-| ② How long / how it ends | **Only one** “number + unit” first: time, distance, kJ, or HR rule | `5m`, `3km`, `500kj`, `hr<150bpm` |
-| ③ What to aim for (optional) | Pace, power, HR, cadence… | `pace …`, `pwr …`, `hr …` |
-
-You can stack several things in ③—they all apply to **the same** chunk of time or distance.
-`work: 20m` and `work 20m` are the same; the colon is optional.
+- Escolha a modalidade exata antes de escrever o treino; a modalidade define a interpretação das zonas e unidades.
+- Configure as zonas de ritmo, potência ou frequência cardíaca do atleta antes de usar `z1`, `z2` e referências semelhantes.
+- Decida se cada etapa termina por tempo, distância, energia ou condição de sensor.
+- Use o construtor visual quando não precisar editar em texto.
 
 ---
 
-## ① Words at the start of the line
+## Escreva cada linha da esquerda para a direita
 
-Stick these **first** (case usually doesn’t matter):
+Cada linha contém até três partes separadas por espaço, nesta ordem:
 
-| Word | Basically |
-| --- | --- |
-| `warmup` / `wu` | Ease in at the start |
-| `work` | The hard / main bit |
-| `recovery` / `rec` | Easy jog or spin between reps |
-| `rest` | Lighter than recovery—more “stop” |
-| `cooldown` / `cd` | Wind down at the end |
-| `other` | Rare, special label |
+| Parte                                | Finalidade                                                                   | Exemplos                                         |
+| ------------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------ |
+| ① O que é esta etapa                 | Aquecimento, trabalho principal, giro leve, descanso, desaquecimento…        | `warmup`, `work`, `recovery`, `rest`, `cooldown` |
+| ② Quanto dura / como termina         | **Apenas uma** medida “número + unidade” primeiro: tempo, distância, kJ ou FC | `5m`, `3km`, `500kj`, `hr<150bpm`                |
+| ③ Qual meta seguir (opcional)        | Ritmo, potência, FC, cadência…                                               | `pace …`, `power …`, `hr …`                      |
 
-`recovery` vs `rest` is fuzzy—**use whichever matches how you coach it**.
+Use **no máximo uma meta** em ③. Uma etapa pode mirar ritmo, potência, frequência cardíaca, cadência ou inclinação, mas não várias ao mesmo tempo. Divida objetivos múltiplos em etapas separadas ou mantenha orientações secundárias nas notas do treino. `work: 20m` e `work 20m` são equivalentes; os dois-pontos são opcionais.
 
 ---
 
-## ② The first number after that word
+## ① Escolha o tipo de etapa
 
-That’s **how this chunk ends**—by time, distance, energy, or HR. **Only one primary measure per line.** Anything like `pwr` or `hr` after it is **intensity**, not a second “length”.
+Escreva uma destas palavras-chave primeiro. Elas não diferenciam maiúsculas de minúsculas:
 
-| Form | Basically |
-| --- | --- |
-| `30s`, `5m`, `1h` | Clock time |
-| `5km`, `400m` | Distance (`3km` is three km, not three seconds) |
-| `500kj` | Kilojoules on the bike |
-| `hr<150bpm`, etc. | End this part when HR hits a rule |
+| Palavra-chave      | Significado                                            |
+| ------------------ | ------------------------------------------------------ |
+| `warmup` / `wu`    | Aquecimento inicial                                    |
+| `work`             | Trabalho principal                                     |
+| `recovery` / `rec` | Recuperação ativa entre etapas de trabalho             |
+| `rest`             | Etapa de descanso                                      |
+| `cooldown` / `cd`  | Desaquecimento final                                   |
+| `other`            | Etapa que não se encaixa nos rótulos padrão            |
 
----
-
-## ③ Targets after that
-
-All after the first measure, space-separated:
-
-| Keyword | For |
-| --- | --- |
-| `pace` | Run pace |
-| `speed` | Speed (app shows pace or km/h) |
-| `pwr` / `power` | Power: prefer **watts** (`250W`); a bare number like `250` is parsed as **watts**; legacy `%FTP` (`85%`) still works |
-| `cad`, `cadence`, `rpm` | Cadence |
-| `hr` | Heart rate: **bpm only** (`150bpm`, `150-160bpm`, or a bare number like `150`) |
-| `grade` | Slope |
-
-`pwr` + `cad` on one line means you’re trying to hold **both** during that chunk.
+Use `recovery` para um trecho leve ativo e `rest` quando a instrução for descansar. O tipo salvo preserva essa distinção na exibição e na exportação.
 
 ---
 
-## `repeat`: same mini-block, many times
+## ② Adicione a condição de término
+
+Ela define **quando a etapa termina** — por tempo, distância, energia ou condição de sensor. Use apenas uma condição principal de término por linha. Um valor de `power` ou `hr` colocado depois é uma meta de intensidade, e não outra duração.
+
+| Formato                         | Em resumo                                            |
+| ------------------------------- | ---------------------------------------------------- |
+| `30s`, `5m`, `25min`, `1h`      | Tempo no relógio                                     |
+| `5km`, `400m`                   | Distância (`3km` são três km, não três segundos)     |
+| `500kj`                         | Quilojoules na bicicleta                             |
+| `hr<150bpm`, `power>250W`, etc. | Encerra a etapa quando a FC ou potência atinge a regra |
+
+---
+
+## ③ Adicione uma meta opcional
+
+Tudo após a primeira medida, separado por espaços:
+
+| Palavra-chave | Para                                                                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `pace`        | Ritmo de corrida                                                                                                                       |
+| `speed`       | Velocidade (o app mostra ritmo ou km/h)                                                                                                |
+| `power`       | Potência: prefira **watts** (`250W`); número puro como `250` é lido como **watts**; o formato legado `%FTP` (`85%`) ainda funciona     |
+| `cadence`     | Cadência                                                                                                                               |
+| `hr`          | Frequência cardíaca: **bpm** (`150bpm`, `150-160bpm`, `<150bpm`, ou número puro como `150`) ou referência de zona como `hr z2`         |
+| `grade`       | Inclinação                                                                                                                             |
+
+Os apelidos legados `pwr`, `cad` e `rpm` ainda são aceitos na leitura, mas a DSL recém-gerada usa as palavras completas.
+
+Palavras-chave, unidades e tokens de zona não diferenciam maiúsculas de minúsculas: `WORK 25M HR Z2` é interpretado da mesma forma que `work 25m hr z2`. O texto salvo ou regenerado é normalizado para palavras-chave em minúsculas.
+
+Se você quiser referenciar as zonas atuais do atleta em vez de travar valores exatos, use:
+
+```text
+work 25m hr z2
+work 10m power z4
+work 20m pace z2
+```
+
+Isso significa “executar dentro da faixa atual de Z2 / Z4 do atleta”. Se as zonas mudarem no futuro, o sistema interpreta o treino com as novas faixas. Use valores explícitos como `hr 140-150bpm`, `power 220-250W` ou `pace 4:30-4:45` quando quiser travar a meta.
+
+Mantenha a primeira regra de duração separada das metas:
+
+```text
+work hr<150bpm
+work 25m hr <150bpm
+```
+
+A primeira linha termina quando a FC cruza a regra e não pode receber outra meta. A segunda linha dura 25 minutos e usa 150 bpm como teto de frequência cardíaca.
+
+---
+
+## `repeat`: o mesmo minibloco, várias vezes
 
 ```text
 repeat 4 {
-  work 4m pwr 270W
+  work 4m power 270W
   recovery 2m
 }
 ```
 
-- `repeat 4` = run the stuff inside **four times**.
-- Inside the braces: line 1, then line 2 = **one round**. Here it’s four rounds of “4 min hard @ ~90% power + 2 min easy”.
-Some builds also let you close with `end` / `endrepeat` instead of `}`—whatever your UI accepts.
+- `repeat 4` executa as etapas internas **quatro vezes**.
+- As duas linhas dentro das chaves formam uma série. Este exemplo cria quatro blocos de 4 minutos a 270 W seguidos de 2 minutos de recuperação. Algumas versões também permitem fechar com `end` / `endrepeat` em vez de `}` — use o formato aceito pelo editor atual.
+
+Você também pode repetir até que uma condição seja atingida:
+
+```text
+repeat until 30m {
+  work 4m power 270W
+  recovery 2m
+}
+
+repeat until cadence<80rpm {
+  work 30s power 300W
+  recovery 30s
+}
+```
+
+`repeat until` aceita condições de tempo, distância, calorias, frequência cardíaca, potência e cadência. Repetições aninhadas são rejeitadas intencionalmente. Uma integração que não consiga representar uma condição deve reportá-la como sem suporte ou explicitamente degradada, em vez de alterar o treino silenciosamente.
 
 ---
 
-## Example 1: run
+## Exemplo 1: corrida
 
 ```text
 warmup 5m
@@ -96,52 +140,86 @@ work 3km
 cooldown 5m
 ```
 
-- `warmup 5m`: five easy minutes.
-- `work 20m pace …`: twenty minutes main work, ~7:20–8:20 / km.
-- `recovery 90s`: ninety seconds easy.
-- `work 3km`: three **km** of work, not another 20 minutes.
-- `cooldown 5m`: five minutes easy to finish.
+- `warmup 5m`: cinco minutos leves.
+- `work 20m pace …`: vinte minutos de trabalho principal, ~7:20–8:20/km.
+- `recovery 90s`: noventa segundos leves.
+- `work 3km`: três **km** de trabalho, não outros 20 minutos.
+- `cooldown 5m`: cinco minutos leves para encerrar.
 
-Top to bottom = session order.
+De cima para baixo = ordem da sessão.
 
 ---
 
-## Example 2: bike
+## Exemplo 2: ciclismo
 
 ```text
-work 8m pwr 220-250W cad 85rpm
+work 8m power 220-250W
 recovery 2m
-work 5m pwr 250W hr 150-160bpm
+work 5m hr 150-160bpm
 ```
 
-- Line 1: eight minutes, 220–250 W, ~85 rpm.
-- Line 2: two minutes easy, nothing else.
-- Line 3: five minutes, 250 W, HR 150–160.
+- Linha 1: oito minutos entre 220 e 250 W.
+- Linha 2: dois minutos leves, sem meta extra.
+- Linha 3: cinco minutos com FC entre 150 e 160 bpm.
 
 ---
 
-## Example 3: four intervals
+## Exemplo 3: quatro intervalados
 
 ```text
 repeat 4 {
-  work 4m pwr 270W
+  work 4m power 270W
   recovery 2m
 }
 ```
 
-Four times: hard 4 min @ ~270 W, then easy 2 min. Without `repeat` you’d paste those two lines four times.
+Quatro vezes: 4 min forte a ~270 W e depois 2 min leve. Sem `repeat`, você precisaria colar essas duas linhas quatro vezes.
 
 ---
 
-## Saves keep failing?
+## Valide e salve
 
-Usually order: **keyword → one measure → then targets**.
-Whether `m` is meters or minutes depends on **position**—the **first** number+unit right after the keyword is the chunk’s main measure.
+1. Selecione **Regras** no editor de treinos.
+2. Digite ou cole a DSL.
+3. Use a ação de interpretar/pré-visualizar antes de salvar, quando disponível.
+4. Compare o texto normalizado e a prévia visual com a ordem de etapas desejada.
+5. Salve o treino, reabra-o e confirme modalidade, duração, contagem de repetições e meta.
+
+O texto salvo pode ser normalizado para palavras-chave em minúsculas e unidades canônicas. A normalização é esperada; qualquer alteração no significado do treino, não.
 
 ---
 
-## Three rules
+## Modalidades e recursos da DSL
 
-1. One line = one piece; read down.
-2. What kind → how it ends → how hard (optional).
-3. Use `repeat` instead of copy-paste.
+Treinos planejados mantêm a modalidade exata, como corrida de rua, corrida em trilha, corrida na esteira, ciclismo de estrada, mountain bike, ciclismo indoor, natação em piscina ou natação em águas abertas. Modalidades relacionadas compartilham zonas e análise de carga de corrida, ciclismo ou natação, enquanto exportações para Suunto, Intervals.icu e COROS priorizam o mapeamento exato da modalidade.
+
+Na API, `sportType` é a família ampla (como corrida, ciclismo ou natação), enquanto `subSportType` é o subtipo canônico, como `TRAIL_RUNNING` ou `INDOOR_CYCLING`.
+
+Uma modalidade desabilitada no seletor indica que o editor estruturado ainda não consegue representá-la sem perda de significado. Ela ainda pode ser usada como tipo de atividade, e o app não converte silenciosamente uma estrutura sem suporte em um treino diferente.
+
+---
+
+## Verifique o treino
+
+- Cada etapa aparece na prévia na ordem em que foi digitada.
+- Cada linha tem uma condição principal de término e no máximo uma meta.
+- As referências de zona correspondem à modalidade e ao perfil de atleta esperados.
+- Blocos de repetição contêm as etapas e a contagem ou condição de término corretas.
+- Reabrir o treino preserva a mesma estrutura e o mesmo subtipo de modalidade.
+
+## Solução de problemas
+
+- **Uma linha relata palavra-chave desconhecida:** use um tipo de etapa ou nome de meta suportado e remova pontuações que não aparecem na gramática.
+- **Duração ou distância incorretas:** verifique a unidade e a posição. A primeira medida após o tipo de etapa é a condição de término.
+- **O interpretador rejeita várias metas:** mantenha uma única meta por linha e mova orientações secundárias para as notas ou para outra etapa.
+- **Uma linha com duração por limiar rejeita uma meta:** `work hr<150bpm` já usa frequência cardíaca como condição de término; use `work 25m hr <150bpm` para uma etapa com duração fixa e teto de FC.
+- **Uma repetição falha:** feche as chaves, evite repetições aninhadas e verifique a condição de `repeat until`.
+- **A prévia muda após trocar a modalidade:** o significado de zonas e unidades depende da modalidade. Selecione novamente a modalidade correta e revise todas as metas.
+- **A exportação relata degradação ou estrutura sem suporte:** simplifique apenas após ler o aviso do provedor; não presuma que todo dispositivo suporta repetições condicionais.
+
+## Próximos passos
+
+- [Rascunhe um treino estruturado no editor de treinos](/pt-BR/workout-editor) e depois cole a DSL aqui.
+- Use o [guia do editor manual de treinos](/pt-BR/docs/planning/manual-workout-editor) para os fluxos visual e de texto no aplicativo.
+- Crie sessões baseadas em exercícios com [Treinos de Força](/pt-BR/docs/planning/strength-workouts).
+- Adicione o treino salvo a um plano em [Criar um Plano de Treino](/pt-BR/docs/guide/create-training-plan).

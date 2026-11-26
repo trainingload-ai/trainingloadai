@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   HttpCode,
@@ -906,6 +907,23 @@ export class ActivityController {
     @ActivityHashId() hashId: string,
   ) {
     return this.activityQuery.getActivityReadiness(hashId, userId);
+  }
+
+  @Get('cards')
+  @AllowPublicDemo(PUBLIC_DEMO_CAPABILITIES.ACTIVITIES_READ)
+  async getActivityCards(
+    @CurrentUserId() userId: string,
+    @Query('hashIds') rawHashIds: unknown,
+  ) {
+    const hashIds = typeof rawHashIds === 'string' ? rawHashIds.split(',') : [];
+    if (
+      hashIds.length === 0 ||
+      hashIds.length > 20 ||
+      hashIds.some((hashId) => !/^[a-zA-Z0-9_-]{1,128}$/.test(hashId))
+    ) {
+      throw new BadRequestException('Provide between 1 and 20 activity IDs.');
+    }
+    return { activities: await this.activityQuery.getActivityCards(userId, hashIds) };
   }
 
   @Get(':hashId')

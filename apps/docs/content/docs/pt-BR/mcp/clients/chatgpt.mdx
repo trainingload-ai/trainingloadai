@@ -1,0 +1,18 @@
+---
+title: Conectar o ChatGPT
+description: Adicione o TrainingLoad como servidor MCP personalizado no ChatGPT e conclua o fluxo OAuth.
+---
+
+# Conectar o ChatGPT
+
+1. Abra **Plugins** no ChatGPT, selecione o botão de adição (`+`) e depois **Add custom MCP server**. Se o seu workspace exigir modo de desenvolvedor, habilite-o antes conforme a política do administrador.
+2. Use `TrainingLoad` como nome e `https://api.trainingload.ai/mcp` como URL do servidor.
+3. Faça a varredura das ferramentas e selecione **Connect**. O ChatGPT abrirá o OAuth do TrainingLoad no seu navegador.
+4. Revise o nome do cliente e os escopos (scopes) somente leitura e aprove.
+5. Ative o TrainingLoad em um novo chat e pergunte: “Resuma meu estado atual de treino e liste as ferramentas e o intervalo de datas utilizados.”
+
+A primeira chamada deve ser `get_training_snapshot`. Solicite `get_health_summary` mais tarde para acionar o consentimento separado de `health:read`.
+
+Se as ferramentas não atualizarem, remova e reative o TrainingLoad no chat. Em caso de falha no OAuth, revogue a conexão antiga no TrainingLoad e conecte novamente.
+
+[Guia oficial de MCP do ChatGPT](https://developers.openai.com/plugins/build/app-quickstart)

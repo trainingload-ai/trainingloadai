@@ -7,6 +7,37 @@ import {
 } from '../training-analytics';
 
 describe('training analytics', () => {
+  it('uses the same eligible activity set for speed and pace', () => {
+    const run = (hashId: string, distance: number, timerTime: number | null) => ({
+      hashId, activityName: null, sportType: SportType.RUN, startTime: new Date('2026-09-01T10:00:00Z'),
+      timerTime, elapsedTime: null, distance, avgHeartRate: null, avgPower: null,
+    });
+    const dataset = buildActivityTrainingDataset({
+      timezone: 'UTC', truncated: false,
+      query: {
+        source: 'ACTIVITIES', from: '2026-09-01', to: '2026-09-01', groupBy: 'DAY',
+        measures: ['DISTANCE_KM', 'AVG_SPEED_KMH', 'AVG_PACE_SEC_PER_KM', 'AVG_DISTANCE_KM'],
+      },
+      activities: [run('a', 5_000, 1800), run('b', 2_000, 600), run('c', 9_000, null)],
+    });
+    expect(dataset.summary).toMatchObject({
+      DISTANCE_KM: 16, AVG_SPEED_KMH: 10.5, AVG_PACE_SEC_PER_KM: 342.9, AVG_DISTANCE_KM: 5.33,
+    });
+  });
+
+  it('retains genuine zero, negative values and gaps in PMC', () => {
+    const query = { source: 'PMC', from: '2026-09-01', to: '2026-09-03', groupBy: 'DAY', measures: ['TSB'] } as const;
+    const dataset = buildPmcTrainingDataset({
+      timezone: 'UTC', query: { ...query, measures: [...query.measures] },
+      records: [
+        { date: new Date('2026-09-01'), TSB: 0 } as PMCData,
+        { date: new Date('2026-09-03'), TSB: -8 } as PMCData,
+      ],
+    });
+    expect(dataset.rows.map((row) => row.values.TSB)).toEqual([0, null, -8]);
+    expect(dataset.coverage.TSB).toBeCloseTo(2 / 3);
+  });
+
   it('groups activities in the athlete timezone and uses duration-weighted averages', () => {
     const dataset = buildActivityTrainingDataset({
       timezone: 'Asia/Shanghai',

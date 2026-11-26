@@ -64,8 +64,13 @@ describe('ImportItemWorkerService leases', () => {
       $queryRawUnsafe.mock.calls[0];
     expect(sql).toContain("status IN ('NORMALIZING','DEDUPING'");
     expect(sql).toContain('lease_expires_at IS NULL');
-    expect(sql).toContain('started_at=COALESCE(j.started_at, $1)');
-    expect(sql).toContain('updated_at=$1');
+    expect(sql).toContain(
+      "started_at=COALESCE(j.started_at, ($1::timestamptz AT TIME ZONE 'UTC'))",
+    );
+    expect(sql).toContain(
+      "lease_expires_at=($4::timestamptz AT TIME ZONE 'UTC')",
+    );
+    expect(sql).toContain("updated_at=($1::timestamptz AT TIME ZONE 'UTC')");
     expect(sql).not.toContain('NOW()');
     expect(now).toBeInstanceOf(Date);
     expect(limit).toBe(2);

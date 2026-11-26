@@ -1,0 +1,146 @@
+---
+title: "Guida all'editor manuale degli allenamenti: modificare sessioni in Trainingload"
+description: "Documentazione di prodotto per modificare allenamenti pianificati in Trainingload. Scopri come modificare manualmente sessioni di endurance e forza nell'editor in-app."
+keywords:
+  [
+    "editor manuale allenamenti",
+    "come modificare allenamenti",
+    "modificare allenamenti manualmente",
+    "guida editor allenamenti Trainingload",
+    "modificare allenamento strutturato",
+    "editor allenamenti in-app",
+  ]
+---
+
+# Come modificare manualmente gli allenamenti in Trainingload
+
+Questa è la **guida di prodotto per l'editor manuale degli allenamenti dentro Trainingload.ai**. Spiega come modificare un allenamento pianificato dopo aver aperto un piano: scegliere lo sport, aggiungere fasi di endurance o serie di forza, controllare l'anteprima della sessione e salvare una bozza valida.
+
+Non è un **editor di allenamenti** o **workout builder** indipendente. Se cerchi uno strumento gratuito nel browser per preparare le fasi e copiare il DSL dell'allenamento, usa l'[Editor e builder di allenamenti](/it/workout-editor). Torna qui quando ti servono il salvataggio nell'app, il builder per la forza e la collocazione nel giorno del piano.
+
+## Prima di iniziare
+
+- Apri un piano manuale o un allenamento modificabile di un piano.
+- Conferma le soglie atleta utilizzate da eventuali obiettivi espressi in zone o percentuali.
+- Stabilisci se la sessione è di endurance o di forza.
+- Se vuoi prima preparare una bozza pubblica, [crea la sessione nell'editor di allenamenti](/it/workout-editor), poi incollala o ricostruiscila qui.
+
+## 1. Scegli lo sport
+
+L'editor manuale offre intenzionalmente un elenco mirato alla pianificazione:
+
+- Corsa: Corsa, Trail running, Tapis roulant.
+- Ciclismo: Ciclismo, Mountain bike, Ciclismo indoor.
+- Nuoto: Nuoto in piscina, Nuoto in acque libere.
+- Altro: Allenamento di forza.
+
+Lo sport selezionato cambia le unità di misura disponibili per gli obiettivi e può cambiare il tipo di struttura dell'allenamento. Passare da endurance a forza (o viceversa) azzera la struttura non compatibile della bozza, quindi scegli lo sport prima di inserire i dettagli delle fasi.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Apri l'editor dal programma del piano"
+  description="Nel Manual Plan Builder prosegui fino alla selezione delle date, poi seleziona + Sessione nel giorno desiderato."
+  route="Piani → Manual Plan Builder → Selezione date → + Sessione"
+/>
+
+<DocsScreenshot
+  id="manual-workout-editor"
+  title="Editor manuale degli allenamenti"
+  description="Scegli lo sport, costruisci il lavoro strutturato, aggiungi note tecniche e confronta l'anteprima prima di salvare."
+  route="Piani → Piano manuale → Aggiungi allenamento"
+/>
+
+## 2. Aggiungi nome e note
+
+Usa il nome per identificare rapidamente la sessione, ad esempio «Intervalli aerobici» o «Forza arti inferiori». Usa le note per le indicazioni testuali che non devono diventare struttura macchina:
+
+- Indicazioni tecniche.
+- Promemoria sull'attrezzatura.
+- Suggerimenti su nutrizione e idratazione.
+- Note su percorso o terreno.
+- Condizioni per interrompere o ridurre la sessione.
+
+Non inserire testo discorsivo in un campo DSL. Le fasi dell'allenamento vanno in modalità Manuale o Regole; il contesto di allenamento va nelle note.
+
+## 3. Costruisci un allenamento di endurance
+
+In modalità Manuale, aggiungi una fase o un modulo di ripetizione. Per ciascuna fase:
+
+1. Scegli il tipo di fase, ad esempio riscaldamento, lavoro o recupero.
+2. Imposta durata o distanza.
+3. Aggiungi un obiettivo solo quando l'atleta dispone di un valore di riferimento affidabile.
+4. Per gli intervalli, usa un modulo di ripetizione invece di duplicare molte volte le stesse fasi di lavoro e recupero.
+5. Controlla il grafico mentre la struttura cambia.
+
+Una struttura di endurance valida richiede almeno una fase significativa. Un obiettivo espresso come intervallo deve avere il valore iniziale minore o uguale a quello finale.
+
+## 4. Costruisci un allenamento di forza
+
+Scegli **Allenamento di forza** per aprire il builder dedicato. Aggiungi esercizi e serie allenanti come descritto in [Allenamenti di forza](/it/docs/planning/strength-workouts). Per l'inserimento testuale, segui il [DSL per allenamenti di forza](/it/docs/planning/strength-workout-dsl).
+
+## 5. Usa la modalità Regole quando conviene
+
+La modalità Regole accetta il DSL supportato per gli allenamenti. È utile per scrivere in modo compatto e riutilizzabile, ma non è un campo per note libere.
+
+Prima di salvare in modalità Regole:
+
+- Mantieni un'istruzione per ciascuna espressione DSL supportata.
+- Inserisci le spiegazioni in linguaggio naturale nelle note.
+- Valida il risultato e controlla la struttura renderizzata.
+- Consulta il [DSL per allenamenti di endurance](/it/docs/planning/workout-dsl) o il [DSL per allenamenti di forza](/it/docs/planning/strength-workout-dsl) per la sintassi corretta.
+- Puoi [preparare prima lo stesso DSL nell'editor pubblico](/it/workout-editor) e poi incollarlo qui.
+
+## 6. Salva
+
+Seleziona **Salva bozza**. Trainingload.ai valida l'allenamento prima di aggiungerlo alla bozza del piano.
+
+## Verifica l'allenamento salvato
+
+Controlla che:
+
+- L'etichetta dello sport sia corretta.
+- L'anteprima corrisponda alla sequenza di lavoro/recupero o alle serie di forza previste.
+- Le note restino separate dalla struttura.
+- L'allenamento salvato compaia nella settimana, nel giorno e nell'ordine corretti.
+- Il carico previsto sia presente solo quando esistono informazioni sufficienti.
+
+## Risoluzione dei problemi
+
+- **L'elenco degli sport contiene voci diverse dal previsto:** verifica di trovarti nell'editor manuale degli allenamenti del piano. L'elenco di creazione è limitato ai nove sport indicati sopra; le schermate di classificazione delle attività hanno un catalogo più ampio.
+- **Cambiare sport cancella la bozza:** le strutture di endurance e di forza non sono compatibili. Scegli prima lo sport e copia eventuali note o regole riutilizzabili prima di cambiare.
+- **L'anteprima endurance è vuota:** aggiungi almeno una fase significativa e verifica che durata/distanza e valori target siano validi.
+- **Un intervallo target viene rifiutato:** inserisci il valore più basso prima di quello più alto e controlla l'unità di misura per lo sport selezionato.
+- **«Inserisci un nome per ogni esercizio»:** compila il nome di tutti gli esercizi di forza; il testo segnaposto non viene salvato.
+- **Un esercizio di forza non si salva:** aggiungi almeno un gruppo di serie e almeno una serie allenante per ogni esercizio.
+- **Un errore della modalità Regole compare ancora in inglese:** non copiare il messaggio grezzo del server nelle note. Annota l'avviso visualizzato, lo sport selezionato e la riga DSL che genera l'errore per il supporto.
+- **L'allenamento salvato compare nel giorno sbagliato:** controlla data di inizio del piano, scostamento settimana/giorno, ordine della sessione e fuso orario dell'account.
+
+## Domande frequenti
+
+### Cos'è l'editor manuale degli allenamenti?
+
+È la schermata in-app per modificare un singolo allenamento pianificato in Trainingload. Scegli uno sport, aggiungi fasi di endurance o esercizi di forza, alleghi note di allenamento, controlli l'anteprima della sessione e la salvi su una settimana e un giorno specifici. L'[editor e builder di allenamenti](/it/workout-editor) pubblico è invece uno strumento separato per preparare bozze.
+
+### Come modifico manualmente un allenamento in Trainingload?
+
+Apri un allenamento modificabile del piano, scegli prima lo sport, poi aggiungi fasi o un modulo di ripetizione. Imposta durata o distanza, aggiungi un obiettivo solo quando la soglia è affidabile e usa un modulo di ripetizione per gli intervalli invece di copiare molte volte la stessa coppia di fasi.
+
+### L'editor in-app può creare sessioni di forza?
+
+Sì. Scegli **Allenamento di forza** per aprire il builder per la forza. Aggiungi esercizi con nome e almeno una serie allenante per esercizio. Per l'inserimento testuale usa il [DSL per allenamenti di forza](/it/docs/planning/strength-workout-dsl).
+
+### Modalità Manuale o modalità Regole?
+
+Usa la modalità Manuale se preferisci comporre le fasi con i controlli visuali. Usa la modalità Regole quando vuoi un DSL compatto e riutilizzabile. Non scrivere testo discorsivo nel campo DSL: quello va nelle note. Vedi il [DSL per allenamenti di endurance](/it/docs/planning/workout-dsl).
+
+### Perché cambiare sport ha azzerato la bozza?
+
+Le strutture di endurance e forza sono incompatibili. Scegli lo sport prima di inserire le fasi dettagliate e copia note o regole riutilizzabili prima di cambiarlo.
+
+## Prossimi passi
+
+- [Prepara un allenamento strutturato nell'editor di allenamenti](/it/workout-editor) se vuoi prima un builder pubblico.
+- Prosegui con [Gestire lo stato del piano](/it/docs/planning/plan-lifecycle), poi attiva il piano quando l'intero programma è pronto.
+- Usa il [DSL per allenamenti di endurance](/it/docs/planning/workout-dsl) per la scrittura in modalità testo/regole.
+- Usa [Allenamenti di forza](/it/docs/planning/strength-workouts) per il builder visuale.
+- [Usa la revisione del Coach AI per regolare il carico di allenamento in sicurezza](/it/ai-training-plan) dopo aver completato la sessione.

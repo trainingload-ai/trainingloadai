@@ -3,7 +3,6 @@
 import * as React from "react";
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useActivityMetricSummary } from "@/api/charts";
 import {
@@ -20,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link } from "@/i18n/navigation";
 import { useSetPageTitle } from "@/hooks/useSetPageTitle";
 import { dayjs } from "@/lib/dayjs-tz";
 import { useStore, type SportType } from "@/lib/store";
@@ -308,18 +306,6 @@ export function ActivitiesStatsPageClient() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-3">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="min-w-0">
-          <Link
-            href="/activities"
-            className="hidden items-center gap-1 text-mobile-caption pc:text-xs font-medium text-muted-foreground transition-colors hover:text-foreground pc:inline-flex"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            {t("back")}
-          </Link>
-        </div>
-      </div>
-
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_160px] lg:items-start">
         <main className="flex min-w-0 flex-col gap-4">
           <YearHeatmapCard

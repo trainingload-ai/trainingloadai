@@ -125,6 +125,13 @@ export class TodaySuggestionGuidanceService {
         ?.status === 'LIMITED'
     )
       return { status: 'UNAVAILABLE' as const, sessionId: null, context: null };
+    const current =
+      stored &&
+      stored.validUntil &&
+      stored.validUntil.getTime() > Date.now() &&
+      stored.signatureHash === projection.factHash &&
+      stored.constraintHash === projection.constraintHash &&
+      stored.date === projection.date;
     const structured = stored?.structuredResult as {
       primaryIntent?: { type: string; activityId?: string };
     } | null;
@@ -165,7 +172,7 @@ export class TodaySuggestionGuidanceService {
         userId,
         id: sessionId,
         lang,
-        title: stored?.summary.slice(0, 80) ?? null,
+        title: current ? stored.summary.slice(0, 80) : null,
       },
       update: {},
     });
@@ -178,11 +185,6 @@ export class TodaySuggestionGuidanceService {
       },
       select: { id: true },
     });
-    const current =
-      stored &&
-      stored.signatureHash === projection.factHash &&
-      stored.constraintHash === projection.constraintHash &&
-      stored.date === projection.date;
     return {
       status: current ? ('CURRENT' as const) : ('UPDATED' as const),
       sessionId,

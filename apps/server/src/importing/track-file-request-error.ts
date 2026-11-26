@@ -18,6 +18,9 @@ export const TRACK_FILE_REQUEST_ERROR = {
   DECODE_FAILED: 'TRACK_FILE_DECODE_FAILED',
   ACTIVITY_REQUIRED: 'TRACK_FILE_ACTIVITY_REQUIRED',
   GPX_COORDINATES_REQUIRED: 'TRACK_FILE_GPX_COORDINATES_REQUIRED',
+  COURSE_COORDINATES_REQUIRED: 'TRACK_FILE_COURSE_COORDINATES_REQUIRED',
+  COURSE_DISTANCE_OUT_OF_RANGE: 'TRACK_FILE_COURSE_DISTANCE_OUT_OF_RANGE',
+  FIT_TIMESTAMPS_OUT_OF_RANGE: 'TRACK_FILE_FIT_TIMESTAMPS_OUT_OF_RANGE',
   TCX_TIMESTAMPS_REQUIRED: 'TRACK_FILE_TCX_TIMESTAMPS_REQUIRED',
   TCX_LAPS_REQUIRED: 'TRACK_FILE_TCX_LAPS_REQUIRED',
   CONVERSION_FAILED: 'TRACK_FILE_CONVERSION_FAILED',
@@ -78,6 +81,18 @@ const ERROR_DEFINITIONS: Record<TrackFileRequestErrorCode, ErrorDefinition> = {
   },
   TRACK_FILE_GPX_COORDINATES_REQUIRED: {
     messageKey: 'common.error.track_file_gpx_coordinates_required',
+    suggestedAction: 'TRY_ANOTHER_OUTPUT_FORMAT',
+  },
+  TRACK_FILE_COURSE_COORDINATES_REQUIRED: {
+    messageKey: 'common.error.track_file_course_coordinates_required',
+    suggestedAction: 'SELECT_ANOTHER_FILE',
+  },
+  TRACK_FILE_COURSE_DISTANCE_OUT_OF_RANGE: {
+    messageKey: 'common.error.track_file_course_distance_out_of_range',
+    suggestedAction: 'SELECT_ANOTHER_FILE',
+  },
+  TRACK_FILE_FIT_TIMESTAMPS_OUT_OF_RANGE: {
+    messageKey: 'common.error.track_file_fit_timestamps_out_of_range',
     suggestedAction: 'TRY_ANOTHER_OUTPUT_FORMAT',
   },
   TRACK_FILE_TCX_TIMESTAMPS_REQUIRED: {
@@ -163,6 +178,18 @@ type TrackFileMappingContext = {
   targetFormat?: TrackFileFormat;
 };
 
+function trackFileOutputInvalid(): HttpException {
+  return new InternalServerErrorException({
+    code: 'TRACK_FILE_OUTPUT_INVALID',
+    data: {
+      category: 'CONVERSION',
+      origin: 'SERVICE',
+      retryable: false,
+      suggestedAction: 'TRY_ANOTHER_OUTPUT_FORMAT',
+    },
+  });
+}
+
 /**
  * 将已识别的输入问题与转换器异常分别映射为稳定的 4xx / 5xx 响应。
  * 返回 null 表示异常来源不确定，交由通用服务端异常处理。
@@ -171,39 +198,18 @@ export function mapTrackFileRequestError(
   error: unknown,
   context: TrackFileMappingContext = {},
 ): HttpException | null {
+  const fileData = {
+    filename: context.filename,
+    targetFormat: context.targetFormat,
+  };
   if (error instanceof TrackFileConversionError) {
-    const data = {
-      filename: context.filename,
-      targetFormat: context.targetFormat,
-    };
-    if (error.code === 'GPX_COORDINATES_REQUIRED') {
-      return trackFileBadRequest(
-        TRACK_FILE_REQUEST_ERROR.GPX_COORDINATES_REQUIRED,
-        { data },
-      );
-    }
-    if (error.code === 'RECORDS_REQUIRED') {
-      return trackFileBadRequest(TRACK_FILE_REQUEST_ERROR.RECORDS_REQUIRED, {
-        data,
-      });
-    }
-    if (error.code === 'TIMESTAMPS_REQUIRED') {
-      return trackFileBadRequest(
-        context.targetFormat === 'tcx'
-          ? TRACK_FILE_REQUEST_ERROR.TCX_TIMESTAMPS_REQUIRED
-          : TRACK_FILE_REQUEST_ERROR.TIMESTAMPS_REQUIRED,
-        { data },
-      );
-    }
-    return new InternalServerErrorException({
-      code: 'TRACK_FILE_OUTPUT_INVALID',
-      data: {
-        category: 'CONVERSION',
-        origin: 'SERVICE',
-        retryable: false,
-        suggestedAction: 'TRY_ANOTHER_OUTPUT_FORMAT',
-      },
-    });
+    if (error.code === 'OUTPUT_INVALID') return trackFileOutputInvalid();
+    return trackFileBadRequest(
+      error.code === 'TIMESTAMPS_REQUIRED' && context.targetFormat === 'tcx'
+        ? TRACK_FILE_REQUEST_ERROR.TCX_TIMESTAMPS_REQUIRED
+        : TRACK_FILE_REQUEST_ERROR[error.code],
+      { data: fileData },
+    );
   }
   if (error instanceof TrackFileValidationError) {
     if (error.code === 'FORMAT_MISMATCH') {
@@ -233,6 +239,19 @@ export function mapTrackFileRequestError(
 
   if (!(error instanceof TrackSwapError)) return null;
 
+  if (error.code === 'COURSE_OUTPUT_INVALID') return trackFileOutputInvalid();
+  if (
+    error.code === 'COURSE_COORDINATES_REQUIRED' ||
+    error.code === 'COURSE_DISTANCE_OUT_OF_RANGE' ||
+    error.code === 'COURSE_TIMESTAMPS_OUT_OF_RANGE'
+  ) {
+    return trackFileBadRequest(
+      error.code === 'COURSE_TIMESTAMPS_OUT_OF_RANGE'
+        ? TRACK_FILE_REQUEST_ERROR.FIT_TIMESTAMPS_OUT_OF_RANGE
+        : TRACK_FILE_REQUEST_ERROR[error.code],
+      { data: fileData },
+    );
+  }
   const commonData = {
     filename: context.filename,
     sourceFormat: error.format,

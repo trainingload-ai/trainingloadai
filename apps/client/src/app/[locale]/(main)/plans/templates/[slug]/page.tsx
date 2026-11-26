@@ -231,7 +231,7 @@ export default function PlanTemplateDetailPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8 pb-14">
-      <Button asChild variant="ghost" size="sm" className="-ml-3">
+      <Button asChild variant="ghost" size="sm" className="-ml-3 tablet:hidden">
         <Link
           href={`/plans/templates/${template.goal === "HALF_MARATHON" ? "half-marathon" : template.goal.toLowerCase()}`}
         >
