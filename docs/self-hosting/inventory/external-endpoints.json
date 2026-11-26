@@ -1022,6 +1022,34 @@
       ]
     },
     {
+      "host": "fazier.com",
+      "url": "https://fazier.com",
+      "references": [
+        {
+          "file": "apps/docs/src/components/FazierBadge.tsx",
+          "line": 17
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "fazier.com",
+      "url": "https://fazier.com/api/v1/public/badges/launch_badges.svg?badge_type=launched&theme=neutral",
+      "references": [
+        {
+          "file": "apps/docs/src/components/FazierBadge.tsx",
+          "line": 23
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
       "host": "fellrnr.com",
       "url": "https://fellrnr.com/wiki/TRIMP#TRIMPexp_Exponential_Heart_Rate_Scaling",
       "references": [
@@ -2341,7 +2369,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 166
+          "line": 167
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2355,7 +2383,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 158
+          "line": 159
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2369,7 +2397,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 152
+          "line": 153
         }
       ],
       "capability": "web-asset-or-tooling",

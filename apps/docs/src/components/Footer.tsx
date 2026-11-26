@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Apple, ArrowRight, ArrowUpRight } from "lucide-react";
 import { withLocalePath } from "@/lib/locale-url";
 import { IOS_APP_STORE_URL } from "@/lib/app-links";
+import { FazierBadge } from "./FazierBadge";
 
 type FooterLink = { href: string; title: string };
 
@@ -171,6 +172,7 @@ export async function Footer({ lang }: { lang: string }) {
               className="hidden h-auto max-w-full dark:block"
             />
           </a>
+          <FazierBadge />
           <p className="mt-6 text-xs leading-5 text-muted-foreground">
             {t("copyright", { year })}
           </p>
