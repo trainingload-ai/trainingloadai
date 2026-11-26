@@ -254,6 +254,7 @@ export enum BenchmarkType {
   LTHR = "LTHR",
   CS = "CS",
   TP = "TP",
+  VO2MAX = "VO2MAX",
 }
 
 export type ZoneBenchmark = BenchmarkType;

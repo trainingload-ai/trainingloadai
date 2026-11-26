@@ -152,6 +152,23 @@ export function ZoneSettings() {
         disabledReason: t("csNoData"),
       },
       {
+        label: "TP",
+        value: BenchmarkType.TP,
+        getValue: (p?: UserProfile) => p?.tp || undefined,
+        isDisabled: (p?: UserProfile) => !p?.tp,
+      },
+      {
+        label: "VO2max",
+        value: BenchmarkType.VO2MAX,
+        getValue: (p?: UserProfile) => {
+          const vdot = p?.vo2max;
+          if (!vdot || vdot <= 0) return undefined;
+          const speedMmin = 29.54 + 5.000663 * vdot - 0.007546 * vdot * vdot;
+          return speedMmin > 0 ? speedMmin / 60 : undefined;
+        },
+        isDisabled: (p?: UserProfile) => !p?.vo2max || p.vo2max <= 0,
+      },
+      {
         label: t("benchmark.custom"),
         value: BenchmarkType.CUSTOM,
         getValue: () => 1,

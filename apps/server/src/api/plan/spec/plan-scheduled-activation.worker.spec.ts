@@ -172,4 +172,59 @@ describe('PlanScheduledActivationWorker', () => {
       }),
     );
   });
+
+  it('localizes blocked activation notification according to user preferredLocale', async () => {
+    const tx = { $executeRawUnsafe: jest.fn(async () => 1) };
+    const prisma = {
+      $transaction: jest.fn(
+        async (run: (value: typeof tx) => Promise<unknown>) => run(tx),
+      ),
+    };
+    const plans = {
+      findUnique: jest.fn(async () => ({
+        id: 'next-plan',
+        userId: 'user-1',
+        title: 'Next plan',
+        status: 'SCHEDULED',
+        scheduledActivationAt: new Date('2026-10-01T00:00:00.000Z'),
+        activationBlockedAt: null,
+        supersedesPlanId: 'source-plan',
+        supersedes: {
+          id: 'source-plan',
+          userId: 'user-1',
+          status: 'CANCELLED',
+        },
+      })),
+      update: jest.fn(async () => ({})),
+    };
+    const contexts = {
+      supersedeContext: jest.fn(async () => undefined),
+      ensureContext: jest.fn(async () => undefined),
+    };
+    const notifications = {
+      ensureNotification: jest.fn(async () => undefined),
+    };
+    const users = {
+      users: jest.fn(() => ({
+        findUnique: jest.fn(async () => ({ preferredLocale: 'en' })),
+      })),
+    };
+    const worker = new PlanScheduledActivationWorker(
+      prisma as never,
+      plans as never,
+      contexts as never,
+      notifications as never,
+      undefined,
+      users as never,
+    );
+
+    await activate(worker);
+
+    expect(notifications.ensureNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Scheduled training plan activation blocked',
+      }),
+      tx,
+    );
+  });
 });

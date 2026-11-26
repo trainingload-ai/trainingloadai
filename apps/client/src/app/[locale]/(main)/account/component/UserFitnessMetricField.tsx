@@ -263,19 +263,30 @@ export function UserFitnessMetricField({
     await save(nextRows);
   };
 
-  const displayedCurrent = (() => {
+  const currentDisplayNumber = (() => {
     const effectiveValue =
       metricPairs?.effective?.[type] === null ||
       metricPairs?.effective?.[type] === undefined
         ? null
         : Number(metricPairs.effective[type]);
-    const normalizedValue = normalizeMetricNumber(
-      effectiveValue && effectiveValue > 0 ? effectiveValue : value,
-    );
-    if (normalizedValue === null || normalizedValue <= 0) return "";
+    if (effectiveValue !== null && Number.isFinite(effectiveValue) && effectiveValue > 0) {
+      return effectiveValue;
+    }
+    const rawFallback = normalizeMetricNumber(value);
+    if (rawFallback === null || rawFallback <= 0) return null;
+    if (isPaceMetric) {
+      // Fallback `value` from UserProfile is speed (m/s), whereas display & estimatedValue use pace seconds.
+      const distanceMeters = sportType === SportType.SWIM ? 100 : 1000;
+      return Math.round(distanceMeters / rawFallback);
+    }
+    return rawFallback;
+  })();
+
+  const displayedCurrent = (() => {
+    if (currentDisplayNumber === null || currentDisplayNumber <= 0) return "";
     return isPaceMetric
-      ? formatPaceSeconds(normalizedValue)
-      : String(normalizedValue);
+      ? formatPaceSeconds(currentDisplayNumber)
+      : String(currentDisplayNumber);
   })();
 
   const displayedEstimated = (() => {
@@ -287,17 +298,19 @@ export function UserFitnessMetricField({
   })();
 
   const estimateDelta = (() => {
-    const normalizedValue = normalizeMetricNumber(value);
     const normalizedEstimate = normalizeMetricNumber(estimatedValue);
     if (
-      normalizedValue === null ||
+      currentDisplayNumber === null ||
       normalizedEstimate === null ||
-      normalizedValue <= 0 ||
+      currentDisplayNumber <= 0 ||
       normalizedEstimate <= 0
     ) {
       return null;
     }
-    return normalizedEstimate - normalizedValue;
+    // For pace seconds, lower seconds = faster pace = improvement (positive delta).
+    return isPaceMetric
+      ? currentDisplayNumber - normalizedEstimate
+      : normalizedEstimate - currentDisplayNumber;
   })();
 
   const estimateSecondary = (() => {

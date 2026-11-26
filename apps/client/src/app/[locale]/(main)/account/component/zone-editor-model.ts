@@ -100,9 +100,11 @@ export function getZoneEditorSportLabel(args: {
 }
 
 export function calculateZoneAbsoluteValue(args: {
+  benchmark?: BenchmarkType;
   benchmarkVal: number;
   isCustom: boolean;
   pct: number;
+  restingHeartRate?: number;
   sportType: string;
   zoneType: string;
 }): string | number | null {
@@ -114,19 +116,29 @@ export function calculateZoneAbsoluteValue(args: {
       if (args.pct <= 0) return "-";
       const speed = args.benchmarkVal * (args.pct / 100);
       if (speed <= 0) return "-";
-      const paceSec100m = 100 / speed;
-      const min = Math.floor(paceSec100m / 60);
-      const sec = Math.round(paceSec100m % 60);
+      const totalSec = Math.round(100 / speed);
+      const min = Math.floor(totalSec / 60);
+      const sec = totalSec % 60;
       return `${min}:${sec.toString().padStart(2, "0")}/100m`;
     }
 
     if (args.pct <= 0) return "-";
     const speed = args.benchmarkVal * (args.pct / 100);
     if (speed <= 0) return "-";
-    const paceSec = 1000 / speed;
-    const min = Math.floor(paceSec / 60);
-    const sec = Math.round(paceSec % 60);
+    const totalSec = Math.round(1000 / speed);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
     return `${min}:${sec.toString().padStart(2, "0")}/km`;
+  }
+
+  if (
+    args.zoneType === "HEART_RATE" &&
+    args.benchmark === BenchmarkType.HRR &&
+    args.restingHeartRate
+  ) {
+    return Math.round(
+      args.restingHeartRate + (args.benchmarkVal * args.pct) / 100,
+    );
   }
 
   return Math.round((args.benchmarkVal * args.pct) / 100);

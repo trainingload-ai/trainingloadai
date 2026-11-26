@@ -429,7 +429,9 @@ export function ZoneEditor({
             getAbs={(pct) =>
               calculateZoneAbsoluteValue({
                 pct,
+                benchmark: selectedBenchmark,
                 benchmarkVal: currentBenchmarkVal,
+                restingHeartRate: localProfile?.restingHeartRate,
                 zoneType,
                 sportType,
                 isCustom,
