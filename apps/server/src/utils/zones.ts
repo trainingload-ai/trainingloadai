@@ -1,6 +1,6 @@
 import { vVo2MaxFromVDOT } from '@/algorithm/vo2max';
 import { round } from 'lodash';
-import { $Enums, ZoneBase } from '@prisma/client';
+import { $Enums, SportType, ZoneBase } from '@prisma/client';
 import {
   resolveLthrForCalculation,
   type LthrCalculationSource,
@@ -174,13 +174,44 @@ export const resolvePaceZoneSettings = (
     vo2max?: number; // VDOT
     tp?: number; // Threshold Speed (m/s)
     cs?: number; // Critical Speed (m/s)
+    sportType?: SportType;
   },
 ): UserZoneValue[] | undefined => {
   const zones = setting?.zones || [];
   if (!zones || zones.length === 0) return undefined;
 
   if (setting.benchmark === ZoneBase.CUSTOM || !setting.benchmark) {
-    return zones;
+    const scale = context.sportType === SportType.SWIM ? 100 : 1000;
+    const positiveBounds = zones
+      .flatMap((z) => [z?.min, z?.max])
+      .filter(
+        (v): v is number =>
+          typeof v === 'number' && Number.isFinite(v) && v > 0,
+      );
+    // Custom pace zones are persisted as integer sec/km (RUN) or sec/100m (SWIM).
+    // Convert display units to sec/m while remaining idempotent for values already in sec/m (< 10).
+    if (!positiveBounds.some((v) => v >= 10)) {
+      return zones;
+    }
+    const toSecPerMeter = (value?: number | null): number | undefined => {
+      if (value == null || !Number.isFinite(value) || value < 0) {
+        return undefined;
+      }
+      return value === 0 ? 0 : round(value / scale, 6);
+    };
+    return zones.map((z, idx) => {
+      const low = toSecPerMeter(z?.min);
+      const high = toSecPerMeter(z?.max);
+      const [min, max] =
+        low != null && high != null && low > high ? [high, low] : [low, high];
+      return {
+        ...z,
+        name: z?.name || `z${idx + 1}`,
+        order: z?.order ?? idx + 1,
+        min,
+        max,
+      };
+    });
   }
 
   let baseSpeedMps: number | undefined;

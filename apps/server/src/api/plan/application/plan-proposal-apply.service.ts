@@ -418,6 +418,14 @@ export class PlanProposalApplyService {
 
     const immediate = proposal.effectiveFrom === today;
     if (immediate) {
+      if (source.planningMode === 'ROLLING') {
+        await this.plans.fenceAutomationJobs?.(
+          source.id,
+          'SUPERSEDED',
+          true,
+          args.tx,
+        );
+      }
       await this.plans.update(
         {
           where: { id: source.id },

@@ -1,6 +1,9 @@
 import { AthleteStateFitnessFacts } from '@/athlete-state/updates/athlete-state-fitness-facts.service';
 import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import dayjs = require('dayjs');
+import utc = require('dayjs/plugin/utc');
+
+dayjs.extend(utc);
 import { createHash } from 'crypto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable, Logger } from '@nestjs/common';
@@ -1177,6 +1180,9 @@ export class UserService {
             ? undefined
             : { originPayload: estimated.originPayload },
           true,
+          undefined,
+          [],
+          true,
         );
       }),
     );
@@ -1458,6 +1464,7 @@ export class UserService {
     forceRecord: boolean = false,
     tx?: Prisma.TransactionClient,
     changedMetrics: UserFitnessMetric[] = [],
+    preserveExactTimestamp: boolean = false,
   ) {
     if (!tx) {
       const result = await this.serializeFitnessWrite(userId, () =>
@@ -1474,6 +1481,7 @@ export class UserService {
             forceRecord,
             client,
             changedMetrics,
+            preserveExactTimestamp,
           ),
         ),
       );
@@ -1516,7 +1524,14 @@ export class UserService {
     const persistedValue2 =
       value2 == null ? value2 : this.normalizeFitnessMetricValue(type, value2);
 
-    if (current && dayjs(current.recordedAt).isSame(dayjs(recordedAt), 'day')) {
+    const persistedRecordedAt = preserveExactTimestamp
+      ? recordedAt
+      : new Date(`${dayjs.utc(recordedAt).format('YYYY-MM-DD')}T00:00:00.000Z`);
+
+    if (
+      current &&
+      dayjs.utc(current.recordedAt).isSame(dayjs.utc(recordedAt), 'day')
+    ) {
       if (forceRecord || isValueDiff || isOriginDiff) {
         const updated = await this.users.fitnessMetrics(tx).update({
           where: { id: current.id },
@@ -1524,9 +1539,7 @@ export class UserService {
             value: persistedValue,
             value2: persistedValue2,
             source,
-            recordedAt: new Date(
-              `${dayjs(recordedAt).format('YYYY-MM-DD')}T00:00:00.000Z`,
-            ),
+            recordedAt: persistedRecordedAt,
             ...originData,
           },
         });
@@ -1535,7 +1548,7 @@ export class UserService {
         return updated;
       }
       this.logger.debug(
-        `[增量复算] 指标未变化，跳过触发：用户ID=${userId}, 类型=${type}, 来源=${source}, 运动类型=${sport}, 记录时间=${dayjs(recordedAt).format('YYYY-MM-DD')}`,
+        `[增量复算] 指标未变化，跳过触发：用户ID=${userId}, 类型=${type}, 来源=${source}, 运动类型=${sport}, 记录时间=${dayjs.utc(recordedAt).format('YYYY-MM-DD')}`,
       );
       return current;
     }
@@ -1553,9 +1566,7 @@ export class UserService {
           value: persistedValue,
           value2: persistedValue2,
           source,
-          recordedAt: new Date(
-            `${dayjs(recordedAt).format('YYYY-MM-DD')}T00:00:00.000Z`,
-          ),
+          recordedAt: persistedRecordedAt,
           ...originData,
         },
       });
@@ -2017,7 +2028,10 @@ export class UserService {
       paceZoneModel: userProfile?.paceZoneModel || profile?.paceZoneModel,
     };
     if (saved) {
-      const resolved = resolvePaceZoneSettings(saved, context);
+      const resolved = resolvePaceZoneSettings(saved, {
+        ...context,
+        sportType,
+      });
       // A missing configured benchmark must not switch to an automatic model.
       return {
         benchmark: saved.benchmark,
@@ -2409,9 +2423,9 @@ export class UserService {
       value: m.value,
       value2: m.value2,
       recordedAt: m.recordedAt,
-      // recordedAt 是时间戳；effectiveDate 是服务端分析语义下的日历日期。
-      // 客户端必须优先使用该字段，避免本地零点序列化成 UTC 后显示为前一天。
-      effectiveDate: dayjs(m.recordedAt).format('YYYY-MM-DD'),
+      // recordedAt is a UTC timestamp; effectiveDate is the UTC calendar date
+      // so negative-offset self-host servers do not shift dates backward by one day.
+      effectiveDate: dayjs.utc(m.recordedAt).format('YYYY-MM-DD'),
       time: m.recordedAt,
       source: m.source,
       editable:
@@ -2844,28 +2858,30 @@ export class UserService {
     const recordedAts = rows.map((r) => r.recordedAt);
 
     const write = async (tx: Prisma.TransactionClient) => {
-      // 设置页提交完整历史时允许清空；Coach 只负责指定日期，空输入不得清空历史。
+      // Only user-editable manual rows (USER_MANUAL or legacy null changeSource)
+      // may be pruned when replacing history; preserve SYSTEM_IMPORTED records.
+      const editableManualScope = {
+        userId: options.userId,
+        type: options.type,
+        source: MetricSource.MANUAL,
+        sport,
+        OR: [
+          { changeSource: null },
+          { changeSource: ChangeSource.USER_MANUAL },
+        ],
+      };
       if (recordedAts.length === 0) {
         if (!options.preserveOtherDates) {
           await this.users.fitnessMetrics(tx).deleteMany({
-            where: {
-              userId: options.userId,
-              type: options.type,
-              source: MetricSource.MANUAL,
-              sport,
-            },
+            where: editableManualScope,
           });
         }
         return;
       }
-      // 设置页提交完整历史时删除缺失日期；Coach 追加/纠正单日时保留其他历史。
       if (!options.preserveOtherDates) {
         await this.users.fitnessMetrics(tx).deleteMany({
           where: {
-            userId: options.userId,
-            type: options.type,
-            source: MetricSource.MANUAL,
-            sport,
+            ...editableManualScope,
             recordedAt: { notIn: recordedAts },
           },
         });

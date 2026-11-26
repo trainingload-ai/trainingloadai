@@ -129,7 +129,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1912
+          "line": 1915
         }
       ]
     },
@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2368
+          "line": 2389
         }
       ]
     },
@@ -939,7 +939,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1172
+          "line": 1170
         }
       ]
     },
@@ -1061,7 +1061,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 963
+          "line": 961
         }
       ]
     },
@@ -1078,11 +1078,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1105
+          "line": 1125
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2778
+          "line": 2874
         }
       ]
     },
@@ -1099,27 +1099,27 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1107
+          "line": 1127
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2364
+          "line": 2404
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2425
+          "line": 2465
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2512
+          "line": 2552
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2654
+          "line": 2748
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2762
+          "line": 2858
         }
       ]
     },
@@ -1233,7 +1233,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 962
+          "line": 960
         }
       ]
     },
@@ -1305,7 +1305,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1143
+          "line": 1163
         }
       ]
     },
@@ -2825,7 +2825,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1334
+          "line": 1337
         },
         {
           "file": "apps/server/src/api/ai/core/tools/fitnessAssessment.tools.ts",

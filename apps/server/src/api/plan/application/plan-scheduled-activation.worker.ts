@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Interval } from '@nestjs/schedule';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -6,6 +7,10 @@ import { NotificationDomainService } from '@/notification/notification-domain.se
 import { CoachContextService } from './coach-context.service';
 import { PlanRepository } from '../persistence/plan.repository';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
+import {
+  PLAN_WORKOUTS_CHANGED_EVENT,
+  PlanWorkoutsChangedEvent,
+} from '../events/plan.events';
 
 const ACTIVATION_POLL_MS = 60_000;
 
@@ -19,6 +24,7 @@ export class PlanScheduledActivationWorker {
     private readonly plans: PlanRepository,
     private readonly contexts: CoachContextService,
     private readonly notifications: NotificationDomainService,
+    @Optional() private readonly events?: EventEmitter2,
   ) {}
 
   @Interval(ACTIVATION_POLL_MS)
@@ -52,7 +58,7 @@ export class PlanScheduledActivationWorker {
   }
 
   private async activate(planId: string, userId: string): Promise<void> {
-    await this.prisma.$transaction(
+    const activated = await this.prisma.$transaction(
       async (tx) => {
         await acquireHashtextAdvisoryXactLock(tx, userId);
         const plan = await this.plans.findUnique(
@@ -70,21 +76,21 @@ export class PlanScheduledActivationWorker {
           !plan.scheduledActivationAt ||
           plan.scheduledActivationAt.getTime() > Date.now()
         ) {
-          return;
+          return false;
         }
 
         const source = plan.supersedes;
         if (!source || source.userId !== userId) {
           await this.block(tx, plan, 'SOURCE_PLAN_MISSING');
-          return;
+          return false;
         }
         if (source.status === 'CANCELLED' || source.status === 'SUPERSEDED') {
           await this.block(tx, plan, `SOURCE_PLAN_${source.status}`);
-          return;
+          return false;
         }
         if (!['ACTIVE', 'PAUSED', 'COMPLETED'].includes(source.status)) {
           await this.block(tx, plan, `SOURCE_PLAN_${source.status}`);
-          return;
+          return false;
         }
 
         const competing = await this.plans.findFirst(
@@ -100,11 +106,19 @@ export class PlanScheduledActivationWorker {
         );
         if (competing) {
           await this.block(tx, plan, 'ANOTHER_ACTIVE_PLAN');
-          return;
+          return false;
         }
 
         const now = new Date();
         if (source.status === 'ACTIVE' || source.status === 'PAUSED') {
+          if (source.planningMode === 'ROLLING') {
+            await this.plans.fenceAutomationJobs?.(
+              source.id,
+              'SUPERSEDED',
+              true,
+              tx,
+            );
+          }
           await this.plans.update(
             {
               where: { id: source.id },
@@ -146,12 +160,32 @@ export class PlanScheduledActivationWorker {
           closedAt: null,
           tx,
         });
+        return true;
       },
       {
         isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
         timeout: 30_000,
       },
     );
+    if (activated && this.events) {
+      await this.events
+        .emitAsync(
+          PLAN_WORKOUTS_CHANGED_EVENT,
+          new PlanWorkoutsChangedEvent(
+            userId,
+            'scheduled_plan_activated',
+            [],
+            planId,
+          ),
+        )
+        .catch((error) => {
+          this.logger.warn(
+            `Scheduled plan activation event emit failed planId=${planId}: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
+        });
+    }
   }
 
   private async block(

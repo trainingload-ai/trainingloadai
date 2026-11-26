@@ -1,6 +1,9 @@
 import { ACTIVITY_COACH_MARKDOWN_FORMAT } from './activity-coach.constants';
 import { CoachTaskResultValidationError } from './core/coach-task-result-error';
-import { appLocaleEnglishName, resolveSupportedLocale } from '@/utils/locale.util';
+import {
+  appLocaleEnglishName,
+  resolveSupportedLocale,
+} from '@/utils/locale.util';
 
 export {
   compileActivityCoachMessages,
@@ -26,13 +29,20 @@ export function isActivityCoachMarkdownEnvelope(
   );
 }
 
-export function activityReviewHasExpectedScript(markdown: string, language: string) {
+export function activityReviewHasExpectedScript(
+  markdown: string,
+  language: string,
+) {
   const prose = markdown
-    .replace(/^(?: {0,3}>.*| {0,3}(?:```|~~~)[^\n]*\n[\s\S]*?^ {0,3}(?:```|~~~)[^\n]*)$/gm, '')
+    .replace(
+      /^(?: {0,3}>.*| {0,3}(?:```|~~~)[^\n]*\n[\s\S]*?^ {0,3}(?:```|~~~)[^\n]*)$/gm,
+      '',
+    )
     .replace(/`[^`\n]+`|!?\[([^\]]+)\]\([^)]*\)/g, '$1');
   const latin = (prose.match(/\p{Script=Latin}/gu) ?? []).length;
   const han = (prose.match(/\p{Script=Han}/gu) ?? []).length;
-  const kana = (prose.match(/[\p{Script=Hiragana}\p{Script=Katakana}]/gu) ?? []).length;
+  const kana = (prose.match(/[\p{Script=Hiragana}\p{Script=Katakana}]/gu) ?? [])
+    .length;
   const hangul = (prose.match(/\p{Script=Hangul}/gu) ?? []).length;
   const locale = resolveSupportedLocale(language);
   // Only reject a clear script mismatch. Proper names and short quoted labels
@@ -42,7 +52,10 @@ export function activityReviewHasExpectedScript(markdown: string, language: stri
     case 'zh-hant':
       return Math.max(latin, kana, hangul) < Math.max(15, han * 2);
     case 'ja':
-      return Math.max(latin, hangul) < Math.max(15, (han + kana) * 2);
+      return (
+        (han + kana < 15 || kana > 0) &&
+        Math.max(latin, hangul) < Math.max(15, (han + kana) * 2)
+      );
     case 'ko':
       return Math.max(latin, han + kana) < Math.max(15, hangul * 2);
     default:
@@ -50,7 +63,10 @@ export function activityReviewHasExpectedScript(markdown: string, language: stri
   }
 }
 
-export function validateActivityReviewMarkdown(content: unknown, language: string) {
+export function validateActivityReviewMarkdown(
+  content: unknown,
+  language: string,
+) {
   const markdown = typeof content === 'string' ? content.trim() : '';
   if (!markdown) throw new Error('Activity review markdown is required.');
   if (!activityReviewHasExpectedScript(markdown, language)) {
@@ -75,11 +91,16 @@ export function readStoredCoachMarkdown(
   if (!content) return null;
   if (typeof content === 'string') {
     const t = content.trim();
-    return t && (!language || activityReviewHasExpectedScript(t, language)) ? t : null;
+    return t && (!language || activityReviewHasExpectedScript(t, language))
+      ? t
+      : null;
   }
   if (isActivityCoachMarkdownEnvelope(content)) {
     if (language?.trim()) {
-      return readStoredCoachMarkdown(content.byLang[resolveSupportedLocale(language)], language);
+      return readStoredCoachMarkdown(
+        content.byLang[resolveSupportedLocale(language)],
+        language,
+      );
     }
     for (const text of Object.values(content.byLang)) {
       if (typeof text === 'string' && text.trim()) {

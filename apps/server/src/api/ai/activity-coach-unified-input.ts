@@ -282,39 +282,37 @@ export async function buildUnifiedActivityAnalysisInput(
   const activityDay = activity.startTime
     ? dayjs(activity.startTime).tz(userTimezone).startOf('day')
     : null;
-  const activityDate =
-    activityDay?.isValid() === true ? activityDay.toDate() : null;
   const activityLocalDate =
     activityDay?.isValid() === true
       ? activityDay.format('YYYY-MM-DD')
       : undefined;
+  // PMCData.date is stored at UTC midnight for each calendar day; align the
+  // range query to the activity's local calendar date at UTC midnight.
+  const activityUtcDay = activityLocalDate
+    ? dayjs.utc(`${activityLocalDate}T00:00:00.000Z`)
+    : null;
 
-  // 加载 PMC 记录
   const pmcRecords =
-    userId && activityDate && pmc
+    userId && activityUtcDay && pmc
       ? await pmc.listRange(
           userId,
-          dayjs(activityDate).subtract(13, 'day').toDate(),
-          activityDate,
+          activityUtcDay.subtract(13, 'day').toDate(),
+          activityUtcDay.toDate(),
           { orderBy: 'desc' },
         )
       : [];
 
-  // 最近 14 天活跃天数
   const activeDays = pmcRecords.filter((r) => r.dailyValue >= 10).length;
-  // 最近 14 天休息天数
-  const rest_days_last_14d = activityDate ? 14 - activeDays : undefined;
-  // 最近 PMC 记录
+  const rest_days_last_14d = activityUtcDay ? 14 - activeDays : undefined;
   const latestPMC = pmcRecords[0];
-  // 最近 7 天 PMC 记录
-  const last7Days = activityDate
+  const last7Days = activityUtcDay
     ? Array.from({ length: 7 })
         .map((_, i) => {
-          const targetDate = dayjs(activityDate)
+          const targetYmd = activityUtcDay
             .subtract(i, 'day')
-            .startOf('day');
-          const record = pmcRecords.find((r) =>
-            dayjs(r.date).startOf('day').isSame(targetDate),
+            .format('YYYY-MM-DD');
+          const record = pmcRecords.find(
+            (r) => dayjs.utc(r.date).format('YYYY-MM-DD') === targetYmd,
           );
           return record ? round(record.dailyValue, 1) : 0;
         })
@@ -419,7 +417,8 @@ export async function buildUnifiedActivityAnalysisInput(
       skiba:
         activityCoachAllows(sportContext, 'power') &&
         activity.bikeScore &&
-        activity.sportType === SportType.RUN
+        (activity.sportType === SportType.CYCLING ||
+          activity.sportType === SportType.RUN)
           ? {
               x_power: activity?.bikeScore?.xPower,
               vi: activity?.bikeScore?.variabilityIndex,
@@ -500,10 +499,9 @@ export async function buildUnifiedActivityAnalysisInput(
         activity.sportType === SportType.CYCLING
           ? round(activity.bikeScore.bikeScore)
           : undefined,
-      trimp:
-        activity?.trimp?.trimp100 && activity.sportType === SportType.RUN
-          ? round(activity.trimp.trimp100)
-          : undefined,
+      trimp: activity?.trimp?.trimp100
+        ? round(activity.trimp.trimp100)
+        : undefined,
     },
     historical_load: {
       ATL: latestPMC ? round(latestPMC.ATL, 1) : undefined,

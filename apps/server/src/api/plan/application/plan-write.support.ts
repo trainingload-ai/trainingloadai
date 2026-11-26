@@ -2,7 +2,10 @@ import { createHash } from 'node:crypto';
 import { generationCoverage } from '@shared/rolling-plan';
 import { PlanCalendarValidationService } from './plan-calendar-validation.service';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
-import { isPrismaSerializableConflict, withSerializableRetry } from '@/prisma/prisma-transaction-errors';
+import {
+  isPrismaSerializableConflict,
+  withSerializableRetry,
+} from '@/prisma/prisma-transaction-errors';
 import {
   ConflictException,
   Injectable,
@@ -640,7 +643,10 @@ export class PlanWriteSupport {
     return {
       inPlan: resolvedInPlanRows.map((row) => {
         if (!row.plan) return this.normalizePlanWorkoutRow(row);
-        const mutability = this.resolveWorkoutMutability({ ...row, plan: row.plan }, preferredTimezone);
+        const mutability = this.resolveWorkoutMutability(
+          { ...row, plan: row.plan },
+          preferredTimezone,
+        );
         return {
           ...this.normalizePlanWorkoutRow(row),
           ...this.workoutCapabilityProjection(mutability),
@@ -648,7 +654,12 @@ export class PlanWriteSupport {
       }),
       independent: resolvedIndependentRows.map((row) => ({
         ...this.normalizePlanWorkoutRow(row),
-        ...this.workoutCapabilityProjection(this.resolveWorkoutMutability({ ...row, plan: { status: 'ACTIVE' } }, preferredTimezone)),
+        ...this.workoutCapabilityProjection(
+          this.resolveWorkoutMutability(
+            { ...row, plan: { status: 'ACTIVE' } },
+            preferredTimezone,
+          ),
+        ),
         calendarMoveAllowed: false,
       })),
     };
@@ -659,11 +670,21 @@ export class PlanWriteSupport {
     { idempotencyKey, ...dto }: CreateIndependentWorkoutDto,
     _meta?: CoachEventMeta,
   ) {
-    const fingerprint = idempotencyKey && createHash('sha256').update(JSON.stringify(dto, (_, value) =>
-      value && typeof value === 'object' && !Array.isArray(value)
-        ? Object.fromEntries(Object.entries(value).sort(([left], [right]) => left.localeCompare(right)))
-        : value,
-    )).digest('hex');
+    const fingerprint =
+      idempotencyKey &&
+      createHash('sha256')
+        .update(
+          JSON.stringify(dto, (_, value) =>
+            value && typeof value === 'object' && !Array.isArray(value)
+              ? Object.fromEntries(
+                  Object.entries(value).sort(([left], [right]) =>
+                    left.localeCompare(right),
+                  ),
+                )
+              : value,
+          ),
+        )
+        .digest('hex');
     const result = await this.prisma.$transaction(async (tx) => {
       if (idempotencyKey && fingerprint) {
         await acquireHashtextAdvisoryXactLock(tx, userId);
@@ -671,45 +692,75 @@ export class PlanWriteSupport {
           where: { userId_key: { userId, key: idempotencyKey } },
         });
         if (receipt) {
-          const row = receipt.fingerprint === fingerprint && await this.workouts.findFirst({
-            where: { userId, id: receipt.workoutId }, include: this.buildScheduledWorkoutInclude(),
-          }, tx);
-          if (!row) throw new BusinessException({
-            code: BUSINESS_ERROR_CODE.PLAN_PROPOSAL_CONFLICT,
-            message: receipt.fingerprint !== fingerprint
-              ? 'This workout creation key was already used for another request'
-              : 'This workout creation was already processed; refresh the calendar',
-          });
+          const row =
+            receipt.fingerprint === fingerprint &&
+            (await this.workouts.findFirst(
+              {
+                where: { userId, id: receipt.workoutId },
+                include: this.buildScheduledWorkoutInclude(),
+              },
+              tx,
+            ));
+          if (!row)
+            throw new BusinessException({
+              code: BUSINESS_ERROR_CODE.PLAN_PROPOSAL_CONFLICT,
+              message:
+                receipt.fingerprint !== fingerprint
+                  ? 'This workout creation key was already used for another request'
+                  : 'This workout creation was already processed; refresh the calendar',
+            });
           return { workout: this.normalizePlanWorkoutRow(row), created: false };
         }
       }
-      const { workout } = await this.createIndependentWorkoutInTransaction(userId, dto, tx);
+      const { workout } = await this.createIndependentWorkoutInTransaction(
+        userId,
+        dto,
+        tx,
+      );
       if (idempotencyKey && fingerprint && workout) {
         await tx.independentWorkoutCreation.create({
-          data: { userId, key: idempotencyKey, fingerprint, workoutId: workout.id },
+          data: {
+            userId,
+            key: idempotencyKey,
+            fingerprint,
+            workoutId: workout.id,
+          },
         });
       }
       return { workout, created: true };
     });
-    if (result.created && result.workout) await this.emitWorkoutsChanged(userId, 'independent_create', [result.workout.id]);
+    if (result.created && result.workout)
+      await this.emitWorkoutsChanged(userId, 'independent_create', [
+        result.workout.id,
+      ]);
     return { workout: result.workout };
   }
 
   private async independentWorkoutToday(userId: string, tx?: Tx) {
     const timezone = await this.userService.getPreferredTimezone(userId, tx);
     const now = new Date();
-    return activityCalendarYmdInZone(now, timezone) ?? now.toISOString().slice(0, 10);
+    return (
+      activityCalendarYmdInZone(now, timezone) ?? now.toISOString().slice(0, 10)
+    );
   }
 
-  private normalizeIndependentDraftWorkout(workout: CreateScheduledWorkoutDto, today: string) {
+  private normalizeIndependentDraftWorkout(
+    workout: CreateScheduledWorkoutDto,
+    today: string,
+  ) {
     if (!isCalendarDate(workout.scheduledDate) || workout.scheduledDate < today)
-      throw new UnprocessableEntityException('Choose a current or future workout date');
+      throw new UnprocessableEntityException(
+        'Choose a current or future workout date',
+      );
     this.assertWorkoutDefinitionPresent(workout);
     const definition = this.resolveWorkoutDefinitionInput(workout);
     return {
       scheduledDate: workout.scheduledDate,
       sportType: workout.sportType,
-      sportDefinitionCode: normalizeSportDefinitionCode(workout.sportType, workout.sportDefinitionCode),
+      sportDefinitionCode: normalizeSportDefinitionCode(
+        workout.sportType,
+        workout.sportDefinitionCode,
+      ),
       name: workout.name ?? null,
       notes: workout.notes ?? null,
       text: definition.text,
@@ -722,15 +773,34 @@ export class PlanWriteSupport {
     };
   }
 
-  private independentWorkoutDraftView(draft: IndependentWorkoutDraft, today: string) {
-    const workout = draft.workout as unknown as ReturnType<PlanWriteSupport['normalizeIndependentDraftWorkout']>;
-    const state = draft.workoutId ? 'APPLIED' : draft.discardedAt ? 'DISCARDED'
-      : workout.scheduledDate < today ? 'EXPIRED' : 'READY';
-    return { id: draft.id, revision: draft.revision, workoutId: draft.workoutId, workout, state };
+  private independentWorkoutDraftView(
+    draft: IndependentWorkoutDraft,
+    today: string,
+  ) {
+    const workout = draft.workout as unknown as ReturnType<
+      PlanWriteSupport['normalizeIndependentDraftWorkout']
+    >;
+    const state = draft.workoutId
+      ? 'APPLIED'
+      : draft.discardedAt
+        ? 'DISCARDED'
+        : workout.scheduledDate < today
+          ? 'EXPIRED'
+          : 'READY';
+    return {
+      id: draft.id,
+      revision: draft.revision,
+      workoutId: draft.workoutId,
+      workout,
+      state,
+    };
   }
 
   async createIndependentWorkoutDraft(
-    userId: string, sid: string, originMessageId: string, workout: CreateScheduledWorkoutDto,
+    userId: string,
+    sid: string,
+    originMessageId: string,
+    workout: CreateScheduledWorkoutDto,
   ) {
     return this.prisma.$transaction(async (tx) => {
       await acquireHashtextAdvisoryXactLock(tx, userId);
@@ -738,7 +808,8 @@ export class PlanWriteSupport {
         where: { userId, sessionId: sid, id: originMessageId, role: 'USER' },
         select: { id: true },
       });
-      if (!origin) throw new NotFoundException('Conversation message not found');
+      if (!origin)
+        throw new NotFoundException('Conversation message not found');
       const today = await this.independentWorkoutToday(userId, tx);
       const prior = await tx.independentWorkoutDraft.findUnique({
         where: { userId_sid_originMessageId: { userId, sid, originMessageId } },
@@ -746,8 +817,13 @@ export class PlanWriteSupport {
       if (prior) return this.independentWorkoutDraftView(prior, today);
       const draft = await tx.independentWorkoutDraft.create({
         data: {
-          userId, sid, originMessageId,
-          workout: this.normalizeIndependentDraftWorkout(workout, today) as Prisma.InputJsonValue,
+          userId,
+          sid,
+          originMessageId,
+          workout: this.normalizeIndependentDraftWorkout(
+            workout,
+            today,
+          ) as Prisma.InputJsonValue,
         },
       });
       return this.independentWorkoutDraftView(draft, today);
@@ -755,42 +831,80 @@ export class PlanWriteSupport {
   }
 
   async getIndependentWorkoutDraft(userId: string, id: string) {
-    const draft = await this.prisma.independentWorkoutDraft.findFirst({ where: { id, userId } });
+    const draft = await this.prisma.independentWorkoutDraft.findFirst({
+      where: { id, userId },
+    });
     if (!draft) throw new NotFoundException('Draft not found');
-    return this.independentWorkoutDraftView(draft, await this.independentWorkoutToday(userId));
+    return this.independentWorkoutDraftView(
+      draft,
+      await this.independentWorkoutToday(userId),
+    );
   }
 
-  async transitionIndependentWorkoutDraft(userId: string, id: string, input: TransitionIndependentWorkoutDraftDto) {
+  async transitionIndependentWorkoutDraft(
+    userId: string,
+    id: string,
+    input: TransitionIndependentWorkoutDraftDto,
+  ) {
     const result = await this.prisma.$transaction(async (tx) => {
       await acquireHashtextAdvisoryXactLock(tx, userId);
-      const draft = await tx.independentWorkoutDraft.findFirst({ where: { id, userId } });
+      const draft = await tx.independentWorkoutDraft.findFirst({
+        where: { id, userId },
+      });
       if (!draft) throw new NotFoundException('Draft not found');
       const today = await this.independentWorkoutToday(userId, tx);
       const view = this.independentWorkoutDraftView(draft, today);
-      if (draft.revision === input.expectedRevision + 1 &&
+      if (
+        draft.revision === input.expectedRevision + 1 &&
         ((input.action === 'CONFIRM' && view.state === 'APPLIED') ||
-         (input.action === 'DISCARD' && view.state === 'DISCARDED'))) {
+          (input.action === 'DISCARD' && view.state === 'DISCARDED'))
+      ) {
         return { view, createdId: null };
       }
-      if (draft.revision !== input.expectedRevision) throw new ConflictException('Draft version changed');
-      if (view.state !== 'READY' && !(view.state === 'EXPIRED' && input.action === 'DISCARD'))
+      if (draft.revision !== input.expectedRevision)
+        throw new ConflictException('Draft version changed');
+      if (
+        view.state !== 'READY' &&
+        !(view.state === 'EXPIRED' && input.action === 'DISCARD')
+      )
         throw new ConflictException('Draft is no longer available');
-      const data: Prisma.IndependentWorkoutDraftUpdateInput = { revision: { increment: 1 } };
+      const data: Prisma.IndependentWorkoutDraftUpdateInput = {
+        revision: { increment: 1 },
+      };
       let createdId: string | null = null;
       if (input.action === 'SAVE') {
-        if (!input.workout) throw new UnprocessableEntityException('Enter a workout to save the draft');
-        data.workout = this.normalizeIndependentDraftWorkout(input.workout, today) as Prisma.InputJsonValue;
+        if (!input.workout)
+          throw new UnprocessableEntityException(
+            'Enter a workout to save the draft',
+          );
+        data.workout = this.normalizeIndependentDraftWorkout(
+          input.workout,
+          today,
+        ) as Prisma.InputJsonValue;
       } else if (input.action === 'CONFIRM') {
-        const { workout } = await this.createIndependentWorkoutInTransaction(userId, view.workout, tx);
+        const { workout } = await this.createIndependentWorkoutInTransaction(
+          userId,
+          view.workout,
+          tx,
+        );
         if (!workout) throw new Error('Confirmed workout was not persisted');
         data.workoutId = createdId = workout.id;
       } else {
         data.discardedAt = new Date();
       }
-      const updated = await tx.independentWorkoutDraft.update({ where: { id }, data });
-      return { view: this.independentWorkoutDraftView(updated, today), createdId };
+      const updated = await tx.independentWorkoutDraft.update({
+        where: { id },
+        data,
+      });
+      return {
+        view: this.independentWorkoutDraftView(updated, today),
+        createdId,
+      };
     });
-    if (result.createdId) await this.emitWorkoutsChanged(userId, 'independent_create', [result.createdId]);
+    if (result.createdId)
+      await this.emitWorkoutsChanged(userId, 'independent_create', [
+        result.createdId,
+      ]);
     return result.view;
   }
 
@@ -801,7 +915,8 @@ export class PlanWriteSupport {
     tx: Prisma.TransactionClient,
   ) {
     await acquireHashtextAdvisoryXactLock(tx, userId);
-    if (!isCalendarDate(dto.scheduledDate)) throw new UnprocessableEntityException('Invalid workout date');
+    if (!isCalendarDate(dto.scheduledDate))
+      throw new UnprocessableEntityException('Invalid workout date');
     this.assertWorkoutDefinitionPresent(dto);
     const definition = this.resolveWorkoutDefinitionInput(dto);
     const scheduledDate = scheduledDateFromCalendar(dto.scheduledDate);
@@ -873,7 +988,10 @@ export class PlanWriteSupport {
 
     await this.attachActualLoadToWorkout(workout);
     const resolved = await this.resolveWorkoutTargetsForRead(userId, workout);
-    const mutability = await this.workoutMutabilityInput(userId, { ...workout, plan: { status: 'ACTIVE' } });
+    const mutability = await this.workoutMutabilityInput(userId, {
+      ...workout,
+      plan: { status: 'ACTIVE' },
+    });
 
     return {
       workout: {
@@ -884,41 +1002,76 @@ export class PlanWriteSupport {
     };
   }
 
-  async updateIndependentWorkout(userId: string, workoutId: string, dto: UpdateIndependentWorkoutDto) {
-    if (!isCalendarDate(dto.scheduledDate)) throw new UnprocessableEntityException('Invalid workout date');
+  async updateIndependentWorkout(
+    userId: string,
+    workoutId: string,
+    dto: UpdateIndependentWorkoutDto,
+  ) {
+    if (!isCalendarDate(dto.scheduledDate))
+      throw new UnprocessableEntityException('Invalid workout date');
     this.assertWorkoutDefinitionPresent(dto);
     const definition = this.resolveWorkoutDefinitionInput(dto);
     const workout = await this.prisma.$transaction(async (tx) => {
       await acquireHashtextAdvisoryXactLock(tx, userId);
       await this.workouts.lockForUpdate(workoutId, tx);
-      const current = await this.workouts.findFirst({
-        where: { id: workoutId, userId, planId: null },
-        include: { links: this.buildWorkoutLinksInclude() },
-      }, tx);
-      if (!current || current.revision !== dto.expectedRevision) throw new BusinessException({
-        code: BUSINESS_ERROR_CODE.PLAN_PROPOSAL_CONFLICT,
-        message: 'Independent workout changed; refresh the calendar',
-      });
-      const mutability = await this.workoutMutabilityInput(userId, { ...current, plan: { status: 'ACTIVE' } }, tx);
+      const current = await this.workouts.findFirst(
+        {
+          where: { id: workoutId, userId, planId: null },
+          include: { links: this.buildWorkoutLinksInclude() },
+        },
+        tx,
+      );
+      if (!current || current.revision !== dto.expectedRevision)
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.PLAN_PROPOSAL_CONFLICT,
+          message: 'Independent workout changed; refresh the calendar',
+        });
+      const mutability = await this.workoutMutabilityInput(
+        userId,
+        { ...current, plan: { status: 'ACTIVE' } },
+        tx,
+      );
       this.workoutMutability.assertMutable(mutability, 'PRESCRIPTION');
       if (dto.scheduledDate < mutability.athleteTodayYmd)
         throw new UnprocessableEntityException('Workout date has passed');
       const scheduledDate = scheduledDateFromCalendar(dto.scheduledDate);
-      const sessionIndex = dto.scheduledDate === mutability.scheduledDateYmd
-        ? current.sessionIndex
-        : await this.nextIndependentSessionIndex(tx, userId, scheduledDate);
-      await this.workouts.update({ where: { id: workoutId }, data: {
-        scheduledDate, sessionIndex, sportType: dto.sportType,
-        sportDefinitionCode: normalizeSportDefinitionCode(dto.sportType, dto.sportDefinitionCode),
-        name: dto.name ?? null, notes: dto.notes ?? null, text: definition.text,
-        structureKind: definition.kind, dslVersion: definition.version, revision: { increment: 1 },
-      } }, tx);
+      const sessionIndex =
+        dto.scheduledDate === mutability.scheduledDateYmd
+          ? current.sessionIndex
+          : await this.nextIndependentSessionIndex(tx, userId, scheduledDate);
+      await this.workouts.update(
+        {
+          where: { id: workoutId },
+          data: {
+            scheduledDate,
+            sessionIndex,
+            sportType: dto.sportType,
+            sportDefinitionCode: normalizeSportDefinitionCode(
+              dto.sportType,
+              dto.sportDefinitionCode,
+            ),
+            name: dto.name ?? null,
+            notes: dto.notes ?? null,
+            text: definition.text,
+            structureKind: definition.kind,
+            dslVersion: definition.version,
+            revision: { increment: 1 },
+          },
+        },
+        tx,
+      );
       await this.replaceWorkoutDefinition(tx, workoutId, definition);
       await this.markExternalMappings(tx, [workoutId], 'LOCAL_CHANGED');
       await this.calendarValidation.assertStored(userId, [workoutId], tx);
-      return this.normalizePlanWorkoutRow(await this.workouts.findUnique({
-        where: { id: workoutId }, include: this.buildScheduledWorkoutInclude(),
-      }, tx));
+      return this.normalizePlanWorkoutRow(
+        await this.workouts.findUnique(
+          {
+            where: { id: workoutId },
+            include: this.buildScheduledWorkoutInclude(),
+          },
+          tx,
+        ),
+      );
     });
     await this.emitWorkoutsChanged(userId, 'independent_update', [workoutId]);
     return { workout };
@@ -1365,7 +1518,10 @@ export class PlanWriteSupport {
     workout: Parameters<PlanWriteSupport['resolveWorkoutMutability']>[0],
     tx?: PlanDb,
   ) {
-    return this.resolveWorkoutMutability(workout, await this.userService.getPreferredTimezone(userId, tx));
+    return this.resolveWorkoutMutability(
+      workout,
+      await this.userService.getPreferredTimezone(userId, tx),
+    );
   }
 
   private resolveWorkoutMutability(
@@ -1385,8 +1541,11 @@ export class PlanWriteSupport {
     },
     preferredTimezone: string | null | undefined,
   ) {
-    const timezone = this.parseStoredScheduleConstraints(workout.plan.generationMetadata)?.calendarTimeZone ??
-      workout.plan.activationTimezone ?? preferredTimezone;
+    const timezone =
+      this.parseStoredScheduleConstraints(workout.plan.generationMetadata)
+        ?.calendarTimeZone ??
+      workout.plan.activationTimezone ??
+      preferredTimezone;
     const athleteTodayYmd =
       activityCalendarYmdInZone(new Date(), timezone) ??
       new Date().toISOString().slice(0, 10);
@@ -1399,7 +1558,10 @@ export class PlanWriteSupport {
       athleteTodayYmd,
       activeActivityLinkCount: workout.links.length,
       planStartYmd: workout.plan.startDate?.toISOString().slice(0, 10),
-      planEndYmd: workout.plan.planningMode !== 'ROLLING' ? workout.plan.endDate?.toISOString().slice(0, 10) : undefined,
+      planEndYmd:
+        workout.plan.planningMode !== 'ROLLING'
+          ? workout.plan.endDate?.toISOString().slice(0, 10)
+          : undefined,
       pendingSupersessionYmd:
         workout.plan.supersededBy?.status === 'SCHEDULED' &&
         workout.plan.supersededBy.startDate
@@ -1414,17 +1576,27 @@ export class PlanWriteSupport {
     const edit = this.workoutMutability.reason(input, 'PRESCRIPTION');
     const remove = this.workoutMutability.reason(input, 'DELETE');
     const postpone = this.workoutMutability.reason(input, 'SCHEDULE');
-    const skip = this.workoutMutability.reason(input, 'STATUS') ??
+    const skip =
+      this.workoutMutability.reason(input, 'STATUS') ??
       (input.activeActivityLinkCount ? 'ACTIVITY_LINKED' : null);
     return {
       calendarTodayYmd: input.athleteTodayYmd,
       calendarMoveWindow: {
-        from: input.planStartYmd && input.planStartYmd > input.athleteTodayYmd ? input.planStartYmd : input.athleteTodayYmd,
+        from:
+          input.planStartYmd && input.planStartYmd > input.athleteTodayYmd
+            ? input.planStartYmd
+            : input.athleteTodayYmd,
         through: input.planEndYmd,
         before: input.pendingSupersessionYmd ?? undefined,
       },
-      calendarMoveAllowed: !postpone && ['ACTIVE', 'PAUSED'].includes(input.planStatus),
-      capabilities: { edit: !edit, delete: !remove, postpone: !postpone, skip: !skip },
+      calendarMoveAllowed:
+        !postpone && ['ACTIVE', 'PAUSED'].includes(input.planStatus),
+      capabilities: {
+        edit: !edit,
+        delete: !remove,
+        postpone: !postpone,
+        skip: !skip,
+      },
       capabilityReasons: { edit, delete: remove, postpone, skip },
     };
   }
@@ -1449,8 +1621,10 @@ export class PlanWriteSupport {
         );
       }
     }
-    const timezone = this.parseStoredScheduleConstraints(plan.generationMetadata)?.calendarTimeZone ??
-      await this.userService.getPreferredTimezone(userId, tx);
+    const timezone =
+      this.parseStoredScheduleConstraints(plan.generationMetadata)
+        ?.calendarTimeZone ??
+      (await this.userService.getPreferredTimezone(userId, tx));
     const athleteTodayYmd =
       activityCalendarYmdInZone(new Date(), timezone) ??
       new Date().toISOString().slice(0, 10);
@@ -2054,7 +2228,8 @@ export class PlanWriteSupport {
       targetZoneSource: 'TRAININGLOAD',
       targetZoneBasis: zoneBasis,
       intensityIntent:
-        args.step.intensityIntent ?? this.workoutService.inferIntensityIntent(args.step),
+        args.step.intensityIntent ??
+        this.workoutService.inferIntensityIntent(args.step),
       targetResolutionMode: identity ? 'DYNAMIC_ZONE' : 'LEGACY_SNAPSHOT',
       targetZoneSystemKey: identity?.systemKey ?? null,
       targetZoneFingerprint: identity?.fingerprint ?? null,
@@ -2646,8 +2821,13 @@ export class PlanWriteSupport {
       const scheduleConstraints = this.parseStoredScheduleConstraints(
         dto.generationMetadata,
       );
-      const planAssessment = dto.planningMode === 'ROLLING' ? undefined
-        : parsePlanAssessment(dto.generationMetadata?.planAssessment, dto.periodWeeks ?? 0);
+      const planAssessment =
+        dto.planningMode === 'ROLLING'
+          ? undefined
+          : parsePlanAssessment(
+              dto.generationMetadata?.planAssessment,
+              dto.periodWeeks ?? 0,
+            );
       if (dto.generationMetadata?.planAssessment != null && !planAssessment)
         throw new UnprocessableEntityException('Invalid plan assessment');
       if (scheduleConstraints && qualityContract?.startDate) {
@@ -2679,8 +2859,11 @@ export class PlanWriteSupport {
                   structureKind: definition.kind,
                   text: definition.text,
                   durationSeconds: definition.summary.durationSeconds,
-                  plannedSessionRpe: workout.plannedSessionRpe ??
-                    (definition.structure?.kind === 'STRENGTH' ? definition.structure.plannedSessionRpe : undefined),
+                  plannedSessionRpe:
+                    workout.plannedSessionRpe ??
+                    (definition.structure?.kind === 'STRENGTH'
+                      ? definition.structure.plannedSessionRpe
+                      : undefined),
                 };
               }),
               qualityContract,
@@ -3095,8 +3278,13 @@ export class PlanWriteSupport {
             : undefined,
         );
 
-      // PAUSED 计划下编辑：对受影响的 workout 增量重算估值；DRAFT 不算
-      if (existing.status === 'PAUSED' && touchedWorkoutIds.length > 0) {
+      // Recompute estimated loads for touched workouts on ACTIVE, PAUSED, or SCHEDULED plans; skip DRAFT.
+      if (
+        (existing.status === 'ACTIVE' ||
+          existing.status === 'PAUSED' ||
+          existing.status === 'SCHEDULED') &&
+        touchedWorkoutIds.length > 0
+      ) {
         for (const wid of touchedWorkoutIds) {
           try {
             await this.planLoadEstimator.applyForWorkout(wid, { tx });
@@ -3121,10 +3309,7 @@ export class PlanWriteSupport {
       await this.attachActualLoadToWorkouts(full);
 
       const affectedWorkoutIds = [
-        ...new Set([
-          ...(dto.deletedWorkoutIds ?? []),
-          ...touchedWorkoutIds,
-        ]),
+        ...new Set([...(dto.deletedWorkoutIds ?? []), ...touchedWorkoutIds]),
       ];
 
       await this.coachContext.appendEvent({
@@ -3150,18 +3335,34 @@ export class PlanWriteSupport {
       });
 
       const plan = this.normalizePlanRow(full);
-      return { plan };
+      return { plan, affectedWorkoutIds };
     };
     const result = options?.tx
       ? await run(options.tx)
       : await withSerializableRetry(() =>
           this.prisma.$transaction(run, { timeout: 60_000 }),
         );
-    const afterCommit = () => this.emitDraftChanged(userId, result.plan);
+    const afterCommit = async () => {
+      await this.emitDraftChanged(userId, result.plan);
+      if (
+        result.plan?.status !== 'DRAFT' &&
+        result.affectedWorkoutIds.length > 0
+      ) {
+        await this.emitWorkoutsChanged(
+          userId,
+          'plan_update',
+          result.affectedWorkoutIds,
+          planId,
+        );
+      }
+    };
     if (!options?.tx) {
       await afterCommit();
     }
-    return { ...result, afterCommit: options?.tx ? afterCommit : undefined };
+    return {
+      plan: result.plan,
+      afterCommit: options?.tx ? afterCommit : undefined,
+    };
   }
 
   async activatePlan(
@@ -3369,9 +3570,13 @@ export class PlanWriteSupport {
         plan: this.normalizePlanRow(full),
       };
     };
-    return options?.tx
-      ? run(options.tx)
-      : this.prisma.$transaction(run, { timeout: 60_000 });
+    const result = options?.tx
+      ? await run(options.tx)
+      : await this.prisma.$transaction(run, { timeout: 60_000 });
+    if (!options?.tx) {
+      await this.emitWorkoutsChanged(userId, 'plan_activate', [], planId);
+    }
+    return result;
   }
 
   async pausePlan(
@@ -3432,9 +3637,13 @@ export class PlanWriteSupport {
         plan: this.normalizePlanRow(updated),
       };
     };
-    return options?.tx
-      ? run(options.tx)
-      : this.prisma.$transaction(run, { timeout: 60_000 });
+    const result = options?.tx
+      ? await run(options.tx)
+      : await this.prisma.$transaction(run, { timeout: 60_000 });
+    if (!options?.tx) {
+      await this.emitWorkoutsChanged(userId, 'plan_pause', [], planId);
+    }
+    return result;
   }
 
   async completePlan(
@@ -3495,7 +3704,10 @@ export class PlanWriteSupport {
       : await withSerializableRetry(() =>
           this.prisma.$transaction(run, { timeout: 60_000 }),
         );
-    if (!options?.tx) await result.afterCommit?.();
+    if (!options?.tx) {
+      await result.afterCommit?.();
+      await this.emitWorkoutsChanged(userId, 'plan_complete', [], planId);
+    }
     return result;
   }
 
@@ -3589,7 +3801,10 @@ export class PlanWriteSupport {
       : await withSerializableRetry(() =>
           this.prisma.$transaction(run, { timeout: 60_000 }),
         );
-    if (!options?.tx) await result.afterCommit?.();
+    if (!options?.tx) {
+      await result.afterCommit?.();
+      await this.emitWorkoutsChanged(userId, 'plan_cancel', [], planId);
+    }
     return result;
   }
 
@@ -3601,6 +3816,24 @@ export class PlanWriteSupport {
         throw new BusinessException({
           code: BUSINESS_ERROR_CODE.WORKOUT_IMMUTABLE,
           message: 'This plan cannot be deleted',
+        });
+      }
+      const scheduledSuccessor = await this.plans.findFirst(
+        {
+          where: {
+            userId,
+            supersedesPlanId: planId,
+            status: 'SCHEDULED',
+          },
+          select: { id: true },
+        },
+        tx,
+      );
+      if (scheduledSuccessor) {
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.WORKOUT_IMMUTABLE,
+          message:
+            'Cannot delete a plan while a scheduled replacement plan depends on it',
         });
       }
       const workouts = await this.workouts.findMany(
@@ -3988,9 +4221,17 @@ export class PlanWriteSupport {
         workoutId,
         tx,
       );
-      if (dto.expectedPlanStatus && workout.plan.status !== dto.expectedPlanStatus)
-        throw new ConflictException('This workout no longer belongs to a draft');
-      if (dto.expectedRevision != null && workout.revision !== dto.expectedRevision)
+      if (
+        dto.expectedPlanStatus &&
+        workout.plan.status !== dto.expectedPlanStatus
+      )
+        throw new ConflictException(
+          'This workout no longer belongs to a draft',
+        );
+      if (
+        dto.expectedRevision != null &&
+        workout.revision !== dto.expectedRevision
+      )
         throw new BusinessException({
           code: BUSINESS_ERROR_CODE.PLAN_PROPOSAL_CONFLICT,
           message: 'Workout revision changed; refresh the calendar',
@@ -4024,7 +4265,9 @@ export class PlanWriteSupport {
         nextDayOffset !== workout.dayOffset &&
         officialPlanTargetRaceDate(workout.plan.generationMetadata)
       ) {
-        throw new UnprocessableEntityException('The target race date cannot be moved');
+        throw new UnprocessableEntityException(
+          'The target race date cannot be moved',
+        );
       }
       if (
         workout.plan.planningMode !== 'ROLLING' &&
@@ -4102,8 +4345,12 @@ export class PlanWriteSupport {
           tx,
         );
         await this.replaceWorkoutDefinition(
-          tx, workoutId, definition,
-          definition.kind === 'STRENGTH' ? undefined : workout.plannedSessionRpe,
+          tx,
+          workoutId,
+          definition,
+          definition.kind === 'STRENGTH'
+            ? undefined
+            : workout.plannedSessionRpe,
         );
         await this.markExternalMappings(tx, [workoutId], 'LOCAL_CHANGED');
 
@@ -4197,7 +4444,9 @@ export class PlanWriteSupport {
       await this.emitWorkoutsChanged(
         userId,
         'workout_update',
-        [workoutId],
+        txResult.clonedWorkoutId
+          ? [workoutId, txResult.clonedWorkoutId]
+          : [workoutId],
         planId,
       );
     };
@@ -4282,7 +4531,11 @@ export class PlanWriteSupport {
         { where: { id: planId }, include: this.buildPlanInclude() },
         tx,
       );
-      const qualityReport = await this.validateStoredPlanQuality(userId, full, tx);
+      const qualityReport = await this.validateStoredPlanQuality(
+        userId,
+        full,
+        tx,
+      );
       await this.plans.update(
         {
           where: { id: planId },
@@ -4329,17 +4582,22 @@ export class PlanWriteSupport {
     }
   }
 
-  private async validateStoredPlanQuality(userId: string, plan: PlanRowLike | null, tx: Tx) {
+  private async validateStoredPlanQuality(
+    userId: string,
+    plan: PlanRowLike | null,
+    tx: Tx,
+  ) {
     if (!plan) throw new UnprocessableEntityException('Plan not found');
     const normalized = this.normalizePlanRow(plan);
     const metadata = plan.generationMetadata as Record<string, unknown> | null;
     let contract;
     try {
-      contract = parsePlanQualityContract(
-        metadata?.qualityContract,
-      );
+      contract = parsePlanQualityContract(metadata?.qualityContract);
       if (contract?.maxMinutesByIsoWeekday && plan.startDate)
-        contract = { ...contract, startDate: normalizePlanDate(plan.startDate)! };
+        contract = {
+          ...contract,
+          startDate: normalizePlanDate(plan.startDate)!,
+        };
     } catch {
       throw new UnprocessableEntityException('Invalid plan quality contract');
     }
@@ -4362,13 +4620,19 @@ export class PlanWriteSupport {
                 structureKind: definition.kind,
                 text: definition.text,
                 durationSeconds: definition.summary.durationSeconds,
-                plannedSessionRpe: workout.plannedSessionRpe ??
-                  (definition.structure?.kind === 'STRENGTH' ? definition.structure.plannedSessionRpe : undefined),
+                plannedSessionRpe:
+                  workout.plannedSessionRpe ??
+                  (definition.structure?.kind === 'STRENGTH'
+                    ? definition.structure.plannedSessionRpe
+                    : undefined),
               };
             }),
             contract,
             tx,
-            parsePlanAssessment(metadata?.planAssessment, plan.periodWeeks ?? 0),
+            parsePlanAssessment(
+              metadata?.planAssessment,
+              plan.periodWeeks ?? 0,
+            ),
           );
     if (!report.valid)
       throw new UnprocessableEntityException({
@@ -4458,7 +4722,7 @@ export class PlanWriteSupport {
       return { link: existing };
     }
 
-    return withSerializableRetry(() =>
+    const result = await withSerializableRetry(() =>
       this.prisma.$transaction(async (tx) => {
         await acquireHashtextAdvisoryXactLock(tx, userId);
         if (!(await this.links.lockLinkTargets(activity.id, workoutId, tx)))
@@ -4541,6 +4805,13 @@ export class PlanWriteSupport {
         return { link };
       }),
     );
+    await this.emitWorkoutsChanged(
+      userId,
+      'activity_link',
+      [workoutId],
+      planId,
+    );
+    return result;
   }
 
   async unlinkWorkoutActivity(

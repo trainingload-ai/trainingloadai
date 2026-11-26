@@ -41,7 +41,7 @@ describe('activity review queue scheduling', () => {
         const db=await PGlite.create();
         try {
           await db.exec(\`CREATE TABLE t_activity_ai_review (
-            id text primary key,activity_id int,user_id text,status text,attempts int default 0,max_attempts int default 3,
+            id text primary key,activity_id int,user_id text,status text,trigger text default 'IMPORT',attempts int default 0,max_attempts int default 3,
             available_at timestamp,created_at timestamp default current_timestamp,updated_at timestamp,
             locked_at timestamp,started_at timestamp,finished_at timestamp,failed_at timestamp);\`);
           const utc=ms=>new Date(ms).toISOString().slice(0,23).replace('T',' ');
@@ -49,7 +49,7 @@ describe('activity review queue scheduling', () => {
           for(const zone of ['UTC','Asia/Shanghai']) {
             await db.query("SELECT set_config('TimeZone',$1,false)",[zone]);
             await db.exec('TRUNCATE t_activity_ai_review');
-            await db.query("INSERT INTO t_activity_ai_review(id,activity_id,user_id,status,available_at) VALUES ('future',42,'user','FAILED',$1::timestamp),('ready',43,'user','PENDING',$2::timestamp)",[utc(now+120000),utc(now-1000)]);
+            await db.query("INSERT INTO t_activity_ai_review(id,activity_id,user_id,status,trigger,available_at,locked_at) VALUES ('future',42,'user','FAILED','IMPORT',$1::timestamp,NULL),('ready',43,'user','PENDING','IMPORT',$2::timestamp,NULL),('manual-stale',44,'user','RUNNING','MANUAL',$2::timestamp,$3::timestamp)",[utc(now+120000),utc(now-1000),utc(now-3600000)]);
             const jobs=(await db.query(query.sql,query.values)).rows;
             const lease=(await db.query("SELECT to_char(locked_at,'YYYY-MM-DD HH24:MI:SS.MS') AS stamp FROM t_activity_ai_review WHERE id='ready'")).rows[0].stamp;
             results.push({zone,ids:jobs.map(row=>row.id),lease});

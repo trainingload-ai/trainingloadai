@@ -154,17 +154,16 @@ export function clampCurrentIndexes(plan: {
     };
   }
 
-  const today =
-    plan.planningMode === 'ROLLING' && plan.activationTimezone
-      ? new Date(
-          new Intl.DateTimeFormat('en-CA', {
-            timeZone: plan.activationTimezone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-          }).format(new Date()) + 'T00:00:00Z',
-        )
-      : new Date();
+  const today = plan.activationTimezone
+    ? new Date(
+        new Intl.DateTimeFormat('en-CA', {
+          timeZone: plan.activationTimezone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }).format(new Date()) + 'T00:00:00Z',
+      )
+    : new Date();
   const start = new Date(plan.startDate);
   const diffDays = Math.max(
     0,
@@ -299,7 +298,10 @@ export function normalizePlanWorkoutRow(
 }
 
 export function planDescription(
-  plan: Pick<PlanRowLike, 'description' | 'sourceType' | 'generationMetadata' | 'periodWeeks'>,
+  plan: Pick<
+    PlanRowLike,
+    'description' | 'sourceType' | 'generationMetadata' | 'periodWeeks'
+  >,
 ) {
   let description = plan.description ?? null;
   // Older official drafts stored the public template copy, even for a
@@ -309,13 +311,19 @@ export function planDescription(
       planTemplate?: { key?: string; variantId?: string; locale?: string };
     } | null;
     const origin = metadata?.planTemplate;
-    const template = origin?.key === 'RUN_5K_FIRST' ? getRunPlanTemplate(origin.key) : null;
-    const variant = template && origin?.variantId
-      ? getPlanTemplateVariant(template, origin.variantId)
-      : null;
+    const template =
+      origin?.key === 'RUN_5K_FIRST' ? getRunPlanTemplate(origin.key) : null;
+    const variant =
+      template && origin?.variantId
+        ? getPlanTemplateVariant(template, origin.variantId)
+        : null;
     const locale = normalizePlanTemplateLocale(origin?.locale);
-    if (template && variant && variant.periodWeeks === plan.periodWeeks &&
-      description === template.copy[locale].description) {
+    if (
+      template &&
+      variant &&
+      variant.periodWeeks === plan.periodWeeks &&
+      description === template.copy[locale].description
+    ) {
       description = getPlanTemplateCopy(template, variant, locale).description;
     }
   }

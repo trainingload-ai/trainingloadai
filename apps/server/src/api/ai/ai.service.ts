@@ -630,9 +630,7 @@ export class AiService {
             approvedAt: true,
             appliedAt: true,
             payload: isReviewBranch,
-            commits: isReviewBranch
-              ? { take: 1, select: { id: true } }
-              : false,
+            commits: isReviewBranch ? { take: 1, select: { id: true } } : false,
             options: {
               select: {
                 optionKey: true,
@@ -1195,7 +1193,10 @@ export class AiService {
   coachStream(
     params: Omit<
       CoachTurnInput,
-      'executionMode' | 'resumeHistory' | 'backgroundTask' | 'allowWithoutConsent'
+      | 'executionMode'
+      | 'resumeHistory'
+      | 'backgroundTask'
+      | 'allowWithoutConsent'
     >,
   ) {
     return this.runCoachTurn(params);
@@ -1293,7 +1294,9 @@ export class AiService {
         topic,
         revision: coachFacts.revision,
         timezone: coachFacts.timezone,
-        ...(excludeMemorySourceMessageId ? { excludeMemorySourceMessageId } : {}),
+        ...(excludeMemorySourceMessageId
+          ? { excludeMemorySourceMessageId }
+          : {}),
       });
     }
     const safetyConcern = background ? null : coachSafetyConcern(prompt);
@@ -1917,7 +1920,8 @@ export class AiService {
       taskType: 'ACTIVITY_REVIEW',
       funding:
         !options?.platformLanguageRepair &&
-        (options?.callerManagedOperationId || prepared.review.trigger === 'MANUAL')
+        (options?.callerManagedOperationId ||
+          prepared.review.trigger === 'MANUAL')
           ? 'USER'
           : 'PLATFORM',
       activeSkillName: 'activity-review',
@@ -1929,7 +1933,12 @@ export class AiService {
           reviewId: prepared.review.id,
           evidenceHash: prepared.evidenceHash,
           systemContract,
-          ...(options?.platformLanguageRepair && { platformLanguageRepair: true }),
+          ...(options?.callerManagedOperationId
+            ? { operationId: options.callerManagedOperationId }
+            : {}),
+          ...(options?.platformLanguageRepair && {
+            platformLanguageRepair: true,
+          }),
         }),
       ),
       triggerType: `ACTIVITY_REVIEW_${prepared.review.trigger}`,
@@ -1949,7 +1958,12 @@ export class AiService {
           raw && typeof raw === 'object' && !Array.isArray(raw)
             ? (raw as Record<string, unknown>)
             : null;
-        return { markdown: validateActivityReviewMarkdown(value?.markdown, prepared.lang) };
+        return {
+          markdown: validateActivityReviewMarkdown(
+            value?.markdown,
+            prepared.lang,
+          ),
+        };
       },
     });
 
@@ -2069,12 +2083,26 @@ export class AiService {
         runInline: true,
       });
       const platformLanguageRepair = cached && 'needsLanguageRepair' in cached;
-      const generated = await this.processQueuedActivityAiReview(queued.id, {
-        ...(platformLanguageRepair
-          ? { platformLanguageRepair: true }
-          : { callerManagedOperationId: operationId }),
-        allowWithoutConsent,
-      });
+      let generated: Awaited<
+        ReturnType<AiService['processQueuedActivityAiReview']>
+      >;
+      try {
+        generated = await this.processQueuedActivityAiReview(queued.id, {
+          ...(platformLanguageRepair
+            ? { platformLanguageRepair: true }
+            : { callerManagedOperationId: operationId }),
+          allowWithoutConsent,
+        });
+      } catch (error) {
+        await this.activityAiReviewService
+          .recoverInlineRunFailure({
+            reviewId: queued.id,
+            priorSucceeded: queued.priorSucceeded,
+            error,
+          })
+          .catch(() => undefined);
+        throw error;
+      }
       if (generated.outcome !== 'SUCCEEDED') {
         throw new Error(generated.code || 'ACTIVITY_ANALYSIS_SKIPPED');
       }
@@ -2108,13 +2136,16 @@ export class AiService {
     activityHashId: string,
     expectedEvidenceHash: string,
     language: string,
-  ): Promise<ActivityAnalysisResult | { needsLanguageRepair: true } | undefined> {
+  ): Promise<
+    ActivityAnalysisResult | { needsLanguageRepair: true } | undefined
+  > {
     const snap = await this.activityAiReviewService.getAiReviewForActivityHash({
       userId,
       activityHashId,
       language,
     });
-    if (!snap.found || snap.evidenceHash !== expectedEvidenceHash) return undefined;
+    if (!snap.found || snap.evidenceHash !== expectedEvidenceHash)
+      return undefined;
     if (snap.needsLanguageRepair) return { needsLanguageRepair: true };
     if (
       snap.markdown &&
@@ -2208,9 +2239,13 @@ export class AiService {
           : params.reviewScope === 'monthly'
             ? AiCoachReviewScope.MONTHLY
             : undefined;
-    const search = typeof params.query === 'string'
-      ? params.query.trim().slice(0, 120).replace(/[\\%_]/g, '\\$&')
-      : '';
+    const search =
+      typeof params.query === 'string'
+        ? params.query
+            .trim()
+            .slice(0, 120)
+            .replace(/[\\%_]/g, '\\$&')
+        : '';
     const match = { contains: search, mode: 'insensitive' as const };
     const rows = await this.prisma.aiCoachSession.findMany({
       where: {
@@ -2228,7 +2263,12 @@ export class AiService {
                 {
                   messages: {
                     some: {
-                      role: { in: [AiCoachMessageRole.USER, AiCoachMessageRole.ASSISTANT] },
+                      role: {
+                        in: [
+                          AiCoachMessageRole.USER,
+                          AiCoachMessageRole.ASSISTANT,
+                        ],
+                      },
                       content: match,
                     },
                   },
@@ -2545,58 +2585,91 @@ export class AiService {
     sid: string,
     messageId: string,
     deliveryId: string,
-    options: { date?: string; hrvSource?: string; metricSource?: string; byActivity?: string } = {},
+    options: {
+      date?: string;
+      hrvSource?: string;
+      metricSource?: string;
+      byActivity?: string;
+    } = {},
   ) {
     if (!(await this.aiDataConsent.isGranted(userId))) {
       throw new NotFoundException('Chart unavailable');
     }
     const row = await this.prisma.aiCoachMessage.findFirst({
-      where: { userId, sessionId: sid, id: messageId, role: AiCoachMessageRole.ASSISTANT },
+      where: {
+        userId,
+        sessionId: sid,
+        id: messageId,
+        role: AiCoachMessageRole.ASSISTANT,
+      },
       select: { message: true },
     });
     const envelope = row?.message as { parts?: unknown[] } | undefined;
-    const delivery = Array.isArray(envelope?.parts) ? envelope.parts.find((part) => {
-      const candidate = part as { type?: string; data?: { toolCallId?: string; name?: string } } | null;
-      return candidate?.type === 'data-coach-tool' &&
-        candidate.data?.toolCallId === deliveryId &&
-        (candidate.data.name === 'TrainingVisualization' ||
-          candidate.data.name === 'CoachHealthVisualization');
-    }) as { data: { input: unknown } } | undefined : undefined;
+    const delivery = Array.isArray(envelope?.parts)
+      ? (envelope.parts.find((part) => {
+          const candidate = part as {
+            type?: string;
+            data?: { toolCallId?: string; name?: string };
+          } | null;
+          return (
+            candidate?.type === 'data-coach-tool' &&
+            candidate.data?.toolCallId === deliveryId &&
+            (candidate.data.name === 'TrainingVisualization' ||
+              candidate.data.name === 'CoachHealthVisualization')
+          );
+        }) as { data: { input: unknown } } | undefined)
+      : undefined;
     const summary = delivery?.data.input;
     const { date, hrvSource } = options;
     if (isCoachHealthVisualization(summary) && this.healthData) {
-      const scope = date ? summary.recent?.date === date ? summary.recent.scope : null : summary.scope;
+      const scope = date
+        ? summary.recent?.date === date
+          ? summary.recent.scope
+          : null
+        : summary.scope;
       if (!scope) throw new NotFoundException('Chart unavailable');
       return readCoachHealthVisualization(this.healthData, userId, scope, {
-        chart: true, observedAt: new Date().toISOString(), hrvSourceId: hrvSource,
+        chart: true,
+        observedAt: new Date().toISOString(),
+        hrvSourceId: hrvSource,
       });
     }
     if (isTrainingVisualizationV2(summary) && summary.detail) {
-      const visualization = await queryTrainingExploration({
-        session: { user: { id: userId } },
-        userService: this.userService,
-        activityService: this.activityService,
-        activitySeries: this.activitySeries,
-        activities: this.activityRead,
-        planQuery: this.planQuery,
-        users: this.users,
-        lang: 'en',
-        power: this.power,
-        coachTools: this.coachTools,
-      } as AiToolContext, {
-        ...summary.provenance.query,
-        title: summary.title,
-        subtitle: summary.subtitle,
-      }, summary.provenance.timezone);
+      const visualization = await queryTrainingExploration(
+        {
+          session: { user: { id: userId } },
+          userService: this.userService,
+          activityService: this.activityService,
+          activitySeries: this.activitySeries,
+          activities: this.activityRead,
+          planQuery: this.planQuery,
+          users: this.users,
+          lang: 'en',
+          power: this.power,
+          coachTools: this.coachTools,
+        } as AiToolContext,
+        {
+          ...summary.provenance.query,
+          title: summary.title,
+          subtitle: summary.subtitle,
+        },
+        summary.provenance.timezone,
+      );
       return { ...visualization, observedAt: new Date().toISOString() };
     }
     if (!isTrainingVisualizationV1(summary) || !summary.detail) {
       throw new NotFoundException('Chart unavailable');
     }
     const scope = summary.provenance;
-    const byActivity = options.byActivity === 'true' && scope.source === 'ACTIVITIES';
-    const vo2History = scope.source === 'METRICS' && summary.series.length === 1 && summary.series[0].key === 'VO2_MAX';
-    const requestedSource = TRAINING_METRIC_SOURCES.find((source) => vo2History && source === options.metricSource);
+    const byActivity =
+      options.byActivity === 'true' && scope.source === 'ACTIVITIES';
+    const vo2History =
+      scope.source === 'METRICS' &&
+      summary.series.length === 1 &&
+      summary.series[0].key === 'VO2_MAX';
+    const requestedSource = TRAINING_METRIC_SOURCES.find(
+      (source) => vo2History && source === options.metricSource,
+    );
     const metricSource = requestedSource ?? scope.metricSource;
     const context = {
       session: { user: { id: userId } },
@@ -2606,25 +2679,46 @@ export class AiService {
       activities: this.activityRead,
       pmc: this.pmcService,
     } as AiToolContext;
-    const read = (source?: TrainingMetricSource) => this.coachTools.trainingAggregate(context, {
-      source: scope.source,
-      from: scope.from,
-      to: scope.to,
-      groupBy: byActivity ? 'ACTIVITY' : scope.groupBy,
-      sportTypes: scope.sportTypes,
-      metricSource: source,
-      measures: summary.series.map((series) => series.key),
-      limit: summary.detail.limit,
-    }, scope.timezone);
+    const read = (source?: TrainingMetricSource) =>
+      this.coachTools.trainingAggregate(
+        context,
+        {
+          source: scope.source,
+          from: scope.from,
+          to: scope.to,
+          groupBy: byActivity ? 'ACTIVITY' : scope.groupBy,
+          sportTypes: scope.sportTypes,
+          metricSource: source,
+          measures: summary.series.map((series) => series.key),
+          limit: summary.detail.limit,
+        },
+        scope.timezone,
+      );
     const dataset = await read(metricSource);
-    const metricSources = vo2History && !requestedSource
-      ? (await Promise.allSettled(TRAINING_METRIC_SOURCES.map(async (source) => ({
-          source,
-          available: (source === metricSource ? dataset : await read(source)).summary.VO2_MAX != null,
-        })))).flatMap((result) => result.status === 'fulfilled' && result.value.available ? [result.value.source] : [])
-      : undefined;
+    const metricSources =
+      vo2History && !requestedSource
+        ? (
+            await Promise.allSettled(
+              TRAINING_METRIC_SOURCES.map(async (source) => ({
+                source,
+                available:
+                  (source === metricSource ? dataset : await read(source))
+                    .summary.VO2_MAX != null,
+              })),
+            )
+          ).flatMap((result) =>
+            result.status === 'fulfilled' && result.value.available
+              ? [result.value.source]
+              : [],
+          )
+        : undefined;
     return {
-      ...buildTrainingVisualization({ dataset, intent: 'TREND', title: summary.title, preferredView: byActivity ? 'TABLE' : undefined }),
+      ...buildTrainingVisualization({
+        dataset,
+        intent: 'TREND',
+        title: summary.title,
+        preferredView: byActivity ? 'TABLE' : undefined,
+      }),
       ...(metricSources?.length ? { metricSources } : {}),
       observedAt: new Date().toISOString(),
     };
@@ -2692,9 +2786,11 @@ export class AiService {
         })
       : [];
     const states = new Map(startStates.map((state) => [state.id, state]));
-    const includeMetricCards = params.publicDemoLocale || !rows.some((row) => hasStoredCoachMetricCard(row.message))
-      ? true
-      : await this.aiDataConsent.isGranted(userId);
+    const includeMetricCards =
+      params.publicDemoLocale ||
+      !rows.some((row) => hasStoredCoachMetricCard(row.message))
+        ? true
+        : await this.aiDataConsent.isGranted(userId);
     return rows.map((r) => {
       const isAssistant = r.role === AiCoachMessageRole.ASSISTANT;
       const role =

@@ -22,7 +22,11 @@ export type FitnessMetricRecomputeType =
   | 'RHR'
   | 'FTP'
   | 'CP'
-  | 'CS';
+  | 'W_PRIME'
+  | 'P_MAX'
+  | 'CS'
+  | 'TP'
+  | 'VO2_MAX';
 
 type ScheduleFitnessMetricChangeArgs = {
   userId: string;
@@ -77,7 +81,11 @@ export class ActivityRecomputeJobService {
     if (type === UserFitnessMetricType.RESTING_HR) return 'RHR';
     if (type === UserFitnessMetricType.FTP) return 'FTP';
     if (type === UserFitnessMetricType.CP) return 'CP';
+    if (type === UserFitnessMetricType.W_PRIME) return 'W_PRIME';
+    if (type === UserFitnessMetricType.P_MAX) return 'P_MAX';
     if (type === UserFitnessMetricType.CS) return 'CS';
+    if (type === UserFitnessMetricType.TP) return 'TP';
+    if (type === UserFitnessMetricType.VO2_MAX) return 'VO2_MAX';
     return null;
   }
 
@@ -94,9 +102,13 @@ export class ActivityRecomputeJobService {
         ];
       case 'FTP':
       case 'CP':
+      case 'W_PRIME':
+      case 'P_MAX':
         return ['POWER_ANALYSIS', 'TRAINING_LOAD', 'FITNESS_SNAPSHOT'];
       case 'CS':
-        return ['PACE_ANALYSIS', 'VO2MAX', 'FITNESS_SNAPSHOT'];
+      case 'TP':
+      case 'VO2_MAX':
+        return ['PACE_ANALYSIS', 'TRAINING_LOAD', 'VO2MAX', 'FITNESS_SNAPSHOT'];
       default:
         return ['FITNESS_SNAPSHOT'];
     }
