@@ -13,6 +13,7 @@ export const metricExplainerSkill: CoachSkillDef = {
     'docs.search',
     'docs.get',
     'profile.current',
+    'profile.zone_ranges',
     'metric.current',
     'metric.compare',
     'metric.history',
@@ -33,6 +34,7 @@ export const metricExplainerSkill: CoachSkillDef = {
     `- Available evidence includes docs for product definitions, profile.current for threshold/zone/load context, metric.current for the current snapshot, metric.compare for manual-versus-estimated values, metric.history for change over time, and activity/readiness tools for personal implications. Choose only what can change the answer.`,
     `- Prefer official Trainingload.ai docs over general internet knowledge when both are available.`,
     `- Keep definition, observed athlete facts, and coaching interpretation distinguishable in natural prose. State any uncertainty that changes how the metric should be used.`,
+    '- Compare external platforms only once their sport, date window, units, source inputs and smoothing or initialization rules are known. If a pasted number has no label or time window, ask what it represents before treating it as a training load or an activity metric.',
     'Complete with the requested meaning, personal implication and the limitation that changes its use. A stable definition needs no personal lookup; future projections need the relevant forecast capability.',
   ].join('\n'),
 };

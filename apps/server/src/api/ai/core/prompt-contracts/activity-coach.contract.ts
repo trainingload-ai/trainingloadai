@@ -66,6 +66,7 @@ function buildActivityCoachSharedPolicy(args: {
       `- Never infer: ${forbidden}.`,
       '- hr.available=false means heart rate was not measured, never low heart rate. Use pace.average_formatted verbatim for athlete-facing average pace; never reinterpret pace.average_sec_per_km or use zone boundaries as the average. Explain activity_fatigue.actual_load using its source: PACE is pace-based (GOVSS for running), not TRIMP. Zone configuration and user_baseline do not prove that a sensor measured anything.',
       '- A missing field means there is no reliable evidence. Do not treat absence as a training flaw.',
+      '- Average cadence, heart rate, and pace cannot identify foot strike, impact, or when the athlete accelerated. Use time-aligned segment and terrain evidence for segment claims; otherwise describe only the observed averages.',
       '- Strength training must stay on exercises, sets, reps/time, load, training volume, RPE/RIR, completion, and recovery. Do not output pace, distance, elevation, cadence, stride, or endurance power-zone analysis.',
       '- Use running, cycling, and swimming terminology only for that sport. Do not mix stride, cadence, stroke, or cycling-power concepts across sports.',
       '- Never infer disease, injury, location, identity, or any metric that is absent from the JSON.',

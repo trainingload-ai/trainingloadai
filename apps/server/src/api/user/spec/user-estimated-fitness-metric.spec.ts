@@ -537,4 +537,26 @@ describe('UserService estimated fitness metric tracks', () => {
       false,
     );
   });
+
+  it('returns stored speed for Coach and keeps rounded pace seconds for dashboard clients', async () => {
+    const { service } = createService();
+    jest.spyOn(service, 'getUserFitnessMetric').mockImplementation(
+      async (_user, type, _date, sport, source) =>
+        type === UserFitnessMetricType.TP && source === MetricSource.AUTO
+          ? createMetric({
+              type, sport: sport ?? SportType.RUN, source,
+              value: sport === SportType.SWIM ? 1.25 : 4.4,
+              recordedAt: new Date('2026-08-04T00:00:00Z'),
+            })
+          : null,
+    );
+    for (const [sportType, speed, pace] of [
+      [SportType.RUN, 4.4, 227], [SportType.SWIM, 1.25, 80],
+    ] as const) {
+      const args = { userId: 'user-1', sportType };
+      expect((await service.getFitnessMetricPairs(args)).effective.TP).toBe(pace);
+      const forCoach = await service.getFitnessMetricPairs({ ...args, paceRepresentation: 'speed' });
+      expect(forCoach.effectiveDetails.TP).toMatchObject({ value: speed, source: 'AUTO' });
+    }
+  });
 });

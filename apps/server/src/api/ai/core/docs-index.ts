@@ -12,12 +12,11 @@ export type CoachDocPage = {
 
 const DOCS_BASE_URL =
   process.env.AI_DOCS_BASE_URL?.trim() ||
+  process.env.NEXT_PUBLIC_DOCS_URL?.trim() ||
   process.env.NEXT_PUBLIC_APP_URL?.trim() ||
   'http://127.0.0.1:3000';
 
-function normalizeBaseUrl() {
-  return DOCS_BASE_URL.replace(/\/+$/, '');
-}
+const PUBLIC_DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL?.trim() || DOCS_BASE_URL;
 
 function normalizeText(input: string) {
   return input.replace(/\s+/g, ' ').trim();
@@ -47,12 +46,21 @@ function stripHtml(html: string) {
 }
 
 function toAbsoluteUrl(url: string, locale: 'zh' | 'en') {
-  const base = normalizeBaseUrl();
   const raw = String(url ?? '').trim();
-  if (!raw) return `${base}/${locale}/docs`;
-  if (/^https?:\/\//i.test(raw)) return raw;
-  if (raw.startsWith('/')) return `${base}${raw}`;
-  return `${base}/${locale}/docs/${raw.replace(/^\/+/, '')}`;
+  const docsPath = locale === 'en' ? '/docs' : '/zh/docs';
+  const path = raw.startsWith('/') || /^https?:\/\//i.test(raw)
+    ? raw
+    : `${docsPath}${raw ? `/${raw}` : ''}`;
+  const ref = new URL(path, PUBLIC_DOCS_URL);
+  const publicOrigin = new URL(PUBLIC_DOCS_URL).origin;
+  if (
+    ref.username || ref.password ||
+    (ref.origin !== publicOrigin && ref.origin !== new URL(DOCS_BASE_URL).origin) ||
+    !/^\/(?:[a-z]{2}(?:-[a-z]+)?\/)?docs(?:\/|$)/i.test(ref.pathname)
+  ) {
+    throw new Error('Expected an official docs reference');
+  }
+  return new URL(ref.pathname + ref.search + ref.hash, publicOrigin).toString();
 }
 
 function toDocId(url: string) {
@@ -63,7 +71,7 @@ function toDocId(url: string) {
 
 function toSlug(url: string) {
   const stripped = toDocId(url);
-  return stripped.replace(/^\/(zh|en)\/docs\/?/, '');
+  return stripped.replace(/^\/(?:[a-z]{2}(?:-[a-z]+)?\/)?docs(?:\/|$)/i, '');
 }
 
 function flattenHighlights(value: unknown) {
@@ -134,7 +142,7 @@ export async function searchCoachDocs(args: {
   topK: number;
   section?: string;
 }) {
-  const searchUrl = new URL('/api/search', normalizeBaseUrl());
+  const searchUrl = new URL('/api/search', DOCS_BASE_URL);
   searchUrl.searchParams.set('query', args.query);
   searchUrl.searchParams.set('locale', args.locale);
 
@@ -169,7 +177,13 @@ export async function searchCoachDocs(args: {
             type?: unknown;
           })
         : {};
-    const absoluteUrl = toAbsoluteUrl(String(item.url ?? ''), args.locale);
+    if (typeof item.url !== 'string' || !item.url.trim()) continue;
+    let absoluteUrl: string;
+    try {
+      absoluteUrl = toAbsoluteUrl(item.url, args.locale);
+    } catch {
+      continue;
+    }
     const slug = toSlug(absoluteUrl);
     if (section && !slug.toLowerCase().startsWith(section)) continue;
 
@@ -228,28 +242,20 @@ export async function getCoachDocByRef(args: {
   const rawRef = String(args.ref ?? '').trim();
   if (!rawRef) throw new Error('Missing docs ref');
 
-  const locale: 'zh' | 'en' =
-    rawRef.startsWith('/zh/') ||
-    rawRef.startsWith('zh:') ||
-    args.locale === 'zh'
-      ? 'zh'
-      : 'en';
-
-  let absoluteUrl = '';
-  if (/^https?:\/\//i.test(rawRef)) {
-    absoluteUrl = rawRef;
-  } else if (rawRef.startsWith('/')) {
-    absoluteUrl = `${normalizeBaseUrl()}${rawRef}`;
-  } else if (rawRef.startsWith('zh:') || rawRef.startsWith('en:')) {
-    const slug = rawRef.replace(/^(zh|en):/, '');
-    absoluteUrl = `${normalizeBaseUrl()}/${locale}/docs/${slug.replace(/^\/+/, '')}`;
-  } else if (rawRef.includes('/docs/')) {
-    absoluteUrl = `${normalizeBaseUrl()}/${rawRef.replace(/^\/+/, '')}`;
-  } else {
-    absoluteUrl = `${normalizeBaseUrl()}/${locale}/docs/${rawRef.replace(/^\/+/, '')}`;
-  }
-
-  const html = await fetchText(absoluteUrl);
+  const explicitLocale = rawRef.match(/^(zh|en):/);
+  const path = explicitLocale
+    ? rawRef.slice(3).replace(/^\/+/, '')
+    : !rawRef.startsWith('/') && !/^https?:\/\//i.test(rawRef) && rawRef.includes('/docs/')
+      ? `/${rawRef}`
+      : rawRef;
+  const absoluteUrl = toAbsoluteUrl(
+    path,
+    explicitLocale?.[1] === 'zh' ? 'zh' : explicitLocale ? 'en' : args.locale ?? 'en',
+  );
+  const ref = new URL(absoluteUrl);
+  const locale: 'zh' | 'en' = ref.pathname.startsWith('/zh/') ? 'zh' : 'en';
+  const fetchUrl = new URL(ref.pathname + ref.search, DOCS_BASE_URL).toString();
+  const html = await fetchText(fetchUrl);
   const title =
     extractMeta(html, 'title') ||
     toSlug(absoluteUrl).split('/').at(-1) ||

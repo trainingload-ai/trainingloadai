@@ -62,6 +62,30 @@ describe('validateTodaySuggestionDraft', () => {
     });
   });
 
+  it('rejects extra training justified by low recorded load when history is sparse', () => {
+    const reason = '整体训练负荷很低，所以今天适合再骑一段。';
+    expect(() => validateTodaySuggestionDraftForProjection({
+      ...valid, summary: reason,
+      trainingBasis: { kind: 'ADDITIONAL', reason },
+    }, { ...projection, lightContext: { activityCoverage: { readyCount: 3 } } }))
+      .toThrow(expect.objectContaining({ code: 'TRAINING_BASIS_SPARSE_LOAD' }));
+  });
+
+  it('keeps the right rolling load and removes a wrong absolute load and unsupported average', () => {
+    const result = validateTodaySuggestionDraftForProjection({
+      ...valid,
+      summary: 'Plane Erholung ein. In den letzten sieben Tagen waren es rund 458 Punkte. Der 28-Tage-Durchschnitt liegt bei 51 Punkten.',
+      recommendation: { kind: 'RECOVER', details: ['Die letzten 7 Tage ergeben 496,7 Punkte.'] },
+      preferredIntent: 'ASK_COACH',
+      trainingBasis: undefined,
+    }, {
+      ...projection,
+      lightContext: { load: { rolling7DayLoad: 496.7, currentWeekLoad: 140, previousWeekLoad: 472 } },
+    });
+    expect(result.summary).toBe('Plane Erholung ein.');
+    expect(result.recommendation.details).toEqual(['Die letzten 7 Tage ergeben 496,7 Punkte.']);
+  });
+
   it.each([' ', {}])(
     'requires a non-empty text reason for an optional session (%j)',
     (reason) => {

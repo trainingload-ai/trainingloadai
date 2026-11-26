@@ -31,6 +31,11 @@ const INTENSITIES = new Set<TodaySuggestionIntensity>([
   'HARD',
 ]);
 
+const LOW_RECORDED_LOAD =
+  /\b(?:low|light|minimal)\b.{0,28}\bload\b|\bload\s+(?:is|was|remains)\s+(?:low|light|minimal)\b|\b(?:niedrige|geringe)\w*\s+(?:Trainings)?(?:last|belastung)\b|(?:负荷|負荷).{0,6}(?:低|不高|不大|较少|較少)|(?:低|很少).{0,4}(?:负荷|負荷)/iu;
+const CONDITIONAL_READINESS =
+  /\bif you feel (?:well|recovered|fresh|rested)\b|\bwenn du dich .{0,24}(?:erholt|fit) fühlst\b|(?:如果|若|假如).{0,28}(?:感觉|感覺|体感|體感|自觉|自覺).{0,16}(?:良好|不错|不錯|恢复|恢復|轻松|輕鬆)/iu;
+
 const TRAINING_BASIS_CORRECTIONS = {
   TRAINING_BASIS_REQUIRED:
     'Provide trainingBasis for the scheduled workout or optional additional training, or reassess whether TRAIN is supported.',
@@ -38,6 +43,8 @@ const TRAINING_BASIS_CORRECTIONS = {
     'Select a PLANNED or IN_PROGRESS workout for the projected date, or revise the recommendation using the current schedule.',
   TRAINING_BASIS_REASON_NOT_IN_SUMMARY:
     'Include the reason for optional additional training in summary and use the same wording in trainingBasis.reason.',
+  TRAINING_BASIS_SPARSE_LOAD:
+    'Sparse activity history cannot establish readiness for extra training. In summary state the coverage limitation; make any easy extra session optional and conditional on how the athlete feels, or choose a non-training recommendation.',
   TRAINING_BASIS_CREATE_WORKOUT_REQUIRED:
     'Use CREATE_TODAY_WORKOUT as preferredIntent for ADDITIONAL training.',
   TRAINING_BASIS_OPEN_WORKOUT_CONFLICT:
@@ -274,6 +281,15 @@ export function validateTodaySuggestionDraftForProjection(
       rejectTrainingBasis('TRAINING_BASIS_WORKOUT_UNAVAILABLE');
     }
     if (basis?.kind === 'ADDITIONAL') {
+      const readyCount = record(projection.lightContext?.activityCoverage)?.readyCount;
+      if (
+        typeof readyCount === 'number' &&
+        readyCount <= 3 &&
+        LOW_RECORDED_LOAD.test(basis.reason) &&
+        !CONDITIONAL_READINESS.test(draft.summary)
+      ) {
+        rejectTrainingBasis('TRAINING_BASIS_SPARSE_LOAD');
+      }
       if (!draft.summary.includes(basis.reason)) {
         rejectTrainingBasis('TRAINING_BASIS_REASON_NOT_IN_SUMMARY');
       }

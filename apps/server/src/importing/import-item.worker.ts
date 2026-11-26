@@ -75,6 +75,7 @@ import { ActivityWeatherService } from '@/weather/activity-weather.service';
 import {
   IMPORT_ITEM_EXTENSION,
   ImportSourceDataUnavailableError,
+  ImportSourceFetchError,
   type ImportItemExtension,
 } from './import-item-provider.port';
 
@@ -1229,6 +1230,11 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
   ) {
     const unavailable =
       error instanceof ImportSourceDataUnavailableError ? error : null;
+    const sourceFetch = error instanceof ImportSourceFetchError ? error : null;
+    const fetchOutcome = sourceFetch &&
+      (sourceFetch.status === 401 || sourceFetch.status === 403
+        ? 'UPSTREAM_ACCESS_DENIED'
+        : 'UPSTREAM_FETCH_FAILED');
     const routeToOrigin =
       job.sourceKind === 'INTERVALS_ICU' &&
       error instanceof IntervalsIcuApiError &&
@@ -1297,6 +1303,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           const terminal =
             invalidAuthorization ||
             error instanceof ImportIdentityConflictError ||
+            sourceFetch?.retryable === false ||
             attempts >=
               (this.configService.get<number>('importItemWorker.maxAttempts') ??
                 6);
@@ -1312,14 +1319,14 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
                     : 'FAILED',
                 ...(invalidAuthorization
                   ? { outcome: 'AUTHORIZATION_CHANGED' }
-                  : {}),
+                  : { outcome: fetchOutcome }),
                 attempts,
                 lastError:
                   error instanceof Error ? error.message : String(error),
                 lastErrorCode:
                   error instanceof ImportIdentityConflictError
                     ? error.code
-                    : null,
+                    : (unavailable?.code ?? sourceFetch?.code ?? null),
                 completedAt: terminal ? new Date() : null,
                 availableAt: new Date(Date.now() + backoffMs(attempts)),
                 lockToken: null,
@@ -1378,6 +1385,8 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     }
     const identityConflict =
       error instanceof ImportIdentityConflictError ? error : null;
+    const permanent = Boolean(identityConflict) || sourceFetch?.retryable === false;
+    const errorCode = identityConflict?.code ?? unavailable?.code ?? sourceFetch?.code;
     const msg = error instanceof Error ? error.message : String(error);
     const lockToken = this.activeLeaseTokens.get(job.id);
     let row: { attempts: number; activityId: number | null } | null;
@@ -1385,12 +1394,12 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       const result = await this.importJobs.itemJobs().updateMany({
         where: { id: job.id, lockToken },
         data: {
-          status: identityConflict ? 'DEAD' : 'FAILED',
+          status: permanent ? 'DEAD' : 'FAILED',
           attempts: { increment: 1 },
           lastError: msg,
-          ...(identityConflict ? { lastErrorCode: identityConflict.code } : {}),
-          ...(unavailable ? { lastErrorCode: unavailable.code } : {}),
-          completedAt: identityConflict ? new Date() : null,
+          outcome: fetchOutcome,
+          ...(errorCode && { lastErrorCode: errorCode }),
+          completedAt: permanent ? new Date() : null,
           availableAt: new Date(Date.now() + 30 * 60_000),
           lockToken: null,
           leaseExpiresAt: null,
@@ -1407,12 +1416,12 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       row = await this.importJobs.itemJobs().update({
         where: { id: job.id },
         data: {
-          status: identityConflict ? 'DEAD' : 'FAILED',
+          status: permanent ? 'DEAD' : 'FAILED',
           attempts: { increment: 1 },
           lastError: msg,
-          ...(identityConflict ? { lastErrorCode: identityConflict.code } : {}),
-          ...(unavailable ? { lastErrorCode: unavailable.code } : {}),
-          completedAt: identityConflict ? new Date() : null,
+          outcome: fetchOutcome,
+          ...(errorCode && { lastErrorCode: errorCode }),
+          completedAt: permanent ? new Date() : null,
         },
         select: { attempts: true, activityId: true },
       });
@@ -1425,7 +1434,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     const maxAttempts =
       this.configService.get<number>('importItemWorker.maxAttempts') ?? 6;
 
-    const terminal = Boolean(identityConflict) || attempts >= maxAttempts;
+    const terminal = permanent || attempts >= maxAttempts;
 
     if (row.activityId) {
       // staging 失败时旧 Activity 仍是 READY，不能把它隐藏；只有已经进入

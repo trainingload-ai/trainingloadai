@@ -118,6 +118,20 @@ describe('ImportBatchService', () => {
     });
   });
 
+  it('returns safe external source reasons for skipped, denied and transient attempts', async () => {
+    const { prisma, service } = createService();
+    (prisma.importItemJob.findMany as jest.Mock).mockResolvedValueOnce([
+      { status: 'SKIPPED', outcome: 'UPSTREAM_DATA_UNAVAILABLE', lastError: 'private' },
+      { status: 'DEAD', outcome: 'UPSTREAM_ACCESS_DENIED', lastError: 'private' },
+      { status: 'FAILED', outcome: 'UPSTREAM_FETCH_FAILED', lastError: 'private' },
+    ] as never);
+    const result = await service.getBatchItems('batch-1', 'user-1');
+    expect(result.items.map((item) => item.lastErrorCode)).toEqual([
+      'IMPORT_SOURCE_UNAVAILABLE', 'IMPORT_SOURCE_ACCESS_DENIED', 'IMPORT_SOURCE_FETCH_FAILED',
+    ]);
+    expect(JSON.stringify(result)).not.toContain('private');
+  });
+
   it('does not expose persisted worker diagnostics or internal error codes', async () => {
     const { prisma, service } = createService();
     (prisma.importItemJob.findMany as jest.Mock).mockResolvedValueOnce([

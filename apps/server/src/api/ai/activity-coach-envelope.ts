@@ -1,4 +1,6 @@
 import { ACTIVITY_COACH_MARKDOWN_FORMAT } from './activity-coach.constants';
+import { CoachTaskResultValidationError } from './core/coach-task-result-error';
+import { appLocaleEnglishName, resolveSupportedLocale } from '@/utils/locale.util';
 
 export {
   compileActivityCoachMessages,
@@ -23,6 +25,44 @@ export function isActivityCoachMarkdownEnvelope(
     !Array.isArray(o.byLang)
   );
 }
+
+export function activityReviewHasExpectedScript(markdown: string, language: string) {
+  const prose = markdown
+    .replace(/^(?: {0,3}>.*| {0,3}(?:```|~~~)[^\n]*\n[\s\S]*?^ {0,3}(?:```|~~~)[^\n]*)$/gm, '')
+    .replace(/`[^`\n]+`|!?\[([^\]]+)\]\([^)]*\)/g, '$1');
+  const latin = (prose.match(/\p{Script=Latin}/gu) ?? []).length;
+  const han = (prose.match(/\p{Script=Han}/gu) ?? []).length;
+  const kana = (prose.match(/[\p{Script=Hiragana}\p{Script=Katakana}]/gu) ?? []).length;
+  const hangul = (prose.match(/\p{Script=Hangul}/gu) ?? []).length;
+  const locale = resolveSupportedLocale(language);
+  // Only reject a clear script mismatch. Proper names and short quoted labels
+  // can legitimately use another script.
+  switch (locale) {
+    case 'zh':
+    case 'zh-hant':
+      return Math.max(latin, kana, hangul) < Math.max(15, han * 2);
+    case 'ja':
+      return Math.max(latin, hangul) < Math.max(15, (han + kana) * 2);
+    case 'ko':
+      return Math.max(latin, han + kana) < Math.max(15, hangul * 2);
+    default:
+      return han + kana + hangul < Math.max(12, latin * 2);
+  }
+}
+
+export function validateActivityReviewMarkdown(content: unknown, language: string) {
+  const markdown = typeof content === 'string' ? content.trim() : '';
+  if (!markdown) throw new Error('Activity review markdown is required.');
+  if (!activityReviewHasExpectedScript(markdown, language)) {
+    throw new CoachTaskResultValidationError(
+      'ACTIVITY_REVIEW_OUTPUT_REJECTED',
+      'ACTIVITY_REVIEW_LANGUAGE_MISMATCH',
+      `Rewrite the complete review, including all headings and prose, in ${appLocaleEnglishName(resolveSupportedLocale(language))}. Retain the activity facts, metric units and proper names.`,
+    );
+  }
+  return markdown;
+}
+
 /**
  * 将存储的教练 Markdown 内容转换为字符串。
  * @param content - 内容。
@@ -35,18 +75,11 @@ export function readStoredCoachMarkdown(
   if (!content) return null;
   if (typeof content === 'string') {
     const t = content.trim();
-    return t ? t : null;
+    return t && (!language || activityReviewHasExpectedScript(t, language)) ? t : null;
   }
   if (isActivityCoachMarkdownEnvelope(content)) {
-    const requested = language?.trim();
-    if (requested) {
-      const exact = content.byLang[requested];
-      if (typeof exact === 'string' && exact.trim()) return exact.trim();
-      const family = requested.toLowerCase().startsWith('zh') ? 'zh' : 'en';
-      const fallback = content.byLang[family];
-      if (typeof fallback === 'string' && fallback.trim()) {
-        return fallback.trim();
-      }
+    if (language?.trim()) {
+      return readStoredCoachMarkdown(content.byLang[resolveSupportedLocale(language)], language);
     }
     for (const text of Object.values(content.byLang)) {
       if (typeof text === 'string' && text.trim()) {

@@ -148,4 +148,34 @@ describe('docs-index', () => {
       searchCoachDocs({ query: 'x', locale: 'en', topK: 1 }),
     ).rejects.toThrow('Docs search request failed: 500 Broken');
   });
+
+  it('fetches from the configured service and returns public references', async () => {
+    const env = process.env;
+    process.env = {
+      ...env,
+      AI_DOCS_BASE_URL: 'http://docs:3000',
+      NEXT_PUBLIC_DOCS_URL: 'https://docs.example.test',
+      NEXT_PUBLIC_APP_URL: 'https://app.example.test',
+    };
+    try {
+      jest.resetModules();
+      const { searchCoachDocs, getCoachDocByRef } = await import('../docs-index');
+      const fetchSearch = mockFetchOnce([
+        { type: 'page', url: '/docs/guide/plan', content: 'Plan' },
+      ]);
+      const [result] = await searchCoachDocs({ query: 'plan', locale: 'en', topK: 1, section: 'guide' });
+      expect(result.url).toBe('https://docs.example.test/docs/guide/plan');
+      expect(fetchSearch.mock.calls[0][0]).toBe('http://docs:3000/api/search?query=plan&locale=en');
+
+      const fetchPage = mockFetchOnce('<article>Plan guide</article>');
+      await expect(getCoachDocByRef({ ref: result.url })).resolves.toMatchObject({
+        url: result.url,
+        content: 'Plan guide',
+      });
+      expect(fetchPage.mock.calls[0][0]).toBe('http://docs:3000/docs/guide/plan');
+    } finally {
+      process.env = env;
+      jest.resetModules();
+    }
+  });
 });

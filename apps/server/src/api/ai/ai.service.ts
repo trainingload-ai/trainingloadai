@@ -117,6 +117,7 @@ import { hashActivityCoachDedupe } from './activity-coach-evidence-hash';
 import {
   compileActivityCoachMessages,
   formatActivityCoachCompiledPromptLog,
+  validateActivityReviewMarkdown,
 } from './activity-coach-envelope';
 import { resolveCoachActiveSkill } from './core/coach-skill-resolution';
 import { getCoachSkillByName } from './core/skill.registry';
@@ -1851,6 +1852,7 @@ export class AiService {
     options?: {
       callerManagedOperationId?: string;
       allowWithoutConsent?: boolean;
+      platformLanguageRepair?: boolean;
     },
   ) {
     const tasks = (this.activityReviewTasks ??= new Map());
@@ -1870,6 +1872,7 @@ export class AiService {
     options?: {
       callerManagedOperationId?: string;
       allowWithoutConsent?: boolean;
+      platformLanguageRepair?: boolean;
     },
   ) {
     const prepared = await this.activityAiReviewService.prepareGeneration(
@@ -1913,8 +1916,8 @@ export class AiService {
       lang: prepared.lang,
       taskType: 'ACTIVITY_REVIEW',
       funding:
-        options?.callerManagedOperationId ||
-        prepared.review.trigger === 'MANUAL'
+        !options?.platformLanguageRepair &&
+        (options?.callerManagedOperationId || prepared.review.trigger === 'MANUAL')
           ? 'USER'
           : 'PLATFORM',
       activeSkillName: 'activity-review',
@@ -1926,6 +1929,7 @@ export class AiService {
           reviewId: prepared.review.id,
           evidenceHash: prepared.evidenceHash,
           systemContract,
+          ...(options?.platformLanguageRepair && { platformLanguageRepair: true }),
         }),
       ),
       triggerType: `ACTIVITY_REVIEW_${prepared.review.trigger}`,
@@ -1945,11 +1949,7 @@ export class AiService {
           raw && typeof raw === 'object' && !Array.isArray(raw)
             ? (raw as Record<string, unknown>)
             : null;
-        const markdown = String(value?.markdown ?? '').trim();
-        if (!markdown) {
-          throw new Error('Activity review markdown is required.');
-        }
-        return { markdown };
+        return { markdown: validateActivityReviewMarkdown(value?.markdown, prepared.lang) };
       },
     });
 
@@ -2038,23 +2038,23 @@ export class AiService {
       unifiedInput,
       lang: requestedLang,
     });
-    if (useCache) {
-      const cached = await this.resolveSucceededReviewMarkdown(
-        userId,
-        activityHashId,
-        evidenceHash,
-        requestedLang,
+    const cached = useCache
+      ? await this.resolveSucceededReviewMarkdown(
+          userId,
+          activityHashId,
+          evidenceHash,
+          requestedLang,
+        )
+      : undefined;
+    if (cached && 'content' in cached) {
+      this.logger.log(
+        `Activity review cache hit activityId=${activity.id} length=${cached.content.length}`,
       );
-      if (cached) {
-        this.logger.log(
-          `[ai][analysis] 复盘缓存命中 活动ID=${activity.id} 用户ID=${userId} 内容长度=${cached.content.length}`,
-        );
-        return AiService.staticContentStream(
-          cached.content,
-          true,
-          cached.reviewId,
-        );
-      }
+      return AiService.staticContentStream(
+        cached.content,
+        true,
+        cached.reviewId,
+      );
     }
     const startedAt = Date.now();
     if (!operationId)
@@ -2068,8 +2068,11 @@ export class AiService {
         metadata: { source: 'activity-review-sse', purpose },
         runInline: true,
       });
+      const platformLanguageRepair = cached && 'needsLanguageRepair' in cached;
       const generated = await this.processQueuedActivityAiReview(queued.id, {
-        callerManagedOperationId: operationId,
+        ...(platformLanguageRepair
+          ? { platformLanguageRepair: true }
+          : { callerManagedOperationId: operationId }),
         allowWithoutConsent,
       });
       if (generated.outcome !== 'SUCCEEDED') {
@@ -2105,16 +2108,16 @@ export class AiService {
     activityHashId: string,
     expectedEvidenceHash: string,
     language: string,
-  ): Promise<ActivityAnalysisResult | undefined> {
+  ): Promise<ActivityAnalysisResult | { needsLanguageRepair: true } | undefined> {
     const snap = await this.activityAiReviewService.getAiReviewForActivityHash({
       userId,
       activityHashId,
       language,
     });
+    if (!snap.found || snap.evidenceHash !== expectedEvidenceHash) return undefined;
+    if (snap.needsLanguageRepair) return { needsLanguageRepair: true };
     if (
-      snap.found &&
       snap.markdown &&
-      snap.evidenceHash === expectedEvidenceHash &&
       snap.status === $Enums.ActivityAiReviewStatus.SUCCEEDED
     ) {
       if (!snap.reviewId) return undefined;

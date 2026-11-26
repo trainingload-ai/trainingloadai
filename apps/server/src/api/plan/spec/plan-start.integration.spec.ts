@@ -264,6 +264,30 @@ describe('saved draft START / PostgreSQL', () => {
     ]);
   });
 
+  it('requires weekday review before activating a legacy dated AI draft on another weekday', async () => {
+    const d = await draft(3, {
+      sourceType: 'AI',
+      generationMetadata: { qualityContract: { startDate: '2099-11-24' } },
+      workouts: [1, 3, 5].map((dayIndex) => ({
+        weekIndex: 1,
+        dayIndex,
+        sportType: 'RUN',
+        definition: { kind: 'FREEFORM', version: 1, source: 'TEXT', text: 'Run 30m' },
+      })),
+    }, '2099-11-25');
+    await expect(f.proposals.createPreview('user', d.request, d.binding)).rejects.toMatchObject({
+      response: {
+        code: 'PLAN_START_WEEKDAY_REVIEW_REQUIRED',
+        data: { assessedStartDate: '2099-11-24', requestedStartDate: '2099-11-25' },
+      },
+    });
+    expect((await f.service.getPlanDetail('user', d.planId)).plan?.status).toBe('DRAFT');
+    const aligned = '2099-12-01';
+    await f.starts.conversation('user', d.planId, aligned);
+    expect(await f.proposals.createPreview('user', { ...d.request, startDate: aligned }, d.binding))
+      .toMatchObject({ mode: 'START' });
+  });
+
   it('enforces the saved weekday limits when changing the start date and moving an active workout', async () => {
     const saturday = '2099-11-28';
     const metadata = { qualityContract: { startDate: saturday, maxDailyMinutes: 90, maxMinutesByIsoWeekday: { 3: 45, 6: 90 } } };

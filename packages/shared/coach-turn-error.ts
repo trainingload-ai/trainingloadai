@@ -70,7 +70,17 @@ export type CoachTurnErrorData = {
   code: string;
   /** Localized, user-facing failure text (already in the reply language). */
   message?: string;
+  recoveryReason?: "ADD_CREDITS" | "SETTLE_OUTSTANDING_CREDITS";
 };
+
+export function coachTurnErrorRecoveryReason(code: unknown, data: unknown) {
+  if (code !== "AI_ACCESS_REQUIRED" || !data || typeof data !== "object")
+    return undefined;
+  const reason = (data as { recoveryReason?: unknown }).recoveryReason;
+  return reason === "ADD_CREDITS" || reason === "SETTLE_OUTSTANDING_CREDITS"
+    ? reason
+    : undefined;
+}
 
 const MACHINE_ERROR_CODE = /^[A-Z][A-Z0-9_]*(?::\S+)?$/;
 

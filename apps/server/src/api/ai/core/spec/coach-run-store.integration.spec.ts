@@ -957,6 +957,50 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     expect(await prisma.coachRunAttempt.count()).toBe(2);
   });
 
+  it('reconciles a legacy cancelled run and its still-running attempt to the same terminal state', async () => {
+    const handle = (await store.begin(startArgs())).handle!;
+    const { runId, attemptId, messageId } = handle.projector.run;
+    const endedAt = new Date();
+    await store.cancel('athlete', runId, attemptId);
+    await prisma.coachRun.update({
+      where: { id: runId },
+      data: { status: 'cancelled', endedAt, activeAttemptId: null },
+    });
+    await prisma.coachRunAttempt.update({
+      where: { id: attemptId },
+      data: { heartbeatAt: new Date(Date.now() - 180_000) },
+    });
+
+    await store.recoverStale('athlete', handle.sessionId);
+    await store.recoverStale('athlete', handle.sessionId);
+
+    expect(await prisma.coachRunAttempt.findUniqueOrThrow({ where: { id: attemptId } }))
+      .toMatchObject({ status: 'cancelled', completionReason: 'cancelled', endedAt, revision: 1 });
+    expect(await prisma.coachRun.findUniqueOrThrow({ where: { id: runId } }))
+      .toMatchObject({ status: 'cancelled', activeAttemptId: null, endedAt });
+    expect((await prisma.aiCoachMessage.findUniqueOrThrow({ where: { id: messageId } })).message)
+      .toMatchObject({ parts: expect.arrayContaining([expect.objectContaining({
+        type: 'data-coach-run',
+        data: expect.objectContaining({ status: 'cancelled', endedAt: endedAt.toISOString() }),
+      })]) });
+    expect(await store.recoverStaleOperation('athlete', handle.operationId)).toBe(true);
+  });
+
+  it('preserves a requested cancellation when the producer stops before checkpointing', async () => {
+    const handle = (await store.begin(startArgs())).handle!;
+    const { runId, attemptId } = handle.projector.run;
+    await store.cancel('athlete', runId, attemptId);
+    await prisma.coachRunAttempt.update({
+      where: { id: attemptId },
+      data: { heartbeatAt: new Date(Date.now() - 180_000) },
+    });
+    expect(await store.recoverStaleOperation('athlete', handle.operationId)).toBe(true);
+    const run = await prisma.coachRun.findUniqueOrThrow({ where: { id: runId } });
+    expect(run).toMatchObject({ status: 'cancelled', activeAttemptId: null, pendingInteraction: null });
+    expect(await prisma.coachRunAttempt.findUniqueOrThrow({ where: { id: attemptId } }))
+      .toMatchObject({ status: 'cancelled', completionReason: 'cancelled', endedAt: run.endedAt });
+  });
+
   it('arbitrates cancel vs completion in the terminal transaction', async () => {
     const { handle } = await store.begin(startArgs());
     const { runId, attemptId } = handle.projector.run;

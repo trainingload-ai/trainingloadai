@@ -7,10 +7,10 @@
 
 | Inventory | Entries |
 | --- | ---: |
-| Environment variables | 296 |
+| Environment variables | 297 |
 | External URL literals | 206 |
 | Filesystem write sites | 228 |
-| Runtime variables missing from configuration docs | 232 |
+| Runtime variables missing from configuration docs | 233 |
 
 ## Undocumented runtime variables
 
@@ -163,6 +163,7 @@
 - `NEXT_PUBLIC_ASSET_BASE_URL` — apps
 - `NEXT_PUBLIC_BASE_URL` — apps
 - `NEXT_PUBLIC_DEMO_HOST` — apps
+- `NEXT_PUBLIC_DOCS_URL` — apps
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID` — apps
 - `NEXT_PUBLIC_MAPBOX_TOKEN` — apps
 - `NEXT_PUBLIC_MARKETING_BASE_URL` — apps

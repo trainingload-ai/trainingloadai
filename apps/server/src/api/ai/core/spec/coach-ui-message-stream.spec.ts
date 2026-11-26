@@ -331,6 +331,26 @@ describe('coachQueryYieldsToUIMessageStream', () => {
     );
   });
 
+  it('preserves only the reviewed account recovery reason on the UI stream', async () => {
+    const chunks = await collectChunks([{
+      type: 'result',
+      subtype: 'error_during_execution',
+      is_error: true,
+      error_code: 'AI_ACCESS_REQUIRED',
+      result: 'AI_ACCESS_REQUIRED',
+      data: { recoveryReason: 'SETTLE_OUTSTANDING_CREDITS', ledgerDiagnostic: 'private' },
+    }]);
+    expect(chunks).toContainEqual(expect.objectContaining({
+      type: 'data-coach-turn-error',
+      data: {
+        code: 'AI_ACCESS_REQUIRED',
+        message: 'AI_ACCESS_REQUIRED',
+        recoveryReason: 'SETTLE_OUTSTANDING_CREDITS',
+      },
+    }));
+    expect(JSON.stringify(chunks)).not.toContain('ledgerDiagnostic');
+  });
+
   it('emits an UI stream error chunk for terminal coach errors', async () => {
     const chunks = await collectChunks([
       {

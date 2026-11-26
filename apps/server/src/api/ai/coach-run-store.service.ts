@@ -1447,14 +1447,20 @@ export class CoachRunStore {
 
   async recoverStaleOperation(userId: string, operationId: string) {
     await this.recoverStaleAttempts(userId, { operationId });
-    // A history read may already have interrupted the attempt. Only lease
-    // recovery leaves an interrupted attempt without a completion reason.
     const attempt = await this.prisma.coachRunAttempt.findFirst({
       where: {
         userId,
         operationId,
-        status: 'interrupted',
-        completionReason: null,
+        OR: [
+          // A history read may already have recovered the attempt.
+          { status: 'interrupted', completionReason: null },
+          {
+            status: 'cancelled',
+            completionReason: 'cancelled',
+            cancelRequestedAt: { not: null },
+            heartbeatAt: { lt: new Date(Date.now() - LEASE_MS) },
+          },
+        ],
       },
       select: { id: true },
     });
@@ -1477,8 +1483,22 @@ export class CoachRunStore {
       include: { message: true, run: true },
     });
     for (const attempt of stale) {
+      const legacyCancelledAt = attempt.run.status === 'cancelled' &&
+        attempt.run.activeAttemptId === null && attempt.cancelRequestedAt
+        ? attempt.run.endedAt
+        : null;
+      const cancellationRequestedAt =
+        attempt.run.status === 'running' && attempt.run.activeAttemptId === attempt.id
+          ? attempt.cancelRequestedAt
+          : null;
+      const status = legacyCancelledAt || cancellationRequestedAt
+        ? 'cancelled'
+        : 'interrupted';
+      const endedAt = legacyCancelledAt ?? (cancellationRequestedAt
+        ? new Date(Math.max(cancellationRequestedAt.getTime(), attempt.heartbeatAt.getTime()))
+        : attempt.heartbeatAt);
       this.logger.warn(
-        `stale_run run=${attempt.runId} attempt=${attempt.id} heartbeat=${attempt.heartbeatAt.toISOString()}`,
+        `stale_run run=${attempt.runId} attempt=${attempt.id} heartbeat=${attempt.heartbeatAt.toISOString()} outcome=${status}`,
       );
       await this.prisma.$transaction(async (tx) => {
         const changed = await tx.coachRunAttempt.updateMany({
@@ -1486,10 +1506,18 @@ export class CoachRunStore {
             id: attempt.id,
             status: 'running',
             heartbeatAt: { lt: cutoff },
+            cancelRequestedAt: attempt.cancelRequestedAt,
+            ...(legacyCancelledAt && {
+              run: { status: 'cancelled', activeAttemptId: null, endedAt: legacyCancelledAt },
+            }),
+            ...(cancellationRequestedAt && {
+              run: { status: 'running', activeAttemptId: attempt.id },
+            }),
           },
           data: {
-            status: 'interrupted',
-            endedAt: attempt.heartbeatAt,
+            status,
+            endedAt,
+            ...(status === 'cancelled' && { completionReason: status }),
             revision: { increment: 1 },
           },
         });
@@ -1497,12 +1525,9 @@ export class CoachRunStore {
         const envelope = attempt.message.message as unknown as {
           parts?: Array<Record<string, unknown>>;
         };
-        const executionMs =
-          attempt.run.executionMs +
-          Math.max(
-            0,
-            attempt.heartbeatAt.getTime() - attempt.startedAt.getTime(),
-          );
+        const executionMs = attempt.run.executionMs + (legacyCancelledAt
+          ? 0
+          : Math.max(0, endedAt.getTime() - attempt.startedAt.getTime()));
         const parts = (envelope.parts ?? []).map((part) => {
           if (part.type === 'data-coach-run')
             return {
@@ -1511,8 +1536,8 @@ export class CoachRunStore {
                 ...(part.data as object),
                 revision:
                   Number((part.data as { revision: number }).revision) + 1,
-                status: 'interrupted',
-                endedAt: attempt.heartbeatAt.toISOString(),
+                status,
+                endedAt: endedAt.toISOString(),
                 executionMs,
                 retryBlocked: attempt.mutationStarted,
               },
@@ -1527,26 +1552,36 @@ export class CoachRunStore {
               ...part,
               data: {
                 ...(part.data as object),
-                status: 'interrupted',
-                endedAt: attempt.heartbeatAt.toISOString(),
+                status,
+                endedAt: endedAt.toISOString(),
               },
             };
+          if (status === 'cancelled' && part.type === 'data-coach-interaction') {
+            const data = part.data as { status?: string; revision?: number } | undefined;
+            if (data?.status === 'pending') {
+              return { ...part, data: { ...data, status, revision: (data.revision ?? 0) + 1 } };
+            }
+          }
           return part;
         });
         await tx.aiCoachMessage.update({
           where: { id: attempt.messageId },
           data: { message: json({ ...envelope, parts }) },
         });
-        await tx.coachRun.updateMany({
+        if (legacyCancelledAt) return;
+        const run = await tx.coachRun.updateMany({
           where: { id: attempt.runId, activeAttemptId: attempt.id },
           data: {
-            status: 'interrupted',
+            status,
             activeAttemptId: null,
-            endedAt: attempt.heartbeatAt,
+            endedAt,
             executionMs,
+            ...(status === 'cancelled' && { pendingInteraction: Prisma.DbNull }),
             revision: { increment: 1 },
           },
         });
+        if (cancellationRequestedAt && run.count !== 1)
+          throw new ConflictException('Coach active attempt changed during cancellation');
       });
     }
   }

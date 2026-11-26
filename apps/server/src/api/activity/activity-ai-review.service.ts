@@ -13,9 +13,11 @@ import {
 } from '@/api/ai/activity-coach-unified-input';
 import { hashActivityCoachDedupe } from '@/api/ai/activity-coach-evidence-hash';
 import {
+  activityReviewHasExpectedScript,
   firstLineVerdict,
   markdownPlainSummary,
   readStoredCoachMarkdown,
+  validateActivityReviewMarkdown,
 } from '@/api/ai/activity-coach-envelope';
 import {
   ACTIVITY_AI_REVIEW_PROMPT_VERSION,
@@ -279,7 +281,8 @@ export class ActivityAiReviewService {
         0,
         480,
       );
-      if (excerpt) excerpts.set(row.activityId, excerpt);
+      if (excerpt && activityReviewHasExpectedScript(excerpt, lang))
+        excerpts.set(row.activityId, excerpt);
     }
     return excerpts;
   }
@@ -314,7 +317,9 @@ export class ActivityAiReviewService {
       existing.evidenceVersion === ACTIVITY_COACH_EVIDENCE_VERSION &&
       (existing.status === $Enums.ActivityAiReviewStatus.RUNNING ||
         (args.trigger !== $Enums.ActivityAiReviewTrigger.MANUAL &&
-          existing.status !== $Enums.ActivityAiReviewStatus.SKIPPED))
+          existing.status !== $Enums.ActivityAiReviewStatus.SKIPPED &&
+          (existing.status !== $Enums.ActivityAiReviewStatus.SUCCEEDED ||
+            readStoredCoachMarkdown(existing.content, language))))
     ) {
       return { id: existing.id, status: existing.status };
     }
@@ -440,8 +445,7 @@ export class ActivityAiReviewService {
     operationId: string;
     usage: ParsedAiUsage;
   }) {
-    const markdown = String(args.markdown ?? '').trim();
-    if (!markdown) throw new Error('Empty activity coach response');
+    const markdown = validateActivityReviewMarkdown(args.markdown, args.prepared.lang);
     const {
       inputTokens,
       outputTokens,
@@ -508,8 +512,8 @@ export class ActivityAiReviewService {
     evidenceHash: string;
     usage: ParsedAiUsage;
   }) {
-    const trimmed = String(args.markdown ?? '').trim();
-    if (!trimmed) return;
+    if (!args.markdown?.trim()) return;
+    const trimmed = validateActivityReviewMarkdown(args.markdown, args.lang);
 
     const {
       inputTokens,
@@ -618,10 +622,11 @@ export class ActivityAiReviewService {
       return { found: false as const, reason: 'ACTIVITY_NOT_FOUND' as const };
     }
 
+    const language = resolveSupportedLocale(args.language);
     const row = await this.findLatestAiReviewForActivity({
       activityId: activity.id,
       userId: args.userId,
-      language: resolveSupportedLocale(args.language),
+      language,
     });
 
     if (!row) {
@@ -630,6 +635,7 @@ export class ActivityAiReviewService {
         activityId: activity.id,
         reviewId: null,
         status: null,
+        needsLanguageRepair: false,
         markdown: null,
         summary: null,
         verdict: null,
@@ -641,21 +647,24 @@ export class ActivityAiReviewService {
     const currentContract =
       row.promptVersion === ACTIVITY_AI_REVIEW_PROMPT_VERSION &&
       row.evidenceVersion === ACTIVITY_COACH_EVIDENCE_VERSION;
-    const markdown =
-      currentContract && row.status === $Enums.ActivityAiReviewStatus.SUCCEEDED
-        ? readStoredCoachMarkdown(row.content, args.language)
-        : null;
+    const succeeded = row.status === $Enums.ActivityAiReviewStatus.SUCCEEDED;
+    const markdown = currentContract && succeeded
+      ? readStoredCoachMarkdown(row.content, language)
+      : null;
+    const usable = currentContract && (!succeeded || Boolean(markdown));
+    const needsLanguageRepair = currentContract && succeeded && !markdown;
 
     return {
       found: true as const,
       activityId: activity.id,
       reviewId: row.id,
-      status: currentContract ? row.status : null,
+      status: usable ? row.status : null,
+      needsLanguageRepair,
       markdown,
-      summary: currentContract ? row.summary : null,
-      verdict: currentContract ? row.verdict : null,
-      evidenceHash: currentContract ? row.evidenceHash : null,
-      updatedAt: currentContract ? row.updatedAt.toISOString() : null,
+      summary: usable ? row.summary : null,
+      verdict: usable ? row.verdict : null,
+      evidenceHash: usable || needsLanguageRepair ? row.evidenceHash : null,
+      updatedAt: usable ? row.updatedAt.toISOString() : null,
     };
   }
 
