@@ -2348,11 +2348,11 @@ describe('remaining schedule / PostgreSQL', () => {
           sportType: 'RUN',
           definition: workout(15),
         });
-        await expect(
+        const updateFirstDayWorkout = (minutes: number, revision: number) =>
           f.service.updatePlan('user', d.planId, {
             scheduleConstraints: {
               ...d.request.scheduleConstraints,
-              revision: 2,
+              revision,
             },
             qualityContractTransition: { mode: 'INHERIT' },
             workouts: [
@@ -2361,11 +2361,20 @@ describe('remaining schedule / PostgreSQL', () => {
                 weekIndex: 1,
                 dayIndex: 1,
                 sportType: 'RUN',
-                definition: workout(50),
+                definition: workout(minutes),
               },
             ],
-          }),
-        ).rejects.toThrow();
+          });
+
+        // The 60-minute budget allows 69 minutes, including the independent workout.
+        await updateFirstDayWorkout(50, 2);
+        await expect(updateFirstDayWorkout(55, 3)).rejects.toThrow(
+          'DAILY_TIME_BUDGET@2099-11-22',
+        );
+        const stored = await prisma.planWorkout.findUniqueOrThrow({
+          where: { id: source.id },
+        });
+        expect(stored.plannedDurationSeconds).toBe(50 * 60);
       }
     },
   );
