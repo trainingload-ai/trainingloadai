@@ -265,8 +265,8 @@ export class ImportBatchService {
    * @param userId 用户ID
    * @returns 用户是否可以导入
    */
-  async assertUserCanImport(userId: string) {
-    const user = await this.users.users().findUnique({
+  async assertUserCanImport(userId: string, tx?: Prisma.TransactionClient) {
+    const user = await this.users.users(tx).findUnique({
       where: { id: userId },
       select: { accountDeletionRequestedAt: true },
     });
@@ -527,14 +527,18 @@ export class ImportBatchService {
    * 为由部署适配器拥有的归档导入创建空批次。
    * Core 只维护批次生命周期，不解释 provider、区域或下载方式。
    */
-  async createExternalArchiveImportBatch(args: {
-    userId: string;
-    sourceKind: ImportSourceKind;
-    requestContext: Record<string, unknown>;
-    summary: Record<string, unknown>;
-  }) {
-    await this.assertUserCanImport(args.userId);
-    const active = await this.importJobs.batchJobs().findFirst({
+  async createExternalArchiveImportBatch(
+    args: {
+      userId: string;
+      sourceKind: ImportSourceKind;
+      requestContext: Record<string, unknown>;
+      summary: Record<string, unknown>;
+    },
+    tx?: Prisma.TransactionClient,
+  ) {
+    await this.assertUserCanImport(args.userId, tx);
+    const jobs = this.importJobs.batchJobs(tx);
+    const active = await jobs.findFirst({
       where: {
         userId: args.userId,
         sourceKind: args.sourceKind,
@@ -544,7 +548,7 @@ export class ImportBatchService {
     });
     if (active) return active;
 
-    return this.importJobs.batchJobs().create({
+    return jobs.create({
       data: {
         userId: args.userId,
         sourceKind: args.sourceKind,
