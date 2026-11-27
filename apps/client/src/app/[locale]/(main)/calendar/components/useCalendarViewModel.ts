@@ -12,6 +12,7 @@ import { useMonthlyActivities } from "@/hooks/useActivities";
 import { queryKeys } from "@/lib/query-keys";
 import { useCalendarWeekStartsOn } from "@/lib/calendar-week-start";
 import { generateCalendarWeeks, startOfCalendarWeek } from "./utils";
+import { calendarMonthDayLabel, calendarMonthYearLabel } from "./calendar-weekday-labels";
 import {
   getCompetitionEvents,
   type CompetitionEvent,
@@ -368,8 +369,8 @@ export function useCalendarViewModel(
       key: "plan",
       title: t("planProgressTitle"),
       description: t("planProgressDescription", {
-        start: effectiveRange.startOfWeek.format("MM/DD"),
-        end: effectiveRange.end.format("MM/DD"),
+        start: calendarMonthDayLabel(effectiveRange.startOfWeek.format("YYYY-MM-DD"), locale),
+        end: calendarMonthDayLabel(effectiveRange.end.format("YYYY-MM-DD"), locale),
       }),
       comparisonLabel: t("comparisonLabelPlan"),
       stats: buildRangeStats({
@@ -385,7 +386,7 @@ export function useCalendarViewModel(
         tssByDate,
       }),
     };
-  }, [activitiesByDate, effectiveRange, hasPlanScope, t, tssByDate]);
+  }, [activitiesByDate, effectiveRange, hasPlanScope, locale, t, tssByDate]);
 
   const monthSummaryScope = React.useMemo<SummaryScope>(() => {
     const monthStart = summaryMonth.startOf("month");
@@ -399,7 +400,7 @@ export function useCalendarViewModel(
       key: "month",
       title: t("monthOverview"),
       description: t("monthOverviewDescription", {
-        month: summaryMonth.format("YYYY/MM"),
+        month: calendarMonthYearLabel(summaryMonth.format("YYYY-MM-DD"), locale),
       }),
       comparisonLabel: t("comparisonLabelMonth"),
       stats: buildRangeStats({
@@ -415,7 +416,7 @@ export function useCalendarViewModel(
         tssByDate,
       }),
     };
-  }, [activitiesByDate, summaryMonth, t, tssByDate]);
+  }, [activitiesByDate, locale, summaryMonth, t, tssByDate]);
 
   return {
     currentMonth,

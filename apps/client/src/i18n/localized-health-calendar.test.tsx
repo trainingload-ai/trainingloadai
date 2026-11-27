@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { useHealthOverviewCopy } from "@/components/health/HealthOverviewSection";
 import {
   calendarMonthDayLabel,
+  calendarMonthYearLabel,
   calendarWeekdayLabels,
 } from "@/app/[locale]/(main)/calendar/components/calendar-weekday-labels";
 import requestConfig from "./request";
@@ -49,5 +50,7 @@ describe("localized health, calendar, and integrations", () => {
     expect(calendarWeekdayLabels("zh-hant", 0)[0]).toMatch(/^週/);
     expect(calendarMonthDayLabel("2026-11-27", "fr")).toBe("27/11");
     expect(calendarMonthDayLabel("2026-11-27", "en-US")).toBe("11/27");
+    expect(calendarMonthYearLabel("2026-11-27", "fr")).toBe("11/2026");
+    expect(calendarMonthYearLabel("2026-11-27", "ja")).toBe("2026/11");
   });
 });

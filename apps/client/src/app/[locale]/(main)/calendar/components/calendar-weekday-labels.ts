@@ -18,3 +18,12 @@ export function calendarMonthDayLabel(date: string, locale: string) {
     timeZone: "UTC",
   }).format(new Date(`${date.slice(0, 10)}T00:00:00Z`));
 }
+
+export function calendarMonthYearLabel(date: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    year: "numeric",
+    month: "numeric",
+    calendar: "gregory",
+    timeZone: "UTC",
+  }).format(new Date(`${date.slice(0, 10)}T00:00:00Z`));
+}
