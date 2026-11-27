@@ -32,6 +32,7 @@ type Snapshot = {
   messages: readonly CoachMessageView[];
   isRunning: boolean;
   status: UseChatHelpers<CoachUiMessage>["status"];
+  error?: Error;
 };
 type Store = {
   snapshot: Snapshot;
@@ -86,6 +87,7 @@ export function CoachChatProvider({
     () => ({
       isRunning,
       status: chat.status,
+      error: chat.error,
       messages: chat.messages.map((message, index) =>
         messageView(
           message,
@@ -95,7 +97,7 @@ export function CoachChatProvider({
         ),
       ),
     }),
-    [chat.messages, chat.status, isRunning],
+    [chat.error, chat.messages, chat.status, isRunning],
   );
   const [store] = useState(() => {
     const value: Store = {

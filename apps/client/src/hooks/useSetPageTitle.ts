@@ -11,10 +11,10 @@ export const useSetPageTitle = (title: string) => {
     }
 
     if (/^Trainingload(?:\.ai)?\b/i.test(pageTitle)) {
-      document.title = pageTitle;
+      document.title = pageTitle.replace(/^Trainingload(?:\.ai)?\s*\|\s*/i, `${appName} · `);
       return;
     }
 
-    document.title = `${appName} | ${pageTitle}`;
+    document.title = `${appName} · ${pageTitle}`;
   }, [title]);
 };

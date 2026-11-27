@@ -118,4 +118,36 @@ describe("MobileCalendarMonthPanel", () => {
     expect(screen.getAllByText("plannedLoad")).toHaveLength(2);
     expect(screen.getAllByText("58")).toHaveLength(2);
   });
+
+  it("keeps the plan start distinct in the adjacent month and when selected", () => {
+    const currentMonth = dayjs("2026-07-01");
+    const startOfWeek = dayjs("2026-08-01");
+    const props = {
+      currentMonth,
+      weeks: generateCalendarWeeks(currentMonth, "en"),
+      range: { startOfWeek, end: dayjs("2026-08-07") },
+      onSelectDate: vi.fn(),
+      onNavigateMonth: vi.fn(),
+      onSelectActivity: vi.fn(),
+      onSelectCompetition: vi.fn(),
+      onSelectWorkout: vi.fn(),
+      activitiesByDate: {},
+      workoutsByDate: {},
+      competitionEventsByDate: {},
+      tssByDate: {},
+    };
+    const { container, rerender } = render(
+      <MobileCalendarMonthPanel {...props} selectedDate={currentMonth} />,
+    );
+    const start = container.querySelector('[data-calendar-date="2026-08-01"]');
+    expect(start).toHaveAccessibleDescription("dateLabel");
+    expect(start).toHaveClass("bg-brand/10");
+    expect(start).not.toHaveClass("opacity-30");
+    expect(container.querySelector('[data-calendar-date="2026-08-02"]')?.className)
+      .toContain("var(--foreground)");
+
+    rerender(<MobileCalendarMonthPanel {...props} selectedDate={startOfWeek} />);
+    expect(start).toHaveClass("bg-brand/10");
+    expect(start).toHaveAttribute("aria-pressed", "true");
+  });
 });
