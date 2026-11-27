@@ -7,7 +7,12 @@ export function resolveCoachReplyLanguage(
   prompt: string,
   preference: string,
 ): string {
+  const preferredLocale = resolveSupportedLocale(preference);
   const explicit = [
+    [
+      'zh-hant',
+      /(?:用|說|使用|請講)\s*(?:繁體中文|繁体中文)|(?:reply|respond|answer) in traditional chinese/i,
+    ],
     [
       'zh',
       /(?:用|说|使用|请讲)\s*(?:简体)?中文|(?:reply|respond|answer) in (?:simplified )?chinese/i,
@@ -22,14 +27,14 @@ export function resolveCoachReplyLanguage(
     !/[\u3040-\u30ff]/.test(prompt) &&
     (prompt.match(/[\u4e00-\u9fff]/g)?.length ?? 0) >= 2
   )
-    return 'zh';
+    return preferredLocale === 'zh-hant' ? preferredLocale : 'zh';
   if (
     /\b(i am|i have|my shoulder|my neck|should i|can you|please|could you)\b/i.test(
       prompt,
     )
   )
     return 'en';
-  return resolveSupportedLocale(preference);
+  return preferredLocale;
 }
 
 /** Narrow deterministic handling of explicit current red flags, not a diagnostic classifier. */

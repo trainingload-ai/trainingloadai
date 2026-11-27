@@ -23,6 +23,7 @@ import { AiService } from './ai.service';
 import { AiUsageService, parseOpenAIUsage } from './ai-usage.service';
 import { UserSession } from '@thallesp/nestjs-better-auth';
 import { I18nContext, I18nService } from 'nestjs-i18n';
+import { resolveSupportedLocale } from '@/utils/locale.util';
 import { BusinessException } from '@/filters/business-exception/business.exception';
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import { $Enums, AiUsageStatus } from '@prisma/client';
@@ -173,7 +174,9 @@ export class CoachTurnOrchestrator {
   }): Promise<void> {
     const { userId, session, idempotencyKey } = args;
     let body = args.body;
-    const requestLocale = String(body.lang ?? I18nContext.current()?.lang ?? 'en').trim() || 'en';
+    const requestLocale = resolveSupportedLocale(
+      String(body.lang ?? '').trim() || I18nContext.current()?.lang,
+    );
     const v2 = body.protocolVersion === 2;
     const command = v2 ? parseCoachRunCommand(body.runCommand) : null;
     if (v2 && !command)

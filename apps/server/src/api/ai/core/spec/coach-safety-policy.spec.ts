@@ -35,6 +35,8 @@ describe('coach safety and current language', () => {
     ['My shoulder hurts and I cannot move it', 'zh', 'en'],
     ['请用英语回答我的肩痛问题', 'zh', 'en'],
     ['Please reply in Chinese', 'en', 'zh'],
+    ['今天適合怎麼訓練？', 'zh-TW', 'zh-hant'],
+    ['Please reply in Traditional Chinese', 'en', 'zh-hant'],
     ['한국어로 답해주세요', 'en', 'ko'],
     ['FTP', 'fr', 'fr'],
   ])('resolves current language: %s', (prompt, preference, expected) =>

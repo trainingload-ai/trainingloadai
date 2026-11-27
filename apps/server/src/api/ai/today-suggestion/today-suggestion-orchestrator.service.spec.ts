@@ -59,25 +59,54 @@ describe('TodaySuggestionOrchestratorService', () => {
     ['ja', '今日は余裕を持った計画に'],
     ['de', 'Heute vorsichtig planen'],
     ['pt-BR', 'Adote um plano conservador hoje'],
-  ])('localizes the high-concern fallback for %s', (locale, headline) => {
+  ])('serves the localized high-concern fallback for %s', async (locale, headline) => {
+    const prisma = {
+      $transaction: async (work) => work(prisma),
+      aiTodaySuggestion: {
+        findUnique: async () => null,
+        upsert: async ({ create }) => ({ id: 'suggestion-1', ...create }),
+      },
+    };
+    const projection = {
+      userId: 'user-1',
+      locale,
+      date: '2026-10-28',
+      timezone: 'UTC',
+      edition: 'self-host',
+      allowAi: false,
+      featureAllowed: true,
+      factHash: 'facts',
+      constraintHash: 'constraints',
+      continuityHash: 'continuity',
+      validUntil: new Date(Date.now() + 60 * 60_000),
+      constraints: [],
+      lightContext: {},
+      todayWorkouts: [],
+      tomorrowWorkouts: [],
+      activityEvidence: {},
+      coachState: { athleteState: null, decisions: [] },
+      highConcern: true,
+      weatherImpact: { status: 'unavailable' },
+    } as TodaySuggestionConstraintProjection;
     const service = new TodaySuggestionOrchestratorService(
-      {} as never,
-      {} as never,
+      prisma as never,
+      { project: async () => projection } as never,
       {} as never,
       {} as never,
       new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
-      {} as never,
-      {} as never,
+      { rollover: async () => ({}) } as never,
+      uncontendedGeneration(prisma),
     );
-    const draft = service['factFallback']({
-      locale,
-      highConcern: true,
-    } as TodaySuggestionConstraintProjection);
+    const advice = await service.get({
+      userId: projection.userId,
+      locale: locale ?? 'en',
+      allowAi: false,
+    });
 
-    expect(draft).toMatchObject({
+    expect(advice).toMatchObject({
       headline,
       recommendation: { kind: 'REST' },
-      evidenceCodes: ['HIGH_CONCERN'],
+      delivery: { reasonCode: 'AI_DISABLED' },
     });
   });
 

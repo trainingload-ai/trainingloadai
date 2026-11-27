@@ -881,6 +881,16 @@ describe('Activity review language through the controller', () => {
 });
 
 describe('AI coach client output contract through the controller', () => {
+  it('uses Traditional Chinese for a Chinese prompt with a Taiwan locale', async () => {
+    const fixture = setup([success]);
+
+    await fixture.run({ lang: 'zh-TW', q: '今天適合怎麼訓練？' });
+
+    expect(fixture.aiService.coachStream).toHaveBeenCalledWith(
+      expect.objectContaining({ lang: 'zh-hant' }),
+    );
+  });
+
   it.each([
     ['empty success', [success]],
     ['missing terminal', []],
