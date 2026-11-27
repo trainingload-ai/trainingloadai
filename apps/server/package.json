@@ -667,6 +667,10 @@
       "types": "./src/power/power.service.ts",
       "default": "./src/power/power.service.ts"
     },
+    "./prisma/fitness-write-lock": {
+      "types": "./src/prisma/fitness-write-lock.ts",
+      "default": "./src/prisma/fitness-write-lock.ts"
+    },
     "./prisma/hashtext-advisory-lock": {
       "types": "./src/prisma/hashtext-advisory-lock.ts",
       "default": "./src/prisma/hashtext-advisory-lock.ts"
