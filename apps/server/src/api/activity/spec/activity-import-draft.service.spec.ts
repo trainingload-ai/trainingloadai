@@ -45,6 +45,7 @@ function createService(queryResults: unknown[], executeResults: number[] = []) {
   const draftUpdate = jest.fn();
   const recomputeCreate = jest.fn();
   const tx = {
+    $executeRaw: executeRaw,
     activity: { findFirst: activityFindFirst, update: activityUpdate },
     activityImportDraft: { update: draftUpdate },
     activityRecomputeJob: { create: recomputeCreate },
@@ -71,7 +72,12 @@ function createService(queryResults: unknown[], executeResults: number[] = []) {
     { t: jest.fn((key: string) => key) } as never,
     {
       batchJobs: () => ({ create: batchCreate }),
-      itemJobs: () => ({ create: itemCreate, update: jest.fn() }),
+      itemJobs: () => ({
+        create: itemCreate,
+        updateMany: jest
+          .fn<() => Promise<{ count: number }>>()
+          .mockResolvedValue({ count: 0 }),
+      }),
     } as never,
   );
   return {

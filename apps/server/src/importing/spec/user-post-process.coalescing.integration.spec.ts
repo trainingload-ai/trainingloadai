@@ -10,7 +10,7 @@ import {
 } from '@jest/globals';
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, type ImportSourceKind } from '@prisma/client';
 import { ImportingJobService } from '../importing-job.service';
 import { ImportBatchService } from '../import-batch.service';
 import { ImportItemWorkerService } from '../import-item.worker';
@@ -18,9 +18,11 @@ import { UserPostProcessWorkerService } from '../user-post-process.worker';
 import { FitnessEvidenceRevisionDriftError } from '@/analyze/chronological-activity-replay.service';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { NotificationRepository } from '@/notification/persistence/notification.repository';
+import { ActivityImportDraftService } from '@/api/activity/activity-import-draft.service';
 
 jest.mock('@/api/activity/activity.service', () => ({
   ActivityService: class {},
+  ActivityAnalyzeMode: { LIGHT: 'LIGHT' },
 }));
 
 type Claimed = {
@@ -30,17 +32,29 @@ type Claimed = {
   lockToken: string;
 };
 type Scheduler = {
+  drain(): Promise<void>;
   claimBatch(limit: number, now?: Date): Promise<Claimed[]>;
   processJob(job: Claimed): Promise<void>;
 };
 type ItemCompletion = {
   activeLeaseTokens: Map<string, string>;
-  claimBatch(limit: number): Promise<Array<{ id: string }>>;
+  claimBatch(limit: number): Promise<ItemClaim[]>;
+  processJob(job: ItemClaim): Promise<void>;
   completeActivityItem(jobId: string, batchJobId: string): Promise<void>;
+};
+type ItemClaim = {
+  id: string;
+  userId: string;
+  batchJobId: string;
+  sourceObjectId: string;
+  sourceKind: ImportSourceKind;
+  lockToken: string;
 };
 const at = (time: Date, delta: number) => new Date(time.getTime() + delta);
 const trainingTime = (day: number) => new Date(Date.UTC(2025, 0, day));
-const realPostgres = Boolean(process.env.CORE_MIGRATION_TEST_POSTGRES_URL);
+const nativePostgres = Boolean(process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN);
+const realPostgres =
+  nativePostgres || Boolean(process.env.CORE_MIGRATION_TEST_POSTGRES_URL);
 const concurrent = realPostgres ? it : it.skip;
 
 describe('durable user post-process coalescing', () => {
@@ -54,19 +68,15 @@ describe('durable user post-process coalescing', () => {
   const users = { getPreferredLocale: async () => 'en' };
 
   beforeAll(async () => {
-    database = fork(
-      resolve(
-        __dirname,
-        realPostgres
-          ? '../../analyze/spec/activity-recompute-postgres.mjs'
-          : '../../api/ai/core/spec/coach-run-postgres.mjs',
-      ),
-      [],
-      {
-        execArgv: [],
-        stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
-      },
-    );
+    const databaseFixture = nativePostgres
+      ? '../../api/plan/spec/plan-sync-native-postgres.mjs'
+      : realPostgres
+        ? '../../analyze/spec/activity-recompute-postgres.mjs'
+        : '../../api/ai/core/spec/coach-run-postgres.mjs';
+    database = fork(resolve(__dirname, databaseFixture), [], {
+      execArgv: [],
+      stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
+    });
     const address = await new Promise<string>((done, fail) => {
       database.once(
         'message',
@@ -239,14 +249,14 @@ describe('durable user post-process coalescing', () => {
     const service = new ImportItemWorkerService(
       database as never,
       { get: () => undefined } as never,
-      {} as never,
+      { getFileWithKey: async () => Buffer.from('synthetic fit') } as never,
       {} as never,
       {} as never,
       undefined,
       {} as never,
       {} as never,
       {} as never,
-      {} as never,
+      { normalize: async () => ({ payloads: [] }) } as never,
       {} as never,
       {} as never,
       batches,
@@ -494,7 +504,297 @@ describe('durable user post-process coalescing', () => {
         .status,
     ).toBe('DONE');
     expect(await db.userPostProcessJob.count()).toBe(1);
+    expect(
+      await db.importBatchJob.findUnique({ where: { id: row.batch.id } }),
+    ).toMatchObject({ status: 'POST_PROCESSING', successCount: 1 });
   });
+
+  it('recovers a historical terminal batch at startup and respects the recovery interval', async () => {
+    const now = new Date();
+    const finished = await seed({ createdAt: now, pendingItem: true });
+    const registering = await seed({ createdAt: now, pendingItem: true });
+    const retrying = await seed({ createdAt: now, pendingItem: true });
+    await db.importItemJob.updateMany({
+      where: { id: { in: [finished.item.id, registering.item.id] } },
+      data: { status: 'DONE', lockToken: null, completedAt: now },
+    });
+    await db.importBatchJob.update({
+      where: { id: registering.batch.id },
+      data: { totalCount: 2 },
+    });
+    await db.importItemJob.update({
+      where: { id: retrying.item.id },
+      data: { status: 'FAILED', lockToken: null },
+    });
+
+    const replay = jest.fn(async (_request: Record<string, unknown>) => {
+      await db.activity.update({
+        where: { id: finished.activity.id },
+        data: { processingStatus: 'READY', readyAt: now },
+      });
+      return { runId: 'recovered-run', completed: true, nextCheckpoint: null };
+    });
+    const { worker } = scheduler(replay);
+    const recover = jest.spyOn(jobs, 'recoverFinishedBatches');
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(now.getTime());
+    try {
+      await worker.drain();
+      const [recovered] = await worker.claimBatch(5, at(now, 60_000));
+      expect(recovered?.batchJobId).toBe(finished.batch.id);
+      await worker.processJob(recovered);
+      expect(await db.userPostProcessJob.findMany()).toMatchObject([
+        { batchJobId: finished.batch.id, status: 'COMPLETED' },
+      ]);
+      expect(
+        await db.importBatchJob.findUnique({
+          where: { id: finished.batch.id },
+        }),
+      ).toMatchObject({ status: 'COMPLETED', successCount: 1 });
+      expect(await db.notification.count()).toBe(1);
+      expect(
+        await db.activity.findUnique({ where: { id: finished.activity.id } }),
+      ).toMatchObject({ processingStatus: 'READY' });
+      expect(replay).toHaveBeenCalledWith(
+        expect.objectContaining({ includeActivityIds: [finished.activity.id] }),
+      );
+
+      clock.mockReturnValue(now.getTime() + 5 * 60_000 - 1);
+      await worker.drain();
+      expect(recover).toHaveBeenCalledTimes(1);
+      clock.mockReturnValue(now.getTime() + 5 * 60_000);
+      await worker.drain();
+      expect(recover).toHaveBeenCalledTimes(2);
+      expect(await db.userPostProcessJob.count()).toBe(1);
+      expect(
+        await db.importBatchJob.count({ where: { status: 'RUNNING' } }),
+      ).toBe(2);
+    } finally {
+      clock.mockRestore();
+      recover.mockRestore();
+    }
+  });
+
+  concurrent(
+    'recovers after terminal item publication across two workers and skips a locked batch',
+    async () => {
+      const now = new Date();
+      const locked = await seed({ createdAt: now, pendingItem: true });
+      const available = await seed({ createdAt: now, pendingItem: true });
+      await db.importBatchJob.updateMany({
+        where: { id: { in: [locked.batch.id, available.batch.id] } },
+        data: { status: 'QUEUED' },
+      });
+      await db.importItemJob.update({
+        where: { id: locked.item.id },
+        data: { status: 'DEAD', lockToken: null, completedAt: now },
+      });
+      await db.importItemJob.update({
+        where: { id: available.item.id },
+        data: {
+          status: 'QUEUED',
+          lockToken: null,
+          activityId: null,
+          sourceRef: { fileKey: 'synthetic.fit' },
+        },
+      });
+      const importer = completion();
+      const [claimed] = await importer.claimBatch(1);
+      expect(claimed.id).toBe(available.item.id);
+      const interrupted = jest
+        .spyOn(batches, 'refreshBatchProgress')
+        .mockRejectedValueOnce(new Error('worker stopped before aggregation'));
+      try {
+        await expect(importer.processJob(claimed)).rejects.toThrow(
+          'worker stopped before aggregation',
+        );
+      } finally {
+        interrupted.mockRestore();
+      }
+      expect(
+        await db.importItemJob.findUnique({ where: { id: available.item.id } }),
+      ).toMatchObject({ status: 'SKIPPED', lastErrorCode: 'no_payloads' });
+      expect(
+        await db.importBatchJob.findUnique({
+          where: { id: available.batch.id },
+        }),
+      ).toMatchObject({ status: 'QUEUED' });
+      expect(await db.userPostProcessJob.count()).toBe(0);
+
+      const first = scheduler().worker;
+      const second = scheduler().worker;
+      const lockAcquired = Promise.withResolvers<void>();
+      const release = Promise.withResolvers<void>();
+      const holdingLock = db.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT id FROM t_import_batch_job
+        WHERE id = ${locked.batch.id} FOR UPDATE`;
+        lockAcquired.resolve();
+        await release.promise;
+      });
+      try {
+        await Promise.race([lockAcquired.promise, holdingLock]);
+        await Promise.all([first.drain(), second.drain()]);
+        expect(await db.userPostProcessJob.findMany()).toMatchObject([
+          { batchJobId: available.batch.id },
+        ]);
+      } finally {
+        release.resolve();
+        await holdingLock;
+      }
+      const [recovered] = await first.claimBatch(5, at(now, 60_000));
+      expect(recovered.batchJobId).toBe(available.batch.id);
+      await first.processJob(recovered);
+      expect(
+        await db.importBatchJob.findUnique({
+          where: { id: available.batch.id },
+        }),
+      ).toMatchObject({ status: 'COMPLETED', skippedCount: 1 });
+      await expect(jobs.recoverFinishedBatches()).resolves.toBe(1);
+      await expect(jobs.recoverFinishedBatches()).resolves.toBe(0);
+      expect(await db.userPostProcessJob.count()).toBe(2);
+      expect(
+        await db.importBatchJob.findUnique({
+          where: { id: locked.batch.id },
+        }),
+      ).toMatchObject({ status: 'POST_PROCESSING', failedCount: 1 });
+    },
+  );
+
+  async function draftWriter(
+    interrupt?: (args: { draftId: string; itemJobId: string }) => Promise<void>,
+  ) {
+    const userId = 'athlete-a';
+    const source = await db.importSourceObject.create({
+      data: { userId, sourceKind: 'FILE', sourceUid: 'draft-source' },
+    });
+    const draft = await db.activityImportDraft.create({
+      data: {
+        userId,
+        sourceObjectId: source.id,
+        sourceUid: source.sourceUid,
+        payload: {
+          identity: { dedupeKey: 'draft-dedupe' },
+          summary: {},
+          records: [],
+          laps: [],
+        },
+      },
+    });
+    const service = new ActivityImportDraftService(
+      db as never,
+      {} as never,
+      {} as never,
+      {
+        materialize: async (args: {
+          batchJobId: string;
+          itemJobId: string;
+        }) => {
+          await interrupt?.({ ...args, draftId: draft.id });
+          const activity = await db.activity.create({
+            data: {
+              userId,
+              hashId: `draft-${args.batchJobId}`,
+              sportType: 'RUN',
+              startTime: trainingTime(20),
+              createdByBatchJobId: args.batchJobId,
+            },
+          });
+          return { activity };
+        },
+      } as never,
+      { generateParquetFileByCanonicalPayload: async () => undefined } as never,
+      {} as never,
+      batches,
+      translate as never,
+      jobs,
+    );
+    return {
+      service,
+      request: { draftId: draft.id, userId, sessionRpe: null },
+    };
+  }
+
+  it('rolls back draft completion and replay publication together before a successful retry', async () => {
+    const { service, request } = await draftWriter();
+    const createPostProcessJob =
+      repository.createPostProcessJob.bind(repository);
+    const interrupted = jest
+      .spyOn(repository, 'createPostProcessJob')
+      .mockImplementationOnce(async (batchId, tx) => {
+        await createPostProcessJob(batchId, tx);
+        throw new Error('interrupted before draft completion');
+      });
+    try {
+      await expect(service.commitDraft(request)).rejects.toThrow(
+        'interrupted before draft completion',
+      );
+    } finally {
+      interrupted.mockRestore();
+    }
+    expect(await db.userPostProcessJob.count()).toBe(0);
+    expect(await db.importItemJob.findMany()).toMatchObject([
+      { status: 'DEAD', activityId: null },
+    ]);
+    expect(await db.importBatchJob.findMany()).toMatchObject([
+      { status: 'CANCELLED', failedCount: 1 },
+    ]);
+    await expect(completion().claimBatch(1)).resolves.toEqual([]);
+    expect(
+      await db.activityImportDraft.findUnique({
+        where: { id: request.draftId },
+      }),
+    ).toMatchObject({ status: 'READY', committedActivityId: null });
+
+    const committed = await service.commitDraft(request);
+    expect(committed.preview).toMatchObject({ status: 'COMMITTED' });
+    expect(
+      await db.importItemJob.findUnique({
+        where: { id: committed.importItemId },
+      }),
+    ).toMatchObject({ status: 'DONE', activityId: committed.activityId });
+    expect(
+      await db.importBatchJob.findUnique({ where: { id: committed.batchId } }),
+    ).toMatchObject({ status: 'POST_PROCESSING', successCount: 1 });
+    expect(await db.userPostProcessJob.findMany()).toMatchObject([
+      { batchJobId: committed.batchId, status: 'PENDING' },
+    ]);
+  });
+
+  it.each(['draft', 'item'])(
+    'does not overwrite a reclaimed inline %s lease',
+    async (reclaimed) => {
+      const newClaimAt = at(new Date(), 1_000);
+      const { service, request } = await draftWriter(
+        async ({ draftId, itemJobId }) => {
+          if (reclaimed === 'draft') {
+            await db.activityImportDraft.update({
+              where: { id: draftId },
+              data: { updatedAt: newClaimAt },
+            });
+          } else {
+            await db.importItemJob.update({
+              where: { id: itemJobId },
+              data: { status: 'NORMALIZING', lockToken: 'background-owner' },
+            });
+          }
+        },
+      );
+      await expect(service.commitDraft(request)).rejects.toThrow(
+        reclaimed === 'draft' ? 'already being committed' : 'lease lost',
+      );
+      expect(await db.userPostProcessJob.count()).toBe(0);
+      if (reclaimed === 'draft') {
+        expect(
+          await db.activityImportDraft.findUnique({
+            where: { id: request.draftId },
+          }),
+        ).toMatchObject({ status: 'COMMITTING', updatedAt: newClaimAt });
+      } else {
+        expect(await db.importItemJob.findMany()).toMatchObject([
+          { status: 'NORMALIZING', lockToken: 'background-owner' },
+        ]);
+      }
+    },
+  );
 
   it('does not publish completion after the import item lease is replaced', async () => {
     const row = await seed({ createdAt: new Date(), pendingItem: true });

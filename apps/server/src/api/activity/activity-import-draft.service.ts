@@ -554,7 +554,7 @@ export class ActivityImportDraftService {
         WHERE "id" = ${row.id}
           AND "user_id" = ${args.userId}
           AND "status" = ${'COMMITTING'}
-          AND "updated_at" = ${row.updatedAt}
+          AND "updated_at" = (${row.updatedAt}::timestamptz AT TIME ZONE 'UTC')
       `);
       row = await this.getDraftRow(args.draftId, args.userId);
     }
@@ -571,9 +571,11 @@ export class ActivityImportDraftService {
       });
     }
 
+    const claimedAt = new Date();
     const claimed = await this.prisma.$executeRaw(Prisma.sql`
       UPDATE "t_activity_import_draft"
-      SET "status" = ${'COMMITTING'}, "updated_at" = NOW()
+      SET "status" = ${'COMMITTING'},
+          "updated_at" = (${claimedAt}::timestamptz AT TIME ZONE 'UTC')
       WHERE "id" = ${row.id}
         AND "user_id" = ${args.userId}
         AND "status" = ${'READY'}
@@ -582,10 +584,11 @@ export class ActivityImportDraftService {
       throw new ConflictException('Activity draft is already being committed');
     }
 
-    const payload = parsePayload(row.payload);
+    const itemLockToken = `draft-inline:${randomUUID()}`;
     let batch: { id: string } | null = null;
     let item: { id: string } | null = null;
     try {
+      const payload = parsePayload(row.payload);
       // 批次和导入项也属于提交过程；任何一步失败都必须释放草稿锁。
       batch = await this.importJobs.batchJobs().create({
         data: {
@@ -612,7 +615,7 @@ export class ActivityImportDraftService {
           status: 'MATERIALIZING',
           // 此 item 由当前 HTTP 请求内联实体化。没有 lease 时，后台 worker 会把
           // MATERIALIZING 视为可回收任务并并发实体化，导致同一草稿生成两条活动。
-          lockToken: `draft-inline:${randomUUID()}`,
+          lockToken: itemLockToken,
           leaseExpiresAt: new Date(Date.now() + 15 * 60 * 1_000),
           sourceRef: {
             draftId: row.id,
@@ -625,6 +628,7 @@ export class ActivityImportDraftService {
       });
       const materialized = await this.materializer.materialize({
         itemJobId: item.id,
+        itemLockToken,
         userId: args.userId,
         batchJobId: batch.id,
         sourceObjectId: row.sourceObjectId,
@@ -637,59 +641,82 @@ export class ActivityImportDraftService {
         userId: args.userId,
       });
 
-      await this.importJobs.itemJobs().update({
-        where: { id: item.id },
-        data: {
-          activityId: activity.id,
-          dedupeKey: payload.identity.dedupeKey,
-          status: 'DONE',
-          completedAt: new Date(),
-          lockToken: null,
-          leaseExpiresAt: null,
-          lastError: null,
-          lastErrorCode: null,
-        },
-      });
-      await this.importBatchService.refreshBatchProgress(batch.id);
+      const batchId = batch.id;
+      const itemId = item.id;
+      const preview = await this.prisma.$transaction(
+        async (tx) => {
+          const completed = await this.importJobs.itemJobs(tx).updateMany({
+            where: {
+              id: itemId,
+              status: 'MATERIALIZING',
+              lockToken: itemLockToken,
+            },
+            data: {
+              activityId: activity.id,
+              dedupeKey: payload.identity.dedupeKey,
+              status: 'DONE',
+              completedAt: new Date(),
+              lockToken: null,
+              leaseExpiresAt: null,
+              lastError: null,
+              lastErrorCode: null,
+            },
+          });
+          if (completed.count !== 1) {
+            throw new ConflictException(
+              'Activity draft import item lease lost',
+            );
+          }
+          await this.importBatchService.refreshBatchProgress(batchId, tx);
 
-      const updatedRows = await this.prisma.$queryRaw<
-        ActivityImportDraftRow[]
-      >(Prisma.sql`
-        UPDATE "t_activity_import_draft"
-        SET
-          "status" = ${'COMMITTED'},
-          "session_rpe" = ${sessionRpe},
-          "committed_activity_id" = ${activity.id},
-          "committed_at" = NOW(),
-          "updated_at" = NOW()
-        WHERE "id" = ${row.id}
-          AND "user_id" = ${args.userId}
-          AND "status" = ${'COMMITTING'}
-        RETURNING
-          "id",
-          "user_id" AS "userId",
-          "source_object_id" AS "sourceObjectId",
-          "source_kind"::text AS "sourceKind",
-          "source_uid" AS "sourceUid",
-          "file_name" AS "fileName",
-          "file_key" AS "fileKey",
-          "raw_storage_key" AS "rawStorageKey",
-          "status",
-          "payload",
-          "summary",
-          "session_rpe" AS "sessionRpe",
-          "committed_activity_id" AS "committedActivityId",
-          "committed_at" AS "committedAt",
-          "created_at" AS "createdAt",
-          "updated_at" AS "updatedAt"
-      `);
+          const [updatedDraft] = await tx.$queryRaw<
+            ActivityImportDraftRow[]
+          >(Prisma.sql`
+            UPDATE "t_activity_import_draft"
+            SET
+              "status" = ${'COMMITTED'},
+              "session_rpe" = ${sessionRpe},
+              "committed_activity_id" = ${activity.id},
+              "committed_at" = NOW(),
+              "updated_at" = NOW()
+            WHERE "id" = ${row.id}
+              AND "user_id" = ${args.userId}
+              AND "status" = ${'COMMITTING'}
+              AND "updated_at" = (${claimedAt}::timestamptz AT TIME ZONE 'UTC')
+            RETURNING
+              "id",
+              "user_id" AS "userId",
+              "source_object_id" AS "sourceObjectId",
+              "source_kind"::text AS "sourceKind",
+              "source_uid" AS "sourceUid",
+              "file_name" AS "fileName",
+              "file_key" AS "fileKey",
+              "raw_storage_key" AS "rawStorageKey",
+              "status",
+              "payload",
+              "summary",
+              "session_rpe" AS "sessionRpe",
+              "committed_activity_id" AS "committedActivityId",
+              "committed_at" AS "committedAt",
+              "created_at" AS "createdAt",
+              "updated_at" AS "updatedAt"
+          `);
+          if (!updatedDraft) {
+            throw new ConflictException(
+              'Activity draft is already being committed',
+            );
+          }
+          return previewFromDraftRow(updatedDraft, activity.hashId);
+        },
+        { timeout: 15_000 },
+      );
 
       return {
         activityHashId: activity.hashId,
         activityId: activity.id,
-        batchId: batch.id,
-        importItemId: item.id,
-        preview: previewFromDraftRow(updatedRows[0]!, activity.hashId),
+        batchId,
+        importItemId: itemId,
+        preview,
       };
     } catch (error) {
       this.logger.error(
@@ -697,26 +724,48 @@ export class ActivityImportDraftService {
           error instanceof Error ? error.message : String(error)
         }`,
       );
-      if (item) {
-        await this.importJobs.itemJobs().update({
-          where: { id: item.id },
-          data: {
-            status: 'FAILED',
-            completedAt: new Date(),
-            lastError: error instanceof Error ? error.message : String(error),
-          },
-        });
-      }
-      if (batch) {
-        await this.importBatchService.refreshBatchProgress(batch.id);
-      }
-      await this.prisma.$executeRaw(Prisma.sql`
-        UPDATE "t_activity_import_draft"
-        SET "status" = ${'READY'}, "updated_at" = NOW()
-        WHERE "id" = ${row.id}
-          AND "user_id" = ${args.userId}
-          AND "status" = ${'COMMITTING'}
-      `);
+      const itemId = item?.id;
+      const batchId = batch?.id;
+      await this.prisma.$transaction(async (tx) => {
+        const completedAt = new Date();
+        let canRetireBatch = !itemId;
+        if (itemId) {
+          const stopped = await this.importJobs.itemJobs(tx).updateMany({
+            where: {
+              id: itemId,
+              status: 'MATERIALIZING',
+              lockToken: itemLockToken,
+            },
+            data: {
+              status: 'DEAD',
+              completedAt,
+              lockToken: null,
+              leaseExpiresAt: null,
+              lastError: error instanceof Error ? error.message : String(error),
+            },
+          });
+          canRetireBatch = stopped.count === 1;
+        }
+        if (batchId && canRetireBatch) {
+          // Retrying the draft creates a new batch. Retire this attempt before releasing the draft.
+          await this.importJobs.batchJobs(tx).update({
+            where: { id: batchId },
+            data: {
+              status: 'CANCELLED',
+              failedCount: itemId ? 1 : 0,
+              completedAt,
+            },
+          });
+        }
+        await tx.$executeRaw(Prisma.sql`
+          UPDATE "t_activity_import_draft"
+          SET "status" = ${'READY'}, "updated_at" = NOW()
+          WHERE "id" = ${row.id}
+            AND "user_id" = ${args.userId}
+            AND "status" = ${'COMMITTING'}
+            AND "updated_at" = (${claimedAt}::timestamptz AT TIME ZONE 'UTC')
+        `);
+      });
       throw error;
     }
   }

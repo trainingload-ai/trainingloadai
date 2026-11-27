@@ -45,6 +45,10 @@ export class ImportingJobService {
     return this.jobs.refreshBatchProgress(batchJobId, tx);
   }
 
+  recoverFinishedBatches() {
+    return this.jobs.recoverFinishedBatches();
+  }
+
   batchJobs(tx?: Parameters<ImportingJobRepository['batchJobs']>[0]) {
     return this.jobs.batchJobs(tx);
   }

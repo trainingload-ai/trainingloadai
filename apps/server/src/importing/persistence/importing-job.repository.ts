@@ -436,6 +436,33 @@ export class ImportingJobRepository {
 
     return job;
   }
+  async recoverFinishedBatches() {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const batches = await tx.$queryRaw<Array<{ id: string }>>`
+          SELECT b.id
+          FROM t_import_batch_job b
+          WHERE b.status IN ('QUEUED', 'RUNNING')
+            AND (SELECT COUNT(*) FROM t_import_item_job i
+              WHERE i.batch_job_id = b.id) >= GREATEST(b.total_count, 1)
+            AND NOT EXISTS (
+              SELECT 1 FROM t_import_item_job i
+              WHERE i.batch_job_id = b.id
+                AND i.status NOT IN ('DONE', 'SKIPPED', 'DEAD')
+            )
+          ORDER BY b.created_at, b.id
+          LIMIT 50
+          FOR UPDATE OF b SKIP LOCKED
+        `;
+        for (const batch of batches) {
+          await this.refreshBatchProgress(batch.id, tx);
+        }
+        return batches.length;
+      },
+      { timeout: 15_000 },
+    );
+  }
+
   /** Publish aggregate progress in the transaction that changes item state. */
   async refreshBatchProgress(
     batchJobId: string,

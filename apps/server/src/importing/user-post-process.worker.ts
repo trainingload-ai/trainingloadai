@@ -43,6 +43,7 @@ import {
 } from './import-completion-presenter.port';
 
 const AI_REVIEW_ENQUEUE_CONCURRENCY = 3;
+const IMPORT_BATCH_RECOVERY_INTERVAL_MS = 5 * 60_000;
 
 function jsonRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -275,6 +276,7 @@ export class UserPostProcessWorkerService
   private timer: NodeJS.Timeout | null = null;
   private stopping = false;
   private draining = false;
+  private nextBatchRecoveryAt = 0;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -1455,6 +1457,17 @@ export class UserPostProcessWorkerService
     return 'COMPLETED' as const;
   }
 
+  private async recoverFinishedBatchesIfDue() {
+    const now = Date.now();
+    if (now < this.nextBatchRecoveryAt) return;
+    this.nextBatchRecoveryAt = now + IMPORT_BATCH_RECOVERY_INTERVAL_MS;
+    try {
+      await this.importJobs.recoverFinishedBatches();
+    } catch (error) {
+      this.logger.error('Failed to recover finished import batches', error);
+    }
+  }
+
   private async drain() {
     // 单实例内用 draining 防重入；并发只在当前抢到的一批 job 内发生。
     if (this.stopping || this.draining) return;
@@ -1477,6 +1490,8 @@ export class UserPostProcessWorkerService
 
     try {
       while (!this.stopping) {
+        await this.recoverFinishedBatchesIfDue();
+        if (this.stopping) return;
         const batch = await this.claimBatch(batchSize);
         if (!batch.length) return;
 
