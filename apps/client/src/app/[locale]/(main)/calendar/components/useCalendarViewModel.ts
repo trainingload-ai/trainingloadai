@@ -204,6 +204,7 @@ export function useCalendarViewModel(
   summaryMonth = currentMonth,
 ) {
   const t = useTranslations("CalendarExperience");
+  const locale = useLocale();
   const {
     weeks,
     weekStartsOn,
