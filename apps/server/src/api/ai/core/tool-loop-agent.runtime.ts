@@ -2111,7 +2111,7 @@ export async function* streamCoachAnswer(args: {
       openErr = effectiveError;
       const classified = classifyCoachModelError(effectiveError, ctx.signal);
       logger.error(
-        `[AI][coach][agent-sdk] model failed provider=${provider ?? 'none'} model=${model} code=${classified.code} status=${classified.statusCode ?? 'none'} retryable=${classified.retryable} step=${currentStep} aborted=${ctx.signal.aborted} abortReason=${String(ctx.signal.reason ?? 'none')} textChars=${visibleTextBuf.length} message="${previewTextForLog(effectiveError instanceof Error ? effectiveError.message : String(effectiveError))}" elapsedMs=${Date.now() - t0}`,
+        `[AI][coach][agent-sdk] model failed provider=${provider ?? 'none'} model=${model} code=${classified.code} status=${classified.statusCode ?? 'none'} retryable=${classified.retryable} step=${activeModelStep || 'none'} aborted=${ctx.signal.aborted} abortReason=${String(ctx.signal.reason ?? 'none')} message="${previewTextForLog(effectiveError instanceof Error ? effectiveError.message : String(effectiveError))}" elapsedMs=${Date.now() - t0}`,
       );
       const canTryNextModel = model !== models[models.length - 1];
       const shouldRetry =
