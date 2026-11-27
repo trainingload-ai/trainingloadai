@@ -1368,6 +1368,40 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     ).toMatchObject({ planWorkoutId: f.independent.id });
   });
 
+  it('keeps automatic completion of a Garmin-imported course out of the outbound revision', async () => {
+    const f = await independentScenario();
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { scheduledDate: new Date('2026-07-07') },
+    });
+    const matching = matcher();
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    expect(
+      await prisma.planActivityMatchState.findUnique({
+        where: { activityId: f.activity.id },
+      }),
+    ).toMatchObject({ outcome: 'NO_MATCH' });
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { scheduledDate: new Date('2026-07-06') },
+    });
+    const beforeMatch = await prisma.planWorkoutChangeRevision.findUniqueOrThrow({
+      where: { userId: 'user' },
+    });
+    await matching.onWorkoutsChanged(
+      new PlanWorkoutsChangedEvent('user', 'garmin_schedule_import', [
+        f.independent.id,
+      ]),
+    );
+    expect(
+      await prisma.planWorkoutActivityLink.findFirst({
+        where: { unlinkedAt: null },
+      }),
+    ).toMatchObject({ planWorkoutId: f.independent.id });
+    expect(await prisma.planWorkoutChangeRevision.findUnique({ where: { userId: 'user' } }))
+      .toMatchObject({ outboundRevision: beforeMatch.outboundRevision, source: 'garmin_schedule_import' });
+  });
+
   it('keeps a matched course occupied and uses the late course for a new activity', async () => {
     const f = await independentScenario();
     const matching = matcher();

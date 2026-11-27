@@ -12,6 +12,7 @@ import { ActivityReadService } from '../../activity/activity-read.service';
 import { PlanRepository } from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
+import { setPlanWorkoutChangeSource } from './plan-workout-change';
 import { CoachContextService } from './coach-context.service';
 import {
   resolveActivityCalendarDayStr,
@@ -90,7 +91,7 @@ export class PlanLinkMatcherService {
   private readonly logger = new Logger(PlanLinkMatcherService.name);
   private readonly pending = new Map<
     string,
-    { dirty: boolean; work: Promise<void> }
+    { dirty: boolean; fromGarmin: boolean; work: Promise<void> }
   >();
   private sweeping = false;
   constructor(
@@ -172,20 +173,21 @@ export class PlanLinkMatcherService {
     if (day) await this.requestDay(activity.userId, day);
   }
 
-  private requestDay(userId: string, day: string): Promise<void> {
+  private requestDay(userId: string, day: string, fromGarmin = false): Promise<void> {
     const key = userId + ':' + day;
     const existing = this.pending.get(key);
     if (existing) {
+      existing.fromGarmin = fromGarmin && (!existing.dirty || existing.fromGarmin);
       existing.dirty = true;
       return existing.work;
     }
-    const entry = { dirty: true, work: Promise.resolve() };
+    const entry = { dirty: true, fromGarmin, work: Promise.resolve() };
     this.pending.set(key, entry);
     entry.work = (async () => {
       while (entry.dirty) {
         entry.dirty = false;
         try {
-          await this.reconcileDay(userId, day);
+          await this.reconcileDay(userId, day, entry.fromGarmin);
         } catch (error) {
           const code = (error as { code?: unknown })?.code;
           this.logger.warn(
@@ -202,7 +204,7 @@ export class PlanLinkMatcherService {
     return entry.work;
   }
 
-  private async reconcileDay(userId: string, day: string) {
+  private async reconcileDay(userId: string, day: string, fromGarmin: boolean) {
     const timezone = await this.timezone(userId);
     const date = scheduledDateFromCalendar(day);
     const from = new Date(date.getTime() - 86_400_000);
@@ -215,6 +217,7 @@ export class PlanLinkMatcherService {
           await acquireHashtextAdvisoryXactLock(tx, userId);
           await lockFitnessUser(tx, userId);
           await this.links.lockMatchDay(userId, day, tx);
+          if (fromGarmin) await setPlanWorkoutChangeSource(tx, 'garmin_schedule_import');
           const activityWhere: Prisma.ActivityWhereInput = {
             userId,
             state: 1,
@@ -570,7 +573,8 @@ export class PlanLinkMatcherService {
       );
       if (day) days.add(day);
     }
-    for (const day of days) await this.requestDay(event.userId, day);
+    for (const day of days)
+      await this.requestDay(event.userId, day, event.reason === 'garmin_schedule_import');
   }
 
   /** Repairs missed wakeups for tracked matches and recently available activities. */
