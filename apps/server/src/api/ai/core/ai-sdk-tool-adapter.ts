@@ -4,7 +4,7 @@ import {
   type ToolExecutionOptions,
   type ToolSet,
 } from 'ai';
-import { Logger } from '@nestjs/common';
+import { HttpException, Logger } from '@nestjs/common';
 import {
   checkAiToolActiveSkill,
   checkAiToolPermissions,
@@ -539,6 +539,10 @@ async function executeCoachTool(args: {
       );
     }
     logger.warn(`[AI][教练][工具] 失败 name=${providerToolName} ${msg}`);
+    const problem = err instanceof HttpException ? asRecord(err.getResponse()) : null;
+    if (problem?.code === 'PLAN_SCHEDULE_INVALID' && Array.isArray(problem.issues)) {
+      return { error: msg, code: problem.code, issues: problem.issues, stage: 'execute' };
+    }
     return { error: msg, stage: 'execute' };
   }
 }

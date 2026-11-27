@@ -35,6 +35,18 @@
     "cycleRationale": "“{planTitle}” is complete. Completion {completionRate}%. Start the next plan from this cycle summary.",
     "cycleNextPlanPrompt": "Start the next plan from the “{planTitle}” cycle summary. Completion {completionRate}. Read the summary first, then ask me about goals and constraints."
   },
+  "planReplacementRules": {
+    "restDays": "Rest days",
+    "unavailableDates": "Unavailable dates",
+    "availableDates": "Availability exceptions",
+    "dailyLimit": "Daily training limit",
+    "weekdayLimits": "Weekday training limits",
+    "weeklyLimit": "Maximum training days per week",
+    "relativeDays": "Allowed days in the plan week",
+    "weekPhases": "Training phases",
+    "requiredSports": "Required sports",
+    "raceDiscipline": "Race discipline"
+  },
   "error": {
     "track_file_output_invalid": "The converted file failed validation, so its download was blocked. Keep the original file and try another format, or contact support.",
     "track_file_conversion_service_failed": "The conversion service could not complete this request. No download was started. Keep the original file and try another format, or contact support.",

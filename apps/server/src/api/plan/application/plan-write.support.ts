@@ -2894,7 +2894,7 @@ export class PlanWriteSupport {
                 };
               }),
               qualityContract,
-              undefined,
+              options?.tx,
               planAssessment,
             );
       if (!qualityReport.valid) {

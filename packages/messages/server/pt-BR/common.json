@@ -35,6 +35,18 @@
     "cycleRationale": "“{planTitle}” está concluído. Conclusão {completionRate}%. Comece o próximo plano a partir deste resumo do ciclo.",
     "cycleNextPlanPrompt": "Comece o próximo plano a partir do resumo do ciclo “{planTitle}”. Conclusão {completionRate}. Leia o resumo primeiro e depois pergunte sobre metas e restrições."
   },
+  "planReplacementRules": {
+    "restDays": "Dias de descanso",
+    "unavailableDates": "Datas indisponíveis",
+    "availableDates": "Exceções de disponibilidade",
+    "dailyLimit": "Limite diário de treino",
+    "weekdayLimits": "Limites de treino por dia da semana",
+    "weeklyLimit": "Máximo de dias de treino por semana",
+    "relativeDays": "Dias permitidos na semana do plano",
+    "weekPhases": "Fases do treino",
+    "requiredSports": "Esportes obrigatórios",
+    "raceDiscipline": "Modalidade da prova"
+  },
   "error": {
     "track_file_output_invalid": "O arquivo convertido não passou na validação e seu download foi bloqueado. Guarde o original e tente outro formato ou entre em contato com o suporte.",
     "track_file_conversion_service_failed": "O serviço de conversão não concluiu a solicitação. O download não foi iniciado. Guarde o original e tente outro formato ou entre em contato com o suporte.",

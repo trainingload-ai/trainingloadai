@@ -1,4 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
+import { UnprocessableEntityException } from '@nestjs/common';
 import {
   createAiSdkCoachTools,
   stringifyAiSdkToolResultForModel,
@@ -52,6 +53,25 @@ function baseTool(overrides: Partial<AiToolDef> = {}): AiToolDef {
 }
 
 describe('createAiSdkCoachTools', () => {
+  it('returns structured calendar problems to a Coach confirmation tool', async () => {
+    const issues = [{ code: 'FIXED_REST_DAY', date: '2099-11-23' }];
+    const tools = createAiSdkCoachTools({
+      ctx: createCtx(),
+      tools: [baseTool({
+        name: 'coach_decision_apply',
+        execute: async () => { throw new UnprocessableEntityException({
+          code: 'PLAN_SCHEDULE_INVALID',
+          message: 'PLAN_SCHEDULE_INVALID: FIXED_REST_DAY@2099-11-23',
+          issues,
+          data: { issues },
+        }); },
+      })],
+    });
+    await expect(tools.coach_decision_apply.execute?.({}, {
+      toolCallId: 'calendar-apply', messages: [],
+    })).resolves.toMatchObject({ code: 'PLAN_SCHEDULE_INVALID', stage: 'execute', issues });
+  });
+
   it('rejects an out-of-scope draft before validation or rejection auditing', async () => {
     const validateInput = jest.fn(() => ({ ok: true as const }));
     const execute = jest.fn(async () => ({}));

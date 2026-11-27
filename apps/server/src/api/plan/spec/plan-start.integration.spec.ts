@@ -1,13 +1,21 @@
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, type Prisma } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   planStartFixture,
   raceWithPlanWriteCheckpoint,
   raceWithUncommittedPlanWrite,
 } from './plan-start.fixture';
-import type { PlanStartPreviewRequest } from '@shared/plan-proposal';
+import type {
+  PlanStartPreviewRequest,
+  PlanSupersessionPreviewRequest,
+} from '@shared/plan-proposal';
+import {
+  calendarIsoWeekday,
+  transitionScheduleMetadata,
+  type ScheduleConstraints,
+} from '@shared/plan-calendar';
 import { PlanLoadEstimatorService } from '../application/plan-load-estimator.service';
 import { PlanScheduledActivationWorker } from '../application/plan-scheduled-activation.worker';
 import { PlanExternalSyncService } from '../application/plan-external-sync.service';
@@ -70,7 +78,419 @@ describe('saved draft START / PostgreSQL', () => {
       "INSERT INTO t_user(id) VALUES ('user'),('other')",
     );
   });
-  const nativeIt = process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN ? it : it.skip;
+  const nativeIt = process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN
+    ? it
+    : it.skip;
+
+  async function supersession(
+    effectiveFrom: string,
+    args: {
+      restDay?: boolean;
+      sourceWorkout?: boolean;
+      sourceMetadata?: Prisma.InputJsonValue;
+      dayIndex?: number;
+      calendarTimeZone?: string;
+      override?: Pick<
+        PlanSupersessionPreviewRequest,
+        'scheduleConstraints' | 'qualityContract'
+      >;
+    } = {},
+  ) {
+    const weekday = calendarIsoWeekday(effectiveFrom);
+    const constraints: ScheduleConstraints = {
+      version: 1,
+      revision: 1,
+      calendarTimeZone: args.calendarTimeZone ?? 'UTC',
+      fixedRestWeekdays: [
+        args.restDay ? weekday : weekday === 7 ? 1 : weekday + 1,
+      ],
+      unavailableDates: [],
+      availableDateOverrides: [],
+      effectiveFrom: '2026-01-01',
+      confirmation: { source: 'USER', reference: 'original-availability' },
+    };
+    const source = await prisma.plan.create({
+      data: {
+        userId: 'user',
+        title: 'Original training block',
+        status: 'ACTIVE',
+        periodWeeks: 2,
+        startDate: new Date(effectiveFrom),
+        activationTimezone: args.calendarTimeZone,
+        generationMetadata: args.sourceMetadata ?? {
+          scheduleConstraints: constraints,
+          qualityContract: {
+            maxDailyMinutes: 40,
+            maxTrainingDaysPerWeek: 3,
+            maxMinutesByIsoWeekday: { 1: 40, 2: 30 },
+          },
+        },
+      },
+    });
+    if (args.sourceWorkout) {
+      await prisma.planWorkout.create({
+        data: {
+          userId: 'user',
+          planId: source.id,
+          dayOffset: 0,
+          sportType: 'RUN',
+          text: 'work 30m',
+          plannedDurationSeconds: 1_800,
+          scheduledDate: new Date(effectiveFrom),
+        },
+      });
+    }
+    const context = await f.context.ensureContext({
+      userId: 'user',
+      planId: source.id,
+      status: 'ACTIVE',
+    });
+    const thread = await prisma.coachThread.create({
+      data: { contextId: context.id },
+    });
+    const branch = await prisma.coachBranch.create({
+      data: { contextId: context.id, threadId: thread.id, baseEventSeq: 0 },
+    });
+    const preview = await f.proposals.createPreview('user', {
+      mode: 'SUPERSEDE',
+      sourcePlanId: source.id,
+      effectiveFrom,
+      rationale: 'Adjust the upcoming training block.',
+      evidenceRefs: [{ type: 'training', label: 'Recent training outcomes' }],
+      plan: {
+        title: 'Replacement block',
+        periodWeeks: 1,
+        workouts: [
+          {
+            weekIndex: 1,
+            dayIndex: args.dayIndex ?? 1,
+            sportType: 'RUN',
+            text: 'work 25m',
+          },
+        ],
+      },
+      ...args.override,
+    });
+    const decision = await prisma.coachDecision.create({
+      data: {
+        contextId: context.id,
+        branchId: branch.id,
+        decisionType: 'PLAN_SUPERSESSION',
+        state: 'APPROVED',
+        payload: preview.decisionPayload,
+      },
+    });
+    await prisma.$transaction((tx) =>
+      f.proposals.claimDecision({
+        previewId: preview.previewId,
+        decisionId: decision.id,
+        sourcePlanId: source.id,
+        userId: 'user',
+        tx,
+      }),
+    );
+    const apply = () =>
+      prisma.$transaction((tx) =>
+        f.apply.apply({
+          previewId: preview.previewId,
+          contextPlanId: source.id,
+          branchId: branch.id,
+          decisionId: decision.id,
+          userId: 'user',
+          tx,
+        }),
+      );
+    return { apply, source, constraints, preview };
+  }
+
+  it.each([false, true])(
+    'inherits calendar rules on supersession, scheduled=%s',
+    async (scheduled) => {
+      const date = scheduled
+        ? '2099-11-22'
+        : new Date().toISOString().slice(0, 10);
+      const { apply, source, constraints } = await supersession(date, {
+        sourceWorkout: true,
+      });
+      const receipt = await apply();
+      const successor = await prisma.plan.findUniqueOrThrow({
+        where: { id: receipt.createdPlanId! },
+      });
+      expect(successor).toMatchObject({
+        status: scheduled ? 'SCHEDULED' : 'ACTIVE',
+        supersedesPlanId: source.id,
+        generationMetadata: {
+          scheduleConstraints: constraints,
+          qualityContract: {
+            startDate: date,
+            maxDailyMinutes: 40,
+            maxTrainingDaysPerWeek: 3,
+          },
+        },
+      });
+      expect(
+        await prisma.planWorkout.findFirst({ where: { planId: successor.id } }),
+      ).toMatchObject({ scheduledDate: new Date(date) });
+    },
+  );
+
+  it('honors explicitly confirmed supersession overrides and preserves other quality fields', async () => {
+    const date = '2099-11-22';
+    const override: ScheduleConstraints = {
+      version: 1,
+      revision: 2,
+      calendarTimeZone: 'UTC',
+      fixedRestWeekdays: [],
+      unavailableDates: [],
+      availableDateOverrides: [],
+      effectiveFrom: date,
+      confirmation: { source: 'USER', reference: 'changed-rest-day' },
+    };
+    const { apply, preview } = await supersession(date, {
+      restDay: true,
+      override: {
+        scheduleConstraints: override,
+        qualityContract: {
+          maxDailyMinutes: 60,
+          maxMinutesByIsoWeekday: { 2: 40 },
+        },
+      },
+    });
+    expect(preview.presentation.facts).toContainEqual(
+      expect.objectContaining({
+        type: 'replacement_dailyLimit',
+        value: expect.stringContaining('60'),
+      }),
+    );
+    const receipt = await apply();
+    expect(
+      await prisma.plan.findUnique({ where: { id: receipt.createdPlanId! } }),
+    ).toMatchObject({
+      generationMetadata: {
+        scheduleConstraints: override,
+        qualityContract: {
+          maxDailyMinutes: 60,
+          maxTrainingDaysPerWeek: 3,
+          maxMinutesByIsoWeekday: { 1: 40, 2: 40 },
+        },
+      },
+    });
+  });
+
+  it('rolls back a supersession that schedules work on an inherited rest day', async () => {
+    const date = '2099-11-22';
+    const { apply, source, preview } = await supersession(date, {
+      restDay: true,
+    });
+    await expect(apply()).rejects.toMatchObject({
+      response: {
+        code: 'PLAN_SCHEDULE_INVALID',
+        data: {
+          issues: [expect.objectContaining({ code: 'FIXED_REST_DAY', date })],
+        },
+      },
+    });
+    expect(await prisma.plan.count()).toBe(1);
+    expect(await prisma.coachContext.findFirst()).toMatchObject({
+      planId: source.id,
+      status: 'ACTIVE',
+    });
+    expect(
+      await prisma.planProposalPreview.findUnique({
+        where: { id: preview.previewId },
+      }),
+    ).toMatchObject({ appliedAt: null });
+  });
+
+  nativeIt(
+    'rechecks the inherited daily budget after a concurrent calendar write',
+    async () => {
+      const date = '2099-11-22';
+      const { apply, source, preview } = await supersession(date);
+      const result = await raceWithUncommittedPlanWrite(
+        prisma,
+        (tx) =>
+          f.write.createIndependentWorkoutInTransaction(
+            'user',
+            { scheduledDate: date, sportType: 'RUN', text: 'work 25m' },
+            tx,
+          ),
+        apply,
+      );
+      expect(result).toMatchObject({
+        status: 'rejected',
+        reason: {
+          response: {
+            code: 'PLAN_SCHEDULE_INVALID',
+            issues: [expect.objectContaining({ code: 'DAILY_TIME_BUDGET' })],
+          },
+        },
+      });
+      expect(await prisma.plan.count()).toBe(1);
+      expect(await prisma.planWorkout.findMany()).toMatchObject([
+        { planId: null },
+      ]);
+      expect(await prisma.coachContext.findFirst()).toMatchObject({
+        planId: source.id,
+        status: 'ACTIVE',
+      });
+      expect(
+        await prisma.planProposalPreview.findUnique({
+          where: { id: preview.previewId },
+        }),
+      ).toMatchObject({ appliedAt: null });
+    },
+  );
+
+  it.each([
+    { before: 40, after: 20, restDays: [], issue: 'DAILY_TIME_BUDGET' },
+    { before: 40, after: 40, restDays: [1], issue: 'FIXED_REST_DAY' },
+    { before: 20, after: 40, restDays: [], issue: null },
+  ])(
+    'uses the inherited rule version effective on each replacement date ($issue)',
+    async ({ before, after, restDays, issue }) => {
+      const date = '2099-11-22';
+      const nextDate = '2099-11-23';
+      const scheduleConstraints: ScheduleConstraints = {
+        version: 1,
+        revision: 1,
+        calendarTimeZone: 'UTC',
+        fixedRestWeekdays: [],
+        unavailableDates: [],
+        availableDateOverrides: [],
+        effectiveFrom: date,
+        confirmation: { source: 'USER', reference: 'starting-calendar' },
+      };
+      const sourceMetadata = transitionScheduleMetadata(
+        { scheduleConstraints, qualityContract: { maxDailyMinutes: before } },
+        {
+          ...scheduleConstraints,
+          revision: 2,
+          effectiveFrom: nextDate,
+          fixedRestWeekdays: restDays,
+        },
+        { mode: 'INHERIT', maxDailyMinutes: after },
+      ) as Prisma.InputJsonValue;
+      const { apply, preview } = await supersession(date, {
+        dayIndex: 2,
+        sourceMetadata,
+      });
+      expect(preview.presentation.scheduleRulePeriods).toMatchObject([
+        { from: date, availability: { maxDailyMinutes: before } },
+        { from: nextDate, availability: { maxDailyMinutes: after } },
+      ]);
+      if (issue) {
+        await expect(apply()).rejects.toMatchObject({
+          response: {
+            data: {
+              issues: [
+                expect.objectContaining({ code: issue, date: nextDate }),
+              ],
+            },
+          },
+        });
+        expect(await prisma.plan.count()).toBe(1);
+      } else {
+        const receipt = await apply();
+        expect(
+          await prisma.plan.findUnique({
+            where: { id: receipt.createdPlanId! },
+          }),
+        ).toMatchObject({
+          generationMetadata: {
+            scheduleConstraintHistory: [
+              expect.objectContaining({
+                qualityContract: { maxDailyMinutes: before, startDate: date },
+              }),
+            ],
+            scheduleConstraints: { revision: 2 },
+          },
+        });
+      }
+    },
+  );
+
+  it('requires a new supersession preview after only the source rules change', async () => {
+    const { apply, source, constraints } = await supersession('2099-11-22');
+    await prisma.plan.update({
+      where: { id: source.id },
+      data: {
+        generationMetadata: {
+          scheduleConstraints: { ...constraints, revision: 2 },
+        },
+      },
+    });
+    await expect(apply()).rejects.toThrow(
+      'Source plan availability changed after preview',
+    );
+    expect(await prisma.plan.count()).toBe(1);
+  });
+
+  it('falls back to inherited rules after a supersession override ends', async () => {
+    const date = '2099-11-22';
+    const scheduleConstraints: ScheduleConstraints = {
+      version: 1,
+      revision: 2,
+      calendarTimeZone: 'UTC',
+      fixedRestWeekdays: [],
+      unavailableDates: [],
+      availableDateOverrides: [],
+      effectiveFrom: date,
+      effectiveUntil: date,
+      confirmation: { source: 'USER', reference: 'one-day-exception' },
+    };
+    const { apply, preview } = await supersession(date, {
+      dayIndex: 2,
+      override: { scheduleConstraints },
+    });
+    expect(preview.presentation.scheduleRulePeriods).toMatchObject([
+      { from: date, to: date, scheduleConstraints: { revision: 2 } },
+      { from: '2099-11-23', scheduleConstraints: { revision: 1 } },
+    ]);
+    await expect(apply()).rejects.toMatchObject({
+      response: {
+        data: {
+          issues: [
+            expect.objectContaining({
+              code: 'FIXED_REST_DAY',
+              date: '2099-11-23',
+            }),
+          ],
+        },
+      },
+    });
+    expect(await prisma.plan.count()).toBe(1);
+  });
+
+  it('schedules replacement midnight in the inherited plan calendar time zone', async () => {
+    const { apply, preview } = await supersession('2099-11-22', { calendarTimeZone: 'America/Los_Angeles' });
+    expect(preview.presentation.calendarTimeZone).toBe('America/Los_Angeles');
+    const receipt = await apply();
+    expect(await prisma.plan.findUnique({ where: { id: receipt.createdPlanId! } }))
+      .toMatchObject({
+        activationTimezone: 'America/Los_Angeles',
+        scheduledActivationAt: new Date('2099-11-22T08:00:00Z'),
+      });
+  });
+
+  it('rolls back the successor, Coach context and removed mapping on stored calendar rejection', async () => {
+    const { apply, source } = await supersession('2099-11-22', { sourceWorkout: true });
+    const oldWorkout = await prisma.planWorkout.findFirstOrThrow({ where: { planId: source.id } });
+    const mapping = await prisma.planWorkoutExternalMapping.create({
+      data: { userId: 'user', provider: 'intervals_icu', planWorkoutId: oldWorkout.id, externalEventId: 'original-71' },
+    });
+    const rejectStored = jest.spyOn(f.calendarValidation, 'assertStored').mockRejectedValueOnce(new Error('stored calendar rejected'));
+    try {
+      await expect(apply()).rejects.toThrow('stored calendar rejected');
+    } finally {
+      rejectStored.mockRestore();
+    }
+    expect(await prisma.plan.count()).toBe(1);
+    expect(await prisma.coachContext.count()).toBe(1);
+    expect(await prisma.planWorkout.count()).toBe(1);
+    expect(await prisma.planWorkoutExternalMapping.findUnique({ where: { id: mapping.id } }))
+      .toMatchObject({ syncState: 'SYNCED', localDeletedAt: null });
+  });
 
   async function scheduledReplacement(
     sourceStatus: 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED' = 'ACTIVE',

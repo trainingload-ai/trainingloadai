@@ -35,6 +35,18 @@
     "cycleRationale": "« {planTitle} » est terminé. Achèvement {completionRate} %. Démarre le plan suivant à partir de ce bilan de cycle.",
     "cycleNextPlanPrompt": "Démarre le plan suivant à partir du bilan du cycle « {planTitle} ». Achèvement {completionRate}. Lis d'abord le bilan, puis demande-moi les objectifs et les contraintes."
   },
+  "planReplacementRules": {
+    "restDays": "Jours de repos",
+    "unavailableDates": "Dates indisponibles",
+    "availableDates": "Exceptions de disponibilité",
+    "dailyLimit": "Limite quotidienne d’entraînement",
+    "weekdayLimits": "Limites d’entraînement par jour de la semaine",
+    "weeklyLimit": "Nombre maximal de jours d’entraînement par semaine",
+    "relativeDays": "Jours autorisés dans la semaine du plan",
+    "weekPhases": "Phases d’entraînement",
+    "requiredSports": "Sports requis",
+    "raceDiscipline": "Discipline de compétition"
+  },
   "error": {
     "track_file_output_invalid": "Le fichier converti n’a pas réussi la validation et son téléchargement a été bloqué. Conservez l’original et essayez un autre format ou contactez l’assistance.",
     "track_file_conversion_service_failed": "Le service de conversion n’a pas pu terminer la demande. Aucun téléchargement n’a été lancé. Conservez l’original et essayez un autre format ou contactez l’assistance.",

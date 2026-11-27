@@ -5,6 +5,7 @@ import type {
 import { UnprocessableEntityException } from '@nestjs/common';
 import { asRecord } from '../ai-common.util';
 import { isCalendarDate } from '@shared/plan-calendar';
+import { planQualityContractSchema } from '@shared/plan-quality';
 import {
   calendarMonthEnd,
   hasRollingWeekTargets,
@@ -185,7 +186,11 @@ export const planProposalPreviewTool: AiToolDef<
       scheduleConstraints: {
         type: 'object',
         description:
-          'Versioned schedule constraints: version=1, revision, calendarTimeZone, fixedRestWeekdays (ISO 1..7), unavailableDates, availableDateOverrides, effectiveFrom/effectiveUntil, confirmation:{source:USER,reference}. Reference is audit only; actual authorization comes from card confirmation.',
+          'Versioned schedule constraints: version=1, revision, calendarTimeZone, fixedRestWeekdays (ISO 1..7), unavailableDates, availableDateOverrides, effectiveFrom/effectiveUntil, confirmation:{source:USER,reference}. SUPERSEDE inherits the source rules unless a replacement is explicitly agreed with the athlete. Reference is audit only; actual authorization comes from card confirmation.',
+      },
+      qualityContract: {
+        ...planQualityContractSchema,
+        description: 'SUPERSEDE only. Provide only quality contract fields explicitly changed by the athlete.',
       },
       rolling: {
         type: 'object',
