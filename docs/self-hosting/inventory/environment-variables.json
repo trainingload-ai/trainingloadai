@@ -32,7 +32,7 @@
       "references": [
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 433
+          "line": 436
         }
       ]
     },
@@ -3654,7 +3654,7 @@
         },
         {
           "file": "apps/server/src/integrations/personal/personal-connection.service.ts",
-          "line": 382
+          "line": 390
         }
       ]
     },
@@ -3700,7 +3700,7 @@
         },
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 439
+          "line": 442
         }
       ]
     },
@@ -4137,7 +4137,7 @@
         },
         {
           "file": "apps/server/src/integrations/personal/personal-connection.service.ts",
-          "line": 382
+          "line": 390
         }
       ]
     },
@@ -5073,7 +5073,7 @@
       "references": [
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 438
+          "line": 441
         }
       ]
     },

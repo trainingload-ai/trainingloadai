@@ -589,10 +589,40 @@ export class PersonalConnectionService {
       return { disconnected: true, revoked: provider !== 'coros' };
     // Erase secrets but retain the receipt ledger and account quota. Account
     // deletion still cascades these records; disconnect is not data deletion.
-    await this.prisma.$transaction(async (tx) => {
+    const removedCredential = await this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`personal-connect:${userId}:${provider}`}, 0))`;
-      const removed = await this.providerConnections.model(tx).updateMany({
-        where: { id: row.id, credentialFingerprint: row.credentialFingerprint },
+      const rows = this.providerConnections.model(tx);
+      let current = row;
+      let indeterminate = false;
+      if (provider === 'coros') {
+        // Refresh commits use this key. Read the credential being erased under the same lock.
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`personal-token:${row.id}`}, 0))`;
+        const latest = await rows.findUnique({ where: { id: row.id } });
+        if (!latest || !this.sameAuthorization(row, latest))
+          throw new PersonalProviderError(
+            'PROVIDER_CONNECTION_CHANGED',
+            undefined,
+            409,
+          );
+        current = latest;
+        const refresh = await tx.personalOAuthRefresh.findUnique({
+          where: { connectionId: row.id },
+        });
+        indeterminate =
+          !!refresh?.dispatchedAt &&
+          refresh.credentialVersion ===
+            createHash('sha256')
+              .update(current.credentialCiphertext)
+              .digest('hex');
+      }
+      const removed = await rows.updateMany({
+        where: {
+          id: current.id,
+          credentialFingerprint: current.credentialFingerprint,
+          ...(provider === 'coros'
+            ? { credentialCiphertext: current.credentialCiphertext }
+            : {}),
+        },
         data: {
           status: 'DISCONNECTED',
           credentialCiphertext: '',
@@ -614,15 +644,17 @@ export class PersonalConnectionService {
           undefined,
           409,
         );
-      await this.cancelPending(tx, row.id);
+      await this.cancelPending(tx, current.id);
+      return { ciphertext: current.credentialCiphertext, indeterminate };
     });
     let revoked = provider !== 'coros';
     if (provider === 'coros') {
       try {
         const credential = JSON.parse(
-          this.vault.decrypt(row.credentialCiphertext),
+          this.vault.decrypt(removedCredential.ciphertext),
         );
         revoked = await this.coros.revoke(personalRegion(row), credential);
+        if (removedCredential.indeterminate) revoked = false;
       } catch {
         revoked = false;
       }
@@ -654,6 +686,7 @@ export class PersonalConnectionService {
     connectionId: string,
     force = false,
     rejectedToken?: string,
+    expected?: ExternalProviderConnection,
   ): Promise<{
     connection: ExternalProviderConnection;
     token: string;
@@ -663,8 +696,15 @@ export class PersonalConnectionService {
         where: { id: connectionId },
       }),
     );
-    if (observed.provider === 'coros')
+    if (observed.provider === 'coros') {
+      if (expected && !this.sameAuthorization(expected, observed))
+        throw new PersonalProviderError(
+          'PROVIDER_CONNECTION_CHANGED',
+          undefined,
+          409,
+        );
       return this.corosCredential(observed, force, rejectedToken);
+    }
 
     // Garmin's Personal API key exchange retains its existing retry and authorization behavior.
     return this.prisma.$transaction(
@@ -888,7 +928,10 @@ export class PersonalConnectionService {
             undefined,
             409,
           );
-        return { connection, token: next.accessToken };
+        return {
+          connection: { ...connection, credentialCiphertext: ciphertext },
+          token: next.accessToken,
+        };
       } catch (error) {
         if (
           error instanceof PersonalProviderError &&
@@ -972,6 +1015,10 @@ export class PersonalConnectionService {
     current: ExternalProviderConnection,
   ) {
     return (
+      expected.id === current.id &&
+      expected.userId === current.userId &&
+      expected.provider === current.provider &&
+      expected.externalAthleteId === current.externalAthleteId &&
       expected.credentialFingerprint === current.credentialFingerprint &&
       personalMetadata(expected).authorizationRevision ===
         personalMetadata(current).authorizationRevision
@@ -1000,8 +1047,13 @@ export class PersonalConnectionService {
     const observed = await this.providerConnections.model().findUnique({
       where: { id: connectionId },
     });
+    let used: ExternalProviderConnection | null = observed;
+    const expected = observed?.provider === 'coros' ? observed : undefined;
     try {
-      let active = await this.credential(connectionId);
+      let active = expected
+        ? await this.credential(connectionId, false, undefined, expected)
+        : await this.credential(connectionId);
+      used = active.connection;
       try {
         return await work(active.connection, active.token);
       } catch (error) {
@@ -1010,7 +1062,10 @@ export class PersonalConnectionService {
           error.code !== 'PROVIDER_AUTH_REQUIRED'
         )
           throw error;
-        active = await this.credential(connectionId, true, active.token);
+        active = expected
+          ? await this.credential(connectionId, true, active.token, expected)
+          : await this.credential(connectionId, true, active.token);
+        used = active.connection;
         return await work(active.connection, active.token);
       }
     } catch (error) {
@@ -1018,14 +1073,19 @@ export class PersonalConnectionService {
         error instanceof PersonalProviderError &&
         error.code === 'PROVIDER_AUTH_REQUIRED' &&
         observed &&
+        used &&
         isPersonalConnection(observed)
       ) {
+        const fence =
+          used.provider === 'coros'
+            ? this.refreshFence(used)
+            : {
+                id: connectionId,
+                status: 'ACTIVE',
+                credentialFingerprint: observed.credentialFingerprint,
+              };
         await this.prisma.$transaction((tx) =>
-          this.invalidateConnection(tx, {
-            id: connectionId,
-            status: 'ACTIVE',
-            credentialFingerprint: observed.credentialFingerprint,
-          }),
+          this.invalidateConnection(tx, fence),
         );
       }
       throw error;

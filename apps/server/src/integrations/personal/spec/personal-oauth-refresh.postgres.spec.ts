@@ -126,12 +126,20 @@ describe('Personal COROS refresh / PostgreSQL', () => {
     client: PrismaClient,
     token: CorosMcpClient['token'],
     failWrite = () => false,
+    revoke: CorosMcpClient['revoke'] = async () => true,
+    afterRead?: () => Promise<void>,
   ) {
     const rows = {
       model: (tx?: Prisma.TransactionClient) => {
         const model = (tx ?? client).externalProviderConnection;
         return {
-          findUnique: model.findUnique.bind(model),
+          findUnique: async (
+            args: Prisma.ExternalProviderConnectionFindUniqueArgs,
+          ) => {
+            const row = await model.findUnique(args);
+            if (!tx) await afterRead?.();
+            return row;
+          },
           updateMany: (
             args: Prisma.ExternalProviderConnectionUpdateManyArgs,
           ) => {
@@ -149,7 +157,7 @@ describe('Personal COROS refresh / PostgreSQL', () => {
       vault,
       {} as never,
       {} as never,
-      { token, revoke: async () => true } as never,
+      { token, revoke } as never,
     );
   }
 
@@ -214,7 +222,7 @@ describe('Personal COROS refresh / PostgreSQL', () => {
         service(replica, token).disconnect(userId, 'coros'),
       ).resolves.toEqual({
         disconnected: true,
-        revoked: true,
+        revoked: false,
       });
     } finally {
       release.resolve();
@@ -225,6 +233,147 @@ describe('Personal COROS refresh / PostgreSQL', () => {
       credentialCiphertext: '',
     });
     expect(token).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the newest committed refresh token for explicit remote revocation', async () => {
+    const read = Promise.withResolvers<void>();
+    const resume = Promise.withResolvers<void>();
+    const sdk = jest.fn<CorosMcpClient['token']>(
+      async (_region, _client, _grant, beforeDispatch) => {
+        await beforeDispatch?.();
+        return replacement();
+      },
+    );
+    const revoke = jest.fn<CorosMcpClient['revoke']>(async () => true);
+    const disconnect = service(db, sdk, undefined, revoke, async () => {
+      read.resolve();
+      await resume.promise;
+    }).disconnect(userId, 'coros');
+    await Promise.race([read.promise, disconnect]);
+    try {
+      await service(replica, sdk).credential(id);
+    } finally {
+      resume.resolve();
+    }
+    await expect(disconnect).resolves.toEqual({
+      disconnected: true,
+      revoked: true,
+    });
+    expect(revoke).toHaveBeenCalledWith(
+      'us',
+      expect.objectContaining({ refreshToken: 'fresh-refresh' }),
+    );
+  });
+
+  it('does not send a stale COROS operation to a reconnected account after an upstream 401', async () => {
+    const before = replacement();
+    await db.externalProviderConnection.update({
+      where: { id },
+      data: { credentialCiphertext: vault.encrypt(JSON.stringify(before)) },
+    });
+    const entered = Promise.withResolvers<void>();
+    const release = Promise.withResolvers<void>();
+    const sdk = jest.fn<CorosMcpClient['token']>();
+    const work = jest.fn(async () => {
+      entered.resolve();
+      await release.promise;
+      throw new PersonalProviderError('PROVIDER_AUTH_REQUIRED', undefined, 401);
+    });
+    const running = service(db, sdk).authorized(id, work);
+    const stale = expect(running).rejects.toMatchObject({
+      code: 'PROVIDER_CONNECTION_CHANGED',
+    });
+    await Promise.race([entered.promise, stale]);
+    const ciphertext = vault.encrypt(
+      JSON.stringify({ ...before, accessToken: 'other-account-access' }),
+    );
+    try {
+      await replica.externalProviderConnection.update({
+        where: { id },
+        data: {
+          credentialCiphertext: ciphertext,
+          credentialFingerprint: 'generation-2',
+          externalAthleteId: 'other-coros-account',
+          metadata: {
+            connectionMode: 'mcp',
+            region: 'us',
+            authorizationRevision: 'revision-2',
+          },
+        },
+      });
+    } finally {
+      release.resolve();
+      await stale;
+    }
+    expect(work).toHaveBeenCalledTimes(1);
+    expect(sdk).not.toHaveBeenCalled();
+    expect(await current()).toMatchObject({
+      status: 'ACTIVE',
+      credentialCiphertext: ciphertext,
+    });
+  });
+
+  it('does not invalidate a newer rotated credential after a late 401 from the same authorization', async () => {
+    await db.externalProviderConnection.update({
+      where: { id },
+      data: {
+        credentialCiphertext: vault.encrypt(
+          JSON.stringify({ ...replacement(), accessToken: 'before' }),
+        ),
+      },
+    });
+    const entered = Promise.withResolvers<void>();
+    const release = Promise.withResolvers<void>();
+    const sdk = jest.fn<CorosMcpClient['token']>(
+      async (_region, _client, _grant, beforeDispatch) => {
+        await beforeDispatch?.();
+        const ordinal = sdk.mock.calls.length;
+        return {
+          ...replacement(),
+          accessToken: `rotated-${ordinal}`,
+          refreshToken: `refresh-${ordinal}`,
+        };
+      },
+    );
+    const first = service(db, sdk).authorized(
+      id,
+      async (_connection, token) => {
+        if (token === 'rotated-1') {
+          entered.resolve();
+          await release.promise;
+        }
+        throw new PersonalProviderError(
+          'PROVIDER_AUTH_REQUIRED',
+          undefined,
+          401,
+        );
+      },
+    );
+    const late = expect(first).rejects.toMatchObject({
+      code: 'PROVIDER_AUTH_REQUIRED',
+    });
+    await Promise.race([entered.promise, late]);
+    try {
+      await expect(
+        service(replica, sdk).authorized(id, async (_connection, token) => {
+          if (token === 'rotated-1')
+            throw new PersonalProviderError(
+              'PROVIDER_AUTH_REQUIRED',
+              undefined,
+              401,
+            );
+          return token;
+        }),
+      ).resolves.toBe('rotated-2');
+    } finally {
+      release.resolve();
+      await late;
+    }
+    expect(await current()).toMatchObject({ status: 'ACTIVE' });
+    expect(
+      JSON.parse(vault.decrypt((await current()).credentialCiphertext))
+        .accessToken,
+    ).toBe('rotated-2');
   });
 
   it('does not replay a dispatched exchange after durable persistence is unavailable', async () => {
