@@ -195,6 +195,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     ).rejects.toMatchObject({
       response: {
         code: 'PLAN_SCHEDULE_INVALID',
+        data: { issues: [{ code: 'FIXED_REST_DAY', date: '2026-11-25' }] },
         issues: [{ code: 'FIXED_REST_DAY', date: '2026-11-25' }],
       },
     });
