@@ -1,4 +1,6 @@
 import type { V2HomePlanWorkout } from "@/api/v2-home";
+import dayjs from "dayjs";
+import { getHomeWeekRange } from "./home-week-range";
 import {
   buildHomeWeeklyActualSummary,
   buildHomeWeeklySummary,
@@ -73,8 +75,10 @@ function workout(
 }
 
 describe("buildHomeWeeklySummary", () => {
+  const { dateKeys } = getHomeWeekRange(dayjs("2026-09-08"));
+
   it("returns an empty weekly summary when the plan has no workouts", () => {
-    expect(buildHomeWeeklySummary([])).toEqual({
+    expect(buildHomeWeeklySummary([], dateKeys)).toEqual({
       completedSessions: 0,
       plannedLoad: 0,
       plannedSessions: 0,
@@ -85,22 +89,25 @@ describe("buildHomeWeeklySummary", () => {
     });
   });
 
-  it("matches the mobile planned/completed rules", () => {
+  it("counts only the calendar week's workouts and places bars by scheduled date", () => {
     const summary = buildHomeWeeklySummary([
       workout({
         id: "done",
         status: "DONE",
-        dayIndex: 1,
+        scheduledDate: "2026-09-07",
+        dayIndex: 6,
         estimatedLoad: 21.4,
       }),
-      workout({ id: "planned", dayIndex: 3, estimatedLoad: 28.2 }),
+      workout({ id: "planned", scheduledDate: "2026-09-09", dayIndex: 1, estimatedLoad: 28.2 }),
       workout({
         id: "moved",
         status: "MOVED",
-        dayIndex: 5,
+        scheduledDate: "2026-09-11",
         estimatedLoad: 99,
       }),
-    ]);
+      workout({ id: "next-week", scheduledDate: "2026-09-14", estimatedLoad: 99 }),
+      workout({ id: "undated", scheduledDate: null, estimatedLoad: 99 }),
+    ], dateKeys);
 
     expect(summary).toMatchObject({
       completedSessions: 1,
