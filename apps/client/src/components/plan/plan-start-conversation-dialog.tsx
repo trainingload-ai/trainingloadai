@@ -194,21 +194,18 @@ function PlanStartAssessmentBody({
   );
 
   const confirmMutation = useMutation({
-    mutationFn: (choice: "ORIGINAL" | "SUGGESTED") => {
-      if (!current) throw new Error("START_DRAFT_UNAVAILABLE");
-      const previewId =
-        phase.step === "result" &&
-        (phase.result.outcome === "SUGGESTED_CHANGES" ||
-          phase.result.outcome === "CONFLICT")
-          ? phase.result.previewId
-          : undefined;
-      return confirmPlanStart(planId, {
-        startDate: current.startDate,
-        revision: current.revision,
-        choice,
-        previewId,
-      });
-    },
+    mutationFn: (input: {
+      choice: "ORIGINAL" | "SUGGESTED";
+      startDate: string;
+      revision: string;
+      previewId?: string;
+    }) =>
+      confirmPlanStart(planId, {
+        startDate: input.startDate,
+        revision: input.revision,
+        choice: input.choice,
+        previewId: input.previewId,
+      }),
     onSuccess: () => {
       finishStart();
     },
@@ -472,14 +469,27 @@ function PlanStartAssessmentBody({
                       type="button"
                       variant="outline"
                       disabled={submitting}
-                      onClick={() => confirmMutation.mutate("ORIGINAL")}
+                      onClick={() =>
+                        confirmMutation.mutate({
+                          choice: "ORIGINAL",
+                          startDate: result.startDate,
+                          revision: result.revision,
+                        })
+                      }
                     >
                       {t("startOriginal")}
                     </Button>
                     <Button
                       type="button"
                       disabled={submitting}
-                      onClick={() => confirmMutation.mutate("SUGGESTED")}
+                      onClick={() =>
+                        confirmMutation.mutate({
+                          choice: "SUGGESTED",
+                          startDate: result.startDate,
+                          revision: result.revision,
+                          previewId: result.previewId,
+                        })
+                      }
                     >
                       {submitting ? (
                         <Loader2 className="me-1.5 size-4 animate-spin" aria-hidden />
@@ -493,7 +503,14 @@ function PlanStartAssessmentBody({
                   <Button
                     type="button"
                     disabled={submitting}
-                    onClick={() => confirmMutation.mutate("SUGGESTED")}
+                    onClick={() =>
+                      confirmMutation.mutate({
+                        choice: "SUGGESTED",
+                        startDate: result.startDate,
+                        revision: result.revision,
+                        previewId: result.previewId,
+                      })
+                    }
                   >
                     {submitting ? (
                       <Loader2 className="me-1.5 size-4 animate-spin" aria-hidden />
@@ -507,7 +524,13 @@ function PlanStartAssessmentBody({
                   <Button
                     type="button"
                     disabled={submitting}
-                    onClick={() => confirmMutation.mutate("ORIGINAL")}
+                    onClick={() =>
+                      confirmMutation.mutate({
+                        choice: "ORIGINAL",
+                        startDate: result.startDate,
+                        revision: result.revision,
+                      })
+                    }
                   >
                     {submitting ? (
                       <Loader2 className="me-1.5 size-4 animate-spin" aria-hidden />
