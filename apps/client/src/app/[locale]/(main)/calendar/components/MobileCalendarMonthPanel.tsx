@@ -200,7 +200,7 @@ export function MobileCalendarMonthPanel({
                   !inMonth && "opacity-30",
                   inPlanRange &&
                     !selected &&
-                    "bg-emerald-500/[0.06] bg-[repeating-linear-gradient(-45deg,rgb(16_185_129/0.16)_0_1.2px,transparent_1.2px_8px)] dark:bg-emerald-500/[0.09] dark:bg-[repeating-linear-gradient(-45deg,rgb(52_211_153/0.18)_0_1.2px,transparent_1.2px_8px)]",
+                    "bg-emerald-500/[0.06] bg-[repeating-linear-gradient(-45deg,hsl(var(--emerald-500)/0.16)_0_1.2px,transparent_1.2px_8px)] dark:bg-emerald-500/[0.09] dark:bg-[repeating-linear-gradient(-45deg,hsl(var(--emerald-400)/0.18)_0_1.2px,transparent_1.2px_8px)]",
                 )}
               >
                 <span

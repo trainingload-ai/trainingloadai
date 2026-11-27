@@ -5967,8 +5967,7 @@
       "description": "Scegli una o più discipline; la forza può supportare l’obiettivo principale."
     },
     "trainingIntent": {
-      "title": "Intento formativo",
-      "description": "Di’ all’IA cosa dovrebbe risolvere questo ciclo."
+      "title": "Intento formativo"
     },
     "raceInfo": {
       "title": "Informazioni sulla gara",
@@ -5984,9 +5983,8 @@
     },
     "strength": {
       "title": "Supporto di forza",
-      "description": "L’IA pianifica sessioni di forza separate in base a obiettivo, attrezzatura e recupero.",
       "preference": {
-        "AUTO": "Lascia decidere all’IA",
+        "AUTO": "Consigliato dal coach",
         "INCLUDE": "Includi forza",
         "EXCLUDE": "Escludi forza"
       },
@@ -6600,10 +6598,11 @@
   },
   "PlanStartConversation": {
     "title": "Prepara l’inizio",
-    "description": "Scegli una data, poi valuta il calendario completo con il coach prima di confermare.",
+    "description": "Scegli la data di inizio. Se il coach ritiene il piano adatto, il piano partirà automaticamente nella data selezionata.",
     "dateLabel": "Data di inizio",
     "dateHint": "La data avvia solo la valutazione. Il piano inizia dopo la tua conferma.",
     "evaluate": "Valuta con il coach",
+    "directStart": "Inizia direttamente",
     "changeDate": "Cambia data",
     "pendingCalendar": "Calendario in attesa di valutazione",
     "evaluatePrompt": "Vorrei iniziare questo piano salvato il {date} ({timeZone}). Valuta tutto il calendario insieme ai miei allenamenti recenti e alla mia condizione attuale, fai le domande necessarie e prepara una proposta da confermare.",
@@ -6621,7 +6620,7 @@
     "conflictHeading": "Schedule conflict in original plan",
     "insufficientDataHeading": "Limited training data",
     "missingEvidenceLabel": "Missing evidence",
-    "versionConflict": "This draft was updated. Reload the latest schedule to re-evaluate.",
+    "versionConflict": "La bozza è cambiata. Ricarica il calendario aggiornato prima di iniziare.",
     "reloadDraft": "Reload latest draft",
     "assessmentFailed": "Assessment failed. Your draft and selected date are preserved—please retry.",
     "confirmFailed": "Unable to start the plan. Please try again.",
@@ -6746,7 +6745,6 @@
     "shortTitle": "Piano continuativo",
     "availabilityTitle": "Disponibilità per gli allenamenti",
     "availability": "{weeklyDays} giorni a settimana · fino a {dailyMinutes} minuti al giorno",
-    "creationHint": "Il coach preparerà una settimana iniziale. Dopo aver scelto la data di inizio, rivedi la prima settimana e conferma cosa sarà gestito automaticamente.",
     "firstWeekPreview": "Anteprima della settimana iniziale",
     "title": "Piano di allenamento continuo",
     "description": "Pianifica e adatta automaticamente in base a obiettivi, tempo e allenamento.",

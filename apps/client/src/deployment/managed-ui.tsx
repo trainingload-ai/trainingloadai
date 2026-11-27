@@ -86,7 +86,11 @@ export function DeploymentUsagePage() {
 export function useManagedAiAccessRecovery(
   _reason: AiOperationErrorReason | null,
   _options?: { retry?: () => void; retryDisabled?: boolean },
-) {
+): {
+  recoveryAction?: { label: string; onClick: () => void; disabled?: boolean };
+  message?: string;
+  overlay: React.ReactNode;
+} {
   return React.useMemo(
     () => ({
       recoveryAction: undefined,

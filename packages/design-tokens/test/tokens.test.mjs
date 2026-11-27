@@ -51,13 +51,16 @@ test("secondary text and load values stay readable on product surfaces", () => {
 });
 
 test("content surfaces preserve Client's rendered hierarchy", () => {
-  assert.equal(colors.light.surface, "#ECEEE8");
+  assert.equal(colors.light.surface, "#E5E8DF");
   assert.equal(colors.light.surfaceStrong, colors.light.surface);
   assert.notEqual(colors.light.surface, colors.light.card);
-  assert.equal(colors.dark.surfaceStrong, "#292B2A");
+  assert.equal(colors.dark.surfaceStrong, "#323834");
   for (const scheme of Object.values(colors)) {
     assert.ok(contrast(scheme.foreground, scheme.surface) >= 4.5);
     assert.ok(contrast(scheme.foreground, scheme.surfaceStrong) >= 4.5);
+    assert.ok(contrast(scheme.card, scheme.background) >= 1.09);
+    assert.ok(contrast(scheme.surface, scheme.background) >= 1.12);
+    assert.ok(contrast(scheme.muted, scheme.background) >= 1.2);
   }
 });
 

@@ -6021,8 +6021,7 @@
       "description": "可選擇一個或多個項目；健身訓練可作為主目標的輔助訓練。"
     },
     "trainingIntent": {
-      "title": "训练目的",
-      "description": "告诉 AI 这轮周期想解决什么问题。"
+      "title": "训练目的"
     },
     "raceInfo": {
       "title": "比赛信息",
@@ -6038,9 +6037,8 @@
     },
     "strength": {
       "title": "輔助力量訓練",
-      "description": "這是計畫偏好；AI 會結合目標、器械和恢復空間安排獨立的力量課。",
       "preference": {
-        "AUTO": "由 AI 建議",
+        "AUTO": "由教練建議",
         "INCLUDE": "包含力量訓練",
         "EXCLUDE": "不包含力量訓練"
       },
@@ -6697,10 +6695,11 @@
   },
   "PlanStartConversation": {
     "title": "準備開始計畫",
-    "description": "選擇日期後，與教練評估完整課表，再確認開始。",
+    "description": "選擇開始日期。教練評估通過後，計畫會按所選日期自動開始。",
     "dateLabel": "開始日期",
     "dateHint": "選日期只發起評估。只有確認教練方案後，計畫才會開始。",
-    "evaluate": "與教練評估",
+    "evaluate": "請教練評估",
+    "directStart": "直接開始",
     "changeDate": "修改日期",
     "pendingCalendar": "待評估的日曆",
     "evaluatePrompt": "我想從 {date} 開始這個已儲存的計畫（日曆時區：{timeZone}）。請結合近期訓練和目前狀況評估完整課表，必要時先問我，再提供可確認的開始方案。",
@@ -6718,7 +6717,7 @@
     "conflictHeading": "原方案存在排期衝突",
     "insufficientDataHeading": "目前訓練資料不足",
     "missingEvidenceLabel": "缺少的評估依據",
-    "versionConflict": "草稿已有更新，請重新載入最新課表後再次評估。",
+    "versionConflict": "草稿已有更新，請重新載入最新課表後再開始。",
     "reloadDraft": "重新載入最新草稿",
     "assessmentFailed": "評估請求暫時失敗，草稿與所選日期已保留，請重試。",
     "confirmFailed": "啟動計畫失敗，請重試。",
@@ -6843,7 +6842,6 @@
     "shortTitle": "持續計畫",
     "availabilityTitle": "訓練時間",
     "availability": "每週 {weeklyDays} 天 · 每天最多 {dailyMinutes} 分鐘",
-    "creationHint": "教練會先產生起步課表。選定開始日後，再確認首週安排和自動管理範圍。",
     "firstWeekPreview": "起步課表",
     "title": "持續訓練計畫",
     "description": "根據你的目標、時間和訓練情況，自動規劃並持續調整",

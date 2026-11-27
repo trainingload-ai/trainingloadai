@@ -1,4 +1,5 @@
-import { isRollingPlan, naturalWeekStart } from "@/lib/rolling-plan";
+import { naturalWeekStart } from "@/lib/rolling-plan";
+import { addCalendarDays, isCalendarDate } from "@shared/plan-calendar";
 
 import type { FitnessStatusData, PMCExtremes } from "@/api/usePMC";
 import type { UserProfile } from "@/api/settings";
@@ -280,14 +281,12 @@ export function mapWorkoutToHomeWorkout(
   workout: PlanWorkout,
   plan?: Pick<TrainingPlanDetail, "id" | "startDate">,
 ): V2HomePlanWorkout {
-  const planStart = plan?.startDate ? new Date(plan.startDate) : null;
   let scheduledDate = workout.scheduledDate
     ? String(workout.scheduledDate).slice(0, 10)
     : null;
-  if (!scheduledDate && planStart) {
-    const date = new Date(planStart);
-    date.setDate(date.getDate() + workout.dayOffset);
-    scheduledDate = date.toISOString().slice(0, 10);
+  const planStart = plan?.startDate?.slice(0, 10);
+  if (!scheduledDate && isCalendarDate(planStart) && Number.isInteger(workout.dayOffset)) {
+    scheduledDate = addCalendarDays(planStart, workout.dayOffset);
   }
   const firstLink = workout.links?.find((link) => !link.unlinkedAt);
   const nameTrim = typeof workout.name === "string" ? workout.name.trim() : "";
@@ -326,7 +325,8 @@ export function mapTrainingPlanToHomePlan(
     mapWorkoutToHomeWorkout(workout, plan),
   );
 
-  const currentWeek = plan.currentWeekIndex ?? 1;
+  const weekStart = naturalWeekStart(todayKey);
+  const weekEnd = addCalendarDays(weekStart, 6);
   const activeWorkouts = workouts.filter(
     (workout) => workout.status !== "MOVED",
   );
@@ -371,20 +371,16 @@ export function mapTrainingPlanToHomePlan(
       .filter((workout) => workout.scheduledDate === todayKey)
       .sort((a, b) => a.sessionIndex - b.sessionIndex),
     currentWeekWorkouts: workouts
-      .filter((workout) =>
-        isRollingPlan(plan)
-          ? Boolean(
-              workout.scheduledDate &&
-              naturalWeekStart(workout.scheduledDate) ===
-                naturalWeekStart(todayKey),
-            )
-          : workout.weekIndex === currentWeek,
+      .filter(
+        (workout) =>
+          workout.scheduledDate !== null &&
+          workout.scheduledDate >= weekStart &&
+          workout.scheduledDate <= weekEnd,
       )
       .sort(
         (a, b) =>
-          (isRollingPlan(plan)
-            ? (a.scheduledDate ?? "").localeCompare(b.scheduledDate ?? "")
-            : a.dayIndex - b.dayIndex) || a.sessionIndex - b.sessionIndex,
+          (a.scheduledDate ?? "").localeCompare(b.scheduledDate ?? "") ||
+          a.sessionIndex - b.sessionIndex,
       ),
   };
 }

@@ -396,6 +396,12 @@ function SidebarLink({
   collapsed: boolean;
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) {
+  const [tooltipOpen, setTooltipOpen] = React.useState(false);
+  if (!collapsed && tooltipOpen) setTooltipOpen(false);
+
+  const preventExpandedTooltip = collapsed
+    ? undefined
+    : (event: React.SyntheticEvent) => event.preventDefault();
   const link = (
     <Link
       href={href}
@@ -428,8 +434,17 @@ function SidebarLink({
   );
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>{link}</TooltipTrigger>
+    <Tooltip
+      open={collapsed && tooltipOpen}
+      onOpenChange={(open) => setTooltipOpen(collapsed && open)}
+    >
+      <TooltipTrigger
+        asChild
+        onFocus={preventExpandedTooltip}
+        onPointerMove={preventExpandedTooltip}
+      >
+        {link}
+      </TooltipTrigger>
       {collapsed && (
         <TooltipContent side="right" sideOffset={8}>
           {label}

@@ -64,14 +64,11 @@ function homeDate(dateKey: string) {
   return new Date(year, month - 1, day, 12);
 }
 
-/**
- * `currentWeekWorkouts` 已由首页 API 限定到当前计划周；这里统一 Web 与
- * mobile 的统计口径：MOVED 不计入目标，DONE 计入已完成。
- */
 export function buildHomeWeeklySummary(
   workouts: V2HomePlanWorkout[] | undefined,
+  dateKeys: readonly string[],
 ): HomeWeeklySummary {
-  const sessionBars = Array.from({ length: 7 }, () => ({
+  const sessionBars = dateKeys.map(() => ({
     completed: 0,
     planned: 0,
   }));
@@ -80,9 +77,13 @@ export function buildHomeWeeklySummary(
   let plannedSessions = 0;
 
   for (const workout of workouts ?? []) {
-    if (workout.status === "MOVED") continue;
+    if (workout.status === "MOVED" || !workout.scheduledDate) continue;
+    const dateIndex = dateKeys.indexOf(workout.scheduledDate.slice(0, 10));
+    if (dateIndex < 0) continue;
+    const bar = sessionBars[dateIndex];
 
     plannedSessions += 1;
+    bar.planned += 1;
     if (
       typeof workout.estimatedLoad === "number" &&
       Number.isFinite(workout.estimatedLoad)
@@ -90,13 +91,9 @@ export function buildHomeWeeklySummary(
       plannedLoad += Math.max(0, workout.estimatedLoad);
     }
 
-    const dayIndex = Math.min(7, Math.max(1, workout.dayIndex)) - 1;
-    const bar = sessionBars[dayIndex];
-    if (bar) bar.planned += 1;
-
     if (workout.status === "DONE") {
       completedSessions += 1;
-      if (bar) bar.completed += 1;
+      bar.completed += 1;
     }
   }
 

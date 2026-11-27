@@ -88,6 +88,54 @@ const emptyCompetitionImpact = {
   },
 };
 
+test("the plan card opens details and keeps its actions independent", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop plan cards");
+  await openCoachFixture(page, undefined, { navigate: false });
+  const title = "训练计划卡片";
+  const listPath = "/zh/plans";
+  const detailPath = `${listPath}/${planId}`;
+  await page.route("**/api/proxy/plans", (route) =>
+    route.fulfill({
+      json: {
+        data: {
+          plans: [{
+            id: planId,
+            title,
+            status: "DRAFT",
+            workoutCount: 18,
+            completedWorkoutCount: 0,
+            createdAt: "2026-10-05T00:00:00Z",
+          }],
+        },
+      },
+    }),
+  );
+  await page.route(`**/api/proxy/ai/plans/${planId}/start-draft`, (route) =>
+    route.fulfill({ status: 404, json: { message: "Fixture draft unavailable" } }),
+  );
+
+  await page.goto(listPath);
+  const card = page.getByRole("article").filter({ has: page.getByRole("heading", { name: title }) });
+  const titleLink = card.getByRole("link", { name: title, exact: true });
+  await expect(card.getByRole("link", { name: "查看计划详情" })).toHaveAttribute("href", detailPath);
+
+  await card.getByRole("button", { name: "开始计划" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  const deleteDialog = page.getByRole("alertdialog", { name: "删除计划" });
+  await card.getByRole("button", { name: "删除计划" }).click();
+  await deleteDialog.getByRole("button", { name: "取消" }).click();
+  await expect(deleteDialog).toBeHidden();
+  await expect(page).toHaveURL(new RegExp(`${listPath}$`));
+
+  await card.click({ position: { x: 20, y: 80 } });
+  await expect(page).toHaveURL(new RegExp(`${detailPath}$`));
+
+  await page.goto(listPath);
+  await titleLink.press("Enter");
+  await expect(page).toHaveURL(new RegExp(`${detailPath}$`));
+});
+
 test("active plan menu offers completion without deletion", async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop plan menu");
   await page.clock.setFixedTime(new Date("2026-10-09T03:00:00Z"));
@@ -349,6 +397,18 @@ test("plan detail uses shared progress and confirmed workout actions", async ({
 }, info) => {
   const { mutations, lastMutation } = await openPlan(page);
   const desktop = (page.viewportSize()?.width ?? 0) >= 1024;
+  const confirmation = page.getByRole("alertdialog");
+  const cancel = confirmation.getByRole("button", { name: "取消", exact: true });
+  const expectSpacedActions = async () => {
+    const buttons = confirmation.locator('[data-slot="alert-dialog-footer"]').getByRole("button");
+    await expect(buttons).toHaveCount(2);
+    const [first, second] = await buttons.evaluateAll((elements) =>
+      elements.map((element) => element.getBoundingClientRect().toJSON()),
+    );
+    expect(first.height).toBe(desktop ? 32 : 44);
+    expect(second.height).toBe(first.height);
+    expect(desktop ? second.left - first.right : first.top - second.bottom).toBeGreaterThanOrEqual(8);
+  };
   if (desktop) {
     await expect(page.getByRole("group", { name: "周期进度" })).toBeVisible();
     await expect(page.getByText("绿色叠层 = 当周实际负荷")).toHaveCount(0);
@@ -384,16 +444,22 @@ test("plan detail uses shared progress and confirmed workout actions", async ({
   });
   await page.getByRole("button", { name: "更多操作", exact: true }).click();
   await page.getByRole("menuitem", { name: "推迟", exact: true }).click();
-  await expect(page.getByRole("alertdialog")).toBeVisible();
+  await expect(confirmation).toBeVisible();
+  await expectSpacedActions();
+  await expect(cancel).toBeFocused();
   expect(mutations()).toBe(0);
   await page.screenshot({
     path: info.outputPath("confirm-postpone.png"),
     fullPage: true,
   });
-  await page
-    .getByRole("alertdialog")
-    .getByRole("button", { name: "取消", exact: true })
-    .click();
+  await cancel.click();
+  await page.getByRole("button", { name: "更多操作", exact: true }).click();
+  await page.getByRole("menuitem", { name: "跳过", exact: true }).click();
+  await expectSpacedActions();
+  await expect(cancel).toBeFocused();
+  await cancel.click();
+  await expect(confirmation).toHaveCount(0);
+
   await page.getByRole("button", { name: "更多操作", exact: true }).click();
   await page.getByRole("menuitem", { name: "删除", exact: true }).click();
   await expect(page.getByRole("alertdialog")).toContainText(

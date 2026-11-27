@@ -1,4 +1,4 @@
 export const designTokenMeta = Object.freeze({
   "schemaVersion": 1,
-  "digest": "a236620861866a9c04b597d7e35a6e87c1339cd754c632e286f7a2c2b709fbfb"
+  "digest": "d6b47b040b1edb715d96ead0832dc0f9eaa7c7dc071a76d114043602bf98e931"
 });

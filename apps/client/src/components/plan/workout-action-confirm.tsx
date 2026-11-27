@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
 export function WorkoutActionConfirm({
   open,
@@ -54,10 +54,14 @@ export function WorkoutActionConfirm({
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="grid grid-cols-2 gap-0 border-t border-border/70 pc:flex pc:border-0">
+        <AlertDialogFooter className="px-5 pb-5 pc:p-0">
           <AlertDialogCancel
             disabled={pending}
-            className="mt-0 h-11 rounded-none border-0 border-r border-border/70 bg-transparent px-3 text-[15px] font-medium shadow-none hover:bg-muted/70 pc:h-9 pc:rounded-md pc:border pc:bg-background pc:px-4 pc:text-sm pc:shadow-xs"
+            className={buttonVariants({
+              variant: "outline",
+              size: "touch-sm",
+              className: "pc:rounded-md",
+            })}
           >
             {cancelLabel}
           </AlertDialogCancel>
@@ -67,11 +71,11 @@ export function WorkoutActionConfirm({
               event.preventDefault();
               void onConfirm();
             }}
-            className={cn(
-              "h-11 rounded-none border-0 bg-transparent px-3 text-[15px] font-semibold text-sky-600 shadow-none hover:bg-muted/70 hover:text-sky-600 dark:text-sky-400 dark:hover:text-sky-400 pc:h-9 pc:rounded-md pc:bg-primary pc:px-4 pc:text-sm pc:text-primary-foreground pc:shadow-xs pc:hover:bg-primary/90 pc:hover:text-primary-foreground",
-              destructive &&
-                "text-destructive hover:text-destructive dark:text-red-400 dark:hover:text-red-400 pc:bg-destructive pc:text-destructive-foreground pc:hover:bg-destructive/90 pc:hover:text-destructive-foreground",
-            )}
+            className={buttonVariants({
+              variant: destructive ? "destructive" : "default",
+              size: "touch-sm",
+              className: "pc:rounded-md",
+            })}
           >
             {confirmLabel}
           </AlertDialogAction>

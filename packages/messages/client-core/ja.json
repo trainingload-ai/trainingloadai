@@ -5927,8 +5927,7 @@
       "description": "1つ以上の種目を選択できます。筋力トレーニングは主目標を補助します。"
     },
     "trainingIntent": {
-      "title": "トレーニング目的",
-      "description": "この周期で解決したいことをAIに伝えます。"
+      "title": "トレーニング目的"
     },
     "raceInfo": {
       "title": "レース情報",
@@ -5944,9 +5943,8 @@
     },
     "strength": {
       "title": "補助筋力トレーニング",
-      "description": "AI が目標、器具、回復状況に合わせて独立した筋力セッションを配置します。",
       "preference": {
-        "AUTO": "AI に任せる",
+        "AUTO": "コーチの提案",
         "INCLUDE": "筋力トレーニングを含める",
         "EXCLUDE": "筋力トレーニングを除外"
       },
@@ -6599,10 +6597,11 @@
   },
   "PlanStartConversation": {
     "title": "開始の準備",
-    "description": "日付を選び、コーチと全日程を確認してから開始を確定します。",
+    "description": "開始日を選択してください。コーチが適切と判断した場合は、選択した日付でプランが自動的に開始されます。",
     "dateLabel": "開始日",
     "dateHint": "日付の選択は評価のみを開始します。提案を確認するまで計画は開始されません。",
-    "evaluate": "コーチと評価",
+    "evaluate": "コーチに評価を依頼",
+    "directStart": "そのまま開始",
     "changeDate": "日付を変更",
     "pendingCalendar": "評価待ちのカレンダー",
     "evaluatePrompt": "この保存済み計画を {date}（{timeZone}）から始めたいです。最近のトレーニングと現在の状態に照らして全日程を評価し、必要なことを質問してから、確認できる開始案を提案してください。",
@@ -6620,7 +6619,7 @@
     "conflictHeading": "Schedule conflict in original plan",
     "insufficientDataHeading": "Limited training data",
     "missingEvidenceLabel": "Missing evidence",
-    "versionConflict": "This draft was updated. Reload the latest schedule to re-evaluate.",
+    "versionConflict": "下書きが更新されました。開始前に最新のスケジュールを読み込んでください。",
     "reloadDraft": "Reload latest draft",
     "assessmentFailed": "Assessment failed. Your draft and selected date are preserved—please retry.",
     "confirmFailed": "Unable to start the plan. Please try again.",
@@ -6745,7 +6744,6 @@
     "shortTitle": "継続プラン",
     "availabilityTitle": "トレーニング可能な時間",
     "availability": "週 {weeklyDays} 日・1 日最大 {dailyMinutes} 分",
-    "creationHint": "コーチが最初の週の案を作成します。開始日を選んだ後、初週の内容と自動管理の範囲を確認します。",
     "firstWeekPreview": "最初の週のプレビュー",
     "title": "継続トレーニングプラン",
     "description": "目標、時間、トレーニング状況に合わせて自動で計画し、継続的に調整します。",

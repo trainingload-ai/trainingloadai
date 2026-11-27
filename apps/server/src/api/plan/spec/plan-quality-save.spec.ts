@@ -51,11 +51,11 @@ function setup() {
   return { service, create, transaction, dto };
 }
 describe('plan save server quality boundary', () => {
-  it('rejects a 46-minute Wednesday before writing and preserves a valid 75-minute Saturday', async () => {
+  it('rejects a Wednesday exceeding the dynamic daily ceiling before writing and preserves a valid 75-minute Saturday', async () => {
     const s = setup();
     const contract = { startDate: '2026-11-30', maxDailyMinutes: 90, maxMinutesByIsoWeekday: { 3: 45, 6: 90 } };
     s.dto.generationMetadata = { qualityContract: contract };
-    s.dto.workouts = [{ weekIndex: 1, dayIndex: 3, sportType: 'RUN', text: 'warmup 10m\nrepeat 4 {\n  work 5m\n  recovery 2m\n}\ncooldown 8m' }];
+    s.dto.workouts = [{ weekIndex: 1, dayIndex: 3, sportType: 'RUN', text: 'warmup 10m\nrepeat 4 {\n  work 6m\n  recovery 3m\n}\ncooldown 10m' }];
     await expect(s.service.createPlan('u', s.dto)).rejects.toMatchObject({ response: {
       code: 'PLAN_QUALITY_INVALID', issues: expect.arrayContaining([expect.objectContaining({ code: 'DAILY_TIME_BUDGET' })]),
     } });
