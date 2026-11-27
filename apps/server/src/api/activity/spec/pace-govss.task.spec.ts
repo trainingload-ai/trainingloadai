@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 import { firstRunningThresholdSpeed } from '../metrics/tasks/pace-govss.task';
 
 describe('firstRunningThresholdSpeed', () => {
@@ -58,9 +58,9 @@ describe('PaceGovssTask cumulative treadmill coverage', () => {
         1,
       ),
     );
-    expect(sparse.outputs.paceGovss.govss).toBeGreaterThan(0);
-    expect(sparse.outputs.paceGovss.govss).toBeCloseTo(
-      dense.outputs.paceGovss.govss,
+    expect(sparse.outputs.paceGovss?.score).toBeGreaterThan(0);
+    expect(sparse.outputs.paceGovss?.score).toBeCloseTo(
+      dense.outputs.paceGovss!.score,
       4,
     );
     // Reconstructed points are only used for load integration, never persisted as sensor facts.
@@ -113,11 +113,60 @@ describe('PaceGovssTask grade-aware load', () => {
     const uphill = await task.exec(outdoorContext(5));
 
     expect(flat.outputs.paceGovss?.gradeMode).toBe('flat');
+    expect(flat.outputs.paceGovss?.method).toBe('GOVSS');
     expect(flat.outputs.paceGovss?.gradeCoverageRatio).toBe(0);
     expect(uphill.outputs.paceGovss?.gradeMode).toBe('record');
     expect(uphill.outputs.paceGovss?.gradeCoverageRatio).toBe(1);
-    expect(uphill.outputs.paceGovss?.govss).toBeGreaterThan(
-      flat.outputs.paceGovss?.govss ?? 0,
+    expect(uphill.outputs.paceGovss?.score).toBeGreaterThan(
+      flat.outputs.paceGovss?.score ?? 0,
     );
+  });
+
+  it('publishes a PACE estimate when the run has pace and a threshold but no weight', async () => {
+    const input = outdoorContext();
+    input.cache.pacePreload!.context = { CS: 2.9, TP: 3.2 };
+    const saveActivityRunningPaceLoad = jest.fn();
+    const estimateTask = new PaceGovssTask({
+      saveActivityRunningPaceLoad,
+    } as unknown as AnalyzePersistenceService);
+
+    const result = await estimateTask.exec(input);
+    expect(result.outputs.paceGovss).toMatchObject({
+      method: 'RUNNING_PACE_ESTIMATE',
+      score: expect.closeTo((599 / 3600) * 100, 8),
+      gradeMode: 'flat',
+      coveredSeconds: 599,
+    });
+    await estimateTask.post(result);
+    expect(saveActivityRunningPaceLoad).toHaveBeenCalledWith(
+      3001,
+      'RUN',
+      result.outputs.paceGovss,
+      undefined,
+    );
+  });
+
+  it('uses grade and excludes gaps from the weight-free estimate', async () => {
+    const input = outdoorContext(5);
+    input.cache.pacePreload!.context = { CS: 3.2 };
+    input.inputs.canonicalRecords!.splice(100, 400);
+    const result = await task.exec(input);
+
+    expect(result.outputs.paceGovss).toMatchObject({
+      method: 'RUNNING_PACE_ESTIMATE',
+      gradeMode: 'record',
+      coveredSeconds: 198,
+      score: expect.closeTo(7.8, 0),
+    });
+  });
+
+  it('requires a usable running threshold and timed pace observations', async () => {
+    const input = outdoorContext();
+    input.cache.pacePreload!.context = { CS: 1 };
+    expect((await task.exec(input)).outputs.paceGovss).toBeUndefined();
+
+    input.cache.pacePreload!.context = { CS: 3.2 };
+    input.inputs.canonicalRecords = input.inputs.canonicalRecords!.slice(0, 1);
+    expect((await task.exec(input)).outputs.paceGovss).toBeUndefined();
   });
 });

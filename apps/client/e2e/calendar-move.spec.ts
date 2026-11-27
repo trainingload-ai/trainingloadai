@@ -382,14 +382,14 @@ test("coalesces narrow calendar moves across months using either side of the com
   expect(rightInset).toBeLessThan(8);
   expect(chartBox.x + chartBox.width).toBeLessThanOrEqual(gripBox.x);
   await startDrag(workoutId);
-  await expect(grid).not.toHaveCSS("background-color", background);
+  await expect(grid).toHaveCSS("background-color", background);
   const blocked = day(yesterday).locator("..");
   await expect(blocked).toHaveAttribute("data-workout-drop", "blocked");
   await expect(day(from).locator("..")).toHaveAttribute("data-workout-drop", "blocked");
   const available = day(to).locator("..");
   await expect(available).toHaveAttribute("data-workout-drop", "available");
   const blockedColor = await blocked.evaluate((element) => getComputedStyle(element).backgroundColor);
-  await expect(available).not.toHaveCSS("background-color", blockedColor);
+  await expect(available).toHaveCSS("background-color", blockedColor);
   await dropOn(to);
   await expect(marker(from, "before")).toBeVisible();
   await expect(marker(to, "after")).toBeVisible();
@@ -1324,6 +1324,7 @@ test("shows valid drop feedback and refuses dates before today", async ({
   const earlier = page.locator(`[data-calendar-date="${yesterday}"]`);
   const current = page.locator(`[data-calendar-date="${today}"]`);
   const future = page.locator(`[data-calendar-date="${to}"]`);
+  const futureBackground = await future.evaluate((el) => getComputedStyle(el).backgroundColor);
   await expect(original).toHaveAttribute("draggable", "true");
   const background = await earlier.evaluate(
     (el) => getComputedStyle(el).backgroundColor,
@@ -1338,7 +1339,9 @@ test("shows valid drop feedback and refuses dates before today", async ({
   await page.mouse.down();
   await page.mouse.move(center.x + 12, center.y, { steps: 4 });
   await expect(earlier).toHaveAttribute("data-workout-drop", "blocked");
-  await expect(earlier).not.toHaveCSS("background-color", background);
+  await expect(earlier).toHaveCSS("background-color", background);
+  const grid = page.locator("[data-calendar-dragging]");
+  await expect(grid).not.toHaveClass(/bg-brand/);
 
   const dragOver = async (day: typeof current) => {
     const box = (await day.boundingBox())!;
@@ -1346,8 +1349,10 @@ test("shows valid drop feedback and refuses dates before today", async ({
   };
   await dragOver(current);
   await expect(current).toHaveAttribute("data-workout-drop", "target");
+  await expect(future).toHaveCSS("background-color", futureBackground);
   await dragOver(future);
   await expect(future).toHaveAttribute("data-workout-drop", "target");
+  await expect(future).not.toHaveCSS("background-color", futureBackground);
   await expect(future).not.toHaveCSS("box-shadow", "none");
   await expect(current).not.toHaveAttribute("data-workout-drop", "target");
 
@@ -1411,7 +1416,7 @@ test("opens the change preview directly after a drop and commits only after conf
   await expect(
     dialog.getByRole("button", { name: "请教练一起调整" }),
   ).toHaveCount(0);
-  await dialog.getByRole("button", { name: "确认调整" }).click();
+  await dialog.getByRole("button", { name: "确定调课" }).click();
   await expect(dialog).toHaveCount(0);
   await expect(cardOn(page, to)).toBeVisible();
   await expect(original).toHaveCount(0);
@@ -1453,12 +1458,12 @@ test("shows direct-save progress and reviews a fresh move after a calendar confl
     targetPosition: { x: 20, y: 26 },
   });
   const dialog = page.getByRole("dialog", { name: "调整训练日期" });
-  const moveButton = dialog.getByRole("button", { name: "确认调整" });
+  const moveButton = dialog.getByRole("button", { name: "确定调课" });
   await moveButton.click();
   try {
     await expect(dialog.getByRole("button", { name: "正在保存…" })).toBeDisabled();
     await expect(dialog.getByText("处理中…", { exact: true })).toHaveCount(0);
-    await expect(dialog.getByRole("button", { name: "请教练一起调整" })).toHaveCount(0);
+    await expect(dialog.getByRole("button", { name: "请教练一起调整" })).toBeDisabled();
   } finally {
     release();
   }
@@ -1473,6 +1478,47 @@ test("shows direct-save progress and reviews a fresh move after a calendar confl
   await expect(cardOn(page, to)).toBeVisible();
   expect(attempts).toEqual([previewId, refreshedId]);
   expect(await page.evaluate(() => window.coachStreamFixture.requests)).toBe(0);
+});
+
+test("explains unavailable coaching and waits for an explicit manual confirmation", async ({ page }) => {
+  const fixture = await openCalendar(page, true);
+  await page.route("**/calendar-moves/*/coach", (route) => route.fulfill({
+    status: 402,
+    json: { error_code: "AI_ACCESS_REQUIRED", data: { recoveryReason: "ADD_CREDITS" } },
+  }));
+  const original = cardOn(page, from);
+  await expect(original).toHaveAttribute("draggable", "true");
+  await original.dragTo(page.locator(`[data-calendar-date="${to}"]`), {
+    targetPosition: { x: 20, y: 26 },
+  });
+  const dialog = page.getByRole("dialog", { name: "调整训练日期" });
+  const confirm = dialog.getByRole("button", { name: "确定调课" });
+  await expect(confirm).toBeEnabled();
+  await dialog.getByRole("button", { name: "请教练一起调整" }).click();
+  await expect(dialog.getByRole("status").filter({ hasText: "你仍可按所选日期确定调课" })).toBeVisible();
+  expect(fixture.confirms()).toBe(0);
+  await confirm.click();
+  await expect(cardOn(page, to)).toBeVisible();
+  expect(fixture.confirms()).toBe(1);
+});
+
+test("explains a blocked date and allows picking another one", async ({ page }) => {
+  const fixture = await openCalendar(page, false);
+  await page.route("**/workouts/*/calendar-move", (route) => route.fulfill({
+    status: 422,
+    json: { error_code: "PLAN_SCHEDULE_INVALID", data: { issues: [{ code: "FIXED_REST_DAY", date: to }] } },
+  }));
+  const original = cardOn(page, from);
+  await expect(original).toHaveAttribute("draggable", "true");
+  await original.dragTo(page.locator(`[data-calendar-date="${to}"]`), {
+    targetPosition: { x: 20, y: 26 },
+  });
+  const dialog = page.getByRole("dialog", { name: "调整训练日期" });
+  await expect(dialog.getByRole("alert")).toHaveText("所选日期是计划中的固定休息日。");
+  await expect(dialog.getByRole("button", { name: "确定调课" })).toHaveCount(0);
+  await dialog.getByRole("button", { name: "选择其他日期" }).click();
+  await expect(dialog.getByRole("grid").first()).toBeVisible();
+  expect(fixture.confirms()).toBe(0);
 });
 
 test("drags a future workout upwards to an earlier week", async ({ page }) => {
@@ -1724,6 +1770,81 @@ test("draws the selected date ring inside cells along all four calendar edges", 
   }
 });
 
+test("selects a visible day from the adjacent month without shifting the calendar", async ({
+  page,
+}) => {
+  await openCalendar(page, false);
+  const viewport = page.locator("[data-calendar-scroll]");
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-10-26");
+  const day = (date: string) =>
+    viewport.getByRole("button", { name: date, exact: true });
+  const cell = (date: string) =>
+    viewport.locator(`[data-calendar-date="${date}"]`);
+  const outsideMonth = /(?:^|\s)bg-secondary(?:\s|$)/;
+
+  await day("2026-10-30").click();
+  await expect(page.getByRole("button", { name: "2026年10月" })).toBeVisible();
+  await page.getByRole("button", { name: "下一月" }).click();
+  await expect(page.getByRole("button", { name: "2026年11月" })).toBeVisible();
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-10-26");
+
+  await viewport.hover({ position: { x: 45, y: 68 } });
+  await page.mouse.wheel(0, 320);
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-11-16");
+  await expect(page.getByRole("button", { name: "2026年12月" })).toBeVisible();
+
+  await day("2026-11-17").click();
+  await expect(day("2026-11-17")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "2026年11月" })).toBeVisible();
+  await expect(cell("2026-11-18")).not.toHaveClass(outsideMonth);
+  await expect(cell("2026-12-03")).toHaveClass(outsideMonth);
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-11-16");
+
+  await page.mouse.wheel(0, 112);
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-11-23");
+  await expect(page.getByRole("button", { name: "2026年12月" })).toBeVisible();
+  await expect(cell("2026-12-03")).not.toHaveClass(outsideMonth);
+});
+
+test("keeps today and plan start distinct when scrolling across months and changing selection", async ({ page }) => {
+  const planStart = "2026-12-01";
+  await openCalendar(page, false);
+  await page.route("**/plans/active", (route) => route.fulfill({ json: { data: { plan: {
+    id: planId, title: "持续跑步课表", status: "ACTIVE", planningMode: "ROLLING",
+    startDate: planStart, endDate: null, generatedThrough: "2026-12-07", workouts: [],
+  } } } }));
+  await page.reload();
+  const viewport = page.locator("[data-calendar-scroll]");
+  const cell = (date: string) => viewport.locator(`[data-calendar-date="${date}"]`);
+  const dateButton = (date: string) => cell(date).getByRole("button", { name: date, exact: true });
+  const todayMarker = cell(today).locator('[data-calendar-marker="today"]');
+  const startCell = cell(planStart);
+  const firstCoveredDay = cell("2026-12-02");
+  const backgroundColor = (element: Element) => getComputedStyle(element).backgroundColor;
+
+  await expect(dateButton(today)).toHaveAttribute("aria-current", "date");
+  await expect(dateButton(today)).toHaveAttribute("aria-pressed", "true");
+  await expect(dateButton(planStart)).toHaveAccessibleDescription("开始日期");
+  const markerColor = await todayMarker.evaluate(backgroundColor);
+  const startColor = await startCell.evaluate(backgroundColor);
+  expect(startColor).not.toBe(await cell("2026-11-30").evaluate(backgroundColor));
+  await expect(firstCoveredDay).toHaveCSS("background-image", /repeating-linear-gradient/);
+
+  await viewport.hover({ position: { x: 45, y: 68 } });
+  await page.mouse.wheel(0, 320);
+  await expect(page.getByRole("button", { name: "2026年12月" })).toBeVisible();
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-11-16");
+  await dateButton(planStart).click();
+  await expect(dateButton(today)).toHaveAttribute("aria-pressed", "false");
+  await expect(todayMarker).toHaveCSS("background-color", markerColor);
+  await expect(startCell).toHaveCSS("background-color", startColor);
+  await expect(startCell).toHaveCSS("background-image", "none");
+
+  await dateButton("2026-12-02").click();
+  await expect(startCell).toHaveCSS("background-color", startColor);
+  await expect(firstCoveredDay).toHaveCSS("background-image", /repeating-linear-gradient/);
+});
+
 test("follows a continuous scroll during the gesture and then snaps to the nearest week", async ({
   page,
 }) => {
@@ -1866,12 +1987,13 @@ test("shows the month with the most visible dates after snapping", async ({
   await expect(page.getByRole("button", { name: "2026年12月" })).toBeVisible();
   await expect.poll(() => readTopWeek(viewport)).toBe("2026-11-16");
   const outsideMonth = /(?:^|\s)bg-secondary(?:\s|$)/;
-  await expect(
-    viewport.locator('[data-calendar-date="2026-11-17"]'),
-  ).toHaveClass(outsideMonth);
-  await expect(
-    viewport.locator('[data-calendar-date="2026-12-01"]'),
-  ).not.toHaveClass(outsideMonth);
+  const previousMonthCell = viewport.locator('[data-calendar-date="2026-11-17"]');
+  const currentMonthCell = viewport.locator('[data-calendar-date="2026-12-01"]');
+  await expect(previousMonthCell).toHaveClass(outsideMonth);
+  await expect(previousMonthCell).toHaveCSS("outline-style", "solid");
+  await expect(previousMonthCell).toHaveCSS("outline-width", "1px");
+  await expect(currentMonthCell).not.toHaveClass(outsideMonth);
+  await expect(currentMonthCell).toHaveCSS("outline-style", "none");
   await expect
     .poll(() =>
       fadingDates.evaluate(
@@ -2273,7 +2395,7 @@ test("saves the original move when the background coach proposes no extra edits"
   await expect(cardOn(page, from)).toHaveAttribute("draggable", "true");
   await cardOn(page, from).dragTo(page.locator(`[data-calendar-date="${to}"]`));
   const dialog = page.getByRole("dialog", { name: "调整训练日期" });
-  await dialog.getByRole("button", { name: "确认调整" }).click();
+  await dialog.getByRole("button", { name: "请教练一起调整" }).click();
   await expect(dialog.getByRole("button", { name: "教练正在检查训练安排…" })).toBeDisabled();
   await expect(page.getByRole("dialog", { name: "对话", exact: true })).toHaveCount(0);
   expect(fixture.confirms()).toBe(0);
@@ -2296,7 +2418,7 @@ test("shows the coach proposal in the calendar and restores the draft after clos
   await expect(original).toHaveAttribute("draggable", "true");
   await original.dragTo(page.locator(`[data-calendar-date="${to}"]`));
   const dialog = page.getByRole("dialog");
-  await dialog.getByRole("button", { name: "确认调整" }).click();
+  await dialog.getByRole("button", { name: "请教练一起调整" }).click();
   await expect(
     dialog.getByRole("heading", { name: "调整训练日期", exact: true }),
   ).toBeVisible();
@@ -2495,7 +2617,7 @@ test("edits and confirms a coach calendar proposal without a second coach turn",
   await page.getByRole("menuitem", { name: "移动课程" }).click();
   const moveDialog = page.getByRole("dialog", { name: "调整训练日期" });
   await moveDialog.getByRole("grid").first().getByRole("button", { name: /2026年11月24日/ }).click();
-  await moveDialog.getByRole("button", { name: "确认调整" }).click();
+  await moveDialog.getByRole("button", { name: "请教练一起调整" }).click();
   await expect.poll(() => page.evaluate(() => window.coachStreamFixture.requests)).toBe(1);
   await sendScheduleDraft(page, fixture);
 
@@ -2560,7 +2682,7 @@ test("keeps adjustment and new-plan calendar instances independent", async ({
   await expect(cardOn(page, from)).toHaveAttribute("draggable", "true");
   await cardOn(page, from).dragTo(page.locator(`[data-calendar-date="${to}"]`));
   const dialog = page.getByRole("dialog");
-  await dialog.getByRole("button", { name: "确认调整" }).click();
+  await dialog.getByRole("button", { name: "请教练一起调整" }).click();
   await expect
     .poll(() => page.evaluate(() => window.coachStreamFixture.requests))
     .toBe(1);

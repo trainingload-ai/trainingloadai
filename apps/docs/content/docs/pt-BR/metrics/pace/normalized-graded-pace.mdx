@@ -45,16 +45,15 @@ Em terrenos acidentados, o ritmo médio pode parecer muito lento. O NGP ajuda a 
 -   **Exemplo**: um treino em trilha de montanha tem média de 10:00/km.
 -   **NGP**: pode ser bem mais rápido, refletindo melhor o estresse metabólico suportado pelo organismo.
 
-### 2. Base para o rTSS
-O Trainingload.ai usa o NGP para calcular o **rTSS (Running Training Stress Score)**. A estrutura da fórmula é semelhante à do TSS no ciclismo:
+### 2. Estimativa da carga de corrida pelo ritmo
 
-Quando NGP e FTPa são exibidos como ritmo em min/km, converta-os primeiro em velocidade. Em termos de velocidade:
+O Trainingload.ai usa GOVSS quando há registro de peso corporal. Sem esse dado, estima a carga de forma semelhante ao rTSS usando o ritmo registrado e o limiar válido no início da atividade. O ritmo de limiar (TP) tem prioridade sobre a velocidade crítica (CS). A estimativa dispensa potência medida e frequência cardíaca.
 
 ```text
-IF = Speed_NGP / Speed_FTPa
+100 × observed hours × (normalized speed / threshold speed)²
 ```
 
-Usar o NGP ajuda a manter a carga de corrida comparável entre terrenos diferentes.
+A inclinação é ajustada quando há dados em pelo menos 80% do tempo com ritmo válido. Trechos sem inclinação registrada são tratados como planos. Sem uma janela completa de 30 segundos, usa-se a velocidade média observada. O tempo sem registro de ritmo é excluído.
 
 ## Comparação de métricas
 
@@ -67,7 +66,6 @@ Usar o NGP ajuda a manter a carga de corrida comparável entre terrenos diferent
 ## Como o Trainingload.ai usa o NGP
 
 -   **Referência de intensidade sensível ao terreno**: o NGP costuma informar mais do que o ritmo médio em corridas com subidas ou variações fortes.
--   **Cálculo da carga de corrida**: o NGP é uma entrada central para o rTSS porque considera relevo e variações de intensidade.
 -   **Uso combinado com VI**: calcule **VI (Índice de Variabilidade) = NGP / GAP Médio**.
     -   Se o VI estiver próximo de 1,0, o esforço foi uniforme.
     -   Se o VI > 1,05, provavelmente houve intervalados ou terreno bastante variado.

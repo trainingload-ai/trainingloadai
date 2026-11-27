@@ -3438,6 +3438,7 @@ export class PlanWriteSupport {
     options?: {
       tx?: Tx;
       validatedStartPreview?: boolean;
+      confirmedSavedDraft?: boolean;
       calendarTimeZone?: string;
     },
   ) {
@@ -3470,7 +3471,8 @@ export class PlanWriteSupport {
         });
       }
 
-      if (plan.status === 'DRAFT' && !options?.validatedStartPreview)
+      const confirmedSavedDraft = plan.status === 'DRAFT' && options?.confirmedSavedDraft;
+      if (plan.status === 'DRAFT' && !confirmedSavedDraft && !options?.validatedStartPreview)
         throw new UnprocessableEntityException({
           code: 'PLAN_START_REASSESSMENT_REQUIRED',
           message:
@@ -3487,14 +3489,11 @@ export class PlanWriteSupport {
         throw new UnprocessableEntityException(
           'Resuming a plan cannot change its start date',
         );
-      const constraints = this.parseStoredScheduleConstraints(
-        plan.generationMetadata,
-      );
       let start =
         plan.status === 'PAUSED' ? plan.startDate : this.parseDate(startDate);
       if (plan.status === 'DRAFT' && !start) {
         const calendarTimeZone =
-          constraints?.calendarTimeZone ??
+          this.parseStoredScheduleConstraints(plan.generationMetadata)?.calendarTimeZone ??
           (await this.userService.getPreferredTimezone(userId, tx)) ??
           'UTC';
         const today = activityCalendarYmdInZone(new Date(), calendarTimeZone);
@@ -3523,12 +3522,13 @@ export class PlanWriteSupport {
         if (this.workoutMutability.reason(input, 'SCHEDULE') === null)
           mutableIds.push(row.id);
       }
-      await this.assertStoredScheduleConstraints(
-        tx,
-        planId,
-        mutableIds,
-        normalizePlanDate(start)!,
-      );
+      if (!confirmedSavedDraft)
+        await this.assertStoredScheduleConstraints(
+          tx,
+          planId,
+          mutableIds,
+          normalizePlanDate(start)!,
+        );
       const end =
         plan.planningMode === 'ROLLING'
           ? null

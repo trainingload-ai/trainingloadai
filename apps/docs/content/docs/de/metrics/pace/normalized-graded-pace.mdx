@@ -45,16 +45,15 @@ In hügeligem Gelände wirkt die Durchschnittspace oft trügerisch langsam. NGP 
 -   **Beispiel**: Ein Berg-Traillauf hat eine Durchschnittspace von 10:00/km.
 -   **NGP**: kann deutlich schneller liegen und den metabolischen Stress für deinen Körper realistischer abbilden.
 
-### 2. Grundlage für rTSS
-Trainingload.ai verwendet NGP, um den **rTSS (Running Training Stress Score)** zu berechnen. Die Formelstruktur entspricht dem TSS aus dem Radsport:
+### 2. Schätzung der Laufbelastung aus der Pace
 
-Wenn NGP und FTPa als min/km angezeigt werden, werden sie zunächst in Geschwindigkeit umgerechnet. Auf Geschwindigkeitsebene gilt:
+Trainingload.ai verwendet GOVSS, wenn das Körpergewicht vorliegt. Fehlt es, schätzt die App die Belastung ähnlich wie bei rTSS aus der aufgezeichneten Pace und der zu Beginn gültigen Laufschwelle. Schwellenpace (TP) hat Vorrang vor der kritischen Geschwindigkeit (CS). Gemessene Leistung und Herzfrequenz sind dafür nicht erforderlich.
 
 ```text
-IF = Speed_NGP / Speed_FTPa
+100 × observed hours × (normalized speed / threshold speed)²
 ```
 
-Durch NGP bleibt die Trainingsbelastung im Laufen auch über sehr unterschiedliche Streckenprofile vergleichbar.
+Die Steigung wird berücksichtigt, wenn sie mindestens 80 % der gültigen Pace-Zeit abdeckt. Abschnitte ohne Steigungsdaten gelten als flach. Ohne vollständiges 30-Sekunden-Fenster nutzt die App die mittlere beobachtete Geschwindigkeit. Zeit ohne Pace-Daten zählt nicht.
 
 ## Metriken im Vergleich
 
@@ -67,7 +66,6 @@ Durch NGP bleibt die Trainingsbelastung im Laufen auch über sehr unterschiedlic
 ## Wie Trainingload.ai NGP nutzt
 
 -   **Geländeangepasste Intensitätsreferenz**: Bei hügeligen oder wechselhaften Läufen ist NGP oft aussagekräftiger als die Durchschnittspace.
--   **Berechnung der Laufbelastung**: NGP ist eine Schlüsselgröße für den rTSS, da sie sowohl Profil als auch Intensitätsschwankungen einbezieht.
 -   **Zusammen mit dem VI auswerten**: Berechne **VI (Variability Index) = NGP / Ø-GAP**.
     -   Liegt der VI nahe 1,0, war die Belastung gleichmäßig.
     -   Liegt der VI > 1,05, deutet das meist auf Intervalle oder sehr anspruchsvolles Gelände hin.

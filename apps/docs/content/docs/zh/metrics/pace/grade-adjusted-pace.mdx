@@ -51,8 +51,9 @@ $$
 -   **GAP 分析**：GAP 显示为 5:00/km。
 -   **解读**：这段代谢强度可能明显高于原始配速看起来的强度，并不一定代表状态下降。
 
-### 2. rTSS 计算的基础
-Trainingload.ai 使用 **NGP (标准化坡度配速)** 来计算跑步的训练负荷 (rTSS)，而 NGP 的基础正是 GAP。
+### 2. 跑步配速负荷估算
+GAP 为跑步配速负荷估算提供坡度修正。 [跑步配速负荷估算](/zh/docs/metrics/pace/normalized-graded-pace)
+
 $$
 Pace_{actual} \xrightarrow{\text{坡度修正}} GAP \xrightarrow{\text{加权平滑}} NGP
 $$
@@ -63,7 +64,6 @@ $$
 ## Trainingload.ai 如何使用 GAP
 
 -   **解释地形上下文**：GAP 可以帮助理解为什么很慢的上坡分段仍然可能是高强度努力。
--   **作为 NGP 的基础**：Trainingload.ai 先计算 GAP，再进一步计算 NGP 与 rTSS。
 -   **不要盲目追求 GAP**：GAP 主要是**能量代谢**等效，不完整反映肌肉骨骼压力。长时间高强度下坡跑，GAP 可能看起来可控，但股四头肌和膝盖负荷仍然很高。
 -   **关注趋势而非瞬时值**：GPS 设备对瞬时坡度的计算往往有延迟和误差，导致实时 GAP 波动明显。建议关注 **Lap GAP**（分段平均 GAP）或赛后分析。
 

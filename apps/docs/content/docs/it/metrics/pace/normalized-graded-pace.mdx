@@ -45,16 +45,15 @@ Su percorsi ricchi di dislivello, il passo medio può sembrare molto lento. Il N
 -   **Esempio**: un trail in montagna ha un passo medio di 10:00/km.
 -   **NGP**: può risultare molto più veloce, rispecchiando meglio lo stress metabolico realmente sostenuto dal tuo organismo.
 
-### 2. Base per l'rTSS
-Trainingload.ai utilizza il NGP per calcolare l'**rTSS (Running Training Stress Score)**. La struttura della formula è simile a quella del TSS ciclistico:
+### 2. Stima del carico di corsa dal passo
 
-Quando NGP e FTPa sono espressi come passo in min/km, vanno prima convertiti in velocità. In termini di velocità:
+Trainingload.ai usa GOVSS se il peso corporeo è disponibile. Se manca, usa una stima simile all’rTSS basata sul passo registrato e sulla soglia valida all’inizio dell’attività. Il passo di soglia (TP) ha la precedenza sulla velocità critica (CS). Non servono potenza misurata o frequenza cardiaca.
 
 ```text
-IF = Speed_NGP / Speed_FTPa
+100 × observed hours × (normalized speed / threshold speed)²
 ```
 
-Usare il NGP aiuta a mantenere confrontabile il carico di allenamento della corsa su terreni diversi.
+La pendenza è corretta se i dati coprono almeno l’80% del tempo con passo valido. I tratti senza pendenza registrata sono trattati come pianeggianti. Se manca una finestra completa di 30 secondi, si usa la velocità media osservata. Il tempo senza dati sul passo è escluso.
 
 ## Confronto tra metriche
 
@@ -67,7 +66,6 @@ Usare il NGP aiuta a mantenere confrontabile il carico di allenamento della cors
 ## Come Trainingload.ai utilizza il NGP
 
 -   **Riferimento di intensità sensibile al terreno**: il NGP è spesso più informativo del passo medio nelle corse collinari o con variazioni di ritmo.
--   **Calcolo del carico di corsa**: il NGP è un input chiave dell'rTSS perché integra sia il terreno sia la variabilità dell'intensità.
 -   **Uso insieme al VI**: calcola **VI (Variability Index) = NGP / Avg GAP**.
     -   Se il VI è vicino a 1,0, lo sforzo è stato costante.
     -   Se il VI > 1,05, probabilmente hai svolto ripetute o corso su terreno molto irregolare.

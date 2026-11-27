@@ -51,8 +51,9 @@ Sur terrain escarpé, l’allure réelle est difficile à interpréter.
 - **GAP** : affiche 5:00/km.
 - **Interprétation** : l’intensité métabolique réelle est bien plus élevée que ce que laisse penser l’allure brute.
 
-### 2. Base de calcul du rTSS
-Trainingload.ai utilise la **NGP (Normalized Graded Pace)** pour calculer la charge en course à pied (rTSS), et la GAP constitue le socle de la NGP.
+### 2. Estimation de la charge de course à partir de l’allure
+La GAP prend en compte la pente dans l’estimation de la charge de course. [Estimation de la charge de course à partir de l’allure](/fr/docs/metrics/pace/normalized-graded-pace)
+
 ```text
 Pace_actual  --(grade adjustment)-->  GAP  --(weighted smoothing)-->  NGP
 ```
@@ -63,7 +64,6 @@ En analysant le profil GPX d’un parcours avec la GAP, vous pouvez planifier l�
 ## Comment Trainingload.ai utilise la GAP
 
 - **Contexte du relief** : la GAP aide à comprendre pourquoi un kilomètre lent en côte peut malgré tout correspondre à une intensité élevée.
-- **Socle de la NGP** : Trainingload.ai utilise la GAP comme première étape avant de calculer la NGP et le rTSS.
 - **Ne pas la suivre aveuglément** : la GAP est une équivalence métabolique. Elle ne reflète pas totalement le stress musculo-squelettique. Des descentes longues et rapides peuvent paraître raisonnables en GAP tout en imposant une forte charge aux quadriceps et aux genoux.
 - **Privilégier les tendances aux valeurs instantanées** : la pente estimée par GPS comporte du bruit et un léger décalage, ce qui rend la GAP en temps réel saccadée. Préférez les moyennes par tour ou l’analyse après séance.
 

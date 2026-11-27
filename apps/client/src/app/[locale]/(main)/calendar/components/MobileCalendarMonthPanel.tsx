@@ -21,6 +21,7 @@ import { MobileCalendarDateDropTarget, MobileCalendarDateGrid, MobileCalendarWor
 import { calendarProposalStyle } from "./calendar-proposal-appearance";
 import type { CalendarProposalMark } from "./calendar-move-model";
 import { CalendarDateContextMenu, type CalendarCreateKind } from "./calendar-context-actions";
+import { calendarPlanRangeClass, calendarPlanStartClass } from "./calendar-plan-day-appearance";
 
 const MONTH_MARKER_COLORS = {
   activity: tokenPalette["sky-500"],
@@ -82,6 +83,7 @@ export function MobileCalendarMonthPanel({
 }) {
   const locale = useLocale();
   const t = useTranslations("MobileCalendarTimeline");
+  const tStart = useTranslations("PlanStartConversation");
   const monthSwipeStartRef = React.useRef<{ x: number; y: number } | null>(
     null,
   );
@@ -181,6 +183,7 @@ export function MobileCalendarMonthPanel({
             const selected = key === selectedKey;
             const today = date.isSame(dayjs(), "day");
             const inMonth = date.month() === currentMonth.month();
+            const isPlanStart = Boolean(range && date.isSame(range.startOfWeek, "day"));
             const inPlanRange = Boolean(
               !(activePlan && isPlanDateNotGenerated(activePlan, key)) && range &&
               !date.isBefore(range.startOfWeek, "day") &&
@@ -193,14 +196,14 @@ export function MobileCalendarMonthPanel({
                 data-tap-feedback="false"
                 type="button"
                 onClick={() => onSelectDate(date)}
+                aria-current={today ? "date" : undefined}
+                aria-description={isPlanStart ? tStart("dateLabel") : undefined}
                 aria-pressed={selected}
                 style={{ WebkitTapHighlightColor: "transparent" }}
                 className={cn(
                   "flex h-12 min-w-0 touch-manipulation flex-col items-center justify-center rounded-compact px-0.5 text-sm font-semibold tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  !inMonth && "opacity-30",
-                  inPlanRange &&
-                    !selected &&
-                    "bg-emerald-500/[0.06] bg-[repeating-linear-gradient(-45deg,hsl(var(--emerald-500)/0.16)_0_1.2px,transparent_1.2px_8px)] dark:bg-emerald-500/[0.09] dark:bg-[repeating-linear-gradient(-45deg,hsl(var(--emerald-400)/0.18)_0_1.2px,transparent_1.2px_8px)]",
+                  !inMonth && !today && !selected && !isPlanStart && "opacity-30",
+                  isPlanStart ? calendarPlanStartClass : inPlanRange && calendarPlanRangeClass,
                 )}
               >
                 <span

@@ -8,10 +8,16 @@ export function useCalendarScrollPosition(initialDate: () => Dayjs, initialAncho
   const [visibleMonth, setVisibleMonth] = useState(() => currentMonth.format("YYYY-MM"));
   const [scrollAnchor, setScrollAnchor] = useState<Dayjs | null>(initialAnchor ?? null);
   const displayedMonth = useMemo(() => dayjs(`${visibleMonth}-01`), [visibleMonth]);
-  const resetScrollAnchor = useCallback((month?: Dayjs) => {
-    setScrollAnchor(null);
-    if (month) setVisibleMonth(month.format("YYYY-MM"));
+  const showMonth = useCallback((month: Dayjs) => {
+    setVisibleMonth(month.format("YYYY-MM"));
   }, []);
+  const resetScrollAnchor = useCallback(
+    (month?: Dayjs) => {
+      setScrollAnchor(null);
+      if (month) showMonth(month);
+    },
+    [showMonth],
+  );
   const syncScrollWeek = useCallback((week: string, month: string) => {
     setScrollAnchor(dayjs(week));
     const target = dayjs(`${month}-01`);
@@ -22,6 +28,7 @@ export function useCalendarScrollPosition(initialDate: () => Dayjs, initialAncho
     currentMonth,
     setCurrentMonth,
     displayedMonth,
+    showMonth,
     resetScrollAnchor,
     scroll: { scrollAnchor, onScrollWeek: syncScrollWeek, onVisibleMonth: setVisibleMonth },
   };

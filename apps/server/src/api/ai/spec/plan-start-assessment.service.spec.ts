@@ -65,6 +65,7 @@ describe('PlanStartAssessmentService', () => {
       'u1',
       'plan-p07',
       expect.objectContaining({ startDate: '2026-12-31', revision: 'rev-1', choice: 'ORIGINAL' }),
+      { assessed: true },
     );
   });
 

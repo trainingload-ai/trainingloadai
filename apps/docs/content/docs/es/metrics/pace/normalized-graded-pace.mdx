@@ -45,16 +45,15 @@ En recorridos con mucho desnivel, el ritmo medio puede parecer muy lento. El NGP
 -   **Ejemplo**: una salida de trail de montaña promedia 10:00/km.
 -   **NGP**: puede ser mucho más rápido, reflejando mejor el estrés metabólico real que soportó tu cuerpo.
 
-### 2. Base para el rTSS
-Trainingload.ai utiliza el NGP para calcular el **rTSS (Running Training Stress Score)**. La estructura de la fórmula es similar a la del TSS de ciclismo:
+### 2. Estimación de la carga de carrera por ritmo
 
-Cuando el NGP y el FTPa se muestran como ritmo en min/km, primero se convierten a velocidad. En términos de velocidad:
+Trainingload.ai usa GOVSS cuando dispone del peso corporal. Si falta, estima la carga con un método similar a rTSS a partir del ritmo registrado y del umbral vigente al inicio de la actividad. Prioriza el ritmo umbral (TP) y usa la velocidad crítica (CS) como alternativa. No requiere potencia medida ni frecuencia cardíaca.
 
 ```text
-IF = Speed_NGP / Speed_FTPa
+100 × observed hours × (normalized speed / threshold speed)²
 ```
 
-Usar NGP ayuda a que la carga de carrera sea comparable entre terrenos distintos.
+La pendiente se ajusta si hay datos durante al menos el 80 % del tiempo con ritmo válido. Los tramos sin pendiente registrada se tratan como llanos. Si falta una ventana completa de 30 segundos, se usa la velocidad media observada. Se excluye el tiempo sin datos de ritmo.
 
 ## Comparativa de métricas
 
@@ -67,7 +66,6 @@ Usar NGP ayuda a que la carga de carrera sea comparable entre terrenos distintos
 ## Cómo usa Trainingload.ai el NGP
 
 -   **Referencia de intensidad sensible al terreno**: el NGP suele ser más informativo que el ritmo medio en sesiones con cuestas o cambios de ritmo.
--   **Cálculo de carga en carrera**: el NGP es una entrada clave del rTSS porque recoge tanto el terreno como la variabilidad de intensidad.
 -   **Uso junto con VI**: calcula el **VI (Índice de variabilidad) = NGP / GAP medio**.
     -   Si el VI está cerca de 1.0, el esfuerzo fue constante.
     -   Si el VI > 1.05, probablemente refleja series o un terreno muy irregular.

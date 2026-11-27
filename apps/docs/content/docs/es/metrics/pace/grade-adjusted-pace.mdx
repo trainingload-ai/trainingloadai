@@ -51,8 +51,9 @@ En terreno empinado, el ritmo real es difícil de interpretar.
 -   **GAP**: muestra 5:00/km.
 -   **Interpretación**: la intensidad metabólica puede ser mucho mayor de lo que sugiere el ritmo bruto.
 
-### 2. Base para el rTSS
-Trainingload.ai utiliza **NGP (Normalized Graded Pace)** para calcular la carga de carrera (rTSS), y el GAP es la base sobre la que se construye el NGP.
+### 2. Estimación de la carga de carrera por ritmo
+El GAP permite corregir la pendiente al estimar la carga de carrera por ritmo. [Estimación de la carga de carrera por ritmo](/es/docs/metrics/pace/normalized-graded-pace)
+
 ```text
 Pace_actual  --(grade adjustment)-->  GAP  --(weighted smoothing)-->  NGP
 ```
@@ -63,7 +64,6 @@ Al analizar los datos GPX del recorrido junto con el GAP, puedes planificar qué
 ## Cómo usa Trainingload.ai el GAP
 
 -   **Contexto del terreno**: el GAP ayuda a explicar por qué un parcial lento en subida puede seguir siendo un esfuerzo de alta intensidad.
--   **Base para el NGP**: Trainingload.ai utiliza el GAP como primer paso antes de calcular el NGP y el rTSS.
 -   **No lo persigas a ciegas**: el GAP es una equivalencia metabólica. No refleja por completo el estrés musculoesquelético: las bajadas largas y fuertes pueden parecer moderadas en GAP, pero generan una carga alta en cuádriceps y rodillas.
 -   **Prioriza tendencias sobre valores instantáneos**: las estimaciones de pendiente por GPS tienen ruido y retraso, lo que puede hacer que el GAP en tiempo real salte mucho. Es mejor usar medias por vuelta o el análisis posterior a la actividad.
 

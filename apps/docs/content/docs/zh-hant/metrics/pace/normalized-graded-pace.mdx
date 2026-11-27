@@ -45,16 +45,15 @@ NGP_intensity = 4th_root( (1/N) * sum_{i=1..N} (GAP_intensity_rolling(i))^4 )
 - **舉例**：一趟高爬升越野跑的平均配速為 10:00/km。
 - **NGP**：換算結果可能快上許多，更能如實反映身體承受的代謝壓力。
 
-### 2. rTSS 的計算基礎
-Trainingload.ai 以 NGP 計算 **rTSS（跑步訓練壓力分數，Running Training Stress Score）**，公式架構與單車 TSS 相同。
+### 2. 跑步配速負荷估算
 
-當 NGP 與 FTPa 以 min/km 配速呈現時，必須先轉換為速度再計算：
+有體重資料時，Trainingload.ai 以 GOVSS 計算跑步的配速負荷。缺少體重時，系統根據有效配速樣本與活動開始時生效的跑步閾值，採用類似 rTSS 的方式估算。優先使用閾值配速（TP），其次使用臨界速度（CS）。此估算無須實測心率或功率。
 
 ```text
-IF = Speed_NGP / Speed_FTPa
+100 × observed hours × (normalized speed / threshold speed)²
 ```
 
-採用 NGP 能讓不同地形條件下的跑步訓練負荷具備更好的可比性。
+有坡度資料的時間達到有效配速時間的 80% 時，系統會對有坡度資料的部分做修正。其餘按平路估算。若沒有完整的 30 秒視窗，則使用有效時段的平均速度。沒有配速記錄的時間不計入。
 
 ## 指標比較
 
@@ -67,7 +66,6 @@ IF = Speed_NGP / Speed_FTPa
 ## Trainingload.ai 如何運用 NGP
 
 - **作為考量地形的強度參考**：在山路或配速起伏大的課表中，NGP 通常比平均配速更有參考價值。
-- **計算跑步訓練負荷**：NGP 是 rTSS 的關鍵輸入，能同時反映坡度與強度變異。
 - **搭配 VI（變異指數）觀察配速穩定度**：計算 **VI = NGP / Avg GAP**（以速度計算）。
   - 若 VI 接近 1.0，代表出力相當穩定。
   - 若 VI > 1.05，通常代表課表包含間歇加速或地形起伏劇烈。

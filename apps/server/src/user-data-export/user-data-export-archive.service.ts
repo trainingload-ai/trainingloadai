@@ -10,6 +10,7 @@ import { pipeline } from 'node:stream/promises';
 import type { UserDataExportJob } from '@prisma/client';
 
 import { ActivityService } from '@/api/activity/activity.service';
+import { RUNNING_PACE_ESTIMATE } from '@/algorithm/GOVSS';
 import { PlanQueryService } from '@/api/plan/application/plan-query.service';
 import { CompetitionQueryService } from '@/api/competition/application/competition-query.service';
 import { HealthFileQueryService } from '@/health-data/health-file-query.service';
@@ -173,6 +174,7 @@ const ACTIVITY_METRIC_UNITS: Record<string, string | null> = {
   'BIKE_SCORE.tissAerobicity': null,
   'SWIM_SCORE.swimScore': 'points',
   'GOVSS.govss': 'points',
+  'RUNNING_PACE_ESTIMATE.score': 'points',
   'TRIMP.trimp': 'points',
   'TRIMP.trimpZonalPoints': 'points',
   'TRIMP.trimp100': 'points',
@@ -1089,6 +1091,7 @@ export class UserDataExportArchiveService {
       activityId: number,
       prefix: string,
       value: Record<string, unknown>,
+      algorithmVersion = 'legacy-unversioned',
     ) => {
       const publicId = activityMap.get(activityId)?.hashId;
       if (!publicId) return;
@@ -1115,7 +1118,7 @@ export class UserDataExportArchiveService {
           metadata: { sportType: value.sport ?? null },
           source: 'TRAININGLOAD',
           algorithm,
-          algorithmVersion: 'legacy-unversioned',
+          algorithmVersion,
           calculatedAt,
         });
       }
@@ -1126,7 +1129,30 @@ export class UserDataExportArchiveService {
       addObjectMetrics(item.activityId, 'BIKE_SCORE', item);
     for (const item of swim)
       addObjectMetrics(item.activityId, 'SWIM_SCORE', item);
-    for (const item of govss) addObjectMetrics(item.activityId, 'GOVSS', item);
+    for (const item of govss) {
+      const parameters = item.parameters;
+      if (
+        parameters &&
+        typeof parameters === 'object' &&
+        !Array.isArray(parameters) &&
+        parameters.method === RUNNING_PACE_ESTIMATE
+      ) {
+        addObjectMetrics(
+          item.activityId,
+          RUNNING_PACE_ESTIMATE,
+          {
+            score: item.govss,
+            coveredSeconds: item.coveredSeconds,
+            gradeCoverageRatio: item.gradeCoverageRatio,
+            sport: item.sport,
+            calculatedAt: item.calculatedAt,
+          },
+          item.algorithmVersion?.toString(),
+        );
+      } else {
+        addObjectMetrics(item.activityId, 'GOVSS', item);
+      }
+    }
     for (const item of calculatedPower) {
       const publicId = activityMap.get(item.activityId)?.hashId;
       if (!publicId) continue;

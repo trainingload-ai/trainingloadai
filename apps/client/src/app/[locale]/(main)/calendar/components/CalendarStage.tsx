@@ -15,7 +15,7 @@ import {
   calendarToday,
   calendarWorkoutDropRejection,
 } from "./calendar-move-model";
-import { calendarDropAppearance, calendarDropGridClass, canDropCalendarWorkout } from "./calendar-workout-drop";
+import { calendarDropAppearance, canDropCalendarWorkout } from "./calendar-workout-drop";
 import type { CalendarCreateKind } from "./calendar-context-actions";
 import {
   useCalendarWeekScroll,
@@ -171,6 +171,7 @@ export function CalendarStage({
   const t = useTranslations("CalendarExperience");
   const tMove = useTranslations("CalendarMove");
   const tCompetition = useTranslations("CompetitionEvents");
+  const tStart = useTranslations("PlanStartConversation");
   const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
   const [highlightedCompetitionId, setHighlightedCompetitionId] =
     React.useState<string | null>(null);
@@ -304,6 +305,7 @@ export function CalendarStage({
                   )}
                   tss={tssByDate && (tssByDate[key] ?? 0)}
                   inPlanRange={inPlanRange}
+                  planStartLabel={range && date.isSame(range.startOfWeek, "day") ? tStart("dateLabel") : undefined}
                   presentWorkout={presentWorkout}
                   onCreate={
                     onCreateOnDate
@@ -434,7 +436,6 @@ export function CalendarStage({
       data-calendar-dragging={dragged ? "" : undefined}
       className={cn(
         "overflow-hidden rounded-md bg-neutral-100 p-2.5 transition-colors dark:bg-muted/70 md:p-3",
-        dragged && calendarDropGridClass,
         desktopScroll && "flex min-h-0 flex-1 flex-col",
         className,
       )}

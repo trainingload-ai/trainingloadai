@@ -63,6 +63,7 @@ export class PlanCalendarValidationService {
         code: 'PLAN_SCHEDULE_INVALID',
         message: `PLAN_SCHEDULE_INVALID: ${summary}`,
         issues,
+        data: { issues },
       });
     }
   }

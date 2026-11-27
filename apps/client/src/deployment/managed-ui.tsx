@@ -85,8 +85,9 @@ export function DeploymentUsagePage() {
 
 export function useManagedAiAccessRecovery(
   _reason: AiOperationErrorReason | null,
-  _options?: { retry?: () => void; retryDisabled?: boolean },
+  _options?: { retry?: () => void; retryDisabled?: boolean; checkAccess?: boolean },
 ): {
+  blocked?: boolean;
   recoveryAction?: { label: string; onClick: () => void; disabled?: boolean };
   message?: string;
   overlay: React.ReactNode;

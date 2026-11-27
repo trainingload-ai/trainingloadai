@@ -110,6 +110,81 @@ describe('continuous training / PostgreSQL', () => {
     expect(detail.plan?.workouts?.map(identity)).toEqual(plan!.workouts.map(identity));
     expect(detail.plan).not.toHaveProperty('workoutWindow');
   });
+  it('directly starts the current rolling draft as shown, including workouts on a rest day and next-week carryover', async () => {
+    const startDate = '2099-11-17';
+    const draftStartDate = '2099-11-16';
+    const strength = {
+      kind: 'STRENGTH',
+      version: 1,
+      source: 'TEXT',
+      text: 'duration 40m\nsession rpe 6\nexercise "Squat" {\nwork 3x5 open rpe 7 rest 3m\n}',
+    } as const;
+    const { plan } = await f.service.createPlan('user', {
+      title: 'Rolling triathlon',
+      planningMode: 'ROLLING',
+      periodWeeks: null,
+      generationMetadata: {
+        qualityContract: {
+          startDate: draftStartDate,
+          requiredSports: ['RUN', 'CYCLING', 'SWIM', 'STRENGTH'],
+        },
+        scheduleConstraints: {
+          version: 1, revision: 1, calendarTimeZone: 'Asia/Shanghai',
+          fixedRestWeekdays: [3],
+          unavailableDates: [], availableDateOverrides: [],
+          effectiveFrom: draftStartDate,
+          confirmation: { source: 'USER', reference: 'saved-rest-day' },
+        },
+      },
+      workouts: [
+        { weekIndex: 1, dayIndex: 1, sportType: 'UNKNOWN', definition: strength },
+        ...([
+          [2, 'CYCLING', 55],
+          [4, 'SWIM', 45],
+          [7, 'RUN', 45],
+        ] as const).map(([dayIndex, sportType, minutes]) => ({
+          weekIndex: 1,
+          dayIndex,
+          sportType,
+          definition: { kind: 'FREEFORM', version: 1, source: 'TEXT', text: `Easy ${minutes}m` } as const,
+        })),
+        { weekIndex: 1, dayIndex: 5, sportType: 'UNKNOWN', definition: strength },
+      ],
+    });
+    const previous = await f.starts.getStartDraft('user', plan!.id, startDate);
+    await prisma.plan.update({ where: { id: plan!.id }, data: { title: 'Updated triathlon' } });
+    await expect(f.starts.confirmDirectStart('user', plan!.id, {
+      startDate,
+      revision: previous.revision,
+      choice: 'ORIGINAL',
+    })).rejects.toMatchObject({ response: { code: 'PLAN_START_REASSESSMENT_REQUIRED' } });
+    const draft = await f.starts.getStartDraft('user', plan!.id, startDate);
+    await expect(f.starts.preflightStart('user', plan!.id, startDate, draft.revision))
+      .resolves.toMatchObject({ originalCanStart: false });
+
+    const result = await f.starts.confirmDirectStart('user', plan!.id, {
+      startDate,
+      revision: draft.revision,
+      choice: 'ORIGINAL',
+    });
+
+    expect(result).toMatchObject({
+      started: true,
+      plan: { status: 'ACTIVE', title: 'Updated triathlon', startDate, generatedThrough: '2099-11-22' },
+    });
+    expect(result.plan.workouts.map(({ id }) => id)).toEqual(
+      draft.plan.workouts.map(({ id }) => id),
+    );
+    expect(result.plan.workouts.find(({ sportType }) => sportType === 'CYCLING'))
+      .toMatchObject({ scheduledDate: '2099-11-18' });
+    await expect(prisma.planWorkout.findFirst({
+      where: { planId: plan!.id, sportType: 'RUN' },
+    })).resolves.toMatchObject({
+      scheduledDate: new Date('2099-11-23T00:00:00Z'),
+      automationProtected: true,
+    });
+  });
+
   async function ready(
     startDate = '2099-11-18',
     configure?: (request: PlanStartPreviewRequest) => void,

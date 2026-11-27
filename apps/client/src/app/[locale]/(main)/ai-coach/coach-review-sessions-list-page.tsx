@@ -73,7 +73,7 @@ export function CoachReviewSessionsListPage() {
   useEffect(() => {
     const prev = document.title;
     if (scope) {
-      document.title = `${sectionTitle} — ${t("title")}`;
+    document.title = `${sectionTitle} · ${t("title")}`;
     }
     return () => {
       document.title = prev;
