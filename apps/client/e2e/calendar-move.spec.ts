@@ -1724,6 +1724,42 @@ test("draws the selected date ring inside cells along all four calendar edges", 
   }
 });
 
+test("selects a visible day from the adjacent month without shifting the calendar", async ({
+  page,
+}) => {
+  await openCalendar(page, false);
+  const viewport = page.locator("[data-calendar-scroll]");
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-10-26");
+  const day = (date: string) =>
+    viewport.getByRole("button", { name: date, exact: true });
+  const cell = (date: string) =>
+    viewport.locator(`[data-calendar-date="${date}"]`);
+  const outsideMonth = /(?:^|\s)bg-secondary(?:\s|$)/;
+
+  await day("2026-10-30").click();
+  await expect(page.getByRole("button", { name: "2026年10月" })).toBeVisible();
+  await page.getByRole("button", { name: "下一月" }).click();
+  await expect(page.getByRole("button", { name: "2026年11月" })).toBeVisible();
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-10-26");
+
+  await viewport.hover({ position: { x: 45, y: 68 } });
+  await page.mouse.wheel(0, 320);
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-11-16");
+  await expect(page.getByRole("button", { name: "2026年12月" })).toBeVisible();
+
+  await day("2026-11-17").click();
+  await expect(day("2026-11-17")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "2026年11月" })).toBeVisible();
+  await expect(cell("2026-11-18")).not.toHaveClass(outsideMonth);
+  await expect(cell("2026-12-03")).toHaveClass(outsideMonth);
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-11-16");
+
+  await page.mouse.wheel(0, 112);
+  await expect.poll(() => readTopWeek(viewport)).toBe("2026-11-23");
+  await expect(page.getByRole("button", { name: "2026年12月" })).toBeVisible();
+  await expect(cell("2026-12-03")).not.toHaveClass(outsideMonth);
+});
+
 test("follows a continuous scroll during the gesture and then snaps to the nearest week", async ({
   page,
 }) => {
