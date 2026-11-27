@@ -5967,8 +5967,7 @@
       "description": "Elige una o más disciplinas; la fuerza puede apoyar el objetivo principal."
     },
     "trainingIntent": {
-      "title": "Intención de entrenamiento",
-      "description": "Dígale a AI qué debería resolver este ciclo."
+      "title": "Intención de entrenamiento"
     },
     "raceInfo": {
       "title": "Información de la carrera",
@@ -5984,9 +5983,8 @@
     },
     "strength": {
       "title": "Apoyo de fuerza",
-      "description": "La IA programa sesiones de fuerza separadas según tu objetivo, equipo y recuperación.",
       "preference": {
-        "AUTO": "Dejar que la IA decida",
+        "AUTO": "Sugerencia del entrenador",
         "INCLUDE": "Incluir fuerza",
         "EXCLUDE": "Excluir fuerza"
       },
@@ -6747,7 +6745,6 @@
     "shortTitle": "Plan continuo",
     "availabilityTitle": "Disponibilidad para entrenar",
     "availability": "{weeklyDays} días a la semana · hasta {dailyMinutes} minutos al día",
-    "creationHint": "Tu entrenador preparará una semana inicial. Tras elegir la fecha de inicio, revisa la primera semana y confirma el alcance de la planificación automática.",
     "firstWeekPreview": "Vista previa de la semana inicial",
     "title": "Plan de entrenamiento continuo",
     "description": "Planifica y adapta automáticamente según tus objetivos, tiempo y entrenamiento.",

@@ -5967,8 +5967,7 @@
       "description": "Wählen Sie eine oder mehrere Disziplinen; Krafttraining kann das Hauptziel unterstützen."
     },
     "trainingIntent": {
-      "title": "Trainingsabsicht",
-      "description": "Sagen Sie der KI, was dieser Zyklus lösen soll."
+      "title": "Trainingsabsicht"
     },
     "raceInfo": {
       "title": "Renninfo",
@@ -5984,9 +5983,8 @@
     },
     "strength": {
       "title": "Ergänzendes Krafttraining",
-      "description": "Die KI plant separate Krafteinheiten passend zu Ziel, Ausrüstung und Erholung.",
       "preference": {
-        "AUTO": "KI entscheiden lassen",
+        "AUTO": "Vom Coach empfohlen",
         "INCLUDE": "Krafttraining einplanen",
         "EXCLUDE": "Krafttraining ausschließen"
       },
@@ -6747,7 +6745,6 @@
     "shortTitle": "Fortlaufender Plan",
     "availabilityTitle": "Verfügbare Trainingszeit",
     "availability": "{weeklyDays} Tage pro Woche · bis zu {dailyMinutes} Minuten pro Tag",
-    "creationHint": "Dein Coach entwirft eine Einstiegswoche. Nach Wahl des Startdatums prüfst du die erste Woche und bestätigst den Umfang der automatischen Planung.",
     "firstWeekPreview": "Vorschau der Einstiegswoche",
     "title": "Fortlaufender Trainingsplan",
     "description": "Passt die Planung automatisch an Ziele, Zeit und Training an.",

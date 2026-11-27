@@ -5967,8 +5967,7 @@
       "description": "Choisissez une ou plusieurs disciplines ; le renforcement peut soutenir l’objectif principal."
     },
     "trainingIntent": {
-      "title": "Intention de formation",
-      "description": "Dites à l’IA ce que ce cycle devrait résoudre."
+      "title": "Intention de formation"
     },
     "raceInfo": {
       "title": "Informations sur la course",
@@ -5984,9 +5983,8 @@
     },
     "strength": {
       "title": "Renforcement complémentaire",
-      "description": "L’IA programme des séances de renforcement séparées selon votre objectif, votre matériel et votre récupération.",
       "preference": {
-        "AUTO": "Laisser l’IA décider",
+        "AUTO": "Recommandé par le coach",
         "INCLUDE": "Inclure le renforcement",
         "EXCLUDE": "Exclure le renforcement"
       },
@@ -6747,7 +6745,6 @@
     "shortTitle": "Plan continu",
     "availabilityTitle": "Disponibilités d’entraînement",
     "availability": "{weeklyDays} jours par semaine · jusqu’à {dailyMinutes} minutes par jour",
-    "creationHint": "Votre coach préparera une semaine de démarrage. Après avoir choisi la date de début, vérifiez la première semaine et confirmez le périmètre de la planification automatique.",
     "firstWeekPreview": "Aperçu de la semaine de démarrage",
     "title": "Plan d’entraînement continu",
     "description": "Planifie et adapte automatiquement selon tes objectifs, ton temps et ton entraînement.",

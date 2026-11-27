@@ -6021,8 +6021,7 @@
       "description": "可選擇一個或多個項目；健身訓練可作為主目標的輔助訓練。"
     },
     "trainingIntent": {
-      "title": "训练目的",
-      "description": "告诉 AI 这轮周期想解决什么问题。"
+      "title": "训练目的"
     },
     "raceInfo": {
       "title": "比赛信息",
@@ -6038,9 +6037,8 @@
     },
     "strength": {
       "title": "輔助力量訓練",
-      "description": "這是計畫偏好；AI 會結合目標、器械和恢復空間安排獨立的力量課。",
       "preference": {
-        "AUTO": "由 AI 建議",
+        "AUTO": "由教練建議",
         "INCLUDE": "包含力量訓練",
         "EXCLUDE": "不包含力量訓練"
       },
@@ -6844,7 +6842,6 @@
     "shortTitle": "持續計畫",
     "availabilityTitle": "訓練時間",
     "availability": "每週 {weeklyDays} 天 · 每天最多 {dailyMinutes} 分鐘",
-    "creationHint": "教練會先產生起步課表。選定開始日後，再確認首週安排和自動管理範圍。",
     "firstWeekPreview": "起步課表",
     "title": "持續訓練計畫",
     "description": "根據你的目標、時間和訓練情況，自動規劃並持續調整",

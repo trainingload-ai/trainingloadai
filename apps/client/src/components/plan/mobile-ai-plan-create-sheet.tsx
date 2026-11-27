@@ -491,9 +491,11 @@ export function MobileAiPlanCreateSheet({
                 </div>
               </section>
 
-              <p className="px-1 text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
-                {rolling ? rollingT("creationHint") : t("brief.handoff")}
-              </p>
+              {!rolling ? (
+                <p className="px-1 text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
+                  {t("brief.handoff")}
+                </p>
+              ) : null}
             </div>
           )}
         </div>

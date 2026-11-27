@@ -331,9 +331,11 @@ function PlanCreateForm({ rolling }: { rolling: boolean }) {
             <h1 className="mt-1 truncate text-base font-semibold tracking-normal text-foreground">
               {title}
             </h1>
-            <p className="mt-1 text-mobile-caption pc:text-xs text-muted-foreground">
-              {rolling ? rollingT("description") : t("header.description")}
-            </p>
+            {!rolling ? (
+              <p className="mt-1 text-mobile-caption pc:text-xs text-muted-foreground">
+                {t("header.description")}
+              </p>
+            ) : null}
           </div>
         </section>
       </header>
@@ -378,9 +380,11 @@ function PlanCreateForm({ rolling }: { rolling: boolean }) {
             >
               {t("brief.start")}
             </Button>
-            <p className="mt-2 text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
-              {rolling ? rollingT("creationHint") : t("brief.handoff")}
-            </p>
+            {!rolling ? (
+              <p className="mt-2 text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
+                {t("brief.handoff")}
+              </p>
+            ) : null}
           </Panel>
         </div>
 
@@ -434,10 +438,7 @@ function PlanCreateForm({ rolling }: { rolling: boolean }) {
           </Panel>
 
           <Panel className="p-3">
-            <SectionTitle
-              title={t("trainingIntent.title")}
-              description={t("trainingIntent.description")}
-            />
+            <SectionTitle title={t("trainingIntent.title")} />
             <ToggleGroup
               type="single"
               value={intent}
@@ -612,10 +613,7 @@ function PlanCreateForm({ rolling }: { rolling: boolean }) {
           </Panel>
 
           <Panel className="p-3">
-            <SectionTitle
-              title={t("strength.title")}
-              description={t("strength.description")}
-            />
+            <SectionTitle title={t("strength.title")} />
             <ToggleGroup
               type="single"
               value={strengthPreference}

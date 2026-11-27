@@ -6445,8 +6445,7 @@
       "description": "至少选择一种，可多选；力量训练也可以作为辅助。"
     },
     "trainingIntent": {
-      "title": "训练目标",
-      "description": "选择这轮训练最想达成的目标。"
+      "title": "训练目标"
     },
     "raceInfo": {
       "title": "比赛信息",
@@ -6462,9 +6461,8 @@
     },
     "strength": {
       "title": "辅助力量训练",
-      "description": "这是计划偏好；AI 会结合目标、器械和恢复空间安排独立的力量课。",
       "preference": {
-        "AUTO": "由 AI 建议",
+        "AUTO": "由教练建议",
         "INCLUDE": "包含力量训练",
         "EXCLUDE": "不包含力量训练"
       },
@@ -7403,7 +7401,6 @@
     "shortTitle": "持续计划",
     "availabilityTitle": "训练时间",
     "availability": "每周 {weeklyDays} 天 · 每天最多 {dailyMinutes} 分钟",
-    "creationHint": "教练会先生成起步课表。选定开始日后，再确认首周安排和自动管理范围。",
     "firstWeekPreview": "起步课表",
     "title": "持续训练计划",
     "description": "根据你的目标、时间和训练情况，自动规划并持续调整",

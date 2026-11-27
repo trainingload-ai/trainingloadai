@@ -6464,8 +6464,7 @@
       "description": "Select one or more disciplines; strength can support the primary goal."
     },
     "trainingIntent": {
-      "title": "Training intent",
-      "description": "Tell AI what this cycle should solve."
+      "title": "Training intent"
     },
     "raceInfo": {
       "title": "Race info",
@@ -6481,9 +6480,8 @@
     },
     "strength": {
       "title": "Strength support",
-      "description": "AI schedules separate strength workouts around your goal, equipment, and recovery constraints.",
       "preference": {
-        "AUTO": "Let AI decide",
+        "AUTO": "Coach recommendation",
         "INCLUDE": "Include strength",
         "EXCLUDE": "Exclude strength"
       },
@@ -7404,7 +7402,6 @@
     "shortTitle": "Rolling plan",
     "availabilityTitle": "Training availability",
     "availability": "{weeklyDays} days per week · up to {dailyMinutes} minutes per day",
-    "creationHint": "Your coach will draft a starter week. Once you pick a start date, review the first week and confirm what the coach can manage automatically.",
     "firstWeekPreview": "Starter week preview",
     "title": "Continuous training plan",
     "description": "Automatically plan and adapt to your goals, availability, and training.",
