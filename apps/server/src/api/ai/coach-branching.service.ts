@@ -1,3 +1,5 @@
+import { I18nContext } from 'nestjs-i18n';
+import { publicRuntimeText } from '@/utils/public-runtime-copy';
 import {
   isPrismaSerializableConflict,
   MAX_SERIALIZABLE_ATTEMPTS,
@@ -173,7 +175,7 @@ export class CoachBranchingService {
       tx,
     );
     if (!context || context.userId !== userId) {
-      this.fail('Coach context not found');
+      this.fail(publicRuntimeText(I18nContext.current()?.lang, 'coachContextMissing'));
     }
     return context;
   }
@@ -1215,7 +1217,7 @@ export class CoachBranchingService {
           preview.sourcePlanId !== decision.context.planId ||
           preview.discardedAt
         ) {
-          this.fail('Plan proposal preview is unavailable');
+          this.fail(publicRuntimeText(I18nContext.current()?.lang, 'coachPreviewMissing'));
         }
         if (preview.appliedAt) {
           const current = await tx.coachDecision.findUniqueOrThrow({
@@ -1228,7 +1230,7 @@ export class CoachBranchingService {
         if (preview.expiresAt.getTime() <= Date.now()) {
           throw new BusinessException({
             code: BUSINESS_ERROR_CODE.PLAN_PROPOSAL_EXPIRED,
-            message: 'Plan proposal has expired; generate a fresh preview',
+            message: publicRuntimeText(I18nContext.current()?.lang, 'coachPreviewExpired'),
           });
         }
       }

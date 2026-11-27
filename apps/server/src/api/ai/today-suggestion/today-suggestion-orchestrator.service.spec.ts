@@ -52,6 +52,35 @@ describe('TodaySuggestionOrchestratorService', () => {
     expect(draft.preferredIntent).toBe('ASK_COACH');
   });
 
+  it.each([
+    [undefined, 'Keep today conservative'],
+    ['zh', '今天先保持保守安排'],
+    ['zh-hant', '今天先保持保守安排'],
+    ['ja', '今日は余裕を持った計画に'],
+    ['de', 'Heute vorsichtig planen'],
+    ['pt-BR', 'Adote um plano conservador hoje'],
+  ])('localizes the high-concern fallback for %s', (locale, headline) => {
+    const service = new TodaySuggestionOrchestratorService(
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
+      {} as never,
+      {} as never,
+    );
+    const draft = service['factFallback']({
+      locale,
+      highConcern: true,
+    } as TodaySuggestionConstraintProjection);
+
+    expect(draft).toMatchObject({
+      headline,
+      recommendation: { kind: 'REST' },
+      evidenceCodes: ['HIGH_CONCERN'],
+    });
+  });
+
   it('serializes identical requests into one Agent run and one generation', async () => {
     let stored: Record<string, any> | null = null;
     const prisma = {

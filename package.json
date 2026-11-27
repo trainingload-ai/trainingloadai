@@ -87,7 +87,7 @@
     "build": "pnpm build:selfhost",
     "test": "pnpm --dir apps/client test:selfhost && pnpm --dir apps/server test:selfhost",
     "test:selfhost": "pnpm test",
-    "messages:check": "node packages/messages/check-client-baseline.mjs",
+    "messages:check": "node packages/messages/check-client-baseline.mjs && node packages/messages/check-server-localized-copy.mjs",
     "docs:dev": "pnpm --dir apps/docs dev",
     "docs:build": "pnpm --dir apps/docs build",
     "screenshots:readme": "SELF_HOST_README_CAPTURE=1 pnpm --dir apps/client exec playwright test --config=playwright.marketing-5k.config.ts --grep 'dark Web (home|calendar|coach).* · (en|zh)$'",

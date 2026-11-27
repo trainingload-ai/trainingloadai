@@ -903,14 +903,15 @@ export class AiController {
     @CurrentUserId() userId: string,
     @CurrentPublicDemo() publicDemo: PublicDemoRequestContext | null,
     @Query('useCache', new ParseBoolPipe({ optional: true })) useCache = true,
-    @Query('lang') lang = 'en',
+    @Query('lang') lang = '',
     @Query('operationId') operationIdRaw?: string,
     @Headers('idempotency-key') idempotencyKey?: string,
   ): Promise<Observable<MessageEvent>> {
+    lang = resolveSupportedLocale(lang || I18nContext.current()?.lang);
     if (!hashId) {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
-        message: this.i18n.t('common.error.missing_activity_id'),
+        message: this.i18n.t('common.error.missing_activity_id', { lang }),
       });
     }
     const maxHashIdChars = Number(
@@ -919,7 +920,7 @@ export class AiController {
     if (String(hashId).length > maxHashIdChars) {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
-        message: this.i18n.t('common.error.invalid_activity_id'),
+        message: this.i18n.t('common.error.invalid_activity_id', { lang }),
       });
     }
     const operationId = String(operationIdRaw ?? '').trim();

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "resolveJsonModule": true,
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -7,6 +8,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
+    "lib": ["es2017", "es2021.intl", "dom", "dom.iterable", "webworker.importscripts", "scripthost"],
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": ".",

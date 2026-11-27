@@ -137,18 +137,26 @@ describe('CoachAssessmentCaseService', () => {
     expect(data.questions).toBeUndefined();
   });
 
-  it('keeps sync-dependent evidence in WAITING_FOR_DATA with a follow-up', async () => {
+  it.each([
+    ['en', 'Waiting for state data'],
+    ['zh-CN', '正在等待状态数据'],
+    ['zh-TW', '正在等待狀態資料'],
+    ['ja', '状態データを待機中'],
+    ['de', 'Warten auf Daten zum Befinden'],
+    ['pt-BR', 'Aguardando dados sobre seu estado'],
+  ])('keeps sync-dependent evidence waiting with a localized outcome in %s', async (locale, title) => {
     const created = await service.createForAssessment({
       userId: 'athlete',
       assessment: assessment as never,
       result: result('WAITING_FOR_SYNC') as never,
       triggerType: 'TEST',
-      locale: 'en',
+      locale,
     });
     expect(created?.status).toBe('WAITING_FOR_DATA');
     const data = (create.mock.calls[0][0] as any).data as Record<string, any>;
     expect(data.resolvedAt).toBeNull();
     expect(data.followUpAt).toBeInstanceOf(Date);
+    expect(data.currentOutcome).toMatchObject({ kind: 'WAITING_FOR_DATA', title });
   });
 
   it('does not exceed the two-question budget', async () => {

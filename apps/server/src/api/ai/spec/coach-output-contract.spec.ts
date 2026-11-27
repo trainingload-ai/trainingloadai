@@ -851,6 +851,35 @@ const modelUnavailableResult = expect.objectContaining({
   result: 'common.error.ai_coach_model_unavailable',
 });
 
+describe('Activity review language through the controller', () => {
+  it.each([
+    [undefined, 'en'],
+    ['zh-CN', 'zh'],
+    ['zh-TW', 'zh-hant'],
+    ['ja', 'ja'],
+    ['de', 'de'],
+    ['pt-BR', 'pt-BR'],
+  ])('uses the supported language for %s when reading the review cache', async (locale, expected) => {
+    const probeActivityAiAnalysisRoute = jest.fn(async () => ({
+      kind: 'CACHED',
+      content: 'review',
+    }));
+    const controller: AiController = Object.assign(Object.create(AiController.prototype), {
+      aiService: { probeActivityAiAnalysisRoute },
+    });
+
+    await controller.streamActivityAiAnalysis('activity', 'athlete', null, true, locale, 'operation');
+
+    expect(probeActivityAiAnalysisRoute).toHaveBeenCalledWith(
+      'activity',
+      'athlete',
+      true,
+      expected,
+      false,
+    );
+  });
+});
+
 describe('AI coach client output contract through the controller', () => {
   it.each([
     ['empty success', [success]],

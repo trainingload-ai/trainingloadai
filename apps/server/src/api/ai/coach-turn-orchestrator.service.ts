@@ -22,7 +22,7 @@ import {
 import { AiService } from './ai.service';
 import { AiUsageService, parseOpenAIUsage } from './ai-usage.service';
 import { UserSession } from '@thallesp/nestjs-better-auth';
-import { I18nService } from 'nestjs-i18n';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { BusinessException } from '@/filters/business-exception/business.exception';
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import { $Enums, AiUsageStatus } from '@prisma/client';
@@ -173,6 +173,7 @@ export class CoachTurnOrchestrator {
   }): Promise<void> {
     const { userId, session, idempotencyKey } = args;
     let body = args.body;
+    const requestLocale = String(body.lang ?? I18nContext.current()?.lang ?? 'en').trim() || 'en';
     const v2 = body.protocolVersion === 2;
     const command = v2 ? parseCoachRunCommand(body.runCommand) : null;
     if (v2 && !command)
@@ -402,7 +403,7 @@ export class CoachTurnOrchestrator {
             await persistLateActivities(runHandle);
             runClosingChunks.push({
               type: 'error',
-              errorText: coachSsePayloadForAbort(this.i18n).message,
+              errorText: coachSsePayloadForAbort(this.i18n, requestLocale).message,
             });
             if (status === 'completed' || status === 'awaiting_input') throw error;
             return;
@@ -435,7 +436,7 @@ export class CoachTurnOrchestrator {
       this.logger.warn(`[AI][教练][${reqId}] 缺少提问内容 用户ID=${userId}`);
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
-        message: this.i18n.t('common.error.missing_prompt') ?? 'Missing prompt',
+        message: this.i18n.t('common.error.missing_prompt', { lang: requestLocale }) ?? 'Missing prompt',
       });
     }
     const sessionId = String(body?.sid ?? '').trim();
@@ -450,7 +451,7 @@ export class CoachTurnOrchestrator {
     }
     const lang = resolveCoachReplyLanguage(
       prompt,
-      String(body?.lang ?? 'en').trim() || 'en',
+      requestLocale,
     );
     let intent = String(body?.intent ?? '').trim();
     const requestedPurpose = parseRequestedModelPurpose(body?.purpose);
@@ -484,7 +485,7 @@ export class CoachTurnOrchestrator {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
         message:
-          this.i18n.t('common.error.prompt_too_long') ?? 'Prompt too long',
+          this.i18n.t('common.error.prompt_too_long', { lang }) ?? 'Prompt too long',
       });
     }
     if (sessionId && sessionId.length > maxSidChars) {
@@ -493,7 +494,7 @@ export class CoachTurnOrchestrator {
       );
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
-        message: this.i18n.t('common.error.invalid_sid') ?? 'Invalid sid',
+        message: this.i18n.t('common.error.invalid_sid', { lang }) ?? 'Invalid sid',
       });
     }
 
@@ -1281,7 +1282,7 @@ export class CoachTurnOrchestrator {
           await failTurn(modelUnavailable());
           return;
         }
-        const { code, message } = coachSsePayloadForAbort(this.i18n);
+        const { code, message } = coachSsePayloadForAbort(this.i18n, lang);
         await sink.emit({
           type: 'result',
           subtype: 'error_during_execution',
@@ -1610,7 +1611,7 @@ export class CoachTurnOrchestrator {
           await failTurn(modelUnavailable());
           return;
         }
-        const { code, message } = coachSsePayloadForAbort(this.i18n);
+        const { code, message } = coachSsePayloadForAbort(this.i18n, lang);
         await sink.emit({
           type: 'result',
           subtype: 'error_during_execution',

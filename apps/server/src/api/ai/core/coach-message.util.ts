@@ -134,14 +134,14 @@ export function coachSsePayloadForModelUnavailable(args: {
 }
 
 /** 客户端断开 / 主动停止时的 SSE 载荷（总超时属于模型失败，走 coachSsePayloadForModelUnavailable）。 */
-export function coachSsePayloadForAbort(i18n: I18nService): {
+export function coachSsePayloadForAbort(i18n: I18nService, lang = 'en'): {
   code: 'aborted';
   message: string;
 } {
   return {
     code: 'aborted',
     message:
-      i18n.t('common.error.ai_coach_request_aborted') ??
+      i18n.t('common.error.ai_coach_request_aborted', { lang }) ??
       'The request was interrupted. Please retry.',
   };
 }

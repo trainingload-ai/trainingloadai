@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 917
+          "line": 918
         }
       ]
     },
@@ -1082,7 +1082,7 @@
         },
         {
           "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
-          "line": 477
+          "line": 478
         }
       ]
     },
@@ -1119,7 +1119,7 @@
         },
         {
           "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
-          "line": 479
+          "line": 480
         }
       ]
     },
@@ -1212,7 +1212,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/coach-branching.service.ts",
-          "line": 2157
+          "line": 2159
         }
       ]
     },
@@ -1305,7 +1305,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
-          "line": 515
+          "line": 516
         }
       ]
     },
