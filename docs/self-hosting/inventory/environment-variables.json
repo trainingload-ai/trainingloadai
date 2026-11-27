@@ -1928,7 +1928,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 238
+          "line": 257
         }
       ]
     },
@@ -6140,7 +6140,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 232
+          "line": 251
         }
       ]
     },
@@ -6157,7 +6157,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 234
+          "line": 253
         }
       ]
     },
