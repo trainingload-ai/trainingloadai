@@ -357,7 +357,7 @@ export class PlanStartAssessmentService {
       revision: preflight.revision,
       choice: 'ORIGINAL',
       rollingSettings: normalizedRolling,
-    });
+    }, { assessed: true });
     return {
       outcome: 'STARTED',
       alreadyActive: confirmed.alreadyActive,

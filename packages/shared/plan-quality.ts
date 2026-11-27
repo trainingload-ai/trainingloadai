@@ -313,6 +313,11 @@ export type PlanQualityWorkout = {
   durationNeedsPace?: boolean;
 };
 
+function planQualitySport(workout: PlanQualityWorkout) {
+  return workout.structureKind === "STRENGTH"
+    ? "STRENGTH"
+    : (workout.sportType ?? "UNKNOWN");
+}
 
 function addRanges(a: PlanNumberRange, b: PlanNumberRange): PlanNumberRange {
   return { min: a.min + b.min, max: a.max + b.max };
@@ -443,7 +448,7 @@ export function assessPlanQuality(
         w.weekIndex,
         { scope: "DAY", weekIndex: w.weekIndex, dayIndex: w.dayIndex },
       );
-    const sport = w.structureKind === "STRENGTH" ? "STRENGTH" : (w.sportType ?? "UNKNOWN");
+    const sport = planQualitySport(w);
     sportSet.add(sport);
     const week = weekly[w.weekIndex - 1];
     const duration = w.durationSeconds;
@@ -720,8 +725,9 @@ export function assessRollingPlanQuality(
     ),
   );
   const issues = reports.flatMap((r) => r.issues);
+  const sports = new Set(workouts.map(planQualitySport));
   for (const sport of contract?.requiredSports ?? [])
-    if (!workouts.some((w) => w.sportType === sport))
+    if (!sports.has(sport))
       issues.push({
         code: "MISSING_SPORT",
         severity: "ERROR",
