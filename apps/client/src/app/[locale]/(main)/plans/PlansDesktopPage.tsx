@@ -264,7 +264,7 @@ function PlanCard({
   const planHref = getPlanHref(plan);
 
   return (
-    <div className="group rounded-surface bg-neutral-100 p-3 transition-colors hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted">
+    <article className="group relative isolate rounded-surface bg-neutral-100 p-3 transition-colors hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-background text-muted-foreground transition-colors group-hover:text-foreground dark:bg-black/20">
           <StatusIcon status={plan.status} />
@@ -273,8 +273,15 @@ function PlanCard({
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex min-w-0 items-center gap-2">
-                <h3 className="min-w-0 truncate text-sm font-semibold">
-                  {plan.title}
+                <h3 className="min-w-0 text-sm font-semibold">
+                  <Link
+                    href={planHref}
+                    prefetch={false}
+                    data-tap-feedback="false"
+                    className="after:absolute after:inset-0 after:z-[1] after:rounded-surface focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
+                  >
+                    <span className="block truncate">{plan.title}</span>
+                  </Link>
                 </h3>
                 <span
                   className={`shrink-0 rounded-compact px-2 py-0.5 text-mobile-caption pc:text-[11px] ${statusClassName(
@@ -295,7 +302,7 @@ function PlanCard({
                   <Link
                     href={planHref}
                     aria-label={getActionLabel(t, plan)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-control text-muted-foreground outline-none transition-colors hover:bg-background hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:bg-background/80 dark:hover:bg-black/20"
+                    className="relative z-10 inline-flex h-8 w-8 items-center justify-center rounded-control text-muted-foreground outline-none transition-colors hover:bg-background hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:bg-background/80 dark:hover:bg-black/20"
                   >
                     <Eye className="h-4 w-4 shrink-0" aria-hidden />
                   </Link>
@@ -307,7 +314,7 @@ function PlanCard({
               {showStart ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="inline-flex rounded-control">
+                    <span className="relative z-10 inline-flex rounded-control">
                       <button
                         type="button"
                         className="inline-flex h-8 w-8 items-center justify-center rounded-control text-emerald-600 outline-none transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 dark:disabled:hover:text-emerald-400"
@@ -331,7 +338,7 @@ function PlanCard({
               {canDelete ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="inline-flex rounded-control">
+                    <span className="relative z-10 inline-flex rounded-control">
                       <button
                         type="button"
                         className="inline-flex h-8 w-8 items-center justify-center rounded-control text-muted-foreground outline-none transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:bg-destructive/15 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
@@ -396,7 +403,7 @@ function PlanCard({
           </div> : null}
 
           {plan.description?.trim() ? (
-            <div className="mt-3 text-sm leading-snug">
+            <div className="mt-3 text-sm leading-snug [&_:is(a,button,input,select,textarea)]:relative [&_:is(a,button,input,select,textarea)]:z-10">
               <PlanDescriptionRich markdown={plan.description} />
             </div>
           ) : (
@@ -406,7 +413,7 @@ function PlanCard({
           )}
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 

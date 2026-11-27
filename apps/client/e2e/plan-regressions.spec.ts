@@ -88,6 +88,54 @@ const emptyCompetitionImpact = {
   },
 };
 
+test("the plan card opens details and keeps its actions independent", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop plan cards");
+  await openCoachFixture(page, undefined, { navigate: false });
+  const title = "训练计划卡片";
+  const listPath = "/zh/plans";
+  const detailPath = `${listPath}/${planId}`;
+  await page.route("**/api/proxy/plans", (route) =>
+    route.fulfill({
+      json: {
+        data: {
+          plans: [{
+            id: planId,
+            title,
+            status: "DRAFT",
+            workoutCount: 18,
+            completedWorkoutCount: 0,
+            createdAt: "2026-10-05T00:00:00Z",
+          }],
+        },
+      },
+    }),
+  );
+  await page.route(`**/api/proxy/ai/plans/${planId}/start-draft`, (route) =>
+    route.fulfill({ status: 404, json: { message: "Fixture draft unavailable" } }),
+  );
+
+  await page.goto(listPath);
+  const card = page.getByRole("article").filter({ has: page.getByRole("heading", { name: title }) });
+  const titleLink = card.getByRole("link", { name: title, exact: true });
+  await expect(card.getByRole("link", { name: "查看计划详情" })).toHaveAttribute("href", detailPath);
+
+  await card.getByRole("button", { name: "开始计划" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  const deleteDialog = page.getByRole("alertdialog", { name: "删除计划" });
+  await card.getByRole("button", { name: "删除计划" }).click();
+  await deleteDialog.getByRole("button", { name: "取消" }).click();
+  await expect(deleteDialog).toBeHidden();
+  await expect(page).toHaveURL(new RegExp(`${listPath}$`));
+
+  await card.click({ position: { x: 20, y: 80 } });
+  await expect(page).toHaveURL(new RegExp(`${detailPath}$`));
+
+  await page.goto(listPath);
+  await titleLink.press("Enter");
+  await expect(page).toHaveURL(new RegExp(`${detailPath}$`));
+});
+
 test("active plan menu offers completion without deletion", async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop plan menu");
   await page.clock.setFixedTime(new Date("2026-10-09T03:00:00Z"));
