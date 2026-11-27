@@ -145,18 +145,23 @@ export class TodaySuggestionEngagementService {
         'code' in error &&
         error.code === 'P2025'
       ) {
-        throw new NotFoundException('TODAY_SUGGESTION_NOT_FOUND');
+        throw new NotFoundException({
+          message: 'TODAY_SUGGESTION_NOT_FOUND',
+          code: 'TODAY_SUGGESTION_SUPERSEDED',
+          reason: 'SUPERSEDED',
+        });
       }
       throw error;
     }
   }
 
   private async recordCurrentInteraction(args: InteractionArgs) {
+    const now = new Date();
     const suggestion = await this.prisma.aiTodaySuggestion.findFirst({
       where: {
         userId: args.userId,
         generationToken: args.generationToken,
-        validUntil: { gt: new Date() },
+        validUntil: { gt: now },
       },
       select: {
         date: true,
@@ -166,8 +171,40 @@ export class TodaySuggestionEngagementService {
         keyContext: true,
       },
     });
-    if (!suggestion) throw new NotFoundException('TODAY_SUGGESTION_NOT_FOUND');
-    const now = new Date();
+    if (!suggestion) {
+      const [expired, current] = await Promise.all([
+        this.prisma.aiTodaySuggestion.findFirst({
+          where: {
+            userId: args.userId,
+            generationToken: args.generationToken,
+          },
+          select: { validUntil: true },
+        }),
+        this.prisma.todaySuggestionEngagementState.findUnique({
+          where: { userId: args.userId },
+          select: { generationToken: true },
+        }),
+      ]);
+      const superseded =
+        Boolean(current?.generationToken) &&
+        current?.generationToken !== args.generationToken;
+      const reason = superseded
+        ? 'SUPERSEDED'
+        : expired
+          ? 'EXPIRED'
+          : 'NOT_FOUND';
+      const code =
+        reason === 'SUPERSEDED'
+          ? 'TODAY_SUGGESTION_SUPERSEDED'
+          : reason === 'EXPIRED'
+            ? 'TODAY_SUGGESTION_EXPIRED'
+            : 'TODAY_SUGGESTION_NOT_FOUND';
+      throw new NotFoundException({
+        message: 'TODAY_SUGGESTION_NOT_FOUND',
+        code,
+        reason,
+      });
+    }
     if (args.input.kind === 'PRESENTED') {
       const current =
         await this.prisma.todaySuggestionEngagementState.findUnique({

@@ -50,11 +50,17 @@ const ymd = (date: Date | null) => date?.toISOString().slice(0, 10) ?? null;
 export class PlanCalendarValidationService {
   constructor(private readonly calendar: PlanCalendarRepository) {}
   private reject(issues: Issue[]) {
-    if (issues.length)
+    if (issues.length) {
+      const summary = issues
+        .slice(0, 5)
+        .map((issue) => (issue.date ? `${issue.code}@${issue.date}` : issue.code))
+        .join(', ');
       throw new UnprocessableEntityException({
         code: 'PLAN_SCHEDULE_INVALID',
+        message: `PLAN_SCHEDULE_INVALID: ${summary}`,
         issues,
       });
+    }
   }
 
   async assertCandidate(input: Candidate, tx: PlanDb) {

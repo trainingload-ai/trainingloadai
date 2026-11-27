@@ -224,4 +224,43 @@ describe('TodaySuggestionEngagementService', () => {
     );
     expect(await service.feedbackForDate('user-1', '2026-10-29')).toBeNull();
   });
+
+  it('distinguishes superseded vs expired generation tokens on 404', async () => {
+    const { service, prisma } = harness();
+    prisma.aiTodaySuggestion.findFirst
+      .mockResolvedValueOnce(null as never)
+      .mockResolvedValueOnce({
+        validUntil: new Date('2026-10-28T16:00:00.000Z'),
+      } as never);
+    await expect(
+      service.recordInteraction({
+        userId: 'user-1',
+        generationToken: 'generation-1',
+        input: { kind: 'PRESENTED' },
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        message: 'TODAY_SUGGESTION_NOT_FOUND',
+        code: 'TODAY_SUGGESTION_EXPIRED',
+        reason: 'EXPIRED',
+      },
+    });
+
+    prisma.aiTodaySuggestion.findFirst
+      .mockResolvedValueOnce(null as never)
+      .mockResolvedValueOnce(null as never);
+    await expect(
+      service.recordInteraction({
+        userId: 'user-1',
+        generationToken: 'older-token',
+        input: { kind: 'PRESENTED' },
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        message: 'TODAY_SUGGESTION_NOT_FOUND',
+        code: 'TODAY_SUGGESTION_SUPERSEDED',
+        reason: 'SUPERSEDED',
+      },
+    });
+  });
 });
