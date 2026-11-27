@@ -1,0 +1,63 @@
+{
+  "garmin": {
+    "description": "Importiere Aktivitäten, Schlaf- und Erholungsdaten mit deinem persönlichen Garmin-Schlüssel.",
+    "createKey": "Schlüssel in Garmin Connect erstellen",
+    "apiKey": "Persönlicher API-Schlüssel"
+  },
+  "coros": {
+    "description": "Verbinde dein COROS-Konto, um Trainingsdaten abzurufen und bestätigte Einheiten, Pläne und Routen zu senden."
+  },
+  "manage": "Verbindungseinstellungen",
+  "reconcile": "Erneut prüfen",
+  "reconciling": "Ergebnis beim Anbieter wird geprüft",
+  "reconnect": "Schlüssel ersetzen oder erneut autorisieren",
+  "loading": "Laden…",
+  "working": "Wird verarbeitet…",
+  "region": "Kontoregion",
+  "timezone": "Zeitzone des Kontos",
+  "account": "Verbundenes Konto: {id}",
+  "lastSync": "Letzte abgeschlossene Synchronisierung: {date}",
+  "settings": {
+    "automatic": "Automatisch synchronisieren",
+    "activities": "Abgeschlossene Aktivitäten importieren",
+    "wellness": "Schlaf- und Erholungsdaten abrufen"
+  },
+  "save": "Einstellungen speichern",
+  "connect": "Garmin verbinden",
+  "authorize": "Mit COROS autorisieren",
+  "connected": "Verbunden",
+  "syncTitle": "Datensynchronisierung",
+  "startDate": "Startdatum",
+  "sync": "Jetzt synchronisieren",
+  "queued": "Zur Warteschlange hinzugefügt. Der Fortschritt wird unten angezeigt und gespeichert.",
+  "jobs": "Letzte Aufträge",
+  "states": {
+    "PREVIEW": "Bestätigung ausstehend",
+    "QUEUED": "In Warteschlange",
+    "RUNNING": "Laufen",
+    "WAITING": "Wartet auf Wiederholung",
+    "SUCCEEDED": "Abgeschlossen",
+    "FAILED": "Fehlgeschlagen",
+    "CANCELLED": "Abgebrochen"
+  },
+  "disconnect": "Verbindung trennen",
+  "confirmDisconnect": "Trennung bestätigen",
+  "cancel": "Abbrechen",
+  "fields": {
+    "date": "Datum",
+    "startDate": "Startdatum"
+  },
+  "tools": {
+    "activities": "Aktivitäten",
+    "activity": "Aktivitätsdetails",
+    "heartRate": "Herzfrequenz",
+    "getActivityDetail": "Aktivitätsdetails",
+    "queryActivityLapData": "Runden",
+    "querySleepOverview": "Schlaf",
+    "queryAvgHeartRate": "Durchschnittliche Herzfrequenz",
+    "queryRestingHeartRate": "Ruheherzfrequenz",
+    "queryFitnessAssessmentOverview": "Fitnessbewertung",
+    "queryWorkoutDetails": "Trainingsdetails",
+    "uploadRouteFile": "Route importieren"
+  }
+}

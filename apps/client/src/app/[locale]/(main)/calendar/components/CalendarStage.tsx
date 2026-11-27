@@ -24,7 +24,7 @@ import {
 } from "./use-calendar-week-scroll";
 import type { CompetitionEvent } from "@/api/competition-events";
 
-import "dayjs/locale/zh-cn";
+import { calendarMonthDayLabel, calendarWeekdayLabels } from "./calendar-weekday-labels";
 
 type CompetitionSegment = {
   event: CompetitionEvent;
@@ -211,13 +211,10 @@ export function CalendarStage({
     setHoveredDropDate(null);
   };
 
-  const weekdayLabels = React.useMemo(() => {
-    const dayjsLocale = locale.startsWith("zh") ? "zh-cn" : "en";
-    const start = startOfCalendarWeek(dayjs().locale(dayjsLocale), weekStartsOn);
-    return Array.from({ length: 7 }, (_, index) =>
-      start.add(index, "day").format(locale.startsWith("zh") ? "dd" : "ddd"),
-    );
-  }, [locale, weekStartsOn]);
+  const weekdayLabels = React.useMemo(
+    () => calendarWeekdayLabels(locale, weekStartsOn),
+    [locale, weekStartsOn],
+  );
 
   const visibleWeeks = displayMode === "week" ? [selectedWeek] : weeks;
   const firstVisibleWeek =
@@ -414,10 +411,10 @@ export function CalendarStage({
                     {segment.event.title}
                   </span>
                   <span className="shrink-0 text-mobile-unit pc:text-[10px] font-medium opacity-70">
-                    {dayjs(segment.event.startDate).format("MM/DD")}
+                    {calendarMonthDayLabel(segment.event.startDate, locale)}
                     {segment.event.endDate &&
                     segment.event.endDate !== segment.event.startDate
-                      ? ` – ${dayjs(segment.event.endDate).format("MM/DD")}`
+                      ? ` – ${calendarMonthDayLabel(segment.event.endDate, locale)}`
                       : ""}
                   </span>
                 </button>

@@ -1,0 +1,63 @@
+{
+  "garmin": {
+    "description": "Importa attività e dati su sonno e recupero con la tua chiave Garmin personale.",
+    "createKey": "Crea una chiave in Garmin Connect",
+    "apiKey": "Chiave API personale"
+  },
+  "coros": {
+    "description": "Collega il tuo account COROS per leggere i dati e inviare allenamenti, piani e percorsi confermati."
+  },
+  "manage": "Impostazioni di connessione",
+  "reconcile": "Verifica di nuovo",
+  "reconciling": "Verifica del risultato sul servizio",
+  "reconnect": "Sostituisci la chiave o autorizza di nuovo",
+  "loading": "Caricamento…",
+  "working": "Elaborazione…",
+  "region": "Regione dell'account",
+  "timezone": "Fuso orario dell'account",
+  "account": "Account collegato: {id}",
+  "lastSync": "Ultima sincronizzazione completata: {date}",
+  "settings": {
+    "automatic": "Sincronizza automaticamente",
+    "activities": "Importa attività completate",
+    "wellness": "Leggi i dati su sonno e recupero"
+  },
+  "save": "Salva impostazioni",
+  "connect": "Collega Garmin",
+  "authorize": "Autorizza con COROS",
+  "connected": "Collegato",
+  "syncTitle": "Sincronizzazione dei dati",
+  "startDate": "Data di inizio",
+  "sync": "Sincronizza ora",
+  "queued": "Aggiunto alla coda. L'avanzamento è salvato e mostrato qui sotto.",
+  "jobs": "Attività recenti",
+  "states": {
+    "PREVIEW": "In attesa di conferma",
+    "QUEUED": "In coda",
+    "RUNNING": "Corsa",
+    "WAITING": "In attesa di nuovo tentativo",
+    "SUCCEEDED": "Completato",
+    "FAILED": "Fallita",
+    "CANCELLED": "Annullata"
+  },
+  "disconnect": "Scollega",
+  "confirmDisconnect": "Conferma scollegamento",
+  "cancel": "Cancellare",
+  "fields": {
+    "date": "Data",
+    "startDate": "Data di inizio"
+  },
+  "tools": {
+    "activities": "Attività",
+    "activity": "Dettagli attività",
+    "heartRate": "Frequenza cardiaca",
+    "getActivityDetail": "Dettagli attività",
+    "queryActivityLapData": "Giri",
+    "querySleepOverview": "Sonno",
+    "queryAvgHeartRate": "Frequenza cardiaca media",
+    "queryRestingHeartRate": "Frequenza cardiaca a riposo",
+    "queryFitnessAssessmentOverview": "Valutazione fisica",
+    "queryWorkoutDetails": "Dettagli allenamento",
+    "uploadRouteFile": "Importa percorso"
+  }
+}

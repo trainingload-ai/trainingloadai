@@ -1,0 +1,62 @@
+{
+  "garmin": {
+    "description": "Importez vos activités et vos données de sommeil et de récupération avec votre clé Garmin personnelle.",
+    "createKey": "Créer une clé dans Garmin Connect",
+    "apiKey": "Clé API personnelle"
+  },
+  "coros": {
+    "description": "Connectez votre compte COROS pour consulter vos données et envoyer les séances, plans et itinéraires confirmés."
+  },
+  "manage": "Paramètres de connexion",
+  "reconcile": "Vérifier à nouveau",
+  "reconciling": "Vérification auprès du fournisseur",
+  "reconnect": "Remplacer la clé ou autoriser à nouveau",
+  "loading": "Chargement…",
+  "working": "Traitement en cours…",
+  "region": "Région du compte",
+  "timezone": "Fuseau horaire du compte",
+  "account": "Compte connecté : {id}",
+  "lastSync": "Dernière synchronisation terminée : {date}",
+  "settings": {
+    "automatic": "Synchroniser automatiquement",
+    "activities": "Importer les activités terminées",
+    "wellness": "Lire les données de sommeil et de récupération"
+  },
+  "save": "Enregistrer les paramètres",
+  "connect": "Connecter Garmin",
+  "authorize": "Autoriser via COROS",
+  "connected": "Connecté",
+  "syncTitle": "Synchronisation des données",
+  "startDate": "Date de début",
+  "sync": "Synchroniser maintenant",
+  "queued": "Ajout à la file. La progression est enregistrée et affichée ci-dessous.",
+  "jobs": "Tâches récentes",
+  "states": {
+    "PREVIEW": "En attente de confirmation",
+    "QUEUED": "En attente",
+    "RUNNING": "Course à pied",
+    "WAITING": "En attente d’une nouvelle tentative",
+    "SUCCEEDED": "Terminé",
+    "FAILED": "Échoué",
+    "CANCELLED": "Annulé"
+  },
+  "disconnect": "Déconnecter",
+  "confirmDisconnect": "Confirmer la déconnexion",
+  "cancel": "Annuler",
+  "fields": {
+    "startDate": "Date de début"
+  },
+  "tools": {
+    "activities": "Activités",
+    "activity": "Détails de l’activité",
+    "heartRate": "Fréquence cardiaque",
+    "getActivityDetail": "Détails de l’activité",
+    "queryActivityLapData": "Tours",
+    "querySleepOverview": "Sommeil",
+    "queryAvgHeartRate": "Fréquence cardiaque moyenne",
+    "queryRestingHeartRate": "Fréquence cardiaque au repos",
+    "queryFitnessAssessmentOverview": "Évaluation physique",
+    "queryWorkoutDetails": "Détails de l’entraînement",
+    "uploadRouteFile": "Importer un itinéraire"
+  }
+}
