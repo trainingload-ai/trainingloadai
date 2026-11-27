@@ -965,11 +965,52 @@ export class CoachRunStore {
     }
   }
 
-  async checkpoint(
+  checkpointStreamProgress(handle: CoachRunHandle) {
+    return this.persistCheckpoint(handle, undefined, undefined, undefined, {
+      requireLiveLease: true,
+    });
+  }
+
+  async checkpointMutationStart(
+    handle: CoachRunHandle,
+    activity: CoachActivityEvent,
+  ): Promise<CoachUiChunk[]> {
+    const { projector, chunks } = handle.projector.stageMutationStart(activity);
+    const staged = { ...handle, projector };
+    await this.persistCheckpoint(staged, undefined, undefined, undefined, {
+      requireLiveLease: true,
+      requireUncancelled: true,
+    });
+    handle.projector = projector;
+    handle.revision = staged.revision;
+    return chunks;
+  }
+
+  checkpointStreamTerminal(
+    handle: CoachRunHandle,
+    terminal: CoachRunStatus,
+    legacyMessage?: unknown,
+  ) {
+    return this.persistCheckpoint(handle, terminal, legacyMessage, undefined, {
+      requireLiveLease: true,
+    });
+  }
+
+  checkpoint(
     handle: CoachRunHandle,
     terminal?: CoachRunStatus,
     legacyMessage?: unknown,
     runResult?: { resultType: string; resultRef: unknown },
+  ) {
+    return this.persistCheckpoint(handle, terminal, legacyMessage, runResult);
+  }
+
+  private async persistCheckpoint(
+    handle: CoachRunHandle,
+    terminal?: CoachRunStatus,
+    legacyMessage?: unknown,
+    runResult?: { resultType: string; resultRef: unknown },
+    options?: { requireLiveLease?: boolean; requireUncancelled?: boolean },
   ) {
     const p = handle.projector;
     const planClarification =
@@ -991,22 +1032,31 @@ export class CoachRunStore {
         staleQuestionChunks = p.finish('cancelled');
       }
     }
-    const envelope = p.envelope(legacyMessage);
     await this.prisma.$transaction(async (tx) => {
+      const now = new Date();
+      const leaseCutoff = new Date(now.getTime() - LEASE_MS);
+      const requireUncancelled =
+        options?.requireUncancelled ||
+        terminal === 'completed' ||
+        terminal === 'awaiting_input' ||
+        terminal === 'interrupted';
+      const where = {
+        id: p.run.attemptId,
+        userId: handle.userId,
+        ownerId: this.ownerId,
+        revision: handle.revision,
+        status: 'running',
+        ...(requireUncancelled ? { cancelRequestedAt: null } : {}),
+        ...(options?.requireLiveLease
+          ? { heartbeatAt: { gte: leaseCutoff } }
+          : {}),
+      } satisfies Prisma.CoachRunAttemptWhereInput;
+      const envelope = p.envelope(legacyMessage);
       const updated = await tx.coachRunAttempt.updateMany({
-        where: {
-          id: p.run.attemptId,
-          userId: handle.userId,
-          ownerId: this.ownerId,
-          revision: handle.revision,
-          status: 'running',
-          ...(['completed', 'awaiting_input'].includes(terminal)
-            ? { cancelRequestedAt: null }
-            : {}),
-        },
+        where,
         data: {
           revision: { increment: 1 },
-          heartbeatAt: new Date(),
+          heartbeatAt: now,
           mutationStarted: p.mutationStarted,
           unresolvedTools: json([...p.unresolvedTools]),
           ...(terminal
@@ -1022,8 +1072,13 @@ export class CoachRunStore {
         const current = await tx.coachRunAttempt.findUnique({
           where: { id: p.run.attemptId },
         });
-        if (current?.status === 'running' && current.cancelRequestedAt)
+        if (
+          current?.status === 'running' &&
+          current.cancelRequestedAt &&
+          (!options?.requireLiveLease || current.heartbeatAt >= leaseCutoff)
+        ) {
           throw new CoachRunCancelledError('user_cancelled');
+        }
         throw new ConflictException('Coach execution ownership changed');
       }
       await tx.aiCoachMessage.update({
@@ -1427,18 +1482,38 @@ export class CoachRunStore {
     });
   }
 
-  async heartbeat(handle: CoachRunHandle) {
+  private async checkActive(handle: CoachRunHandle) {
     const row = await this.prisma.coachRunAttempt.findUnique({
       where: { id: handle.projector.run.attemptId },
+      select: {
+        status: true,
+        ownerId: true,
+        cancelRequestedAt: true,
+        heartbeatAt: true,
+      },
     });
     if (!row || row.status !== 'running' || row.ownerId !== this.ownerId)
       return 'ownership_lost';
     if (row.cancelRequestedAt) return 'user_cancelled';
-    await this.prisma.coachRunAttempt.updateMany({
-      where: { id: row.id, ownerId: this.ownerId, status: 'running' },
-      data: { heartbeatAt: new Date() },
-    });
+    if (row.heartbeatAt.getTime() < Date.now() - LEASE_MS)
+      return 'ownership_lost';
     return null;
+  }
+
+  async heartbeat(handle: CoachRunHandle) {
+    const now = new Date();
+    const updated = await this.prisma.coachRunAttempt.updateMany({
+      where: {
+        id: handle.projector.run.attemptId,
+        ownerId: this.ownerId,
+        status: 'running',
+        cancelRequestedAt: null,
+        heartbeatAt: { gte: new Date(now.getTime() - LEASE_MS) },
+      },
+      data: { heartbeatAt: now },
+    });
+    if (updated.count === 1) return null;
+    return (await this.checkActive(handle)) ?? 'ownership_lost';
   }
 
   recoverStale(userId: string, sid: string) {

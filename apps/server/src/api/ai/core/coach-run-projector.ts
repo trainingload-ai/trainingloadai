@@ -225,6 +225,25 @@ export class CoachRunProjector {
     }
   }
 
+  stageMutationStart(activity: CoachActivityEvent) {
+    // Copy the state an activity can change so a failed checkpoint cannot
+    // publish a tool start that never reached execution.
+    const projector = new CoachRunProjector({ run: this.run });
+    Object.assign(projector, this, {
+      run: { ...this.run },
+      message: { ...this.message, parts: [...this.message.parts] },
+      activities: new Map(this.activities),
+      toolNameByCallId: new Map(this.toolNameByCallId),
+      activityAudit: [...this.activityAudit],
+      deferredFailures: new Map(this.deferredFailures),
+      unresolvedTools: new Set(this.unresolvedTools),
+    });
+    return {
+      projector,
+      chunks: projector.consume({ type: 'activity', activity }),
+    };
+  }
+
   consume(
     event: CoachUiStreamYield,
     now = new Date().toISOString(),

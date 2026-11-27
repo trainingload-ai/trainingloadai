@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2468
+          "line": 2588
         }
       ]
     },
@@ -1078,7 +1078,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1187
+          "line": 1301
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
@@ -1099,7 +1099,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1189
+          "line": 1303
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
@@ -1157,7 +1157,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 296
+          "line": 309
         }
       ]
     },
@@ -1174,7 +1174,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 295
+          "line": 308
         }
       ]
     },
@@ -1305,7 +1305,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1225
+          "line": 1339
         }
       ]
     },
@@ -1398,7 +1398,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 161
+          "line": 162
         }
       ]
     },
@@ -1592,7 +1592,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 305
+          "line": 318
         }
       ]
     },
@@ -1609,7 +1609,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 304
+          "line": 317
         }
       ]
     },

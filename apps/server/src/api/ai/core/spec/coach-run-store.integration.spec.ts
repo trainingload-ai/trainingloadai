@@ -38,6 +38,7 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
   let database: ChildProcess;
   let prisma: PrismaClient;
   let store: CoachRunStore;
+  const queries: string[] = [];
   beforeAll(async () => {
     database = fork(resolve(__dirname, 'coach-run-postgres.mjs'), [], {
       execArgv: [],
@@ -52,9 +53,12 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
         reject(new Error(`Test database exited: ${code}`)),
       );
     });
-    prisma = new PrismaClient({
+    const testClient = new PrismaClient({
       datasourceUrl: `postgresql://postgres:postgres@${address}/postgres?connection_limit=1&sslmode=disable`,
+      log: [{ level: 'query', emit: 'event' }],
     });
+    testClient.$on('query', (event) => queries.push(event.query));
+    prisma = testClient;
     await prisma.$connect();
     store = new CoachRunStore(prisma as PrismaService);
   }, 30_000);
@@ -1020,6 +1024,96 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     expect(
       await prisma.coachRun.findUnique({ where: { id: runId } }),
     ).toMatchObject({ status: 'cancelled', activeAttemptId: null });
+  });
+
+  it.each(['cancelled', 'expired'] as const)(
+    'fences a write tool before it starts when the attempt is %s',
+    async (condition) => {
+      const { handle } = await store.begin(startArgs());
+      const { runId, attemptId } = handle.projector.run;
+      if (condition === 'cancelled') {
+        await store.cancel('athlete', runId, attemptId);
+      } else {
+        await prisma.coachRunAttempt.update({
+          where: { id: attemptId },
+          data: { heartbeatAt: new Date(Date.now() - 120_000) },
+        });
+        await expect(store.checkpointStreamProgress(handle)).rejects.toThrow(
+          'Coach execution ownership changed',
+        );
+      }
+
+      await expect(store.heartbeat(handle)).resolves.toBe(
+        condition === 'cancelled' ? 'user_cancelled' : 'ownership_lost',
+      );
+      await expect(store.checkpointMutationStart(handle, {
+          key: 'tool:write',
+          kind: 'tool',
+          status: 'running',
+          labelKey: 'tool',
+          toolCallId: 'write',
+          mutation: true,
+      })).rejects.toThrow(
+        condition === 'cancelled' ? 'user_cancelled' : 'Coach execution ownership changed',
+      );
+      expect(await prisma.coachRunAttempt.findUniqueOrThrow({
+        where: { id: attemptId },
+        select: { mutationStarted: true, unresolvedTools: true },
+      })).toEqual({ mutationStarted: false, unresolvedTools: [] });
+      expect(handle.projector.activities.size).toBe(0);
+      if (condition === 'expired') {
+        handle.projector.finish('interrupted');
+        await expect(store.checkpointStreamTerminal(handle, 'interrupted')).rejects.toThrow(
+          'Coach execution ownership changed',
+        );
+      }
+    },
+  );
+
+  it('keeps the live projection unchanged when saving a write-tool start rolls back', async () => {
+    const { handle } = await store.begin(startArgs());
+    const projector = handle.projector;
+    projector.consume({
+      type: 'stream_event',
+      event: { type: 'text_delta', text: 'rejected by test constraint' },
+    });
+    await prisma.$executeRaw`
+      ALTER TABLE t_ai_coach_message ADD CONSTRAINT test_rejected_checkpoint
+      CHECK (content <> 'rejected by test constraint')
+    `;
+    try {
+      await expect(store.checkpointMutationStart(handle, {
+        key: 'tool:rolled-back-write',
+        kind: 'tool',
+        status: 'running',
+        labelKey: 'tool',
+        toolCallId: 'rolled-back-write',
+        mutation: true,
+      })).rejects.toThrow('test_rejected_checkpoint');
+      expect(handle.projector).toBe(projector);
+      expect(projector.activities.size).toBe(0);
+      expect(projector.mutationStarted).toBe(false);
+      expect(projector.unresolvedTools.size).toBe(0);
+      expect(await prisma.coachRunAttempt.findUniqueOrThrow({
+        where: { id: projector.run.attemptId },
+        select: { mutationStarted: true, unresolvedTools: true },
+      })).toEqual({ mutationStarted: false, unresolvedTools: [] });
+    } finally {
+      await prisma.$executeRaw`
+        ALTER TABLE t_ai_coach_message DROP CONSTRAINT test_rejected_checkpoint
+      `;
+    }
+  });
+
+  it('uses a single attempt update for a heartbeat and one attempt and message update for progress', async () => {
+    const { handle } = await store.begin(startArgs());
+    queries.length = 0;
+    await expect(store.heartbeat(handle)).resolves.toBeNull();
+    expect(queries.filter((query) => /t_coach_run_attempt/i.test(query))).toHaveLength(1);
+
+    queries.length = 0;
+    await store.checkpointStreamProgress(handle);
+    expect(queries.filter((query) => /\bUPDATE\b/i.test(query))).toHaveLength(2);
   });
 
   it('rejects stale actions after a question is cancelled and finalizes the new text turn', async () => {

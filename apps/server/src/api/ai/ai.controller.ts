@@ -129,6 +129,7 @@ import {
 } from './coach-run-store.service';
 import {
   parseCoachRunCommand,
+  type CoachActivityEvent,
   type CoachRunStatus,
 } from '@shared/ai-coach-run-contract';
 import {
@@ -233,6 +234,18 @@ type CoachTurnSink = {
   onClose(listener: () => void): void;
   offClose(listener: () => void): void;
 };
+
+const COACH_RUN_HEARTBEAT_MS = 5_000;
+const COACH_RUN_CHECKPOINT_MS = 2_000;
+const COACH_IMMEDIATE_TOOL_CARDS = new Set([
+  'AskUserQuestion',
+  'MutationApplied',
+  'CoachDecisionApplied',
+]);
+
+function isCoachMutationCheckpoint(activity: CoachActivityEvent) {
+  return activity.mutation && !['queued', 'waiting'].includes(activity.status);
+}
 
 function createCoachTypedSseSink(res: Response): CoachTurnSink {
   return {
@@ -1049,16 +1062,58 @@ export class AiController {
     const rawSink = args.sink;
     let runHandle: CoachRunHandle | undefined;
     let runFinished = false;
-    const lateActivities: import('@shared/ai-coach-run-contract').CoachActivityEvent[] =
-      [];
+    let runOwnershipLost = false;
+    const lateActivities: CoachActivityEvent[] = [];
     const runClosingChunks: import('./core/coach-ui-message-stream').CoachUiChunk[] =
       [];
     let runQueue: Promise<void> = Promise.resolve();
-    let runTimer: ReturnType<typeof setInterval> | undefined;
+    let runHeartbeatTimer: ReturnType<typeof setInterval> | undefined;
+    let runCheckpointTimer: ReturnType<typeof setTimeout> | undefined;
     let runLastFlush = 0;
     let runDirty = false;
     let heartbeatBusy = false;
     const preRunEvents: CoachUiStreamYield[] = [];
+    const enqueueRunWrite = (persist: () => Promise<void>) => {
+      const write = runQueue.then(persist);
+      runQueue = write.catch(() => undefined);
+      return write;
+    };
+    const clearRunCheckpointTimer = () => {
+      if (runCheckpointTimer) clearTimeout(runCheckpointTimer);
+      runCheckpointTimer = undefined;
+    };
+    const flushRunCheckpoint = async (handle: CoachRunHandle) => {
+      clearRunCheckpointTimer();
+      await this.coachRuns.checkpointStreamProgress(handle);
+      runLastFlush = Date.now();
+      runDirty = false;
+    };
+    const abortForCheckpointError = (error: unknown) => {
+      if (error instanceof CoachRunCancelledError) abort.abort(error.message);
+      else if (error instanceof ConflictException) {
+        runOwnershipLost = true;
+        abort.abort('ownership_lost');
+      } else abort.abort('checkpoint_failed');
+    };
+    const scheduleRunCheckpoint = (handle: CoachRunHandle) => {
+      if (runCheckpointTimer) return;
+      runCheckpointTimer = setTimeout(() => {
+        runCheckpointTimer = undefined;
+        void enqueueRunWrite(async () => {
+          if (
+            runFinished ||
+            !runDirty ||
+            runOwnershipLost
+          )
+            return;
+          if (Date.now() - runLastFlush < COACH_RUN_CHECKPOINT_MS) {
+            scheduleRunCheckpoint(handle);
+            return;
+          }
+          await flushRunCheckpoint(handle);
+        }).catch(abortForCheckpointError);
+      }, Math.max(0, runLastFlush + COACH_RUN_CHECKPOINT_MS - Date.now()));
+    };
     const sink: CoachTurnSink = !v2
       ? rawSink
       : {
@@ -1081,66 +1136,125 @@ export class AiController {
               preRunEvents.push(event);
               return;
             }
-            if (runFinished) return;
-            const write = runQueue.then(async () => {
+            if (runFinished && event.type !== 'activity') return;
+            return enqueueRunWrite(async () => {
+              const projector = runHandle.projector;
+              if (event.type === 'activity') {
+                const activity = event.activity;
+                const stillRunning = projector.run.status === 'running';
+                if (activity.status === 'running' || activity.status === 'queued') {
+                  if (!stillRunning) abort.abort('ownership_lost');
+                  abort.signal.throwIfAborted();
+                }
+                // Completed tools may settle after the client or lease is gone.
+                if (runFinished) {
+                  await this.coachRuns.recordLateOutcome(runHandle, activity);
+                  return;
+                }
+                if (!stillRunning || runOwnershipLost) {
+                  lateActivities.push(activity);
+                  return;
+                }
+              }
               if (runFinished) return;
-              const chunks = runHandle.projector.consume(event);
+              if (runOwnershipLost) return;
+              if (
+                event.type === 'activity' &&
+                event.activity.mutation &&
+                event.activity.status === 'running'
+              ) {
+                clearRunCheckpointTimer();
+                const chunks = await this.coachRuns.checkpointMutationStart(
+                  runHandle,
+                  event.activity,
+                );
+                runLastFlush = Date.now();
+                runDirty = false;
+                for (const chunk of chunks)
+                  await rawSink.emit({ type: 'ui_chunk', chunk });
+                return;
+              }
+              const chunks = projector.consume(event);
               if (
                 !chunks.length &&
                 event.type !== 'user' &&
                 event.type !== 'assistant'
               )
                 return;
-              const isText =
-                event.type === 'stream_event' &&
-                event.event.type === 'text_delta';
               runDirty = true;
-              if (!isText || Date.now() - runLastFlush >= 500) {
-                await this.coachRuns.checkpoint(runHandle);
-                runLastFlush = Date.now();
-                runDirty = false;
-              }
+              if (
+                (event.type === 'activity' &&
+                  isCoachMutationCheckpoint(event.activity)) ||
+                (event.type === 'assistant' &&
+                  event.message.content.some((block) =>
+                    block.type === 'tool_use' && COACH_IMMEDIATE_TOOL_CARDS.has(block.name),
+                  )) ||
+                event.type === 'result' ||
+                Date.now() - runLastFlush >= COACH_RUN_CHECKPOINT_MS
+              ) {
+                await flushRunCheckpoint(runHandle).catch((error: unknown) => {
+                  abortForCheckpointError(error);
+                  throw error;
+                });
+              } else scheduleRunCheckpoint(runHandle);
               for (const chunk of chunks)
                 await rawSink.emit({ type: 'ui_chunk', chunk });
             });
-            runQueue = write.catch(() => undefined);
-            return write;
           },
         };
-    const finishRun = async (
-      status: CoachRunStatus,
-      legacyMessage?: unknown,
-    ) => {
-      await runQueue;
-      if (!runHandle || runFinished) return;
-      if (status === 'completed' || status === 'awaiting_input') {
-        const cancellation = await this.coachRuns.heartbeat(runHandle);
-        if (cancellation) {
-          abort.abort(cancellation);
-          throw new Error(cancellation);
-        }
-      }
-      let chunks = runHandle.projector.finish(status);
-      let terminalCancellation: CoachRunCancelledError | undefined;
-      try {
-        await this.coachRuns.checkpoint(runHandle, status, legacyMessage);
-      } catch (error) {
-        if (!(error instanceof CoachRunCancelledError)) throw error;
-        abort.abort(error.message);
-        if (!error.terminalChunks) throw error;
-        chunks = error.terminalChunks;
-        terminalCancellation = error;
-      }
-      runFinished = true;
+    const persistLateActivities = async (handle: CoachRunHandle) => {
       for (const activity of lateActivities.splice(0))
-        await this.coachRuns.recordLateOutcome(runHandle, activity);
-      for (const chunk of chunks) {
-        if (chunk.type === 'finish' || chunk.type === 'finish-step')
-          runClosingChunks.push(chunk);
-        else await rawSink.emit({ type: 'ui_chunk', chunk });
-      }
-      if (terminalCancellation) throw terminalCancellation;
+        await this.coachRuns.recordLateOutcome(handle, activity);
     };
+    const finishRun = (status: CoachRunStatus, legacyMessage?: unknown) =>
+      enqueueRunWrite(async () => {
+        if (!runHandle || runFinished) return;
+        clearRunCheckpointTimer();
+        let chunks = runHandle.projector.finish(status);
+        let terminalCancellation: CoachRunCancelledError | undefined;
+        try {
+          try {
+            await this.coachRuns.checkpointStreamTerminal(runHandle, status, legacyMessage);
+          } catch (error) {
+            if (
+              !(error instanceof CoachRunCancelledError) ||
+              status !== 'interrupted' ||
+              error.message !== 'user_cancelled'
+            ) throw error;
+            chunks = runHandle.projector.finish('cancelled');
+            await this.coachRuns.checkpointStreamTerminal(runHandle, 'cancelled');
+          }
+        } catch (error) {
+          if (error instanceof ConflictException) {
+            abortForCheckpointError(error);
+            await this.coachRuns.recoverStaleOperation(
+              userId,
+              runHandle.operationId,
+            );
+            runFinished = true;
+            await persistLateActivities(runHandle);
+            runClosingChunks.push({
+              type: 'error',
+              errorText: coachSsePayloadForAbort(this.i18n).message,
+            });
+            if (status === 'completed' || status === 'awaiting_input') throw error;
+            return;
+          }
+          if (!(error instanceof CoachRunCancelledError)) throw error;
+          abort.abort(error.message);
+          if (!error.terminalChunks) throw error;
+          chunks = error.terminalChunks;
+          terminalCancellation = error;
+        }
+        runFinished = true;
+        await persistLateActivities(runHandle);
+        for (const chunk of chunks) {
+          if (chunk.type === 'finish' || chunk.type === 'finish-step')
+            runClosingChunks.push(chunk);
+          else await rawSink.emit({ type: 'ui_chunk', chunk });
+        }
+        if (terminalCancellation) throw terminalCancellation;
+      });
     const reqId = randomUUID();
     const startedAt = Date.now();
     let coachUserMessage = normalizeCoachUserMessage(body?.message);
@@ -1614,7 +1728,7 @@ export class AiController {
         runHandle = begun.handle;
         userTurnPersisted = true;
         const chunks = runHandle.projector.start();
-        await this.coachRuns.checkpoint(runHandle);
+        await flushRunCheckpoint(runHandle);
         for (const chunk of chunks)
           await rawSink.emit({ type: 'ui_chunk', chunk });
         for (const event of preRunEvents.splice(0)) await sink.emit(event);
@@ -1627,28 +1741,26 @@ export class AiController {
               content: [{ type: 'text', text: prompt }],
             },
           });
-        runTimer = setInterval(() => {
+        runHeartbeatTimer = setInterval(() => {
           if (heartbeatBusy || runFinished) return;
           heartbeatBusy = true;
           void (async () => {
             const reason = await this.coachRuns.heartbeat(runHandle);
-            if (reason) abort.abort(reason);
-            if (runDirty && !runFinished) {
-              const write = runQueue.then(async () => {
-                if (!runFinished && runDirty) {
-                  await this.coachRuns.checkpoint(runHandle);
-                  runDirty = false;
-                }
-              });
-              runQueue = write.catch(() => undefined);
-              await write;
+            if (
+              reason &&
+              !runFinished &&
+              (reason !== 'ownership_lost' ||
+                runHandle.projector.run.status === 'running')
+            ) {
+              if (reason === 'ownership_lost') runOwnershipLost = true;
+              abort.abort(reason);
             }
           })()
             .catch(() => abort.abort('checkpoint_failed'))
             .finally(() => {
               heartbeatBusy = false;
             });
-        }, 500);
+        }, COACH_RUN_HEARTBEAT_MS);
       } else if (skipUserAppend) {
         await this.aiService.assertCoachSkipAppendMatchesPrompt({
           session,
@@ -1787,22 +1899,29 @@ export class AiController {
           ? (event) =>
               this.coachRuns.recordPlanValidationRejection(runHandle, event)
           : undefined,
-        onActivity: v2
+        onActivity: runHandle
           ? async (activity) => {
-              const reason = await this.coachRuns.heartbeat(runHandle);
-              if (reason) abort.abort(reason);
-              if (runFinished || reason === 'ownership_lost') {
-                await this.coachRuns.recordLateOutcome(runHandle, activity);
-                return;
+              try {
+                await sink.emit({ type: 'activity', activity });
+              } catch (error) {
+                if (
+                  !(error instanceof CoachRunCancelledError) &&
+                  !(error instanceof ConflictException)
+                ) throw error;
+                abortForCheckpointError(error);
+                if (
+                  isCoachMutationCheckpoint(activity) &&
+                  activity.status !== 'running'
+                ) {
+                  await enqueueRunWrite(async () => {
+                    if (runFinished)
+                      await this.coachRuns.recordLateOutcome(runHandle, activity);
+                    else lateActivities.push(activity);
+                  });
+                  return;
+                }
+                throw error;
               }
-              if (runHandle.projector.run.status !== 'running') {
-                lateActivities.push(activity);
-                return;
-              }
-              // Completed tool receipts must be recorded even after a disconnect.
-              if (activity.status === 'running' || activity.status === 'queued')
-                abort.signal.throwIfAborted();
-              await sink.emit({ type: 'activity', activity });
             }
           : undefined,
       });
@@ -2384,7 +2503,8 @@ export class AiController {
       // Failed or interrupted platform attempts still retain their actual cost.
       if (platformFunded && (modelUsageEvents.length || lastUsage))
         await persistCoachUsage().catch(() => undefined);
-      if (runTimer) clearInterval(runTimer);
+      if (runHeartbeatTimer) clearInterval(runHeartbeatTimer);
+      clearRunCheckpointTimer();
       if (v2) {
         try {
           if (runHandle && !runFinished) {
