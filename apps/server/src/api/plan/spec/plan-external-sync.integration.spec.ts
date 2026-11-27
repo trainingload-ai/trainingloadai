@@ -25,6 +25,11 @@ import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.re
 import { PlanLinkMatcherService } from '../application/plan-link-matcher.service';
 import { ActivityReadService } from '../../activity/activity-read.service';
 import { lockFitnessUser } from '@/prisma/fitness-write-lock';
+import {
+  acquireHashtextAdvisoryXactLock,
+  HASHTEXT_ADVISORY_XACT_LOCK_SQL,
+  REGISTERED_ADVISORY_XACT_LOCK_SQL,
+} from '@/prisma/hashtext-advisory-lock';
 import { PlanWriteSupport } from '../application/plan-write.support';
 import { PlanActivityLinkService } from '../application/plan-activity-link.service';
 import { ActivityService } from '../../activity/activity.service';
@@ -1756,6 +1761,70 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
   const nativeIt = process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN
     ? it
     : it.skip;
+
+  nativeIt('serializes a legacy athlete writer with an updated plan writer and releases both keys at rollback', async () => {
+    const held = Promise.withResolvers<void>();
+    const rollback = Promise.withResolvers<void>();
+    const legacy = prisma.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(HASHTEXT_ADVISORY_XACT_LOCK_SQL, 'user');
+      held.resolve();
+      await rollback.promise;
+      throw new Error('legacy rollback');
+    });
+    const stopped = expect(legacy).rejects.toThrow('legacy rollback');
+    await Promise.race([held.promise, stopped]);
+    let finished = false;
+    const sameAthlete = create().then((workout) => {
+      finished = true;
+      return workout;
+    });
+    try {
+      const independent = await service.createIndependentWorkout({
+        userId: 'other',
+        scheduledDate: new Date('2026-07-06'),
+        sportType: 'RUN',
+        text: 'Cross-athlete write',
+        blocks: [],
+      });
+      expect(independent.userId).toBe('other');
+      expect(finished).toBe(false);
+    } finally {
+      rollback.resolve();
+      await stopped;
+    }
+    expect((await sameAthlete).userId).toBe('user');
+
+    const bothHeld = Promise.withResolvers<void>();
+    const release = Promise.withResolvers<void>();
+    const compatible = prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, 'user');
+      bothHeld.resolve();
+      await release.promise;
+    });
+    await Promise.race([bothHeld.promise, compatible]);
+    try {
+      const registered = REGISTERED_ADVISORY_XACT_LOCK_SQL.replace(
+        'pg_advisory_xact_lock', 'pg_try_advisory_xact_lock',
+      );
+      const old = HASHTEXT_ADVISORY_XACT_LOCK_SQL.replace(
+        'pg_advisory_xact_lock', 'pg_try_advisory_xact_lock',
+      );
+      const observed = await prisma.$transaction(async (tx) => ({
+        legacy: await tx.$queryRawUnsafe<Array<{ lock: string }>>(old, 'user'),
+        registered: await tx.$queryRawUnsafe<Array<{ lock: string }>>(registered, 'user'),
+        independent: await tx.$queryRawUnsafe<Array<{ lock: string }>>(registered, 'other'),
+      }));
+      expect(observed).toEqual({
+        legacy: [{ lock: 'false' }],
+        registered: [{ lock: 'false' }],
+        independent: [{ lock: 'true' }],
+      });
+    } finally {
+      release.resolve();
+      await compatible;
+    }
+  });
+
 
   nativeIt('waits on the fitness lock before grabbing the activity row while matching', async () => {
     const { activity, independent } = await independentScenario();
