@@ -903,6 +903,10 @@
       "types": "./src/importing/activity-data-migration-backup.ts",
       "default": "./src/importing/activity-data-migration-backup.ts"
     },
+    "./importing/raw-association-recovery": {
+      "types": "./src/importing/raw-association-recovery.ts",
+      "default": "./src/importing/raw-association-recovery.ts"
+    },
     "./integrations/external-provider/provider-rate-limit": {
       "types": "./src/integrations/external-provider/provider-rate-limit.ts",
       "default": "./src/integrations/external-provider/provider-rate-limit.ts"
