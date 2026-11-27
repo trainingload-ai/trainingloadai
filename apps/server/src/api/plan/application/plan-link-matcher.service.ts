@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import { UserService } from '@/api/user/user.service';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { ActivityReadService } from '../../activity/activity-read.service';
@@ -140,6 +141,7 @@ export class PlanLinkMatcherService {
     const persisted = await withSerializableRetry(() =>
       this.prisma.$transaction(async (tx) => {
         await acquireHashtextAdvisoryXactLock(tx, activity.userId);
+        await lockFitnessUser(tx, activity.userId);
         if (!(await this.links.lockLinkTargets(activityId, null, tx)))
           return false;
         await this.links.putMatchState(
@@ -211,6 +213,7 @@ export class PlanLinkMatcherService {
           // Share the user lock with plan writers and read the committed state
           // after waiting for it. The day and row locks protect matching writes.
           await acquireHashtextAdvisoryXactLock(tx, userId);
+          await lockFitnessUser(tx, userId);
           await this.links.lockMatchDay(userId, day, tx);
           const activityWhere: Prisma.ActivityWhereInput = {
             userId,

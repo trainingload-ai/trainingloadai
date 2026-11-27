@@ -236,6 +236,14 @@ describe('Public imported strength and replay writes / PostgreSQL', () => {
       },
     ]);
     expect(await strength.get(result.activityHashId, userId)).toEqual(result);
+    const actualSet = result.exercises[0].sets[0];
+    await prisma.activityStrengthSet.update({
+      where: { id: actualSet.id },
+      data: { plannedSetGroupId: null },
+    });
+    await strength.attachImportedPlanSetGroups(result.activityHashId, userId);
+    await strength.attachImportedPlanSetGroups(result.activityHashId, userId);
+    expect(await strength.get(result.activityHashId, userId)).toEqual(result);
     expect(
       await prisma.activitySource.count({
         where: { activityId: result.activityId },

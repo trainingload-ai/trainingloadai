@@ -23,6 +23,7 @@ import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
 import { PlanLinkMatcherService } from '../application/plan-link-matcher.service';
 import { ActivityReadService } from '../../activity/activity-read.service';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import { PlanWriteSupport } from '../application/plan-write.support';
 import { PlanActivityLinkService } from '../application/plan-activity-link.service';
 import { ActivityService } from '../../activity/activity.service';
@@ -1689,6 +1690,38 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     ? it
     : it.skip;
 
+  nativeIt('waits on the fitness lock before grabbing the activity row while matching', async () => {
+    const { activity, independent } = await independentScenario();
+    const locked = Promise.withResolvers<void>();
+    const release = Promise.withResolvers<void>();
+    const importWrite = prisma.$transaction(async (tx) => {
+      await lockFitnessUser(tx, 'user');
+      locked.resolve();
+      await release.promise;
+      await tx.$queryRaw`SELECT id FROM t_activity WHERE id = ${activity.id} FOR UPDATE NOWAIT`;
+    });
+    await Promise.race([locked.promise, importWrite]);
+    const matching = matcher().tryAutoLinkForActivity(activity.id);
+    try {
+      let waiting = false;
+      for (let attempt = 0; attempt < 50 && !waiting; attempt++) {
+        const [lock] = await prisma.$queryRaw<Array<{ waiting: boolean }>>`
+          SELECT EXISTS(SELECT 1 FROM pg_locks
+            WHERE locktype = 'advisory' AND NOT granted) AS waiting
+        `;
+        waiting = lock.waiting;
+        if (!waiting) await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      expect(waiting).toBe(true);
+    } finally {
+      release.resolve();
+      await Promise.all([importWrite, matching]);
+    }
+    expect(await prisma.planWorkoutActivityLink.findFirst({
+      where: { activityId: activity.id, unlinkedAt: null },
+    })).toMatchObject({ planWorkoutId: independent.id, source: 'AUTO_MATCH' });
+  });
+
   nativeIt('commits an unrelated serializable workout write while matching another athlete', async () => {
     const { activity, independent } = await independentScenario();
     const edited = await service.createIndependentWorkout({
@@ -1912,30 +1945,13 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       });
       const workouts = new PlanWorkoutRepository(prisma as never);
       const find = workouts.findMany.bind(workouts);
-      let inspected!: () => void;
-      let resume!: () => void;
-      const snapshot = new Promise<void>((done) => (inspected = done));
-      const released = new Promise<void>((done) => (resume = done));
-      jest
-        .spyOn(workouts, 'findMany')
-        .mockImplementationOnce(async (args, tx) => {
-          const rows = await find(args, tx);
-          inspected();
-          await released;
-          return rows;
-        });
-      const matching = matcher(workouts).tryAutoLinkForActivity(f.activity.id);
-      let importedId: string;
-      try {
-        await Promise.race([
-          snapshot,
-          matching.then(() => {
-            throw new Error('Matching did not reach the workout snapshot');
-          }),
-        ]);
-        // The normal plan writer takes the same user lock. Insert outside that
-        // path to exercise the matcher against a row added after its snapshot.
-        const imported = await prisma.planWorkout.create({
+      let importedId: string | undefined;
+      jest.spyOn(workouts, 'findMany').mockImplementationOnce(async (args, tx) => {
+        const rows = await find(args, tx);
+        if (!tx) throw new Error('Missing matching transaction');
+        // The fitness lock now blocks independent same-athlete writes. Insert in
+        // this transaction to probe the locked candidate set after its first read.
+        const imported = await tx.planWorkout.create({
           data: {
             userId: 'user',
             dayOffset: 0,
@@ -1949,10 +1965,10 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
           },
         });
         importedId = imported.id;
-      } finally {
-        resume();
-        await matching;
-      }
+        return rows;
+      });
+      await matcher(workouts).tryAutoLinkForActivity(f.activity.id);
+      if (!importedId) throw new Error('No workout was inserted after the first read');
       await matcher().onWorkoutsChanged(
         new PlanWorkoutsChangedEvent('user', 'external_import', [importedId]),
       );

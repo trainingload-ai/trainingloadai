@@ -10,6 +10,7 @@ import {
   SportType,
 } from '@prisma/client';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import { PrismaService } from '@/prisma/prisma.service';
 import { BusinessException } from '@/filters/business-exception/business.exception';
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
@@ -392,6 +393,45 @@ export class StrengthActivityService {
     tx?: Prisma.TransactionClient,
   ): Promise<ActivityStrengthResponse> {
     return this.replaceInternal(activityHashId, userId, input, true, tx);
+  }
+
+  /** Restore planned set associations after an imported activity is auto-matched. */
+  async attachImportedPlanSetGroups(activityHashId: string, userId: string) {
+    await this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
+      await lockFitnessUser(tx, userId);
+      const activity = await this.loadOwnedActivity(activityHashId, userId, tx);
+      const planned = await this.loadPlanned(activity.id, tx);
+      if (!planned) return;
+
+      const assigned = this.attachPlannedSetGroupIds(
+        activity.strengthExercises,
+        planned.structure,
+      );
+      const changes = assigned.flatMap((exercise, index) =>
+        exercise.sets.flatMap((set, setIndex) =>
+          set.plannedSetGroupId &&
+          !activity.strengthExercises[index].sets[setIndex].plannedSetGroupId
+            ? [{ id: set.id, plannedSetGroupId: set.plannedSetGroupId }]
+            : [],
+        ),
+      );
+      await this.assertPlannedSetGroupsOwned(
+        userId,
+        changes.map((set) => set.plannedSetGroupId),
+        tx,
+      );
+      for (const change of changes) {
+        await tx.activityStrengthSet.updateMany({
+          where: { id: change.id, plannedSetGroupId: null },
+          data: { plannedSetGroupId: change.plannedSetGroupId },
+        });
+      }
+      if (changes.length)
+        await tx.activityAiReview.deleteMany({
+          where: { activityId: activity.id, userId },
+        });
+    });
   }
 
   /**
@@ -822,10 +862,17 @@ export class StrengthActivityService {
   /**
    * 覆盖写入时，按动作编码/名称把实际组对上预定 setGroup。
    */
-  private attachPlannedSetGroupIds(
-    exercises: ReplaceActivityStrengthDto['exercises'],
-    planned?: StrengthWorkoutIrV1,
-  ): ReplaceActivityStrengthDto['exercises'] {
+  private attachPlannedSetGroupIds<
+    Exercise extends {
+      name: string;
+      exerciseCode?: string | null;
+      sets: Array<{
+        setIndex: number;
+        setType: 'WORK' | 'WARMUP';
+        plannedSetGroupId?: string | null;
+      }>;
+    },
+  >(exercises: Exercise[], planned?: StrengthWorkoutIrV1): Exercise[] {
     if (!planned) return exercises;
     return exercises.map((exercise, exerciseIndex) => {
       const normalizedName = exercise.name.trim().toLowerCase();
