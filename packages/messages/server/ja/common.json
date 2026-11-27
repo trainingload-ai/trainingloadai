@@ -151,7 +151,9 @@
     "rollingPlan": {
       "titleMonthApplied": "継続プラン：月の方針を更新しました",
       "titleWeekApplied": "継続プラン：トレーニング予定を更新しました",
-      "titleBlocked": "継続プランの確認が必要です"
+      "titleBlocked": "継続プランの確認が必要です",
+      "titleFailed": "継続トレーニング：スケジュール更新に失敗しました",
+      "bodyFailed": "複数回試行しましたが自動スケジュール生成を完了できませんでした。プランを開いて条件を確認するか、手動で生成してください。"
     },
     "reviewDigest": {
       "report": {

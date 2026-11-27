@@ -338,7 +338,9 @@
     "rollingPlan": {
       "titleMonthApplied": "지속 훈련 계획: 월간 방향이 업데이트되었습니다",
       "titleWeekApplied": "지속 훈련 계획: 훈련 일정이 업데이트되었습니다",
-      "titleBlocked": "지속 훈련 계획을 확인해 주세요"
+      "titleBlocked": "지속 훈련 계획을 확인해 주세요",
+      "titleFailed": "지속 훈련 계획: 일정 업데이트 실패",
+      "bodyFailed": "여러 번 시도했으나 자동 일정 생성을 완료하지 못했습니다. 계획을 열어 제약 조건을 확인하거나 수동으로 생성해 주세요."
     },
     "reviewDigest": {
       "report": {

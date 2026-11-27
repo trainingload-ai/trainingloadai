@@ -697,7 +697,12 @@ export class RollingPlanAutomationService {
       { timeout: 60000 },
     );
   }
-  async fail(job: RollingPlanJob, error: unknown, resumeAt?: Date) {
+  async fail(
+    job: RollingPlanJob,
+    error: unknown,
+    resumeAt?: Date,
+    options?: { discardCandidate?: boolean },
+  ) {
     const reason = error instanceof Error ? error.message : String(error);
     const needsInput = reason === 'ROLLING_CANDIDATE_NEEDS_INPUT';
     const stale =
@@ -711,11 +716,33 @@ export class RollingPlanAutomationService {
           : job.attempts >= MAX_ATTEMPTS
             ? 'FAILED'
             : 'RETRY';
+    const shouldDiscardCandidate =
+      !resumeAt &&
+      (options?.discardCandidate === true || state === 'FAILED');
+    let nextReceipt: Prisma.InputJsonValue | undefined;
+    if (shouldDiscardCandidate) {
+      const current = await this.prisma.rollingPlanJob.findFirst({
+        where: { id: job.id, state: 'RUNNING', claimToken: job.claimToken },
+        select: { receipt: true },
+      });
+      const record =
+        current?.receipt &&
+        typeof current.receipt === 'object' &&
+        !Array.isArray(current.receipt)
+          ? { ...(current.receipt as Record<string, unknown>) }
+          : undefined;
+      if (record && ('candidate' in record || 'runId' in record)) {
+        delete record.candidate;
+        delete record.runId;
+        nextReceipt = json(record);
+      }
+    }
     const updated = await this.prisma.rollingPlanJob.updateMany({
       where: { id: job.id, state: 'RUNNING', claimToken: job.claimToken },
       data: {
         state,
         ...(resumeAt ? { attempts: { decrement: 1 } } : {}),
+        ...(nextReceipt !== undefined ? { receipt: nextReceipt } : {}),
         lastError: [reason, (error as { reason?: string })?.reason]
           .filter(Boolean)
           .join(': ')

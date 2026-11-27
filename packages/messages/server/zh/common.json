@@ -338,7 +338,9 @@
     "rollingPlan": {
       "titleMonthApplied": "持续训练计划：月度方向已更新",
       "titleWeekApplied": "持续训练计划：训练安排已更新",
-      "titleBlocked": "持续训练计划需要处理"
+      "titleBlocked": "持续训练计划需要处理",
+      "titleFailed": "持续训练计划：自动排课失败",
+      "bodyFailed": "系统在多次尝试后仍未能自动生成本周期课表，请打开训练计划检查排课约束或手动生成。"
     },
     "reviewDigest": {
       "report": {

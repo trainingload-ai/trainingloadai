@@ -338,7 +338,9 @@
     "rollingPlan": {
       "titleMonthApplied": "Fortlaufender Trainingsplan: Monatsziel aktualisiert",
       "titleWeekApplied": "Fortlaufender Trainingsplan: Einheiten aktualisiert",
-      "titleBlocked": "Fortlaufender Trainingsplan erfordert Aufmerksamkeit"
+      "titleBlocked": "Fortlaufender Trainingsplan erfordert Aufmerksamkeit",
+      "titleFailed": "Kontinuierliches Training: Planaktualisierung fehlgeschlagen",
+      "bodyFailed": "Die automatische Planerstellung konnte nach mehreren Versuchen nicht abgeschlossen werden. Öffne deinen Plan, um die Vorgaben zu prüfen oder manuell zu generieren."
     },
     "reviewDigest": {
       "report": {

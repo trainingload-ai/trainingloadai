@@ -338,7 +338,9 @@
     "rollingPlan": {
       "titleMonthApplied": "Plan continu : orientation mensuelle mise à jour",
       "titleWeekApplied": "Plan continu : séances mises à jour",
-      "titleBlocked": "Le plan continu nécessite votre attention"
+      "titleBlocked": "Le plan continu nécessite votre attention",
+      "titleFailed": "Entraînement continu : échec de mise à jour du programme",
+      "bodyFailed": "La génération automatique du programme n’a pas pu aboutir après plusieurs tentatives. Ouvrez votre plan pour vérifier vos contraintes ou générer manuellement."
     },
     "reviewDigest": {
       "report": {
