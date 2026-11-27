@@ -7417,6 +7417,19 @@
     "targetDate": "新日期",
     "review": "查看影响",
     "working": "处理中…",
+    "coachUnavailable": "教练暂时无法参与这次调课。",
+    "manualMoveHint": "你仍可按所选日期确定调课。",
+    "scheduleBlocked": "这次调课与计划的排期规则冲突。",
+    "changeDate": "选择其他日期",
+    "scheduleIssue": {
+      "restDay": "所选日期是计划中的固定休息日。",
+      "unavailableDate": "所选日期已标记为不可训练。",
+      "unavailableDay": "计划未安排在所选星期训练。",
+      "dailyBudget": "调课后会超出当天的训练时长上限。",
+      "unknownDuration": "暂时无法核实当天的训练总时长。",
+      "weeklyBudget": "调课后会超出当周的训练天数上限。",
+      "outsidePlan": "所选日期超出计划范围。"
+    },
     "previewFailed": "无法加载调课预览，请重试。",
     "coachFailed": "无法打开教练对话，请重试。",
     "closeFailed": "无法关闭本次调整，请重试。",
@@ -7440,7 +7453,7 @@
     "unknown": "未知",
     "expired": "预览已过期。你可以重新发起调课，或继续教练对话。",
     "cancel": "取消",
-    "moveOnly": "确认调整",
+    "moveOnly": "确定调课",
     "askCoach": "请教练一起调整"
   },
   "RollingPlan": {

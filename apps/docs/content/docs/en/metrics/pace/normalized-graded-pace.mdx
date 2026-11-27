@@ -45,16 +45,15 @@ On hilly terrain, average pace can look very slow. NGP helps reveal that your ac
 -   **Example**: a mountainous trail run averages 10:00/km.
 -   **NGP**: could be much faster, better reflecting the metabolic stress your body felt.
 
-### 2. Basis for rTSS
-Trainingload.ai uses NGP to compute **rTSS (Running Training Stress Score)**. The formula structure is similar to cycling TSS:
+### 2. Running pace load estimate
 
-When NGP and FTPa are displayed as min/km pace, convert them to speed first. In speed terms:
+Trainingload.ai uses GOVSS for running pace load when body weight is available. Without weight, it uses an rTSS-style estimate from observed pace and the running threshold effective at the activity start. Threshold pace (TP) takes priority, followed by critical speed (CS). The estimate requires neither measured power nor heart rate.
 
 ```text
-IF = Speed_NGP / Speed_FTPa
+100 × observed hours × (normalized speed / threshold speed)²
 ```
 
-Using NGP helps keep running load comparable across different terrains.
+Grade adjustment applies when grade data covers at least 80% of observed pace time. Segments without grade are treated as flat. If there is no complete 30-second window, the estimate uses mean speed over the observed time. Time without pace observations does not contribute.
 
 ## Metric comparison
 
@@ -67,7 +66,6 @@ Using NGP helps keep running load comparable across different terrains.
 ## How Trainingload.ai uses NGP
 
 -   **Use as a terrain-aware intensity reference**: NGP is often more informative than average pace on hilly or variable runs.
--   **Compute running load**: NGP is a key input for rTSS because it reflects terrain and intensity variation.
 -   **Use with VI**: compute **VI (Variability Index) = NGP / Avg GAP**.
     -   If VI is close to 1.0, the effort was steady.
     -   If VI > 1.05, it likely reflects intervals or very complex terrain.

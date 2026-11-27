@@ -23,6 +23,7 @@ import {
 import { calendarProposalStyle } from "./calendar-proposal-appearance";
 import { calendarDropDayClass, type CalendarDropAppearance } from "./calendar-workout-drop";
 import { CalendarWorkoutPreview, calendarWorkoutStatusClassName } from "./CalendarWorkoutPreview";
+import { calendarPlanRangeClass, calendarPlanStartClass } from "./calendar-plan-day-appearance";
 
 export type CalendarWorkoutPresentation = {
   caption?: string;
@@ -40,6 +41,7 @@ type CalendarDayButtonProps = {
   competitionLaneCount?: number;
   tss?: number;
   inPlanRange?: boolean;
+  planStartLabel?: string;
   onSelect: () => void;
   onSelectWorkout?: (workout: PlanWorkout) => void;
   workoutDrag?: {
@@ -68,6 +70,7 @@ export function CalendarDayButton({
   competitionLaneCount = 0,
   tss,
   inPlanRange = false,
+  planStartLabel,
   onSelect,
   onSelectWorkout,
   workoutDrag,
@@ -166,31 +169,34 @@ export function CalendarDayButton({
       tabIndex={onCreate ? -1 : undefined}
       className={cn(
         "group relative flex min-h-[100px] min-w-0 flex-col items-center rounded-md p-1 text-center transition-[background-color,box-shadow] duration-200 ease-out md:min-h-[112px] md:items-stretch md:px-2.5 md:py-2 md:text-left",
-        "touch-manipulation select-none ring-inset",
+        "touch-manipulation select-none text-foreground ring-inset",
         isSelected
-          ? "bg-card text-foreground ring-2 ring-ring"
-          : !isCurrentMonth
-            ? "bg-secondary text-foreground hover:bg-secondary/80"
-            : "bg-card text-foreground hover:bg-secondary",
-        !isSelected &&
-          inPlanRange &&
-          "bg-[repeating-linear-gradient(-45deg,hsl(var(--emerald-500)/0.14)_0_1.5px,transparent_1.5px_10px)] dark:bg-[repeating-linear-gradient(-45deg,hsl(var(--emerald-400)/0.16)_0_1.5px,transparent_1.5px_10px)]",
+          ? "bg-card ring-2 ring-ring"
+          : isCurrentMonth
+            ? "bg-card hover:bg-secondary"
+            : "bg-secondary hover:bg-secondary/80 dark:bg-background dark:hover:bg-background/80",
+        !isCurrentMonth && !isSelected && workoutDrag?.appearance !== "target" &&
+          "outline-1 -outline-offset-1 outline-border/70",
+        planStartLabel && calendarPlanStartClass,
+        inPlanRange && !planStartLabel && calendarPlanRangeClass,
         dropClass,
       )}
     >
       <button
         type="button"
         aria-label={dateKey}
+        aria-current={isToday ? "date" : undefined}
+        aria-description={planStartLabel}
         aria-pressed={isSelected}
         onClick={onSelect}
         className="absolute inset-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       />
       <div className="pointer-events-none relative z-10 flex w-full items-start justify-between gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <span
             className={cn(
               "text-[15px] font-semibold tracking-tight transition-colors duration-200 ease-out md:text-[15px]",
-              isCurrentMonth || isSelected
+              isCurrentMonth || isSelected || isToday || planStartLabel
                 ? "text-foreground"
                 : "text-muted-foreground",
             )}
@@ -199,13 +205,15 @@ export function CalendarDayButton({
           </span>
           {isToday ? (
             <span
-              className={cn(
-                "h-1.5 w-1.5 rounded-full",
-                isSelected
-                  ? "bg-[hsl(var(--emerald-500))]"
-                  : "bg-foreground/50",
-              )}
+              aria-hidden="true"
+              data-calendar-marker="today"
+              className="size-1.5 shrink-0 rounded-full bg-ring"
             />
+          ) : null}
+          {planStartLabel ? (
+            <span aria-hidden="true" className="truncate text-mobile-unit font-medium text-muted-foreground pc:text-[10px]">
+              {planStartLabel}
+            </span>
           ) : null}
         </div>
         {tss !== undefined ? (

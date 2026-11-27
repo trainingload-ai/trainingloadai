@@ -1393,6 +1393,7 @@ export class PlanStartService {
       previewId?: string;
       rollingSettings?: RollingStartSettings;
     },
+    options?: { assessed?: boolean },
   ) {
     if (!isCalendarDate(input.startDate))
       throw new UnprocessableEntityException('Invalid calendar start date');
@@ -1415,6 +1416,82 @@ export class PlanStartService {
           code: 'PLAN_START_REASSESSMENT_REQUIRED',
           message: 'The draft changed. Review the latest calendar before starting.',
         });
+      }
+
+      if (input.choice === 'ORIGINAL' && !options?.assessed) {
+        const { startDate } = input;
+        const metadata = source.generationMetadata as Record<string, unknown> | null;
+        const calendarTimeZone =
+          this.constraints(metadata?.scheduleConstraints)?.calendarTimeZone ??
+          (await this.users.getPreferredTimezone(userId, tx)) ??
+          'UTC';
+        this.assertFutureStart(startDate, calendarTimeZone);
+        await this.plans.activatePlan(
+          userId, planId, startDate, { source: 'manual', action: 'direct_start_saved_draft' },
+          { tx, confirmedSavedDraft: true, calendarTimeZone },
+        );
+        const rolling = source.planningMode === 'ROLLING'
+          ? await this.rolling.publishStart({
+              userId,
+              planId,
+              decisionId: `direct-start:${randomUUID()}`,
+              startDate,
+              settings: this.defaultRollingStartSettings(source, startDate),
+              evidenceRevision: currentRevision,
+              receipt: { executionSource: 'USER_CONFIRMATION', readbackVerified: true },
+            }, tx)
+          : undefined;
+        await this.invalidate(userId, planId, tx);
+        const readback = await this.storage.readback(planId, tx);
+        const scheduledWorkouts = new Map(readback.workouts.map((workout) => [workout.id, workout]));
+        if (
+          readback.status !== 'ACTIVE' ||
+          readback.startDate?.toISOString().slice(0, 10) !== startDate ||
+          readback.activationTimezone !== calendarTimeZone ||
+          scheduledWorkouts.size !== source.workouts.length
+        ) fail('Saved draft start readback failed');
+        const identityMap = source.workouts.map((workout) => {
+          const scheduled = scheduledWorkouts.get(workout.id);
+          const scheduledDate = addCalendarDays(startDate, workout.dayOffset);
+          if (
+            !scheduled || scheduled.revision !== workout.revision ||
+            scheduled.scheduledDate?.toISOString().slice(0, 10) !== scheduledDate
+          ) fail('Saved draft workout dates changed during activation');
+          return {
+            sourceWorkoutId: workout.id,
+            candidateKey: null,
+            workoutId: workout.id,
+            scheduledDate,
+            revision: scheduled.revision,
+          };
+        });
+        return {
+          plan: normalizePlanRow(readback, {
+            workoutService: this.workout,
+            workoutDefinitionService: this.definitions,
+            workoutPersistence: this.persistence,
+          })!,
+          started: true,
+          alreadyActive: false,
+          receipt: {
+            ...(rolling ? { rolling } : {}),
+            planId,
+            createdPlanId: null,
+            changedWorkoutCount: 0,
+            addedWorkoutCount: 0,
+            deletedWorkoutCount: 0,
+            preservedWorkoutCount: identityMap.length,
+            workoutIds: readback.workouts.map(({ id }) => id),
+            startDate,
+            calendarTimeZone,
+            identityMap,
+            readbackVerified: true,
+            changed: false,
+            executionSource: 'USER_CONFIRMATION' as const,
+            qualityContract: metadata?.qualityContract ?? null,
+            scheduleConstraints: metadata?.scheduleConstraints ?? null,
+          },
+        };
       }
 
       if (input.choice === 'SUGGESTED') {

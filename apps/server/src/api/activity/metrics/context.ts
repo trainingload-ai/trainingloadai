@@ -15,7 +15,7 @@ import type {
 import type { PowerSeriesAggregates } from '@/analyze/power/power-engine.service';
 import type { CogganResult } from '@/algorithm/coggan';
 import type { BikeScoreResult } from '@/algorithm/BikeScore';
-import type { GOVSSResult } from '@/algorithm/GOVSS';
+import type { RunningPaceLoadResult } from '@/algorithm/GOVSS';
 import type { MeasuredPowerEvidence } from '@/training-load/measured-power-evidence';
 import type { SensorData } from '@/analyze/analyze.interface';
 import type { UserProfileResponse } from '@/api/user/user.interface';
@@ -280,7 +280,7 @@ export type MetricsContext = {
     powerBikeScore?: BikeScoreResult;
     paceBase?: PaceBaseMetrics;
     paceZoneDistribution?: UserZoneValue[];
-    paceGovss?: GOVSSResult;
+    paceGovss?: RunningPaceLoadResult;
     swimScore?: {
       algorithmVersion: number;
       swimScore: number;

@@ -202,6 +202,7 @@ export function useCalendarViewModel(
   currentMonth: Dayjs,
   requestedRange?: { start: Dayjs; end: Dayjs } | null,
   summaryMonth = currentMonth,
+  selectBufferedDates = false,
 ) {
   const t = useTranslations("CalendarExperience");
   const locale = useLocale();
@@ -220,17 +221,20 @@ export function useCalendarViewModel(
   const [selectedDate, setSelectedDate] = React.useState<Dayjs>(() => dayjs());
 
   React.useEffect(() => {
-    const visible = weeks.flat();
-    const inVisibleRange = visible.some((date) =>
-      date.isSame(selectedDate, "day"),
-    );
+    const inVisibleRange =
+      selectBufferedDates && requestedRange
+        ? !selectedDate.isBefore(requestedRange.start, "day") &&
+          !selectedDate.isAfter(requestedRange.end, "day")
+        : weeks.some((week) =>
+            week.some((date) => date.isSame(selectedDate, "day")),
+          );
     if (inVisibleRange) return;
 
     const fallback = currentMonth.isSame(dayjs(), "month")
       ? dayjs()
       : currentMonth.startOf("month");
     setSelectedDate(fallback);
-  }, [currentMonth, selectedDate, weeks]);
+  }, [currentMonth, requestedRange, selectBufferedDates, selectedDate, weeks]);
 
   const { data: activeCompetitionEvents = [] } = useQuery({
     queryKey: queryKeys.competitionEvents.range(fetchStart, fetchEnd),
@@ -314,17 +318,17 @@ export function useCalendarViewModel(
     competitionEventsByDate[selectedDateKey] || [];
   const selectedTss = tssByDate[selectedDateKey] || 0;
 
-  const selectedWeek = React.useMemo(() => {
-    return (
-      weeks.find((week) =>
-        week.some((date) => date.isSame(selectedDate, "day")),
-      ) ||
-      weeks[0] ||
-      []
-    );
-  }, [selectedDate, weeks]);
-
-  const selectedWeekStart = selectedWeek[0] || startOfCalendarWeek(selectedDate, weekStartsOn);
+  const selectedWeekStart = React.useMemo(
+    () => startOfCalendarWeek(selectedDate, weekStartsOn),
+    [selectedDate, weekStartsOn],
+  );
+  const selectedWeek = React.useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, index) =>
+        selectedWeekStart.add(index, "day"),
+      ),
+    [selectedWeekStart],
+  );
   const selectedWeekStats = React.useMemo(
     () =>
       buildWeekStats({

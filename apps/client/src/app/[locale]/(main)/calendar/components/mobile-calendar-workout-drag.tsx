@@ -19,7 +19,7 @@ import type { PlanWorkout } from "@/api/plans";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { calendarToday } from "./calendar-move-model";
-import { calendarDropAppearance, calendarDropDayClass, calendarDropGridClass, canDropCalendarWorkout } from "./calendar-workout-drop";
+import { calendarDropAppearance, calendarDropDayClass, canDropCalendarWorkout } from "./calendar-workout-drop";
 
 export function MobileCalendarWorkoutDrag({
   onMove,
@@ -67,7 +67,7 @@ export function MobileCalendarDateGrid({ children }: { children: ReactNode }) {
     <div
       data-calendar-date-grid
       data-calendar-dragging={active ? "" : undefined}
-      className={cn("relative grid grid-cols-7 gap-px border-t border-border/70 pt-2 transition-colors", active && calendarDropGridClass)}
+      className="relative grid grid-cols-7 gap-px border-t border-border/70 pt-2"
     >
       {children}
     </div>

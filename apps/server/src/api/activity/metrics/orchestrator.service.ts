@@ -141,7 +141,6 @@ function inferSkippedReason(key: MetricsTaskKey, ctx: MetricsContext): string {
       if (!(paceContext?.CS > 0 || paceContext?.TP > 0)) {
         return 'pace_threshold_unavailable';
       }
-      if (!(paceContext?.userWeight > 0)) return 'user_weight_unavailable';
       if (!(ctx.cache.sampleSec && ctx.cache.sampleSec > 0)) {
         return 'sample_interval_unavailable';
       }

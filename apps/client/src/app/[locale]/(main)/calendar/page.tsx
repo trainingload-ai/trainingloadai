@@ -89,8 +89,14 @@ export default function PMCPage() {
   const pcViewport = usePcViewport();
   const isPc = pcViewport === true;
   const isMobileLayout = pcViewport === false;
-  const { currentMonth, setCurrentMonth, displayedMonth: scrolledMonth, scroll, resetScrollAnchor } =
-    useCalendarScrollPosition(() => dayjs());
+  const {
+    currentMonth,
+    setCurrentMonth,
+    displayedMonth: scrolledMonth,
+    showMonth,
+    scroll,
+    resetScrollAnchor,
+  } = useCalendarScrollPosition(() => dayjs());
   const displayedMonth = isPc ? scrolledMonth : currentMonth;
   const [displayMode, setDisplayMode] = React.useState<"week" | "month">(
     "month",
@@ -146,7 +152,12 @@ export default function PMCPage() {
     competitionEventsByDate,
     tssByDate,
     range,
-  } = useCalendarViewModel(currentMonth, requestedCalendarRange, displayedMonth);
+  } = useCalendarViewModel(
+    currentMonth,
+    requestedCalendarRange,
+    displayedMonth,
+    isPc,
+  );
   const mobileAgendaDays = React.useMemo(() => {
     const start = mobileAgendaWindow.start.startOf("day");
     const end = mobileAgendaWindow.end.endOf("day");
@@ -193,11 +204,15 @@ export default function PMCPage() {
     (nextDate: dayjs.Dayjs) => {
       setSelectedCompetitionEvent(null);
       setSelectedDate(nextDate);
-      if (!nextDate.isSame(currentMonth, "month")) {
-        setCurrentMonth(nextDate.startOf("month"));
+      if (isPc) {
+        showMonth(nextDate);
+      } else {
+        setCurrentMonth((month) =>
+          nextDate.isSame(month, "month") ? month : nextDate.startOf("month"),
+        );
       }
     },
-    [currentMonth, setSelectedDate],
+    [isPc, setCurrentMonth, setSelectedDate, showMonth],
   );
 
   const openWorkoutDetails = React.useCallback(
@@ -246,9 +261,9 @@ export default function PMCPage() {
   const navigateMonth = React.useCallback(
     (direction: 1 | -1, fromMonth?: string) => {
       setNavigationDirection(direction);
-      resetScrollAnchor();
       const sourceMonth = fromMonth ? dayjs(`${fromMonth}-01`) : displayedMonth;
       const targetMonth = sourceMonth.add(direction, "month").startOf("month");
+      resetScrollAnchor(targetMonth);
       setCurrentMonth(targetMonth);
       const targetDate = targetMonth.date(
         Math.min(selectedDate.date(), targetMonth.daysInMonth()),
@@ -286,7 +301,7 @@ export default function PMCPage() {
     const today = dayjs();
     setNavigationDirection(1);
     setCurrentMonth(today.startOf("month"));
-    resetScrollAnchor();
+    resetScrollAnchor(today);
     setSelectedDate(today);
     setMonthOpen(false);
   }, [resetScrollAnchor, setCurrentMonth, setSelectedDate]);
@@ -352,7 +367,7 @@ export default function PMCPage() {
               currentMonthDate: displayedMonth.toDate(),
               onMonthChange: (date) => {
                 const nextMonth = dayjs(date).startOf("month");
-                resetScrollAnchor();
+                resetScrollAnchor(nextMonth);
                 setCurrentMonth(nextMonth);
                 setSelectedDate(
                   nextMonth.date(Math.min(selectedDate.date(), nextMonth.daysInMonth())),

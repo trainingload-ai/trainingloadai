@@ -99,7 +99,7 @@ function scrollBehavior(smooth: boolean): ScrollBehavior {
 
 export function useCalendarWeekScroll(
   anchor: string | undefined,
-  initialMonth: string,
+  visibleMonth: string,
   navigate: NavigateCalendar | undefined,
   syncWeek: SyncCalendarWeek | undefined,
   onVisibleMonth: ((month: string) => void) | undefined,
@@ -108,7 +108,7 @@ export function useCalendarWeekScroll(
   const viewport = useRef<HTMLDivElement>(null);
   const previousAnchor = useRef<string>(undefined);
   const [visibleWeek, setVisibleWeek] = useState(anchor);
-  const settledMonth = useRef(initialMonth);
+  const settledMonth = useRef(visibleMonth);
   const position = useRef<WeekPosition | null>(null);
   const rebasing = useRef<string | null>(null);
   const programmaticTop = useRef<number | null>(null);
@@ -145,6 +145,11 @@ export function useCalendarWeekScroll(
     syncWeekRef.current = syncWeek;
     onVisibleMonthRef.current = onVisibleMonth;
   }, [navigate, onVisibleMonth, syncWeek]);
+
+  useLayoutEffect(() => {
+    // Date selection can change the displayed month without moving the viewport.
+    settledMonth.current = visibleMonth;
+  }, [visibleMonth]);
 
   useLayoutEffect(() => {
     const element = viewport.current;

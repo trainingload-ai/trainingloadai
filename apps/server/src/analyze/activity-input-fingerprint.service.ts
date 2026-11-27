@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { RUNNING_PACE_ESTIMATE_VERSION } from '@/algorithm/GOVSS';
 import { fitnessTimelineFingerprint } from '@/algorithm/fitness-timeline';
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -187,6 +188,11 @@ export class ActivityInputFingerprintService {
       }),
       PACE: fitnessTimelineFingerprint({
         common,
+        ...(activity.sportType === 'RUN' &&
+        activity.sportDefinitionCode !== 'WALKING' &&
+        activity.sportDefinitionCode !== 'HIKING'
+          ? { runningPaceEstimateVersion: RUNNING_PACE_ESTIMATE_VERSION }
+          : {}),
         distance: activity.distance,
         ascent: activity.ascent,
         descent: activity.descent,
