@@ -32,7 +32,7 @@
       "references": [
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 430
+          "line": 433
         }
       ]
     },
@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2451
+          "line": 2468
         }
       ]
     },
@@ -3700,7 +3700,7 @@
         },
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 436
+          "line": 439
         }
       ]
     },
@@ -5073,7 +5073,7 @@
       "references": [
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 435
+          "line": 438
         }
       ]
     },
