@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { registerHiddenActivityLinkCleaner } from '@/sync/activity-source-lifecycle.service';
 import { PlanWriteSupport } from './plan-write.support';
 import type { LinkPlanWorkoutActivityDto } from '../dto/link-plan-workout-activity.dto';
 import type { ReplaceActivityPlanLinkDto } from '../dto/replace-activity-plan-link.dto';
@@ -7,12 +8,18 @@ import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import type { PlanDb } from '../persistence/plan-db';
 
 @Injectable()
-export class PlanActivityLinkService {
+export class PlanActivityLinkService implements OnModuleInit {
   constructor(
     private readonly write: PlanWriteSupport,
     private readonly links: PlanActivityLinkRepository,
     private readonly workouts: PlanWorkoutRepository,
   ) {}
+
+  onModuleInit() {
+    registerHiddenActivityLinkCleaner((activityIds, tx, unlinkedAt) =>
+      this.unlinkHiddenActivitiesInTransaction(activityIds, tx, unlinkedAt),
+    );
+  }
 
   async findAutoCompletedWorkoutIdsForActivity(
     activityId: number,

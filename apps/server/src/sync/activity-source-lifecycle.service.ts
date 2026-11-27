@@ -1,8 +1,26 @@
 import { inheritedImportAuthorization } from '@/importing/import-publication-authorization';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
-import { Injectable, Optional } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { PlanActivityLinkService } from '@/api/plan/application/plan-activity-link.service';
+
+export type HiddenActivityLinkCleaner = (
+  activityIds: number[],
+  tx: Prisma.TransactionClient,
+  unlinkedAt: Date,
+) => Promise<void>;
+
+let hiddenActivityLinkCleaner: HiddenActivityLinkCleaner | null = null;
+
+/**
+ * Registers the plan-domain handler that unlinks active plan workout links
+ * when activities are soft-hidden (`state = 0`). Using a callback hook avoids a
+ * circular module dependency between SyncModule -> PlanModule -> UserModule.
+ */
+export function registerHiddenActivityLinkCleaner(
+  cleaner: HiddenActivityLinkCleaner | null,
+): void {
+  hiddenActivityLinkCleaner = cleaner;
+}
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { ImportingJobService } from '@/importing/importing-job.service';
 import {
@@ -144,7 +162,6 @@ export class ActivitySourceLifecycleService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly importJobs: ImportingJobService,
-    @Optional() private readonly planActivityLinks?: PlanActivityLinkService,
   ) {}
 
   async deactivateThirdPartyActivity(id: number) {
@@ -613,8 +630,8 @@ export class ActivitySourceLifecycleService {
                 },
               })
             : { count: 0 };
-          if (hiddenActivityIds.length > 0 && this.planActivityLinks) {
-            await this.planActivityLinks.unlinkHiddenActivitiesInTransaction(
+          if (hiddenActivityIds.length > 0 && hiddenActivityLinkCleaner) {
+            await hiddenActivityLinkCleaner(
               hiddenActivityIds,
               tx,
               processingUpdatedAt,
