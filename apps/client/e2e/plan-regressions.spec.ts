@@ -397,6 +397,18 @@ test("plan detail uses shared progress and confirmed workout actions", async ({
 }, info) => {
   const { mutations, lastMutation } = await openPlan(page);
   const desktop = (page.viewportSize()?.width ?? 0) >= 1024;
+  const confirmation = page.getByRole("alertdialog");
+  const cancel = confirmation.getByRole("button", { name: "取消", exact: true });
+  const expectSpacedActions = async () => {
+    const buttons = confirmation.locator('[data-slot="alert-dialog-footer"]').getByRole("button");
+    await expect(buttons).toHaveCount(2);
+    const [first, second] = await buttons.evaluateAll((elements) =>
+      elements.map((element) => element.getBoundingClientRect().toJSON()),
+    );
+    expect(first.height).toBe(desktop ? 32 : 44);
+    expect(second.height).toBe(first.height);
+    expect(desktop ? second.left - first.right : first.top - second.bottom).toBeGreaterThanOrEqual(8);
+  };
   if (desktop) {
     await expect(page.getByRole("group", { name: "周期进度" })).toBeVisible();
     await expect(page.getByText("绿色叠层 = 当周实际负荷")).toHaveCount(0);
@@ -432,16 +444,22 @@ test("plan detail uses shared progress and confirmed workout actions", async ({
   });
   await page.getByRole("button", { name: "更多操作", exact: true }).click();
   await page.getByRole("menuitem", { name: "推迟", exact: true }).click();
-  await expect(page.getByRole("alertdialog")).toBeVisible();
+  await expect(confirmation).toBeVisible();
+  await expectSpacedActions();
+  await expect(cancel).toBeFocused();
   expect(mutations()).toBe(0);
   await page.screenshot({
     path: info.outputPath("confirm-postpone.png"),
     fullPage: true,
   });
-  await page
-    .getByRole("alertdialog")
-    .getByRole("button", { name: "取消", exact: true })
-    .click();
+  await cancel.click();
+  await page.getByRole("button", { name: "更多操作", exact: true }).click();
+  await page.getByRole("menuitem", { name: "跳过", exact: true }).click();
+  await expectSpacedActions();
+  await expect(cancel).toBeFocused();
+  await cancel.click();
+  await expect(confirmation).toHaveCount(0);
+
   await page.getByRole("button", { name: "更多操作", exact: true }).click();
   await page.getByRole("menuitem", { name: "删除", exact: true }).click();
   await expect(page.getByRole("alertdialog")).toContainText(
