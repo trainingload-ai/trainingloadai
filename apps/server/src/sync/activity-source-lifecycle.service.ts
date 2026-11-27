@@ -2,6 +2,7 @@ import { inheritedImportAuthorization } from '@/importing/import-publication-aut
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { ImportingJobService } from '@/importing/importing-job.service';
 import {
   ImportSourceKind,
@@ -225,6 +226,10 @@ export class ActivitySourceLifecycleService {
     return withSerializableRetry(() =>
       this.prisma.$transaction(
         async (tx) => {
+          await acquireHashtextAdvisoryXactLock(
+            tx,
+            `activity-source:${args.userId}`,
+          );
           await args.assertAuthorization?.(tx);
           const thirdPartyActivities = await tx.thirdPartyActivity.findMany({
             where: thirdPartyWhere,
@@ -727,7 +732,7 @@ export class ActivitySourceLifecycleService {
             requeuedActivities: rebuildItems.length,
           };
         },
-        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+        { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
       ),
     );
   }

@@ -166,7 +166,9 @@ export class PlanScheduledActivationWorker {
         return true;
       },
       {
-        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        // Single-user serialization is enforced by acquireHashtextAdvisoryXactLock(tx, userId);
+        // ReadCommitted avoids cross-user PostgreSQL SSI 40001 conflicts.
+        isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
         timeout: 30_000,
       },
     );

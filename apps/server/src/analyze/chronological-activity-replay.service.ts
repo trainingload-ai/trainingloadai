@@ -51,7 +51,10 @@ import { localDateKeyToUtcDate } from '@/training-load/activity-local-date';
 const REPLAY_TRANSACTION_OPTIONS = {
   maxWait: 10_000,
   timeout: 30_000,
-  isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+  // Single-user serialization is enforced by lockFitnessUser + lease ownership +
+  // evidenceRevision checks; ReadCommitted avoids cross-user PostgreSQL SSI 40001
+  // page-lock false positives when unrelated athletes replay concurrently.
+  isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
 } as const;
 
 export class FitnessEvidenceRevisionDriftError extends Error {
@@ -1206,6 +1209,7 @@ export class ChronologicalActivityReplayService {
         request.suppressAthleteStateReassessment === true,
     });
     await this.withReplayTransaction(async (tx) => {
+      await lockFitnessUser(tx, request.userId);
       await this.leases.assertOwned(tx, lease);
       const latest = await this.readSourceCheckpoint(tx, request);
       const latestPending = pendingPmcWindow(latest);
