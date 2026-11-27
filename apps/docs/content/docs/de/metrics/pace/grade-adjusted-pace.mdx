@@ -51,8 +51,9 @@ In steilem Gelände ist die reine Laufpace kaum aussagekräftig.
 -   **GAP**: zeigt 5:00/km an.
 -   **Einordnung**: Die metabolische Intensität war deutlich höher, als es die Rohpace vermuten lässt.
 
-### 2. Grundlage für rTSS
-Trainingload.ai nutzt **NGP (Normalized Graded Pace)** zur Berechnung der Laufbelastung (rTSS) – und GAP bildet das Fundament für NGP.
+### 2. Schätzung der Laufbelastung aus der Pace
+GAP berücksichtigt die Steigung bei der Schätzung der Laufbelastung. [Schätzung der Laufbelastung aus der Pace](/de/docs/metrics/pace/normalized-graded-pace)
+
 ```text
 Pace_actual  --(grade adjustment)-->  GAP  --(weighted smoothing)-->  NGP
 ```
@@ -63,7 +64,6 @@ Wenn du die GPX-Daten einer Strecke zusammen mit GAP analysierst, kannst du gezi
 ## Wie Trainingload.ai GAP nutzt
 
 -   **Geländekontext**: GAP macht verständlich, warum ein langsamer Bergauf-Split dennoch eine hochintensive Belastung war.
--   **Basis für NGP**: Trainingload.ai nutzt GAP als ersten Schritt vor der Berechnung von NGP und rTSS.
 -   **Nicht blind verfolgen**: GAP bildet eine metabolische Äquivalenz ab, erfasst aber die orthopädische und muskuläre Belastung nur unvollständig. Lange, harte Bergabpassagen können bei GAP harmlos wirken, belasten Oberschenkel und Knie aber massiv.
 -   **Trends statt Momentanwerten bevorzugen**: GPS-Steigungsschätzungen sind verrauscht und leicht verzögert, weshalb Echtzeit-GAP stark springen kann. Rundenwerte oder die Auswertung nach der Aktivität sind deutlich verlässlicher.
 

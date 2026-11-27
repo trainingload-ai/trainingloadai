@@ -6,12 +6,13 @@ import type { MetricsTask } from '../task';
 import {
   calculateObservedGradeCoverageRatio,
   computeGOVSS,
+  computeRunningPaceLoadEstimate,
+  RUNNING_PACE_MIN_GRADE_COVERAGE_RATIO,
+  type RunningPaceLoadResult,
 } from '@/algorithm/GOVSS';
 import { AnalyzePersistenceService } from '@/analyze/analyze-persistence.service';
-import type { SensorRecord } from '@/sensor/sensor-data.service';
 
 const MIN_RUNNING_THRESHOLD_SPEED_METERS_PER_SECOND = 1.8;
-const MIN_GRADE_COVERAGE_RATIO = 0.8;
 
 @Injectable()
 export class PaceGovssTask implements MetricsTask {
@@ -61,73 +62,82 @@ export class PaceGovssTask implements MetricsTask {
       sampleSec = timeline.sampleSec;
     }
 
-    const cv = firstRunningThresholdSpeed(context.CS, context.TP);
     const weight = firstPositiveNumber(context.userWeight);
-    const height = normalizeHeightMeters(context.userHeight);
-    if (!cv || !weight) {
-      this.logger.debug(
-        `[paceGovss] 跳过，活动ID=${activity.id}，cv=${cv ?? 'missing'}，weight=${
-          weight ?? 'missing'
-        }`,
+    const threshold = weight
+      ? firstRunningThresholdSpeed(context.CS, context.TP)
+      : firstRunningThresholdSpeed(context.TP, context.CS);
+    if (!threshold) return ctx;
+
+    const samples = canonical.map((row) => ({
+      timestamp: new Date(row.time),
+      distance: toFiniteNumber(row.distance),
+      speed: toFiniteNumber(row.enhancedSpeed ?? row.speed),
+      grade: toFiniteNumber(row.grade),
+    }));
+
+    let load: RunningPaceLoadResult | undefined;
+    if (weight) {
+      const records = samples.filter(
+        ({ speed, distance }) =>
+          speed != null && speed >= 0 && distance != null,
       );
-      return ctx;
+      if (records.length === 0) return ctx;
+
+      const gradeCoverageRatio = calculateObservedGradeCoverageRatio(records);
+      const gradeMode =
+        gradeCoverageRatio >= RUNNING_PACE_MIN_GRADE_COVERAGE_RATIO
+          ? 'record'
+          : 'flat';
+      const height = normalizeHeightMeters(context.userHeight);
+      const result = computeGOVSS(
+        records,
+        weight,
+        height,
+        threshold,
+        sampleSec,
+        {
+          gradeMode,
+        },
+      );
+      load = {
+        method: 'GOVSS',
+        score: result.govss,
+        algorithmVersion: result.algorithmVersion,
+        gradeMode: result.gradeMode,
+        coveredSeconds: result.coveredSeconds,
+        gradeCoverageRatio: result.gradeCoverageRatio,
+      };
+    } else {
+      load = computeRunningPaceLoadEstimate(samples, threshold);
     }
-
-    const records: SensorRecord[] = [];
-    for (let index = 0; index < canonical.length; index++) {
-      const row = canonical[index];
-      const speed = toFiniteNumber(row.enhancedSpeed ?? row.speed);
-      const distance = toFiniteNumber(row.distance);
-      if (speed == null || speed < 0 || distance == null) continue;
-      records.push({
-        activityId: activity.id,
-        index,
-        lapIndex: 0,
-        timestamp: new Date(row.time),
-        distance,
-        speed,
-        enhancedSpeed: speed,
-        grade: toFiniteNumber(row.grade),
-      } as SensorRecord);
-    }
-
-    if (records.length === 0) return ctx;
-
-    const gradeCoverageRatio = calculateObservedGradeCoverageRatio(records);
-    const gradeMode =
-      gradeCoverageRatio >= MIN_GRADE_COVERAGE_RATIO ? 'record' : 'flat';
-
-    const govss = computeGOVSS(records, weight, height, cv, sampleSec, {
-      gradeMode,
-    });
+    if (!load || !Number.isFinite(load.score) || load.score <= 0) return ctx;
 
     return {
       ...ctx,
       outputs: {
         ...ctx.outputs,
-        paceGovss: govss,
+        paceGovss: load,
       },
     };
   }
 
   async post(ctx: MetricsContext) {
     const activity = ctx.inputs.activity;
-    const govss = ctx.outputs.paceGovss;
+    const load = ctx.outputs.paceGovss;
     if (
       !activity?.id ||
       activity.sportType !== $Enums.SportType.RUN ||
       activity.sportDefinitionCode === 'WALKING' ||
       activity.sportDefinitionCode === 'HIKING' ||
-      !govss ||
-      govss.govss <= 0
+      !load
     ) {
       return ctx;
     }
 
-    await this.persistence.saveActivityGovssRow(
+    await this.persistence.saveActivityRunningPaceLoad(
       activity.id,
       activity.sportType,
-      govss,
+      load,
       ctx.persistenceTx,
     );
     return ctx;

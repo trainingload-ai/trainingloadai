@@ -1,6 +1,11 @@
 import { SensorRecord } from '../sensor/sensor-data.service';
 import { toMs } from '@/utils';
-import { resampleObservedValues } from './time-series-metrics';
+import { computeGapSpeed } from './gap';
+import {
+  averageKnownValues,
+  computeNormalizedRollingValue,
+  resampleObservedValues,
+} from './time-series-metrics';
 
 const toTimestampMs = (value: SensorRecord['timestamp']): number =>
   toMs(value) ?? NaN;
@@ -93,7 +98,25 @@ export interface GOVSSOptions {
   gradeMode?: 'record' | 'flat';
 }
 
-function buildGovssTimelines(records: SensorRecord[]) {
+export const RUNNING_PACE_ESTIMATE = 'RUNNING_PACE_ESTIMATE';
+export const RUNNING_PACE_ESTIMATE_VERSION = 1;
+export const RUNNING_PACE_ESTIMATE_WINDOW_SECONDS = 30;
+export const RUNNING_PACE_MIN_GRADE_COVERAGE_RATIO = 0.8;
+
+export type RunningPaceLoadResult = Pick<
+  GOVSSResult,
+  'algorithmVersion' | 'gradeMode' | 'coveredSeconds' | 'gradeCoverageRatio'
+> & {
+  method: 'GOVSS' | typeof RUNNING_PACE_ESTIMATE;
+  score: number;
+};
+
+type RunningPaceSample = Pick<
+  SensorRecord,
+  'timestamp' | 'speed' | 'enhancedSpeed' | 'grade'
+>;
+
+function buildRunningPaceTimelines(records: RunningPaceSample[]) {
   const timestamps = records.map((record) => toTimestampMs(record.timestamp));
   const speed = resampleObservedValues(
     records.map((record, index) => {
@@ -125,9 +148,9 @@ function buildGovssTimelines(records: SensorRecord[]) {
 }
 
 export function calculateObservedGradeCoverageRatio(
-  records: SensorRecord[],
+  records: RunningPaceSample[],
 ): number {
-  const { speed, grade } = buildGovssTimelines(records);
+  const { speed, grade } = buildRunningPaceTimelines(records);
   return gradeCoverageRatioFromTimelines(speed.values, grade.values);
 }
 
@@ -145,15 +168,61 @@ function gradeCoverageRatioFromTimelines(
   return speedSeconds > 0 ? gradeSeconds / speedSeconds : 0;
 }
 
+/** Estimate load on the 100 points/hour scale using observed pace and threshold speed. */
+export function computeRunningPaceLoadEstimate(
+  records: RunningPaceSample[],
+  thresholdSpeed: number,
+): RunningPaceLoadResult | undefined {
+  const { speed, grade } = buildRunningPaceTimelines(records);
+  if (
+    !speed.coveredSeconds ||
+    !Number.isFinite(thresholdSpeed) ||
+    thresholdSpeed <= 0
+  ) {
+    return undefined;
+  }
+
+  const gradeCoverageRatio = gradeCoverageRatioFromTimelines(
+    speed.values,
+    grade.values,
+  );
+  const gradeMode =
+    gradeCoverageRatio >= RUNNING_PACE_MIN_GRADE_COVERAGE_RATIO
+      ? 'record'
+      : 'flat';
+  const equivalentSpeeds =
+    gradeMode === 'record'
+      ? speed.values.map((value, index) =>
+          value == null
+            ? null
+            : computeGapSpeed(value, grade.values[index] ?? 0),
+        )
+      : speed.values;
+  const normalizedSpeed = computeNormalizedRollingValue(
+    equivalentSpeeds,
+    RUNNING_PACE_ESTIMATE_WINDOW_SECONDS,
+  ).value;
+  const speedForLoad = normalizedSpeed || averageKnownValues(equivalentSpeeds);
+  const intensity = speedForLoad / thresholdSpeed;
+  return {
+    method: RUNNING_PACE_ESTIMATE,
+    score: (speed.coveredSeconds / 3600) * intensity ** 2 * 100,
+    algorithmVersion: RUNNING_PACE_ESTIMATE_VERSION,
+    gradeMode,
+    coveredSeconds: speed.coveredSeconds,
+    gradeCoverageRatio,
+  };
+}
+
 export function computeGOVSS(
-  records: SensorRecord[],
+  records: RunningPaceSample[],
   weight: number,
   height: number,
   cv?: number,
   _sampleSec?: number,
   options: GOVSSOptions = {},
 ): GOVSSResult {
-  const timelines = buildGovssTimelines(records ?? []);
+  const timelines = buildRunningPaceTimelines(records ?? []);
   const gradeCoverageRatio = gradeCoverageRatioFromTimelines(
     timelines.speed.values,
     timelines.grade.values,

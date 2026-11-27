@@ -40,6 +40,7 @@ export type LoadActivityRow = {
   coggan?: { bikeStress: number | null } | null;
   trimp?: { trimp100: number | null } | null;
   bikeScore?: { bikeScore: number | null } | null;
+  /** Persisted running pace load, including the weight-free estimate. */
   govss?: { govss: number | null } | null;
   swimScore?: { swimScore: number | null } | null;
   activitySources?: Array<{ metadata: unknown }>;

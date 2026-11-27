@@ -51,8 +51,9 @@ GAP = Pace_actual / (C_r / C_flat)
 - **GAP**: 5:00/km로 표시됩니다.
 - **해석**: 겉으로 보이는 페이스보다 실제 대사 강도가 훨씬 높았음을 파악할 수 있습니다.
 
-### 2. rTSS 계산의 토대
-Trainingload.ai는 러닝 훈련 부하(rTSS)를 계산할 때 **NGP(정규화 경사도 페이스)**를 사용하며, GAP은 바로 NGP의 기반이 됩니다.
+### 2. 페이스 기반 러닝 부하 추정
+GAP은 페이스 기반 러닝 부하를 추정할 때 경사를 보정합니다. [페이스 기반 러닝 부하 추정](/ko/docs/metrics/pace/normalized-graded-pace)
+
 ```text
 Pace_actual  --(grade adjustment)-->  GAP  --(weighted smoothing)-->  NGP
 ```
@@ -63,7 +64,6 @@ Pace_actual  --(grade adjustment)-->  GAP  --(weighted smoothing)-->  NGP
 ## Trainingload.ai의 GAP 활용 방식
 
 - **지형 맥락 파악**: 느려 보이는 오르막 스플릿이 실제로는 고강도 노력이었음을 설명해 줍니다.
-- **NGP의 기반**: Trainingload.ai는 NGP와 rTSS를 계산하기 전 첫 단계로 GAP을 산출합니다.
 - **맹목적으로 쫓지 마세요**: GAP은 대사적 등가치일 뿐 근골격계 스트레스를 온전히 반영하지는 못합니다. 길고 강한 내리막은 GAP상 무난해 보여도 대퇴사두근과 무릎에는 큰 충격을 줄 수 있습니다.
 - **순간값보다 추세 우선**: GPS 기반 경사도 추정은 노이즈와 지연이 있어 실시간 GAP이 들쭉날쭉할 수 있습니다. 랩 평균이나 활동 완료 후 분석에 활용하는 것이 더 정확합니다.
 

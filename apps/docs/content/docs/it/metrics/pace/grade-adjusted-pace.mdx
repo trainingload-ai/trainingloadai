@@ -51,8 +51,9 @@ Su terreni ripidi, il passo reale è difficile da interpretare.
 -   **GAP**: indica 5:00/km.
 -   **Interpretazione**: l'intensità metabolica è molto più alta di quanto lasci intuire il passo grezzo.
 
-### 2. Base per l'rTSS
-Trainingload.ai usa il **NGP (Normalized Graded Pace)** per calcolare il carico nella corsa (rTSS), e il GAP è il fondamento del NGP.
+### 2. Stima del carico di corsa dal passo
+Il GAP permette di correggere la pendenza nella stima del carico di corsa. [Stima del carico di corsa dal passo](/it/docs/metrics/pace/normalized-graded-pace)
+
 ```text
 Pace_actual  --(grade adjustment)-->  GAP  --(weighted smoothing)-->  NGP
 ```
@@ -63,7 +64,6 @@ Analizzando il file GPX del percorso con il GAP, puoi pianificare quale passo re
 ## Come Trainingload.ai utilizza il GAP
 
 -   **Contesto del terreno**: il GAP spiega perché un parziale lento in salita può comunque corrispondere a uno sforzo ad alta intensità.
--   **Fondamento del NGP**: Trainingload.ai usa il GAP come primo passaggio prima di calcolare NGP e rTSS.
 -   **Non inseguirlo alla cieca**: il GAP è un'equivalenza metabolica, ma non riflette appieno lo stress muscolo-scheletrico. Discese lunghe e impegnative possono sembrare gestibili nel GAP pur generando un forte carico su quadricipiti e ginocchia.
 -   **Preferisci i trend ai valori istantanei**: la pendenza ricavata dal GPS è rumorosa e ritardata, rendendo il GAP istantaneo ballerino. Privilegia le medie sui lap o l'analisi post-attività.
 

@@ -45,16 +45,15 @@ Sur parcours vallonné ou montagneux, l’allure moyenne peut paraître très le
 - **Exemple** : une sortie trail en montagne présente une moyenne de 10:00/km.
 - **NGP** : peut ressortir beaucoup plus rapide, reflétant plus fidèlement le stress métabolique réellement encaissé.
 
-### 2. Base de calcul du rTSS
-Trainingload.ai utilise la NGP pour calculer le **rTSS (Running Training Stress Score)**. La structure de la formule est proche de celle du TSS cycliste :
+### 2. Estimation de la charge de course à partir de l’allure
 
-Lorsque la NGP et la FTPa sont exprimées en min/km, convertissez-les d’abord en vitesse. En vitesse :
+Trainingload.ai utilise GOVSS lorsque le poids corporel est renseigné. En son absence, une estimation de type rTSS combine l’allure enregistrée et le seuil en vigueur au départ. L’allure au seuil (TP) est prioritaire, puis la vitesse critique (CS). Cette estimation ne nécessite ni puissance mesurée ni fréquence cardiaque.
 
 ```text
-IF = Speed_NGP / Speed_FTPa
+100 × observed hours × (normalized speed / threshold speed)²
 ```
 
-Utiliser la NGP permet de garder des charges de course comparables quel que soit le relief.
+La pente est prise en compte si elle couvre au moins 80 % du temps avec une allure valide. Les segments sans pente enregistrée sont traités comme plats. Sans fenêtre complète de 30 secondes, le calcul utilise la vitesse moyenne observée. Les périodes sans données d’allure sont exclues.
 
 ## Comparaison des métriques
 
@@ -67,7 +66,6 @@ Utiliser la NGP permet de garder des charges de course comparables quel que soit
 ## Comment Trainingload.ai utilise la NGP
 
 - **Repère d’intensité tenant compte du relief** : la NGP est souvent plus informative que l’allure moyenne sur les sorties vallonnées ou irrégulières.
-- **Calcul de la charge de course** : la NGP est un paramètre central du rTSS, car elle capture à la fois le relief et la variabilité d’intensité.
 - **Utilisation avec le VI** : calculez **VI (Indice de variabilité) = NGP / GAP moyenne**.
   - Si le VI est proche de 1,0, l’effort était régulier.
   - Si le VI > 1,05, cela reflète probablement des intervalles ou un terrain très exigeant.

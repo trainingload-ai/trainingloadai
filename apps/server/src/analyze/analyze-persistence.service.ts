@@ -9,6 +9,11 @@ import { BusinessException } from '@/filters/business-exception/business.excepti
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import type { HeartRateAnalysisResult } from './heart-rate/heart-rate.types';
 import type { computeEPOCFromHR } from '@/algorithm/epoc';
+import {
+  RUNNING_PACE_ESTIMATE_WINDOW_SECONDS,
+  RUNNING_PACE_MIN_GRADE_COVERAGE_RATIO,
+  type RunningPaceLoadResult,
+} from '@/algorithm/GOVSS';
 import { replaceActivityZoneRows } from '@/prisma/activity-zone-write';
 import type { PrismaTx } from '@/prisma/prisma-db';
 import {
@@ -334,53 +339,45 @@ export class AnalyzePersistenceService {
     });
   }
 
-  async saveActivityGovssRow(
+  async saveActivityRunningPaceLoad(
     activityId: number,
     sportType: $Enums.SportType,
-    govss: import('@/algorithm/GOVSS').GOVSSResult,
+    load: RunningPaceLoadResult,
     tx?: PrismaTx,
   ) {
-    if (!activityId || !govss) return;
+    if (!activityId || !load) return;
+    const parameters =
+      load.method === 'GOVSS'
+        ? { speedGradeWindowSeconds: 120, powerWindowSeconds: 30 }
+        : {
+            method: load.method,
+            paceWindowSeconds: RUNNING_PACE_ESTIMATE_WINDOW_SECONDS,
+          };
+    const data = {
+      sport: sportType,
+      // This column is the existing running PACE score slot.
+      govss: round(load.score, 4) ?? null,
+      algorithmVersion: load.algorithmVersion,
+      gradeMode: load.gradeMode,
+      coveredSeconds: load.coveredSeconds,
+      gradeCoverageRatio: load.gradeCoverageRatio,
+      parameters: {
+        ...parameters,
+        gradeUnit: 'percent',
+        minimumGradeCoverageRatio: RUNNING_PACE_MIN_GRADE_COVERAGE_RATIO,
+        maxObservationGapSeconds: 10,
+      } as Prisma.InputJsonValue,
+    };
     try {
       await (tx ?? this.prisma).activityGOVSS.upsert({
         where: { activityId },
-        update: {
-          sport: sportType,
-          govss: round(govss.govss, 4) ?? null,
-          algorithmVersion: govss.algorithmVersion,
-          gradeMode: govss.gradeMode,
-          coveredSeconds: govss.coveredSeconds,
-          gradeCoverageRatio: govss.gradeCoverageRatio,
-          parameters: {
-            gradeUnit: 'percent',
-            minimumGradeCoverageRatio: 0.8,
-            speedGradeWindowSeconds: 120,
-            powerWindowSeconds: 30,
-            maxObservationGapSeconds: 10,
-          } as Prisma.InputJsonValue,
-          calculatedAt: new Date(),
-        },
-        create: {
-          activityId,
-          sport: sportType,
-          govss: round(govss.govss, 4) ?? null,
-          algorithmVersion: govss.algorithmVersion,
-          gradeMode: govss.gradeMode,
-          coveredSeconds: govss.coveredSeconds,
-          gradeCoverageRatio: govss.gradeCoverageRatio,
-          parameters: {
-            gradeUnit: 'percent',
-            minimumGradeCoverageRatio: 0.8,
-            speedGradeWindowSeconds: 120,
-            powerWindowSeconds: 30,
-            maxObservationGapSeconds: 10,
-          } as Prisma.InputJsonValue,
-        },
+        update: { ...data, calculatedAt: new Date() },
+        create: { activityId, ...data },
       });
     } catch (e) {
       if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
-        `[保存 GOVSS] 活动ID=${activityId} 失败：${
+        `Could not save running pace load for activity ${activityId}: ${
           e instanceof Error ? e.message : String(e)
         }`,
       );

@@ -51,8 +51,9 @@ On steep terrain, actual pace can be hard to interpret.
 -   **GAP**: shows 5:00/km.
 -   **Interpretation**: the metabolic intensity may be much higher than the raw pace suggests.
 
-### 2. Basis for rTSS
-Trainingload.ai uses **NGP (Normalized Graded Pace)** to compute running load (rTSS), and GAP is the foundation of NGP.
+### 2. Running pace load estimate
+GAP provides terrain adjustment for the running pace load estimate. [Running pace load estimate](/docs/metrics/pace/normalized-graded-pace)
+
 ```text
 Pace_actual  --(grade adjustment)-->  GAP  --(weighted smoothing)-->  NGP
 ```
@@ -63,7 +64,6 @@ By analyzing course GPX data with GAP, you can plan what actual pace to run on d
 ## How Trainingload.ai uses GAP
 
 -   **Terrain context**: GAP helps explain why a slow uphill split may still be a high-intensity effort.
--   **Foundation for NGP**: Trainingload.ai uses GAP as the first step before computing NGP and rTSS.
 -   **Do not chase it blindly**: GAP is a metabolic equivalence. It does not fully reflect musculoskeletal stress. Long, hard downhills may look manageable in GAP but still create high quad and knee load.
 -   **Prefer trends over instant values**: GPS-grade estimates are noisy and delayed, which can make real-time GAP jumpy. Prefer lap averages or post-activity analysis.
 
