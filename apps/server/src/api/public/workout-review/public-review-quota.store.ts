@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, type PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '@/prisma/prisma.service';
+import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import {
   PublicReviewQuotaError,
   type PublicReviewQuotaLimits,
@@ -92,38 +93,40 @@ export class PostgresPublicReviewQuotaStore implements PublicReviewQuotaStore {
     limits: PublicReviewQuotaLimits,
   ) {
     try {
-      return await this.prisma.$transaction(
-        async (tx) => {
-          await this.lockSubjects(tx, input);
-          await this.assertNoActiveConflict(tx, input);
+      return await withSerializableRetry(() =>
+        this.prisma.$transaction(
+          async (tx) => {
+            await this.lockSubjects(tx, input);
+            await this.assertNoActiveConflict(tx, input);
 
-          const snapshots = await this.readSnapshots(tx, input.subjects);
-          for (const subject of input.subjects) {
-            this.assertCapacity(
-              subject.scope,
-              snapshots.get(subject.scope),
-              input.reservedWt,
-              limits,
-            );
-          }
+            const snapshots = await this.readSnapshots(tx, input.subjects);
+            for (const subject of input.subjects) {
+              this.assertCapacity(
+                subject.scope,
+                snapshots.get(subject.scope),
+                input.reservedWt,
+                limits,
+              );
+            }
 
-          const reservationId = randomUUID();
-          const rows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
-            INSERT INTO "t_public_ai_review_reservation" (
-              "id", "visitor_hash", "ip_hash", "activity_hash",
-              "admission_nonce", "status", "reserved_wt", "expires_at"
-            ) VALUES (
-              ${reservationId}, ${input.visitorHash}, ${input.ipHash},
-              ${input.activityHash}, ${input.admissionNonce}, 'RESERVED',
-              ${input.reservedWt},
-              NOW() + ${limits.reservationLeaseSeconds} * INTERVAL '1 second'
-            )
-            RETURNING "id"
-          `);
-          if (!rows[0]) throw new PublicReviewQuotaError('ADMISSION_INVALID');
-          return { reservationId: rows[0].id };
-        },
-        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+            const reservationId = randomUUID();
+            const rows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+              INSERT INTO "t_public_ai_review_reservation" (
+                "id", "visitor_hash", "ip_hash", "activity_hash",
+                "admission_nonce", "status", "reserved_wt", "expires_at"
+              ) VALUES (
+                ${reservationId}, ${input.visitorHash}, ${input.ipHash},
+                ${input.activityHash}, ${input.admissionNonce}, 'RESERVED',
+                ${input.reservedWt},
+                NOW() + ${limits.reservationLeaseSeconds} * INTERVAL '1 second'
+              )
+              RETURNING "id"
+            `);
+            if (!rows[0]) throw new PublicReviewQuotaError('ADMISSION_INVALID');
+            return { reservationId: rows[0].id };
+          },
+          { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+        ),
       );
     } catch (error) {
       if (error instanceof PublicReviewQuotaError) throw error;
@@ -139,27 +142,29 @@ export class PostgresPublicReviewQuotaStore implements PublicReviewQuotaStore {
     outcome: 'SUCCEEDED' | 'FAILED' | 'CANCELLED';
     actualWt?: number;
   }) {
-    await this.prisma.$transaction(
-      async (tx) => {
-        const reservations = await tx.$queryRaw<ReservationRow[]>(Prisma.sql`
-          SELECT "id", "reserved_wt" AS "reservedWt"
-          FROM "t_public_ai_review_reservation"
-          WHERE "id" = ${input.reservationId} AND "status" = 'RESERVED'
-          FOR UPDATE
-        `);
-        const reservation = reservations[0];
-        if (!reservation) return;
+    await withSerializableRetry(() =>
+      this.prisma.$transaction(
+        async (tx) => {
+          const reservations = await tx.$queryRaw<ReservationRow[]>(Prisma.sql`
+            SELECT "id", "reserved_wt" AS "reservedWt"
+            FROM "t_public_ai_review_reservation"
+            WHERE "id" = ${input.reservationId} AND "status" = 'RESERVED'
+            FOR UPDATE
+          `);
+          const reservation = reservations[0];
+          if (!reservation) return;
 
-        const actualWt = Math.max(0, Math.floor(input.actualWt ?? 0));
-        await tx.$executeRaw(Prisma.sql`
-          UPDATE "t_public_ai_review_reservation"
-          SET "status" = ${input.outcome}::"PublicAiReviewReservationStatus",
-              "actual_wt" = ${actualWt > 0 ? actualWt : null},
-              "finished_at" = NOW()
-          WHERE "id" = ${reservation.id} AND "status" = 'RESERVED'
-        `);
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+          const actualWt = Math.max(0, Math.floor(input.actualWt ?? 0));
+          await tx.$executeRaw(Prisma.sql`
+            UPDATE "t_public_ai_review_reservation"
+            SET "status" = ${input.outcome}::"PublicAiReviewReservationStatus",
+                "actual_wt" = ${actualWt > 0 ? actualWt : null},
+                "finished_at" = NOW()
+            WHERE "id" = ${reservation.id} AND "status" = 'RESERVED'
+          `);
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      ),
     );
   }
 

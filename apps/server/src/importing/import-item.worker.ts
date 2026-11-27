@@ -1,4 +1,6 @@
 import { acquireActivityWriteLock } from '@/prisma/activity-write-lock';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
+import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import { inheritedImportAuthorization } from './import-publication-authorization';
 import { matchesIntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { ImportIdentityConflictError } from './import-identity-conflict.error';
@@ -380,6 +382,11 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     work: (tx: Prisma.TransactionClient) => Promise<T>,
   ): Promise<T> {
     const publish = async (tx: Prisma.TransactionClient) => {
+      // Match replay lock order (fitness:<userId> -> activityWriteLock) so
+      // fitness_revision triggers on activity/lap/parquet writes cannot AB-BA deadlock.
+      if (typeof tx.$queryRaw === 'function') {
+        await lockFitnessUser(tx, args.userId);
+      }
       await acquireActivityWriteLock(tx, token.activityId);
       const primary = await tx.activitySource.findFirst({
         where: {
@@ -400,7 +407,9 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           { itemJobId: args.jobId, userId: args.userId, lockToken },
           publish,
         )
-      : this.prisma.$transaction(publish, { timeout: 15_000 });
+      : withSerializableRetry(() =>
+          this.prisma.$transaction(publish, { timeout: 15_000 }),
+        );
   }
 
   private extractThirdPartyActivityId(job: ImportJobJsonFields) {
