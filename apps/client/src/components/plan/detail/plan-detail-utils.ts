@@ -444,7 +444,7 @@ export function buildWeekGroups(
 
 type LifecycleActionModel = {
   action: PlanLifecycleAction;
-  tone: "primary" | "neutral" | "destructive";
+  tone: "brand" | "primary" | "neutral" | "destructive";
 };
 
 export function getLifecycleActions(
@@ -453,7 +453,7 @@ export function getLifecycleActions(
 ): LifecycleActionModel[] {
   if (status === "DRAFT") {
     return [
-      { action: "activate", tone: "primary" },
+      { action: "activate", tone: "brand" },
       { action: "delete", tone: "destructive" },
     ];
   }

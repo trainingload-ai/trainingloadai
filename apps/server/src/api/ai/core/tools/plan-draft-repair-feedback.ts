@@ -77,8 +77,8 @@ export function timedIntervalBreakdown(blocks: EndurancePlanBlock[], durationSec
   let hasRepeats = false;
   function timedTerm(step: EnduranceWorkRestStep, count: number) {
     stepIndex++;
-    if (step.durationMeta?.kind !== 'TIME' || !(step.duration > 0)) return undefined;
-    if (step.stepKind === 'WORK' || step.stepKind === 'COOLDOWN') {
+    if (step.durationMeta?.kind !== 'TIME' || !Number.isFinite(step.duration) || step.duration < 0) return undefined;
+    if (step.duration > 0 && (step.stepKind === 'WORK' || step.stepKind === 'COOLDOWN')) {
       editableSteps.push({ kind: step.stepKind === 'WORK' ? 'work' : 'cooldown', seconds: step.duration, count, stepIndex });
     }
     return elapsed(step.duration);

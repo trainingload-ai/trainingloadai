@@ -10,6 +10,7 @@ import { RollingPlanAutomation } from "@/components/plan/rolling-plan-automation
 import { PlanStartConversationDialog } from "./plan-start-conversation-dialog";
 
 import { useGuestAccessText } from "@deployment/managed-ui";
+import { buttonVariants } from "@/components/ui/button";
 
 import dayjs from "dayjs";
 import {
@@ -401,7 +402,9 @@ export function MobilePlanLifecycleActions({
             title={publicDemo.active ? demoText("readOnlyAction") : undefined}
             onClick={() => onAction(action)}
             className={cn(
+              tone === "brand" && buttonVariants({ variant: "brand", size: "auto" }),
               "flex min-h-11 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              tone === "brand" && "border-transparent",
               tone === "primary" &&
                 "border-foreground bg-foreground text-background",
               tone === "neutral" &&

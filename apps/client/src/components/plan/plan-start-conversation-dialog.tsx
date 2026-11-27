@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, Info, Loader2 } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { aiOperationErrorReason, type AiOperationErrorReason } from "@shared/ai-operation-errors";
+import { useManagedAiAccessRecovery } from "@deployment/managed-ui";
 import {
   assessPlanStart,
   confirmPlanStart,
@@ -30,6 +32,7 @@ import {
   workoutsForPlanStart,
 } from "@/lib/coach-plan-start";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
+import { aiOperationErrorCode } from "@/lib/ai-operation-errors";
 import { cn } from "@/lib/utils";
 import { OfficialPlanStartCalendar } from "./official-plan-start-calendar";
 import { PlanStartCalendarFooter } from "./plan-start-calendar-footer";
@@ -37,13 +40,14 @@ import { PlanStartCalendarFooter } from "./plan-start-calendar-footer";
 function isReassessmentConflict(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const candidate = error as {
-    status?: number;
     code?: string;
+    errorCode?: string;
     message?: string;
     data?: { code?: string };
   };
   return (
     candidate.code === "PLAN_START_REASSESSMENT_REQUIRED" ||
+    candidate.errorCode === "PLAN_START_REASSESSMENT_REQUIRED" ||
     candidate.data?.code === "PLAN_START_REASSESSMENT_REQUIRED" ||
     (typeof candidate.message === "string" &&
       candidate.message.includes("PLAN_START_REASSESSMENT_REQUIRED"))
@@ -102,7 +106,7 @@ type AssessmentPhase =
   | { step: "date" }
   | { step: "evaluating" }
   | { step: "result"; result: Exclude<PlanStartAssessmentResult, { outcome: "STARTED" }> }
-  | { step: "error"; conflict: boolean };
+  | { step: "error"; conflict: boolean; reason: AiOperationErrorReason | null };
 
 function PlanStartAssessmentBody({
   planId,
@@ -114,6 +118,7 @@ function PlanStartAssessmentBody({
   onTitleChange: (title: string | null) => void;
 }) {
   const t = useTranslations("PlanStartConversation");
+  const operationT = useTranslations("AiOperationErrors");
   const locale = useLocale();
   const queryClient = useQueryClient();
   const { data: session } = useViewerSession();
@@ -187,7 +192,11 @@ function PlanStartAssessmentBody({
         setPhase({ step: "result", result });
       } catch (err) {
         if (controller.signal.aborted) return;
-        setPhase({ step: "error", conflict: isReassessmentConflict(err) });
+        setPhase({
+          step: "error",
+          conflict: isReassessmentConflict(err),
+          reason: aiOperationErrorReason(aiOperationErrorCode(err)),
+        });
       }
     },
     [finishStart, locale, planId],
@@ -206,6 +215,10 @@ function PlanStartAssessmentBody({
         choice: input.choice,
         previewId: input.previewId,
       }),
+    onMutate: () => {
+      setConfirmError(null);
+      setVersionConflict(false);
+    },
     onSuccess: () => {
       finishStart();
     },
@@ -233,6 +246,13 @@ function PlanStartAssessmentBody({
     setVersionConflict(false);
     setPhase({ step: "date" });
   }, []);
+
+  const submitting = confirmMutation.isPending;
+  const assessmentError = phase.step === "error" ? phase.reason : null;
+  const managedRecovery = useManagedAiAccessRecovery(assessmentError, {
+    retry: current ? () => void runAssessment(current) : undefined,
+    retryDisabled: submitting,
+  });
 
   if (draftQuery.isPending && !current) {
     return (
@@ -266,6 +286,28 @@ function PlanStartAssessmentBody({
     );
   }
 
+  const canStartOnDate =
+    current.startDate >= current.earliestStartDate &&
+    !dateMutation.isPending &&
+    !submitting;
+  const directStart = (
+    <Button
+      type="button"
+      variant="outline"
+      disabled={!canStartOnDate}
+      onClick={() =>
+        confirmMutation.mutate({
+          choice: "ORIGINAL",
+          startDate: current.startDate,
+          revision: current.revision,
+        })
+      }
+    >
+      {submitting ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
+      {t("directStart")}
+    </Button>
+  );
+
   if (phase.step === "date") {
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-3 sm:px-4">
@@ -273,26 +315,32 @@ function PlanStartAssessmentBody({
         <PlanStartCalendarFooter
           startDate={current.startDate}
           earliestStartDate={current.earliestStartDate}
-          canChangeDate={!dateMutation.isPending}
+          canChangeDate={!dateMutation.isPending && !submitting}
           onChangeDate={(nextDate) => dateMutation.mutate(nextDate)}
           notice={
-            dateMutation.error ? (
+            confirmError || dateMutation.error ? (
               <p role="alert" className="text-sm text-destructive">
-                {t("loadFailed")}
+                {confirmError ?? t("loadFailed")}
               </p>
             ) : null
           }
         >
-          <Button
-            type="button"
-            disabled={
-              current.startDate < current.earliestStartDate ||
-              dateMutation.isPending
-            }
-            onClick={() => void runAssessment(current)}
-          >
-            {t("evaluate")}
-          </Button>
+          {versionConflict ? (
+            <Button type="button" onClick={() => void reloadDraft()}>
+              {t("reloadDraft")}
+            </Button>
+          ) : (
+            <>
+              {directStart}
+              <Button
+                type="button"
+                disabled={!canStartOnDate}
+                onClick={() => void runAssessment(current)}
+              >
+                {t("evaluate")}
+              </Button>
+            </>
+          )}
         </PlanStartCalendarFooter>
       </div>
     );
@@ -333,35 +381,52 @@ function PlanStartAssessmentBody({
   }
 
   if (phase.step === "error") {
+    const { recoveryAction } = managedRecovery;
+    const requiresReload = phase.conflict || versionConflict;
     return (
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {compactDateBar}
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2.5 px-6 py-10 text-center">
           <AlertCircle className="size-5 text-destructive" aria-hidden />
           <p role="alert" className="max-w-md text-sm text-foreground">
-            {phase.conflict ? t("versionConflict") : t("assessmentFailed")}
+            {phase.conflict
+              ? t("versionConflict")
+              : managedRecovery.message ??
+                (phase.reason ? operationT(phase.reason) : t("assessmentFailed"))}
           </p>
+          {confirmError ? (
+            <p role="alert" className="text-sm text-destructive">{confirmError}</p>
+          ) : null}
         </div>
-        <DialogFooter className="shrink-0 border-t border-border/60 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] pc:pb-3">
-          <Button type="button" variant="outline" onClick={backToDate}>
+        <DialogFooter className="shrink-0 border-t border-border/60 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] sm:flex-wrap pc:pb-3">
+          <Button type="button" variant="outline" disabled={submitting} onClick={backToDate}>
             {t("changeDate")}
           </Button>
-          {phase.conflict ? (
+          {requiresReload ? (
             <Button type="button" onClick={() => void reloadDraft()}>
               {t("reloadDraft")}
             </Button>
           ) : (
-            <Button type="button" onClick={() => void runAssessment(current)}>
-              {t("retryAssessment")}
-            </Button>
+            <>
+              {directStart}
+              {recoveryAction ? (
+                <Button type="button" disabled={submitting || recoveryAction.disabled} onClick={recoveryAction.onClick}>
+                  {recoveryAction.label}
+                </Button>
+              ) : phase.reason !== "accessRequired" ? (
+                <Button type="button" disabled={submitting} onClick={() => void runAssessment(current)}>
+                  {t("retryAssessment")}
+                </Button>
+              ) : null}
+            </>
           )}
         </DialogFooter>
+        {managedRecovery.overlay}
       </div>
     );
   }
 
   const { result } = phase;
-  const submitting = confirmMutation.isPending;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

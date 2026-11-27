@@ -772,7 +772,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 241
+          "line": 260
         }
       ],
       "capability": "telemetry",
@@ -786,7 +786,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 263
+          "line": 282
         }
       ],
       "capability": "telemetry",
@@ -968,7 +968,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 150
+          "line": 151
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
@@ -2661,7 +2661,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 264
+          "line": 283
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2897,7 +2897,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 230
+          "line": 249
         }
       ],
       "capability": "web-asset-or-tooling",

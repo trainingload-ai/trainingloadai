@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2589
+          "line": 2599
         }
       ]
     },
@@ -1078,7 +1078,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1301
+          "line": 1310
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
@@ -1099,7 +1099,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1303
+          "line": 1312
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
@@ -1305,7 +1305,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1339
+          "line": 1348
         }
       ]
     },
@@ -1928,7 +1928,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 238
+          "line": 257
         }
       ]
     },
@@ -1966,7 +1966,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 146
+          "line": 147
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
@@ -2369,7 +2369,7 @@
         },
         {
           "file": "apps/server/src/importing/activity-data-migration.service.ts",
-          "line": 109
+          "line": 149
         },
         {
           "file": "apps/server/src/training-load/vdot-forecast-export.command.ts",
@@ -4921,7 +4921,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 149
+          "line": 150
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
@@ -6140,7 +6140,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 232
+          "line": 251
         }
       ]
     },
@@ -6157,7 +6157,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 234
+          "line": 253
         }
       ]
     },

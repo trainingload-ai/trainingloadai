@@ -1286,8 +1286,17 @@ export class AiController {
       String(body?.lang ?? 'en').trim() || 'en',
     );
     let intent = String(body?.intent ?? '').trim();
-    const purpose = parseRequestedModelPurpose(body?.purpose);
-    const thinking = purpose === 'REASONING';
+    const requestedPurpose = parseRequestedModelPurpose(body?.purpose);
+    // Plan creation benefits from the stronger reasoning-tier model (e.g. deepseek-v4-pro)
+    // without forcing slow chain-of-thought thinking unless the user explicitly requested it.
+    const planBuilderModel =
+      intent === 'plan-builder' && requestedPurpose !== 'REASONING'
+        ? getCoachModel({ thinking: true })
+        : '';
+    const purpose: AiModelPurpose = planBuilderModel
+      ? 'REASONING'
+      : requestedPurpose;
+    const thinking = requestedPurpose === 'REASONING';
     const operationId =
       String(body?.operationId ?? '').trim() ||
       (platformFunded ? randomUUID() : '');
@@ -1327,7 +1336,7 @@ export class AiController {
       body?.skip_user_append === 'true';
 
     const provider = getCoachUpstreamProvider();
-    const model = getCoachModel({ thinking });
+    const model = planBuilderModel || getCoachModel({ thinking });
     this.logger.log(
       `[AI][教练][${reqId}] 开始处理 用户ID=${userId} 会话ID=${sessionId || 'default'} 语言=${lang} 服务商=${provider ?? 'none'} 模型=${model || 'none'} skipUserAppend=${skipUserAppend ? '是' : 'no'} 提示字符数=${prompt.length}`,
     );
@@ -1891,6 +1900,7 @@ export class AiController {
         message: coachUserMessage,
         intent: intent || undefined,
         thinking,
+        model: planBuilderModel || undefined,
         operationId,
         usageKind: $Enums.AiUsageKind.COACH_CHAT,
         branchId: coachBranchId,

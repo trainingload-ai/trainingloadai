@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PlanProposalPresentation } from "@shared/plan-proposal";
+import { ApiFetchError } from "@/lib/api-error";
 import { PlanStartConversationDialog } from "./plan-start-conversation-dialog";
 
 const api = vi.hoisted(() => ({
@@ -11,6 +12,17 @@ const api = vi.hoisted(() => ({
   confirm: vi.fn(),
   invalidate: vi.fn().mockResolvedValue(undefined),
   toastSuccess: vi.fn(),
+  openCreditPacks: vi.fn(),
+}));
+
+vi.mock("@deployment/managed-ui", () => ({
+  useManagedAiAccessRecovery: (reason: string | null) =>
+    reason === "accessRequired"
+      ? {
+          message: "积分不足",
+          recoveryAction: { label: "补充积分", onClick: api.openCreditPacks },
+        }
+      : {},
 }));
 
 vi.mock("@/lib/query-invalidation", () => ({
@@ -177,6 +189,63 @@ function renderDialog(onOpenChange = vi.fn()) {
 describe("PlanStartConversationDialog (direct start assessment)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("starts the selected original draft without calling the coach assessment", async () => {
+    api.fetchDraft.mockResolvedValueOnce(makeRollingDraft());
+    api.confirm.mockResolvedValueOnce({ started: true });
+    const { onOpenChange } = renderDialog();
+
+    fireEvent.click(await screen.findByRole("button", { name: "directStart" }));
+
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+    expect(api.assess).not.toHaveBeenCalled();
+    expect(api.confirm).toHaveBeenCalledWith("plan-p07", {
+      startDate: "2026-12-31",
+      revision: "rev-1",
+      choice: "ORIGINAL",
+      previewId: undefined,
+    });
+  });
+
+  it("requires a fresh draft when direct start detects a revision conflict", async () => {
+    api.fetchDraft.mockResolvedValueOnce(makeRollingDraft());
+    api.confirm.mockRejectedValueOnce(
+      new ApiFetchError("Draft changed", 409, "PLAN_START_REASSESSMENT_REQUIRED"),
+    );
+    const { onOpenChange } = renderDialog();
+
+    fireEvent.click(await screen.findByRole("button", { name: "directStart" }));
+
+    expect(await screen.findByText("versionConflict")).toBeVisible();
+    expect(screen.getByRole("button", { name: "reloadDraft" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "directStart" })).toBeNull();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(api.assess).not.toHaveBeenCalled();
+  });
+
+  it("offers credit recovery and direct start when AI access is denied", async () => {
+    api.fetchDraft.mockResolvedValueOnce(makeRollingDraft());
+    api.assess.mockRejectedValueOnce(
+      new ApiFetchError("Access required", 402, "AI_ACCESS_REQUIRED", { recoveryReason: "ADD_CREDITS" }),
+    );
+    api.confirm.mockResolvedValueOnce({ started: true });
+    const { onOpenChange } = renderDialog();
+
+    fireEvent.click(await screen.findByRole("button", { name: "evaluate" }));
+
+    expect(await screen.findByText("积分不足")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "补充积分" }));
+    expect(api.openCreditPacks).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "directStart" }));
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+    expect(api.assess).toHaveBeenCalledTimes(1);
+    expect(api.confirm).toHaveBeenCalledWith("plan-p07", {
+      startDate: "2026-12-31",
+      revision: "rev-1",
+      choice: "ORIGINAL",
+      previewId: undefined,
+    });
   });
 
   it("shows all three cross-year rolling workouts (Jan 2, 4, 6) and carryover notice", async () => {

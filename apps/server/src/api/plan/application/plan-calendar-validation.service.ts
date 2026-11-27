@@ -11,6 +11,7 @@ import {
   type ScheduledPlanWorkout,
 } from '@shared/plan-calendar';
 import {
+  planDailyMinuteHardLimit,
   planDailyMinuteLimit,
   type PlanQualityContract,
 } from '@shared/plan-quality';
@@ -252,7 +253,7 @@ export class PlanCalendarValidationService {
       )
         return [{ code: 'DAILY_TIME_UNVERIFIED', date }];
       return daily.reduce((sum, w) => sum + w.durationSeconds!, 0) >
-        minutes * 60
+        planDailyMinuteHardLimit(minutes) * 60
         ? [{ code: 'DAILY_TIME_BUDGET', date }]
         : [];
     });

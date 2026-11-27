@@ -85,6 +85,7 @@ function phaseCandidate(ctx: AiToolContext, input: Input) {
   if (input.sessionTemplates !== undefined && !Array.isArray(input.sessionTemplates))
     return aiToolError('sessionTemplates must be an array.', 'INVALID_INPUT');
   const supplied = new Set<string>();
+  let anyPatchedFieldChanged = false;
   for (const item of (input.sessionTemplates ?? []) as unknown[]) {
     const template = asRecord(item);
     const id = typeof template?.id === 'string' ? template.id.trim() : '';
@@ -98,13 +99,16 @@ function phaseCandidate(ctx: AiToolContext, input: Input) {
         return aiToolError(`Template "${id}" is not used by this rejected window. Submit a complete schedule to add or schedule a template.`, 'INVALID_INPUT');
       const changed = Object.keys(template).some((key) => key !== 'id' && !isDeepStrictEqual(template[key], original[key]) &&
         occurrences.some((row) => !(key in row)));
-      if (!changed)
-        return aiToolError(`Change a field used by a scheduled occurrence of template "${id}". Its submitted fields do not change the rejected schedule.`, 'INVALID_INPUT');
+      if (!changed) continue;
+      anyPatchedFieldChanged = true;
     }
     if (!patch && (typeof template.structureKind !== 'string' || typeof template.text !== 'string' || !template.text.trim())) {
       return aiToolError(`Session template "${id}" requires structureKind and non-empty text in a full window schedule.`, 'INVALID_INPUT');
     }
     templates.set(id, patch ? { ...original, ...template, id } : { ...template, id });
+  }
+  if (patch && !anyPatchedFieldChanged) {
+    return aiToolError('Change at least one field used by a scheduled occurrence of the rejected window. Its submitted fields do not change the rejected schedule.', 'INVALID_INPUT');
   }
   const { maxTrainingDaysPerWeek, maxDailyMinutes, requiredSports, raceDiscipline } = assessment.constraints;
   const candidate = {

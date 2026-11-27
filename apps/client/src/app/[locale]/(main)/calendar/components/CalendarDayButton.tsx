@@ -174,7 +174,7 @@ export function CalendarDayButton({
             : "bg-card text-foreground hover:bg-secondary",
         !isSelected &&
           inPlanRange &&
-          "bg-[repeating-linear-gradient(-45deg,rgb(16_185_129/0.14)_0_1.5px,transparent_1.5px_10px)] dark:bg-[repeating-linear-gradient(-45deg,rgb(52_211_153/0.16)_0_1.5px,transparent_1.5px_10px)]",
+          "bg-[repeating-linear-gradient(-45deg,hsl(var(--emerald-500)/0.14)_0_1.5px,transparent_1.5px_10px)] dark:bg-[repeating-linear-gradient(-45deg,hsl(var(--emerald-400)/0.16)_0_1.5px,transparent_1.5px_10px)]",
         dropClass,
       )}
     >

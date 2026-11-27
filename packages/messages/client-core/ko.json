@@ -5967,8 +5967,7 @@
       "description": "하나 이상의 종목을 선택할 수 있으며 근력 운동은 주 목표를 보조합니다."
     },
     "trainingIntent": {
-      "title": "훈련 의도",
-      "description": "이 주기가 무엇을 해결해야 하는지 AI에게 알려주세요."
+      "title": "훈련 의도"
     },
     "raceInfo": {
       "title": "경주 정보",
@@ -5984,9 +5983,8 @@
     },
     "strength": {
       "title": "보조 근력 운동",
-      "description": "AI가 목표, 장비, 회복 여건에 맞춰 별도의 근력 세션을 배치합니다.",
       "preference": {
-        "AUTO": "AI가 결정",
+        "AUTO": "코치 추천",
         "INCLUDE": "근력 운동 포함",
         "EXCLUDE": "근력 운동 제외"
       },
@@ -6600,10 +6598,11 @@
   },
   "PlanStartConversation": {
     "title": "시작 준비",
-    "description": "날짜를 선택하고 코치와 전체 일정을 검토한 후 시작을 확인하세요.",
+    "description": "시작 날짜를 선택하세요. 코치가 계획이 적합하다고 판단하면 선택한 날짜에 자동으로 시작됩니다.",
     "dateLabel": "시작일",
     "dateHint": "날짜를 선택하면 평가만 시작됩니다. 제안을 확인해야 계획이 시작됩니다.",
-    "evaluate": "코치와 평가",
+    "evaluate": "코치에게 평가 요청",
+    "directStart": "바로 시작",
     "changeDate": "날짜 변경",
     "pendingCalendar": "평가 대기 중인 달력",
     "evaluatePrompt": "저장된 이 계획을 {date} ({timeZone})부터 시작하고 싶어요. 최근 훈련과 현재 상태를 바탕으로 전체 일정을 검토하고, 필요한 질문을 한 뒤 제가 확인할 수 있는 시작 제안을 준비해 주세요.",
@@ -6621,7 +6620,7 @@
     "conflictHeading": "Schedule conflict in original plan",
     "insufficientDataHeading": "Limited training data",
     "missingEvidenceLabel": "Missing evidence",
-    "versionConflict": "This draft was updated. Reload the latest schedule to re-evaluate.",
+    "versionConflict": "초안이 변경되었습니다. 시작하기 전에 최신 일정을 다시 불러오세요.",
     "reloadDraft": "Reload latest draft",
     "assessmentFailed": "Assessment failed. Your draft and selected date are preserved—please retry.",
     "confirmFailed": "Unable to start the plan. Please try again.",
@@ -6746,7 +6745,6 @@
     "shortTitle": "지속 계획",
     "availabilityTitle": "훈련 가능 시간",
     "availability": "주 {weeklyDays}일 · 하루 최대 {dailyMinutes}분",
-    "creationHint": "코치가 시작 주의 초안을 만듭니다. 시작일을 고른 뒤 첫 주 일정과 자동 관리 범위를 확인하세요.",
     "firstWeekPreview": "시작 주 미리보기",
     "title": "지속 훈련 계획",
     "description": "목표, 시간, 훈련 상황에 맞춰 자동으로 계획하고 지속적으로 조정합니다.",

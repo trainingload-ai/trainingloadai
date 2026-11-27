@@ -1,14 +1,17 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
+  cpSync,
   existsSync,
   lstatSync,
   readFileSync,
   readdirSync,
   realpathSync,
+  statSync,
 } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
+/** @returns {never} */
 function fail(code, message) {
   throw Object.assign(new Error(message), { code });
 }
@@ -181,6 +184,33 @@ export function assertCoreResources(source, manifest) {
     );
 }
 
+const clientAssetDirectories = [
+  ["static", ".next/static"],
+  ["selfhost-public", "public"],
+];
+
+export function resolveDesktopClientEntry(standalone) {
+  const candidates = [
+    join(standalone, "apps/client/server.js"),
+    join(standalone, "server.js"),
+  ];
+  const entry = candidates.find(existsSync);
+  if (!entry)
+    fail(
+      "DESKTOP_CLIENT_ENTRY_MISSING",
+      `Desktop runtime entry is missing: ${candidates.join(", ")}`,
+    );
+  return entry;
+}
+
+export function stageDesktopClientAssets(nextRoot) {
+  const entry = resolveDesktopClientEntry(join(nextRoot, "standalone"));
+  for (const [output, target] of clientAssetDirectories)
+    cpSync(join(nextRoot, output), resolve(entry, "..", target), {
+      recursive: true,
+    });
+}
+
 /** Next must never write caches inside a signed application bundle. */
 export function assertDesktopClientBuild(clientEntry) {
   const manifest = resolve(clientEntry, "../.next/required-server-files.json");
@@ -193,6 +223,14 @@ export function assertDesktopClientBuild(clientEntry) {
       "DESKTOP_CLIENT_MUTABLE_BUILD",
       "The client build writes caches into application resources. Run pnpm desktop:build.",
     );
+  for (const [, target] of clientAssetDirectories) {
+    const path = resolve(clientEntry, "..", target);
+    if (!statSync(path, { throwIfNoEntry: false })?.isDirectory())
+      fail(
+        "DESKTOP_CLIENT_ASSETS_MISSING",
+        `The standalone client is missing ${target}. Run pnpm desktop:build.`,
+      );
+  }
 }
 
 export function resolveCoreMigrationRunner(packageDirectory) {

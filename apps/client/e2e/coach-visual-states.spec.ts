@@ -115,6 +115,39 @@ test("workspace sidebar keeps navigation, chat groups and account in a compact s
   await expect(sidebar.getByRole("button", { name: "搜索对话" })).toBeVisible();
 });
 
+test("the coach conversation has no standalone workout toolbar action", async ({ page }) => {
+  await openCoachFixture(page, undefined, { empty: true });
+  await expect(page.getByRole("button", { name: "计划外", exact: true })).toHaveCount(0);
+});
+
+test("collapsing the workspace does not reveal previously hovered navigation tooltips", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Expanded desktop sidebar");
+  await openCoachFixture(page, undefined, { empty: true });
+
+  const sidebar = page.locator("#workspace-sidebar");
+  const plan = sidebar.getByRole("link", { name: "计划", exact: true });
+  const calendar = sidebar.getByRole("link", { name: "日历", exact: true });
+  const navigationTooltips = page.getByRole("tooltip", { name: /^(计划|日历)$/ });
+
+  await plan.hover();
+  await calendar.hover();
+  await expect(navigationTooltips).toHaveCount(0);
+  await page.getByRole("button", { name: "收起侧边栏" }).click();
+  await expect(sidebar.locator("[data-sidebar-collapsed]")).toHaveAttribute(
+    "data-sidebar-collapsed",
+    "true",
+  );
+  await expect(navigationTooltips).toHaveCount(0, { timeout: 1_000 });
+
+  await calendar.hover();
+  await expect(navigationTooltips).toHaveText("日历");
+  await page.keyboard.press("Escape");
+  await expect(navigationTooltips).toHaveCount(0);
+
+  await plan.focus();
+  await expect(navigationTooltips).toHaveText("计划");
+});
+
 test("workspace usage shows the share of subscription credits used and a compact summary", async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop usage panel");
   await page.clock.setFixedTime(new Date("2026-11-22T05:00:00Z"));

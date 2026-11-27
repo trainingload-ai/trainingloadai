@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   getPlanTemplateRecommendation,
@@ -97,8 +97,7 @@ export function PlanTemplateGoalPage({ goal }: { goal: RunPlanTemplateGoal }) {
                     {template.trainingDaysPerWeek}×
                   </span>
                   {recommended ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                      <Sparkles className="size-3.5" />
+                    <span className="text-xs font-bold text-success">
                       {locale.startsWith("zh") ? "为你推荐" : "Recommended"}
                     </span>
                   ) : null}
@@ -132,18 +131,20 @@ export function PlanTemplateGoalPage({ goal }: { goal: RunPlanTemplateGoal }) {
                     />
                   </div>
                 ) : null}
-                <Button
-                  asChild
-                  className="mt-6 w-full"
-                  variant={recommended ? "default" : "outline"}
-                >
-                  <Link href={`/plans/templates/${template.slug}`}>
-                    {locale.startsWith("zh")
-                      ? "查看完整计划"
-                      : "View full plan"}
-                    <ArrowRight className="ml-2 size-4" />
-                  </Link>
-                </Button>
+                <footer className="mt-auto pt-6">
+                  <Button
+                    asChild
+                    className="w-full"
+                    variant={recommended ? "default" : "outline"}
+                  >
+                    <Link href={`/plans/templates/${template.slug}`}>
+                      {locale.startsWith("zh")
+                        ? "查看完整计划"
+                        : "View full plan"}
+                      <ArrowRight className="ml-2 size-4" />
+                    </Link>
+                  </Button>
+                </footer>
               </article>
             );
           })}

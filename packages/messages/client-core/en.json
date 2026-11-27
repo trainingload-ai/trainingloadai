@@ -6465,8 +6465,7 @@
       "description": "Select one or more disciplines; strength can support the primary goal."
     },
     "trainingIntent": {
-      "title": "Training intent",
-      "description": "Tell AI what this cycle should solve."
+      "title": "Training intent"
     },
     "raceInfo": {
       "title": "Race info",
@@ -6482,9 +6481,8 @@
     },
     "strength": {
       "title": "Strength support",
-      "description": "AI schedules separate strength workouts around your goal, equipment, and recovery constraints.",
       "preference": {
-        "AUTO": "Let AI decide",
+        "AUTO": "Coach recommendation",
         "INCLUDE": "Include strength",
         "EXCLUDE": "Exclude strength"
       },
@@ -7258,10 +7256,11 @@
   },
   "PlanStartConversation": {
     "title": "Prepare to start",
-    "description": "Choose a start date to check how this plan fits your current training state.",
+    "description": "Choose a start date. If your coach finds the plan suitable, it will start automatically on that date.",
     "dateLabel": "Start date",
     "dateHint": "The date starts an assessment. Your plan starts only after you confirm the coach’s proposal.",
-    "evaluate": "Assess and start",
+    "evaluate": "Ask coach to assess",
+    "directStart": "Start directly",
     "changeDate": "Change date",
     "pendingCalendar": "Calendar awaiting assessment",
     "evaluatePrompt": "I’d like to start this saved plan on {date} ({timeZone}). Please review the full schedule with my recent training and current condition, ask any essential questions, and prepare a proposal for me to confirm.",
@@ -7279,7 +7278,7 @@
     "conflictHeading": "Schedule conflict in original plan",
     "insufficientDataHeading": "Limited training data",
     "missingEvidenceLabel": "Missing evidence",
-    "versionConflict": "This draft was updated. Reload the latest schedule to re-evaluate.",
+    "versionConflict": "The draft has changed. Reload the latest schedule before starting.",
     "reloadDraft": "Reload latest draft",
     "assessmentFailed": "Assessment failed. Your draft and selected date are preserved—please retry.",
     "confirmFailed": "Unable to start the plan. Please try again.",
@@ -7404,7 +7403,6 @@
     "shortTitle": "Rolling plan",
     "availabilityTitle": "Training availability",
     "availability": "{weeklyDays} days per week · up to {dailyMinutes} minutes per day",
-    "creationHint": "Your coach will draft a starter week. Once you pick a start date, review the first week and confirm what the coach can manage automatically.",
     "firstWeekPreview": "Starter week preview",
     "title": "Continuous training plan",
     "description": "Automatically plan and adapt to your goals, availability, and training.",

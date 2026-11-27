@@ -211,7 +211,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }) {
               }
             >
               {usesDesktopWorkspaceTitleBar ? <DesktopWorkspaceTitleBar /> : null}
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background tablet:my-1.5 tablet:me-1.5 tablet:rounded-surface tablet:border tablet:border-border/45">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background tablet:mb-1.5 tablet:me-1.5 tablet:rounded-surface tablet:border tablet:border-border/45">
                 {!usesDesktopTitleBar ? <WorkspaceToolbar /> : null}
                 <MobileTopBarContent
                   id="main-content"

@@ -70,7 +70,7 @@ describe('presentCoachPlanDraftTool competition integration', () => {
       planSuitability: { latest: { assessmentId: 'test', skillName: 'plan-builder', status: 'READY',
         constraints: { ...limits, periodWeeks: 1, maxMinutesByIsoWeekday: { 1: 45, 3: 45 }, strengthPreference: 'AUTO' } } },
     } as unknown as AiToolContext;
-    const workout = { dayIndex: 1, weekIndex: 1, sportType: 'RUN', text: 'warmup 10m\nrepeat 4 {\n work 5m\n recovery 2m\n}\ncooldown 8m', notes: 'Run four tempo intervals with jogging recoveries.' };
+    const workout = { dayIndex: 1, weekIndex: 1, sportType: 'RUN', text: 'warmup 10m\nrepeat 4 {\n work 6m\n recovery 3m\n}\ncooldown 10m', notes: 'Run four tempo intervals with jogging recoveries.' };
     const draft = { title: 'Base week', periodWeeks: 1, qualityContract: { ...limits, startDate: '2026-12-02' }, workouts: [workout] };
     const tooLong = await presentCoachPlanDraftTool.validateInput!(ctx, draft);
     expect(tooLong).toMatchObject({ ok: false, modelRepair: expect.stringContaining('daily cap 45m') });
@@ -440,7 +440,7 @@ describe('presentCoachPlanDraftTool competition integration', () => {
     const input = {
       title: 'Build a running habit', assessmentId, periodWeeks: 8, qualityContract: limits,
       sessionTemplates: [{ id: 'walkrun_1_2', name: 'Walk and run', sportType: 'RUN', structureKind: 'ENDURANCE',
-        text: 'warmup 5m\nrepeat 8 {\n  work 1m\n  recovery 2m\n}\ncooldown 5m', notes: 'Start and finish with five minutes of easy walking.' }],
+        text: 'warmup 5m\nrepeat 9 {\n  work 1m\n  recovery 2m\n}\ncooldown 5m', notes: 'Start and finish with five minutes of easy walking.' }],
       workouts: [{ weekIndexes, dayIndex: 1, templateId: 'walkrun_1_2' },
         { weekIndexes, dayIndex: 4, templateId: 'walkrun_1_2', name: '10 km test' }],
     };
@@ -451,16 +451,16 @@ describe('presentCoachPlanDraftTool competition integration', () => {
     expect(visible).toContain('walkrun_1_2');
     for (const code of ['WEEK_TARGET_DURATION', 'DAILY_TIME_BUDGET', 'GOAL_BENCHMARK_MISMATCH'])
       expect(visible).toContain(code);
-    expect(visible).toMatch(/34\s*m/);
-    expect(visible).toMatch(/68\s*m/);
-    expect(visible).toContain('cut 8–18m');
+    expect(visible).toMatch(/37\s*m/);
+    expect(visible).toMatch(/74\s*m/);
+    expect(visible).toContain('cut 14–24m');
     expect(visible).toContain('repairWeeks');
     expect(archive.mock.calls[0][0]).toMatchObject({ candidate: input, modelRepair: (result as { error: string }).error,
       diagnostics: { repairableWeeks: weekIndexes } });
     expect(archive.mock.calls[0][0].feedback).toHaveLength(32);
     expect(archive.mock.calls[0][0].feedback).toContainEqual(expect.objectContaining({
       code: 'WEEK_TARGET_DURATION', mainWorkouts: expect.arrayContaining([
-        expect.objectContaining({ durationSeconds: 2040, dayIndex: 1 }),
+        expect.objectContaining({ durationSeconds: 2220, dayIndex: 1 }),
       ]),
     }));
   });
@@ -836,23 +836,34 @@ exercise "Push-Up" {
 describe('whole-day interval budget feedback', () => {
   const interval = {
     weekIndex: 1, dayIndex: 1, name: '30-minute run-walk', notes: 'Walk, then run easy repeats.',
-    text: 'warmup 5m\nrepeat 3 {\n  work 7m\n  recovery 2m\n}\ncooldown 3m',
+    text: 'warmup 5m\nrepeat 3 {\n  work 7m\n  recovery 2m\n}\ncooldown 4m',
   };
   it.each([
-    { extra: [], remaining: '22m' },
-    { extra: [{ weekIndex: 1, dayIndex: 1, sessionIndex: 2, text: 'work 5m', notes: 'Short spin.' }], remaining: '17m' },
+    { extra: [], remaining: '21m' },
+    { extra: [{ weekIndex: 1, dayIndex: 1, sessionIndex: 2, text: 'work 5m', notes: 'Short spin.' }], remaining: '16m' },
   ])('explains the actual repeats and the time left under the daily cap ($remaining)', async ({ extra, remaining }) => {
     const result = await presentCoachPlanDraftTool.validateInput!({ session: null, workoutDefinitions } as never, {
       title: 'Habit-building', periodWeeks: 1, qualityContract: { maxDailyMinutes: 30 }, workouts: [interval, ...extra],
     });
-    expect(result).toMatchObject({ ok: false, modelRepair: expect.stringContaining('5m + 3 × (7m + 2m) + 3m = 35m') });
+    expect(result).toMatchObject({ ok: false, modelRepair: expect.stringContaining('5m + 3 × (7m + 2m) + 4m = 36m') });
     if (!result.ok) expect(result.modelRepair).toContain(`at most ${remaining} for all repeats`);
+  });
+
+  it('keeps the timed interval breakdown equation when a prescription includes cooldown 0m', async () => {
+    const result = await presentCoachPlanDraftTool.validateInput!({ session: null, workoutDefinitions } as never, {
+      title: 'Zero cooldown breakdown', periodWeeks: 1, qualityContract: { maxDailyMinutes: 25 },
+      workouts: [{
+        weekIndex: 1, dayIndex: 2, name: 'Long repeats', notes: 'Two 12-minute aerobic blocks.',
+        text: 'warmup 3m\nrepeat 2 {\n  work 12m\n  recovery 2m\n}\ncooldown 0m',
+      }],
+    });
+    expect(result).toMatchObject({ ok: false, modelRepair: expect.stringContaining('3m + 2 × (12m + 2m) + 0s = 31m') });
   });
 });
 
 describe('time edits constrained by both the day and the whole week', () => {
   const id = 'd8a4055e-0e1a-4905-9066-117cd6bd2131';
-  const tempo = 'warmup 10m\nrepeat 3 {\n  work 8m\n  recovery 2m\n}\ncooldown 11m';
+  const tempo = 'warmup 10m\nrepeat 3 {\n  work 8m\n  recovery 2m\n}\ncooldown 13m';
   const workout = (dayIndex: number, text: string, sessionIndex = 1) => ({
     weekIndex: 1, dayIndex, sessionIndex, text, notes: 'Keep the prescribed effort.', sportType: 'RUN', structureKind: 'ENDURANCE',
   });
@@ -869,12 +880,12 @@ describe('time edits constrained by both the day and the whole week', () => {
   }
   it('offers the closest whole-minute cooldown within the athlete’s daily and weekly limits', async () => {
     const message = await reject(tempo);
-    expect(message).toMatch(/cooldown 11m → 5m.*day 45m, week 125m/);
+    expect(message).toMatch(/cooldown 13m → 5m.*day 45m, week 125m/);
     expect(message).toContain('1–5m');
   });
   it('deducts a second session that day and never reduces a segment to zero', async () => {
     const message = await reject(tempo, [workout(6, 'work 4m', 2)]);
-    expect(message).toMatch(/cooldown 11m → 1m.*day 45m, week 125m/);
+    expect(message).toMatch(/cooldown 13m → 1m.*day 45m, week 125m/);
     expect(message).not.toMatch(/→ 0m/);
   });
   it('leaves the arithmetic to the coach when there is an untimed distance session that week', async () => {
@@ -883,26 +894,26 @@ describe('time edits constrained by both the day and the whole week', () => {
     expect(message).not.toContain('one-slot option');
   });
   it('reports both over-budget days without suggesting a single edit would fix both', async () => {
-    const message = await reject(tempo, [workout(1, 'work 10m', 2)]);
+    const message = await reject(tempo, [workout(1, 'work 13m', 2)]);
     expect(message).toContain('W1/D1');
     expect(message).toContain('W1/D6');
     expect(message).not.toContain('one-slot option');
   });
   it('allocates a combined budget for three over-limit days, adding multiple sessions on the same day', async () => {
-    const message = await reject(tempo, [workout(1, 'work 10m', 2), workout(3, 'work 12m', 2)]);
+    const message = await reject(tempo, [workout(1, 'work 13m', 2), workout(3, 'work 15m', 2)]);
     expect(message).toContain('change together: D1 ≤45m, D3 ≤45m, D6 ≤45m; combined 120m–135m');
     expect(message).not.toContain('one-slot option');
   });
   it('preserves a recovery after the final work rep when the original workout includes one', async () => {
-    const message = await reject(['warmup 5m', ...Array(8).fill('work 4m\nrecovery 1m'), 'cooldown 5m'].join('\n'));
-    expect(message).toContain('8 × 4m + 8 × 1m');
-    expect(message).toContain('8→7 work reps (7 rests), day 45m, week 125m');
+    const message = await reject(['warmup 5m', ...Array(9).fill('work 4m\nrecovery 1m'), 'cooldown 5m'].join('\n'));
+    expect(message).toContain('9 × 4m + 9 × 1m');
+    expect(message).toContain('9→7 work reps (7 rests), day 45m, week 125m');
   });
   it('keeps equally timed work steps with different intensity targets separate', async () => {
-    const message = await reject('warmup 5m\nwork 15m hr z2\nrecovery 5m\nwork 15m hr z3\nrecovery 5m\ncooldown 5m');
+    const message = await reject('warmup 5m\nwork 18m hr z2\nrecovery 5m\nwork 18m hr z3\nrecovery 5m\ncooldown 5m');
     expect(message).toContain('DAILY_TIME_BUDGET');
     expect(message).not.toContain('work reps');
-    expect(message).not.toContain('2 × 15m');
+    expect(message).not.toContain('2 × 18m');
   });
   it('gives the duration delta when a single edit cannot satisfy the daily and weekly constraints', async () => {
     const message = await reject(tempo, [], { min: 130, max: 135 });

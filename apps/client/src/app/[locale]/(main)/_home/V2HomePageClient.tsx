@@ -369,8 +369,8 @@ function LoadComparisonChart({
     (point) => point.actual > 0 || point.planned > 0,
   );
   const weeklySummary = useMemo(
-    () => buildHomeWeeklySummary(plannedWorkouts),
-    [plannedWorkouts],
+    () => buildHomeWeeklySummary(plannedWorkouts, dateKeys),
+    [plannedWorkouts, dateKeys],
   );
   const weeklyActualSummary = useMemo(
     () => buildHomeWeeklyActualSummary(chartPoints),

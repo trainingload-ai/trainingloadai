@@ -102,4 +102,43 @@ describe("home scheduled workout contract", () => {
       expect(home.activePlan?.id ?? null).toBe(hasPlan ? "plan" : null);
     },
   );
+
+  it.each([
+    { today: "2026-11-27", currentWeekIds: [] },
+    { today: "2026-12-01", currentWeekIds: ["first", "legacy", "sunday"] },
+  ])("uses the calendar week for a fixed plan on $today", async ({ today, currentWeekIds }) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(`${today}T01:00:00Z`));
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const { pathname } = new URL(String(input));
+      if (pathname === "/plans/active") {
+        return Response.json({ data: { plan: {
+          id: "plan",
+          title: "Fixed plan",
+          planningMode: "FIXED",
+          startDate: "2026-11-30",
+          currentWeekIndex: 1,
+          workouts: [
+            { ...independent, id: "next-monday", scheduledDate: "2026-12-07" },
+            { ...independent, id: "sunday", scheduledDate: "2026-12-06", weekIndex: 2 },
+            { ...independent, id: "legacy", scheduledDate: null, dayOffset: 2 },
+            { ...independent, id: "first", scheduledDate: "2026-12-01" },
+          ],
+        } } });
+      }
+      if (pathname === "/users/profile") {
+        return Response.json({ data: { timezone: "Asia/Shanghai" } });
+      }
+      return Response.json({ data: null });
+    }));
+
+    const response = await GET(new NextRequest("http://client.test/api/v2/home", {
+      headers: { cookie: "better-auth.session_token=synthetic" },
+    }));
+    const home = await response.json();
+    expect(home.activePlan.currentWeekIndex).toBe(1);
+    expect(home.activePlan.currentWeekWorkouts.map((workout: { id: string }) => workout.id))
+      .toEqual(currentWeekIds);
+    expect(home.activePlan.nextWorkout.scheduledDate).toBe("2026-12-01");
+  });
 });

@@ -50,7 +50,7 @@ enum RecordingDesignTokens {
     static let zinc800 = "#27272A"
     static let zinc900 = "#18181B"
     static let zinc950 = "#09090B"
-    static let neutral100 = "#ECEEE8"
+    static let neutral100 = "#E5E8DF"
     static let neutral950 = "#0A0A0A"
     static let stone50 = "#FAFAF9"
     static let stone100 = "#F5F5F4"
