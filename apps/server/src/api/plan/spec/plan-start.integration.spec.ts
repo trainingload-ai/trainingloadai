@@ -89,6 +89,7 @@ describe('saved draft START / PostgreSQL', () => {
       sourceWorkout?: boolean;
       sourceMetadata?: Prisma.InputJsonValue;
       dayIndex?: number;
+      durationMinutes?: number;
       calendarTimeZone?: string;
       override?: Pick<
         PlanSupersessionPreviewRequest,
@@ -165,7 +166,7 @@ describe('saved draft START / PostgreSQL', () => {
             weekIndex: 1,
             dayIndex: args.dayIndex ?? 1,
             sportType: 'RUN',
-            text: 'work 25m',
+            text: `work ${args.durationMinutes ?? 25}m`,
           },
         ],
       },
@@ -343,12 +344,13 @@ describe('saved draft START / PostgreSQL', () => {
   );
 
   it.each([
-    { before: 40, after: 20, restDays: [], issue: 'DAILY_TIME_BUDGET' },
-    { before: 40, after: 40, restDays: [1], issue: 'FIXED_REST_DAY' },
-    { before: 20, after: 40, restDays: [], issue: null },
+    { before: 40, after: 20, duration: 26, restDays: [], issue: 'DAILY_TIME_BUDGET' },
+    { before: 40, after: 20, duration: 25, restDays: [], issue: null },
+    { before: 40, after: 40, duration: 25, restDays: [1], issue: 'FIXED_REST_DAY' },
+    { before: 20, after: 40, duration: 26, restDays: [], issue: null },
   ])(
-    'uses the inherited rule version effective on each replacement date ($issue)',
-    async ({ before, after, restDays, issue }) => {
+    'uses the inherited rule version after a budget change from $before to $after min for a $duration min workout ($issue)',
+    async ({ before, after, duration, restDays, issue }) => {
       const date = '2099-11-22';
       const nextDate = '2099-11-23';
       const scheduleConstraints: ScheduleConstraints = {
@@ -373,6 +375,7 @@ describe('saved draft START / PostgreSQL', () => {
       ) as Prisma.InputJsonValue;
       const { apply, preview } = await supersession(date, {
         dayIndex: 2,
+        durationMinutes: duration,
         sourceMetadata,
       });
       expect(preview.presentation.scheduleRulePeriods).toMatchObject([
