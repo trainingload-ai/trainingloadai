@@ -19,6 +19,7 @@ import { FitnessEvidenceRevisionDriftError } from '@/analyze/chronological-activ
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { NotificationRepository } from '@/notification/persistence/notification.repository';
 import { ActivityImportDraftService } from '@/api/activity/activity-import-draft.service';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 
 jest.mock('@/api/activity/activity.service', () => ({
   ActivityService: class {},
@@ -508,6 +509,246 @@ describe('durable user post-process coalescing', () => {
       await db.importBatchJob.findUnique({ where: { id: row.batch.id } }),
     ).toMatchObject({ status: 'POST_PROCESSING', successCount: 1 });
   });
+
+  it('replays through the last accepted activity and rejects imports beyond 24 hours across retry and pagination', async () => {
+    const now = new Date('2026-01-15T12:00:00.000Z');
+    const boundary = at(now, 86_400_000);
+    const row = await seed({ createdAt: at(new Date(), -30_000), from: now });
+    const addActivity = async (position: number, startTime: Date) => {
+      const activity = await db.activity.create({
+        data: {
+          userId: 'athlete-a',
+          hashId: `future-import-${position}`,
+          sportType: 'RUN',
+          startTime,
+          processingStatus: 'ANALYZING',
+          createdByBatchJobId: row.batch.id,
+        },
+      });
+      await db.importItemJob.create({
+        data: {
+          batchJobId: row.batch.id,
+          userId: 'athlete-a',
+          sourceObjectId: row.item.sourceObjectId,
+          sourceKind: 'FILE',
+          sourceUid: `future-import-${position}`,
+          activityId: activity.id,
+          position,
+          status: 'DONE',
+        },
+      });
+      return activity.id;
+    };
+    const near = await addActivity(1, at(now, 2 * 3_600_000));
+    const exact = await addActivity(2, boundary);
+    const invalid = await addActivity(3, at(boundary, 1));
+    await db.importItemJob.create({
+      data: {
+        batchJobId: row.batch.id,
+        userId: 'athlete-a',
+        sourceObjectId: row.item.sourceObjectId,
+        sourceKind: 'FILE',
+        sourceUid: 'reused-future-activity',
+        activityId: invalid,
+        position: 4,
+        status: 'DONE',
+        analysisRequired: false,
+      },
+    });
+    await db.importBatchJob.update({
+      where: { id: row.batch.id },
+      data: { totalCount: 5, successCount: 5 },
+    });
+    await db.userPostProcessJob.update({
+      where: { id: row.post!.id },
+      data: { recomputeFrom: at(now, 1_000), recomputeTo: at(boundary, 1) },
+    });
+
+    const replay = jest
+      .fn(async (request: Record<string, unknown>) => {
+        await db.activity.updateMany({
+          where: { id: { in: request.includeActivityIds as number[] } },
+          data: { processingStatus: 'READY' },
+        });
+        return {
+          runId: 'future-replay',
+          completed: true,
+          nextCheckpoint: null,
+        };
+      })
+      .mockRejectedValueOnce(new Error('retry the replay'))
+      .mockImplementationOnce(async () => {
+        await db.activity.updateMany({
+          where: { id: { in: [row.activity.id, near] } },
+          data: { processingStatus: 'READY' },
+        });
+        const nextCheckpoint = {
+          nextEffectiveFrom: boundary.toISOString(),
+          lastActivityId: near,
+        };
+        await db.userPostProcessJob.update({
+          where: { id: row.post!.id },
+          data: { replayCheckpoint: nextCheckpoint },
+        });
+        return {
+          runId: 'future-replay',
+          completed: false,
+          nextCheckpoint: null,
+        };
+      });
+    const { worker } = scheduler(replay);
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(now.getTime());
+    try {
+      const [first] = await worker.claimBatch(1);
+      await worker.processJob(first);
+      expect(replay).toHaveBeenCalledWith(
+        expect.objectContaining({
+          effectiveFrom: now,
+          effectiveTo: boundary,
+          includeActivityIds: expect.arrayContaining([
+            row.activity.id,
+            near,
+            exact,
+          ]),
+        }),
+      );
+      expect(replay.mock.calls[0][0].includeActivityIds).not.toContain(invalid);
+      expect(
+        await db.importItemJob.count({
+          where: {
+            activityId: invalid,
+            status: 'DEAD',
+            lastErrorCode: 'IMPORT_ACTIVITY_START_IN_FUTURE',
+          },
+        }),
+      ).toBe(2);
+      expect(
+        await db.activity.findUnique({ where: { id: invalid } }),
+      ).toMatchObject({ processingStatus: 'FAILED' });
+
+      clock.mockReturnValue(now.getTime() + 1_000);
+      const [second] = await worker.claimBatch(1);
+      await worker.processJob(second);
+      expect(replay.mock.calls[1][0]).toMatchObject({ effectiveTo: boundary });
+      expect(replay.mock.calls[1][0].includeActivityIds).not.toContain(invalid);
+      const [third] = await worker.claimBatch(1);
+      await worker.processJob(third);
+      expect(replay.mock.calls[2][0]).toMatchObject({
+        effectiveFrom: boundary,
+        effectiveTo: boundary,
+      });
+      expect(replay.mock.calls[2][0].includeActivityIds).not.toContain(invalid);
+      expect(
+        await db.activity.count({
+          where: {
+            id: { in: [row.activity.id, near, exact] },
+            processingStatus: 'READY',
+          },
+        }),
+      ).toBe(3);
+      expect(
+        await db.importBatchJob.findUnique({ where: { id: row.batch.id } }),
+      ).toMatchObject({
+        status: 'PARTIAL_FAILED',
+        successCount: 3,
+        failedCount: 2,
+      });
+      expect(
+        await batches.getBatchSummary(row.batch.id, 'athlete-a'),
+      ).toMatchObject({
+        counts: {
+          readyActivities: 3,
+          processingActivities: 0,
+          analysisFailedActivities: 0,
+        },
+      });
+      expect(await db.notification.findMany()).toMatchObject([
+        { kind: 'IMPORT_BATCH_PARTIAL_FAILED' },
+      ]);
+      expect(
+        (await batches.getBatchItems(row.batch.id, 'athlete-a')).items[3],
+      ).toMatchObject({
+        lastError: 'common.error.import_activity_start_in_future',
+      });
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it('does not claim coverage for a sibling whose activity moved into the future', async () => {
+    const now = new Date();
+    const later = at(now, 6 * 3_600_000);
+    const earlier = at(now, 2 * 3_600_000);
+    const leader = await seed({ createdAt: at(now, -10_000), from: later });
+    const sibling = await seed({
+      createdAt: at(now, -5_000),
+      from: at(now, -30_000),
+    });
+    await db.activity.update({
+      where: { id: sibling.activity.id },
+      data: { startTime: earlier },
+    });
+    const { worker, replay } = scheduler();
+    const [first] = await worker.claimBatch(1, now);
+    expect(first.id).toBe(leader.post!.id);
+    await worker.processJob(first);
+    expect(replay.mock.calls[0][0]).toMatchObject({
+      effectiveTo: later,
+      includeActivityIds: [leader.activity.id],
+    });
+    const [second] = await worker.claimBatch(1, now);
+    expect(second.id).toBe(sibling.post!.id);
+    await worker.processJob(second);
+    expect(replay.mock.calls[1][0]).toMatchObject({
+      effectiveTo: earlier,
+      includeActivityIds: [sibling.activity.id],
+    });
+  });
+
+  concurrent(
+    'takes the fitness lock before writing an out-of-range activity',
+    async () => {
+      const now = new Date();
+      const row = await seed({
+        createdAt: at(now, -30_000),
+        from: at(now, 2 * 86_400_000),
+      });
+      const [job] = await scheduler().worker.claimBatch(1, now);
+      const locked = Promise.withResolvers<void>();
+      const release = Promise.withResolvers<void>();
+      const replay = db.$transaction(async (tx) => {
+        await lockFitnessUser(tx, job.userId);
+        locked.resolve();
+        await release.promise;
+        await tx.$queryRaw`SELECT id FROM t_activity WHERE id = ${row.activity.id} FOR UPDATE NOWAIT`;
+      });
+      await Promise.race([locked.promise, replay]);
+      const rejection = jobs.rejectFutureActivities({
+        ...job,
+        jobId: job.id,
+        cutoff: at(now, 86_400_000),
+      });
+      try {
+        let waitingForLock = false;
+        for (let attempt = 0; attempt < 50 && !waitingForLock; attempt++) {
+          const [lock] = await db.$queryRaw<Array<{ waiting: boolean }>>`
+          SELECT EXISTS(SELECT 1 FROM pg_locks
+            WHERE locktype = 'advisory' AND NOT granted) AS waiting
+        `;
+          waitingForLock = lock.waiting;
+          if (!waitingForLock)
+            await new Promise((done) => setTimeout(done, 10));
+        }
+        expect(waitingForLock).toBe(true);
+      } finally {
+        release.resolve();
+        await Promise.all([replay, rejection]);
+      }
+      expect(
+        await db.activity.findUnique({ where: { id: row.activity.id } }),
+      ).toMatchObject({ processingStatus: 'FAILED' });
+    },
+  );
 
   it('recovers a historical terminal batch at startup and respects the recovery interval', async () => {
     const now = new Date();

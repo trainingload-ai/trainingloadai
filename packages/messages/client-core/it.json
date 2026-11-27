@@ -2722,6 +2722,7 @@
     "uploadFailed": "Caricamento non riuscito",
     "unknownError": "Errore sconosciuto",
     "importProgress": {
+      "activityStartInFuture": "L’attività inizia tra più di 24 ore. Verifica l’ora di inizio e importala di nuovo.",
       "processingFailed": "Non è stato possibile completare l’elaborazione del file. Riprova più tardi o contatta l’assistenza se il problema persiste.",
       "title": "Importazione",
       "description": "I tuoi file sono stati in coda per l'importazione. Puoi continuare a navigare mentre li elaboriamo in background.",

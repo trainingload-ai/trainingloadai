@@ -69,6 +69,8 @@ export type ChronologicalReplayRequest = {
   sourceJobId: string;
   effectiveFrom: Date;
   effectiveTo?: Date | null;
+  /** Cover selected activities' end events while keeping effectiveTo as the latest eligible start. */
+  includeActivityEnds?: boolean;
   priority?: number;
   dataRepair?: boolean;
   includeActivityIds?: readonly number[];
@@ -398,9 +400,17 @@ export class ChronologicalActivityReplayService {
     const evidenceLookbackStart = new Date(
       request.effectiveFrom.getTime() - 180 * 86_400_000,
     );
+    const activityPage = this.loadCausallyClosedActivityPage(request, replayTo);
+    const evidenceThrough = request.includeActivityEnds
+      ? activityPage.then((page) =>
+          page.replayTo > replayTo ? page.replayTo : replayTo,
+        )
+      : Promise.resolve(replayTo);
     const [metricRows, priorActivities, page, autoUpdateVersions] =
       await Promise.all([
-        this.users.listTimelineFitnessMetrics(request.userId, replayTo),
+        evidenceThrough.then((through) =>
+          this.users.listTimelineFitnessMetrics(request.userId, through),
+        ),
         this.prisma.activity.findMany({
           where: readyActivityWhere({
             userId: request.userId,
@@ -418,8 +428,10 @@ export class ChronologicalActivityReplayService {
             elapsedTime: true,
           },
         }),
-        this.loadCausallyClosedActivityPage(request, replayTo),
-        this.analysisConfigs.listAutoUpdateVersions(request.userId, replayTo),
+        activityPage,
+        evidenceThrough.then((through) =>
+          this.analysisConfigs.listAutoUpdateVersions(request.userId, through),
+        ),
       ]);
     if ((await this.readRevision(request.userId)) !== initialRevision) {
       throw new FitnessEvidenceRevisionDriftError();
@@ -955,7 +967,10 @@ export class ChronologicalActivityReplayService {
     if (!next?.startTime) {
       return {
         activities: selected,
-        replayTo: requestedReplayTo,
+        replayTo:
+          request.includeActivityEnds && causalCutoff > requestedReplayTo
+            ? causalCutoff
+            : requestedReplayTo,
         nextCheckpoint: null,
       };
     }

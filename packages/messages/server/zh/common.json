@@ -237,6 +237,7 @@
     "polar_webhook_signature_invalid": "Polar webhook 签名无效",
     "polar_webhook_secret_missing": "Polar webhook secret 未配置",
     "polar_webhook_raw_body_missing": "无法获取原始请求体，无法校验 webhook 签名",
+    "import_activity_start_in_future": "活动开始时间比当前时间晚了超过 24 小时。请核对开始时间后重新导入。",
     "import_identity_conflict": "活动归属存在冲突，请联系支持人员处理此次导入。",
     "intervals_icu_athlete_identity_missing": "无法确认 Intervals.icu 账号身份，请重新授权。"
   },

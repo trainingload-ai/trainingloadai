@@ -2814,6 +2814,7 @@
     "uploadFailed": "上載失敗",
     "unknownError": "未知錯誤",
     "importProgress": {
+      "activityStartInFuture": "活動開始時間比目前時間晚了超過 24 小時。請核對開始時間後重新匯入。",
       "processingFailed": "系統暫時無法完成此檔案的處理，請稍後重試。若仍失敗，請聯絡技術支援。",
       "title": "匯入中",
       "description": "你嘅檔案已排入匯入隊列。我哋會喺背景處理，你可以繼續瀏覽。",

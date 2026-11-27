@@ -2721,6 +2721,7 @@
     "uploadFailed": "업로드 실패",
     "unknownError": "알 수 없는 오류",
     "importProgress": {
+      "activityStartInFuture": "활동 시작 시간이 현재보다 24시간 넘게 앞서 있습니다. 활동 시간을 확인한 후 다시 가져오세요.",
       "processingFailed": "이 파일의 처리를 완료하지 못했습니다. 나중에 다시 시도하고 문제가 계속되면 지원팀에 문의하세요.",
       "title": "가져오기",
       "description": "파일을 가져오기 위해 대기 중입니다. 백그라운드에서 처리하는 동안 계속 탐색할 수 있습니다.",

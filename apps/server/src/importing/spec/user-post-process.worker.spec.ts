@@ -19,7 +19,9 @@ function featureAccess(allowed: boolean) {
 }
 
 function createImportingJobs(prisma: unknown) {
-  return new ImportingJobService(importingJobRepository(prisma as never));
+  const jobs = new ImportingJobService(importingJobRepository(prisma as never));
+  jest.spyOn(jobs, 'rejectFutureActivities').mockResolvedValue(undefined);
+  return jobs;
 }
 
 function userQueries(prisma: Record<string, unknown>) {
@@ -560,6 +562,7 @@ describe('UserPostProcessWorkerService', () => {
     const prisma = {
       $transaction: jest.fn(async (callback: (tx: unknown) => unknown) =>
         callback({
+          $queryRaw: jest.fn(async () => []),
           userPostProcessJob: {
             updateMany: jest.fn(async () => ({ count: 0 })),
           },
@@ -603,6 +606,7 @@ describe('UserPostProcessWorkerService', () => {
     const refreshUserFitnessProfilePost = jest.fn();
     const emitAsync = jest.fn();
     const prisma = {
+      $queryRaw: jest.fn(async () => []),
       $transaction: jest.fn(async (callback: (tx: unknown) => unknown) =>
         callback(prisma as never),
       ),

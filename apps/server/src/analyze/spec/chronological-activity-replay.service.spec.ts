@@ -305,6 +305,35 @@ describe('ChronologicalActivityReplayService', () => {
     effectiveTo: new Date('2026-01-02T00:00:00.000Z'),
   };
 
+  it('reads and commits evidence through the end of an admitted future activity', async () => {
+    const start = new Date('2026-01-02T00:00:00.000Z');
+    const end = new Date('2026-01-02T01:00:00.000Z');
+    const pending = replayActivity(42, start.toISOString(), end.toISOString());
+    pending.processingStatus = 'ANALYZING';
+    const harness = replayHarness({ activities: [pending] });
+
+    const result = await harness.service.replay({
+      ...request,
+      effectiveFrom: start,
+      effectiveTo: start,
+      includeActivityEnds: true,
+      includeActivityIds: [42],
+    });
+
+    expect(result).toMatchObject({ completed: true, processedActivities: 1 });
+    expect(harness.users.listTimelineFitnessMetrics).toHaveBeenCalledWith(
+      'user-1',
+      end,
+    );
+    expect(harness.users.applyTimelineProjectionBatch).toHaveBeenCalledWith(
+      expect.objectContaining({ replaceFrom: start, replaceTo: end }),
+      expect.anything(),
+    );
+    expect(harness.observations.calculate).toHaveBeenCalledWith(
+      expect.objectContaining({ effectiveAt: end, eligibleActivityIds: [42] }),
+    );
+  });
+
   it('does not read high-frequency records when every calculation fingerprint hits', async () => {
     const harness = replayHarness();
 

@@ -44,6 +44,7 @@ import {
 
 const AI_REVIEW_ENQUEUE_CONCURRENCY = 3;
 const IMPORT_BATCH_RECOVERY_INTERVAL_MS = 5 * 60_000;
+const MAX_FUTURE_ACTIVITY_START_MS = 24 * 60 * 60_000;
 
 function jsonRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -504,6 +505,7 @@ export class UserPostProcessWorkerService
       leaseExpiresAt: null,
     };
     await this.prisma.$transaction(async (tx) => {
+      await this.importJobs.lockBatch(job.batchJobId, tx);
       if (!job.lockToken) {
         await this.importJobs.postProcessJobs(tx).update({
           where: { id: job.id },
@@ -640,6 +642,7 @@ export class UserPostProcessWorkerService
 
     const hasExportFailures = (args.exportOutcome?.failedCount ?? 0) > 0;
     const kind =
+      batch.failedCount > 0 ||
       batch.status === 'PARTIAL_FAILED' ||
       batch.status === 'FAILED' ||
       hasExportFailures
@@ -751,6 +754,7 @@ export class UserPostProcessWorkerService
   private async getBatchAnalysisActivityIds(args: {
     batchJobId: string;
     userId: string;
+    startedBy?: Date;
   }): Promise<number[]> {
     const doneItems = await this.importJobs.itemJobs().findMany({
       where: {
@@ -759,6 +763,9 @@ export class UserPostProcessWorkerService
         status: 'DONE',
         activityId: { not: null },
         analysisRequired: true,
+        ...(args.startedBy
+          ? { activity: { startTime: { lte: args.startedBy } } }
+          : {}),
       },
       select: { activityId: true },
     });
@@ -969,6 +976,7 @@ export class UserPostProcessWorkerService
     userId: string;
     effectiveFrom: Date;
     activityIds: number[];
+    now: Date;
   }) {
     const siblings = await this.listCoalescibleSiblingJobs(
       args.userId,
@@ -979,13 +987,17 @@ export class UserPostProcessWorkerService
     const covered: ReadySiblingPostProcessJob[] = [];
     for (const sibling of siblings) {
       const siblingFrom = sibling.recomputeFrom;
-      if (!siblingFrom) continue;
+      // Future timestamps are classified and replayed by the sibling's own job,
+      // so they remain in scope when that job resumes from its own page cursor.
+      if (!siblingFrom || (sibling.recomputeTo ?? siblingFrom) > args.now)
+        continue;
       if (siblingFrom.getTime() < effectiveFrom.getTime()) {
         effectiveFrom = siblingFrom;
       }
       const siblingActivityIds = await this.getBatchAnalysisActivityIds({
         batchJobId: sibling.batchJobId,
         userId: args.userId,
+        startedBy: args.now,
       });
       for (const activityId of siblingActivityIds) activityIds.add(activityId);
       covered.push(sibling);
@@ -1125,24 +1137,38 @@ export class UserPostProcessWorkerService
       const postProcessPolicy = importPostProcessPolicy(batch?.requestContext);
 
       const sportTypes = asSportTypes(row.affectedSportTypes);
-      const batchAnalysisActivityIds = await this.getBatchAnalysisActivityIds({
-        batchJobId: job.batchJobId,
-        userId: job.userId,
+      const now = new Date(Date.now());
+      const cutoff = new Date(now.getTime() + MAX_FUTURE_ACTIVITY_START_MS);
+      const loadActivityRange = (ids: number[]) =>
+        ids.length
+          ? this.prisma.activity.aggregate({
+              where: { id: { in: ids } },
+              _min: { startTime: true },
+              _max: { startTime: true },
+            })
+          : null;
+      await this.importJobs.rejectFutureActivities({
+        ...job,
+        jobId: job.id,
+        cutoff,
       });
-      const batchActivityRange = batchAnalysisActivityIds.length
-        ? await this.prisma.activity.aggregate({
-            where: { id: { in: batchAnalysisActivityIds } },
-            _min: { startTime: true },
-            _max: { startTime: true },
-          })
-        : null;
+      const batchAnalysisActivityIds =
+        await this.getBatchAnalysisActivityIds(job);
+      const batchActivityRange = await loadActivityRange(
+        batchAnalysisActivityIds,
+      );
+      const earliestActivity = batchActivityRange?._min.startTime;
+      const replayStart =
+        row.recomputeFrom &&
+        row.recomputeFrom <= cutoff &&
+        (!earliestActivity || row.recomputeFrom < earliestActivity)
+          ? row.recomputeFrom
+          : earliestActivity;
       const ownReplayFrom =
         replayCheckpointEffectiveFrom(row.replayCheckpoint) ??
-        row.recomputeFrom ??
-        batchActivityRange?._min.startTime ??
+        replayStart ??
         null;
-      const ownReplayTo =
-        row.recomputeTo ?? batchActivityRange?._max.startTime ?? ownReplayFrom;
+      const ownReplayTo = batchActivityRange?._max.startTime ?? ownReplayFrom;
       // 新导入的历史活动可能改变滚动指标，并继续影响批次之后已经存在的活动。
       // recomputeTo 只保留原批次审计范围，正确性重放必须检查完整后缀。
       const heavyActivityIds = batchAnalysisActivityIds;
@@ -1166,6 +1192,7 @@ export class UserPostProcessWorkerService
           userId: job.userId,
           effectiveFrom: ownReplayFrom,
           activityIds: batchAnalysisActivityIds,
+          now,
         });
         replayFrom = expanded.effectiveFrom;
         replayActivityIds = expanded.activityIds;
@@ -1213,13 +1240,14 @@ export class UserPostProcessWorkerService
       }
       if (!replayCovered && replayFrom && batchAnalysisActivityIds.length > 0) {
         const effectiveFrom = replayFrom;
-        const replayTo = new Date();
+        const replayTo = ownReplayTo && ownReplayTo > now ? ownReplayTo : now;
         const replayResult = await this.chronologicalReplay.replay({
           userId: job.userId,
           sourceJobType: 'USER_POST_PROCESS',
           sourceJobId: job.id,
           effectiveFrom,
           effectiveTo: replayTo,
+          includeActivityEnds: true,
           includeActivityIds: replayActivityIds,
           maxActivities: 100,
           sourceLockToken: job.lockToken,
@@ -1274,7 +1302,7 @@ export class UserPostProcessWorkerService
           userId: job.userId,
           sourceJobId: job.id,
           effectiveFrom,
-          satisfiedThrough: replayTo,
+          satisfiedThrough: now,
           siblings: coalescedSiblings,
         });
       }

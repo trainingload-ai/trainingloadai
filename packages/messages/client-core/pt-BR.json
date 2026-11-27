@@ -2722,6 +2722,7 @@
     "uploadFailed": "Falha no upload",
     "unknownError": "Erro desconhecido",
     "importProgress": {
+      "activityStartInFuture": "A atividade começa em mais de 24 horas. Confira o horário de início e importe novamente.",
       "processingFailed": "Não foi possível concluir o processamento deste arquivo. Tente novamente mais tarde ou entre em contato com o suporte se o problema persistir.",
       "title": "Importando",
       "description": "Seus arquivos foram colocados na fila para importação. Você pode continuar navegando enquanto os processamos em segundo plano.",

@@ -2962,6 +2962,7 @@
     "uploadFailed": "上传失败",
     "unknownError": "未知错误",
     "importProgress": {
+      "activityStartInFuture": "活动开始时间比当前时间晚了超过 24 小时。请核对开始时间后重新导入。",
       "processingFailed": "系统暂时无法完成此文件的处理，请稍后重试。若仍失败，请联系技术支持。",
       "title": "导入中",
       "description": "文件已提交到导入队列。你可以继续浏览页面，系统会持续处理这些文件。",

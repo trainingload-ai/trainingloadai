@@ -2722,6 +2722,7 @@
     "uploadFailed": "Échec du téléchargement",
     "unknownError": "Erreur inconnue",
     "importProgress": {
+      "activityStartInFuture": "L’activité commence dans plus de 24 heures. Vérifiez son heure de début et importez-la à nouveau.",
       "processingFailed": "Ce fichier n’a pas pu être traité. Réessayez plus tard ou contactez l’assistance si le problème persiste.",
       "title": "Importation",
       "description": "Vos fichiers ont été mis en file d'attente pour l'importation. Vous pouvez continuer à naviguer pendant que nous les traitons en arrière-plan.",

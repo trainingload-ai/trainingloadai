@@ -3041,6 +3041,7 @@
     "uploadFailed": "Upload failed",
     "unknownError": "Unknown error",
     "importProgress": {
+      "activityStartInFuture": "The activity starts more than 24 hours in the future. Check the activity time and import it again.",
       "processingFailed": "We couldn't finish processing this file. Please try again later, or contact support if the problem persists.",
       "title": "Importing",
       "description": "Your files have been queued for import. You can keep browsing while we process them in the background.",

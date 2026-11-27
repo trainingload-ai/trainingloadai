@@ -2722,6 +2722,7 @@
     "uploadFailed": "Error al subir",
     "unknownError": "Error desconocido",
     "importProgress": {
+      "activityStartInFuture": "La actividad comienza dentro de más de 24 horas. Comprueba la hora de inicio y vuelve a importarla.",
       "processingFailed": "No pudimos terminar de procesar este archivo. Inténtalo más tarde o contacta con soporte si el problema persiste.",
       "title": "Importador",
       "description": "Sus archivos han sido puestos en cola para su importación. Puedes seguir navegando mientras los procesamos en segundo plano.",

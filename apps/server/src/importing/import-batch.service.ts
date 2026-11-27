@@ -1,4 +1,8 @@
-import { ImportSourceObjectType, importJsonValue } from './import-item-job.types';
+import {
+  IMPORT_ACTIVITY_START_IN_FUTURE,
+  ImportSourceObjectType,
+  importJsonValue,
+} from './import-item-job.types';
 import type { IntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { createHash } from 'crypto';
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
@@ -1394,6 +1398,10 @@ export class ImportBatchService {
           where: {
             userId,
             createdByBatchJobId: batch.id,
+            // These activities already contribute to the batch's failed item count.
+            importItemJobs: {
+              none: { batchJobId: batch.id, status: 'DEAD', lastErrorCode: IMPORT_ACTIVITY_START_IN_FUTURE },
+            },
           },
           _count: { _all: true },
         })
@@ -1417,7 +1425,7 @@ export class ImportBatchService {
     );
     const processingActivities = Math.max(
       0,
-      batch._count.createdActivities -
+      activityProcessingStatusCounts.reduce((total, row) => total + row._count._all, 0) -
         readyActivities -
         analysisFailedActivities,
     );
@@ -1570,6 +1578,8 @@ export class ImportBatchService {
 }
 
 function importFailurePresentation(item: { outcome: string | null; lastErrorCode: string | null }) {
+  if (item.lastErrorCode === IMPORT_ACTIVITY_START_IN_FUTURE)
+    return { code: item.lastErrorCode, key: 'common.error.import_activity_start_in_future' as const };
   if (item.lastErrorCode === 'IMPORT_IDENTITY_CONFLICT')
     return { code: item.lastErrorCode, key: 'common.error.import_identity_conflict' as const };
   if (item.outcome === 'UPSTREAM_ACCESS_DENIED')

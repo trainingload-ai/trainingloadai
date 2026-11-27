@@ -180,3 +180,5 @@ export type ImportItemJobStatusExtra = {
   attempts?: number;
   startedAt?: Date | null;
 };
+export const IMPORT_ACTIVITY_START_IN_FUTURE =
+  'IMPORT_ACTIVITY_START_IN_FUTURE';

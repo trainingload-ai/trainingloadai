@@ -49,6 +49,16 @@ export class ImportingJobService {
     return this.jobs.recoverFinishedBatches();
   }
 
+  lockBatch(...args: Parameters<ImportingJobRepository['lockBatch']>) {
+    return this.jobs.lockBatch(...args);
+  }
+
+  rejectFutureActivities(
+    args: Parameters<ImportingJobRepository['rejectFutureActivities']>[0],
+  ) {
+    return this.jobs.rejectFutureActivities(args);
+  }
+
   batchJobs(tx?: Parameters<ImportingJobRepository['batchJobs']>[0]) {
     return this.jobs.batchJobs(tx);
   }

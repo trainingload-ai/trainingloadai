@@ -2722,6 +2722,7 @@
     "uploadFailed": "Der Upload ist fehlgeschlagen",
     "unknownError": "Unbekannter Fehler",
     "importProgress": {
+      "activityStartInFuture": "Die Aktivität beginnt mehr als 24 Stunden in der Zukunft. Prüfe die Startzeit und importiere sie erneut.",
       "processingFailed": "Diese Datei konnte nicht vollständig verarbeitet werden. Bitte versuche es später erneut oder kontaktiere den Support, wenn das Problem bestehen bleibt.",
       "title": "Importieren",
       "description": "Ihre Dateien wurden zum Import in die Warteschlange gestellt. Sie können weitersurfen, während wir sie im Hintergrund verarbeiten.",

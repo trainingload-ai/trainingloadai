@@ -482,7 +482,12 @@ export function ImportBatchProgressDialog({
                       <div className="mt-2 flex items-start gap-2 text-mobile-caption pc:text-xs text-red-600 dark:text-red-300">
                         <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                         <span className="break-words">
-                          {t("importProgress.processingFailed")}
+                          {t(
+                            item.lastErrorCode ===
+                              "IMPORT_ACTIVITY_START_IN_FUTURE"
+                              ? "importProgress.activityStartInFuture"
+                              : "importProgress.processingFailed",
+                          )}
                         </span>
                       </div>
                     )}
