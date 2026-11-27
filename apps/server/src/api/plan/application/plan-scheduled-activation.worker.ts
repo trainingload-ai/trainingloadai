@@ -5,7 +5,11 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { CoachContextService } from './coach-context.service';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
+import { PlanWriteSupport } from './plan-write.support';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { resolveSupportedLocale } from '@/utils/locale.util';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
@@ -20,6 +24,7 @@ const ACTIVATION_POLL_MS = 60_000;
 export class PlanScheduledActivationWorker {
   private readonly logger = new Logger(PlanScheduledActivationWorker.name);
   private running = false;
+  private reportedCompletionPreview = false;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -28,17 +33,26 @@ export class PlanScheduledActivationWorker {
     private readonly notifications: NotificationDomainService,
     @Optional() private readonly events?: EventEmitter2,
     @Optional() private readonly users?: UserQueryService,
+    @Optional() private readonly writer?: PlanWriteSupport,
   ) {}
 
   @Interval(ACTIVATION_POLL_MS)
-  async tick(): Promise<void> {
+  async tick(referenceTime = new Date()): Promise<void> {
     if (this.running) return;
     this.running = true;
     try {
+      if (this.writer && !this.reportedCompletionPreview) {
+        const { due, historical } =
+          await this.plans.previewFixedPlanCompletion(referenceTime);
+        this.logger.log(
+          `Fixed plan completion preflight: ${due} due, ${historical} expired before enablement`,
+        );
+        this.reportedCompletionPreview = true;
+      }
       const due = await this.plans.findMany({
         where: {
           status: 'SCHEDULED',
-          scheduledActivationAt: { lte: new Date() },
+          scheduledActivationAt: { lte: referenceTime },
           activationBlockedAt: null,
         },
         select: { id: true, userId: true },
@@ -47,10 +61,27 @@ export class PlanScheduledActivationWorker {
       });
       for (const candidate of due) {
         try {
-          await this.activate(candidate.id, candidate.userId);
+          await this.activate(candidate.id, candidate.userId, referenceTime);
         } catch (error) {
           this.logger.error(
             `Scheduled plan activation failed planId=${candidate.id}`,
+            error instanceof Error ? error.stack : String(error),
+          );
+        }
+      }
+      if (!this.writer) return;
+      for (const candidate of await this.plans.findElapsedFixedPlans(
+        referenceTime,
+      )) {
+        try {
+          await this.completeExpired(
+            candidate.id,
+            candidate.userId,
+            referenceTime,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Fixed plan completion failed planId=${candidate.id}`,
             error instanceof Error ? error.stack : String(error),
           );
         }
@@ -60,7 +91,71 @@ export class PlanScheduledActivationWorker {
     }
   }
 
-  private async activate(planId: string, userId: string): Promise<void> {
+  private async completeExpired(
+    planId: string,
+    userId: string,
+    referenceTime: Date,
+  ) {
+    const completed = await this.prisma.$transaction(
+      async (tx) => {
+        await acquireHashtextAdvisoryXactLock(tx, userId);
+        const [due] = await this.plans.findElapsedFixedPlans(referenceTime, {
+          tx,
+          planId,
+        });
+        if (!due || due.userId !== userId) return null;
+        const successor = await this.plans.findFirst(
+          {
+            where: {
+              ...scheduledReplacementReservationWhere(userId),
+              supersedesPlanId: planId,
+              scheduledActivationAt: { lte: referenceTime },
+            },
+            select: { scheduledActivationAt: true },
+          },
+          tx,
+        );
+        if (
+          successor?.scheduledActivationAt &&
+          !(
+            await this.plans.findElapsedFixedPlans(
+              successor.scheduledActivationAt,
+              { tx, planId },
+            )
+          ).length
+        ) {
+          return null;
+        }
+        return this.completeFixedPlan(planId, userId, tx);
+      },
+      { timeout: 30_000 },
+    );
+    if (completed) {
+      await completed.afterCommit?.();
+      await this.emitWorkoutsChanged(userId, planId, 'plan_complete');
+    }
+  }
+
+  private completeFixedPlan(
+    planId: string,
+    userId: string,
+    tx: Prisma.TransactionClient,
+  ) {
+    return this.writer?.completePlan(
+      userId,
+      planId,
+      undefined,
+      undefined,
+      { source: 'system', reason: 'fixed_plan_expired' },
+      { tx, preserveEndDate: true },
+    );
+  }
+
+  private async activate(
+    planId: string,
+    userId: string,
+    referenceTime = new Date(),
+  ): Promise<void> {
     const activated = await this.prisma.$transaction(
       async (tx) => {
         await acquireHashtextAdvisoryXactLock(tx, userId);
@@ -77,7 +172,7 @@ export class PlanScheduledActivationWorker {
           plan.status !== 'SCHEDULED' ||
           plan.activationBlockedAt ||
           !plan.scheduledActivationAt ||
-          plan.scheduledActivationAt.getTime() > Date.now()
+          plan.scheduledActivationAt > referenceTime
         ) {
           return false;
         }
@@ -112,8 +207,23 @@ export class PlanScheduledActivationWorker {
           return false;
         }
 
+        const completedSource =
+          this.writer &&
+          source.status === 'ACTIVE' &&
+          source.planningMode === 'FIXED' &&
+          (
+            await this.plans.findElapsedFixedPlans(plan.scheduledActivationAt, {
+              tx,
+              planId: source.id,
+            })
+          ).length
+            ? await this.completeFixedPlan(source.id, userId, tx)
+            : undefined;
         const now = new Date();
-        if (source.status === 'ACTIVE' || source.status === 'PAUSED') {
+        if (
+          !completedSource &&
+          (source.status === 'ACTIVE' || source.status === 'PAUSED')
+        ) {
           if (source.planningMode === 'ROLLING') {
             await this.plans.fenceAutomationJobs?.(
               source.id,
@@ -163,7 +273,12 @@ export class PlanScheduledActivationWorker {
           closedAt: null,
           tx,
         });
-        return true;
+        return completedSource
+          ? {
+              completedSourceId: source.id,
+              afterCompletion: completedSource.afterCommit,
+            }
+          : {};
       },
       {
         // Single-user serialization is enforced by acquireHashtextAdvisoryXactLock(tx, userId);
@@ -172,20 +287,37 @@ export class PlanScheduledActivationWorker {
         timeout: 30_000,
       },
     );
-    if (activated && this.events) {
+    if (activated) {
+      await activated.afterCompletion?.();
+      if (activated.completedSourceId) {
+        await this.emitWorkoutsChanged(
+          userId,
+          activated.completedSourceId,
+          'plan_complete',
+        );
+      }
+      await this.emitWorkoutsChanged(
+        userId,
+        planId,
+        'scheduled_plan_activated',
+      );
+    }
+  }
+
+  private async emitWorkoutsChanged(
+    userId: string,
+    planId: string,
+    reason: string,
+  ) {
+    if (this.events) {
       await this.events
         .emitAsync(
           PLAN_WORKOUTS_CHANGED_EVENT,
-          new PlanWorkoutsChangedEvent(
-            userId,
-            'scheduled_plan_activated',
-            [],
-            planId,
-          ),
+          new PlanWorkoutsChangedEvent(userId, reason, [], planId),
         )
         .catch((error) => {
           this.logger.warn(
-            `Scheduled plan activation event emit failed planId=${planId}: ${
+            `Plan lifecycle event emit failed planId=${planId}: ${
               error instanceof Error ? error.message : String(error)
             }`,
           );

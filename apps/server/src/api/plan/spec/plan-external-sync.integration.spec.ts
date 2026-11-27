@@ -16,6 +16,7 @@ import { CoachContextRepository } from '../persistence/coach-context.repository'
 import { CoachContextService } from '../application/coach-context.service';
 import { PlanQueryService } from '../application/plan-query.service';
 import { PlanSummaryService } from '../application/plan-summary.service';
+import { PlanScheduledActivationWorker } from '../application/plan-scheduled-activation.worker';
 import { CoachCycleReviewRuntimeService } from '@/review/coach-cycle-review-runtime.service';
 import { featureAccessSnapshot } from '@/access/feature-access.types';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
@@ -336,7 +337,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       write.completePlan('user', planId, undefined, undefined, undefined, {
         tx,
       });
-    return { complete, worker, branching, events };
+    return { complete, worker, branching, events, write, coachContext };
   }
 
   const activePlan = () =>
@@ -458,6 +459,212 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     expect(await prisma.coachBranch.count()).toBe(1);
     expect(await prisma.coachDecision.count()).toBe(1);
   });
+
+  function fixedPlanWorker(fixture = cycleReview()) {
+    return new PlanScheduledActivationWorker(
+      prisma as never,
+      new PlanRepository(prisma as never),
+      fixture.coachContext,
+      {} as never,
+      fixture.events,
+      undefined,
+      fixture.write,
+    );
+  }
+
+  it.each([
+    ['Asia/Shanghai', '2026-02-16', '2026-02-16T16:00:00Z'],
+    ['America/Los_Angeles', '2026-03-08', '2026-03-09T07:00:00Z'],
+    ['America/New_York', '2026-11-01', '2026-11-02T05:00:00Z'],
+    [null, '2026-02-16', '2026-02-17T00:00:00Z'],
+  ])(
+    'settles a due fixed plan after the last local day in %s',
+    async (zone, lastDay, midnight) => {
+      const fixture = cycleReview();
+      const plan = await activePlan();
+      const endDate = new Date(lastDay);
+      const expiration = new Date(midnight);
+      await prisma.plan.update({
+        where: { id: plan.id },
+        data: { endDate, activationTimezone: zone },
+      });
+      await prisma.planFixedCompletionPolicy.update({
+        where: { id: 1 },
+        data: { enabledFrom: expiration },
+      });
+      const worker = fixedPlanWorker(fixture);
+      const notice = jest.fn();
+      fixture.events.on(PLAN_COMPLETED_EVENT, notice);
+      await worker.tick(new Date(expiration.getTime() - 1));
+      expect(
+        await prisma.plan.findUnique({ where: { id: plan.id } }),
+      ).toMatchObject({ status: 'ACTIVE', endDate, completedAt: null });
+      expect(notice).not.toHaveBeenCalled();
+
+      await Promise.all([
+        worker.tick(expiration),
+        fixedPlanWorker(fixture).tick(expiration),
+      ]);
+      expect(
+        await prisma.plan.findUnique({ where: { id: plan.id } }),
+      ).toMatchObject({
+        status: 'COMPLETED',
+        endDate,
+        completedAt: expect.any(Date),
+      });
+      expect(notice).toHaveBeenCalledTimes(1);
+      expect(notice.mock.calls[0][0]).toMatchObject({
+        planId: plan.id,
+        periodEnd: endDate,
+      });
+      expect(await prisma.coachContext.findFirst()).toMatchObject({
+        planId: plan.id,
+        status: 'FINALIZED',
+      });
+      expect(await prisma.coachCycleReviewJob.count()).toBe(1);
+    },
+  );
+
+  it.each([
+    [-60_000, 'SUPERSEDED', 0],
+    [0, 'COMPLETED', 1],
+    [60_000, 'COMPLETED', 1],
+  ])(
+    'orders downtime recovery when the successor starts %d ms from expiry',
+    async (activationOffset, status, reviews) => {
+      const endDate = new Date('2026-11-20');
+      const expiration = new Date('2026-11-21T00:00:00Z');
+      const fixture = cycleReview();
+      const source = await activePlan();
+      await prisma.plan.update({
+        where: { id: source.id },
+        data: { endDate, activationTimezone: 'UTC' },
+      });
+      await prisma.planFixedCompletionPolicy.update({
+        where: { id: 1 },
+        data: { enabledFrom: new Date('2026-11-01T00:00:00Z') },
+      });
+      const successor = await prisma.plan.create({
+        data: {
+          userId: 'user',
+          title: 'Next cycle',
+          periodWeeks: 2,
+          status: 'SCHEDULED',
+          supersedesPlanId: source.id,
+          activationTimezone: 'UTC',
+          scheduledActivationAt: new Date(
+            expiration.getTime() + activationOffset,
+          ),
+          startDate: new Date('2026-11-21'),
+          endDate: new Date('2026-12-04'),
+        },
+      });
+      const notice = jest.fn();
+      const workoutsChanged = jest.fn();
+      fixture.events.on(PLAN_COMPLETED_EVENT, notice);
+      fixture.events.on(PLAN_WORKOUTS_CHANGED_EVENT, workoutsChanged);
+      const restarted = new Date('2026-11-25T00:00:00Z');
+      await Promise.all([
+        fixedPlanWorker(fixture).tick(restarted),
+        fixedPlanWorker(fixture).tick(restarted),
+      ]);
+      const finished = await prisma.plan.findUniqueOrThrow({ where: { id: source.id } });
+      const activated = await prisma.plan.findUniqueOrThrow({ where: { id: successor.id } });
+      expect(finished).toMatchObject({ status, endDate });
+      expect(activated).toMatchObject({ status: 'ACTIVE' });
+      if (reviews) {
+        expect(finished.completedAt!.getTime()).toBeLessThanOrEqual(activated.activatedAt!.getTime());
+        expect(workoutsChanged).toHaveBeenNthCalledWith(
+          1, expect.objectContaining({ planId: source.id, reason: 'plan_complete' }),
+        );
+      }
+      expect(workoutsChanged).toHaveBeenLastCalledWith(
+        expect.objectContaining({ planId: successor.id, reason: 'scheduled_plan_activated' }),
+      );
+      expect(workoutsChanged).toHaveBeenCalledTimes(reviews + 1);
+      expect(await prisma.coachCycleReviewJob.count()).toBe(reviews);
+      expect(notice).toHaveBeenCalledTimes(reviews);
+    },
+  );
+
+  it('reports historical expiry in preflight without closing plans outside the enabled scope', async () => {
+    const fixture = cycleReview();
+    const old = await activePlan();
+    await prisma.planFixedCompletionPolicy.update({
+      where: { id: 1 },
+      data: { enabledFrom: new Date('2026-02-01T00:00:00Z') },
+    });
+    const paused = await prisma.plan.create({
+      data: {
+        userId: 'other',
+        title: 'Paused cycle',
+        periodWeeks: 1,
+        status: 'PAUSED',
+        startDate: new Date('2026-02-02'),
+        endDate: new Date('2026-02-08'),
+      },
+    });
+    const repository = new PlanRepository(prisma as never);
+    const checkAt = new Date('2026-02-16T00:00:00Z');
+    expect(
+      await repository.previewFixedPlanCompletion(checkAt),
+    ).toEqual({ due: 0, historical: 1 });
+    await fixedPlanWorker(fixture).tick(checkAt);
+    expect(
+      await prisma.plan.findUnique({ where: { id: old.id } }),
+    ).toMatchObject({ status: 'ACTIVE' });
+    expect(
+      await prisma.plan.findUnique({ where: { id: paused.id } }),
+    ).toMatchObject({ status: 'PAUSED' });
+    expect(await prisma.coachCycleReviewJob.count()).toBe(0);
+  });
+
+  it.each(['complete', 'cancel'])(
+    'serializes auto-completion against a manual %s',
+    async (action) => {
+      const fixture = cycleReview();
+      const plan = await activePlan();
+      await prisma.planFixedCompletionPolicy.update({
+        where: { id: 1 },
+        data: { enabledFrom: new Date('2026-01-01T00:00:00Z') },
+      });
+      const referenceTime = new Date('2026-01-16T05:00:00Z');
+      const notice = jest.fn();
+      fixture.events.on(PLAN_COMPLETED_EVENT, notice);
+      const manual = prisma.$transaction(async (tx) => {
+        const result =
+          action === 'complete'
+            ? await fixture.complete(plan.id, tx)
+            : await fixture.write.cancelPlan(
+                'user',
+                plan.id,
+                undefined,
+                undefined,
+                { tx },
+              );
+        return result.afterCommit;
+      });
+      const [manualResult] = await Promise.allSettled([
+        manual,
+        fixedPlanWorker(fixture).tick(referenceTime),
+      ]);
+      if (manualResult.status === 'fulfilled') await manualResult.value?.();
+
+      const current = await prisma.plan.findUniqueOrThrow({
+        where: { id: plan.id },
+      });
+      const manualWon = manualResult.status === 'fulfilled';
+      expect(current.status).toBe(
+        action === 'cancel' && manualWon ? 'CANCELLED' : 'COMPLETED',
+      );
+      const completed = current.status === 'COMPLETED';
+      expect(await prisma.coachCycleReviewJob.count()).toBe(completed ? 1 : 0);
+      expect(notice).toHaveBeenCalledTimes(completed ? 1 : 0);
+      expect(
+        await prisma.coachEvent.count({ where: { type: 'CONTEXT_FINALIZED' } }),
+      ).toBe(1);
+    },
+  );
 
   async function independentScenario() {
     const f = await matchingScenario();

@@ -201,6 +201,10 @@
       "0045_coach_cycle_review_queue": {
         "phase": "expand",
         "releaseVersion": "1.1.27"
+      },
+      "0046_fixed_plan_completion": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
       }
     }
   }

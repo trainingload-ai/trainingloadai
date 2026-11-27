@@ -5396,6 +5396,13 @@ model Plan {
   @@map("t_plan")
 }
 
+model PlanFixedCompletionPolicy {
+  id          Int      @id
+  enabledFrom DateTime @map("enabled_from") @db.Timestamptz(3)
+
+  @@map("t_plan_fixed_completion_policy")
+}
+
 /// 用户确认前的服务端规范化计划提案。提案不可由模型在确认阶段改写，且短期过期。
 model PlanProposalPreview {
   id        String   @id @default(cuid())

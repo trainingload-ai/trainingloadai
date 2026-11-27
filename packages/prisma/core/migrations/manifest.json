@@ -225,7 +225,12 @@
       "id": "0045_coach_cycle_review_queue",
       "file": "0045_coach_cycle_review_queue/migration.sql",
       "sha256": "eb6fc7e66423bbbe479b7bd92d15115831a2e5b465b391e3098e6bc8943eaee9"
+    },
+    {
+      "id": "0046_fixed_plan_completion",
+      "file": "0046_fixed_plan_completion/migration.sql",
+      "sha256": "83ba1dba8aeab54cfed8f342bb4edc7a6f22cdd7909aa993881c674836b78da6"
     }
   ],
-  "schemaChecksum": "c270cbf486897b93ee6078d395ebf190a738e2ea876e150a3911489bf10d9179"
+  "schemaChecksum": "f7ada8319c2c92754c197f2419a7479a3919aeeb904e5a8076e9201bfac1aa86"
 }

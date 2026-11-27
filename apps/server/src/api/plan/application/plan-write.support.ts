@@ -3735,7 +3735,7 @@ export class PlanWriteSupport {
     completedAt?: string,
     _reason?: string,
     meta?: CoachEventMeta,
-    options?: { tx?: Tx },
+    options?: { tx?: Tx; preserveEndDate?: boolean },
   ) {
     const run = async (tx: Tx) => {
       await acquireHashtextAdvisoryXactLock(tx, userId);
@@ -3756,7 +3756,10 @@ export class PlanWriteSupport {
           data: {
             status: 'COMPLETED',
             completedAt: completed,
-            endDate: plan.planningMode === 'ROLLING' ? null : completed,
+            endDate:
+              plan.planningMode === 'ROLLING'
+                ? null
+                : options?.preserveEndDate ? plan.endDate : completed,
             currentWeekIndex: null,
             currentDayIndex: null,
           },
