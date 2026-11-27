@@ -318,6 +318,7 @@ export class AccountDeletionService {
       healthSeriesFiles,
       routeFiles,
       userDataExports,
+      deploymentStorageKeys,
     ] = await Promise.all([
       this.users.users(tx).findUnique({
         where: { id: userId },
@@ -351,6 +352,7 @@ export class AccountDeletionService {
         where: { userId },
         select: { artifactStorageKey: true },
       }),
+      this.deploymentLocalData.listPrivateStorageKeys?.({ tx, userId }) ?? [],
     ]);
 
     const privateKeys = new Set<string>();
@@ -384,6 +386,7 @@ export class AccountDeletionService {
     for (const row of healthSeriesFiles) addPrivate(row.parquetPath);
     for (const row of routeFiles) addPrivate(row.rawStorageKey);
     for (const row of userDataExports) addPrivate(row.artifactStorageKey);
+    for (const key of deploymentStorageKeys) addPrivate(key);
 
     const avatarKey = this.internalAvatarStorageKey(user?.image);
     if (avatarKey) addPublic(avatarKey);
