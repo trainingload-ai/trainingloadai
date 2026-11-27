@@ -6,6 +6,8 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { CoachContextService } from './coach-context.service';
 import { PlanRepository } from '../persistence/plan.repository';
+import { UserQueryService } from '@/api/user/user-query.service';
+import { resolveSupportedLocale } from '@/utils/locale.util';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import {
   PLAN_WORKOUTS_CHANGED_EVENT,
@@ -25,6 +27,7 @@ export class PlanScheduledActivationWorker {
     private readonly contexts: CoachContextService,
     private readonly notifications: NotificationDomainService,
     @Optional() private readonly events?: EventEmitter2,
+    @Optional() private readonly users?: UserQueryService,
   ) {}
 
   @Interval(ACTIVATION_POLL_MS)
@@ -209,14 +212,52 @@ export class PlanScheduledActivationWorker {
       },
       tx,
     );
+    const userRow = this.users
+      ? await this.users.users(tx).findUnique({
+          where: { id: plan.userId },
+          select: { preferredLocale: true },
+        })
+      : null;
+    const locale = resolveSupportedLocale(
+      userRow ? String(userRow.preferredLocale ?? '') : 'zh',
+    );
+    const copyByLocale: Record<
+      string,
+      { title: string; bodyMarkdown: string }
+    > = {
+      zh: {
+        title: '训练计划自动接管未完成',
+        bodyMarkdown:
+          '计划状态发生变化，系统已停止自动重试。请打开计划，让 AI 教练重新评估后再接管。',
+      },
+      'zh-hant': {
+        title: '訓練計畫自動接管未完成',
+        bodyMarkdown:
+          '計畫狀態已變更，系統已停止自動重試。請打開計畫，讓 AI 教練重新評估後再接管。',
+      },
+      ja: {
+        title: 'トレーニングプランの自動引き継ぎが完了しませんでした',
+        bodyMarkdown:
+          'プランの状態が変更されたため、自動再試行を停止しました。プランを開き、AIコーチに再評価させてから引き継いでください。',
+      },
+      ko: {
+        title: '훈련 계획 자동 전환이 완료되지 않았습니다',
+        bodyMarkdown:
+          '계획 상태가 변경되어 자동 재시도가 중지되었습니다. 계획을 열고 AI 코치에게 다시 평가받은 후 전환해 주세요.',
+      },
+    };
+    const localizedCopy = copyByLocale[locale] ?? {
+      title: 'Scheduled training plan activation blocked',
+      bodyMarkdown:
+        'Your plan state changed and automatic retries have stopped. Open the plan and ask AI Coach to reassess before activating.',
+    };
     await this.notifications.ensureNotification(
       {
         userId: plan.userId,
         kind: 'PLAN_ACTIVATION_BLOCKED',
         dedupeKey: `plan-activation-blocked:${plan.id}`,
-        title: '训练计划自动接管未完成',
-        bodyMarkdown:
-          '计划状态发生变化，系统已停止自动重试。请打开计划，让 AI 教练重新评估后再接管。',
+        title: localizedCopy.title,
+        bodyMarkdown: localizedCopy.bodyMarkdown,
         data: {
           planId: plan.id,
           sourcePlanId: plan.supersedesPlanId,

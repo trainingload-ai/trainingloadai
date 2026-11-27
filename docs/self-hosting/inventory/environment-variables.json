@@ -1082,7 +1082,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2874
+          "line": 2951
         }
       ]
     },
@@ -1103,23 +1103,23 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2404
+          "line": 2481
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2465
+          "line": 2542
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2552
+          "line": 2629
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2748
+          "line": 2825
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2858
+          "line": 2935
         }
       ]
     },

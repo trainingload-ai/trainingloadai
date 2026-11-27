@@ -500,7 +500,7 @@ export class ChronologicalActivityReplayService {
       crossingBoundary.map(({ activity }) => activity.id),
     );
     const preparedVo2RefreshRequired = new Set<number>();
-    const estimatedOnly = new Map<string, TimelineFitnessProjection>();
+    const estimateProjector = new FitnessTimelineProjector();
     const observationProfiles = new Map<string, Record<string, unknown>>();
     let expectedRevision = initialRevision;
     let processedActivities = 0;
@@ -546,30 +546,18 @@ export class ChronologicalActivityReplayService {
         const enabled = autoUpdateEnabledAt(autoUpdateVersions, type, at);
         if (enabled) {
           enabledCandidates.push(candidate);
-          continue;
+        } else {
+          disabledCandidates.push(candidate);
         }
-        disabledCandidates.push(candidate);
-        const estimate: TimelineFitnessProjection = {
-          type,
-          sport: sportType(candidate.sport),
-          value: candidate.value,
-          value2: candidate.value2,
-          effectiveAt: at,
-          projectionVersion: FITNESS_TIMELINE_PROJECTION_VERSION,
-          projectionFingerprint: fitnessTimelineFingerprint({
-            source: 'ESTIMATED',
-            candidate,
-          }),
-          originPayload: {
-            sourceActivityIds: candidate.sourceActivityIds ?? [],
-            evidenceFingerprint: candidate.evidenceFingerprint,
-          },
-        };
-        estimatedOnly.set(
-          `${estimate.type}:${estimate.sport}:${at.toISOString()}`,
-          estimate,
-        );
       }
+      // ESTIMATED always records the complete algorithmic estimation track
+      // regardless of whether auto-update is enabled; AUTO only promotes
+      // candidates when auto-update is enabled at that timestamp.
+      estimateProjector.applyObservationGroup({
+        effectiveAt: at,
+        observations: candidates,
+        autoUpdateEnabled: true,
+      });
       const changes = projector.applyObservationGroup({
         effectiveAt: at,
         observations: enabledCandidates,
@@ -798,11 +786,36 @@ export class ChronologicalActivityReplayService {
         },
       }),
     );
+    const estimatedProjections = estimateProjector.changePoints().map(
+      (change): TimelineFitnessProjection => ({
+        type: metricType(change.metric),
+        sport: sportType(change.sport),
+        value: change.value,
+        value2: change.value2,
+        effectiveAt: change.effectiveAt,
+        projectionVersion: FITNESS_TIMELINE_PROJECTION_VERSION,
+        projectionFingerprint: fitnessTimelineFingerprint({
+          source: 'ESTIMATED',
+          candidate: {
+            metric: change.metric,
+            sport: change.sport,
+            value: change.value,
+            value2: change.value2,
+            evidenceFingerprint: change.evidenceFingerprint,
+            sourceActivityIds: change.sourceActivityIds,
+          },
+        }),
+        originPayload: {
+          sourceActivityIds: change.sourceActivityIds ?? [],
+          evidenceFingerprint: change.evidenceFingerprint,
+        },
+      }),
+    );
     expectedRevision = await this.commitProjections({
       request,
       runId,
       projections,
-      estimatedOnly: [...estimatedOnly.values()],
+      estimatedOnly: estimatedProjections,
       expectedRevision,
       lease,
       replayTo: projectionReplaceTo,
@@ -819,7 +832,7 @@ export class ChronologicalActivityReplayService {
       highFrequencyReads,
       fingerprintHits,
       projectionChanges: projections.length,
-      estimatedOnlyChanges: estimatedOnly.size,
+      estimatedOnlyChanges: estimatedProjections.length,
       pmcRecomputeFrom,
       completed: page.nextCheckpoint == null,
       nextCheckpoint: page.nextCheckpoint,
@@ -1131,7 +1144,9 @@ export class ChronologicalActivityReplayService {
         {
           userId: args.request.userId,
           projectionRunId: args.runId,
-          replacementReason: 'AUTO_UPDATE_DISABLED',
+          replacementReason: args.request.dataRepair
+            ? 'DATA_REPAIR_REPLAY'
+            : 'CHRONOLOGICAL_REPLAY',
           replaceFrom: args.request.effectiveFrom,
           replaceTo: args.replayTo,
           scopes: this.projectionScopes(),

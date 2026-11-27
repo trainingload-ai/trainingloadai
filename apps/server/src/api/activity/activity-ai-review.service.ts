@@ -83,6 +83,20 @@ export class ActivityAiReviewService {
     private readonly capabilities?: RuntimeCapabilityService,
   ) {}
 
+  /** Check whether the athlete has Activity AI Review enabled in settings. */
+  async isActivityReviewEnabled(userId: string): Promise<boolean> {
+    const reviewSetting = await this.users.settings().findUnique({
+      where: {
+        userId_category: {
+          userId,
+          category: $Enums.SettingCategory.AI_REVIEW_MODE,
+        },
+      },
+      select: { value: true },
+    });
+    return parseAiReviewModeFeatures(reviewSetting?.value).activityReview;
+  }
+
   /** Resolve the deployment-neutral activity review access gate. */
   private async getGenerationGate(args: {
     userId: string;

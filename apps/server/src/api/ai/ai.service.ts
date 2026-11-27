@@ -1980,6 +1980,80 @@ export class AiService {
    * ActivityReview Agent task。服务端完成持久化后一次性返回 Markdown，
    * 避免 API 层再维护一条直连模型的平行实现。
    */
+  async probeActivityAiAnalysisRoute(
+    activityHashId: string,
+    userId: string,
+    useCache: boolean,
+    lang: string,
+    allowWithoutConsent = false,
+  ): Promise<
+    | { kind: 'CACHED'; content: string; reviewId: string }
+    | { kind: 'PLATFORM_LANGUAGE_REPAIR' }
+    | { kind: 'USER_GENERATE' }
+  > {
+    const enabled =
+      await this.activityAiReviewService.isActivityReviewEnabled(userId);
+    if (!enabled) {
+      throw new BusinessException({
+        code: BUSINESS_ERROR_CODE.COMMON,
+        message: 'ACTIVITY_REVIEW_DISABLED',
+      });
+    }
+    if (!useCache) return { kind: 'USER_GENERATE' };
+    if (!allowWithoutConsent) {
+      await this.aiDataConsent.assertGranted(userId);
+    }
+    const requestedLang = resolveSupportedLocale(lang);
+    const activityIdentity = await this.prisma.activity.findFirst({
+      where: readyActivityWhere({ hashId: activityHashId, userId }),
+      select: { id: true },
+    });
+    if (!activityIdentity) {
+      throw new BusinessException({
+        code: BUSINESS_ERROR_CODE.ACTIVITY_NOT_FOUND,
+        message: this.i18n.t(
+          'common.error.activity_not_found_or_no_permission',
+        ),
+      });
+    }
+    const activity =
+      await this.activityAiReviewService.loadActivityForCoachAnalysis(
+        activityIdentity.id,
+        userId,
+      );
+    const profile = await this.userService.getComposedUserProfile(
+      userId,
+      activity.sportType,
+    );
+    const unifiedInput = await buildUnifiedActivityAnalysisInput(
+      activity,
+      userId,
+      profile,
+      this.pmcService,
+    );
+    const evidenceHash = await hashActivityCoachDedupe({
+      unifiedInput,
+      lang: requestedLang,
+    });
+    const cached = await this.resolveSucceededReviewMarkdown(
+      userId,
+      activityHashId,
+      evidenceHash,
+      requestedLang,
+    );
+    if (cached && 'content' in cached) {
+      return {
+        kind: 'CACHED',
+        content: cached.content,
+        reviewId: cached.reviewId,
+      };
+    }
+    if (cached && 'needsLanguageRepair' in cached) {
+      return { kind: 'PLATFORM_LANGUAGE_REPAIR' };
+    }
+    return { kind: 'USER_GENERATE' };
+  }
+
   async streamActivityAiAnalysis(
     activityHashId: string,
     userId: string,
@@ -2089,7 +2163,10 @@ export class AiService {
         throw error;
       }
       if (generated.outcome !== 'SUCCEEDED') {
-        throw new Error(generated.code || 'ACTIVITY_ANALYSIS_SKIPPED');
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: generated.code || 'ACTIVITY_ANALYSIS_SKIPPED',
+        });
       }
       return {
         content: generated.markdown,

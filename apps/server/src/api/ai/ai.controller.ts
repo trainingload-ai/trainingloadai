@@ -2464,11 +2464,63 @@ export class AiController {
       });
     }
     const purpose: AiModelPurpose = 'DEFAULT';
+    const effectiveUseCache = publicDemo ? true : useCache;
+    // Check free cache hits and platform-funded language repairs before opening
+    // a user-billed AI operation slot so zero-credit or concurrent users are not blocked.
+    const route = await this.aiService.probeActivityAiAnalysisRoute(
+      hashId,
+      userId,
+      effectiveUseCache,
+      lang,
+      Boolean(publicDemo),
+    );
+    if (route.kind === 'CACHED') {
+      return new Observable((subscriber) => {
+        if (route.content) {
+          subscriber.next({ data: { content: route.content } } as MessageEvent);
+        }
+        subscriber.complete();
+      });
+    }
+    if (route.kind === 'PLATFORM_LANGUAGE_REPAIR') {
+      return new Observable((subscriber) => {
+        (async () => {
+          try {
+            const stream = await this.aiService.streamActivityAiAnalysis(
+              hashId,
+              userId,
+              true,
+              lang,
+              purpose,
+              operationId,
+              Boolean(publicDemo),
+            );
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            for await (const chunk of stream) {
+              if (subscriber.closed) continue;
+              const content =
+                (chunk as { choices?: Array<{ delta?: { content?: string } }> })
+                  .choices?.[0]?.delta?.content || '';
+              if (content) {
+                subscriber.next({ data: { content } } as MessageEvent);
+              }
+            }
+            if (!subscriber.closed) subscriber.complete();
+          } catch (err) {
+            this.logger.error(
+              `Platform language repair failed hashId=${hashId} error=${String(err)}`,
+            );
+            if (!subscriber.closed) subscriber.error(err);
+          }
+        })();
+      });
+    }
     const requestFingerprint = createHash('sha256')
       .update(
         JSON.stringify({
           activityHashId: hashId,
-          useCache: publicDemo ? true : useCache,
+          useCache: effectiveUseCache,
           lang,
           purpose,
         }),

@@ -139,6 +139,7 @@ export default defineConfig({
       "src/app/[locale]/(main)/ai-coach/coach-turn-error-model.test.ts",
       "src/app/[locale]/(main)/ai-coach/coach-turn-error-card.test.tsx",
       "src/app/[locale]/(main)/account/component/AccountPrivacyDataLinks.test.tsx",
+      "src/app/[locale]/(main)/account/component/zone-editor-model.test.ts",
       "src/app/[locale]/(main)/account/athlete-memory/AthleteMemorySettings.test.tsx",
       "src/app/[locale]/(main)/_home/home-weekly-summary.test.ts",
       "src/app/[locale]/(main)/calendar/components/MobileCalendarTimeline.test.tsx",

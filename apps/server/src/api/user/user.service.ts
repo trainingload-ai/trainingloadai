@@ -1895,12 +1895,9 @@ export class UserService {
     },
     tx?: PrismaTx,
   ): Promise<UserZoneSetting> {
-    const profile = await this.getComposedUserProfile(
-      userId,
-      sportType,
-      undefined,
-      tx,
-    );
+    const profile = userProfile
+      ? undefined
+      : await this.getComposedUserProfile(userId, sportType, undefined, tx);
     const saved = await this.users.zoneSettings(tx).findUnique({
       where: {
         userId_sportType_zoneType: {
@@ -2003,12 +2000,9 @@ export class UserService {
     },
     tx?: PrismaTx,
   ): Promise<UserZoneSetting> {
-    const profile = await this.getComposedUserProfile(
-      userId,
-      sportType,
-      undefined,
-      tx,
-    );
+    const profile = userProfile
+      ? undefined
+      : await this.getComposedUserProfile(userId, sportType, undefined, tx);
     const saved = await this.users.zoneSettings(tx).findUnique({
       where: {
         userId_sportType_zoneType: {
@@ -2717,33 +2711,40 @@ export class UserService {
         type: { in: args.changes.map((c) => c.metric) },
       },
     });
-    for (const c of args.changes) {
-      const data = {
-        value: c.value,
-        changeSource: ChangeSource.USER_MANUAL,
-        originExternalId: args.calculationId,
-        originPayload: args.provenance,
-      };
-      await this.users.fitnessMetrics(tx).upsert({
-        where: {
-          userId_type_source_sport_recordedAt: {
+    const runWrite = async () => {
+      for (const c of args.changes) {
+        const data = {
+          value: c.value,
+          changeSource: ChangeSource.USER_MANUAL,
+          originExternalId: args.calculationId,
+          originPayload: args.provenance,
+        };
+        await this.users.fitnessMetrics(tx).upsert({
+          where: {
+            userId_type_source_sport_recordedAt: {
+              userId,
+              sport,
+              type: c.metric,
+              source: 'MANUAL',
+              recordedAt,
+            },
+          },
+          create: {
             userId,
             sport,
             type: c.metric,
             source: 'MANUAL',
             recordedAt,
+            ...data,
           },
-        },
-        create: {
-          userId,
-          sport,
-          type: c.metric,
-          source: 'MANUAL',
-          recordedAt,
-          ...data,
-        },
-        update: data,
-      });
+          update: data,
+        });
+      }
+    };
+    if (this.stateFitness) {
+      await this.stateFitness.observe(userId, tx, runWrite);
+    } else {
+      await runWrite();
     }
     // A global reference can become the fallback in several sports. Validate
     // only scopes that actually inherit it, preserving sport-specific overrides.
@@ -2921,8 +2922,12 @@ export class UserService {
         }),
       );
     };
-    if (options.tx) await write(options.tx);
-    else await this.prisma.$transaction(write);
+    const runObservedWrite = async (tx: Prisma.TransactionClient) =>
+      this.stateFitness
+        ? this.stateFitness.observe(options.userId, tx, () => write(tx))
+        : write(tx);
+    if (options.tx) await runObservedWrite(options.tx);
+    else await this.prisma.$transaction(runObservedWrite);
 
     const metricType = options.type;
     const oldByTime = new Map<
@@ -3557,7 +3562,7 @@ export class UserService {
           String(m.value).trim() !== '',
       )
       .map((m) => {
-        const rawValue = String(m.value);
+        const rawValue = String(m.value).trim();
         const value =
           type === BodyMetricType.GENDER ? rawValue.toUpperCase() : rawValue;
         return {
@@ -3566,6 +3571,43 @@ export class UserService {
         };
       })
       .filter((m) => Number.isFinite(m.effectiveDate.getTime()));
+
+    for (const entry of normalized) {
+      if (type === BodyMetricType.WEIGHT) {
+        const num = Number(entry.value);
+        if (!Number.isFinite(num) || num < 20 || num > 300) {
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Invalid body weight (must be between 20 and 300 kg)',
+          });
+        }
+      } else if (type === BodyMetricType.HEIGHT) {
+        const num = Number(entry.value);
+        if (!Number.isFinite(num) || num < 50 || num > 260) {
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Invalid body height (must be between 50 and 260 cm)',
+          });
+        }
+      } else if (type === BodyMetricType.TIMEZONE) {
+        try {
+          new Intl.DateTimeFormat(undefined, { timeZone: entry.value });
+        } catch {
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Invalid IANA timezone',
+          });
+        }
+      } else if (type === BodyMetricType.BIRTHDAY) {
+        const parsed = dayjs(entry.value);
+        if (!parsed.isValid() || parsed.isAfter(dayjs(), 'day')) {
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Invalid birth date',
+          });
+        }
+      }
+    }
 
     const existing = await this.users.bodyMetrics().findMany({
       where: { userId, type },

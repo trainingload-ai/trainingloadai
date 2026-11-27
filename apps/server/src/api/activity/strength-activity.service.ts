@@ -445,6 +445,9 @@ export class StrengthActivityService {
           });
         }
       }
+      await tx.activityAiReview?.deleteMany({
+        where: { activityId: activity.id, userId },
+      });
     });
     return this.get(activityHashId, userId);
   }
@@ -551,6 +554,9 @@ export class StrengthActivityService {
           } satisfies Prisma.ActivityStrengthSetUncheckedCreateInput,
         });
       }
+      await tx.activityAiReview?.deleteMany({
+        where: { activityId: activity.id, userId },
+      });
     });
     return this.get(activityHashId, userId);
   }

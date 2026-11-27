@@ -324,4 +324,29 @@ describe("AIAnalysis feature access", () => {
     );
     expect(screen.getByRole("button", { name: "send" })).toBeInTheDocument();
   });
+
+  it("shows the managed access recovery prompt instead of regenerate when stream fails with AI_ACCESS_REQUIRED", () => {
+    mocks.accessAllowed = true;
+    mocks.reviewQuery = {
+      data: { found: false, markdown: "" },
+      isLoading: false,
+      isError: false,
+    };
+    mocks.useAiAnalysisStream.mockReturnValue({
+      data: "",
+      isLoading: false,
+      isDone: true,
+      error: new Error("AI access required"),
+      errorCode: "AI_ACCESS_REQUIRED",
+      operation: null,
+    } as never);
+
+    render(<AIAnalysis />);
+
+    expect(screen.getByText("AI access required")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "managed access prompt" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("regenerate")).not.toBeInTheDocument();
+  });
 });

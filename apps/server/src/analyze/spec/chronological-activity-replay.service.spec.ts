@@ -550,6 +550,52 @@ describe('ChronologicalActivityReplayService', () => {
       }),
     );
   });
+
+  it('persists ESTIMATED estimates even when auto-update is enabled and promotes AUTO simultaneously', async () => {
+    const harness = replayHarness();
+    const effectiveAt = new Date('2026-01-01T11:00:00.000Z');
+    harness.observations.calculate.mockResolvedValueOnce([
+      {
+        metric: 'FTP',
+        sport: 'CYCLING',
+        value: 280,
+        evidenceFingerprint: 'ev-ftp-280',
+        sourceActivityIds: [42],
+      } as never,
+    ]);
+
+    const result = await harness.service.replay(request);
+
+    expect(result.projectionChanges).toBe(1);
+    expect(result.estimatedOnlyChanges).toBe(1);
+    expect(harness.users.applyTimelineProjectionBatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        projections: [
+          expect.objectContaining({
+            type: 'FTP',
+            sport: 'CYCLING',
+            value: 280,
+            effectiveAt,
+          }),
+        ],
+      }),
+      harness.tx,
+    );
+    expect(harness.users.saveTimelineEstimatesBatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        replacementReason: 'CHRONOLOGICAL_REPLAY',
+        projections: [
+          expect.objectContaining({
+            type: 'FTP',
+            sport: 'CYCLING',
+            value: 280,
+            effectiveAt,
+          }),
+        ],
+      }),
+      harness.tx,
+    );
+  });
 });
 
 

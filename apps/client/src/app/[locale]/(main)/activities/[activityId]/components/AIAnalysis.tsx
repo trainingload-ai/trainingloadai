@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useAiDataConsent } from "@/api/ai-data-consent";
 import { featureAllowed, useFeatureAccess } from "@/api/feature-access";
 import { queryKeys } from "@/lib/query-keys";
+import { aiOperationErrorCode } from "@/lib/ai-operation-errors";
 import { ManagedActivityReviewAccessPrompt } from "@deployment/managed-ui";
 import { AiDataConsentPrompt } from "@/components/ai-consent/AiDataConsentPrompt";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,7 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
   const [open, setOpen] = useState(false);
   const [streamAttempt, setStreamAttempt] = useState<{
     activityId: string;
+    lang: string;
     restartKey: number;
   } | null>(null);
   const locale = useLocale();
@@ -107,7 +109,7 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   const reviewSettled = !accessLoading && !reviewQuery.isLoading;
   const streamEligible =
-    Boolean(activityId) &&
+    !!activityId &&
     hasReviewAccess &&
     hasAiDataConsent &&
     reviewSettled &&
@@ -124,9 +126,11 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
       !workerSkipped
     ) {
       setStreamAttempt((previous) =>
-        previous?.activityId === activityId
+        previous !== null &&
+        previous.activityId === activityId &&
+        previous.lang === lang
           ? previous
-          : { activityId: activityId!, restartKey: 0 },
+          : { activityId, lang, restartKey: 0 },
       );
     }
   }, [
@@ -137,6 +141,7 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
     workerFailed,
     workerSkipped,
     activityId,
+    lang,
   ]);
   // Once started, keep this request alive while canonical status changes to RUNNING.
   const streamEnabled =
@@ -144,12 +149,15 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
     Boolean(activityId) &&
     hasReviewAccess &&
     hasAiDataConsent &&
-    streamAttempt?.activityId === activityId;
+    streamAttempt !== null &&
+    streamAttempt.activityId === activityId &&
+    streamAttempt.lang === lang;
 
   const {
     data: aiInfo,
     isLoading: aiInfoLoading,
     error,
+    errorCode,
     isDone: streamDone,
     operation,
   } = useAiAnalysisStream(
@@ -199,6 +207,8 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
     !hasContent &&
     !loadingCombined &&
     (reviewQuery.isError || Boolean(error) || workerFailed);
+  const accessRequiredError =
+    (errorCode ?? aiOperationErrorCode(error)) === "AI_ACCESS_REQUIRED";
   const showFreeUpsell =
     !readOnly && !accessLoading && !hasReviewAccess && !hasContent && !loadingCombined;
 
@@ -207,6 +217,7 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
     if (activityId) {
       setStreamAttempt((previous) => ({
         activityId,
+        lang,
         restartKey: (previous?.restartKey ?? 0) + 1,
       }));
     }
@@ -245,18 +256,25 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
           {showFreeUpsell ? (
             <ManagedActivityReviewAccessPrompt />
           ) : reviewFailed ? (
-            <div className="flex items-center gap-3">
-              <p className="text-mobile-caption pc:text-xs text-muted-foreground">
-                {error instanceof Error ? error.message : t("analysisFailed")}
-              </p>
-              {!readOnly ? <Button
-                variant="ghost"
-                size="sm"
-                onClick={startReview}
-              >
-                {t("regenerate")}
-              </Button> : null}
-            </div>
+            accessRequiredError && !readOnly ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-mobile-caption pc:text-xs text-muted-foreground">
+                  {error instanceof Error ? error.message : t("analysisFailed")}
+                </p>
+                <ManagedActivityReviewAccessPrompt />
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <p className="text-mobile-caption pc:text-xs text-muted-foreground">
+                  {error instanceof Error ? error.message : t("analysisFailed")}
+                </p>
+                {!readOnly ? (
+                  <Button variant="ghost" size="sm" onClick={startReview}>
+                    {t("regenerate")}
+                  </Button>
+                ) : null}
+              </div>
+            )
           ) : hasContent ? (
             <button
               type="button"

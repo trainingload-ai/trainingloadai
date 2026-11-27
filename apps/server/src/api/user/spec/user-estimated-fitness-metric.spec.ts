@@ -599,4 +599,70 @@ describe('UserService estimated fitness metric tracks', () => {
       }),
     });
   });
+
+  it('observes AthleteState fitness facts when replacing manual fitness metrics', async () => {
+    const { service, prisma } = createService();
+    const observe = jest.fn(
+      async (_userId: unknown, _tx: unknown, write: () => Promise<unknown>) =>
+        write(),
+    );
+    (
+      service as unknown as { stateFitness: { observe: typeof observe } }
+    ).stateFitness = { observe };
+    const deleteMany = jest.fn(async () => ({ count: 0 }));
+    const upsert = jest.fn(async () => ({
+      id: 'm1',
+      recordedAt: new Date('2026-11-26T00:00:00.000Z'),
+    }));
+    Object.assign(prisma.userFitnessMetric, { deleteMany, upsert });
+
+    await service.replaceManualFitnessMetricsForDialog({
+      userId: 'user-1',
+      type: UserFitnessMetricType.FTP,
+      sportType: SportType.CYCLING,
+      metrics: [{ effectiveDate: '2026-11-26', value: '275' }],
+      tx: prisma as never,
+    });
+
+    expect(observe).toHaveBeenCalledWith(
+      'user-1',
+      prisma,
+      expect.any(Function),
+    );
+  });
+
+  it('does not leak current profile thresholds when resolving historical power zones with an explicit snapshot', async () => {
+    const { service, prisma } = createService();
+    Object.assign(prisma, {
+      userZoneSetting: { findUnique: jest.fn(async () => null) },
+    });
+    const composedSpy = jest
+      .spyOn(service, 'getComposedUserProfile')
+      .mockResolvedValue({ ftp: 300, powerZoneModel: 'FRIEL' } as never);
+
+    const resolved = await service.getPowerZoneSettingResolved(
+      'user-1',
+      SportType.CYCLING,
+      { powerZoneModel: 'FRIEL' },
+    );
+
+    expect(composedSpy).not.toHaveBeenCalled();
+    expect(resolved.zones).toEqual([]);
+  });
+
+  it('rejects out-of-range body weight and invalid IANA timezones in replaceUserBodyMetrics', async () => {
+    const { service } = createService();
+
+    await expect(
+      service.replaceUserBodyMetrics('user-1', 'WEIGHT', [
+        { effectiveDate: '2026-11-26', value: '-5' },
+      ]),
+    ).rejects.toThrow('Invalid body weight');
+
+    await expect(
+      service.replaceUserBodyMetrics('user-1', 'TIMEZONE', [
+        { effectiveDate: '2026-11-26', value: 'Not/A_Real_Zone' },
+      ]),
+    ).rejects.toThrow('Invalid IANA timezone');
+  });
 });
