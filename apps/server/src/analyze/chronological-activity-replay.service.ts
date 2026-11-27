@@ -26,6 +26,7 @@ import {
   type FitnessTimelineSport,
   type FitnessTimelineValue,
 } from '@/algorithm/fitness-timeline';
+import { isCausalTimelineFitnessMetric } from '@/algorithm/causal-fitness-metric';
 import {
   UserService,
   type TimelineFitnessProjection,
@@ -464,7 +465,22 @@ export class ChronologicalActivityReplayService {
       })}`,
     );
 
-    const seeds = metricRows
+    const causalMetricRows = metricRows.filter((row) => {
+      if (isCausalTimelineFitnessMetric(row)) return true;
+      this.logger.warn(
+        `[activity-replay] 忽略非因果 AUTO 日历日零点投影 ${JSON.stringify({
+          userId: request.userId,
+          sourceJobType: request.sourceJobType,
+          dataRepair: request.dataRepair ?? false,
+          id: row.id,
+          type: row.type,
+          sport: row.sport,
+          recordedAt: row.recordedAt.toISOString(),
+        })}`,
+      );
+      return false;
+    });
+    const seeds = causalMetricRows
       .filter(
         (row) =>
           supportedMetric(row.type) && row.recordedAt < request.effectiveFrom,
@@ -478,7 +494,7 @@ export class ChronologicalActivityReplayService {
         : [];
     });
     const events: ReplayEvent[] = [
-      ...metricRows
+      ...causalMetricRows
         .filter(
           (row) =>
             supportedMetric(row.type) &&

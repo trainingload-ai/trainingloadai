@@ -1,5 +1,6 @@
 import { AthleteStateFitnessFacts } from '@/athlete-state/updates/athlete-state-fitness-facts.service';
 import { lockFitnessUser } from '@/prisma/fitness-write-lock';
+import { isCausalTimelineFitnessMetric } from '@/algorithm/causal-fitness-metric';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
 
@@ -477,6 +478,18 @@ export class UserService {
           (input.replaceTo != null && projection.effectiveAt > input.replaceTo)
         ) {
           throw new Error('INVALID_TIMELINE_PROJECTION_VALUE');
+        }
+        if (
+          !isCausalTimelineFitnessMetric({
+            source: MetricSource.AUTO,
+            recordedAt: projection.effectiveAt,
+            originPayload: projection.originPayload,
+          })
+        ) {
+          this.logger.warn(
+            `[体能指标] 拒绝 AUTO 日历日零点投影进入因果时间线：用户ID=${input.userId}, 类型=${projection.type}, 运动=${projection.sport}, recordedAt=${projection.effectiveAt.toISOString()}。该时刻不是活动或设备观测时间，不改写时间戳。`,
+          );
+          continue;
         }
         const key = [
           projection.type,
@@ -1466,6 +1479,19 @@ export class UserService {
     changedMetrics: UserFitnessMetric[] = [],
     preserveExactTimestamp: boolean = false,
   ) {
+    if (
+      source === MetricSource.AUTO &&
+      !isCausalTimelineFitnessMetric({
+        source,
+        recordedAt,
+        originPayload: origin?.originPayload,
+      })
+    ) {
+      this.logger.warn(
+        `[体能指标] 拒绝 AUTO 日历日零点投影进入因果时间线：用户ID=${userId}, 类型=${type}, 运动=${sport}, recordedAt=${recordedAt.toISOString()}。该时刻不是活动或设备观测时间，不改写时间戳。`,
+      );
+      return null;
+    }
     if (!tx) {
       const result = await this.serializeFitnessWrite(userId, () =>
         this.runFitnessWriteTransaction(userId, (client) =>
@@ -1524,9 +1550,11 @@ export class UserService {
     const persistedValue2 =
       value2 == null ? value2 : this.normalizeFitnessMetricValue(type, value2);
 
-    const persistedRecordedAt = preserveExactTimestamp
-      ? recordedAt
-      : new Date(`${dayjs.utc(recordedAt).format('YYYY-MM-DD')}T00:00:00.000Z`);
+    // AUTO 保留调用方给出的观测时刻。MANUAL / ESTIMATED 仍使用日历日标签。
+    const persistedRecordedAt =
+      source === MetricSource.AUTO || preserveExactTimestamp
+        ? recordedAt
+        : new Date(`${dayjs.utc(recordedAt).format('YYYY-MM-DD')}T00:00:00.000Z`);
 
     if (
       current &&

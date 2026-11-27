@@ -231,6 +231,119 @@ describe('UserService.applyTimelineProjectionBatch', () => {
     expect(tx.userFitnessMetric.create).not.toHaveBeenCalled();
   });
 
+  it('does not write an AUTO calendar-day snap and still stores a real activity time', async () => {
+    const legacy = {
+      id: 'legacy-lthr',
+      userId: 'legacy-athlete',
+      type: UserFitnessMetricType.FTP,
+      sport: SportType.CYCLING,
+      value: 250,
+      value2: null,
+      source: MetricSource.AUTO,
+      recordedAt: new Date('2026-07-16T00:00:00.000Z'),
+      createdAt: new Date('2026-07-16T00:00:00.000Z'),
+      changeSource: ChangeSource.SYSTEM_CALCULATED,
+      originProvider: null,
+      originExternalId: null,
+      originChecksum: null,
+      originPayload: null,
+      originSyncedAt: null,
+      projectionVersion: null,
+      projectionRunId: null,
+      projectionFingerprint: null,
+    };
+    const tx = {
+      $queryRaw: jest.fn(async () => []),
+      userFitnessMetric: {
+        findMany: jest.fn(async () => [legacy]),
+        deleteMany: jest.fn(async () => ({ count: 1 })),
+        create: jest.fn(async ({ data }: { data: { recordedAt: Date } }) => data),
+      },
+      userFitnessMetricProjectionAudit: {
+        upsert: jest.fn(async () => ({})),
+      },
+    };
+    const prisma = {
+      ...tx,
+      $transaction: jest.fn(async (callback: (client: typeof tx) => unknown) =>
+        callback(tx),
+      ),
+    };
+    const users = new UserQueryService(
+      new UserIdentityRepository(prisma as never),
+    );
+    const service = new UserService(
+      prisma as never,
+      {} as never,
+      { get: jest.fn() } as never,
+      {} as never,
+      { emitAsync: jest.fn(async () => []) } as never,
+      users,
+      analysisConfigs(prisma, users),
+    );
+    const activityEnd = new Date('2026-07-16T02:05:11.000Z');
+    const endedAtMidnight = new Date('2026-07-17T00:00:00.000Z');
+
+    await service.applyTimelineProjectionBatch(
+      {
+        userId: 'legacy-athlete',
+        projectionRunId: 'legacy-replay',
+        replacementReason: 'DATA_REPAIR_REPLAY',
+        replaceFrom: new Date('2026-07-16T00:00:00.000Z'),
+        replaceTo: new Date('2026-07-18T00:00:00.000Z'),
+        scopes: [{ type: UserFitnessMetricType.FTP, sport: SportType.CYCLING }],
+        projections: [
+          {
+            type: UserFitnessMetricType.FTP,
+            sport: SportType.CYCLING,
+            value: 250,
+            effectiveAt: new Date('2026-07-16T00:00:00.000Z'),
+            projectionVersion: 2,
+            projectionFingerprint: 'snapped',
+          },
+          {
+            type: UserFitnessMetricType.FTP,
+            sport: SportType.CYCLING,
+            value: 275,
+            effectiveAt: activityEnd,
+            projectionVersion: 2,
+            projectionFingerprint: 'activity-end',
+            originPayload: { sourceActivityIds: [28] },
+          },
+          {
+            type: UserFitnessMetricType.FTP,
+            sport: SportType.CYCLING,
+            value: 270,
+            effectiveAt: endedAtMidnight,
+            projectionVersion: 2,
+            projectionFingerprint: 'real-midnight-end',
+            originPayload: { sourceActivityIds: [34] },
+          },
+        ],
+      },
+      tx as never,
+    );
+
+    expect(tx.userFitnessMetric.create).toHaveBeenCalledTimes(2);
+    expect(tx.userFitnessMetric.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        source: MetricSource.AUTO,
+        recordedAt: activityEnd,
+        value: 275,
+      }),
+    });
+    expect(tx.userFitnessMetric.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        source: MetricSource.AUTO,
+        recordedAt: endedAtMidnight,
+        value: 270,
+      }),
+    });
+    expect(tx.userFitnessMetric.deleteMany).toHaveBeenCalledWith({
+      where: { id: { in: ['legacy-lthr'] } },
+    });
+  });
+
   it('does not borrow future body metrics when resolving a historical activity', async () => {
     const bodyFindMany = jest.fn(async () => []);
     const prisma = {

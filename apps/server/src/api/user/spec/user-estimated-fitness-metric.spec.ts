@@ -280,6 +280,9 @@ describe('UserService estimated fitness metric tracks', () => {
       MetricSource.AUTO,
     ]);
     expect(created.every((row) => row.originPayload)).toBe(true);
+    expect(created.find((row) => row.source === MetricSource.AUTO)?.recordedAt).toEqual(
+      new Date('2026-08-04T12:00:00.000Z'),
+    );
   });
 
   it('does not publish an automatic power metric without peak evidence', async () => {
@@ -305,6 +308,49 @@ describe('UserService estimated fitness metric tracks', () => {
 
     expect(created).toHaveLength(0);
     expect(prisma.userFitnessMetric.create).not.toHaveBeenCalled();
+  });
+
+  it('does not persist an AUTO calendar-day snap and still persists MANUAL', async () => {
+    const { service, created } = createService({ autoEnabled: true });
+    const midnight = new Date('2026-07-16T00:00:00.000Z');
+
+    const rejected = await service.upsertFitnessMetric(
+      'legacy-athlete',
+      UserFitnessMetricType.LTHR,
+      168,
+      SportType.RUN,
+      undefined,
+      MetricSource.AUTO,
+      midnight,
+      {
+        originPayload: {
+          method: 'PASSIVE_30M_TAIL20',
+          observationIds: ['obs-1'],
+        },
+      },
+    );
+    const manual = await service.upsertFitnessMetric(
+      'legacy-athlete',
+      UserFitnessMetricType.LTHR,
+      164,
+      SportType.RUN,
+      undefined,
+      MetricSource.MANUAL,
+      midnight,
+    );
+
+    expect(rejected).toBeNull();
+    expect(created.map((row) => row.source)).toEqual([
+      MetricSource.ESTIMATED,
+      MetricSource.MANUAL,
+    ]);
+    expect(manual).toEqual(
+      expect.objectContaining({
+        source: MetricSource.MANUAL,
+        value: 164,
+        recordedAt: midnight,
+      }),
+    );
   });
 
   it('publishes one power model with one transaction and one user lock', async () => {
