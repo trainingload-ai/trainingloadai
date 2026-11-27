@@ -32,6 +32,13 @@ const actionIcons = {
   delete: Trash2,
 } satisfies Record<PlanLifecycleAction, typeof PlayCircle>;
 
+const actionVariants = {
+  brand: "brand",
+  primary: "default",
+  neutral: "ghost",
+  destructive: "ghost",
+} as const;
+
 export function PlanDetailLifecyclePanel({
   plan,
   t,
@@ -114,7 +121,7 @@ export function PlanDetailLifecyclePanel({
                     <Button
                       key={action}
                       size="touch-sm"
-                      variant={tone === "primary" ? "default" : "ghost"}
+                      variant={actionVariants[tone]}
                       className={cn(
                         "max-w-full whitespace-normal",
                         tone === "neutral" && "bg-background/80 hover:bg-background",
