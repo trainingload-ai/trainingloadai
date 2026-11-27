@@ -301,3 +301,43 @@ it('explains all eight swim sessions from the rejected first phase, including bo
   const chosen = [10, 11, 12, 11, 12, 12, 12, 12];
   await accept(ctx, windowInput(1, 4, { workouts: workouts.map((w,i) => ({...w, text: swim(chosen[i], logged[i][1])})) }));
 });
+
+it('allows unchanged templates to be resent alongside changed ones in a patch submission, while still rejecting a no-op patch', async () => {
+  const ctx = context();
+  const { dayIndex: _day, ...baseTemplate } = session;
+  const rejected = windowInput(1, 4, {
+    sessionTemplates: [
+      { id: 'w1_ok', ...baseTemplate, text: 'work 30m' },
+      { id: 'w2_too_long', ...baseTemplate, text: 'work 60m' },
+    ],
+    workouts: [
+      { weekIndexes: [1, 3, 4], dayIndex: 1, templateId: 'w1_ok' },
+      { weekIndexes: [2], dayIndex: 1, templateId: 'w2_too_long' },
+    ],
+  });
+  expect(await validateAiToolInput(planStagePhaseTool, ctx, rejected)).toMatchObject({ ok: false, code: 'PLAN_QUALITY_INVALID' });
+
+  // No-op patch (none of the submitted templates changed) is still rejected.
+  const noOpPatch = {
+    assessmentId: id,
+    startWeek: 1,
+    endWeek: 4,
+    sessionTemplates: [
+      { id: 'w1_ok', text: 'work 30m' },
+      { id: 'w2_too_long', text: 'work 60m' },
+    ],
+  };
+  expect(await validateAiToolInput(planStagePhaseTool, ctx, noOpPatch)).toMatchObject({ ok: false, code: 'INVALID_INPUT' });
+
+  // Resending unchanged w1_ok alongside the fixed w2_too_long succeeds.
+  const mixedPatch = {
+    assessmentId: id,
+    startWeek: 1,
+    endWeek: 4,
+    sessionTemplates: [
+      { id: 'w1_ok', text: 'work 30m' },
+      { id: 'w2_too_long', text: 'work 30m' },
+    ],
+  };
+  await accept(ctx, mixedPatch);
+});
