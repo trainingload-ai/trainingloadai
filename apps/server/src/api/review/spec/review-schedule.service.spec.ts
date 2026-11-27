@@ -1,6 +1,7 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { Logger } from '@nestjs/common';
 import { BodyMetricType } from '@prisma/client';
+import { AthleteClockService } from '@/timezone/athlete-clock.service';
 import { ReviewScheduleService } from '../review-schedule.service';
 
 describe('ReviewScheduleService', () => {
@@ -22,9 +23,9 @@ describe('ReviewScheduleService', () => {
       prisma,
       service: new ReviewScheduleService(
         prisma as never,
-        {
+        new AthleteClockService({
           bodyMetrics: () => prisma.userBodyMetric,
-        } as never,
+        } as never),
       ),
     };
   }
@@ -218,14 +219,51 @@ describe('ReviewScheduleService', () => {
     }
   });
 
+  it.each([
+    [undefined, undefined, '2026-03-08T00:00:00.000Z'],
+    ['Bad/Profile', 'Bad/Override', '2026-03-08T00:00:00.000Z'],
+    [undefined, 'America/New_York', '2026-03-07T05:00:00.000Z'],
+    ['Asia/Shanghai', 'America/New_York', '2026-03-07T16:00:00.000Z'],
+  ])(
+    'selects a valid review time zone (%s, %s)',
+    async (preferred, fallback, periodEnd) => {
+      const env = { ...process.env };
+      if (fallback) env.REVIEW_DEFAULT_TIMEZONE = fallback;
+      else delete env.REVIEW_DEFAULT_TIMEZONE;
+      const override = jest.replaceProperty(process, 'env', env);
+      try {
+        const { prisma, service } = createService();
+        prisma.userBodyMetric.findFirst.mockResolvedValue({ value: preferred });
+        await service.triggerNow(
+          'user-1',
+          'DAILY',
+          new Date('2026-03-08T00:30:00.000Z'),
+        );
+        expect(prisma.reviewJob.upsert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            create: expect.objectContaining({ periodEnd: new Date(periodEnd) }),
+          }),
+        );
+      } finally {
+        override.restore();
+      }
+    },
+  );
+
   it('uses an explicit review date without postponing the job', async () => {
     const { prisma, service } = createService();
-    prisma.userBodyMetric.findFirst.mockResolvedValueOnce({ value: 'Asia/Shanghai' });
+    prisma.userBodyMetric.findFirst.mockResolvedValueOnce({
+      value: 'Asia/Shanghai',
+    });
     jest.useFakeTimers();
     const now = new Date('2026-11-26T12:00:00Z');
     jest.setSystemTime(now);
     try {
-      await service.triggerNow('user-1', 'WEEKLY', new Date('2026-12-06T21:00:00Z'));
+      await service.triggerNow(
+        'user-1',
+        'WEEKLY',
+        new Date('2026-12-06T21:00:00Z'),
+      );
       expect(prisma.reviewJob.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           create: expect.objectContaining({

@@ -5,6 +5,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, SportType, UserFitnessMetricType } from '@prisma/client';
 import { UserService } from '@/api/user/user.service';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
+import { resolveAthleteTimezone } from '@/timezone/athlete-timezone';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
 import timezone = require('dayjs/plugin/timezone');
@@ -114,27 +115,11 @@ export class ActivityRecomputeJobService {
     }
   }
 
-  private defaultTimezone() {
-    return (
-      this.configService.get<string>(
-        'activityRecomputePolicy.defaultTimezone',
-      ) ?? 'Asia/Shanghai'
-    );
-  }
-
-  private normalizeTimezone(value?: string | null) {
-    const candidate = value?.trim() || this.defaultTimezone();
-    try {
-      new Intl.DateTimeFormat('en-US', { timeZone: candidate }).format();
-      return candidate;
-    } catch {
-      return this.defaultTimezone();
-    }
-  }
-
   private async getUserTimezone(userId: string) {
-    const preferred = await this.userService.getPreferredTimezone(userId);
-    return this.normalizeTimezone(preferred);
+    return resolveAthleteTimezone({
+      preferred: await this.userService.getPreferredTimezone(userId),
+      fallback: this.configService.get<string>('activityRecomputePolicy.defaultTimezone'),
+    });
   }
 
   private nextNightlyAvailableAt(now: Date, timezoneName: string) {
@@ -149,17 +134,13 @@ export class ActivityRecomputeJobService {
     const jitterMinutes =
       jitterMax > 0 ? Math.floor(Math.random() * (jitterMax + 1)) : 0;
 
-    const localNow = dayjs(now).tz(timezoneName);
-    let target = localNow
-      .hour(hour)
-      .minute(0)
-      .second(0)
-      .millisecond(0)
-      .add(jitterMinutes, 'minute');
-    if (!target.isAfter(localNow)) {
-      target = target.add(1, 'day');
-    }
-    return target.utc().toDate();
+    const localDate = dayjs(now).tz(timezoneName).format('YYYY-MM-DD');
+    const midnight = dayjs.utc(localDate);
+    const localTime = hour * 60 + jitterMinutes;
+    const onDate = (day: typeof midnight) =>
+      dayjs.tz(day.add(localTime, 'minute').format('YYYY-MM-DD HH:mm'), timezoneName);
+    const target = onDate(midnight);
+    return (target.isAfter(now) ? target : onDate(midnight.add(1, 'day'))).toDate();
   }
 
   private async upsertScheduledJob(

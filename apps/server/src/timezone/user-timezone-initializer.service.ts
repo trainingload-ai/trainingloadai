@@ -7,6 +7,9 @@ import { UserQueryService } from '@/api/user/user-query.service';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { readyActivityWhere } from '@/utils/activity-ready-where';
 
+import { normalizeIanaTimezone } from './athlete-timezone';
+export { normalizeIanaTimezone } from './athlete-timezone';
+
 export type TimezoneInitializationSource =
   | 'EXISTING'
   | 'ACTIVITY_COORDINATES'
@@ -18,17 +21,6 @@ export type TimezoneInitializationResult = {
   initialized: boolean;
   source: TimezoneInitializationSource;
 };
-
-export function normalizeIanaTimezone(value: unknown): string | null {
-  const candidate = String(value ?? '').trim();
-  if (!candidate) return null;
-  try {
-    new Intl.DateTimeFormat('en-US', { timeZone: candidate }).format();
-    return candidate;
-  } catch {
-    return null;
-  }
-}
 
 @Injectable()
 export class UserTimezoneInitializerService {

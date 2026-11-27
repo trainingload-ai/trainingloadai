@@ -1,3 +1,4 @@
+import { DEFAULT_ATHLETE_TIMEZONE } from '@/timezone/athlete-timezone';
 import {
   Inject,
   Injectable,
@@ -127,9 +128,10 @@ export class ReviewCronService implements OnModuleInit, OnModuleDestroy {
           sch.user_id,
           sch.enabled,
           sch.send_at_local_time,
-          COALESCE(tz.timezone, 'UTC') AS timezone
+          COALESCE(valid_timezone.name, '${DEFAULT_ATHLETE_TIMEZONE}') AS timezone
         FROM schedule sch
         LEFT JOIN tz ON tz.user_id = sch.user_id
+        LEFT JOIN pg_timezone_names valid_timezone ON lower(valid_timezone.name) = lower(btrim(tz.timezone))
       ),
       due AS (
         SELECT

@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { UserQueryService } from '@/api/user/user-query.service';
+import { AthleteClockService } from '@/timezone/athlete-clock.service';
 import { DEFAULT_REVIEW_SEND_AT_LOCAL_TIME } from '@/review/review-schedule.constants';
-import { BodyMetricType, ReviewDigestType } from '@prisma/client';
+import { ReviewDigestType } from '@prisma/client';
 import { completedReviewWindow } from '@/review/review-date-window';
 
 const TYPES = ['DAILY', 'WEEKLY', 'MONTHLY'] as const;
@@ -24,35 +24,8 @@ export class ReviewScheduleService {
   private readonly logger = new Logger(ReviewScheduleService.name);
   constructor(
     private readonly prisma: PrismaService,
-    users: UserQueryService,
-  ) {
-    this.users = users;
-  }
-
-  private readonly users: UserQueryService;
-
-  private defaultTimezone() {
-    return process.env.REVIEW_DEFAULT_TIMEZONE?.trim() || 'Asia/Shanghai';
-  }
-
-  private normalizeTimezone(value?: string | null) {
-    const candidate = value?.trim() || this.defaultTimezone();
-    try {
-      new Intl.DateTimeFormat('en-US', { timeZone: candidate }).format();
-      return candidate;
-    } catch {
-      return this.defaultTimezone();
-    }
-  }
-
-  private async getUserTimezone(userId: string) {
-    const row = await this.users.bodyMetrics().findFirst({
-      where: { userId, type: BodyMetricType.TIMEZONE },
-      orderBy: [{ effectiveDate: 'desc' }, { createdAt: 'desc' }],
-      select: { value: true },
-    });
-    return this.normalizeTimezone(row?.value);
-  }
+    private readonly clock: AthleteClockService,
+  ) {}
 
   async getSchedules(userId: string) {
     const rows = await this.prisma.reviewSchedule.findMany({
@@ -115,12 +88,12 @@ export class ReviewScheduleService {
   }
 
   async triggerNow(userId: string, type: ReviewDigestType, asOf = new Date()) {
-    const tz = await this.getUserTimezone(userId);
-    const { periodStart, periodEnd } = completedReviewWindow(
-      type,
-      asOf,
-      tz,
-    );
+    const { timezone: tz } = await this.clock.resolve({
+      userId,
+      instant: asOf,
+      fallbackTimezone: process.env.REVIEW_DEFAULT_TIMEZONE,
+    });
+    const { periodStart, periodEnd } = completedReviewWindow(type, asOf, tz);
 
     const row = await this.prisma.reviewJob.upsert({
       where: {

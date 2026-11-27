@@ -62,6 +62,97 @@ describe('ActivityRecomputeJobService', () => {
     });
   });
 
+  it.each([
+    [
+      '2026-03-08T00:30:00.000Z',
+      undefined,
+      undefined,
+      'UTC',
+      '2026-03-08T02:00:00.000Z',
+    ],
+    [
+      '2026-03-07T23:59:00.000Z',
+      'Bad/Profile',
+      'Bad/Override',
+      'UTC',
+      '2026-03-08T02:00:00.000Z',
+    ],
+    [
+      '2026-03-08T04:50:00.000Z',
+      'America/New_York',
+      undefined,
+      'America/New_York',
+      '2026-03-08T07:00:00.000Z',
+    ],
+    [
+      '2026-03-08T00:30:00.000Z',
+      undefined,
+      'Asia/Shanghai',
+      'Asia/Shanghai',
+      '2026-03-08T18:00:00.000Z',
+    ],
+  ])(
+    'schedules a recompute in a validated timezone at %s (%s, %s)',
+    async (now, preferred, fallback, zone, availableAt) => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(now));
+      try {
+        const update = jest.fn(async ({ data }: { data: object }) => ({
+          id: 'job',
+          ...data,
+        }));
+        const tx = {
+          $executeRaw: jest.fn(async () => 1),
+          $queryRaw: jest.fn(async () => [
+            {
+              id: 'job',
+              status: 'SCHEDULED',
+              recomputeFrom: new Date('2026-01-01T00:00:00.000Z'),
+              recomputeTo: new Date(now),
+            },
+          ]),
+          activityRecomputeJob: { update },
+        };
+        const service = new ActivityRecomputeJobService(
+          {
+            $transaction: async (
+              callback: (transaction: typeof tx) => unknown,
+            ) => callback(tx),
+          } as never,
+          {
+            get: (key: string) =>
+              ({
+                'activityRecomputePolicy.defaultTimezone': fallback,
+                'activityRecomputePolicy.nightlyJitterMinutes': 0,
+              })[key],
+          } as never,
+          {
+            getPreferredTimezone: async () => preferred,
+            getActivityRecomputePolicyForUser: async () => ({
+              lookbackDays: 7,
+              entitlement: 'FREE',
+            }),
+          } as never,
+        );
+        await service.scheduleContextChangeRecompute({
+          userId: 'user-1',
+          contextType: 'PROFILE',
+          changedTimes: [Date.parse('2026-01-01T00:00:00.000Z')],
+        });
+        expect(update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              availableAt: new Date(availableAt),
+              triggerPayload: expect.objectContaining({ timezone: zone }),
+            }),
+          }),
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    },
+  );
+
   it('does not drop a context change that arrives while the deduplicated job is running', async () => {
     const update = jest.fn(
       async ({ data }: { data: { dedupeKey: string } }) => ({

@@ -405,7 +405,7 @@ const config = () => ({
       .map((v) => v.trim())
       .filter(Boolean),
     defaultTimezone:
-      process.env.ACTIVITY_RECOMPUTE_DEFAULT_TIMEZONE || 'Asia/Shanghai',
+      process.env.ACTIVITY_RECOMPUTE_DEFAULT_TIMEZONE,
     nightlyStartHour:
       Number(process.env.ACTIVITY_RECOMPUTE_NIGHTLY_START_HOUR) >= 0 &&
       Number(process.env.ACTIVITY_RECOMPUTE_NIGHTLY_START_HOUR) <= 23
