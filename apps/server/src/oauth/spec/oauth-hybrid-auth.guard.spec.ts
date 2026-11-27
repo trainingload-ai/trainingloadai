@@ -1,4 +1,4 @@
-import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { describe, expect, it, jest } from '@jest/globals';
 
 jest.mock('@thallesp/nestjs-better-auth', () => ({
@@ -33,6 +33,7 @@ describe('OAuthHybridAuthGuard', () => {
     optional?: boolean;
     sessionOnly?: boolean;
     publicDemoCapability?: string;
+    hasPublicDemoRuntime?: boolean;
   }) {
     const reflector = {
       getAllAndOverride: jest.fn((key: string) => {
@@ -72,12 +73,39 @@ describe('OAuthHybridAuthGuard', () => {
         reflector as never,
         auth as never,
         bearer as never,
-        publicDemo as never,
+        flags?.hasPublicDemoRuntime === false ? undefined : publicDemo as never,
         prisma as never,
         { users: () => prisma.t_user } as never,
       ),
     };
   }
+
+  it('keeps a Self-host session authorized without a demo adapter', async () => {
+    const { guard, prisma, publicDemo } = createGuard({ hasPublicDemoRuntime: false });
+    const request = {
+      session: { user: { id: 'self-host-owner' } },
+      headers: { cookie: 'trainingload.public-demo=unused' },
+    };
+    await expect(guard.canActivate(context(request))).resolves.toBe(true);
+    expect(publicDemo.verifyRequest).not.toHaveBeenCalled();
+    expect(prisma.t_user.findUnique).toHaveBeenCalledWith({
+      where: { id: 'self-host-owner' },
+      select: { accountDeletionRequestedAt: true },
+    });
+  });
+
+  it.each([
+    new UnauthorizedException({ code: 'PUBLIC_DEMO_TOKEN_INVALID' }),
+    new NotFoundException({ code: 'PUBLIC_DEMO_DISABLED' }),
+  ])('keeps a configured adapter rejection instead of reusing the browser session', async (rejection) => {
+    const { guard, prisma, publicDemo } = createGuard({ publicDemoCapability: 'plans:read' });
+    publicDemo.verifyRequest.mockImplementationOnce(() => { throw rejection; });
+    await expect(guard.canActivate(context({
+      session: { user: { id: 'signed-in-user' } },
+      headers: { cookie: 'trainingload.public-demo=expired' },
+    }))).rejects.toBe(rejection);
+    expect(prisma.t_user.findUnique).not.toHaveBeenCalled();
+  });
 
   it('allows requests that already have a session user after checking deletion state', async () => {
     const { auth, bearer, guard, prisma } = createGuard();

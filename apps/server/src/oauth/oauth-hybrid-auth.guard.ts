@@ -2,7 +2,9 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Inject,
   Injectable,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService, type UserSession } from '@thallesp/nestjs-better-auth';
@@ -21,9 +23,10 @@ import {
   type PublicDemoCapability,
 } from '@shared/public-demo-policy';
 import {
-  PublicDemoTokenService,
+  PUBLIC_DEMO_RUNTIME,
   type PublicDemoIdentity,
-} from '@/public-demo/public-demo-token.service';
+  type PublicDemoRuntime,
+} from '../public-demo/public-demo-runtime.port';
 import { PUBLIC_DEMO_ACCESS_METADATA } from '@/public-demo/allow-public-demo.decorator';
 import {
   getDeploymentResourceScopeRules,
@@ -104,7 +107,9 @@ export class OAuthHybridAuthGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly auth: AuthService,
     private readonly bearer: OAuthBearerService,
-    private readonly publicDemo: PublicDemoTokenService,
+    @Optional()
+    @Inject(PUBLIC_DEMO_RUNTIME)
+    private readonly publicDemo: PublicDemoRuntime | undefined,
     private readonly prisma: PrismaService,
     users: UserQueryService,
   ) {
@@ -126,7 +131,7 @@ export class OAuthHybridAuthGuard implements CanActivate {
     // Public endpoints (including guest-session refresh) skip this branch so an
     // expired Demo cookie cannot prevent a new capability from being issued.
     if (!this.isPublic(context)) {
-      const publicDemo = await this.publicDemo.verifyRequest(request);
+      const publicDemo = await this.publicDemo?.verifyRequest(request);
       if (publicDemo) {
         const capability = this.assertPublicDemoAccess(context);
         const user = await this.users.users().findUnique({

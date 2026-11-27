@@ -7,10 +7,9 @@ import { OAuthHybridAuthGuard } from './oauth-hybrid-auth.guard';
 import { OAuthMobileConfigService } from './oauth-mobile-config.service';
 import { OAuthClientRepository } from './persistence/oauth-client.repository';
 import { UserQueryModule } from '@/api/user/user-query.module';
-import { PublicDemoModule } from '@/public-demo/public-demo.module';
 
 @Module({
-  imports: [PrismaModule, UserQueryModule, PublicDemoModule],
+  imports: [PrismaModule, UserQueryModule],
   controllers: [OAuthController, OAuthMetadataController],
   providers: [
     OAuthBearerService,
@@ -18,9 +17,6 @@ import { PublicDemoModule } from '@/public-demo/public-demo.module';
     OAuthMobileConfigService,
     OAuthClientRepository,
   ],
-  // Controllers in feature modules reference OAuthHybridAuthGuard directly via
-  // @UseGuards. Re-export its Demo dependency as well so Nest can resolve the
-  // same PublicDemoTokenService instance in each consuming module context.
-  exports: [OAuthBearerService, OAuthHybridAuthGuard, PublicDemoModule],
+  exports: [OAuthBearerService, OAuthHybridAuthGuard],
 })
 export class OAuthModule {}

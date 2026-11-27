@@ -903,6 +903,10 @@
       "types": "./src/importing/activity-data-migration-backup.ts",
       "default": "./src/importing/activity-data-migration-backup.ts"
     },
+    "./public-demo/public-demo-runtime.port": {
+      "types": "./src/public-demo/public-demo-runtime.port.ts",
+      "default": "./src/public-demo/public-demo-runtime.port.ts"
+    },
     "./importing/raw-association-recovery": {
       "types": "./src/importing/raw-association-recovery.ts",
       "default": "./src/importing/raw-association-recovery.ts"
