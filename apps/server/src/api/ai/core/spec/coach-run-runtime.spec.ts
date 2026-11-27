@@ -4,6 +4,7 @@ import type { CoachActivityEvent } from '@shared/ai-coach-run-contract';
 import type { AiToolContext, AiToolDef } from '../tool.types';
 import { createAiSdkCoachTools } from '../ai-sdk-tool-adapter';
 import { streamCoachAnswer } from '../tool-loop-agent.runtime';
+import { CoachRunProjector, coachSnapshotChunks } from '../coach-run-projector';
 import { COACH_TOOL_DEFINITIONS } from '../tool.registry';
 import { getCoachSkillByName } from '../skill.registry';
 import { skillActivateTool } from '../tools/skillActivate.tool';
@@ -11,6 +12,8 @@ import { skillActivateTool } from '../tools/skillActivate.tool';
 let modelAttempts = 0;
 let latestAgentConfig: any;
 let executeBeforeFailure = false;
+let textBeforeFailure: 'buffered' | 'visible' | undefined;
+let upstreamStatus = 429;
 jest.mock('ai', () => ({
   ...jest.requireActual<typeof import('ai')>('ai'),
   ToolLoopAgent: class {
@@ -20,9 +23,21 @@ jest.mock('ai', () => ({
     }
     async stream() {
       const { tools } = this.config;
+      const isFallback = modelAttempts > 1;
       return {
         fullStream: (async function* () {
           yield { type: 'start-step' };
+          const usage = { inputTokens: 5, outputTokens: 3 };
+          if (isFallback && textBeforeFailure) {
+            yield { type: 'text-delta', text: '今天先做轻松骑行。' };
+            yield { type: 'finish-step', usage };
+            yield { type: 'finish', totalUsage: usage, finishReason: 'stop' };
+            return;
+          }
+          if (textBeforeFailure) {
+            yield { type: 'text-delta', text: '今天先做轻松跑。' };
+            if (textBeforeFailure === 'visible') yield { type: 'finish-step', usage };
+          }
           if (executeBeforeFailure)
             await tools.test_write.execute(
               {},
@@ -30,7 +45,7 @@ jest.mock('ai', () => ({
             );
           yield {
             type: 'error',
-            error: Object.assign(new Error('rate limited'), { status: 429 }),
+            error: Object.assign(new Error('rate limited'), { status: upstreamStatus }),
           };
         })(),
       };
@@ -110,6 +125,8 @@ describe('real execution lifecycle / fallback fences', () => {
   afterEach(() => {
     modelAttempts = 0;
     executeBeforeFailure = false;
+    textBeforeFailure = undefined;
+    upstreamStatus = 429;
     if (previousFallback === undefined)
       delete process.env.OPENROUTER_DEFAULT_FALLBACK_MODELS;
     else process.env.OPENROUTER_DEFAULT_FALLBACK_MODELS = previousFallback;
@@ -255,6 +272,58 @@ describe('real execution lifecycle / fallback fences', () => {
       await expect(run()).rejects.toThrow('rate limited');
       expect(modelAttempts).toBe(write ? 1 : 2);
       expect(execute).toHaveBeenCalledTimes(write ? 1 : 0);
+    },
+  );
+
+  it.each([
+    ['visible', 429, false, 1, '今天先做轻松跑。', 'FAILED'],
+    ['buffered', 429, false, 2, '今天先做轻松骑行。', 'SUCCESS'],
+    ['buffered', 400, false, 1, '', undefined],
+    ['buffered', 429, true, 1, '', undefined],
+  ] as const)(
+    'isolates %s text on upstream %s (cancelled=%s)',
+    async (visibility, status, cancel, attempts, expectedText, usageStatus) => {
+      process.env.OPENROUTER_DEFAULT_FALLBACK_MODELS = 'test-fallback';
+      textBeforeFailure = visibility;
+      upstreamStatus = status;
+      const controller = new AbortController();
+      const context = { ...ctx(async () => undefined), signal: controller.signal };
+      const projector = new CoachRunProjector({
+        run: {
+          runId: 'run-1', attemptId: 'attempt-1', messageId: 'message-1',
+          revision: 0, status: 'running', startedAt: new Date().toISOString(),
+          previousExecutionMs: 0, executionMs: 0,
+        },
+      });
+      const streamed: string[] = [];
+      const usage: string[] = [];
+      const drain = async () => {
+        for await (const event of streamCoachAnswer({
+          tools: [tool()],
+          ctx: context,
+          messages: [{ role: 'user', content: '今天应该怎么训练？' }],
+        })) {
+          for (const chunk of projector.consume(event))
+            if (chunk.type === 'text-delta') streamed.push(chunk.delta);
+          if (event.type === 'model_usage') usage.push(event.status);
+          if (cancel && event.type === 'activity' && event.activity.status === 'running')
+            controller.abort(new Error('client disconnected'));
+          if (event.type === 'result') expect(event.result).toBe(expectedText);
+        }
+      };
+
+      if (attempts === 2) await drain();
+      else await expect(drain()).rejects.toThrow();
+      expect(modelAttempts).toBe(attempts);
+      expect(streamed.join('')).toBe(expectedText);
+      expect(usage).toEqual(usageStatus ? [usageStatus] : []);
+
+      projector.finish(attempts === 2 ? 'completed' : 'failed');
+      const stored = projector.envelope().message;
+      const replayed = coachSnapshotChunks('message-1', stored)
+        .filter((chunk) => chunk.type === 'text-delta')
+        .map((chunk) => chunk.delta);
+      expect(replayed.join('')).toBe(expectedText);
     },
   );
 });

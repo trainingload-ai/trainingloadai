@@ -1256,7 +1256,7 @@ export async function* streamCoachAnswer(args: {
     };
   let mutationStarted = false;
   let committedWrite = false;
-  let uiDelivered = false;
+  let outputDelivered = false;
   let modelAttempt = 0;
 
   let openErr: unknown = null;
@@ -1700,7 +1700,7 @@ export async function* streamCoachAnswer(args: {
             pausedForUi = true;
           if (uiAssistant) {
             if (result.name === 'present_coach_plan_draft') planDraftDelivered = true;
-            uiDelivered = true;
+            outputDelivered = true;
             deliveredUiSurfaceCallIds.add(result.id);
             yield uiAssistant;
             logger.log(
@@ -1807,6 +1807,7 @@ export async function* streamCoachAnswer(args: {
             !suppressTextForSelfContainedUiSurface(stepCalls)
           ) {
             visibleTextBuf += visibleStep.text;
+            outputDelivered = true;
             if (!stepCalls.length) summaryRequired = false;
             yield {
               type: 'stream_event',
@@ -1867,7 +1868,7 @@ export async function* streamCoachAnswer(args: {
                       block.name === 'CoachDecisionDraft',
                   )
                 )
-                  uiDelivered = true;
+                  outputDelivered = true;
                 yield ev;
               }
             }
@@ -1926,6 +1927,7 @@ export async function* streamCoachAnswer(args: {
             !suppressTextForSelfContainedUiSurface(stepCalls)
           ) {
             visibleTextBuf += visibleStep.text;
+            outputDelivered = true;
             if (!stepCalls.length) summaryRequired = false;
             yield {
               type: 'stream_event',
@@ -2052,6 +2054,7 @@ export async function* streamCoachAnswer(args: {
         !suppressTextForSelfContainedUiSurface(stepCalls)
       ) {
         visibleTextBuf += visibleStep.text;
+        outputDelivered = true;
         if (!stepCalls.length) summaryRequired = false;
         yield {
           type: 'stream_event',
@@ -2116,7 +2119,7 @@ export async function* streamCoachAnswer(args: {
       const canTryNextModel = model !== models[models.length - 1];
       const shouldRetry =
         !mutationStarted &&
-        !uiDelivered &&
+        !outputDelivered &&
         !ctx.signal.aborted &&
         canTryNextModel &&
         classified.retryable;
