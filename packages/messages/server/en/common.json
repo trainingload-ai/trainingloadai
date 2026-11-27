@@ -442,6 +442,7 @@
     "importBatch": {
       "titleCompleted": "Import batch completed",
       "titleCompletedWithFailures": "Import batch completed with failures",
+      "bodyPostProcessingFailed": "\n\nActivity analysis could not finish. Any activities that were already ready remain available.",
       "bodyBatchSummary": "Processed {totalCount} source objects.\n\n- Success: {successCount}\n- Failed: {failedCount}\n- Skipped: {skippedCount}",
       "bodyThirdPartyExportFailures": "\n\nThird-party upload failed for {providers} ({failedCount} activities). Open connection settings or retry from the activity."
     }

@@ -552,7 +552,14 @@ export class ImportingJobRepository {
     await this.lockBatch(batchJobId, tx);
     const batch = await this.batchJobs(tx).findUnique({
       where: { id: batchJobId },
-      select: { id: true, userId: true, totalCount: true, startedAt: true },
+      select: {
+        id: true,
+        userId: true,
+        totalCount: true,
+        startedAt: true,
+        completedAt: true,
+        postProcessJobs: { where: { status: 'DEAD' }, select: { id: true }, take: 1 },
+      },
     });
     if (!batch) throw new Error(`Import batch not found: ${batchJobId}`);
 
@@ -577,12 +584,12 @@ export class ImportingJobRepository {
     // Never shrink the declared count to the few items registered so far:
     // doing so can start post-processing before the remaining files exist.
     const totalCount = Math.max(batch.totalCount, actualTotalCount);
-    const nextStatus = summarizeBatchStatus({
-      totalCount,
-      successCount,
-      failedCount,
-      skippedCount,
-    });
+    const postProcessDead = Boolean(batch.postProcessJobs?.length);
+    const nextStatus = postProcessDead
+      ? (successCount > 0 ? 'PARTIAL_FAILED' : 'FAILED')
+      : summarizeBatchStatus({ totalCount, successCount, failedCount, skippedCount });
+    const isTerminal =
+      nextStatus === 'COMPLETED' || nextStatus === 'PARTIAL_FAILED' || nextStatus === 'FAILED';
 
     const updated = await this.batchJobs(tx).update({
       where: { id: batchJobId },
@@ -596,20 +603,13 @@ export class ImportingJobRepository {
           nextStatus === 'RUNNING'
             ? (batch.startedAt ?? new Date())
             : batch.startedAt,
-        completedAt:
-          nextStatus === 'COMPLETED' ||
-          nextStatus === 'PARTIAL_FAILED' ||
-          nextStatus === 'FAILED'
-            ? new Date()
-            : null,
+        completedAt: isTerminal
+          ? (postProcessDead && batch.completedAt ? batch.completedAt : new Date())
+          : null,
       },
     });
 
-    if (
-      nextStatus === 'COMPLETED' ||
-      nextStatus === 'PARTIAL_FAILED' ||
-      nextStatus === 'FAILED'
-    ) {
+    if (isTerminal && !postProcessDead) {
       await this.createPostProcessJob(batchJobId, tx);
     }
 

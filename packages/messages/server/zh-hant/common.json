@@ -255,6 +255,7 @@
     "importBatch": {
       "titleCompleted": "匯入批次已完成",
       "titleCompletedWithFailures": "匯入批次已完成，但有失敗項",
+      "bodyPostProcessingFailed": "\n\n活動分析未能完成。已就緒的活動仍可查看。",
       "bodyBatchSummary": "已處理 {totalCount} 個來源物件。\n\n- 成功：{successCount}\n- 失敗：{failedCount}\n- 跳過：{skippedCount}",
       "bodyThirdPartyExportFailures": "\n\n向 {providers} 上傳失敗（{failedCount} 個活動）。請開啟連線設定檢查授權，或從活動頁面重試。"
     }

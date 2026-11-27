@@ -442,6 +442,7 @@
     "importBatch": {
       "titleCompleted": "Lote de importação concluído",
       "titleCompletedWithFailures": "Lote de importação concluído com falhas",
+      "bodyPostProcessingFailed": "\n\nNão foi possível concluir a análise das atividades. As atividades já prontas continuam disponíveis.",
       "bodyBatchSummary": "Processados {totalCount} objetos de origem.\n\n- Sucesso: {successCount}\n- Falha: {failedCount}\n- Ignorados: {skippedCount}",
       "bodyThirdPartyExportFailures": "\n\nO envio para {providers} falhou em {failedCount} atividades. Verifique as configurações da conexão ou tente novamente pela atividade."
     }

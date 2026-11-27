@@ -255,6 +255,7 @@
     "importBatch": {
       "titleCompleted": "インポートバッチが完了しました",
       "titleCompletedWithFailures": "インポートバッチは完了しましたが、失敗した項目があります",
+      "bodyPostProcessingFailed": "\n\nアクティビティの分析を完了できませんでした。準備が完了しているアクティビティは引き続き利用できます。",
       "bodyBatchSummary": "ソースオブジェクト {totalCount} 件を処理しました。\n\n- 成功：{successCount}\n- 失敗：{failedCount}\n- スキップ：{skippedCount}",
       "bodyThirdPartyExportFailures": "\n\n{providers} へのアップロードが {failedCount} 件のアクティビティで失敗しました。接続設定を確認するか、アクティビティ画面から再試行してください。"
     }

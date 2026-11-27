@@ -442,6 +442,7 @@
     "importBatch": {
       "titleCompleted": "Batch di importazione completato",
       "titleCompletedWithFailures": "Batch di importazione completato con errori",
+      "bodyPostProcessingFailed": "\n\nNon è stato possibile completare l’analisi delle attività. Le attività già pronte restano disponibili.",
       "bodyBatchSummary": "Elaborati {totalCount} oggetti sorgente.\n\n- Riusciti: {successCount}\n- Non riusciti: {failedCount}\n- Saltati: {skippedCount}",
       "bodyThirdPartyExportFailures": "\n\nIl caricamento su {providers} non è riuscito per {failedCount} attività. Controlla le impostazioni di connessione o riprova dall’attività."
     }

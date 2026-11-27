@@ -442,6 +442,7 @@
     "importBatch": {
       "titleCompleted": "Importbatch abgeschlossen",
       "titleCompletedWithFailures": "Importbatch abgeschlossen, aber mit Fehlern",
+      "bodyPostProcessingFailed": "\n\nDie Aktivitätsanalyse konnte nicht abgeschlossen werden. Bereits verfügbare Aktivitäten bleiben verfügbar.",
       "bodyBatchSummary": "{totalCount} Quellobjekte verarbeitet.\n\n- Erfolgreich: {successCount}\n- Fehlgeschlagen: {failedCount}\n- Übersprungen: {skippedCount}",
       "bodyThirdPartyExportFailures": "\n\nDer Upload zu {providers} ist für {failedCount} Aktivitäten fehlgeschlagen. Prüfe die Verbindungseinstellungen oder versuche es in der Aktivität erneut."
     }

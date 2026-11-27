@@ -108,6 +108,45 @@ export class NotificationDomainService {
     }
   }
 
+  /** A batch-lock owner may reconcile a notification published by an older worker. */
+  async ensureImportBatchFailureNotification(
+    args: Omit<EnsureNotificationDto, 'kind'>,
+    tx: Prisma.TransactionClient,
+  ) {
+    const kind = 'IMPORT_BATCH_PARTIAL_FAILED';
+    const successWhere = {
+      userId: args.userId,
+      dedupeKey: args.dedupeKey,
+      kind: 'IMPORT_BATCH_COMPLETED' as const,
+      cancelledAt: null,
+    };
+    const existing = await this.notifications.findUnique({
+      where: { userId_kind_dedupeKey: {
+        userId: args.userId, kind, dedupeKey: args.dedupeKey,
+      } },
+      select: { id: true },
+    }, tx);
+    const data = {
+      kind,
+      title: args.title,
+      bodyMarkdown: args.bodyMarkdown ?? undefined,
+      data: args.data ?? undefined,
+    } as const;
+    if (existing) {
+      await this.notifications.updateMany({
+        where: { id: existing.id },
+        data: { ...data, cancelledAt: null },
+      }, tx);
+      await this.notifications.updateMany({
+        where: successWhere,
+        data: { cancelledAt: new Date() },
+      }, tx);
+      return;
+    }
+    const corrected = await this.notifications.updateMany({ where: successWhere, data }, tx);
+    if (corrected.count === 0) await this.ensureNotification({ ...args, kind }, tx);
+  }
+
   /**
    * 通过 (userId, kind, dedupeKey) 更新通知正文（不要求通知一定存在）。
    */

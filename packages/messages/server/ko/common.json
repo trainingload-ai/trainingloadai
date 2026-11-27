@@ -442,6 +442,7 @@
     "importBatch": {
       "titleCompleted": "가져오기 배치가 완료되었습니다",
       "titleCompletedWithFailures": "가져오기 배치가 완료되었지만 실패한 항목이 있습니다",
+      "bodyPostProcessingFailed": "\n\n활동 분석을 완료하지 못했습니다. 이미 준비된 활동은 계속 확인할 수 있습니다.",
       "bodyBatchSummary": "소스 객체 {totalCount}개를 처리했습니다.\n\n- 성공: {successCount}\n- 실패: {failedCount}\n- 건너뜀: {skippedCount}",
       "bodyThirdPartyExportFailures": "\n\n{providers} 업로드가 {failedCount}개 활동에서 실패했습니다. 연결 설정을 확인하거나 활동 화면에서 다시 시도하세요."
     }

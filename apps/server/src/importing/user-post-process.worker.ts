@@ -9,6 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
 import { PrismaService } from '@/prisma/prisma.service';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import { ImportingJobService } from './importing-job.service';
 import {
   ChronologicalActivityReplayService,
@@ -45,6 +46,22 @@ import {
 const AI_REVIEW_ENQUEUE_CONCURRENCY = 3;
 const IMPORT_BATCH_RECOVERY_INTERVAL_MS = 5 * 60_000;
 const MAX_FUTURE_ACTIVITY_START_MS = 24 * 60 * 60_000;
+
+const DEAD_BATCH_NOTICE_MISSING = Prisma.sql`
+(
+          b.notification_sent_at IS NULL
+          OR EXISTS (
+            SELECT 1 FROM t_notification n
+            WHERE n.user_id = j.user_id AND n.dedupe_key = 'import-batch:' || b.id
+              AND n.cancelled_at IS NULL
+              AND (
+                n.kind = 'IMPORT_BATCH_COMPLETED'
+                OR (n.kind = 'IMPORT_BATCH_PARTIAL_FAILED'
+                  AND n.data->>'postProcessingFailed' IS DISTINCT FROM 'true')
+              )
+          )
+        )
+`;
 
 function jsonRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -300,15 +317,16 @@ export class UserPostProcessWorkerService
     private readonly importCompletionPresenter?: ImportCompletionPresenter,
   ) {}
 
-  private async translateNotification(
-    userId: string,
+  private async notificationLocale(userId: string) {
+    return (await this.userService?.getPreferredLocale(userId).catch(() => null)) ?? 'en';
+  }
+
+  private translateNotification(
+    lang: string,
     key: string,
     fallback: string,
     args?: Record<string, string | number>,
   ) {
-    const lang =
-      (await this.userService?.getPreferredLocale(userId).catch(() => null)) ??
-      'en';
     const translated = this.i18n?.t(key, { lang, args });
     return typeof translated === 'string' &&
       translated.trim() &&
@@ -494,9 +512,11 @@ export class UserPostProcessWorkerService
   }
 
   private async completeClaimedJob(
-    job: { id: string; batchJobId: string; lockToken?: string },
+    job: { id: string; batchJobId: string; userId: string; lockToken?: string },
     batchStatus: 'COMPLETED' | 'PARTIAL_FAILED' | 'FAILED',
+    exportOutcome?: ThirdPartyExportOutcome,
   ) {
+    const lang = await this.notificationLocale(job.userId);
     const data = {
       status: 'COMPLETED' as const,
       completedAt: new Date(),
@@ -513,7 +533,12 @@ export class UserPostProcessWorkerService
         });
       } else {
         const result = await this.importJobs.postProcessJobs(tx).updateMany({
-          where: { id: job.id, status: 'RUNNING', lockToken: job.lockToken },
+          where: {
+            id: job.id,
+            status: 'RUNNING',
+            lockToken: job.lockToken,
+            leaseExpiresAt: { gt: new Date() },
+          },
           data,
         });
         if (result.count !== 1) {
@@ -524,6 +549,7 @@ export class UserPostProcessWorkerService
         where: { id: job.batchJobId },
         data: { status: batchStatus },
       });
+      await this.sendBatchNotification({ ...job, lang, exportOutcome }, tx);
     });
   }
 
@@ -573,48 +599,110 @@ export class UserPostProcessWorkerService
   }
 
   private async failClaimedJob(
-    job: { id: string; lockToken?: string },
+    job: { id: string; batchJobId: string; userId: string; lockToken?: string },
     message: string,
-  ): Promise<number | null> {
-    if (!job.lockToken) {
-      const row = await this.importJobs.postProcessJobs().update({
-        where: { id: job.id },
+  ): Promise<boolean> {
+    const maxAttempts =
+      this.configService.get<number>('userPostProcessWorker.maxAttempts') ?? 6;
+    const lang = await this.notificationLocale(job.userId);
+    return this.prisma.$transaction(async (tx) => {
+      // Activity revision triggers also acquire this lock. Keep replay's lock order.
+      await lockFitnessUser(tx, job.userId);
+      await this.importJobs.lockBatch(job.batchJobId, tx);
+      const jobs = this.importJobs.postProcessJobs(tx);
+      const now = new Date();
+      const where = {
+        id: job.id,
+        userId: job.userId,
+        status: 'RUNNING' as const,
+        ...(job.lockToken ? {
+          lockToken: job.lockToken,
+          leaseExpiresAt: { gt: now },
+        } : {}),
+      };
+      const current = await jobs.findFirst({ where, select: { attempts: true } });
+      if (!current) return false;
+      const attempts = current.attempts + 1;
+      const exhausted = attempts >= maxAttempts;
+      const updated = await jobs.updateMany({
+        where,
         data: {
-          status: 'FAILED',
-          attempts: { increment: 1 },
+          status: exhausted ? 'DEAD' : 'FAILED',
+          attempts,
           lastError: message,
+          lockToken: null,
+          leaseExpiresAt: null,
+          ...(exhausted
+            ? { completedAt: now }
+            : { availableAt: new Date(Date.now() + backoffMs(attempts)) }),
         },
-        select: { attempts: true },
       });
-      return row.attempts ?? 0;
-    }
-    // 先放到未来，避免清理最终状态前被另一个 worker 立即重新 claim。
-    const result = await this.importJobs.postProcessJobs().updateMany({
-      where: { id: job.id, status: 'RUNNING', lockToken: job.lockToken },
-      data: {
-        status: 'FAILED',
-        attempts: { increment: 1 },
-        lastError: message,
-        availableAt: new Date(Date.now() + 60 * 60_000),
-        lockToken: null,
-        leaseExpiresAt: null,
-      },
+      if (updated.count !== 1) return false;
+      if (exhausted) await this.finalizeDeadBatch(job, lang, now, tx);
+      return true;
     });
-    if (result.count !== 1) return null;
-    const row = await this.importJobs.postProcessJobs().findUnique({
-      where: { id: job.id },
-      select: { attempts: true },
-    });
-    return row?.attempts ?? null;
   }
 
-  private async sendBatchNotification(args: {
-    batchJobId: string;
-    userId: string;
-    exportOutcome?: ThirdPartyExportOutcome;
-  }) {
+  private async finalizeDeadBatch(
+    job: { batchJobId: string; userId: string },
+    lang: string,
+    now: Date,
+    tx: Prisma.TransactionClient,
+  ) {
+    const batches = this.importJobs.batchJobs(tx);
+    const batch = await batches.findUnique({
+      where: { id: job.batchJobId, userId: job.userId },
+      select: { successCount: true, createdAt: true, completedAt: true },
+    });
+    if (!batch) return;
+    await batches.update({
+      where: { id: job.batchJobId },
+      data: {
+        status: batch.successCount > 0 ? 'PARTIAL_FAILED' : 'FAILED',
+        completedAt: batch.completedAt ?? now,
+      },
+    });
+    await tx.activity.updateMany({
+      where: {
+        userId: job.userId,
+        processingStatus: { not: 'READY' },
+        readyAt: null,
+        importItemJobs: {
+          some: {
+            batchJobId: job.batchJobId,
+            userId: job.userId,
+            status: 'DONE',
+            analysisRequired: true,
+          },
+          none: {
+            userId: job.userId,
+            status: { notIn: ['SKIPPED', 'DEAD'] },
+            analysisRequired: true,
+            batchJob: { createdAt: { gt: batch.createdAt } },
+          },
+        },
+      },
+      data: {
+        processingStatus: 'FAILED',
+        processingUpdatedAt: now,
+        readyAt: null,
+      },
+    });
+    await this.sendBatchNotification({ ...job, lang, postProcessingFailed: true }, tx);
+  }
+
+  private async sendBatchNotification(
+    args: {
+      batchJobId: string;
+      userId: string;
+      lang: string;
+      exportOutcome?: ThirdPartyExportOutcome;
+      postProcessingFailed?: boolean;
+    },
+    tx: Prisma.TransactionClient,
+  ) {
     // 通知按 batch 去重；即使 worker 重试，也只会保留同一 dedupeKey 的最终通知。
-    const batch = await this.importJobs.batchJobs().findUnique({
+    const batch = await this.importJobs.batchJobs(tx).findUnique({
       where: { id: args.batchJobId },
       select: {
         status: true,
@@ -632,7 +720,7 @@ export class UserPostProcessWorkerService
       unknown
     >;
     if (requestContext.suppressCompletionNotification === true) {
-      await this.importJobs.batchJobs().update({
+      await this.importJobs.batchJobs(tx).update({
         where: { id: args.batchJobId },
         data: { notificationSentAt: new Date() },
       });
@@ -663,20 +751,20 @@ export class UserPostProcessWorkerService
       completed,
     });
     if (deploymentMessage) {
-      title = await this.translateNotification(
-        args.userId,
+      title = this.translateNotification(
+        args.lang,
         deploymentMessage.title.key,
         deploymentMessage.title.fallback,
       );
-      bodyMarkdown = await this.translateNotification(
-        args.userId,
+      bodyMarkdown = this.translateNotification(
+        args.lang,
         deploymentMessage.body.key,
         deploymentMessage.body.fallback,
         summaryArgs,
       );
     } else if (isIntervalsIcu) {
-      title = await this.translateNotification(
-        args.userId,
+      title = this.translateNotification(
+        args.lang,
         completed
           ? 'common.notification.intervalsIcu.titleSyncCompleted'
           : 'common.notification.intervalsIcu.titleSyncCompletedWithFailures',
@@ -684,15 +772,15 @@ export class UserPostProcessWorkerService
           ? 'Intervals.icu sync completed'
           : 'Intervals.icu sync completed with failures',
       );
-      bodyMarkdown = await this.translateNotification(
-        args.userId,
+      bodyMarkdown = this.translateNotification(
+        args.lang,
         'common.notification.intervalsIcu.bodyBatchSummary',
         'Processed {totalCount} Intervals.icu activities.\n\n- Success: {successCount}\n- Failed: {failedCount}\n- Skipped: {skippedCount}',
         summaryArgs,
       );
     } else {
-      title = await this.translateNotification(
-        args.userId,
+      title = this.translateNotification(
+        args.lang,
         completed
           ? 'common.notification.importBatch.titleCompleted'
           : 'common.notification.importBatch.titleCompletedWithFailures',
@@ -700,8 +788,8 @@ export class UserPostProcessWorkerService
           ? 'Import batch completed'
           : 'Import batch completed with failures',
       );
-      bodyMarkdown = await this.translateNotification(
-        args.userId,
+      bodyMarkdown = this.translateNotification(
+        args.lang,
         'common.notification.importBatch.bodyBatchSummary',
         'Processed {totalCount} source objects.\n\n- Success: {successCount}\n- Failed: {failedCount}\n- Skipped: {skippedCount}',
         summaryArgs,
@@ -710,8 +798,8 @@ export class UserPostProcessWorkerService
 
     if (hasExportFailures) {
       const providers = args.exportOutcome!.failedProviders.join(', ');
-      bodyMarkdown += await this.translateNotification(
-        args.userId,
+      bodyMarkdown += this.translateNotification(
+        args.lang,
         'common.notification.importBatch.bodyThirdPartyExportFailures',
         '\n\nThird-party upload failed for {providers} ({failedCount} activities). Open connection settings or retry from the activity.',
         {
@@ -721,9 +809,16 @@ export class UserPostProcessWorkerService
       );
     }
 
-    await this.notificationDomain.ensureNotification({
+    if (args.postProcessingFailed) {
+      bodyMarkdown += this.translateNotification(
+        args.lang,
+        'common.notification.importBatch.bodyPostProcessingFailed',
+        '\n\nActivity analysis could not finish. Any activities that were already ready remain available.',
+      );
+    }
+
+    const notice = {
       userId: args.userId,
-      kind,
       dedupeKey: `import-batch:${args.batchJobId}`,
       title,
       bodyMarkdown,
@@ -733,14 +828,20 @@ export class UserPostProcessWorkerService
         successCount: batch.successCount,
         failedCount: batch.failedCount,
         skippedCount: batch.skippedCount,
+        ...(args.postProcessingFailed
+          ? { batchStatus: batch.status, postProcessingFailed: true }
+          : {}),
         thirdPartyExportFailedProviders:
           args.exportOutcome?.failedProviders ?? [],
         thirdPartyExportFailedCount: args.exportOutcome?.failedCount ?? 0,
       },
-      digestId: undefined,
-    });
+    };
+    if (args.postProcessingFailed)
+      await this.notificationDomain.ensureImportBatchFailureNotification(notice, tx);
+    else
+      await this.notificationDomain.ensureNotification({ ...notice, kind }, tx);
 
-    await this.importJobs.batchJobs().update({
+    await this.importJobs.batchJobs(tx).update({
       where: { id: args.batchJobId },
       data: { notificationSentAt: new Date() },
     });
@@ -1341,16 +1442,10 @@ export class UserPostProcessWorkerService
           message: '维护批次已关闭第三方活动回写',
         });
       }
-      // 发送批次完成通知
-      await this.sendBatchNotification({
-        batchJobId: job.batchJobId,
-        userId: job.userId,
-        exportOutcome,
-      });
-      // 原子写入 post-process 与 batch 最终状态；租约已转移时整个事务回滚。
       await this.completeClaimedJob(
         job,
         await this.resolveFinalBatchStatus(job.batchJobId),
+        exportOutcome,
       );
 
       this.logImportPipelineEvent({
@@ -1387,16 +1482,10 @@ export class UserPostProcessWorkerService
         );
         return;
       }
-      const attempts = await this.failClaimedJob(job, msg);
-      if (attempts == null) {
-        this.logger.warn(
-          `[用户后处理] 失败结果未写入：租约已转移，job=${job.id}`,
-        );
+      if (!(await this.failClaimedJob(job, msg))) {
+        this.logger.warn(`Post-process failure not recorded after lease loss job=${job.id}`);
         return;
       }
-      const maxAttempts =
-        this.configService.get<number>('userPostProcessWorker.maxAttempts') ??
-        6;
 
       this.logImportPipelineEvent({
         batchJobId: job.batchJobId,
@@ -1406,66 +1495,6 @@ export class UserPostProcessWorkerService
         message: msg,
         level: 'ERROR',
       });
-
-      if (attempts >= maxAttempts) {
-        await this.importJobs.postProcessJobs().update({
-          where: { id: job.id },
-          data: {
-            status: 'DEAD',
-            completedAt: new Date(),
-            lockToken: null,
-            leaseExpiresAt: null,
-          },
-        });
-        const batch = await this.importJobs.batchJobs().findUnique({
-          where: { id: job.batchJobId },
-          select: { successCount: true },
-        });
-        if (batch) {
-          await this.importJobs.batchJobs().update({
-            where: { id: job.batchJobId },
-            data: {
-              status: batch.successCount > 0 ? 'PARTIAL_FAILED' : 'FAILED',
-              completedAt: new Date(),
-            },
-          });
-        }
-        const failedActivityItems = await this.importJobs.itemJobs().findMany({
-          where: {
-            batchJobId: job.batchJobId,
-            userId: job.userId,
-            status: 'DONE',
-            activityId: { not: null },
-            analysisRequired: true,
-          },
-          select: { activityId: true },
-        });
-        const failedActivityIds = Array.from(
-          new Set(
-            failedActivityItems
-              .map((item) => item.activityId)
-              .filter((id: unknown): id is number => typeof id === 'number'),
-          ),
-        ) as number[];
-        if (failedActivityIds.length > 0) {
-          await this.prisma.activity.updateMany({
-            where: {
-              id: { in: failedActivityIds },
-              processingStatus: { not: 'READY' },
-            },
-            data: {
-              processingStatus: 'FAILED',
-              processingUpdatedAt: new Date(),
-              readyAt: null,
-            },
-          });
-        }
-      } else {
-        await this.importJobs.postProcessJobs().update({
-          where: { id: job.id },
-          data: { availableAt: new Date(Date.now() + backoffMs(attempts)) },
-        });
-      }
     } finally {
       clearInterval(heartbeat);
     }
@@ -1485,6 +1514,39 @@ export class UserPostProcessWorkerService
     return 'COMPLETED' as const;
   }
 
+  private async recoverDeadBatchNotifications() {
+    const unpublished = await this.prisma.$queryRaw<
+      Array<{ id: string; batchJobId: string; userId: string }>
+    >`
+      SELECT j.id, j.batch_job_id AS "batchJobId", j.user_id AS "userId"
+      FROM t_user_post_process_job j
+      JOIN t_import_batch_job b ON b.id = j.batch_job_id
+      WHERE j.status = 'DEAD'
+        AND ${DEAD_BATCH_NOTICE_MISSING}
+      ORDER BY j.completed_at, j.id
+      LIMIT 50
+    `;
+    for (const job of unpublished) {
+      if (this.stopping) return;
+      try {
+        const lang = await this.notificationLocale(job.userId);
+        await this.prisma.$transaction(async (tx) => {
+          await lockFitnessUser(tx, job.userId);
+          await this.importJobs.lockBatch(job.batchJobId, tx);
+          const [pending] = await tx.$queryRaw<Array<{ completedAt: Date | null }>>`
+            SELECT j.completed_at AS "completedAt" FROM t_user_post_process_job j
+            JOIN t_import_batch_job b ON b.id = j.batch_job_id
+            WHERE j.id = ${job.id} AND j.status = 'DEAD' AND ${DEAD_BATCH_NOTICE_MISSING}
+          `;
+          if (pending)
+            await this.finalizeDeadBatch(job, lang, pending.completedAt ?? new Date(), tx);
+        });
+      } catch (error) {
+        this.logger.error(`Failed to recover import post-process notification batch=${job.batchJobId}`, error);
+      }
+    }
+  }
+
   private async recoverFinishedBatchesIfDue() {
     const now = Date.now();
     if (now < this.nextBatchRecoveryAt) return;
@@ -1493,6 +1555,11 @@ export class UserPostProcessWorkerService
       await this.importJobs.recoverFinishedBatches();
     } catch (error) {
       this.logger.error('Failed to recover finished import batches', error);
+    }
+    try {
+      await this.recoverDeadBatchNotifications();
+    } catch (error) {
+      this.logger.error('Failed to find unpublished import post-process notifications', error);
     }
   }
 

@@ -442,6 +442,7 @@
     "importBatch": {
       "titleCompleted": "导入批次已完成",
       "titleCompletedWithFailures": "导入批次已完成，但有失败项",
+      "bodyPostProcessingFailed": "\n\n活动分析未能完成。已就绪的活动仍可查看。",
       "bodyBatchSummary": "已处理 {totalCount} 个源对象。\n\n- 成功：{successCount}\n- 失败：{failedCount}\n- 跳过：{skippedCount}",
       "bodyThirdPartyExportFailures": "\n\n向 {providers} 上传失败（{failedCount} 个活动）。请打开连接设置检查授权，或从活动页面重试。"
     }
