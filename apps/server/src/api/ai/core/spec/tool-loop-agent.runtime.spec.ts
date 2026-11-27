@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import {
+  classifyCoachModelError,
   detectUiSurfacePayloadError,
   isDisplayableFitnessAssessmentResult,
   uiSurfaceAssistantForToolResult,
@@ -516,5 +517,50 @@ describe('ToolLoopAgent runtime compatibility helpers', () => {
       false,
     );
     expect(state.emitUiSurfaceFallback).toBe(false);
+  });
+
+  it('classifies model failures with fine-grained codes and retryability', () => {
+    const disconnected = new AbortController();
+    disconnected.abort('client_disconnected');
+    expect(
+      classifyCoachModelError(new Error('aborted'), disconnected.signal),
+    ).toEqual({ code: 'client_disconnected', retryable: false });
+
+    const upstream502 = Object.assign(new Error('Bad Gateway'), {
+      statusCode: 502,
+    });
+    expect(classifyCoachModelError(upstream502)).toEqual({
+      code: 'upstream_502',
+      statusCode: 502,
+      retryable: true,
+    });
+
+    const upstream400 = Object.assign(new Error('Bad Request'), {
+      statusCode: 400,
+    });
+    expect(classifyCoachModelError(upstream400)).toEqual({
+      code: 'upstream_400',
+      statusCode: 400,
+      retryable: false,
+    });
+
+    const socketReset = new Error('fetch failed', {
+      cause: Object.assign(new Error('read ECONNRESET'), {
+        code: 'ECONNRESET',
+      }),
+    });
+    expect(classifyCoachModelError(socketReset)).toEqual({
+      code: 'network_error',
+      retryable: true,
+    });
+
+    expect(
+      classifyCoachModelError(new Error('AI_COACH_DELIVERY_SUMMARY_EMPTY')),
+    ).toEqual({ code: 'delivery_summary_empty', retryable: false });
+
+    expect(classifyCoachModelError(new Error('unexpected failure'))).toEqual({
+      code: 'unknown',
+      retryable: false,
+    });
   });
 });

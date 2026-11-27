@@ -1239,7 +1239,7 @@ export class AiController {
     const cleanup = () => {
       if (!abort.signal.aborted && !sink.isClosed()) {
         this.logger.warn(
-          `[AI][教练][${reqId}] 客户端断开连接 用户ID=${userId} 服务商=${provider ?? 'none'} 模型=${model || 'none'} 耗时毫秒=${Date.now() - startedAt}`,
+          `[AI][coach][${reqId}] client disconnected userId=${userId} provider=${provider ?? 'none'} model=${model || 'none'} elapsedMs=${Date.now() - startedAt} operationStarted=${operationStarted} userTurnPersisted=${userTurnPersisted} assistantResultPersisted=${assistantResultPersisted} usageEvents=${modelUsageEvents.length}`,
         );
         abort.abort('client_disconnected');
       }
