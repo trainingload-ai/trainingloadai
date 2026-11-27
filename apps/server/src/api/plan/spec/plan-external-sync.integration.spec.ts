@@ -1800,15 +1800,17 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       await acquireHashtextAdvisoryXactLock(tx, 'user');
       bothHeld.resolve();
       await release.promise;
+      throw new Error('compatible rollback');
     });
-    await Promise.race([bothHeld.promise, compatible]);
+    const rolledBack = expect(compatible).rejects.toThrow('compatible rollback');
+    await Promise.race([bothHeld.promise, rolledBack]);
+    const registered = REGISTERED_ADVISORY_XACT_LOCK_SQL.replace(
+      'pg_advisory_xact_lock', 'pg_try_advisory_xact_lock',
+    );
+    const old = HASHTEXT_ADVISORY_XACT_LOCK_SQL.replace(
+      'pg_advisory_xact_lock', 'pg_try_advisory_xact_lock',
+    );
     try {
-      const registered = REGISTERED_ADVISORY_XACT_LOCK_SQL.replace(
-        'pg_advisory_xact_lock', 'pg_try_advisory_xact_lock',
-      );
-      const old = HASHTEXT_ADVISORY_XACT_LOCK_SQL.replace(
-        'pg_advisory_xact_lock', 'pg_try_advisory_xact_lock',
-      );
       const observed = await prisma.$transaction(async (tx) => ({
         legacy: await tx.$queryRawUnsafe<Array<{ lock: string }>>(old, 'user'),
         registered: await tx.$queryRawUnsafe<Array<{ lock: string }>>(registered, 'user'),
@@ -1821,10 +1823,15 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       });
     } finally {
       release.resolve();
-      await compatible;
+      await rolledBack;
     }
+    await prisma.$transaction(async (tx) => {
+      for (const sql of [old, registered]) {
+        const next = await tx.$queryRawUnsafe<Array<{ lock: string }>>(sql, 'user');
+        expect(next).toEqual([{ lock: 'true' }]);
+      }
+    });
   });
-
 
   nativeIt('waits on the fitness lock before grabbing the activity row while matching', async () => {
     const { activity, independent } = await independentScenario();

@@ -3,6 +3,10 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { Test } from '@nestjs/testing';
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
 import { PrismaService } from '@/prisma/prisma.service';
+import {
+  HASHTEXT_ADVISORY_XACT_LOCK_SQL,
+  REGISTERED_ADVISORY_XACT_LOCK_SQL,
+} from '@/prisma/hashtext-advisory-lock';
 import { ATHLETE_STATE_REASSESS_REQUESTED_EVENT } from '@/athlete-state/athlete-state.events';
 import {
   consolidateHealthCandidates,
@@ -539,16 +543,12 @@ describe('HealthDataIngestService', () => {
         }),
       }),
     );
-    expect(prisma.$executeRawUnsafe).toHaveBeenNthCalledWith(
-      1,
-      'SELECT pg_advisory_xact_lock(hashtext($1))::text AS lock',
-      'health-daily-user|user-1',
-    );
-    expect(prisma.$executeRawUnsafe).toHaveBeenNthCalledWith(
-      2,
-      'SELECT pg_advisory_xact_lock(hashtext($1))::text AS lock',
-      'health-daily|user-1|2026-06-20|STEP_COUNT',
-    );
+    expect(prisma.$executeRawUnsafe.mock.calls.slice(0, 4)).toEqual([
+      [HASHTEXT_ADVISORY_XACT_LOCK_SQL, 'health-daily-user|user-1'],
+      [REGISTERED_ADVISORY_XACT_LOCK_SQL, 'health-daily-user|user-1'],
+      [HASHTEXT_ADVISORY_XACT_LOCK_SQL, 'health-daily|user-1|2026-06-20|STEP_COUNT'],
+      [REGISTERED_ADVISORY_XACT_LOCK_SQL, 'health-daily|user-1|2026-06-20|STEP_COUNT'],
+    ]);
   });
 
   it('atomically removes a missing authoritative candidate and reselects another provider', async () => {
