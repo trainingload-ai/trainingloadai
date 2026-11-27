@@ -1,10 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
+import { I18nService } from 'nestjs-i18n';
 import type { PlanProposalPresentation, PlanStartPreviewRequest } from '@shared/plan-proposal';
 import type { RollingStartSettings } from '@shared/rolling-plan';
 import { z } from 'zod';
+import { resolveSupportedLocale } from '@/utils/locale.util';
 import { PlanStartService } from '../plan/application/plan-start.service';
 import { AiService } from './ai.service';
+import { aiFallbackText } from './core/ai-fallback-copy';
 
 const PLAN_START_ASSESSMENT_READ_TOOLS = [
   'plan.by_id',
@@ -102,6 +105,7 @@ export class PlanStartAssessmentService {
   constructor(
     private readonly ai: AiService,
     private readonly planStarts: PlanStartService,
+    private readonly i18n: I18nService,
   ) {}
 
   getStartDraft(userId: string, planId: string, selectedDate?: string) {
@@ -149,7 +153,23 @@ export class PlanStartAssessmentService {
       };
     }
 
-    const lang = input.lang?.trim() || 'zh';
+    const lang = resolveSupportedLocale(input.lang);
+    const activeWorkouts = preflight.source.workouts.filter(
+      (w) => w.status !== 'MOVED',
+    );
+    if (activeWorkouts.length === 0) {
+      const message = aiFallbackText(this.i18n, lang, 'planStart.emptyDraft');
+      return {
+        outcome: 'CONFLICT',
+        startDate: preflight.startDate,
+        calendarTimeZone: preflight.calendarTimeZone,
+        revision: preflight.revision,
+        summary: message,
+        conflicts: [{ code: 'PLAN_EMPTY_WORKOUTS', message }],
+        originalCanStart: false,
+      };
+    }
+
     const isRolling = preflight.source.planningMode === 'ROLLING';
     const taskPayload = {
       planId,
@@ -293,25 +313,42 @@ export class PlanStartAssessmentService {
     }
 
     // Branch 3: Coach suggests adjustments and they validate cleanly
-    if (model.verdict === 'SUGGEST_ADJUSTMENT' && hasSuggestedEdits) {
-      const preview = await tryBuildSuggestedPreview();
-      if (preview) {
-        const changedRows = preview.presentation.rows.filter(
-          (row) => row.changeKind && row.changeKind !== 'PRESERVED',
-        );
-        if (changedRows.length > 0) {
-          return {
-            outcome: 'SUGGESTED_CHANGES',
-            startDate: preflight.startDate,
-            calendarTimeZone: preflight.calendarTimeZone,
-            revision: preflight.revision,
-            summary: model.summary,
-            originalCanStart: true,
-            previewId: preview.previewId,
-            proposal: preview.presentation,
-          };
+    if (model.verdict === 'SUGGEST_ADJUSTMENT') {
+      if (hasSuggestedEdits) {
+        const preview = await tryBuildSuggestedPreview();
+        if (preview) {
+          const changedRows = preview.presentation.rows.filter(
+            (row) => row.changeKind && row.changeKind !== 'PRESERVED',
+          );
+          if (changedRows.length > 0) {
+            return {
+              outcome: 'SUGGESTED_CHANGES',
+              startDate: preflight.startDate,
+              calendarTimeZone: preflight.calendarTimeZone,
+              revision: preflight.revision,
+              summary: model.summary,
+              originalCanStart: true,
+              previewId: preview.previewId,
+              proposal: preview.presentation,
+            };
+          }
         }
       }
+      // Never silently auto-start the unmodified plan when the coach recommended
+      // adjustments but the preview could not be built; require explicit user confirmation.
+      this.logger.warn(
+        `PlanStartAssessment suggested adjustments for plan=${planId} but no valid preview was produced; requiring explicit confirmation`,
+      );
+      return {
+        outcome: 'INSUFFICIENT_DATA',
+        startDate: preflight.startDate,
+        calendarTimeZone: preflight.calendarTimeZone,
+        revision: preflight.revision,
+        summary: model.summary,
+        missingEvidence: model.missingEvidence ?? [],
+        originalCanStart: true,
+        conflicts: [],
+      };
     }
 
     // Branch 4: Original schedule fits — start directly

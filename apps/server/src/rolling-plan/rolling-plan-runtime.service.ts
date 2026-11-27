@@ -116,6 +116,7 @@ export class RollingPlanRuntimeService
             }),
           30000,
         );
+        let candidateApplyStage = false;
         try {
           this.capabilities.require('ai');
           const prepared = await this.queue.prepare(job.id, token);
@@ -192,6 +193,7 @@ export class RollingPlanRuntimeService
           if (leaseLost) throw new Error('ROLLING_LEASE_LOST');
           this.capabilities.require('ai');
           await this.queue.assertFresh(job.id, token);
+          candidateApplyStage = true;
           let changed = true;
           if (candidate.kind === 'MONTH')
             changed = (
@@ -230,27 +232,45 @@ export class RollingPlanRuntimeService
             await this.queue.discover(now, job.planId);
           }
         } catch (error) {
-          const state = await this.queue.fail(
-            job,
-            error,
+          const resumeAt =
             error instanceof ReviewModelDeferredError
               ? error.resumeAt
-              : undefined,
-          );
-          if (state === 'BLOCKED') {
+              : undefined;
+          const state = candidateApplyStage
+            ? await this.queue.fail(job, error, resumeAt, {
+                discardCandidate: true,
+              })
+            : await this.queue.fail(job, error, resumeAt);
+          if (state === 'BLOCKED' || state === 'FAILED') {
             try {
               const prepared = await this.queue.statusForNotification(job.id);
+              const windowKey = job.windowStart.toISOString().slice(0, 10);
+              const isBlocked = state === 'BLOCKED';
               await this.notifications.ensureNotification({
                 userId: prepared.userId,
                 kind: 'REVIEW_DIGEST',
-                dedupeKey: `rolling:${job.planId}:${job.windowStart.toISOString().slice(0, 10)}:needs-input`,
+                dedupeKey: `rolling:${job.planId}:${windowKey}:${isBlocked ? 'needs-input' : 'failed'}`,
                 title: String(
-                  this.i18n?.t('common.notification.rollingPlan.titleBlocked', {
-                    lang: prepared.lang,
-                  }) ?? 'Continuous training needs attention',
+                  this.i18n?.t(
+                    isBlocked
+                      ? 'common.notification.rollingPlan.titleBlocked'
+                      : 'common.notification.rollingPlan.titleFailed',
+                    { lang: prepared.lang },
+                  ) ??
+                    (isBlocked
+                      ? 'Continuous training needs attention'
+                      : 'Continuous training schedule update failed'),
                 ),
-                bodyMarkdown: (error as { reason?: string })?.reason,
-                data: { planId: job.planId, jobId: job.id, state: 'BLOCKED' },
+                bodyMarkdown: isBlocked
+                  ? (error as { reason?: string })?.reason
+                  : String(
+                      this.i18n?.t(
+                        'common.notification.rollingPlan.bodyFailed',
+                        { lang: prepared.lang },
+                      ) ??
+                        'Automatic schedule generation could not be completed after multiple attempts. Open your plan to review constraints or generate manually.',
+                    ),
+                data: { planId: job.planId, jobId: job.id, state },
               });
             } catch (notificationError) {
               this.logger.warn(

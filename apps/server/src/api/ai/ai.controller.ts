@@ -1239,7 +1239,7 @@ export class AiController {
     const cleanup = () => {
       if (!abort.signal.aborted && !sink.isClosed()) {
         this.logger.warn(
-          `[AI][教练][${reqId}] 客户端断开连接 用户ID=${userId} 服务商=${provider ?? 'none'} 模型=${model || 'none'} 耗时毫秒=${Date.now() - startedAt}`,
+          `[AI][coach][${reqId}] client disconnected userId=${userId} provider=${provider ?? 'none'} model=${model || 'none'} elapsedMs=${Date.now() - startedAt} operationStarted=${operationStarted} userTurnPersisted=${userTurnPersisted} assistantResultPersisted=${assistantResultPersisted} usageEvents=${modelUsageEvents.length}`,
         );
         abort.abort('client_disconnected');
       }
@@ -1279,7 +1279,10 @@ export class AiController {
       )
       .digest('hex');
 
-    const persistCoachUsage = async (ensureModelCall = false) => {
+    const persistCoachUsage = async (
+      ensureModelCall = false,
+      required = false,
+    ) => {
       if (isCalendarConfirmation) return;
       const hasReportedUsage =
         modelUsageEvents.length > 0 || lastUsage !== undefined;
@@ -1326,6 +1329,9 @@ export class AiController {
           this.logger.error(
             `[AI][教练][${reqId}] usage 落库失败 operationId=${operationId} callKey=${callKey} error=${String(error)}`,
           );
+          if (required) {
+            throw error;
+          }
         }
       }
     };
@@ -1726,12 +1732,21 @@ export class AiController {
             return this.operations.begin(operationAdmissionArgs);
           });
         if (admission.replay) {
+          if (runHandle && !runFinished) {
+            await finishRun('cancelled').catch(() => undefined);
+          }
           await emitOperationReplay(admission.operation);
           return;
         }
         operationStarted = true;
         operationHeartbeatTimer = setInterval(() => {
-          void this.operations.heartbeat(userId, operationId);
+          void this.operations
+            .heartbeat(userId, operationId)
+            .catch((heartbeatError: unknown) => {
+              this.logger.warn(
+                `[AI][教练][${reqId}] operation heartbeat 失败 operationId=${operationId} error=${String(heartbeatError)}`,
+              );
+            });
         }, 30_000);
       }
 
@@ -2042,7 +2057,7 @@ export class AiController {
 
       // Usage 与操作状态均为必需步骤，不能 best-effort 跳过。
       const usageRecordStartedAt = Date.now();
-      await persistCoachUsage(true);
+      await persistCoachUsage(true, !platformFunded);
       const usageRecordMs = Date.now() - usageRecordStartedAt;
 
       const internalStructuredEvents = structuredEventsToPersist.filter(
@@ -2113,8 +2128,10 @@ export class AiController {
         assistantMessages: uiAssistantMessages,
       });
 
+      const abortedByHardCancel =
+        abort.signal.aborted && abort.signal.reason !== 'client_disconnected';
       if (
-        !abort.signal.aborted &&
+        !abortedByHardCancel &&
         (assistantPersist.content.length > 0 ||
           assistantPersist.message.content.length > 0 ||
           Boolean(assistantPersist.message.reasoning_content?.trim()))

@@ -338,7 +338,9 @@
     "rollingPlan": {
       "titleMonthApplied": "Plano contínuo: objetivo mensal atualizado",
       "titleWeekApplied": "Plano contínuo: treinos atualizados",
-      "titleBlocked": "O plano contínuo precisa de atenção"
+      "titleBlocked": "O plano contínuo precisa de atenção",
+      "titleFailed": "Treino contínuo: falha ao atualizar a programação",
+      "bodyFailed": "A geração automática não pôde ser concluída após várias tentativas. Abra seu plano para revisar as restrições ou gerar manualmente."
     },
     "reviewDigest": {
       "report": {

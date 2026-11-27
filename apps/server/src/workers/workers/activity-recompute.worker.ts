@@ -136,6 +136,7 @@ export class ActivityRecomputeWorkerService
         lookback_days: number;
         priority: number;
         replay_checkpoint: unknown;
+        trigger_source: string | null;
         trigger_payload: unknown;
         lock_token: string;
       }>
@@ -180,6 +181,7 @@ export class ActivityRecomputeWorkerService
         j.lookback_days,
         j.priority,
         j.replay_checkpoint,
+        j.trigger_source,
         j.trigger_payload,
         j.lock_token;
       `;
@@ -194,6 +196,7 @@ export class ActivityRecomputeWorkerService
       lookbackDays: r.lookback_days,
       priority: r.priority,
       replayCheckpoint: r.replay_checkpoint,
+      triggerSource: r.trigger_source ?? undefined,
       includeActivityIds: includeActivityIds(r.trigger_payload),
       lockToken: r.lock_token,
     }));
@@ -209,6 +212,7 @@ export class ActivityRecomputeWorkerService
     lookbackDays: number;
     priority: number;
     replayCheckpoint: unknown;
+    triggerSource?: string;
     includeActivityIds: number[];
     lockToken: string;
   }) {
@@ -228,14 +232,26 @@ export class ActivityRecomputeWorkerService
       this.logger.log(
         `[活动复算][消费] 开始 任务ID=${job.id} 用户ID=${job.userId} 类型=${job.metricType} 运动类型=${job.sportType ?? 'ALL'} 回溯天数=${job.lookbackDays}`,
       );
+      const persistedEffectiveFrom = checkpointEffectiveFrom(
+        job.replayCheckpoint,
+      );
+      const isActivityRemovalTrigger =
+        job.triggerSource === 'activity_deleted' ||
+        job.triggerSource === 'activities_batch_deleted' ||
+        job.triggerSource === 'activity_source_removed_or_reselected';
+      // Shift back by 24h so PMC recomputation covers the deleted/hidden
+      // activity's local calendar day regardless of IANA timezone offset.
+      const forcePmcRecomputeFrom =
+        !persistedEffectiveFrom && isActivityRemovalTrigger
+          ? new Date(job.recomputeFrom.getTime() - 24 * 60 * 60 * 1000)
+          : undefined;
       const replayResult =
         await this.recomputeExecutor.executeMetricChangeRecompute({
           sourceJobId: job.id,
           userId: job.userId,
           metricType: job.metricType,
           sportType: job.sportType,
-          effectiveFrom:
-            checkpointEffectiveFrom(job.replayCheckpoint) ?? job.recomputeFrom,
+          effectiveFrom: persistedEffectiveFrom ?? job.recomputeFrom,
           effectiveTo: job.recomputeTo,
           lookbackDays: job.lookbackDays,
           priority: job.priority,
@@ -243,6 +259,7 @@ export class ActivityRecomputeWorkerService
           maxActivities: 100,
           includeActivityIds: job.includeActivityIds,
           sourceLockToken: job.lockToken,
+          ...(forcePmcRecomputeFrom ? { forcePmcRecomputeFrom } : {}),
         });
       if (!replayResult.completed && replayResult.nextCheckpoint) {
         const yielded = await this.prisma.activityRecomputeJob.updateMany({

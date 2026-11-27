@@ -606,7 +606,7 @@ describe('short replay transaction conflicts',()=>{
     const work=jest.fn();
     await expect(service.withReplayTransaction(work)).resolves.toBe(42);
     expect(transaction).toHaveBeenCalledTimes(2);
-    expect(transaction).toHaveBeenLastCalledWith(work,expect.objectContaining({isolationLevel:'Serializable'}));
+    expect(transaction).toHaveBeenLastCalledWith(work,expect.objectContaining({isolationLevel:'ReadCommitted'}));
   });
   it('does not retry a constraint violation',async()=>{
     const error={code:'P2002'};const transaction=jest.fn<(...args:unknown[])=>Promise<number>>().mockRejectedValue(error);

@@ -151,7 +151,9 @@
     "rollingPlan": {
       "titleMonthApplied": "持續訓練計劃：月度方向已更新",
       "titleWeekApplied": "持續訓練計劃：訓練安排已更新",
-      "titleBlocked": "持續訓練計劃需要處理"
+      "titleBlocked": "持續訓練計劃需要處理",
+      "titleFailed": "持續訓練計畫：自動排課失敗",
+      "bodyFailed": "系統在多次嘗試後仍未能自動產生本週期課表，請開啟訓練計畫檢查排課限制或手動產生。"
     },
     "reviewDigest": {
       "report": {

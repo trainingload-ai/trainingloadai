@@ -147,5 +147,8 @@
       "CREATE_TODAY_WORKOUT": "Add as today's workout",
       "SCHEDULE_REMINDER": "Remind me later"
     }
+  },
+  "planStart": {
+    "emptyDraft": "This draft plan has no workouts yet. Add or generate workouts before starting it."
   }
 }

@@ -79,8 +79,17 @@ export class TodaySuggestionEngagementService {
         where: { userId: args.userId },
       });
       if (current?.generationToken === args.generationToken) return current;
-      if (current && current.suggestionDate > args.suggestionDate)
-        return current;
+      // Allow a 1-day backward date shift when a user travels west across timezones
+      // (e.g. UTC+8 -> UTC-8), while still rejecting truly stale older-date rollovers.
+      if (current && current.suggestionDate > args.suggestionDate) {
+        const currentMs = Date.parse(`${current.suggestionDate}T00:00:00.000Z`);
+        const nextMs = Date.parse(`${args.suggestionDate}T00:00:00.000Z`);
+        const backwardDays =
+          Number.isFinite(currentMs) && Number.isFinite(nextMs)
+            ? (currentMs - nextMs) / 86_400_000
+            : Number.POSITIVE_INFINITY;
+        if (backwardDays > 1) return current;
+      }
       const continuesUnresolved = Boolean(
         current?.firstPresentedAt &&
         !current.resolvedAt &&
@@ -145,18 +154,23 @@ export class TodaySuggestionEngagementService {
         'code' in error &&
         error.code === 'P2025'
       ) {
-        throw new NotFoundException('TODAY_SUGGESTION_NOT_FOUND');
+        throw new NotFoundException({
+          message: 'TODAY_SUGGESTION_NOT_FOUND',
+          code: 'TODAY_SUGGESTION_SUPERSEDED',
+          reason: 'SUPERSEDED',
+        });
       }
       throw error;
     }
   }
 
   private async recordCurrentInteraction(args: InteractionArgs) {
+    const now = new Date();
     const suggestion = await this.prisma.aiTodaySuggestion.findFirst({
       where: {
         userId: args.userId,
         generationToken: args.generationToken,
-        validUntil: { gt: new Date() },
+        validUntil: { gt: now },
       },
       select: {
         date: true,
@@ -166,8 +180,40 @@ export class TodaySuggestionEngagementService {
         keyContext: true,
       },
     });
-    if (!suggestion) throw new NotFoundException('TODAY_SUGGESTION_NOT_FOUND');
-    const now = new Date();
+    if (!suggestion) {
+      const [expired, current] = await Promise.all([
+        this.prisma.aiTodaySuggestion.findFirst({
+          where: {
+            userId: args.userId,
+            generationToken: args.generationToken,
+          },
+          select: { validUntil: true },
+        }),
+        this.prisma.todaySuggestionEngagementState.findUnique({
+          where: { userId: args.userId },
+          select: { generationToken: true },
+        }),
+      ]);
+      const superseded =
+        Boolean(current?.generationToken) &&
+        current?.generationToken !== args.generationToken;
+      const reason = superseded
+        ? 'SUPERSEDED'
+        : expired
+          ? 'EXPIRED'
+          : 'NOT_FOUND';
+      const code =
+        reason === 'SUPERSEDED'
+          ? 'TODAY_SUGGESTION_SUPERSEDED'
+          : reason === 'EXPIRED'
+            ? 'TODAY_SUGGESTION_EXPIRED'
+            : 'TODAY_SUGGESTION_NOT_FOUND';
+      throw new NotFoundException({
+        message: 'TODAY_SUGGESTION_NOT_FOUND',
+        code,
+        reason,
+      });
+    }
     if (args.input.kind === 'PRESENTED') {
       const current =
         await this.prisma.todaySuggestionEngagementState.findUnique({

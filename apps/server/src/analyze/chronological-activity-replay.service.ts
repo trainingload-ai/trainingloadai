@@ -51,7 +51,10 @@ import { localDateKeyToUtcDate } from '@/training-load/activity-local-date';
 const REPLAY_TRANSACTION_OPTIONS = {
   maxWait: 10_000,
   timeout: 30_000,
-  isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+  // Single-user serialization is enforced by lockFitnessUser + lease ownership +
+  // evidenceRevision checks; ReadCommitted avoids cross-user PostgreSQL SSI 40001
+  // page-lock false positives when unrelated athletes replay concurrently.
+  isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
 } as const;
 
 export class FitnessEvidenceRevisionDriftError extends Error {
@@ -72,6 +75,12 @@ export type ChronologicalReplayRequest = {
   maxActivities?: number;
   sourceLockToken?: string;
   suppressAthleteStateReassessment?: boolean;
+  /**
+   * Forces a PMC recompute from at least this date even when no remaining
+   * activities in the replay window change (e.g. after hard-deleting or hiding
+   * an activity).
+   */
+  forcePmcRecomputeFrom?: Date | null;
 };
 
 export type ChronologicalReplayResult = {
@@ -506,7 +515,7 @@ export class ChronologicalActivityReplayService {
     let processedActivities = 0;
     let highFrequencyReads = 0;
     let fingerprintHits = 0;
-    let pmcRecomputeFrom: Date | null = null;
+    let pmcRecomputeFrom: Date | null = request.forcePmcRecomputeFrom ?? null;
     const projectEligibleObservations = async (at: Date) => {
       const maxHr = projector.resolve({
         metric: 'MAX_HR',
@@ -1182,7 +1191,11 @@ export class ChronologicalActivityReplayService {
         .filter((value): value is Date => value != null)
         .sort((left, right) => left.getTime() - right.getTime())[0];
       if (pendingFrom) {
-        const pendingTo = [currentWindow?.endDate, args.pmcRecomputeTo]
+        const pendingTo = [
+          currentWindow?.endDate,
+          args.pmcRecomputeTo,
+          pendingFrom,
+        ]
           .filter((value): value is Date => value != null)
           .sort((left, right) => right.getTime() - left.getTime())[0];
         checkpoint.pendingPmcRecomputeFrom = pendingFrom.toISOString();
@@ -1206,6 +1219,7 @@ export class ChronologicalActivityReplayService {
         request.suppressAthleteStateReassessment === true,
     });
     await this.withReplayTransaction(async (tx) => {
+      await lockFitnessUser(tx, request.userId);
       await this.leases.assertOwned(tx, lease);
       const latest = await this.readSourceCheckpoint(tx, request);
       const latestPending = pendingPmcWindow(latest);
@@ -1229,14 +1243,15 @@ export class ChronologicalActivityReplayService {
     const currentWindow = pendingPmcWindow(current);
     const checkpoint = replayCheckpointRecord(current);
     checkpoint.schemaVersion = 1;
-    checkpoint.pendingPmcRecomputeFrom =
+    const nextFrom =
       currentWindow && currentWindow.startDate < startDate
-        ? currentWindow.startDate.toISOString()
-        : startDate.toISOString();
-    checkpoint.pendingPmcRecomputeTo =
-      currentWindow && currentWindow.endDate > endDate
-        ? currentWindow.endDate.toISOString()
-        : endDate.toISOString();
+        ? currentWindow.startDate
+        : startDate;
+    const nextTo = [currentWindow?.endDate, endDate, nextFrom]
+      .filter((value): value is Date => value != null)
+      .sort((left, right) => right.getTime() - left.getTime())[0];
+    checkpoint.pendingPmcRecomputeFrom = nextFrom.toISOString();
+    checkpoint.pendingPmcRecomputeTo = nextTo.toISOString();
     await this.writeSourceCheckpoint(tx, request, checkpoint);
   }
 

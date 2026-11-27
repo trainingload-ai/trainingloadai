@@ -172,6 +172,46 @@ describe('TodaySuggestionEngagementService', () => {
     );
   });
 
+  it('allows 1-day backward rollover when traveling west across timezones while blocking stale dates', async () => {
+    const { service, table, setState } = harness();
+    setState({
+      userId: 'user-1',
+      generationToken: 'utc-plus-8-token',
+      continuityHash: 'facts-east',
+      suggestionDate: '2026-11-27',
+    });
+
+    await service.rollover({
+      userId: 'user-1',
+      generationToken: 'utc-minus-8-token',
+      continuityHash: 'facts-west',
+      suggestionDate: '2026-11-26',
+    });
+    expect(table.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          generationToken: 'utc-minus-8-token',
+          suggestionDate: '2026-11-26',
+        }),
+      }),
+    );
+
+    table.upsert.mockClear();
+    setState({
+      userId: 'user-1',
+      generationToken: 'current-token',
+      continuityHash: 'facts-current',
+      suggestionDate: '2026-11-27',
+    });
+    await service.rollover({
+      userId: 'user-1',
+      generationToken: 'stale-token',
+      continuityHash: 'facts-stale',
+      suggestionDate: '2026-11-24',
+    });
+    expect(table.upsert).not.toHaveBeenCalled();
+  });
+
   it('rejects forged selected intents that were not delivered', async () => {
     const { service } = harness();
     await expect(
@@ -223,5 +263,44 @@ describe('TodaySuggestionEngagementService', () => {
       { feedback: 'REST_TODAY' },
     );
     expect(await service.feedbackForDate('user-1', '2026-10-29')).toBeNull();
+  });
+
+  it('distinguishes superseded vs expired generation tokens on 404', async () => {
+    const { service, prisma } = harness();
+    prisma.aiTodaySuggestion.findFirst
+      .mockResolvedValueOnce(null as never)
+      .mockResolvedValueOnce({
+        validUntil: new Date('2026-10-28T16:00:00.000Z'),
+      } as never);
+    await expect(
+      service.recordInteraction({
+        userId: 'user-1',
+        generationToken: 'generation-1',
+        input: { kind: 'PRESENTED' },
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        message: 'TODAY_SUGGESTION_NOT_FOUND',
+        code: 'TODAY_SUGGESTION_EXPIRED',
+        reason: 'EXPIRED',
+      },
+    });
+
+    prisma.aiTodaySuggestion.findFirst
+      .mockResolvedValueOnce(null as never)
+      .mockResolvedValueOnce(null as never);
+    await expect(
+      service.recordInteraction({
+        userId: 'user-1',
+        generationToken: 'older-token',
+        input: { kind: 'PRESENTED' },
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        message: 'TODAY_SUGGESTION_NOT_FOUND',
+        code: 'TODAY_SUGGESTION_SUPERSEDED',
+        reason: 'SUPERSEDED',
+      },
+    });
   });
 });

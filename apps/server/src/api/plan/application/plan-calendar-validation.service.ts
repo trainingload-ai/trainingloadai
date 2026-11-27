@@ -50,11 +50,17 @@ const ymd = (date: Date | null) => date?.toISOString().slice(0, 10) ?? null;
 export class PlanCalendarValidationService {
   constructor(private readonly calendar: PlanCalendarRepository) {}
   private reject(issues: Issue[]) {
-    if (issues.length)
+    if (issues.length) {
+      const summary = issues
+        .slice(0, 5)
+        .map((issue) => (issue.date ? `${issue.code}@${issue.date}` : issue.code))
+        .join(', ');
       throw new UnprocessableEntityException({
         code: 'PLAN_SCHEDULE_INVALID',
+        message: `PLAN_SCHEDULE_INVALID: ${summary}`,
         issues,
       });
+    }
   }
 
   async assertCandidate(input: Candidate, tx: PlanDb) {
@@ -178,11 +184,18 @@ export class PlanCalendarValidationService {
     plan: {
       status: string;
       startDate: Date | null;
-      supersededBy: { status: string; startDate: Date | null } | null;
+      activationBlockedAt?: Date | null;
+      supersededBy: {
+        status: string;
+        startDate: Date | null;
+        activationBlockedAt?: Date | null;
+      } | null;
     } | null;
   }) {
     if (!w.plan) return true;
     if (!['ACTIVE', 'PAUSED', 'SCHEDULED'].includes(w.plan.status))
+      return false;
+    if (w.plan.status === 'SCHEDULED' && w.plan.activationBlockedAt)
       return false;
     const date = ymd(w.scheduledDate);
     const start = ymd(w.plan.startDate);
@@ -190,6 +203,7 @@ export class PlanCalendarValidationService {
     const successor = w.plan.supersededBy;
     return !(
       successor?.status === 'SCHEDULED' &&
+      !successor.activationBlockedAt &&
       ymd(successor.startDate) &&
       date >= ymd(successor.startDate)!
     );

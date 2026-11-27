@@ -147,5 +147,8 @@
       "CREATE_TODAY_WORKOUT": "今日のトレーニングに追加する",
       "SCHEDULE_REMINDER": "後で通知する"
     }
+  },
+  "planStart": {
+    "emptyDraft": "このプラン下書きにはまだセッションがありません。開始する前にセッションを追加または生成してください。"
   }
 }

@@ -11,6 +11,7 @@ import type { PrismaTx } from '@/prisma/prisma-db';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { PrismaService } from '@/prisma/prisma.service';
+import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import { HealthFileQueryService } from '@/health-data/health-file-query.service';
 import { ImportingJobService } from '@/importing/importing-job.service';
 import { UserQueryService } from './user-query.service';
@@ -121,8 +122,9 @@ export class AccountDeletionService {
     const subjectHash = accountDeletionSubjectHash(args.userId);
     const extensionSnapshot = await this.obligations.snapshot(args.userId);
 
-    const result = await this.prisma.$transaction(
-      async (tx) => {
+    const result = await withSerializableRetry(() =>
+      this.prisma.$transaction(
+        async (tx) => {
         await tx.$queryRaw`
           SELECT "id"
           FROM "t_user"
@@ -240,7 +242,8 @@ export class AccountDeletionService {
 
         return job;
       },
-      { isolationLevel: 'Serializable' },
+      { isolationLevel: 'Serializable', timeout: 30_000 },
+    ),
     );
 
     if (this.events) {

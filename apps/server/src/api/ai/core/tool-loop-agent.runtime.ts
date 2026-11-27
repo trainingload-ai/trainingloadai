@@ -2109,11 +2109,9 @@ export async function* streamCoachAnswer(args: {
             : new CoachStepTimeoutError(timedOut.step, stepTimeoutMs)
         : err;
       openErr = effectiveError;
-      const errorCode = isCoachModelTimeoutError(effectiveError)
-        ? effectiveError.code
-        : 'unknown';
+      const classified = classifyCoachModelError(effectiveError, ctx.signal);
       logger.error(
-        `[AI][教练][agent-sdk] 模型失败 服务商=${provider ?? 'none'} 模型=${model} code=${errorCode} message="${previewTextForLog(effectiveError instanceof Error ? effectiveError.message : String(effectiveError))}" 耗时毫秒=${Date.now() - t0}`,
+        `[AI][coach][agent-sdk] model failed provider=${provider ?? 'none'} model=${model} code=${classified.code} status=${classified.statusCode ?? 'none'} retryable=${classified.retryable} step=${activeModelStep || 'none'} aborted=${ctx.signal.aborted} abortReason=${String(ctx.signal.reason ?? 'none')} message="${previewTextForLog(effectiveError instanceof Error ? effectiveError.message : String(effectiveError))}" elapsedMs=${Date.now() - t0}`,
       );
       const canTryNextModel = model !== models[models.length - 1];
       const shouldRetry =
@@ -2121,8 +2119,7 @@ export async function* streamCoachAnswer(args: {
         !uiDelivered &&
         !ctx.signal.aborted &&
         canTryNextModel &&
-        (isRateLimitError(effectiveError) ||
-          isCoachModelTimeoutError(effectiveError));
+        classified.retryable;
       for (const usage of attemptUsageEvents) {
         yield {
           type: 'model_usage',
@@ -2147,4 +2144,83 @@ export async function* streamCoachAnswer(args: {
   }
 
   throw openErr ?? new Error('AI SDK ToolLoopAgent stream failed');
+}
+
+export type ClassifiedCoachModelError = {
+  code: string;
+  statusCode?: number;
+  retryable: boolean;
+};
+
+function readNumericStatusCode(error: unknown): number | undefined {
+  if (!error || typeof error !== 'object') return undefined;
+  const record = error as Record<string, unknown>;
+  for (const key of ['statusCode', 'status'] as const) {
+    const value = record[key];
+    if (typeof value === 'number' && Number.isInteger(value) && value >= 100) {
+      return value;
+    }
+  }
+  if (record.cause && record.cause !== error) {
+    return readNumericStatusCode(record.cause);
+  }
+  return undefined;
+}
+
+function readErrorCodeString(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') return undefined;
+  const record = error as Record<string, unknown>;
+  if (typeof record.code === 'string' && record.code.trim()) {
+    return record.code.trim();
+  }
+  if (record.cause && record.cause !== error) {
+    return readErrorCodeString(record.cause);
+  }
+  return undefined;
+}
+
+const TRANSIENT_NETWORK_ERROR_RE =
+  /ECONNRESET|ETIMEDOUT|EPIPE|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|UND_ERR_SOCKET|UND_ERR_CONNECT_TIMEOUT|fetch failed|socket hang up|other side closed|terminated/i;
+
+export function classifyCoachModelError(
+  error: unknown,
+  signal?: AbortSignal,
+): ClassifiedCoachModelError {
+  if (isCoachModelTimeoutError(error)) {
+    return { code: error.code, retryable: true };
+  }
+  if (signal?.aborted) {
+    const reason =
+      typeof signal.reason === 'string' && signal.reason.trim()
+        ? signal.reason.trim()
+        : 'client_aborted';
+    return { code: reason, retryable: false };
+  }
+  if (isRateLimitError(error)) {
+    return { code: 'rate_limit', statusCode: 429, retryable: true };
+  }
+  const statusCode = readNumericStatusCode(error);
+  if (statusCode !== undefined) {
+    if (statusCode >= 500) {
+      return { code: `upstream_${statusCode}`, statusCode, retryable: true };
+    }
+    if (statusCode >= 400) {
+      return { code: `upstream_${statusCode}`, statusCode, retryable: false };
+    }
+  }
+  const message = error instanceof Error ? error.message : String(error ?? '');
+  if (message.includes('AI_COACH_DELIVERY_SUMMARY_EMPTY')) {
+    return { code: 'delivery_summary_empty', retryable: false };
+  }
+  const rawCode = readErrorCodeString(error);
+  if (
+    (rawCode && TRANSIENT_NETWORK_ERROR_RE.test(rawCode)) ||
+    TRANSIENT_NETWORK_ERROR_RE.test(message)
+  ) {
+    return { code: 'network_error', retryable: true };
+  }
+  if (rawCode && /^[A-Za-z0-9_.-]{2,48}$/.test(rawCode)) {
+    return { code: rawCode, retryable: false };
+  }
+  return { code: 'unknown', retryable: false };
 }

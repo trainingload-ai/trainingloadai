@@ -338,7 +338,9 @@
     "rollingPlan": {
       "titleMonthApplied": "Piano continuo: obiettivo mensile aggiornato",
       "titleWeekApplied": "Piano continuo: allenamenti aggiornati",
-      "titleBlocked": "Il piano continuo richiede attenzione"
+      "titleBlocked": "Il piano continuo richiede attenzione",
+      "titleFailed": "Allenamento continuo: aggiornamento programma non riuscito",
+      "bodyFailed": "La generazione automatica non è riuscita dopo diversi tentativi. Apri il tuo piano per verificare i vincoli o generarlo manualmente."
     },
     "reviewDigest": {
       "report": {

@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { registerHiddenActivityLinkCleaner } from '@/sync/activity-source-lifecycle.service';
 import { PlanWriteSupport } from './plan-write.support';
 import type { LinkPlanWorkoutActivityDto } from '../dto/link-plan-workout-activity.dto';
 import type { ReplaceActivityPlanLinkDto } from '../dto/replace-activity-plan-link.dto';
@@ -7,12 +8,18 @@ import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import type { PlanDb } from '../persistence/plan-db';
 
 @Injectable()
-export class PlanActivityLinkService {
+export class PlanActivityLinkService implements OnModuleInit {
   constructor(
     private readonly write: PlanWriteSupport,
     private readonly links: PlanActivityLinkRepository,
     private readonly workouts: PlanWorkoutRepository,
   ) {}
+
+  onModuleInit() {
+    registerHiddenActivityLinkCleaner((activityIds, tx, unlinkedAt) =>
+      this.unlinkHiddenActivitiesInTransaction(activityIds, tx, unlinkedAt),
+    );
+  }
 
   async findAutoCompletedWorkoutIdsForActivity(
     activityId: number,
@@ -63,6 +70,44 @@ export class PlanActivityLinkService {
         where: { id: { in: orphanedIds }, status: 'DONE' },
         data: { status: 'PLANNED', completedAt: null },
       },
+      tx,
+    );
+  }
+
+  /**
+   * Unlink active plan workout links for activities soft-hidden (`state = 0`)
+   * when an external source is deactivated, and restore auto-completed workouts
+   * that no longer have any active primary activity link.
+   */
+  async unlinkHiddenActivitiesInTransaction(
+    activityIds: number[],
+    tx: PlanDb,
+    unlinkedAt = new Date(),
+  ): Promise<void> {
+    if (activityIds.length === 0) return;
+    const autoCompletedWorkoutIds = Array.from(
+      new Set(
+        (
+          await Promise.all(
+            activityIds.map((activityId) =>
+              this.findAutoCompletedWorkoutIdsForActivity(activityId, tx),
+            ),
+          )
+        ).flat(),
+      ),
+    );
+    await this.links.updateMany(
+      {
+        where: {
+          activityId: { in: activityIds },
+          unlinkedAt: null,
+        },
+        data: { unlinkedAt },
+      },
+      tx,
+    );
+    await this.restoreOrphanedAutoCompletedWorkouts(
+      autoCompletedWorkoutIds,
       tx,
     );
   }

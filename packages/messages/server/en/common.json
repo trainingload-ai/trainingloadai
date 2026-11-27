@@ -338,7 +338,9 @@
     "rollingPlan": {
       "titleMonthApplied": "Continuous training: month direction updated",
       "titleWeekApplied": "Continuous training: schedule updated",
-      "titleBlocked": "Continuous training needs attention"
+      "titleBlocked": "Continuous training needs attention",
+      "titleFailed": "Continuous training schedule update failed",
+      "bodyFailed": "Automatic schedule generation could not be completed after multiple attempts. Open your plan to review constraints or generate manually."
     },
     "reviewDigest": {
       "report": {

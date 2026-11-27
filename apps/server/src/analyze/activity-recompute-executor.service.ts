@@ -55,6 +55,7 @@ export class ActivityRecomputeExecutorService {
     maxActivities?: number;
     includeActivityIds?: readonly number[];
     sourceLockToken?: string;
+    forcePmcRecomputeFrom?: Date | null;
   }) {
     return this.replayService.replay({
       userId: params.userId,
@@ -68,6 +69,7 @@ export class ActivityRecomputeExecutorService {
       includeActivityIds: params.includeActivityIds,
       sourceLockToken: params.sourceLockToken,
       suppressAthleteStateReassessment: params.metricType === 'DATA_REPAIR',
+      forcePmcRecomputeFrom: params.forcePmcRecomputeFrom,
     });
   }
 }

@@ -147,5 +147,8 @@
       "CREATE_TODAY_WORKOUT": "Als heutiges Training hinzufügen",
       "SCHEDULE_REMINDER": "Später erinnern"
     }
+  },
+  "planStart": {
+    "emptyDraft": "Dieser Planentwurf enthält noch keine Trainingseinheiten. Füge zuerst Einheiten hinzu oder erstelle welche, bevor du ihn startest."
   }
 }

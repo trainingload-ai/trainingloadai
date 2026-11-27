@@ -2,6 +2,7 @@ import { Injectable, Optional } from '@nestjs/common';
 import { BodyMetricType, ChangeSource, Prisma } from '@prisma/client';
 
 import { PrismaService } from '@/prisma/prisma.service';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { readyActivityWhere } from '@/utils/activity-ready-where';
@@ -125,6 +126,10 @@ export class UserTimezoneInitializerService {
       try {
         return await this.prisma.$transaction(
           async (tx) => {
+            await acquireHashtextAdvisoryXactLock(
+              tx,
+              `user-timezone:${userId}`,
+            );
             const current = await this.users.bodyMetrics(tx).findFirst({
               where: { userId, type: BodyMetricType.TIMEZONE },
               orderBy: [{ effectiveDate: 'desc' }, { createdAt: 'desc' }],
@@ -160,7 +165,7 @@ export class UserTimezoneInitializerService {
               source: origin.source,
             };
           },
-          { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+          { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
         );
       } catch (error) {
         if (

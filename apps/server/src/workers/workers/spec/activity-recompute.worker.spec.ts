@@ -120,4 +120,41 @@ describe('ActivityRecomputeWorkerService claim fencing', () => {
     // transaction and mutate attempts/checkpoint owned by the new worker.
     expect(prisma.$transaction).not.toHaveBeenCalled();
   });
+
+  it('forces PMC recompute from 24h before recomputeFrom when an activity is deleted or hidden', async () => {
+    const updateMany = jest.fn(async () => ({ count: 1 }));
+    const prisma = {
+      activityRecomputeJob: { updateMany },
+      $transaction: jest.fn(),
+    };
+    const executor = {
+      executeMetricChangeRecompute: jest.fn(async () => ({
+        completed: true,
+        nextCheckpoint: null,
+        processedActivities: 0,
+      })),
+    };
+    const worker = new ActivityRecomputeWorkerService(
+      prisma as never,
+      { get: jest.fn(() => 3) } as never,
+      executor as never,
+    );
+
+    await (
+      worker as unknown as { processJob(input: unknown): Promise<void> }
+    ).processJob(
+      job({
+        replayCheckpoint: null,
+        triggerSource: 'activity_deleted',
+        recomputeFrom: new Date('2026-11-27T17:00:00.000Z'),
+      }),
+    );
+
+    expect(executor.executeMetricChangeRecompute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effectiveFrom: new Date('2026-11-27T17:00:00.000Z'),
+        forcePmcRecomputeFrom: new Date('2026-11-26T17:00:00.000Z'),
+      }),
+    );
+  });
 });

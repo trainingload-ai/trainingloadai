@@ -37,8 +37,15 @@ describe('PlanStartAssessmentService', () => {
       createDirectStartPreview: jest.fn(),
       confirmDirectStart: jest.fn(),
     };
-    const service = new PlanStartAssessmentService(ai as never, planStarts as never);
-    return { service, ai, planStarts };
+    const i18n = {
+      t: jest.fn((key: string) => key),
+    };
+    const service = new PlanStartAssessmentService(
+      ai as never,
+      planStarts as never,
+      i18n as never,
+    );
+    return { service, ai, planStarts, i18n };
   }
 
   it('starts the same draft directly when verdict is FIT and originalCanStart is true', async () => {
@@ -178,5 +185,62 @@ describe('PlanStartAssessmentService', () => {
 
     expect(validated.generatedFrom).toBe('2026-12-31');
     expect(validated.generatedThrough).toBe('2027-01-03');
+  });
+
+  it('returns CONFLICT with PLAN_EMPTY_WORKOUTS without invoking AI when draft has zero active workouts', async () => {
+    const { service, ai } = setup({
+      source: {
+        ...basePreflight.source,
+        workouts: [],
+      },
+    });
+
+    const result = await service.assessStart('user-1', 'plan-empty', {
+      startDate: '2026-12-31',
+      revision: 'rev-1',
+      lang: 'zh',
+    });
+
+    expect(ai.runBackgroundCoachTask).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      outcome: 'CONFLICT',
+      originalCanStart: false,
+      conflicts: [
+        expect.objectContaining({ code: 'PLAN_EMPTY_WORKOUTS' }),
+      ],
+    });
+  });
+
+  it('requires explicit confirmation instead of auto-starting original when SUGGEST_ADJUSTMENT preview fails', async () => {
+    const { service, ai, planStarts } = setup();
+    ai.runBackgroundCoachTask.mockResolvedValue({
+      result: {
+        verdict: 'SUGGEST_ADJUSTMENT',
+        summary: '近期负荷偏高，建议首周减量 20%。',
+        changes: [
+          {
+            sourceWorkoutId: 'w-1',
+            expectedRevision: 1,
+            workout: { title: 'Reduced Easy Run' },
+          },
+        ],
+      },
+    } as never);
+    planStarts.createDirectStartPreview.mockRejectedValue(
+      new Error('PLAN_SCHEDULE_INVALID: REST_DAY_CONFLICT@2026-12-31'),
+    );
+
+    const result = await service.assessStart('user-1', 'plan-1', {
+      startDate: '2026-12-31',
+      revision: 'rev-1',
+      lang: 'zh',
+    });
+
+    expect(planStarts.confirmDirectStart).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      outcome: 'INSUFFICIENT_DATA',
+      originalCanStart: true,
+      summary: '近期负荷偏高，建议首周减量 20%。',
+    });
   });
 });

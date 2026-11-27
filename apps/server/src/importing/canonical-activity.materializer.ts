@@ -35,6 +35,7 @@ import {
   type DatasetQuality,
 } from './activity-dataset-selector.service';
 import { acquireActivityWriteLock } from '@/prisma/activity-write-lock';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import { sanitizeActivityRecordSpeeds } from '@/algorithm/instantaneous-speed';
 import { providerFromSourceKind } from './external-provider-identity';
 import { replaceCanonicalStrengthRows } from './canonical-strength.materializer';
@@ -745,6 +746,12 @@ export class CanonicalActivityMaterializer {
   }): Promise<Activity> {
     const resolvedMaxSpeeds = resolveCanonicalMaxSpeeds(args.payload);
     return this.publishImport(args, async (tx) => {
+      // Acquire fitness user lock before activity write lock to match
+      // ChronologicalActivityReplayService (fitness_revision trigger also takes
+      // fitness:<userId> on activity/parquet writes) and avoid AB-BA deadlocks.
+      if (typeof tx.$queryRaw === 'function') {
+        await lockFitnessUser(tx, args.userId);
+      }
       if (typeof tx.$executeRawUnsafe === 'function') {
         await acquireActivityWriteLock(tx, args.token.activityId);
       }

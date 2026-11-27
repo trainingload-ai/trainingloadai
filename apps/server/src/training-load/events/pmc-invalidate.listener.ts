@@ -17,11 +17,15 @@ export class PmcInvalidateListener {
     @Optional() private readonly events?: EventEmitter2,
   ) {}
 
-  @OnEvent(PMC_INVALIDATE_EVENT)
+  @OnEvent(PMC_INVALIDATE_EVENT, { suppressErrors: false })
   async handle(event: PmcInvalidateEvent) {
     if (event.startDate) {
-      const endDate =
+      const rawEndDate =
         event.endDate ?? dayjs.utc().add(1, 'day').endOf('day').toDate();
+      const endDate =
+        rawEndDate.getTime() < event.startDate.getTime()
+          ? dayjs.utc(event.startDate).endOf('day').toDate()
+          : rawEndDate;
       this.logger.log(
         `[pmc.invalidate] windowed recalculate userId=${event.userId}`,
       );

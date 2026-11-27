@@ -626,12 +626,19 @@ export class PlanWriteSupport {
       const plan = row.plan;
       if (!date || !plan) return false;
       if (plan.status === 'SCHEDULED') {
+        if ((plan as { activationBlockedAt?: Date | null }).activationBlockedAt) {
+          return false;
+        }
         const starts = plan.startDate?.toISOString().slice(0, 10);
         return Boolean(starts && date >= starts);
       }
+      const successor = plan.supersededBy as
+        | { status?: string; startDate?: Date | null; activationBlockedAt?: Date | null }
+        | null
+        | undefined;
       const cutoff =
-        plan.supersededBy?.status === 'SCHEDULED'
-          ? plan.supersededBy.startDate?.toISOString().slice(0, 10)
+        successor?.status === 'SCHEDULED' && !successor.activationBlockedAt
+          ? successor.startDate?.toISOString().slice(0, 10)
           : null;
       return !cutoff || date < cutoff;
     });
