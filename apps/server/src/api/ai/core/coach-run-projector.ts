@@ -19,6 +19,7 @@ import { sanitizeStoredCoachMessageForClient } from './coach-history-messages';
 import { COACH_RUN_PART_TYPES } from '@shared/ai-coach-run-contract';
 import { coachTurnErrorRecoveryReason } from '@shared/coach-turn-error';
 import { sanitizeCoachPublicSummary } from './coach-public-summary';
+import { COACH_MUTATION_ACTIVITY_PREFIX } from './coach-mutation-receipt';
 import {
   buildCoachFailureReceipt,
   type StoredCoachFailureReceipt,
@@ -168,15 +169,18 @@ export class CoachRunProjector {
     // Repeated status snapshots must not manufacture duplicate work.
     if (previous?.status === event.status) return;
     const terminal = !['queued', 'running', 'waiting'].includes(event.status);
-    if (previous && !['queued', 'running', 'waiting'].includes(previous.status))
+    const mutationInvocation = event.key.startsWith(COACH_MUTATION_ACTIVITY_PREFIX);
+    const retrying = mutationInvocation && previous?.status === 'failed' && event.status === 'running';
+    if (previous && !['queued', 'running', 'waiting'].includes(previous.status) && !retrying)
       return;
+    if (retrying) this.deferredFailures.delete(id);
     this.activityAudit.push({ ...event, at: now });
     const publicSummary =
       event.kind === 'analysis'
         ? sanitizeCoachPublicSummary(event.publicSummary)
         : undefined;
     const item: CoachActivity = {
-      ...previous,
+      ...(retrying ? {} : previous),
       activityId: id,
       runId: this.run.runId,
       attemptId: this.run.attemptId,
@@ -218,10 +222,11 @@ export class CoachRunProjector {
       });
     }
     if (event.mutation && event.toolCallId) {
+      const unresolvedId = mutationInvocation ? event.key : event.toolCallId;
       if (event.status === 'running') {
         this.mutationStarted = true;
-        this.unresolvedTools.add(event.toolCallId);
-      } else if (terminal) this.unresolvedTools.delete(event.toolCallId);
+        this.unresolvedTools.add(unresolvedId);
+      } else if (terminal) this.unresolvedTools.delete(unresolvedId);
     }
   }
 

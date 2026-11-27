@@ -1,6 +1,17 @@
 import type { CoachActionRiskTier, CoachActionType } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 import { CoachActionRiskTier as RiskTierEnum } from '@prisma/client';
+import { ConflictException } from '@nestjs/common';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
+import { sha256Hex, stableJson } from './ai-common.util';
+import {
+  coachMutationInvocationKey,
+  readCoachMutationReceipt,
+  toCoachMutationReceipt,
+  type MutationAppliedToolResult,
+} from './coach-mutation-receipt';
+export type { MutationAppliedToolResult } from './coach-mutation-receipt';
+import { COACH_RUN_ATTEMPT_LEASE_MS } from './coach-turn-input';
 import {
   buildAiTool,
   type AiRiskTier,
@@ -11,6 +22,8 @@ import {
 import type {
   CoachActionExecResult,
   CoachActionUndoHandler,
+  RecordCoachActionInput,
+  RecordCoachActionResult,
 } from './coach-action.service';
 
 /**
@@ -75,23 +88,13 @@ export type MutationToolDef<
   validateInput?: AiToolDef<Input>['validateInput'];
 };
 
-/** mutation tool 给模型/前端的统一回执；前端按 kind 路由到 MutationAppliedCard */
-export type MutationAppliedToolResult<UiPayload = unknown> = {
-  kind: 'mutation_applied';
-  ok: true;
-  actionId: string;
-  type: CoachActionType;
-  riskTier: CoachActionRiskTier;
-  summary: string;
-  /** 撤销窗口 ISO 字符串；HIGH 风险动作恒为 null */
-  undoUntil: string | null;
-  payload: UiPayload;
-};
-
 /**
  * 可撤销（LOW）mutation 的工厂产物；启动期注册表见 `coach-mutation-undo-bundles.ts`。
  */
-export type MutationToolBundle<Input extends object = object, UiPayload = unknown> = {
+export type MutationToolBundle<
+  Input extends object = object,
+  UiPayload = unknown,
+> = {
   tool: AiToolDef<Input, MutationAppliedToolResult<UiPayload>>;
   type: CoachActionType;
   undoHandler: CoachActionUndoHandler;
@@ -99,6 +102,103 @@ export type MutationToolBundle<Input extends object = object, UiPayload = unknow
 
 function toRiskTierEnum(tier: AiRiskTier): CoachActionRiskTier {
   return tier === 'low' ? RiskTierEnum.LOW : RiskTierEnum.HIGH;
+}
+
+function mutationInvocation<UiPayload>(
+  context: AiToolContext,
+  userId: string,
+  toolName: string,
+  input: object,
+) {
+  const { mutationRun, currentToolCallId } = context;
+  if (!mutationRun) return null;
+  const sid = context.sid;
+  const invocationKey = coachMutationInvocationKey(
+    context,
+    toolName,
+    currentToolCallId,
+  );
+  if (!sid || !invocationKey) {
+    throw new ConflictException({
+      code: 'COACH_MUTATION_INVOCATION_INVALID',
+      message: 'Coach mutation invocation identity is incomplete',
+    });
+  }
+
+  const { runId, attemptId } = mutationRun;
+  const invocationInputHash = sha256Hex(stableJson(input));
+  const read = async (
+    db: Pick<Prisma.TransactionClient, 'coachAction'>,
+  ): Promise<RecordCoachActionResult<UiPayload> | null> => {
+    const existing = await db.coachAction.findUnique({
+      where: { invocationKey },
+    });
+    if (!existing) return null;
+    if (
+      existing.userId !== userId ||
+      existing.invocationInputHash !== invocationInputHash
+    ) {
+      throw new ConflictException({
+        code: 'COACH_MUTATION_INVOCATION_MISMATCH',
+        message: 'Coach mutation invocation does not match the committed input',
+      });
+    }
+    return readCoachMutationReceipt<UiPayload>(existing);
+  };
+
+  const transaction: Pick<
+    RecordCoachActionInput<UiPayload>,
+    'replay' | 'finalize'
+  > = {
+    replay: async (tx) => {
+      await acquireHashtextAdvisoryXactLock(
+        tx,
+        `coach-mutation:${invocationKey}`,
+      );
+      const receipt = await read(tx);
+      if (receipt) return receipt;
+
+      // Recheck the clock after acquiring the row lock. Lock waits can outlast the lease.
+      await tx.$queryRaw`
+        SELECT a.id FROM t_coach_run_attempt a
+        WHERE a.id = ${attemptId} AND a.user_id = ${userId}
+        FOR UPDATE
+      `;
+      const active = await tx.$queryRaw<Array<{ id: string }>>`
+        SELECT a.id
+        FROM t_coach_run_attempt a
+        JOIN t_coach_run r ON r.id = a.run_id
+        WHERE a.id = ${attemptId} AND r.id = ${runId}
+          AND a.user_id = ${userId} AND r.user_id = ${userId}
+          AND r.session_id = ${sid} AND r.active_attempt_id = a.id
+          AND a.status = 'running' AND a.cancel_requested_at IS NULL
+          AND a.heartbeat_at >= (clock_timestamp() AT TIME ZONE 'UTC')
+            - ${COACH_RUN_ATTEMPT_LEASE_MS}::integer * interval '1 millisecond'
+      `;
+      if (!active.length) {
+        throw new ConflictException({
+          code: 'COACH_MUTATION_INACTIVE_ATTEMPT',
+          message: 'Coach mutation attempt is no longer active',
+        });
+      }
+      return null;
+    },
+    finalize: async (tx, result) => {
+      await tx.coachAction.update({
+        where: { id: result.actionId },
+        data: {
+          invocationKey,
+          invocationAttemptId: attemptId,
+          invocationInputHash,
+          invocationPayload:
+            result.payloadForUi === undefined
+              ? {}
+              : { value: result.payloadForUi as Prisma.InputJsonValue },
+        },
+      });
+    },
+  };
+  return { read, transaction };
 }
 
 /**
@@ -137,6 +237,19 @@ export function mutationToolFactory<
     isConcurrencySafe: false,
     checkPermissions: def.checkPermissions,
     validateInput: def.validateInput,
+    async replayCommittedInvocation(ctx, input) {
+      const userId = ctx.session?.user?.id;
+      if (!userId) return null;
+      const invocation = mutationInvocation<UiPayload>(
+        ctx,
+        userId,
+        def.name,
+        input,
+      );
+      if (!invocation) return null;
+      const result = await invocation.read(ctx.prisma);
+      return result ? toCoachMutationReceipt(result) : null;
+    },
     async execute(ctx, input) {
       const session = ctx.session;
       const userId = session?.user?.id;
@@ -150,23 +263,20 @@ export function mutationToolFactory<
         riskTier: toRiskTierEnum(def.riskTier),
         sid: ctx.sid ?? null,
         messageId: ctx.currentToolCallId ?? null,
+        ...mutationInvocation<UiPayload>(ctx, userId, def.name, input)
+          ?.transaction,
         exec: (tx) =>
-          def.exec(ctx, input, {
-            messageId: ctx.currentToolCallId ?? null,
-          }, tx),
+          def.exec(
+            ctx,
+            input,
+            {
+              messageId: ctx.currentToolCallId ?? null,
+            },
+            tx,
+          ),
       });
 
-      const payload: MutationAppliedToolResult<UiPayload> = {
-        kind: 'mutation_applied',
-        ok: true,
-        actionId: result.actionId,
-        type: result.type,
-        riskTier: result.riskTier,
-        summary: result.summary,
-        undoUntil: result.undoUntil ? result.undoUntil.toISOString() : null,
-        payload: result.payloadForUi,
-      };
-      return payload;
+      return toCoachMutationReceipt(result);
     },
   });
 

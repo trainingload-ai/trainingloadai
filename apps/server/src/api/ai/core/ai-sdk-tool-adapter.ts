@@ -18,6 +18,8 @@ import {
   asRecordTool,
 } from './tool.types';
 import { safeJsonPreview } from './safe-json-preview';
+import { COACH_MUTATION_ACTIVITY_PREFIX, coachMutationInvocationKey } from './coach-mutation-receipt';
+import type { CoachActivityEvent } from '@shared/ai-coach-run-contract';
 import { getCoachSkillByName } from './skill.registry';
 import { toolSchemaValidator } from './tool-input-validation';
 import { planPhaseProgress } from './tools/plan-draft-phase-progress';
@@ -344,10 +346,13 @@ async function executeCoachTool(args: {
   ctx: AiToolContext;
   input: Record<string, unknown>;
   rawInput: unknown;
-  toolCallId: string;
+  event: CoachActivityEvent & { toolCallId: string };
+  beforeRunning: () => Promise<void>;
+  onReplay: () => void;
   providerToolName: string;
 }): Promise<unknown> {
-  const { tool, ctx, input, rawInput, toolCallId, providerToolName } = args;
+  const { tool, ctx, input, rawInput, event, beforeRunning, onReplay, providerToolName } = args;
+  const { toolCallId } = event;
 
   const skill = checkAiToolActiveSkill(tool, ctx);
   if (skill.ok === false) {
@@ -496,19 +501,31 @@ async function executeCoachTool(args: {
     currentToolCallId: toolCallId,
   };
 
-  ctx.signal.throwIfAborted();
-  await ctx.onActivity?.({
-    key: `tool:${toolCallId}`,
-    kind: tool.name === 'skill.activate' ? 'skill' : 'tool',
-    status: 'running',
-    labelKey: tool.name === 'skill.activate' ? 'skill' : 'tool',
-    toolCallId,
-    toolName: tool.name,
-    ...skillIdentity(tool.name, input),
-    mutation: tool.isReadOnly === false || tool.kind === 'mutation',
-  });
-  ctx.signal.throwIfAborted();
+  const replayCommitted = () => recordTool.replayCommittedInvocation?.(execCtx, input);
+  let guardFailed = false;
   try {
+    if (execCtx.mutationRun && recordTool.replayCommittedInvocation) {
+      const receipt = await replayCommitted();
+      if (receipt) {
+        onReplay();
+        return receipt;
+      }
+    }
+    try {
+      ctx.signal.throwIfAborted();
+      await beforeRunning();
+      await ctx.onActivity?.({ ...event, status: 'running' });
+      ctx.signal.throwIfAborted();
+    } catch (error) {
+      // The same call may have committed while the checkpoint or signal was fenced.
+      const receipt = execCtx.mutationRun ? await replayCommitted() : null;
+      if (receipt) {
+        onReplay();
+        return receipt;
+      }
+      guardFailed = true;
+      throw error;
+    }
     const out = await recordTool.execute(execCtx, input);
     const outChars = (() => {
       try {
@@ -543,6 +560,13 @@ async function executeCoachTool(args: {
     if (problem?.code === 'PLAN_SCHEDULE_INVALID' && Array.isArray(problem.issues)) {
       return { error: msg, code: problem.code, issues: problem.issues, stage: 'execute' };
     }
+    if (
+      problem?.code === 'COACH_MUTATION_INVOCATION_MISMATCH' ||
+      problem?.code === 'COACH_MUTATION_INACTIVE_ATTEMPT' ||
+      problem?.code === 'COACH_MUTATION_INVOCATION_INVALID'
+    )
+      return { error: msg, code: problem.code, stage: 'execute' };
+    if (guardFailed) throw err;
     return { error: msg, stage: 'execute' };
   }
 }
@@ -605,8 +629,22 @@ export function createAiSdkCoachTools(args: {
             stage: 'delivery',
           };
         const inputRecord = asRecord(input);
-        const event = {
-          key: `tool:${options.toolCallId}`,
+        const guardedMutation = Boolean(ctx.mutationRun && toolDef.replayCommittedInvocation);
+        const invocationKey = guardedMutation
+          ? coachMutationInvocationKey(ctx, toolDef.name, options.toolCallId)
+          : null;
+        if (guardedMutation && !invocationKey) {
+          return {
+            error: 'Coach mutation invocation identity is incomplete',
+            code: 'COACH_MUTATION_INVOCATION_INVALID',
+            stage: 'execute',
+          };
+        }
+        const event: CoachActivityEvent & { toolCallId: string } = {
+          status: 'queued',
+          key: invocationKey
+            ? `${COACH_MUTATION_ACTIVITY_PREFIX}${invocationKey}`
+            : `tool:${options.toolCallId}`,
           kind:
             toolDef.name === 'skill.activate'
               ? ('skill' as const)
@@ -617,17 +655,26 @@ export function createAiSdkCoachTools(args: {
           ...skillIdentity(toolDef.name, inputRecord),
           mutation: toolDef.isReadOnly === false || toolDef.kind === 'mutation',
         };
-        await ctx.onActivity?.({ ...event, status: 'queued' });
+        if (!guardedMutation) await ctx.onActivity?.(event);
         const run = async () => {
-          ctx.signal.throwIfAborted();
+          if (!guardedMutation) ctx.signal.throwIfAborted();
+          let queuedActivity = !guardedMutation;
+          let replayed = false;
           const result = await executeCoachTool({
             tool: toolDef,
             ctx,
             input: inputRecord,
             rawInput: input,
-            toolCallId: options.toolCallId,
+            event,
+            beforeRunning: async () => {
+              if (queuedActivity) return;
+              await ctx.onActivity?.(event);
+              queuedActivity = true;
+            },
+            onReplay: () => { replayed = true; },
             providerToolName,
           });
+          if (!queuedActivity || replayed) return result;
           const failed =
             result &&
             typeof result === 'object' &&

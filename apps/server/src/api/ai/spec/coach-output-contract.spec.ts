@@ -494,6 +494,39 @@ describe('durable Coach output contract', () => {
     expect(fixture.operations.fail).toHaveBeenCalledTimes(1);
   });
 
+  it('does not charge a failed paid turn after it delivered a mutation receipt', async () => {
+    const fixture = setup([
+      {
+        type: 'assistant',
+        message: { content: [{
+          type: 'tool_use',
+          id: 'mutation-applied:committed',
+          name: 'MutationApplied',
+          input: { kind: 'mutation_applied', ok: true, actionId: 'committed' },
+        }] },
+      },
+      success,
+    ]);
+    fixture.coachRuns.checkpointStreamTerminal.mockRejectedValueOnce(
+      new ConflictException('Coach execution ownership changed'),
+    );
+
+    const output = await fixture.run({
+      protocolVersion: 2,
+      runCommand: { kind: 'start', requestId: 'failed-after-mutation' },
+    });
+    expect(output).toContainEqual(expect.objectContaining({
+      type: 'ui_chunk',
+      chunk: expect.objectContaining({
+        type: 'data-coach-tool',
+        data: expect.objectContaining({ name: 'MutationApplied' }),
+      }),
+    }));
+    expect(fixture.operations.markDelivered).not.toHaveBeenCalled();
+    expect(fixture.operations.complete).not.toHaveBeenCalled();
+    expect(fixture.operations.fail).toHaveBeenCalledTimes(1);
+  });
+
   it('ends an obsolete answer with the stale-question code before calling the model', async () => {
     const { run, coachRuns, aiService, aiUsage, logger } = setup([]);
     coachRuns.begin.mockRejectedValueOnce(

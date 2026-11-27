@@ -1880,6 +1880,7 @@ export class AiController {
       const stream = await this.aiService.coachStream({
         platformFunded,
         runtimeRunId: runHandle?.projector.run.runId,
+        runtimeAttemptId: runHandle?.projector.run.attemptId,
         currentUserMessageId: runHandle?.inputMessageId,
         calendarEdit: calendarEdit ?? undefined,
         activeSkillName: platformFunded ? 'athlete-state' : undefined,

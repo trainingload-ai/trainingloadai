@@ -129,7 +129,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1913
+          "line": 1917
         }
       ]
     },
@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2588
+          "line": 2589
         }
       ]
     },
@@ -990,7 +990,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
-          "line": 99
+          "line": 101
         },
         {
           "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
@@ -998,7 +998,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 846
+          "line": 864
         }
       ]
     },
@@ -1015,7 +1015,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
-          "line": 92
+          "line": 94
         },
         {
           "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
@@ -1040,11 +1040,11 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 1166
+          "line": 1184
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 1295
+          "line": 1313
         }
       ]
     },
@@ -1082,7 +1082,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2938
+          "line": 2942
         }
       ]
     },
@@ -1103,23 +1103,23 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2468
+          "line": 2472
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2529
+          "line": 2533
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2616
+          "line": 2620
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2812
+          "line": 2816
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2922
+          "line": 2926
         }
       ]
     },
@@ -1271,7 +1271,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 340
+          "line": 341
         }
       ]
     },
@@ -1288,7 +1288,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 366
+          "line": 367
         }
       ]
     },
@@ -1432,7 +1432,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
-          "line": 85
+          "line": 87
         },
         {
           "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
@@ -1718,7 +1718,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 353
+          "line": 354
         }
       ]
     },
@@ -1735,7 +1735,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 378
+          "line": 379
         }
       ]
     },
@@ -2529,7 +2529,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 346
+          "line": 347
         }
       ]
     },
@@ -2546,7 +2546,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 371
+          "line": 372
         }
       ]
     },
@@ -4870,7 +4870,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 358
+          "line": 359
         }
       ]
     },
@@ -4887,7 +4887,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 384
+          "line": 385
         }
       ]
     },

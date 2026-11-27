@@ -4647,6 +4647,11 @@ model CoachAction {
   /// 教练会话 sid，便于按会话过滤「我都帮你做了什么」
   sid       String? @map("sid")
 
+  invocationKey       String? @unique @map("invocation_key")
+  invocationAttemptId String? @map("invocation_attempt_id")
+  invocationInputHash String? @map("invocation_input_hash")
+  invocationPayload   Json?   @map("invocation_payload")
+
   /// 撤销窗口截止时间（仅 LOW 写入；HIGH 永远为 null）
   undoUntil DateTime? @map("undo_until")
   /// 撤销已执行时间；非空表示已撤销，禁止再次撤销
@@ -4654,6 +4659,7 @@ model CoachAction {
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([userId, sid, createdAt(sort: Desc)])
+  @@index([invocationAttemptId])
   @@map("t_coach_action")
 }
 

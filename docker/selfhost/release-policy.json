@@ -205,6 +205,10 @@
       "0046_fixed_plan_completion": {
         "phase": "expand",
         "releaseVersion": "1.1.27"
+      },
+      "0047_coach_mutation_invocation": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
       }
     }
   }

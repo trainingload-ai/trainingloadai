@@ -38,10 +38,18 @@ import {
 } from './core/coach-history-messages';
 import type { CoachUserMessageBody } from './core/coach-query-yield';
 import { CoachRunProjector } from './core/coach-run-projector';
+import { COACH_RUN_ATTEMPT_LEASE_MS as LEASE_MS } from './core/coach-turn-input';
 import { COACH_QUESTION_STALE_ERROR_CODE } from '@shared/coach-turn-error';
 import { isPlanClarification } from './core/coach-plan-question-review';
 import type { CoachUiChunk } from './core/coach-ui-message-stream';
-import { stableJson } from './core/ai-common.util';
+import { asRecord, stableJson } from './core/ai-common.util';
+import {
+  COACH_MUTATION_ACTIVITY_PREFIX,
+  COACH_MUTATION_CARD_NAME,
+  coachMutationCardId,
+  readCoachMutationReceipt,
+  toCoachMutationReceipt,
+} from './core/coach-mutation-receipt';
 import { CoachMemoryExtractionEnqueuer } from './memory/coach-memory-extraction-enqueuer.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { aiOperationError } from './ai-operation.error';
@@ -54,7 +62,6 @@ const json = (value: unknown): Prisma.InputJsonValue =>
   JSON.parse(JSON.stringify(value));
 const hash = (value: unknown) =>
   createHash('sha256').update(stableJson(value)).digest('hex');
-const LEASE_MS = 60_000;
 export class CoachRunCancelledError extends Error {
   constructor(
     reason: 'facts_changed' | 'user_cancelled',
@@ -230,6 +237,71 @@ export class CoachRunStore {
     );
   }
 
+  private async replayCommittedMutations(attempt: {
+    id: string;
+    userId: string;
+    run: { sessionId: string };
+    message: { message: unknown };
+  }) {
+    const envelope = asRecord(attempt.message.message);
+    if (!envelope || !Array.isArray(envelope.parts)) return attempt.message.message;
+
+    const receipts = await this.prisma.coachAction.findMany({
+      where: {
+        userId: attempt.userId,
+        sid: attempt.run.sessionId,
+        invocationAttemptId: attempt.id,
+        invocationKey: { not: null },
+      },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    if (!receipts.length) return envelope;
+
+    const parts = [...envelope.parts];
+    const knownActions = new Set(parts.flatMap((part) => {
+      const data = asRecord(asRecord(part)?.data);
+      const input = asRecord(data?.input);
+      return part?.type === 'data-coach-tool' && data?.name === COACH_MUTATION_CARD_NAME
+        ? [input?.actionId]
+        : [];
+    }));
+    const byActivityId = new Map(receipts.map((row) => [
+      `${attempt.id}:${COACH_MUTATION_ACTIVITY_PREFIX}${row.invocationKey}`,
+      row,
+    ]));
+    for (let index = 0; index < parts.length; index++) {
+      const part = parts[index];
+      if (part?.type !== 'data-coach-activity') continue;
+      const row = byActivityId.get(part.id);
+      const data = asRecord(part.data);
+      if (!row || !data || data.status === 'completed') continue;
+      const { display: _display, ...visible } = data;
+      parts[index] = {
+        ...part,
+        data: {
+          ...visible,
+          status: 'completed',
+          endedAt: row.createdAt.toISOString(),
+          revision: Number(data.revision) + 1,
+        },
+      };
+    }
+    for (const row of receipts) {
+      if (knownActions.has(row.id)) continue;
+      const id = coachMutationCardId(row.id);
+      parts.push({
+        type: 'data-coach-tool',
+        id,
+        data: {
+          toolCallId: id,
+          name: COACH_MUTATION_CARD_NAME,
+          input: toCoachMutationReceipt(readCoachMutationReceipt(row)),
+        },
+      });
+    }
+    return { ...envelope, parts };
+  }
+
   async begin(args: {
     userId: string;
     sid: string;
@@ -282,7 +354,7 @@ export class CoachRunStore {
       return {
         replay: {
           id: existing.messageId,
-          message: existing.message.message,
+          message: await this.replayCommittedMutations(existing),
           operationId: existing.operationId,
         },
       };
@@ -1431,6 +1503,9 @@ export class CoachRunStore {
   async recordLateOutcome(handle: CoachRunHandle, event: CoachActivityEvent) {
     if (!event.toolCallId || !['completed', 'failed'].includes(event.status))
       return;
+    const invocation = event.key.startsWith(COACH_MUTATION_ACTIVITY_PREFIX);
+    const unresolvedId = invocation ? event.key : event.toolCallId;
+    const activityId = `${handle.projector.run.attemptId}:${event.key}`;
     await this.prisma.$transaction(async (tx) => {
       const attempt = await tx.coachRunAttempt.findFirst({
         where: {
@@ -1448,7 +1523,8 @@ export class CoachRunStore {
         const data = part.data as Record<string, unknown> | undefined;
         if (
           part.type !== 'data-coach-activity' ||
-          data?.toolCallId !== event.toolCallId
+          (invocation ? part.id !== activityId : data?.toolCallId !== event.toolCallId) ||
+          !data
         )
           return part;
         return {
@@ -1463,7 +1539,7 @@ export class CoachRunStore {
         };
       });
       const unresolved = Array.isArray(attempt.unresolvedTools)
-        ? attempt.unresolvedTools.filter((id) => id !== event.toolCallId)
+        ? attempt.unresolvedTools.filter((id) => id !== unresolvedId)
         : [];
       const updated = await tx.coachRunAttempt.updateMany({
         where: {

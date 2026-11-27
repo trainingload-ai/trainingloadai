@@ -246,6 +246,8 @@ export type AiToolContext = {
    * 当前执行的 OpenAI `tool_calls[].id`（orchestrator 在每次 `execute` 前浅拷贝 ctx 时写入；供 mutation 入账关联 messageId）
    */
   currentToolCallId?: string | null;
+  /** Server-owned scope for mutation receipts in a durable Coach run. */
+  mutationRun?: { runId: string; attemptId: string };
 };
 
 /**
@@ -417,6 +419,8 @@ export type AiToolDef<Input extends object = object, Output = unknown> = {
    * 工具执行函数：在服务端执行，返回结构化结果给模型作为“可信事实”
    */
   execute: (ctx: AiToolContext, input: Input) => Promise<Output>;
+  /** Read a committed result for the same trusted invocation without starting a new write. */
+  replayCommittedInvocation?: (ctx: AiToolContext, input: Input) => Promise<Output | null>;
 };
 
 export type AiToolCall = {

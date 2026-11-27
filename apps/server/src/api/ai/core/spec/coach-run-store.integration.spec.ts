@@ -5,11 +5,13 @@ import {
   describe,
   expect,
   it,
+  jest,
 } from '@jest/globals';
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { PrismaService } from '@/prisma/prisma.service';
 import {
   CoachRunStore,
@@ -19,7 +21,15 @@ import {
 import { CoachMemoryExtractionEnqueuer } from '../../memory/coach-memory-extraction-enqueuer.service';
 import { AthleteStateInquiryService } from '../../athlete-state/athlete-state-inquiry.service';
 import { createAiSdkCoachTools } from '../ai-sdk-tool-adapter';
+import { coachSnapshotChunks } from '../coach-run-projector';
+import { uiSurfaceAssistantForToolResult } from '../tool-loop-agent.runtime';
+import { COACH_RUN_ATTEMPT_LEASE_MS } from '../coach-turn-input';
 import { presentCoachPlanDraftTool } from '../tools/presentCoachPlanDraft.tool';
+import { planWorkoutAddMutationTool } from '../tools/mutationPlanWorkoutAdd.tool';
+import { planWorkoutStatusMutationTool } from '../tools/mutationPlanWorkoutStatus.tool';
+import { CoachActionService } from '../coach-action.service';
+import { planStartFixture } from '@/api/plan/spec/plan-start.fixture';
+import { PLAN_DRAFT_CHANGED_EVENT } from '@/api/plan/events/plan.events';
 import { WorkoutDefinitionService } from '@/api/workout/workout-definition.service';
 import { WorkoutCodecRegistry } from '@/api/workout/workout-codec.registry';
 import { EnduranceWorkoutCodec } from '@/api/workout/codecs/endurance-workout.codec';
@@ -33,6 +43,9 @@ import {
   sanitizeStoredCoachMessageForClient,
 } from '../coach-history-messages';
 
+const nativePostgres = Boolean(process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN);
+const concurrent = nativePostgres ? it : it.skip;
+
 /** A disposable real PostgreSQL engine. NEVER loads .env or connects to application databases. */
 describe('Coach run transactions / PostgreSQL constraints', () => {
   let database: ChildProcess;
@@ -40,7 +53,10 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
   let store: CoachRunStore;
   const queries: string[] = [];
   beforeAll(async () => {
-    database = fork(resolve(__dirname, 'coach-run-postgres.mjs'), [], {
+    const fixture = nativePostgres
+      ? '../../../plan/spec/plan-sync-native-postgres.mjs'
+      : 'coach-run-postgres.mjs';
+    database = fork(resolve(__dirname, fixture), [], {
       execArgv: [],
       stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
     });
@@ -54,7 +70,7 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
       );
     });
     const testClient = new PrismaClient({
-      datasourceUrl: `postgresql://postgres:postgres@${address}/postgres?connection_limit=1&sslmode=disable`,
+      datasourceUrl: `postgresql://postgres:postgres@${address}/postgres?connection_limit=${nativePostgres ? 6 : 1}&sslmode=disable`,
       log: [{ level: 'query', emit: 'event' }],
     });
     testClient.$on('query', (event) => queries.push(event.query));
@@ -92,6 +108,206 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     operationId: randomUUID(),
     command: { kind: 'start' as const, requestId: randomUUID() },
   });
+
+  async function mutationSetup(userId = 'athlete') {
+    const request = { ...startArgs(), userId };
+    const handle = (await store.begin(request)).handle!;
+    const plan = await prisma.plan.create({
+      data: { userId: handle.userId, title: 'Athlete draft', status: 'DRAFT', periodWeeks: 2 },
+    });
+    const events = new EventEmitter2();
+    const changed = jest.fn();
+    events.on(PLAN_DRAFT_CHANGED_EVENT, changed);
+    const fixture = planStartFixture(prisma);
+    Object.assign(fixture.write, { events });
+    const abort = new AbortController();
+    const ctx: AiToolContext = {
+      prisma: prisma as PrismaService,
+      session: { user: { id: handle.userId } },
+      sid: handle.sessionId,
+      mutationRun: {
+        runId: handle.projector.run.runId,
+        attemptId: handle.projector.run.attemptId,
+      },
+      signal: abort.signal,
+      activeSkillName: 'plan-followup',
+      planService: fixture.service,
+      coachActions: new CoachActionService(prisma as PrismaService, {} as never),
+    } as AiToolContext;
+    let activityQueue: Promise<unknown> = Promise.resolve();
+    ctx.onActivity = (activity) => {
+      const next = activityQueue.then(async () => {
+        if (activity.status === 'queued' || activity.status === 'running')
+          abort.signal.throwIfAborted();
+        if (activity.mutation && activity.status === 'running')
+          await store.checkpointMutationStart(handle, activity);
+        else
+          handle.projector.consume({ type: 'activity', activity });
+      });
+      activityQueue = next.catch(() => undefined);
+      return next;
+    };
+    const tool = () => createAiSdkCoachTools({ tools: [planWorkoutAddMutationTool], ctx }).mutation_plan_workout_add;
+    return {
+      request, handle, plan, ctx, tool, changed, fixture, abort,
+      input: { planId: plan.id, weekIndex: 1, dayIndex: 1, sportType: 'RUN', text: 'work 25m' },
+    };
+  }
+
+  concurrent('returns one durable receipt from simultaneous deliveries of the same mutation call', async () => {
+    const { tool, input, plan, changed } = await mutationSetup();
+    const options = { toolCallId: 'add-request-1', messages: [] };
+    // Two SDK entry points have separate in-memory queues and share only PostgreSQL.
+    const [first, repeated] = await Promise.all([
+      tool().execute!(input, options),
+      tool().execute!({ ...input }, options),
+    ]);
+    expect(first).toMatchObject({ ok: true, kind: 'mutation_applied', payload: { planId: plan.id } });
+    expect(repeated).toEqual(first);
+    expect(changed).toHaveBeenCalledTimes(1);
+    expect(await prisma.coachAction.count()).toBe(1);
+    expect(await prisma.planWorkout.count()).toBe(1);
+
+    await expect(tool().execute!({ ...input, text: 'work 30m' }, options)).resolves.toMatchObject({
+      code: 'COACH_MUTATION_INVOCATION_MISMATCH',
+    });
+    expect(await prisma.coachAction.count()).toBe(1);
+  });
+
+  it('rolls back a failed mutation, replays a committed receipt and rejects a late new write', async () => {
+    const { request, handle, tool, input, changed, fixture, abort } = await mutationSetup();
+    const original = fixture.service.updatePlan.bind(fixture.service);
+    const interrupt = jest.spyOn(fixture.service, 'updatePlan').mockImplementationOnce(async (...args) => {
+      await original(...args);
+      throw new Error('mutation interrupted before commit');
+    });
+    const options = { toolCallId: 'add-request-1', messages: [] };
+    try {
+      await expect(tool().execute!(input, options)).resolves.toMatchObject({
+        error: 'mutation interrupted before commit',
+      });
+    } finally {
+      interrupt.mockRestore();
+    }
+    expect(await prisma.coachAction.count()).toBe(0);
+    expect(await prisma.planWorkout.count()).toBe(0);
+    expect(changed).not.toHaveBeenCalled();
+
+    const receipt = await tool().execute!(input, options);
+    expect(receipt).toMatchObject({ ok: true, kind: 'mutation_applied' });
+    await prisma.coachRunAttempt.update({
+      where: { id: handle.projector.run.attemptId },
+      data: { cancelRequestedAt: new Date() },
+    });
+    abort.abort(new Error('request cancelled'));
+    await expect(tool().execute!(input, options)).resolves.toEqual(receipt);
+    await expect(tool().execute!({ ...input, dayIndex: 2 }, {
+      toolCallId: 'late-call', messages: [],
+    })).rejects.toThrow('request cancelled');
+    const replay = (await new CoachRunStore(prisma as PrismaService).begin(request)).replay!;
+    const chunks = coachSnapshotChunks(replay.id, replay.message);
+    expect(chunks.filter((chunk) => chunk.type === 'data-coach-tool')).toEqual([
+      expect.objectContaining({ data: expect.objectContaining({ name: 'MutationApplied', input: receipt }) }),
+    ]);
+    expect(chunks.filter((chunk) => chunk.type === 'data-coach-activity')).toEqual([
+      expect.objectContaining({ data: expect.objectContaining({ status: 'completed', toolCallId: options.toolCallId }) }),
+    ]);
+    await expect(store.begin({ ...request, userId: 'intruder' })).resolves.not.toHaveProperty('replay');
+    expect(changed).toHaveBeenCalledTimes(1);
+    expect(await prisma.coachAction.count()).toBe(1);
+    expect(await prisma.planWorkout.count()).toBe(1);
+  });
+
+  it('separates provider call IDs across tools, turns and athletes while retaining legacy actions', async () => {
+    const first = await mutationSetup();
+    const call = { toolCallId: 'provider-call-1', messages: [] };
+    const addReceipt = await first.tool().execute!(first.input, call);
+    expect(addReceipt).toMatchObject({ ok: true });
+
+    const workout = await prisma.planWorkout.findFirstOrThrow({ where: { planId: first.plan.id } });
+    const statusTool = createAiSdkCoachTools({
+      tools: [planWorkoutStatusMutationTool], ctx: first.ctx,
+    }).mutation_plan_workout_status;
+    const statusReceipt = await statusTool.execute!({
+      planId: first.plan.id, workoutId: workout.id, status: 'SKIPPED',
+    }, call);
+    expect(statusReceipt).toMatchObject({ ok: true });
+    for (const [name, output] of [
+      ['mutation_plan_workout_add', addReceipt],
+      ['mutation_plan_workout_status', statusReceipt],
+    ] as const)
+      first.handle.projector.consume(uiSurfaceAssistantForToolResult({
+        id: call.toolCallId, name, input: {}, output, ok: true,
+      })!);
+    await store.checkpointStreamProgress(first.handle);
+    const projected = first.handle.projector.message.parts;
+    expect(projected.filter((part) => part.type === 'data-coach-tool')).toHaveLength(2);
+    expect([...first.handle.projector.activities.values()]
+      .filter(({ kind }) => kind === 'tool')
+      .map(({ status }) => status)).toEqual(['completed', 'completed']);
+    const replay = (await store.begin(first.request)).replay!;
+    expect(coachSnapshotChunks(replay.id, replay.message).filter((chunk) => chunk.type === 'data-coach-tool')).toHaveLength(2);
+
+    const next = await mutationSetup();
+    expect(next.handle.sessionId).toBe(first.handle.sessionId);
+    await expect(next.tool().execute!(next.input, call)).resolves.toMatchObject({ ok: true });
+
+    const other = await mutationSetup('intruder');
+    expect(other.handle.sessionId).toBe(first.handle.sessionId);
+    await expect(other.tool().execute!(other.input, call)).resolves.toMatchObject({ ok: true });
+
+    const legacy = createAiSdkCoachTools({
+      tools: [planWorkoutAddMutationTool], ctx: { ...first.ctx, mutationRun: undefined, onActivity: undefined },
+    }).mutation_plan_workout_add;
+    await expect(legacy.execute!({ ...first.input, dayIndex: 2 }, call)).resolves.toMatchObject({ ok: true });
+    const actions = await prisma.coachAction.findMany();
+    expect(actions).toHaveLength(5);
+    expect(new Set(actions.map(({ invocationKey }) => invocationKey)).size).toBe(5);
+    expect(actions.filter(({ invocationKey }) => invocationKey === null)).toHaveLength(1);
+    expect(await prisma.planWorkout.count()).toBe(4);
+  });
+
+  it('rejects an incomplete runtime identity before recording activity or writing', async () => {
+    const { tool, input, handle } = await mutationSetup();
+    await expect(tool().execute!(input, { toolCallId: ' ', messages: [] })).resolves.toMatchObject({
+      code: 'COACH_MUTATION_INVOCATION_INVALID',
+    });
+    expect(handle.projector.activities.size).toBe(0);
+    expect(await prisma.coachAction.count()).toBe(0);
+    expect(await prisma.planWorkout.count()).toBe(0);
+  });
+
+  concurrent('rechecks the database lease after waiting for an unchanged attempt row', async () => {
+    const { ctx, input, handle } = await mutationSetup();
+    const id = handle.projector.run.attemptId;
+    // Omit the SDK checkpoint to test the transaction's own admission guarantee.
+    // A different connection holds the row without changing it.
+    await prisma.$executeRaw`
+      UPDATE t_coach_run_attempt
+      SET heartbeat_at = (clock_timestamp() AT TIME ZONE 'UTC')
+        - ${COACH_RUN_ATTEMPT_LEASE_MS - 750}::integer * interval '1 millisecond'
+      WHERE id = ${id}
+    `;
+    let notifyLocked!: () => void;
+    const locked = new Promise<void>((resolveLocked) => { notifyLocked = resolveLocked; });
+    const lock = prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM t_coach_run_attempt WHERE id = ${id} FOR UPDATE`;
+      notifyLocked();
+      await tx.$queryRaw`SELECT 1 AS waited FROM pg_sleep(1)`;
+    });
+    await locked;
+    try {
+      await expect(planWorkoutAddMutationTool.execute({ ...ctx, currentToolCallId: 'waiting' }, input as never))
+        .rejects.toMatchObject({
+          response: expect.objectContaining({ code: 'COACH_MUTATION_INACTIVE_ATTEMPT' }),
+        });
+    } finally {
+      await lock;
+    }
+    expect(await prisma.coachAction.count()).toBe(0);
+    expect(await prisma.planWorkout.count()).toBe(0);
+  });
+
   it('retains every rejected plan candidate privately and returns scoped feedback to the tool caller', async () => {
     const handle = (await store.begin(startArgs())).handle!;
     const workoutService = new WorkoutService({} as never);

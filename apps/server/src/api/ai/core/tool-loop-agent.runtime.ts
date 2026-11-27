@@ -1,3 +1,4 @@
+import { COACH_MUTATION_CARD_NAME, coachMutationCardId } from './coach-mutation-receipt';
 import type { CoachFactContextService } from './coach-fact-context.service';
 import { Logger } from '@nestjs/common';
 import { projectCoachCompetitionEvents } from '@shared/coach-competition-events';
@@ -121,7 +122,7 @@ const COACH_UI_CARD_TOOL_DISPLAY_NAMES: Record<string, string> = {
   coach_decision_apply: 'CoachDecisionApplied',
 };
 
-const MUTATION_APPLIED_UI_NAME = 'MutationApplied';
+
 
 class CoachStepTimeoutError extends Error {
   readonly code = 'AI_COACH_STEP_TIMEOUT';
@@ -503,6 +504,10 @@ export function toAiSdkModelMessages(
   return out;
 }
 
+function toolCallIdentity(call: { id: string; name: string }) {
+  return JSON.stringify([call.id, call.name]);
+}
+
 function resolveCanonicalTool(args: {
   tools: AiToolDef[];
   providerToolName: string;
@@ -515,9 +520,9 @@ export function buildCoachUiCardToolUseBlocks(args: {
   calls: ProviderToolCall[];
   results: ProviderToolResult[];
 }): CoachAssistantContentBlock[] {
-  const resultsById = new Map(args.results.map((result) => [result.id, result]));
+  const resultsById = new Map(args.results.map((result) => [toolCallIdentity(result), result]));
   return args.calls.flatMap<CoachAssistantContentBlock>((call) => {
-    const result = resultsById.get(call.id);
+    const result = resultsById.get(toolCallIdentity(call));
     const resolvedTool = resolveCanonicalTool({
       tools: args.tools,
       providerToolName: call.name,
@@ -573,7 +578,7 @@ export function buildCoachUiCardToolUseBlocks(args: {
         input: publicOutput,
       };
     }
-    const out = result?.output as { kind?: unknown } | undefined;
+    const out = result?.output as { kind?: unknown; actionId?: unknown } | undefined;
     if (
       resolvedTool?.kind === 'mutation' &&
       out?.kind === 'mutation_applied' &&
@@ -581,8 +586,8 @@ export function buildCoachUiCardToolUseBlocks(args: {
     ) {
       return {
         type: 'tool_use',
-        id: call.id,
-        name: MUTATION_APPLIED_UI_NAME,
+        id: typeof out.actionId === 'string' ? coachMutationCardId(out.actionId) : call.id,
+        name: COACH_MUTATION_CARD_NAME,
         input: result.output,
       };
     }
@@ -612,7 +617,20 @@ export function uiSurfaceAssistantForToolResult(
   result: ProviderToolResult,
 ): CoachQueryYield | null {
   if (!result.ok) return null;
-  const output = result.output as { kind?: unknown; draftId?: unknown } | undefined;
+  const output = result.output as { kind?: unknown; draftId?: unknown; actionId?: unknown } | undefined;
+  if (output?.kind === 'mutation_applied' && typeof output.actionId === 'string') {
+    return {
+      type: 'assistant',
+      message: {
+        content: [{
+          type: 'tool_use',
+          id: coachMutationCardId(output.actionId),
+          name: COACH_MUTATION_CARD_NAME,
+          input: result.output,
+        }],
+      },
+    };
+  }
   if (result.name === 'present_independent_workout_draft' && typeof output?.draftId === 'string') {
     return {
       type: 'assistant',
@@ -1072,7 +1090,7 @@ export async function emitToolStepMessages(args: {
   ctx: AiToolContext;
 }): Promise<CoachQueryYield[]> {
   if (args.calls.length === 0) return [];
-  const resultsById = new Map(args.results.map((result) => [result.id, result]));
+  const resultsById = new Map(args.results.map((result) => [toolCallIdentity(result), result]));
   const assistant: CoachQueryYield = {
     type: 'assistant',
     message: {
@@ -1088,7 +1106,7 @@ export async function emitToolStepMessages(args: {
     message: {
       content: await Promise.all(
         args.calls.map(async (call) => {
-          const result = resultsById.get(call.id);
+          const result = resultsById.get(toolCallIdentity(call));
           const tool = resolveCanonicalTool({
             tools: args.tools,
             providerToolName: call.name,
@@ -1671,7 +1689,7 @@ export async function* streamCoachAnswer(args: {
           const uiAssistant = uiSurfaceAssistantForToolResult(result);
           if (uiAssistant && result.name === 'present_coach_plan_draft' &&
             planDraftDelivered && planPhaseProgress(ctx)) {
-            deliveredUiSurfaceCallIds.add(result.id);
+            deliveredUiSurfaceCallIds.add(toolCallIdentity(result));
             continue;
           }
           if (
@@ -1701,7 +1719,7 @@ export async function* streamCoachAnswer(args: {
           if (uiAssistant) {
             if (result.name === 'present_coach_plan_draft') planDraftDelivered = true;
             outputDelivered = true;
-            deliveredUiSurfaceCallIds.add(result.id);
+            deliveredUiSurfaceCallIds.add(toolCallIdentity(result));
             yield uiAssistant;
             logger.log(
               `[AI][教练][agent-sdk] UI 工具已交付 tool=${part.toolName}，等待当前模型步骤用量收尾 耗时毫秒=${Date.now() - t0}`,
@@ -1828,10 +1846,10 @@ export async function* streamCoachAnswer(args: {
               result_count: stepResults.length,
             };
             const resultByCallId = new Map(
-              stepResults.map((result) => [result.id, result]),
+              stepResults.map((result) => [toolCallIdentity(result), result]),
             );
             const historyPairs = stepCalls
-              .map((call) => ({ call, result: resultByCallId.get(call.id) }))
+              .map((call) => ({ call, result: resultByCallId.get(toolCallIdentity(call)) }))
               .filter(
                 (
                   pair,
@@ -1839,7 +1857,7 @@ export async function* streamCoachAnswer(args: {
                   call: ProviderToolCall;
                   result: ProviderToolResult;
                 } =>
-                  !deliveredUiSurfaceCallIds.has(pair.call.id) &&
+                  !deliveredUiSurfaceCallIds.has(toolCallIdentity(pair.call)) &&
                   pair.result !== undefined,
               )
               .filter((pair) => {
