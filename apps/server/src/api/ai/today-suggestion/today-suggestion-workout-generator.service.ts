@@ -6,6 +6,7 @@ import { WorkoutDefinitionService } from '@/api/workout/workout-definition.servi
 import { normalizeSportDefinitionCode } from '@/sports/sport-catalog.types';
 import { AiService } from '../ai.service';
 import { stableJson } from '../core/ai-common.util';
+import { CoachTaskResultValidationError } from '../core/coach-task-result-error';
 import type {
   TodaySuggestionConstraintProjection,
   TodaySuggestionDraft,
@@ -75,7 +76,7 @@ export class TodaySuggestionWorkoutGeneratorService {
         'The daily coaching decision is already complete. Generate the one standard Workout requested by that decision; do not repeat or revise the daily judgment.',
         'The Workout is an independent session for the supplied athlete-local date. Do not schedule or persist it, and do not output plan/week/day fields.',
         'For RUN, CYCLING, or SWIM, use structureKind ENDURANCE. For strength, use sportType UNKNOWN, sportDefinitionCode STRENGTH_TRAINING, and structureKind STRENGTH. Use FREEFORM only when the activity genuinely has no structured codec.',
-        'The complete parsed duration should match recommendation.durationMinutes when it is supplied. Notes must explain the full session in the athlete language and must not copy the DSL.',
+        'The complete parsed duration should match recommendation.durationMinutes when it is supplied. Derive any duration mentioned in name and notes directly from the exact sum of all steps in text (never write conflicting durations or open-ended repeat ranges like "6-8 reps" when text encodes a fixed repeat count). Notes must explain the full session in the athlete language and must not copy the DSL.',
         'Submit exactly: {"name":"...","sportType":"RUN|CYCLING|SWIM|STRETCHING|UNKNOWN","sportDefinitionCode":"catalog code","structureKind":"ENDURANCE|STRENGTH|FREEFORM","dslVersion":1,"text":"valid Workout DSL only","notes":"complete athlete-readable execution instructions"}.',
         `Write name and notes in locale ${projection.locale}.`,
         `SETTLED_DAILY_DECISION_BEGIN\n${stableJson({
@@ -145,10 +146,15 @@ export class TodaySuggestionWorkoutGeneratorService {
     const requestedMinutes = draft.recommendation.durationMinutes;
     const actualSeconds = definition.summary.durationSeconds;
     if (requestedMinutes && actualSeconds != null) {
+      const actualMinutes = Math.round((actualSeconds / 60) * 10) / 10;
       const deltaMinutes = Math.abs(actualSeconds / 60 - requestedMinutes);
       const toleranceMinutes = Math.max(3, requestedMinutes * 0.1);
       if (deltaMinutes > toleranceMinutes) {
-        throw new Error('TODAY_WORKOUT_DURATION_MISMATCH');
+        throw new CoachTaskResultValidationError(
+          'TODAY_WORKOUT_DURATION_MISMATCH',
+          'TODAY_WORKOUT_DURATION_MISMATCH',
+          `Parsed workout total duration is ${actualMinutes} min (${actualSeconds}s), which differs from requested ${requestedMinutes} min by more than ±${Math.round(toleranceMinutes * 10) / 10} min. Adjust step durations in text so total parsed time matches ${requestedMinutes} min, and ensure name and notes state the exact same total duration.`,
+        );
       }
     }
     const normalizedSport = sportType as TodaySuggestionWorkout['sportType'];

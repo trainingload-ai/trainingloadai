@@ -179,4 +179,28 @@ describe('PlanStartAssessmentService', () => {
     expect(validated.generatedFrom).toBe('2026-12-31');
     expect(validated.generatedThrough).toBe('2027-01-03');
   });
+
+  it('returns CONFLICT with PLAN_EMPTY_WORKOUTS without invoking AI when draft has zero active workouts', async () => {
+    const { service, ai } = setup({
+      source: {
+        ...basePreflight.source,
+        workouts: [],
+      },
+    });
+
+    const result = await service.assessStart('user-1', 'plan-empty', {
+      startDate: '2026-12-31',
+      revision: 'rev-1',
+      lang: 'zh',
+    });
+
+    expect(ai.runBackgroundCoachTask).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      outcome: 'CONFLICT',
+      originalCanStart: false,
+      conflicts: [
+        expect.objectContaining({ code: 'PLAN_EMPTY_WORKOUTS' }),
+      ],
+    });
+  });
 });

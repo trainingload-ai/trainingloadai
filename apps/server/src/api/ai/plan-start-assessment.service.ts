@@ -150,6 +150,24 @@ export class PlanStartAssessmentService {
     }
 
     const lang = input.lang?.trim() || 'zh';
+    const activeWorkouts = preflight.source.workouts.filter(
+      (w) => w.status !== 'MOVED',
+    );
+    if (activeWorkouts.length === 0) {
+      const message = lang.toLowerCase().startsWith('zh')
+        ? '该计划草稿目前没有任何课次，请先在计划中添加或生成课次后再开始。'
+        : 'This draft plan has no workouts yet. Add or generate workouts before starting it.';
+      return {
+        outcome: 'CONFLICT',
+        startDate: preflight.startDate,
+        calendarTimeZone: preflight.calendarTimeZone,
+        revision: preflight.revision,
+        summary: message,
+        conflicts: [{ code: 'PLAN_EMPTY_WORKOUTS', message }],
+        originalCanStart: false,
+      };
+    }
+
     const isRolling = preflight.source.planningMode === 'ROLLING';
     const taskPayload = {
       planId,
