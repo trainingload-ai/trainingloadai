@@ -47,6 +47,23 @@ const siteSecurityHeaders = createSiteSecurityHeaders({
 /** @type {import('next').NextConfig} */
 const config = {
   transpilePackages: ["@trainingloadai/shared"],
+  modularizeImports: {
+    // Compile the requested brand icons without traversing the package entry point.
+    "@icons-pack/react-simple-icons": {
+      transform: "@icons-pack/react-simple-icons/icons/{{member}}.mjs",
+    },
+  },
+  webpack(webpackConfig, { dev, nextRuntime }) {
+    if (!dev) {
+      // Production image builds start from a clean output directory.
+      webpackConfig.cache = false;
+      if (nextRuntime === "nodejs") {
+        // Scope hoisting peaks during code generation for the large Docs server bundle.
+        webpackConfig.optimization.concatenateModules = false;
+      }
+    }
+    return webpackConfig;
+  },
   // Allow release verification to use an isolated output directory while a
   // local `next dev` process is still using the default `.next` directory.
   ...(nextDistDir ? { distDir: nextDistDir } : {}),
@@ -80,6 +97,8 @@ const config = {
       Number.isSafeInteger(nextBuildCpus) && nextBuildCpus > 0
         ? nextBuildCpus
         : undefined,
+    // Release the compiler processes before collecting page data.
+    webpackBuildWorker: true,
     serverSourceMaps: Boolean(sentryAuthToken),
   },
   devIndicators: {
