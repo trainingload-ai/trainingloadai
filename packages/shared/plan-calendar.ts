@@ -1,5 +1,6 @@
 import {
   parsePlanQualityContract,
+  planDailyMinuteHardLimit,
   planDailyMinuteLimit,
   type PlanQualityContract,
 } from "./plan-quality";
@@ -614,7 +615,7 @@ export function assessPlanSchedule(input: {
     if (
       limit !== undefined &&
       daily.reduce((sum, w) => sum + (w.durationSeconds ?? 0), 0) >
-        limit * 60
+        planDailyMinuteHardLimit(limit) * 60
     )
       issues.push({ code: "DAILY_TIME_BUDGET", date });
   }

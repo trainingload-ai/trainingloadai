@@ -32,7 +32,7 @@ const codes = (result: ReturnType<typeof assessPlanQuality>) =>
 describe('plan quality contract', () => {
   it('applies the civil weekday budget to all sessions together and keeps the longer Saturday', () => {
     const sessions = [
-      workout(6, 35 * 60, 2), { ...workout(6, 11 * 60, 2), sessionIndex: 2 },
+      workout(6, 35 * 60, 2), { ...workout(6, 18 * 60, 2), sessionIndex: 2 },
       workout(6, 75 * 60, 5),
     ];
     // The start date is Tuesday. Day 2 is Wednesday and day 5 is Saturday.
@@ -43,6 +43,21 @@ describe('plan quality contract', () => {
       expect.objectContaining({ target: { scope: 'DAY', weekIndex: 6, dayIndex: 2 }, message: expect.stringContaining('45-minute') }),
     ]);
     expect(assessPlanQuality(8, sessions, { maxDailyMinutes: 90 }).valid).toBe(true);
+  });
+  it('tolerates minor daily overruns within dynamic grace buffer while rejecting large overruns', () => {
+    const limits = { maxDailyMinutes: 30 };
+    const thirtyThree = assessPlanQuality(1, [workout(1, 33 * 60, 1)], limits);
+    expect(thirtyThree.valid).toBe(true);
+    expect(codes(thirtyThree)).toContain('DAILY_TIME_BUDGET_REVIEW');
+    expect(codes(thirtyThree)).not.toContain('DAILY_TIME_BUDGET');
+
+    const thirtyFive = assessPlanQuality(1, [workout(1, 35 * 60, 1)], limits);
+    expect(thirtyFive.valid).toBe(true);
+    expect(codes(thirtyFive)).toContain('DAILY_TIME_BUDGET_REVIEW');
+
+    const thirtySix = assessPlanQuality(1, [workout(1, 36 * 60, 1)], limits);
+    expect(thirtySix.valid).toBe(false);
+    expect(codes(thirtySix)).toContain('DAILY_TIME_BUDGET');
   });
   it('does not accept a multi-week training phase with only the first week populated', () => {
     expect(
@@ -62,7 +77,7 @@ describe('plan quality contract', () => {
   it('enforces Sunday across a year boundary, missing duration and the stricter global ceiling', () => {
     const limits = { startDate: '2026-12-31', maxDailyMinutes: 90, maxMinutesByIsoWeekday: { 7: 45, 6: 100 } };
     const unknown = { ...workout(1, 0, 4), durationSeconds: null, durationNeedsPace: true };
-    const report = assessPlanQuality(1, [unknown, workout(1, 95 * 60, 3)], limits);
+    const report = assessPlanQuality(1, [unknown, workout(1, 105 * 60, 3)], limits);
     expect(report.issues).toEqual(expect.arrayContaining([
       expect.objectContaining({ code: 'UNBOUNDED_DISTANCE_SESSION', message: expect.stringContaining('45-minute') }),
       expect.objectContaining({ code: 'DAILY_TIME_BUDGET', message: expect.stringContaining('90-minute') }),

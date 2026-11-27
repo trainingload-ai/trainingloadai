@@ -760,9 +760,9 @@ describe('PlanLoadEstimatorService.estimateForViewerWorkouts', () => {
     const service = buildEstimator({}, { getComposedUserProfile: async () => ({ tp: 4 }) }, new WorkoutService({} as never));
     const run = { weekIndex: 1, dayIndex: 1, sportType: 'RUN', durationSeconds: null };
     const assessment = async (text: string) => service.assessPlanQualityForViewer('athlete', 1, [{ ...run, text }], { maxDailyMinutes: 45 });
-    const supported = await assessment('work 10km pace 5:00-5:00');
+    const supported = await assessment('work 11km pace 5:00-5:00');
     expect(supported.issues).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'DAILY_TIME_BUDGET' })]));
-    expect(supported.weeks[0]?.totalDurationSeconds).toBe(3000);
+    expect(supported.weeks[0]?.totalDurationSeconds).toBe(3300);
     const unknown = await assessment('work 10km');
     expect(unknown.valid).toBe(true);
     expect(unknown.weeks[0]?.totalDurationSeconds).toBeNull();

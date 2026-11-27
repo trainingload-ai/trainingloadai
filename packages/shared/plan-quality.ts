@@ -147,6 +147,21 @@ export function planDayMinuteLimit(contract: PlanQualityContract | undefined, da
   return planDailyMinuteLimit(contract, ((startWeekday + dayIndex - 1) % 7) || 7);
 }
 
+/**
+ * Dynamic grace buffer above an agreed daily minute limit so minor warm-up,
+ * recovery, or interval rounding overruns (e.g. 33–35m on a 30m budget) do not
+ * hard-reject an otherwise sound plan, while large overruns are still blocked.
+ */
+export function planDailyMinuteTolerance(limitMinutes: number): number {
+  if (!Number.isFinite(limitMinutes) || limitMinutes <= 0) return 0;
+  if (limitMinutes < 15) return Math.max(1, Math.round(limitMinutes * 0.2));
+  return Math.min(15, Math.max(5, Math.round(limitMinutes * 0.15)));
+}
+
+export function planDailyMinuteHardLimit(limitMinutes: number): number {
+  return limitMinutes + planDailyMinuteTolerance(limitMinutes);
+}
+
 export const planQualityContractSchema = {
   type: "object" as const,
   additionalProperties: false,
@@ -530,14 +545,26 @@ export function assessPlanQuality(
       );
     for (const [dayIndex, seconds] of week.days) {
       const dayLimit = planDayMinuteLimit(contract, dayIndex);
-      if (dayLimit !== undefined && seconds > dayLimit * 60)
-        issue(
-          "DAILY_TIME_BUDGET",
-          "ERROR",
-          `Day ${dayIndex} totals ${seconds / 60} minutes, above the agreed ${dayLimit}-minute limit including warm-up and recovery.`,
-          week.weekIndex,
-          { scope: "DAY", weekIndex: week.weekIndex, dayIndex },
-        );
+      if (dayLimit !== undefined) {
+        const hardLimit = planDailyMinuteHardLimit(dayLimit);
+        if (seconds > hardLimit * 60) {
+          issue(
+            "DAILY_TIME_BUDGET",
+            "ERROR",
+            `Day ${dayIndex} totals ${seconds / 60} minutes, above the agreed ${dayLimit}-minute limit (hard cap ${hardLimit} minutes including warm-up and recovery).`,
+            week.weekIndex,
+            { scope: "DAY", weekIndex: week.weekIndex, dayIndex },
+          );
+        } else if (seconds > dayLimit * 60) {
+          issue(
+            "DAILY_TIME_BUDGET_REVIEW",
+            "WARNING",
+            `Day ${dayIndex} totals ${seconds / 60} minutes, slightly above the agreed ${dayLimit}-minute target (within the ${hardLimit}-minute dynamic tolerance).`,
+            week.weekIndex,
+            { scope: "DAY", weekIndex: week.weekIndex, dayIndex },
+          );
+        }
+      }
     }
     if (week.unknownDurationSessions)
       issue(
