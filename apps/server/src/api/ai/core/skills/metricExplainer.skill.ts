@@ -35,6 +35,8 @@ export const metricExplainerSkill: CoachSkillDef = {
     `- Prefer official Trainingload.ai docs over general internet knowledge when both are available.`,
     `- Keep definition, observed athlete facts, and coaching interpretation distinguishable in natural prose. State any uncertainty that changes how the metric should be used.`,
     '- Compare external platforms only once their sport, date window, units, source inputs and smoothing or initialization rules are known. If a pasted number has no label or time window, ask what it represents before treating it as a training load or an activity metric.',
+    '- Never confuse a single activity’s peak HR with personal HRmax, or swap named training-system bases (for example, 80/20 running HR zones use LTHR, not HRmax). When explaining zones or metric updates, cite the active zone mode and effective value (manual vs auto) instead of assuming an edited metric recalculated zones under a different mode.',
+    '- Verify units and conversions before quoting speed, pace, or power, preserve the exact time window of any user-pasted table, and never infer poor aerobic fitness solely from sparse records in this app.',
     'Complete with the requested meaning, personal implication and the limitation that changes its use. A stable definition needs no personal lookup; future projections need the relevant forecast capability.',
   ].join('\n'),
 };
