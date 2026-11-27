@@ -2,7 +2,6 @@ jest.mock('../unknown-activity-sport-repair', () => ({
   applyUnknownActivitySportRepairs: async () => ({ repaired: 0 }),
 }));
 import { ActivityDataMigrationService } from '../activity-data-migration.service';
-import { ImportItemJobStatus } from '@prisma/client';
 
 function harness() {
   const row: any = {
@@ -43,23 +42,39 @@ function harness() {
     activityDataMigration: {
       findFirst: jest.fn(async () => row),
       findMany: jest.fn(async () => state.others),
+      findUniqueOrThrow: jest.fn(async ({ where }) => {
+        const target = [row, failed].find((item) => item.id === where.id);
+        if (!target) throw new Error(`missing migration ${where.id}`);
+        return target;
+      }),
       update: jest.fn(async ({ where, data }) => {
-        expect(where.id).toBe(row.id);
-        Object.assign(row, data);
-        return row;
+        const target = [row, failed].find((item) => item.id === where.id);
+        if (!target) throw new Error(`unexpected migration ${where.id}`);
+        Object.assign(target, data);
+        return target;
       }),
     },
     activityAnalysisLease: { findFirst: jest.fn(async () => state.lease) },
     activityRecomputeJob: { findUnique: jest.fn(async () => state.replay) },
     storageObjectRetention: { createMany: jest.fn() },
+    sportDefinition: { findMany: jest.fn(async () => []) },
+    providerSportMapping: { findMany: jest.fn(async () => []) },
   };
-  const items = { findFirst: jest.fn(async () => state.item) };
-  const post = { findFirst: jest.fn(async () => state.post) };
+  const items = {
+    findFirst: jest.fn(async () => state.item),
+    updateMany: jest.fn(async () => ({ count: 0 })),
+  };
+  const post = {
+    findFirst: jest.fn(async () => state.post),
+    updateMany: jest.fn(async () => ({ count: 0 })),
+  };
+  const batches = { updateMany: jest.fn(async () => ({ count: 0 })) };
   const service = new ActivityDataMigrationService(
     { $transaction: async (fn: any) => fn(tx) } as never,
     {} as never,
     {
       itemJobs: () => items,
+      batchJobs: () => batches,
       postProcessJobs: () => post,
       sourceObjects: () => ({ findMany: async () => [] }),
     } as never,
@@ -73,6 +88,7 @@ function harness() {
     tx,
     items,
     post,
+    batches,
     service,
     start: (deferral?: any) => (service as any).start('current-run', deferral),
   };
@@ -82,32 +98,18 @@ const decision = {
   reason: 'Repair failed sources after the full pass',
 };
 
-describe('explicit per-run migration deferral', () => {
-  it('queries only supported terminal import item states before deferring', async () => {
+describe('one active migration barrier', () => {
+  it('queries FAILED together with MIGRATING and VERIFYING', async () => {
     const h = harness();
-    h.failed.importBatchIds = ['batch'];
-    await h.start(decision);
-    const excluded = h.items.findFirst.mock.calls[0][0].where.status.notIn;
-    expect(excluded).toEqual(['DONE', 'SKIPPED', 'DEAD']);
-    for (const status of excluded)
-      expect(Object.values(ImportItemJobStatus)).toContain(status);
-  });
-
-  it('preserves the deferral audit while initializing the current protection baseline', async () => {
-    const h = harness();
-    h.row.status = 'PENDING';
-    h.row.beforeManifest = null;
-    jest.spyOn(h.service as any, 'manifest').mockResolvedValue({
-      protectedHash: 'new-baseline',
-      primaryHash: 'new-primary',
-      files: [],
-    });
-    const result = await h.start(decision);
-    expect(result.beforeManifest).toMatchObject({
-      protectedHash: 'new-baseline',
-      primaryHash: 'new-primary',
-      sportRepairs: { repaired: 0 },
-      deferredFailureAudits: [{ decision: { reason: decision.reason } }],
+    await expect(h.start()).rejects.toThrow(
+      'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
+    );
+    expect(h.tx.activityDataMigration.findMany).toHaveBeenCalledWith({
+      where: {
+        id: { not: 'current' },
+        status: { in: ['MIGRATING', 'VERIFYING', 'FAILED'] },
+      },
+      select: { id: true },
     });
   });
 
@@ -117,34 +119,39 @@ describe('explicit per-run migration deferral', () => {
       'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
     );
     expect(h.tx.activityDataMigration.update).not.toHaveBeenCalled();
+    expect(h.row.status).not.toBe('VERIFIED');
   });
 
-  it('continues another user while preserving the complete failure and checkpoint', async () => {
-    const h = harness(),
-      original = structuredClone(h.failed);
-    const result = await h.start(decision);
+  it('does not start another user while FAILED remains, even when that row is named', async () => {
+    const h = harness();
+    const original = structuredClone(h.failed);
+    await expect(h.start(decision)).rejects.toThrow(
+      'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
+    );
     expect(h.failed).toEqual(original);
-    expect(result.status).toBe('MIGRATING');
-    expect(result.beforeManifest).toMatchObject({
-      protectedHash: 'original',
-      primaryHash: 'original-primary',
-      deferredFailureAudits: [
-        {
-          decision: {
-            reason: decision.reason,
-            migrations: [
-              {
-                id: 'failed',
-                phase: 'RAW_SCAN',
-                errorCode: 'RAW_DECODE_FAILED',
-                checkpointFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/),
-              },
-            ],
-          },
-        },
-      ],
-    });
-    expect(h.tx.storageObjectRetention.createMany).not.toHaveBeenCalled();
+    expect(h.tx.activityDataMigration.update).not.toHaveBeenCalled();
+    expect(h.items.findFirst).not.toHaveBeenCalled();
+    expect(h.row.status).toBe('MIGRATING');
+    expect(h.row.beforeManifest.deferredFailureAudits).toBeUndefined();
+  });
+
+  it('does not initialize the next user or record a deferral audit while FAILED remains', async () => {
+    const h = harness();
+    h.row.status = 'PENDING';
+    h.row.beforeManifest = null;
+    const manifest = jest
+      .spyOn(h.service as any, 'manifest')
+      .mockResolvedValue({
+        protectedHash: 'new-baseline',
+        primaryHash: 'new-primary',
+        files: [],
+      });
+    await expect(h.start(decision)).rejects.toThrow(
+      'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
+    );
+    expect(manifest).not.toHaveBeenCalled();
+    expect(h.tx.activityDataMigration.update).not.toHaveBeenCalled();
+    expect(h.row.status).toBe('PENDING');
   });
 
   it.each(['MIGRATING', 'VERIFYING'])(
@@ -189,7 +196,7 @@ describe('explicit per-run migration deferral', () => {
   });
 
   it.each(['lease', 'item', 'post', 'replay'])(
-    'refuses an unsettled %s',
+    'still blocks while a failed user has an unsettled %s',
     async (kind) => {
       const h = harness();
       h.failed.importBatchIds = ['batch'];
@@ -198,25 +205,24 @@ describe('explicit per-run migration deferral', () => {
       h.state[kind] =
         kind === 'replay' ? { status: 'RUNNING' } : { id: 'busy' };
       await expect(h.start(decision)).rejects.toThrow(
-        'ACTIVITY_MIGRATION_DEFERRED_USER_BUSY',
+        'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
       );
       expect(h.tx.activityDataMigration.update).not.toHaveBeenCalled();
+      expect(h.items.findFirst).not.toHaveBeenCalled();
     },
   );
 
-  it('treats automatically retrying FAILED child jobs as unsettled', async () => {
+  it('rejects before inspecting automatically retrying FAILED child jobs', async () => {
     const h = harness();
     h.failed.importBatchIds = ['batch'];
     h.state.item = { status: 'FAILED' };
     await expect(h.start(decision)).rejects.toThrow(
-      'ACTIVITY_MIGRATION_DEFERRED_USER_BUSY',
+      'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
     );
-    expect(h.items.findFirst.mock.calls[0][0].where.status.notIn).not.toContain(
-      'FAILED',
-    );
+    expect(h.items.findFirst).not.toHaveBeenCalled();
   });
 
-  it('requires every unrelated failure to be explicitly named', async () => {
+  it('blocks while any other barrier row still exists', async () => {
     const h = harness();
     h.state.others.push({ ...h.failed, id: 'unreviewed' });
     await expect(h.start(decision)).rejects.toThrow(
@@ -224,17 +230,74 @@ describe('explicit per-run migration deferral', () => {
     );
   });
 
-  it('deduplicates identical decisions and audits changed checkpoints', async () => {
+  it('does not append a deferral audit when the same FAILED barrier is retried', async () => {
     const h = harness();
-    await h.start(decision);
-    await h.start(decision);
-    expect(h.row.beforeManifest.deferredFailureAudits).toHaveLength(1);
-    h.failed.rawCursor = 'changed';
-    await h.start(decision);
-    expect(h.row.beforeManifest.deferredFailureAudits).toHaveLength(2);
-    const audits = h.row.beforeManifest.deferredFailureAudits;
-    expect(audits[0].decision.migrations[0].checkpointFingerprint).not.toBe(
-      audits[1].decision.migrations[0].checkpointFingerprint,
+    await expect(h.start(decision)).rejects.toThrow(
+      'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
     );
+    h.failed.rawCursor = 'changed';
+    await expect(h.start(decision)).rejects.toThrow(
+      'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
+    );
+    expect(h.row.beforeManifest.deferredFailureAudits).toBeUndefined();
+    expect(h.tx.activityDataMigration.update).not.toHaveBeenCalled();
+  });
+
+  it('lets the failed user retry, then lets the next user start only after that barrier is cleared', async () => {
+    const h = harness();
+    h.row.status = 'PENDING';
+    h.row.beforeManifest = null;
+    jest.spyOn(h.service as any, 'manifest').mockResolvedValue({
+      protectedHash: 'new-baseline',
+      primaryHash: 'new-primary',
+      files: [],
+      activityIds: [],
+      activityCount: 0,
+    });
+    await expect(h.start()).rejects.toThrow(
+      'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
+    );
+    expect(h.row.status).toBe('PENDING');
+
+    const retried = await h.service.retry('failed');
+    expect(retried.status).toBe('MIGRATING');
+    expect(h.failed.errorCode).toBeNull();
+    await expect(h.start()).rejects.toThrow(
+      'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
+    );
+    expect(h.row.status).toBe('PENDING');
+
+    h.failed.status = 'VERIFIED';
+    h.state.others = [];
+    const started = await h.start();
+    expect(started.status).toBe('MIGRATING');
+    expect(started.phase).toBe('RAW_SCAN');
+    expect(h.row.status).not.toBe('VERIFIED');
+  });
+
+  it('maps a one_active unique violation to the barrier error without marking the user verified', async () => {
+    const h = harness();
+    h.state.others = [];
+    h.row.status = 'PENDING';
+    h.row.beforeManifest = null;
+    jest.spyOn(h.service as any, 'manifest').mockResolvedValue({
+      protectedHash: 'p',
+      primaryHash: 'h',
+      files: [],
+      activityIds: [],
+      activityCount: 0,
+    });
+    h.tx.activityDataMigration.update.mockImplementationOnce(async () => {
+      const error = new Error(
+        'Unique constraint failed on activity_data_migration_one_active',
+      );
+      (error as any).code = 'P2002';
+      (error as any).meta = { target: 'activity_data_migration_one_active' };
+      throw error;
+    });
+    await expect(h.start()).rejects.toThrow(
+      'ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE',
+    );
+    expect(h.row.status).toBe('PENDING');
   });
 });

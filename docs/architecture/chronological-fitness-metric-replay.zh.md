@@ -244,9 +244,9 @@ Finding 按用户合并，从最早受影响时刻重放。DATA_REPAIR 默认每
 
 旧 AUTO 若按自然日零点生效，可能早于当天首项活动。Replay / DATA_REPAIR 的 seed 选择直接忽略这些没有活动或设备证据的 AUTO，因此它们即使还在历史表里也不能再形成区间边界。不把它们改写成猜测的活动时间，也不因此删除 MANUAL。替换窗口内不再有效的旧 AUTO 仍走归档后删除。该存量重建检查属于发布门禁。
 
-逐用户迁移默认在任意失败后停止。需要先完成其余用户、之后集中修复失败来源时，维护者可以在 `activity-data:migrate` 的 `advance` 或 `run` 命令显式传入 `--deferred-migration-ids=<id1,id2>` 与 `--deferral-reason=<reason>`。每次调用必须明确列出所有暂缓的失败任务；参数不会成为全局配置，也不会自动跳过新错误。
+逐用户迁移在任意失败后停止。`activity_data_migration_one_active` 把 `FAILED` 与 `MIGRATING`、`VERIFYING` 视为同一把活动屏障：同一时刻只能有一名用户处于这三种状态。失败用户必须先经显式 `retry` 或 `restart-user` 离开 `FAILED`，并在该用户到达 `VERIFIED` 之后，才能 `prepare` 或启动下一名用户。`--deferred-migration-ids` 不能把仍处于 `FAILED` 的用户移出这把屏障，也不能把下一名用户标成 `VERIFIED` 或静默跳过。被屏障拦住时返回 `ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE`，当前用户保持原状态。
 
-暂缓只允许其他用户的 `FAILED` 任务，且该任务的导入、后处理、Replay 和分析租约均已停止。会自动重试的 `FAILED` 子任务仍视为未停止。原失败状态、错误码、检查点、保护基线和恢复对象全部保留；当前任务的审计追加暂缓原因及失败检查点指纹。暂缓不代表验证通过，同一用户不能另建任务绕过原失败，修复后必须从原任务显式 `retry`。
+同一用户不能另建任务绕过原失败。修复后必须从原任务显式 `retry`。
 
 RAW 扫描达到候选上限时仍须继续读取下一页，直到确认来源游标已耗尽，不能以“本页候选已满”作为全部来源处理完成的依据。
 

@@ -27,6 +27,27 @@ import {
 } from './raw-association-recovery';
 
 const LOCK = 'activity-data-migration';
+/** Statuses that occupy activity_data_migration_one_active. FAILED blocks the next user. */
+const ONE_ACTIVE_BARRIER = ['MIGRATING', 'VERIFYING', 'FAILED'] as const;
+
+function rethrowOneActiveIndexViolation(error: unknown): never {
+  const candidate = error as {
+    code?: string;
+    message?: string;
+    meta?: unknown;
+  };
+  const detail = `${candidate.message ?? ''} ${JSON.stringify(
+    candidate.meta ?? {},
+  )}`;
+  if (
+    candidate.code === 'P2002' &&
+    detail.includes('activity_data_migration_one_active')
+  ) {
+    throw new Error('ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE');
+  }
+  throw error;
+}
+
 const STABLE_UNRECOVERABLE_SOURCE = new Set([
   'RAW_FILE_UNAVAILABLE',
   'RAW_CHECKSUM_MISMATCH',
@@ -158,6 +179,13 @@ export class ActivityDataMigrationService {
           throw new Error('ACTIVITY_MIGRATION_RUN_CONFLICT');
         return existing;
       }
+      const active = await tx.activityDataMigration.findFirst({
+        where: { status: { in: [...ONE_ACTIVE_BARRIER] } },
+        select: { id: true },
+      });
+      // A new run is another user. PENDING rows are not in the index, so
+      // reject here instead of failing later inside a status write.
+      if (active) throw new Error('ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE');
       const users = await this.users
         .users(tx)
         .count({ where: { id: { in: userIds } } });
@@ -309,98 +337,16 @@ export class ActivityDataMigrationService {
         const others = await tx.activityDataMigration.findMany({
           where: {
             id: { not: row.id },
-            status: { in: ['MIGRATING', 'VERIFYING', 'FAILED'] },
+            status: { in: [...ONE_ACTIVE_BARRIER] },
           },
+          select: { id: true },
         });
-        if (
-          others.some(
-            (other) =>
-              other.status !== 'FAILED' ||
-              other.userId === row.userId ||
-              !deferredIds.includes(other.id),
-          )
-        )
+        // activity_data_migration_one_active includes FAILED. Explicit
+        // deferral must not start or verify another user while it remains.
+        if (others.length)
           throw new Error('ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE');
-        if (deferredIds.some((id) => !others.some((other) => other.id === id)))
+        if (deferredIds.length)
           throw new Error('ACTIVITY_MIGRATION_DEFERRAL_INVALID');
-        for (const other of others) {
-          // A failed migration can still have automatically retrying children.
-          // Deferral never cancels those jobs or releases recovery objects.
-          const batchIds = Array.isArray(other.importBatchIds)
-            ? (other.importBatchIds as string[])
-            : [];
-          const lease = await tx.activityAnalysisLease.findFirst({
-            where: { userId: other.userId, leaseExpiresAt: { gt: new Date() } },
-          });
-          const item = batchIds.length
-            ? await this.jobs.itemJobs(tx).findFirst({
-                where: {
-                  batchJobId: { in: batchIds },
-                  status: { notIn: ['DONE', 'SKIPPED', 'DEAD'] },
-                },
-              })
-            : null;
-          const post = batchIds.length
-            ? await this.jobs.postProcessJobs(tx).findFirst({
-                where: {
-                  batchJobId: { in: batchIds },
-                  status: { notIn: ['COMPLETED', 'DEAD'] },
-                },
-              })
-            : null;
-          const replay = other.recomputeJobId
-            ? await tx.activityRecomputeJob.findUnique({
-                where: { id: other.recomputeJobId },
-                select: { status: true },
-              })
-            : null;
-          if (
-            lease ||
-            item ||
-            post ||
-            (other.recomputeJobId &&
-              (!replay || !['COMPLETED', 'DEAD'].includes(replay.status)))
-          )
-            throw new Error('ACTIVITY_MIGRATION_DEFERRED_USER_BUSY');
-        }
-        if (others.length) {
-          const before = row.beforeManifest as Record<string, any> | null;
-          const audit = {
-            reason: deferral!.reason.trim(),
-            migrations: others
-              .map((other) => ({
-                id: other.id,
-                userId: other.userId,
-                runKey: other.runKey,
-                phase: other.phase,
-                errorCode: other.errorCode,
-                checkpointFingerprint: hash({
-                  rawCursor: other.rawCursor,
-                  importBatchIds: other.importBatchIds,
-                  recomputeJobId: other.recomputeJobId,
-                  beforeManifest: other.beforeManifest,
-                }),
-              }))
-              .sort((a, b) => a.id.localeCompare(b.id)),
-          };
-          const history = before?.deferredFailureAudits ?? [];
-          if (
-            !history.length ||
-            hash(history.at(-1).decision) !== hash(audit)
-          ) {
-            row.beforeManifest = json({
-              ...before,
-              deferredFailureAudits: [
-                ...history,
-                { at: new Date().toISOString(), decision: audit },
-              ],
-            });
-            await tx.activityDataMigration.update({
-              where: { id: row.id },
-              data: { beforeManifest: row.beforeManifest },
-            });
-          }
-        }
         if (row.status !== 'PENDING') return row;
         await this.lockUser(tx, row.userId);
         if (
@@ -430,14 +376,18 @@ export class ActivityDataMigrationService {
           data: refs.map((o) => ({ ...o, migrationId: row.id })),
           skipDuplicates: true,
         });
-        await tx.activityDataMigration.update({
-          where: { id: row.id },
-          data: {
-            status: 'MIGRATING',
-            beforeManifest: json(before),
-            phase: 'RAW_SCAN',
-          },
-        });
+        try {
+          await tx.activityDataMigration.update({
+            where: { id: row.id },
+            data: {
+              status: 'MIGRATING',
+              beforeManifest: json(before),
+              phase: 'RAW_SCAN',
+            },
+          });
+        } catch (error) {
+          rethrowOneActiveIndexViolation(error);
+        }
         const sportRepairs = await applyUnknownActivitySportRepairs(
           tx,
           row.userId,
