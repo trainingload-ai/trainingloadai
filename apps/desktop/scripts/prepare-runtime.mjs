@@ -17,6 +17,7 @@ import { core, coreRelease, validateCoreSource } from "./core-path.mjs";
 import {
   assertCoreResources,
   assertDesktopClientBuild,
+  resolveDesktopClientEntry,
 } from "../src/runtime/core-source.mjs";
 import {
   collectRuntimePackages,
@@ -38,15 +39,13 @@ const shellManifest = join(desktop, "package.json");
 const serverManifest = join(core, "apps/server/package.json");
 const serverDist = join(core, "apps/server/dist-selfhost");
 const standalone = join(core, "apps/client/.next/standalone");
-const clientRelative = existsSync(join(standalone, "apps/client/server.js"))
-  ? "apps/client"
-  : ".";
+const clientEntry = resolveDesktopClientEntry(standalone);
 const versions = [
   shellManifest,
   join(core, "package.json"),
   serverManifest,
   join(core, "apps/client/package.json"),
-  join(standalone, clientRelative, "package.json"),
+  join(dirname(clientEntry), "package.json"),
 ].map((path) => ({
   path,
   version: JSON.parse(readFileSync(path, "utf8")).version,
@@ -56,12 +55,10 @@ if (versions.some((item) => item.version !== coreRelease.version))
 const source = validateCoreSource(true);
 const { commit } = source;
 assertCoreResources(source, join(desktop, "dist/core-source.json"));
-assertDesktopClientBuild(join(standalone, clientRelative, "server.js"));
+assertDesktopClientBuild(clientEntry);
 for (const path of [
   join(desktop, "dist/main.js"),
   join(serverDist, "apps/server/src/main.self-host.js"),
-  join(standalone, clientRelative, "server.js"),
-  join(core, "apps/client/.next/static"),
 ]) {
   if (!existsSync(path))
     throw new Error(`Build the public Core and desktop first; missing ${path}`);
@@ -135,14 +132,6 @@ try {
   const client = join(staging, "runtime/client");
   copy(standalone, client);
   removeUntracedLinks(client);
-  copy(
-    join(core, "apps/client/.next/static"),
-    join(client, clientRelative, ".next/static"),
-  );
-  copy(
-    join(core, "apps/client/.next/selfhost-public"),
-    join(client, clientRelative, "public"),
-  );
   const standalonePruning = pruneStandaloneBuildTools(client);
   removeUntracedLinks(client);
 
@@ -203,7 +192,6 @@ try {
   const bytes = directoryBytes(staging);
   const baselineBytes =
     directoryBytes(standalone) +
-    directoryBytes(join(core, "apps/client/.next/static")) +
     directoryBytes(serverDist) +
     dependencies.sourceBytes;
   // A hard budget makes future dependency growth visible before packaging.

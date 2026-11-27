@@ -4,6 +4,7 @@ import {
   assertCoreResources,
   assertDesktopClientBuild,
   readCoreSource,
+  resolveDesktopClientEntry,
   resolveCoreMigrationRunner,
 } from "./core-source.mjs";
 
@@ -33,12 +34,8 @@ export async function resolveDesktopRuntimeEntries(
   if (packagedAppRoot) {
     // Installed apps must be self-contained; never fall back to a developer's
     // workspace or an environment-provided entrypoint.
-    const client = await firstExisting(
-      [
-        resolve(packagedAppRoot, "runtime/client/apps/client/server.js"),
-        resolve(packagedAppRoot, "runtime/client/server.js"),
-      ],
-      "DESKTOP_CLIENT_ENTRY_MISSING",
+    const client = resolveDesktopClientEntry(
+      resolve(packagedAppRoot, "runtime/client"),
     );
     assertDesktopClientBuild(client);
     return {
@@ -62,13 +59,8 @@ export async function resolveDesktopRuntimeEntries(
     source,
     resolve(desktopDirectory, "dist/core-source.json"),
   );
-  const clientRoot = resolve(source.directory, "apps/client/.next/standalone");
-  const client = await firstExisting(
-    [
-      resolve(clientRoot, "apps/client/server.js"),
-      resolve(clientRoot, "server.js"),
-    ],
-    "DESKTOP_CLIENT_ENTRY_MISSING",
+  const client = resolveDesktopClientEntry(
+    resolve(source.directory, "apps/client/.next/standalone"),
   );
   const manifest = JSON.parse(
     await readFile(resolve(client, "../package.json"), "utf8"),

@@ -19,7 +19,8 @@ test("packaged runtime resolves only bundled entries, including paths with space
       await mkdir(dirname(path), { recursive: true });
       await writeFile(path, "");
     }
-    await mkdir(join(dirname(client), ".next"));
+    await mkdir(join(dirname(client), ".next/static"), { recursive: true });
+    await mkdir(join(dirname(client), "public"));
     await writeFile(
       join(dirname(client), ".next/required-server-files.json"),
       JSON.stringify({

@@ -15,6 +15,7 @@ import {
   assertCoreResources,
   assertDesktopClientBuild,
   selectCoreSource,
+  stageDesktopClientAssets,
   runtimeSourceCommit,
 } from "../src/runtime/core-source.mjs";
 import { resolveDesktopRuntimeEntries } from "../dist/runtime/runtime-entry.js";
@@ -77,6 +78,8 @@ function fixture() {
   file("packages/messages/client-core/en.json", "{}");
   file("apps/server/dist-selfhost/apps/server/src/main.self-host.js");
   file("apps/client/.next/standalone/apps/client/server.js");
+  file("apps/client/.next/standalone/apps/client/.next/static/site.js");
+  file("apps/client/.next/standalone/apps/client/public/logo.png");
   file(
     "apps/client/.next/standalone/apps/client/.next/required-server-files.json",
     JSON.stringify({
@@ -147,6 +150,33 @@ test("independent Core or per-service overrides are rejected before startup", ()
           }),
         { code: "DESKTOP_CORE_SPLIT_OVERRIDE" },
       );
+  } finally {
+    f.cleanup();
+  }
+});
+
+test("development requires the Next assets staged beside the standalone client", async () => {
+  const f = fixture();
+  try {
+    const nextRoot = join(f.root, "apps/client/.next");
+    const client = join(nextRoot, "standalone/apps/client");
+    rmSync(join(client, ".next/static"), { recursive: true });
+    await assert.rejects(resolveDesktopRuntimeEntries(f.desktop), {
+      code: "DESKTOP_CLIENT_ASSETS_MISSING",
+    });
+    rmSync(join(client, "public"), { recursive: true });
+    f.file("apps/client/.next/static/site.js", "client script");
+    f.file("apps/client/.next/selfhost-public/logo.png", "public image");
+    stageDesktopClientAssets(nextRoot);
+    assert.equal(
+      readFileSync(join(client, ".next/static/site.js"), "utf8"),
+      "client script",
+    );
+    assert.equal(
+      readFileSync(join(client, "public/logo.png"), "utf8"),
+      "public image",
+    );
+    await resolveDesktopRuntimeEntries(f.desktop);
   } finally {
     f.cleanup();
   }
