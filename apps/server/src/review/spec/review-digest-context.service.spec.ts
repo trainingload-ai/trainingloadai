@@ -31,6 +31,7 @@ function createFixture() {
         skipped: 0,
         moved: 0,
         incomplete: 0,
+        unverified: 0,
         plannedLoad: 35,
         actualLoad: 38,
         extraActivities: 0,

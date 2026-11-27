@@ -11,8 +11,99 @@ jest.mock('@/api/pace/pace.service', () => ({
 import { CoachToolsService } from '../coach-tools.service';
 
 describe('CoachToolsService activity summaries', () => {
-  it('reads an athlete-local day even when the clock falls back', async () => {
-    const searchActivitiesForAi = jest.fn(async () => []);
+  it('includes an athlete’s Monday morning in the requested ISO week', async () => {
+    const monday = new Date('2026-10-11T23:00:00Z');
+    const findMany = jest.fn(async (args: {
+      where: { AND: [{ startTime: { gte: Date; lte: Date } }] };
+    }) => {
+      const { gte, lte } = args.where.AND[0].startTime;
+      return monday >= gte && monday <= lte
+        ? [{ hashId: 'monday', sportType: 'RUN', startTime: monday, timerTime: 2340 }]
+        : [];
+    });
+    const service = new CoachToolsService(
+      {} as never, {} as never, {} as never, { findMany } as never,
+      {} as never, {} as never, {} as never,
+    );
+    const ctx = {
+      session: { user: { id: 'athlete-1' } },
+      currentTurnCalendar: { timezone: 'Asia/Shanghai' },
+      pmc: { listRange: jest.fn(async () => []) },
+    } as never;
+
+    await expect(service.trainingWeekSummary(ctx, { asOf: '2026-10-18' }))
+      .resolves.toMatchObject({
+        week: { from: '2026-10-12', to: '2026-10-18' },
+        summary: { activityCount: 1 },
+        comparison: { previousWeek: { activityCount: 0 } },
+      });
+  });
+
+  it('aggregates authoritative activity actualLoad with coverage instead of UTC PMC dailyValue', async () => {
+    const currentWeekActs = [
+      {
+        hashId: 'a1',
+        sportType: 'RUN',
+        startTime: new Date('2026-10-13T01:00:00Z'),
+        timerTime: 1800,
+        fitnessMetricsSnapshot: { actualLoad: 34.17, actualLoadSource: 'TRIMP' },
+      },
+      {
+        hashId: 'a2',
+        sportType: 'RUN',
+        startTime: new Date('2026-10-15T01:00:00Z'),
+        timerTime: 1800,
+        fitnessMetricsSnapshot: { actualLoad: 34.17, actualLoadSource: 'TRIMP' },
+      },
+      {
+        hashId: 'a3',
+        sportType: 'RUN',
+        startTime: new Date('2026-10-17T01:00:00Z'),
+        timerTime: 1800,
+        fitnessMetricsSnapshot: { actualLoad: null, actualLoadSource: null },
+      },
+    ];
+    let call = 0;
+    const findMany = jest.fn(async () => (call++ === 0 ? currentWeekActs : []));
+    const service = new CoachToolsService(
+      {} as never, {} as never, {} as never, { findMany } as never,
+      {} as never, {} as never, {} as never,
+    );
+    const ctx = {
+      session: { user: { id: 'athlete-1' } },
+      currentTurnCalendar: { timezone: 'Asia/Shanghai' },
+      pmc: {
+        listRange: jest.fn(async () => [{ dailyValue: 41.7, ATL: 20, CTL: 25, TSB: 5 }]),
+      },
+    } as never;
+
+    await expect(service.trainingWeekSummary(ctx, { asOf: '2026-10-18' }))
+      .resolves.toMatchObject({
+        summary: {
+          activityCount: 3,
+          totalLoad: 68.34,
+          pmcTotalLoad: 41.7,
+          loadSamples: 2,
+          missingLoadCount: 1,
+          loadComplete: false,
+        },
+        comparison: {
+          loadDelta: null,
+        },
+      });
+  });
+
+  it('reports the activity-local day and existing plan match when the athlete timezone differs', async () => {
+    const linkedWorkout = { id: 'workout-1', planId: 'plan-1', name: 'Easy run' };
+    const searchActivitiesForAi = jest.fn(async () => [{
+      id: 1,
+      hashId: 'run-1',
+      sportType: 'RUN',
+      startTime: new Date('2026-11-02T07:30:00Z'),
+      timezone: 'America/Los_Angeles',
+      avgHeartRate: 0,
+      planWorkoutLinks: [{ planWorkout: linkedWorkout }],
+    }]);
     const service = new CoachToolsService(
       { getMapThumbnailUrlsForAi: jest.fn(async () => new Map()) } as never,
       { searchActivitiesForAi } as never,
@@ -20,18 +111,21 @@ describe('CoachToolsService activity summaries', () => {
     );
     const ctx = {
       session: { user: { id: 'athlete-1' } },
-      currentTurnCalendar: { timezone: 'America/Los_Angeles' },
+      currentTurnCalendar: { timezone: 'Asia/Shanghai' },
       userService: { getComposedUserProfile: jest.fn(async () => ({})) },
       i18n: { t: (key: string) => key },
     } as never;
 
     await expect(service.activitiesDayView(ctx, { date: '2026-11-01', sportType: 'RUN' }))
-      .resolves.toEqual({ kind: 'activity_day_view', date: '2026-11-01', items: [] });
+      .resolves.toMatchObject({
+        kind: 'activity_day_view',
+        date: '2026-11-01',
+        items: [{ activityDate: '2026-11-01', linkedWorkout, avgHr: undefined }],
+      });
     expect(searchActivitiesForAi).toHaveBeenCalledWith(expect.objectContaining({
       userId: 'athlete-1',
       sportType: 'RUN',
-      from: new Date('2026-11-01T07:00:00.000Z'),
-      to: new Date('2026-11-02T07:59:59.999Z'),
+      calendar: { from: '2026-11-01', to: '2026-11-01', timezone: 'Asia/Shanghai' },
     }));
     await expect(service.activitiesDayView(ctx, { date: '2026-02-30' })).rejects.toThrow();
   });

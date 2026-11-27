@@ -766,6 +766,31 @@ describe('real AI SDK delivery loop', () => {
       },
     });
   });
+  it('preserves continuous planning mode and the goal in the draft card used to save the plan', async () => {
+    setupModel();
+    const rollingDraft = {
+      ...draft,
+      periodWeeks: 1,
+      planningMode: 'ROLLING',
+      goal: 'Run 10 km comfortably',
+    };
+    const events: CoachQueryYield[] = [];
+    for await (const event of streamCoachAnswer({
+      ctx: ctx(),
+      tools: [tool(async () => rollingDraft)],
+      messages: [{ role: 'user', content: 'Create a continuous running plan.' }],
+    })) {
+      events.push(event);
+    }
+    expect(events.find(({ type }) => type === 'assistant')).toMatchObject({
+      message: {
+        content: [{
+          name: 'PresentCoachPlanDraft',
+          input: { periodWeeks: 1, planningMode: 'ROLLING', goal: rollingDraft.goal },
+        }],
+      },
+    });
+  });
   it.each([
     ['no accepted draft', false, '训练草案由 present_coach_plan_draft 生成。'],
     [

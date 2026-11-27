@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import dayjs from "dayjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import {
@@ -10,21 +9,17 @@ import {
 } from "@/api/plans";
 import { CalendarMovePreviewCalendar } from "@/app/[locale]/(main)/calendar/components/calendar-move-preview-calendar";
 import { canMoveCalendarWorkout } from "@/app/[locale]/(main)/calendar/components/calendar-move-model";
-import CalendarSelect from "@/components/calendar-select";
 import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { LoadErrorState } from "@/components/ui/load-error-state";
 import { ApiFetchError } from "@/lib/api";
-import { useCalendarWeekStartsOn } from "@/lib/calendar-week-start";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
 import { queryKeys } from "@/lib/query-keys";
 import {
   draftWorkoutPosition,
-  isCalendarDate,
   parseScheduleConstraints,
   projectPlanCalendar,
 } from "@shared/plan-calendar";
+import { PlanStartCalendarFooter } from "./plan-start-calendar-footer";
 
 export function OfficialPlanStartCalendar({ planId, close }: { planId: string; close: () => void }) {
   const t = useTranslations("PlanActivationDialog");
@@ -34,7 +29,6 @@ export function OfficialPlanStartCalendar({ planId, close }: { planId: string; c
   const overview = useTranslations("V2PlanDetailPage.overview");
   const fmt = useFormatter();
   const cache = useQueryClient();
-  const weekStartsOn = useCalendarWeekStartsOn();
   const draft = useQuery({
     queryKey: ["official-plan-start", planId],
     queryFn: () => getOfficialPlanStart(planId),
@@ -164,38 +158,23 @@ export function OfficialPlanStartCalendar({ planId, close }: { planId: string; c
           }}
         />
       </section>
-      <DialogFooter className="shrink-0 flex-col border-t border-border/60 pt-2 pb-[max(12px,env(safe-area-inset-bottom))] sm:flex-col sm:pt-3 pc:pb-0">
-        {error ? <p role="alert" className="text-sm text-destructive">{t(error === "refresh" ? "changedDraft" : error === "start" ? "startFailed" : "editFailed")}</p> : null}
-        {conflicts.length ? <p role="status" className="text-sm text-destructive">{calendar("scheduleConflict")} · {conflicts.map(dateLabel).join("、")}</p> : null}
-        <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-          <div className="flex min-w-fit flex-1 items-center gap-2 sm:flex-none sm:gap-3">
-            <Label htmlFor="official-plan-start-date" className="shrink-0 text-muted-foreground">
-              {startup("dateLabel")}
-            </Label>
-            <CalendarSelect
-              id="official-plan-start-date"
-              title={startup("dateLabel")}
-              date={dayjs(startDate).hour(12).toDate()}
-              dateLabel={dateLabel(startDate)}
-              fromDate={dayjs(current.earliestStartDate).toDate()}
-              fromYear={dayjs(current.earliestStartDate).year()}
-              weekStartsOn={weekStartsOn}
-              size="default"
-              className="sm:w-auto"
-              disabled={!editable || busy || current.targetRaceDate ? true : { before: dayjs(current.earliestStartDate).toDate() }}
-              onSelect={(date) => {
-                const value = date && dayjs(date).format("YYYY-MM-DD");
-                if (!busy && isCalendarDate(value) && value >= current.earliestStartDate && value !== startDate) {
-                  dateSave.mutate({ date: value, revision: current.revision });
-                }
-              }}
-            />
-          </div>
-          <Button size="default" disabled={!canStart} onClick={() => start.mutate({ date: startDate, revision: current.revision })}>
-            {editable ? t("title") : startup("activePlanCalendar")}
-          </Button>
-        </div>
-      </DialogFooter>
+      <PlanStartCalendarFooter
+        dateId="official-plan-start-date"
+        startDate={startDate}
+        earliestStartDate={current.earliestStartDate}
+        canChangeDate={editable && !busy && !current.targetRaceDate}
+        onChangeDate={(date) => dateSave.mutate({ date, revision: current.revision })}
+        notice={
+          <>
+            {error ? <p role="alert" className="text-sm text-destructive">{t(error === "refresh" ? "changedDraft" : error === "start" ? "startFailed" : "editFailed")}</p> : null}
+            {conflicts.length ? <p role="status" className="text-sm text-destructive">{calendar("scheduleConflict")} · {conflicts.map(dateLabel).join("、")}</p> : null}
+          </>
+        }
+      >
+        <Button size="default" disabled={!canStart} onClick={() => start.mutate({ date: startDate, revision: current.revision })}>
+          {editable ? t("title") : startup("activePlanCalendar")}
+        </Button>
+      </PlanStartCalendarFooter>
     </div>
   );
 }

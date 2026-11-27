@@ -1,9 +1,9 @@
 "use client";
 
-import { addCalendarDays } from "@shared/plan-calendar";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import type { TrainingPlanDetail } from "@/api/plans";
+import type { PlanStartConversation, TrainingPlanDetail } from "@/api/plans";
+import { workoutsForPlanStart } from "@/lib/coach-plan-start";
 import { PlanDetailWeekBreakdown } from "./detail/plan-detail-week-breakdown";
 import {
   buildWeekGroups,
@@ -13,26 +13,20 @@ import { ViewWorkoutDialog } from "./view-workout-dialog";
 
 export function RollingPlanCalendar({
   plan,
-  pendingStartDate,
+  pendingStart,
 }: {
   plan: TrainingPlanDetail;
-  pendingStartDate?: string;
+  pendingStart?: Pick<PlanStartConversation, "startDate" | "earliestStartDate">;
 }) {
   const t = useTranslations("V2PlanDetailPage");
   const [workout, setWorkout] = useState<DerivedWorkout | null>(null);
-  const calendarPlan = pendingStartDate
+  const calendarPlan = pendingStart
     ? {
         ...plan,
-        startDate: pendingStartDate,
+        startDate: pendingStart.startDate,
         currentWeekIndex: 1,
         currentDayIndex: 1,
-        workouts: plan.workouts.map((item) => ({
-          ...item,
-          scheduledDate: addCalendarDays(
-            pendingStartDate,
-            item.dayOffset ?? (item.weekIndex - 1) * 7 + item.dayIndex - 1,
-          ),
-        })),
+        workouts: workoutsForPlanStart(plan, pendingStart.startDate, pendingStart.earliestStartDate),
       }
     : plan;
   return (

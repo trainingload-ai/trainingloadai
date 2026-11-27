@@ -169,10 +169,12 @@ export function CalendarDayButton({
         "touch-manipulation select-none ring-inset",
         isSelected
           ? "bg-card text-foreground ring-2 ring-ring"
-          : inPlanRange
-            ? "bg-[hsl(var(--emerald-100)/0.75)] text-foreground hover:bg-[hsl(var(--emerald-100)/0.9)] dark:bg-[hsl(var(--emerald-900)/0.32)] dark:hover:bg-[hsl(var(--emerald-900)/0.42)]"
+          : !isCurrentMonth
+            ? "bg-secondary text-foreground hover:bg-secondary/80"
             : "bg-card text-foreground hover:bg-secondary",
-        !isCurrentMonth && !isSelected && "bg-secondary",
+        !isSelected &&
+          inPlanRange &&
+          "bg-[repeating-linear-gradient(-45deg,rgb(16_185_129/0.14)_0_1.5px,transparent_1.5px_10px)] dark:bg-[repeating-linear-gradient(-45deg,rgb(52_211_153/0.16)_0_1.5px,transparent_1.5px_10px)]",
         dropClass,
       )}
     >

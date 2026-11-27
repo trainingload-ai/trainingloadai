@@ -254,6 +254,33 @@ describe('coach review runtime v4 safety', () => {
     expect(result.evidenceCodes).not.toContain('PLAN_ON_TRACK');
   });
 
+  it('suppresses a missed streak inferred only from missing completion records', () => {
+    const value = context({});
+    value.executionSignals.unverifiedWorkoutIds = ['run-1', 'run-2'];
+    const result = normalizeCoachReviewJudgment({
+      context: value,
+      judgment: {
+        decision: 'KEEP',
+        presentation: 'GUIDANCE',
+        action: null,
+        targetWorkoutId: null,
+        rationale: 'You missed two runs in a row.',
+        confidence: 0.8,
+        evidenceCodes: ['MISSED_WORKOUT', 'MISSED_STREAK', 'LOAD_DEFICIT'],
+        adjustmentIntent: null,
+        source: 'llm',
+        upstreamFailureCode: null,
+      },
+    });
+
+    expect(result).toMatchObject({
+      decision: 'KEEP',
+      presentation: 'SILENT',
+      rationale: '',
+      evidenceCodes: ['INSUFFICIENT_DATA', 'UNSUPPORTED_EXECUTION_CLAIM'],
+    });
+  });
+
   it('preserves valid model-authored coaching guidance for KEEP', () => {
     const value = context({ incompleteWorkout: true, reviewedWorkoutLoad: 30 });
     value.meta.locale = 'zh';
@@ -436,6 +463,7 @@ function context(options: ContextOptions): CoachReviewContext {
       skipped: 0,
       moved: 0,
       incomplete: reviewedWorkout.length,
+      unverified: 0,
       plannedLoad: options.reviewedWorkoutLoad ?? 0,
       actualLoad: options.activity?.load ?? 0,
       extraActivities: activities.filter((row) => !row.linkedWorkoutId).length,
@@ -443,6 +471,7 @@ function context(options: ContextOptions): CoachReviewContext {
     },
     executionSignals: {
       missedWorkoutIds: options.incompleteWorkout ? ['missed'] : [],
+      unverifiedWorkoutIds: [],
       consecutiveMissedWorkouts: options.incompleteWorkout ? 1 : 0,
       plannedSessionsToDate: reviewedWorkout.length,
       completedSessionsToDate: 0,

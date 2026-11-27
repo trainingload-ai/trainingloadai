@@ -314,6 +314,17 @@ export function MobilePlanDetailContent({
           <div className="rounded-surface bg-neutral-100 px-3 py-4 text-sm text-muted-foreground dark:bg-muted/45">
             {t("weekBreakdown.emptyPlanTitle")}
           </div>
+        ) : isRollingPlan(plan) && plan.status === "DRAFT" ? (
+          workouts.map((workout) => (
+            <MobilePlanWorkoutRow
+              key={workout.id}
+              plan={plan}
+              workout={workout}
+              onClick={onWorkoutClick}
+              emptyTitle={mobileT("plannedWorkout")}
+              emptyDetail={mobileT("noPlannedWorkout")}
+            />
+          ))
         ) : (
           <div className="space-y-2">
             <MobilePlanWorkoutRow

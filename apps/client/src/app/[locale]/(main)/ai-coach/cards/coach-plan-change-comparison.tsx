@@ -28,7 +28,7 @@ const protectedReasonKeys = {
   PENDING_SUPERSESSION: "protectedSuccessor",
 } as const;
 
-const comparisonColumns = "grid-cols-2 @min-[26rem]:grid-cols-[minmax(0,1fr)_1.5rem_minmax(0,1fr)]";
+const comparisonColumns = "grid-cols-1 @min-[26rem]:grid-cols-[minmax(0,1fr)_1.5rem_minmax(0,1fr)]";
 
 export function CoachPlanChangeComparison({ rows, mode, effectiveFrom, initialMove, footer }: {
   rows: PlanProposalPresentationRow[];
@@ -57,7 +57,7 @@ export function CoachPlanChangeComparison({ rows, mode, effectiveFrom, initialMo
 
   return (
     <div className="@container space-y-2.5">
-      <div aria-hidden className={cn("grid gap-2 text-xs font-semibold", comparisonColumns)}>
+      <div aria-hidden className={cn("hidden gap-2 text-xs font-semibold @min-[26rem]:grid", comparisonColumns)}>
         <span className="px-2.5 text-palette-sky-800 dark:text-palette-sky-300 @min-[26rem]:px-3">{move("before")}</span>
         <span className="px-2.5 text-palette-emerald-800 dark:text-palette-emerald-300 @min-[26rem]:col-start-3 @min-[26rem]:px-3">{move("after")}</span>
       </div>
@@ -101,6 +101,14 @@ export function CoachPlanChangeComparison({ rows, mode, effectiveFrom, initialMo
                       side === "after" && "@min-[26rem]:col-start-3",
                       planChangeVersionStyles[tone],
                     )}>
+                      <p className={cn(
+                        "mb-1 text-[11px] font-semibold @min-[26rem]:hidden",
+                        side === "before"
+                          ? "text-palette-sky-800 dark:text-palette-sky-300"
+                          : "text-palette-emerald-800 dark:text-palette-emerald-300",
+                      )}>
+                        {move(side)}
+                      </p>
                       {name ? (
                         <>
                           <p className="text-sm font-semibold text-foreground">{name}</p>

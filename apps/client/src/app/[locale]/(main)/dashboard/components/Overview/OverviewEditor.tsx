@@ -126,15 +126,16 @@ export function OverviewEditor() {
           </p>
         </div>
         <Button
-          size="sm"
-          variant="outline"
+          size="icon-sm"
+          variant="ghost"
           onClick={() => setAddOpen(true)}
           disabled={
             draftLayout.length >= MAX_DASHBOARD_OVERVIEW_METRICS
           }
+          aria-label={tOverview("add")}
+          title={tOverview("add")}
         >
-          <Plus className="mr-1 h-4 w-4" />
-          {tOverview("add")}
+          <Plus className="size-4" aria-hidden />
         </Button>
       </div>
 

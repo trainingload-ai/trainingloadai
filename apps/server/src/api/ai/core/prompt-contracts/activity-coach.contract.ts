@@ -12,7 +12,7 @@ import { ATHLETE_FACING_COACH_VOICE_PROMPT_LINES } from './coach-voice.contract'
  * `buildActivityCoachSystemPrompt` 是登录复盘和公开 `/free-ai-workout-review` 的同一份核心提示词。
  * 公开工具只允许在这份核心后面追加约束，不得改写或替换核心正文。
  */
-export const ACTIVITY_AI_REVIEW_PROMPT_VERSION = 'activity_ai_review_v10';
+export const ACTIVITY_AI_REVIEW_PROMPT_VERSION = 'activity_ai_review_v11';
 
 export type ActivityCoachChatMessage = {
   role: 'system' | 'user';
@@ -64,8 +64,8 @@ function buildActivityCoachSharedPolicy(args: {
       '- Analyze only allowedMetricDomains. forbiddenInferences are hard constraints: do not fill them in with common sense or cross-sport analogy.',
       `- Prioritize: ${focus}.`,
       `- Never infer: ${forbidden}.`,
-      '- hr.available=false means heart rate was not measured, never low heart rate. Use pace.average_formatted verbatim for athlete-facing average pace; never reinterpret pace.average_sec_per_km or use zone boundaries as the average. Explain activity_fatigue.actual_load using its source: PACE is pace-based (GOVSS for running), not TRIMP. Zone configuration and user_baseline do not prove that a sensor measured anything.',
-      '- A missing field means there is no reliable evidence. Do not treat absence as a training flaw.',
+      '- hr.available=false means this summary provides no heart-rate measurement. Use pace.average_formatted verbatim for athlete-facing average pace; never reinterpret pace.average_sec_per_km or use zone boundaries as the average. Explain activity_fatigue.actual_load using its source: PACE is pace-based (GOVSS for running), not TRIMP. Zone configuration and user_baseline do not prove that a sensor measured anything.',
+      '- A missing field means the summary cannot support that conclusion. Say which information is unavailable for the review when it matters. Do not conclude that the activity or device lacked a sensor recording.',
       '- Average cadence, heart rate, and pace cannot identify foot strike, impact, or when the athlete accelerated. Use time-aligned segment and terrain evidence for segment claims; otherwise describe only the observed averages.',
       '- Strength training must stay on exercises, sets, reps/time, load, training volume, RPE/RIR, completion, and recovery. Do not output pace, distance, elevation, cadence, stride, or endurance power-zone analysis.',
       '- Use running, cycling, and swimming terminology only for that sport. Do not mix stride, cadence, stroke, or cycling-power concepts across sports.',
@@ -95,13 +95,13 @@ export function buildActivityCoachSystemPrompt(args: {
     '- hr: avg, max, zone_type, primary_zone, paHr',
     '- power: avg, max, pw_hr, zone_type, primary_zone, coggan, skiba',
     '- pace: average_sec_per_km, average_formatted, average_basis, zone_type, primary_zone',
-    '- cadence: avg, max',
+    '- cadence: avg, max, unit (spm for running steps, rpm for cycling revolutions). Values are already in the display unit.',
     '- estimate: ftp, cp',
     '- strength: exercise/set evidence for strength sessions',
     '- activity_fatigue: session load scores when present',
     '- temporal_context: activity_local_date, activity_timezone, historical_load_as_of, historical_load_window_days',
     '- review_context: review_local_date, activity_age_days, recency (same_day, recent, or historical)',
-    '- historical_load: ATL, CTL, TSB, AC_ratio, daily_load_last_7d, rest_days_last_14d',
+    '- historical_load: ATL, CTL, TSB, AC_ratio, daily_load_last_7d, days_without_recorded_activity_last_14d',
     '- user_baseline: max_hr, rest_hr, lthr, hrr, ftp, cp, w_prime',
     'zone_type is the athlete’s configured zone model label. primary_zone is the dominant zone in this session when present.',
     'If historical_load, user_baseline, zone models, or strength sets are absent from the JSON, treat them as missing evidence, not as a rest week or poor fitness.',
@@ -109,6 +109,7 @@ export function buildActivityCoachSystemPrompt(args: {
     '# Time grounding',
     '- start_time is when the activity actually happened. Never treat upload time or review generation time as the activity time.',
     '- historical_load is a snapshot ending on temporal_context.historical_load_as_of. Describe it as the load context at that activity date, never as the athlete’s current load.',
+    '- A zero load score does not establish a rest day. Days without a recorded activity describe only the app’s records and do not establish that the athlete rested.',
     '- review_context states how old the activity was when this review was generated. When recency=historical, do not make claims about the athlete’s current fitness, recovery, or recent training from this activity snapshot.',
     '- When recency=historical, do not prescribe calendar-relative actions such as today, tomorrow, or the coming week. Phrase actionable advice for the next comparable session instead.',
     '- When review_context is absent, avoid current-state claims and calendar-relative recovery or scheduling advice.',

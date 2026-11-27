@@ -79,6 +79,7 @@ function review(overrides: Record<string, unknown> = {}) {
       skipped: 0,
       moved: 0,
       incomplete: 0,
+      unverified: 0,
       plannedLoad: 0,
       actualLoad: 0,
       extraActivities: 0,
@@ -280,7 +281,7 @@ describe('CoachDailyReviewRuntimeService v4', () => {
       expect.objectContaining({
         payload: expect.objectContaining({
           decision: 'KEEP',
-          promptVersion: 'plan_review_judgment_v5_3',
+          promptVersion: 'plan_review_judgment_v5_4',
         }),
       }),
     );

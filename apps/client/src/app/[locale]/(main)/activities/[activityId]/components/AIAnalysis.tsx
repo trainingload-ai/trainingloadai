@@ -112,15 +112,16 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
     hasAiDataConsent &&
     reviewSettled &&
     !reviewQuery.isError;
-  const workerFailed =
-    review?.found === true && ["DEAD", "SKIPPED"].includes(review.status ?? "");
+  const workerFailed = review?.found === true && review.status === "DEAD";
+  const workerSkipped = review?.found === true && review.status === "SKIPPED";
   useEffect(() => {
     if (
       !readOnly &&
       streamEligible &&
       !hasStoredMarkdown &&
       !workerPending &&
-      !workerFailed
+      !workerFailed &&
+      !workerSkipped
     ) {
       setStreamAttempt((previous) =>
         previous?.activityId === activityId
@@ -134,6 +135,7 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
     hasStoredMarkdown,
     workerPending,
     workerFailed,
+    workerSkipped,
     activityId,
   ]);
   // Once started, keep this request alive while canonical status changes to RUNNING.
@@ -200,6 +202,16 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
   const showFreeUpsell =
     !readOnly && !accessLoading && !hasReviewAccess && !hasContent && !loadingCombined;
 
+  const startReview = () => {
+    if (reviewQuery.isError) void reviewQuery.refetch();
+    if (activityId) {
+      setStreamAttempt((previous) => ({
+        activityId,
+        restartKey: (previous?.restartKey ?? 0) + 1,
+      }));
+    }
+  };
+
   const handleCardClick = () => {
     if (loadingCombined && !markdownBody) {
       toast.info(t("analyzing"));
@@ -240,14 +252,7 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
               {!readOnly ? <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  if (reviewQuery.isError) void reviewQuery.refetch();
-                  if (activityId)
-                    setStreamAttempt((previous) => ({
-                      activityId,
-                      restartKey: (previous?.restartKey ?? 0) + 1,
-                    }));
-                }}
+                onClick={startReview}
               >
                 {t("regenerate")}
               </Button> : null}
@@ -272,10 +277,17 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
                 <span>{t("expand")} ›</span>
               </div>
             </button>
-          ) : readOnly && !loadingCombined ? (
-            <p className="text-mobile-caption text-muted-foreground pc:text-xs">
-              {t("emptyHint")}
-            </p>
+          ) : !loadingCombined && (readOnly || (workerSkipped && !streamEnabled)) ? (
+            <div className="flex items-center gap-3">
+              <p className="text-mobile-caption text-muted-foreground pc:text-xs">
+                {t("emptyHint")}
+              </p>
+              {!readOnly && streamEligible ? (
+                <Button variant="ghost" size="sm" onClick={startReview}>
+                  {t("startReview")}
+                </Button>
+              ) : null}
+            </div>
           ) : (
             analyzingPulse
           )}
@@ -318,5 +330,29 @@ const AIAnalysis = ({ readOnly = false }: { readOnly?: boolean }) => {
     </div>
   );
 };
+
+export function ActivityCoachReview({ readOnly = false }: { readOnly?: boolean }) {
+  const t = useTranslations("ActivityDetail");
+  const tAi = useTranslations("AIAnalysis");
+
+  return (
+    <section className="relative overflow-clip rounded-md bg-neutral-50 px-4 py-3.5 dark:bg-visual-artwork-inset-dark @min-[42rem]/activity-detail:px-5">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_srgb,var(--visual-review-gradient-start)_20%,transparent),transparent_46%)] dark:bg-[radial-gradient(ellipse_at_top_left,color-mix(in_srgb,var(--visual-review-gradient-start-dark)_20%,transparent),transparent_46%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-visual-review-accent/45 via-visual-review-accent/15 to-transparent" />
+      <div className="pointer-events-none absolute bottom-3.5 left-0 top-3.5 w-px bg-gradient-to-b from-visual-review-accent/30 to-transparent" />
+      <div className="relative flex items-center justify-between gap-3">
+        <h2 className="text-mobile-caption font-semibold tracking-[0.2px] text-visual-review-title pc:text-xs dark:text-visual-review-title-dark">
+          {t("coachReview")}
+        </h2>
+        <span className="text-[10px] tracking-[0.2px] text-muted-foreground/65">
+          {tAi("generated")}
+        </span>
+      </div>
+      <div className="relative mt-2.5">
+        <AIAnalysis readOnly={readOnly} />
+      </div>
+    </section>
+  );
+}
 
 export default AIAnalysis;

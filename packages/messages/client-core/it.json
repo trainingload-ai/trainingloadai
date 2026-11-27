@@ -2718,6 +2718,7 @@
     "upload": "Caricamento",
     "uploadSuccess": "Caricamento riuscito",
     "checkDuplicatesFailed": "Impossibile controllare i duplicati",
+    "invalidActivityFile": "Impossibile leggere questo file. Seleziona un file FIT, TCX o GPX valido.",
     "uploadFailed": "Caricamento non riuscito",
     "unknownError": "Errore sconosciuto",
     "importProgress": {
@@ -3455,6 +3456,7 @@
     "expand": "Espandere",
     "aiDetailedAnalysis": "Analisi dettagliata dell'intelligenza artificiale",
     "useCache": "Usa la cache",
+    "startReview": "Avvia analisi",
     "regenerate": "Rigenerare",
     "emptyHint": "Nessuna analisi dell’allenatore al momento.",
     "standardMode": "Modalità standard · 1×",
@@ -4670,7 +4672,14 @@
       "cycle": "Blocco formativo",
       "weekLabel": "Settimana corrente",
       "todayFocus": "Oggi",
-      "noWorkoutToday": "Nessun allenamento in programma oggi"
+      "noWorkoutToday": "Nessun allenamento in programma oggi",
+      "startsOn": "Inizia il {date}",
+      "progress": "{completed}/{total} completate",
+      "weekSessions": "{count} questa settimana",
+      "nextSession": "Prossima sessione pianificata",
+      "todaySession": "Sessione pianificata di oggi",
+      "todayBadge": "Oggi",
+      "noUpcomingSession": "Nessuna sessione pianificata in programma"
     },
     "weekday": {
       "mon": "Lun",
@@ -6600,7 +6609,24 @@
     "evaluatePrompt": "Vorrei iniziare questo piano salvato il {date} ({timeZone}). Valuta tutto il calendario insieme ai miei allenamenti recenti e alla mia condizione attuale, fai le domande necessarie e prepara una proposta da confermare.",
     "loadFailed": "Impossibile caricare la conversazione. Riprova.",
     "activePlanConversation": "Il piano è iniziato. Continua qui a discutere gli allenamenti futuri.",
-    "activePlanCalendar": "Calendario attuale del piano"
+    "activePlanCalendar": "Calendario attuale del piano",
+    "evaluatingTitle": "Checking how this plan fits your current training state",
+    "evaluatingHint": "Reviewing recent training load, recovery, and schedule constraints. If everything fits, the plan starts automatically.",
+    "cancelAssessment": "Cancel",
+    "coachRecommendation": "Coach recommendation",
+    "startWithSuggestions": "Start with suggestions",
+    "startOriginal": "Start original plan",
+    "adjustSchedule": "Adjust schedule",
+    "retryAssessment": "Retry assessment",
+    "conflictHeading": "Schedule conflict in original plan",
+    "insufficientDataHeading": "Limited training data",
+    "missingEvidenceLabel": "Missing evidence",
+    "versionConflict": "This draft was updated. Reload the latest schedule to re-evaluate.",
+    "reloadDraft": "Reload latest draft",
+    "assessmentFailed": "Assessment failed. Your draft and selected date are preserved—please retry.",
+    "confirmFailed": "Unable to start the plan. Please try again.",
+    "startedToast": "Plan started",
+    "rollingCarryoverNote": "Week 1 publishes through {through}; saved workouts on {dates} are preserved and carry over into next week."
   },
   "CalendarMove": {
     "viewLatestAdjustment": "View latest version",

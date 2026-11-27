@@ -914,6 +914,7 @@ describe('remaining schedule / PostgreSQL', () => {
     const activityReview = new ActivityAiReviewService(
       prisma as never, undefined as never, profiles, pmc,
       undefined as never, undefined as never, loads, undefined as never,
+      { getRecordSeriesStats: async () => ({}) } as never,
     );
     const periods = [
       { scale: 'daily', type: 'DAILY', start: '2099-11-22' },

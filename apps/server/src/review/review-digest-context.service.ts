@@ -99,6 +99,7 @@ function projectDigestContext(
           dayIndex: workout.dayIndex,
           sportType: workout.sportType,
           status: workout.status,
+          executionStatus: workout.executionStatus,
           name: workout.name,
           plannedDurationSeconds: workout.plannedDurationSeconds,
           plannedSessionRpe: workout.plannedSessionRpe,

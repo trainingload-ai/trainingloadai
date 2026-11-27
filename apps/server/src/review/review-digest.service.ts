@@ -4,6 +4,10 @@ import type { ReviewDigestType } from './review-types';
 import { I18nService } from 'nestjs-i18n';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
+import {
+  LoadReadoutService,
+  type LoadSourceKey,
+} from '@/api/activity/load-readout.service';
 import { ReviewDigestRepository } from './persistence/review-digest.repository';
 import {
   getCoachBaseUrlForLog,
@@ -21,6 +25,7 @@ import {
 import { ActivityAiReviewService } from '@/api/activity/activity-ai-review.service';
 import { HealthDataQueryService } from '@/health-data/health-data-query.service';
 import { healthLocalDateKey } from '@/health-data/health-local-day';
+import { resolveActivityCalendarDayStr } from '@/api/plan/plan-link-calendar.util';
 import { completedReviewWindow } from './review-date-window';
 import { readyActivityWhere } from '@/utils/activity-ready-where';
 import { ReviewDigestContextService } from './review-digest-context.service';
@@ -48,14 +53,14 @@ type AggregatedActivity = {
   hashId: string;
   sportType: string | null;
   startTime: Date | null;
+  timezone: string | null;
   timerTime: number | null;
   elapsedTime: number | null;
   distance: number | null;
   activityName: string | null;
   cogganBikeStress: number | null;
-  govss: number | null;
-  swimScore: number | null;
-  trimp100: number | null;
+  actualLoad: number | null;
+  actualLoadSource: LoadSourceKey | null;
 };
 
 type NormalizedSportType = 'RUN' | 'CYCLING' | 'SWIM' | 'UNKNOWN';
@@ -70,7 +75,8 @@ type AggregatedTotals = {
   totalDurationSec: number;
   totalDistanceM: number;
   totalTss: number;
-  totalLoad: number;
+  totalLoad: number | null;
+  loadSamples: number;
   bySport: TotalsBySport;
 };
 
@@ -82,6 +88,8 @@ type HighlightItem = {
   distanceM: number | null;
   tss: number | null;
   title: string | null;
+  load?: number | null;
+  loadSource?: LoadSourceKey | null;
   rank: number;
 };
 
@@ -146,6 +154,7 @@ export class ReviewDigestService {
     private readonly activities: ActivityReadService,
     private readonly digests: ReviewDigestRepository,
     private readonly modelGuard: ReviewModelCallGuard,
+    private readonly loadReadout: LoadReadoutService,
     @Optional() private readonly digestContext?: ReviewDigestContextService,
     @Optional() private readonly aiDataConsent?: AiDataConsentService,
     @Optional() private readonly ai?: AiService,
@@ -235,34 +244,7 @@ export class ReviewDigestService {
     return null;
   }
 
-  /**
-   * 解析“综合负荷”（用于跨运动类型对齐 Top/highlights 与总体压力估计）。
-   * 规则：
-   * - 骑行：优先 bikeStress
-   * - 跑步：优先 GOVSS
-   * - 游泳：优先 SwimScore
-   * - 兜底：TRIMP100（心率负荷）
-   *
-   * 注意：该指标用于“相对排序/汇总”，不强行等价于 TSS。
-   */
-  private resolveLoad(
-    a: Pick<
-      AggregatedActivity,
-      'sportType' | 'cogganBikeStress' | 'govss' | 'swimScore' | 'trimp100'
-    >,
-  ) {
-    const sport = this.normalizeSportType(a.sportType);
-    // 优先使用运动专属负荷
-    if (sport === 'CYCLING' && typeof a.cogganBikeStress === 'number')
-      return a.cogganBikeStress;
-    if (sport === 'RUN' && typeof a.govss === 'number') return a.govss;
-    if (sport === 'SWIM' && typeof a.swimScore === 'number') return a.swimScore;
-    // 兜底：trimp100（心率负荷）
-    if (typeof a.trimp100 === 'number') return a.trimp100;
-    return null;
-  }
-
-  /** Read the full period in bounded pages; highlights retain the existing load ranking. */
+  /** Read the full period in bounded pages and share the activity load readout. */
   async aggregateWindow(
     args: AggregateWindowArgs,
   ): Promise<AggregateWindowResult> {
@@ -284,30 +266,33 @@ export class ReviewDigestService {
           hashId: true,
           sportType: true,
           startTime: true,
+          timezone: true,
           timerTime: true,
           elapsedTime: true,
           distance: true,
           activityName: true,
           coggan: { select: { bikeStress: true } },
-          govss: { select: { govss: true } },
-          swimScore: { select: { swimScore: true } },
-          trimp: { select: { trimp100: true } },
         },
       });
+      if (!rows.length) break;
+      const loads = await this.loadReadout.batchGetActualLoad(
+        rows.map(({ id }) => id),
+      );
       for (const row of rows) {
+        const load = loads.get(row.id);
         activities.push({
           id: row.id,
           hashId: row.hashId,
           sportType: row.sportType ?? null,
           startTime: row.startTime ?? null,
+          timezone: row.timezone ?? null,
           timerTime: row.timerTime ?? null,
           elapsedTime: row.elapsedTime ?? null,
           distance: Number.isFinite(row.distance) ? row.distance : null,
           activityName: row.activityName ?? null,
           cogganBikeStress: row.coggan?.bikeStress ?? null,
-          govss: row.govss?.govss ?? null,
-          swimScore: row.swimScore?.swimScore ?? null,
-          trimp100: row.trimp?.trimp100 ?? null,
+          actualLoad: load?.actualLoad ?? null,
+          actualLoadSource: load?.actualLoadSource ?? null,
         });
       }
       if (rows.length < pageSize) break;
@@ -326,6 +311,7 @@ export class ReviewDigestService {
     let totalDistanceM = 0;
     let totalTss = 0;
     let totalLoad = 0;
+    let loadSamples = 0;
 
     for (const a of activities) {
       const sport = this.normalizeSportType(
@@ -351,10 +337,9 @@ export class ReviewDigestService {
         totalTss += tss;
       }
 
-      const load = this.resolveLoad(a);
-      if (load != null) {
-        // 复用 bySport.tss 作为“综合负荷”不合适，因此这里单独累加到 totalLoad，并在写快照时写入 totalLoad 字段
-        totalLoad += load;
+      if (a.actualLoad != null) {
+        totalLoad += a.actualLoad;
+        loadSamples += 1;
       }
     }
 
@@ -370,9 +355,11 @@ export class ReviewDigestService {
         durationSec: this.resolveDurationSec(a),
         distanceM: a.distance,
         tss: this.resolveTss(a),
+        load: a.actualLoad,
+        loadSource: a.actualLoadSource,
         title: a.activityName,
         score:
-          this.resolveLoad(a) ??
+          a.actualLoad ??
           this.resolveTss(a) ??
           (this.resolveDurationSec(a) ?? 0) / 60,
       }))
@@ -389,7 +376,8 @@ export class ReviewDigestService {
         totalDistanceM,
         totalTss,
         bySport,
-        totalLoad,
+        totalLoad: loadSamples > 0 ? totalLoad : null,
+        loadSamples,
       },
       highlights,
     };
@@ -704,7 +692,7 @@ export class ReviewDigestService {
         ),
         durationSec: this.resolveDurationSec(activity),
         distanceM: activity.distance,
-        load: args.type === 'WEEKLY' ? this.resolveLoad(activity) : undefined,
+        load: args.type === 'WEEKLY' ? activity.actualLoad : undefined,
       }),
     );
     const training = buildReviewReportTraining({
@@ -730,11 +718,36 @@ export class ReviewDigestService {
           durationSec: this.resolveDurationSec(activity),
           distanceM: activity.distance,
           tss: null,
+          load: activity.actualLoad,
+          loadSource: activity.actualLoadSource,
         })),
     ];
+    const activityDates = new Map(
+      agg.activities.flatMap((activity) => {
+        const date = activity.startTime
+          ? resolveActivityCalendarDayStr(
+              activity.startTime,
+              activity.timezone,
+              null,
+              timezone,
+            )
+          : null;
+        return date ? [[activity.id, date] as const] : [];
+      }),
+    );
     const references = candidates.flatMap(({ activityId, rank }) => {
       const activity = byId.get(activityId);
-      return activity ? [{ rank, activity }] : [];
+      return activity
+        ? [
+            {
+              rank,
+              activity: {
+                ...activity,
+                date: activityDates.get(activityId) ?? activity.date,
+              },
+            },
+          ]
+        : [];
     });
     const [coachingContext, recovery, previousPeriod] =
       await Promise.all([
@@ -753,7 +766,10 @@ export class ReviewDigestService {
       periodEnd: args.periodEnd,
       timezone,
       totals: agg.totals,
-      highlights: candidates,
+      highlights: candidates.map((candidate) => ({
+        ...candidate,
+        activityDate: activityDates.get(candidate.activityId),
+      })),
       coachingContext,
       training,
       recovery,

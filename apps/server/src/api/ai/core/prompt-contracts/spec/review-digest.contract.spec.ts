@@ -39,6 +39,7 @@ const coachingContext: ReviewDigestCoachingContext = {
     skipped: 0,
     moved: 0,
     incomplete: 0,
+    unverified: 0,
     plannedLoad: 40,
     actualLoad: 45,
     extraActivities: 0,

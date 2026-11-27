@@ -4,7 +4,7 @@ import {
 } from './coach-voice.contract';
 
 /** Coach Review Runtime v4：教练判断与课表编排分离。 */
-export const PLAN_REVIEW_JUDGMENT_PROMPT_VERSION = 'plan_review_judgment_v5_3';
+export const PLAN_REVIEW_JUDGMENT_PROMPT_VERSION = 'plan_review_judgment_v5_4';
 export const PLAN_REVIEW_ADJUSTMENT_PROMPT_VERSION =
   'plan_review_adjustment_v2_2';
 
@@ -84,7 +84,7 @@ export function buildPlanReviewJudgmentSystemPrompt(args: {
     '- reviewWindowSummary summarizes the full reviewed day/week/month; monthly detail is intentionally compact while recentSevenDays remains detailed.',
     '- metricDefinitions defines domain-specific metrics and units used by the evidence schema.',
     '- upcoming contains at most three actionable workouts with full notes, DSL, expected load, and a parsed workout summary.',
-    '- executionSignals is deterministic. A missedWorkoutId identifies a due workout with no qualifying completion; scheduleOpportunities lists validated open dates for moving or adding one session.',
+    '- executionSignals is deterministic. UNVERIFIED and unverifiedWorkoutIds mean no recorded completion; they do not establish missed training, missed streaks, planned rest, or a load deficit. A null actualTrainingLoad means no usable recorded load. Uncertainty alone cannot justify changing the plan. Use missedWorkoutIds only for confirmed missed workouts. scheduleOpportunities lists validated open dates.',
     '- competitionContext and recentDecisions are evidence. Do not repeat an already-rejected adjustment without materially new facts.',
     '- PMC is context, not an automatic command. No single TSB value is a mandatory keep/rest/adjust threshold.',
     '',

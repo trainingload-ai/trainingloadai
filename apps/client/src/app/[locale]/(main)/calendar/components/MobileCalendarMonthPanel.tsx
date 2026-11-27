@@ -198,7 +198,9 @@ export function MobileCalendarMonthPanel({
                 className={cn(
                   "flex h-12 min-w-0 touch-manipulation flex-col items-center justify-center rounded-compact px-0.5 text-sm font-semibold tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   !inMonth && "opacity-30",
-                  inPlanRange && !selected && "bg-emerald-500/[0.055]",
+                  inPlanRange &&
+                    !selected &&
+                    "bg-emerald-500/[0.06] bg-[repeating-linear-gradient(-45deg,rgb(16_185_129/0.16)_0_1.2px,transparent_1.2px_8px)] dark:bg-emerald-500/[0.09] dark:bg-[repeating-linear-gradient(-45deg,rgb(52_211_153/0.18)_0_1.2px,transparent_1.2px_8px)]",
                 )}
               >
                 <span

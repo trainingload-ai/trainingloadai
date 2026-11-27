@@ -2717,6 +2717,7 @@
     "upload": "アップロード",
     "uploadSuccess": "アップロード成功",
     "checkDuplicatesFailed": "重複確認に失敗しました",
+    "invalidActivityFile": "このファイルを読み込めません。有効な FIT、TCX、または GPX ファイルを選択してください。",
     "uploadFailed": "アップロード失敗",
     "unknownError": "不明なエラー",
     "importProgress": {
@@ -3454,6 +3455,7 @@
     "expand": "Expand",
     "aiDetailedAnalysis": "AI Detailed Analysis",
     "useCache": "Use cache",
+    "startReview": "振り返りを開始",
     "regenerate": "Regenerate",
     "emptyHint": "コーチレビューはまだありません。",
     "standardMode": "標準モード · 1×",
@@ -4669,7 +4671,14 @@
       "cycle": "トレーニングブロック",
       "weekLabel": "現在の週",
       "todayFocus": "今日の予定",
-      "noWorkoutToday": "今日は予定されているトレーニングはありません"
+      "noWorkoutToday": "今日は予定されているトレーニングはありません",
+      "startsOn": "{date} 開始",
+      "progress": "{completed}/{total} 完了",
+      "weekSessions": "今週 {count} セッション",
+      "nextSession": "次の計画セッション",
+      "todaySession": "今日の計画セッション",
+      "todayBadge": "今日",
+      "noUpcomingSession": "予定されている計画セッションはありません"
     },
     "weekday": {
       "mon": "月",
@@ -6599,7 +6608,24 @@
     "evaluatePrompt": "この保存済み計画を {date}（{timeZone}）から始めたいです。最近のトレーニングと現在の状態に照らして全日程を評価し、必要なことを質問してから、確認できる開始案を提案してください。",
     "loadFailed": "会話を読み込めませんでした。再試行してください。",
     "activePlanConversation": "プランは開始済みです。今後のトレーニングについて引き続き相談できます。",
-    "activePlanCalendar": "現在のプランのカレンダー"
+    "activePlanCalendar": "現在のプランのカレンダー",
+    "evaluatingTitle": "Checking how this plan fits your current training state",
+    "evaluatingHint": "Reviewing recent training load, recovery, and schedule constraints. If everything fits, the plan starts automatically.",
+    "cancelAssessment": "Cancel",
+    "coachRecommendation": "Coach recommendation",
+    "startWithSuggestions": "Start with suggestions",
+    "startOriginal": "Start original plan",
+    "adjustSchedule": "Adjust schedule",
+    "retryAssessment": "Retry assessment",
+    "conflictHeading": "Schedule conflict in original plan",
+    "insufficientDataHeading": "Limited training data",
+    "missingEvidenceLabel": "Missing evidence",
+    "versionConflict": "This draft was updated. Reload the latest schedule to re-evaluate.",
+    "reloadDraft": "Reload latest draft",
+    "assessmentFailed": "Assessment failed. Your draft and selected date are preserved—please retry.",
+    "confirmFailed": "Unable to start the plan. Please try again.",
+    "startedToast": "Plan started",
+    "rollingCarryoverNote": "Week 1 publishes through {through}; saved workouts on {dates} are preserved and carry over into next week."
   },
   "CalendarMove": {
     "viewLatestAdjustment": "View latest version",

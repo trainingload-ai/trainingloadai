@@ -1,301 +1,525 @@
 "use client";
 
-import { isRollingPlan } from "@/lib/rolling-plan";
-import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
-import { RollingPlanCalendar } from "@/components/plan/rolling-plan-calendar";
-
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { AlertCircle, Info, Loader2 } from "lucide-react";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
 import {
-  openPlanStartConversation,
-  type PlanStartConversation,
+  assessPlanStart,
+  confirmPlanStart,
+  fetchPlanStartDraft,
+  type PlanStartAssessmentResult,
+  type PlanStartDraft,
+  type PlanWorkout,
 } from "@/api/plans";
-import {
-  aiCoachMessagesQueryKey,
-  fetchCoachSessionMessages,
-} from "@/api/ai-coach";
 import { useViewerSession } from "@/public-demo/use-viewer-session";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import CalendarSelect from "@/components/calendar-select";
-import { CoachRuntimeProvider } from "@/app/[locale]/(main)/ai-coach/coach-runtime-provider";
-import { CoachThreadLoading } from "@/app/[locale]/(main)/ai-coach/coach-thread";
-import { coachRowsToUiMessages } from "@/app/[locale]/(main)/ai-coach/coach-rows-to-ui-messages";
-import { CoachPlanDraftCalendarPreview } from "@/app/[locale]/(main)/ai-coach/coach-plan-draft-calendar-preview";
-import { savedPlanToCoachDraft } from "@/lib/coach-plan-start";
-import { parseScheduleConstraints } from "@shared/plan-calendar";
-import { getRestoredStartDecisionApply } from "@/app/[locale]/(main)/ai-coach/coach-plan-decision-state";
+import { CalendarMovePreviewCalendar } from "@/app/[locale]/(main)/calendar/components/calendar-move-preview-calendar";
+import { CoachScheduleReview } from "@/app/[locale]/(main)/ai-coach/cards/coach-schedule-comparison";
+import {
+  rollingStartCarryoverInfo,
+  workoutsForPlanStart,
+} from "@/lib/coach-plan-start";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
-import { OfficialPlanStartCalendar } from "./official-plan-start-calendar";
 import { cn } from "@/lib/utils";
+import { OfficialPlanStartCalendar } from "./official-plan-start-calendar";
+import { PlanStartCalendarFooter } from "./plan-start-calendar-footer";
 
-function PlanCoachDialogBody({ planId }: { planId: string }) {
+function isReassessmentConflict(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as {
+    status?: number;
+    code?: string;
+    message?: string;
+    data?: { code?: string };
+  };
+  return (
+    candidate.code === "PLAN_START_REASSESSMENT_REQUIRED" ||
+    candidate.data?.code === "PLAN_START_REASSESSMENT_REQUIRED" ||
+    (typeof candidate.message === "string" &&
+      candidate.message.includes("PLAN_START_REASSESSMENT_REQUIRED"))
+  );
+}
+
+function PlanStartCalendarPreview({ current }: { current: PlanStartDraft }) {
   const t = useTranslations("PlanStartConversation");
+  const fmt = useFormatter();
+  const schedule: Record<string, PlanWorkout[]> = {};
+  for (const workout of workoutsForPlanStart(
+    current.plan,
+    current.startDate,
+    current.earliestStartDate,
+  )) {
+    (schedule[workout.scheduledDate] ??= []).push(workout);
+  }
+  const carryover = rollingStartCarryoverInfo(current.plan, current.startDate);
+  const formatShort = (ymd: string) =>
+    fmt.dateTime(new Date(`${ymd}T12:00:00Z`), {
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+      {carryover ? (
+        <div className="flex shrink-0 items-start gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+          <span>
+            {t("rollingCarryoverNote", {
+              through: formatShort(carryover.firstWeekThrough),
+              dates: carryover.carryoverDates.map(formatShort).join("、"),
+            })}
+          </span>
+        </div>
+      ) : null}
+      <section
+        className="min-h-0 flex-1 overflow-hidden"
+        aria-label={t("pendingCalendar")}
+      >
+        <CalendarMovePreviewCalendar
+          key={current.startDate}
+          planId={current.plan.id}
+          initialDate={current.startDate}
+          presentation={null}
+          schedule={schedule}
+        />
+      </section>
+    </div>
+  );
+}
+
+type AssessmentPhase =
+  | { step: "date" }
+  | { step: "evaluating" }
+  | { step: "result"; result: Exclude<PlanStartAssessmentResult, { outcome: "STARTED" }> }
+  | { step: "error"; conflict: boolean };
+
+function PlanStartAssessmentBody({
+  planId,
+  close,
+  onTitleChange,
+}: {
+  planId: string;
+  close: () => void;
+  onTitleChange: (title: string | null) => void;
+}) {
+  const t = useTranslations("PlanStartConversation");
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const { data: session } = useViewerSession();
-  const prepared = useQuery({
-    queryKey: ["plan-start-conversation", session?.user?.id, planId],
-    queryFn: () => openPlanStartConversation(planId),
+
+  const [selected, setSelected] = useState<PlanStartDraft | null>(null);
+  const [phase, setPhase] = useState<AssessmentPhase>({ step: "date" });
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [versionConflict, setVersionConflict] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const draftQuery = useQuery({
+    queryKey: ["plan-start-draft", session?.user?.id, planId],
+    queryFn: () => fetchPlanStartDraft(planId),
     enabled: Boolean(session?.user?.id),
     staleTime: 0,
     retry: false,
     refetchOnWindowFocus: false,
   });
-  const [selected, setSelected] = useState<PlanStartConversation | null>(null);
-  const [editingDate, setEditingDate] = useState(false);
-  const [entered, setEntered] = useState(false);
-  const [committed, setCommitted] = useState(false);
-  const current = selected ?? prepared.data;
-  const messages = useQuery({
-    queryKey: aiCoachMessagesQueryKey(current?.sid ?? ""),
-    queryFn: () => fetchCoachSessionMessages(current!.sid),
-    enabled: Boolean(current?.sid && session?.user?.id),
-    staleTime: 0,
-    refetchInterval: 5_000,
-    refetchOnWindowFocus: true,
-  });
-  const initialMessages = coachRowsToUiMessages(messages.data ?? []);
-  const hasStartProposal = initialMessages.some((message) =>
-    message.parts.some(
-      (part) =>
-        part.type === "data-coach-tool" &&
-        (part.data.input as { decisionType?: string } | null)?.decisionType ===
-          "PLAN_START",
-    ),
-  );
-  const appliedDecisionIds = JSON.stringify(
-    [
-      ...new Set(
-        initialMessages.flatMap((message) =>
-          message.parts.flatMap((part) => {
-            if (part.type !== "data-coach-tool") return [];
-            const result = part.data.input as {
-              kind?: string;
-              result?: string;
-              decisionId?: string;
-            } | null;
-            const restored = getRestoredStartDecisionApply(result);
-            if (restored) return [restored.decisionId];
-            return result?.kind === "coach_decision_apply" &&
-              result.result === "APPLIED" &&
-              typeof result.decisionId === "string"
-              ? [result.decisionId]
-              : [];
-          }),
-        ),
-      ),
-    ].sort(),
-  );
-  const appliedReceipt = appliedDecisionIds !== "[]";
-  const invalidatedDecisions = useRef(new Set<string>());
-  const invalidateAppliedDecision = useCallback(
-    (decisionId: string) => {
-      setCommitted(true);
-      setEditingDate(false);
-      if (invalidatedDecisions.current.has(decisionId)) return;
-      invalidatedDecisions.current.add(decisionId);
-      void invalidateAfterPlanMutation(queryClient, { planId });
-    },
-    [planId, queryClient],
-  );
+
+  const current = selected ?? draftQuery.data ?? null;
+
   useEffect(() => {
-    if (
-      !prepared.isFetchedAfterMount ||
-      !messages.isFetchedAfterMount ||
-      prepared.isError ||
-      messages.isError
-    )
-      return;
-    for (const decisionId of JSON.parse(appliedDecisionIds) as string[])
-      invalidateAppliedDecision(decisionId);
-  }, [
-    appliedDecisionIds,
-    invalidateAppliedDecision,
-    prepared.isFetchedAfterMount,
-    messages.isFetchedAfterMount,
-    prepared.isError,
-    messages.isError,
-  ]);
+    onTitleChange(current?.plan.title ?? null);
+  }, [current?.plan.title, onTitleChange]);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
+  const finishStart = useCallback(() => {
+    void invalidateAfterPlanMutation(queryClient, { planId });
+    toast.success(t("startedToast"));
+    close();
+  }, [close, planId, queryClient, t]);
+
   const dateMutation = useMutation({
-    mutationFn: (startDate: string) =>
-      openPlanStartConversation(planId, startDate),
+    mutationFn: (startDate: string) => fetchPlanStartDraft(planId, startDate),
     onSuccess: (next) => {
       setSelected(next);
-      void queryClient.invalidateQueries({
-        queryKey: aiCoachMessagesQueryKey(next.sid),
-      });
+      setConfirmError(null);
+      setVersionConflict(false);
+      setPhase({ step: "date" });
     },
   });
-  const [date, setDate] = useState<Date>();
-  useEffect(() => {
-    if (current) setDate(new Date(`${current.startDate}T12:00:00`));
-  }, [current]);
-  const error = prepared.error ?? dateMutation.error ?? messages.error;
-  if (
-    prepared.isError ||
-    messages.isError ||
-    !current ||
-    messages.isPending ||
-    !prepared.isFetchedAfterMount ||
-    !messages.isFetchedAfterMount
-  ) {
-    return error ? (
-      <p role="alert" className="p-4 text-sm text-destructive">
-        {t("loadFailed")}
-      </p>
-    ) : (
-      <CoachThreadLoading />
+
+  const runAssessment = useCallback(
+    async (draft: PlanStartDraft) => {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      setConfirmError(null);
+      setVersionConflict(false);
+      setPhase({ step: "evaluating" });
+      try {
+        const result = await assessPlanStart(
+          planId,
+          {
+            startDate: draft.startDate,
+            revision: draft.revision,
+            lang: locale,
+          },
+          controller.signal,
+        );
+        if (controller.signal.aborted) return;
+        if (result.outcome === "STARTED") {
+          finishStart();
+          return;
+        }
+        setPhase({ step: "result", result });
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        setPhase({ step: "error", conflict: isReassessmentConflict(err) });
+      }
+    },
+    [finishStart, locale, planId],
+  );
+
+  const confirmMutation = useMutation({
+    mutationFn: (choice: "ORIGINAL" | "SUGGESTED") => {
+      if (!current) throw new Error("START_DRAFT_UNAVAILABLE");
+      const previewId =
+        phase.step === "result" &&
+        (phase.result.outcome === "SUGGESTED_CHANGES" ||
+          phase.result.outcome === "CONFLICT")
+          ? phase.result.previewId
+          : undefined;
+      return confirmPlanStart(planId, {
+        startDate: current.startDate,
+        revision: current.revision,
+        choice,
+        previewId,
+      });
+    },
+    onSuccess: () => {
+      finishStart();
+    },
+    onError: (err) => {
+      if (isReassessmentConflict(err)) {
+        setVersionConflict(true);
+        setConfirmError(t("versionConflict"));
+        return;
+      }
+      setConfirmError(t("confirmFailed"));
+    },
+  });
+
+  const reloadDraft = useCallback(async () => {
+    setSelected(null);
+    setConfirmError(null);
+    setVersionConflict(false);
+    setPhase({ step: "date" });
+    await draftQuery.refetch();
+  }, [draftQuery]);
+
+  const backToDate = useCallback(() => {
+    abortRef.current?.abort();
+    setConfirmError(null);
+    setVersionConflict(false);
+    setPhase({ step: "date" });
+  }, []);
+
+  if (draftQuery.isPending && !current) {
+    return (
+      <div
+        role="status"
+        className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 py-12 text-center"
+      >
+        <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden />
+      </div>
     );
   }
-  const earliestStart = new Date(`${current.earliestStartDate}T00:00:00`);
-  const showChat =
-    !editingDate &&
-    (entered ||
-      current.evaluationStarted ||
-      appliedReceipt ||
-      current.plan.status === "ACTIVE");
-  const changeDate = (next?: Date) => {
-    if (next && next < earliestStart) return;
-    setDate(next);
-    setEntered(false);
-    setEditingDate(true);
-    if (!next) return;
-    const value = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-${String(next.getDate()).padStart(2, "0")}`;
-    // Revoke old cards on the server before another evaluation can start.
-    dateMutation.mutate(value);
-  };
-  return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
-      {showChat ? (
-        <>
-          <div className="flex shrink-0 items-center justify-between gap-3 border-b px-4 pb-3 text-sm">
-            <span>
-              {current.startDate} · {current.calendarTimeZone}
-            </span>
-            {current.plan.status === "DRAFT" &&
-            !committed &&
-            !appliedReceipt ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setEditingDate(true)}
-              >
-                {t("changeDate")}
-              </Button>
-            ) : (
-              <span className="text-xs text-muted-foreground">
-                {t("activePlanConversation")}
-              </span>
-            )}
-          </div>
-          <details open={!hasStartProposal} className="shrink-0 px-4">
-            <summary className="cursor-pointer text-sm text-muted-foreground">
-              {t(
-                current.plan.status === "ACTIVE" || committed || appliedReceipt
-                  ? "activePlanCalendar"
-                  : "pendingCalendar",
-              )}
-            </summary>
-            <div className="max-h-64 overflow-y-auto py-3">
-              {isRollingPlan(current.plan) ? (
-                <>
-                  <RollingPlanCoverage plan={current.plan} />
-                  <RollingPlanCalendar
-                    plan={current.plan}
-                    pendingStartDate={current.plan.status === "DRAFT" ? current.startDate : undefined}
-                  />
-                </>
-              ) : (
-                <CoachPlanDraftCalendarPreview
-                  draft={savedPlanToCoachDraft(current.plan)}
-                  startDate={current.startDate}
-                  calendarTimeZone={current.calendarTimeZone}
-                  scheduleConstraints={parseScheduleConstraints(
-                    current.plan.generationMetadata?.scheduleConstraints,
-                  )}
-                />
-              )}
-            </div>
-          </details>
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <CoachRuntimeProvider
-              key={current.entryKey}
-              sid={current.sid}
-              initialMessages={initialMessages}
-              variant="embedded"
-              enableUrlSeed={false}
-              entry={{
-                key: current.entryKey,
-                resumeExisting: current.evaluationStarted,
-                intent: "plan-start",
-                branchContext: {
-                  branchId: current.branchId,
-                  planId,
-                  openReason: "plan-start",
-                },
-                firstMessage: {
-                  id: current.entryKey,
-                  role: "user",
-                  parts: [
-                    {
-                      type: "text",
-                      text: t("evaluatePrompt", {
-                        date: current.startDate,
-                        timeZone: current.calendarTimeZone,
-                      }),
-                    },
-                  ],
-                },
-              }}
-              onTurnFinished={() => {
-                void messages.refetch();
-              }}
-              onPlanApplied={invalidateAppliedDecision}
-            />
-          </div>
-        </>
-      ) : (
-        <div className="flex flex-col gap-4 p-4">
-          <CalendarSelect
-            date={date}
-            fromDate={earliestStart}
-            disabled={{ before: earliestStart }}
-            fromYear={earliestStart.getFullYear()}
-            title={t("dateLabel")}
-            placeholder={t("dateLabel")}
-            onSelect={dateMutation.isPending ? undefined : changeDate}
-          />
-          <p className="text-sm text-muted-foreground">{t("dateHint")}</p>
-          {error ? (
-            <p role="alert" className="text-sm text-destructive">
-              {t("loadFailed")}
-            </p>
-          ) : null}
+
+  if (draftQuery.isError || !current) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col justify-between">
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 py-10 text-center">
+          <AlertCircle className="size-5 text-destructive" aria-hidden />
+          <p role="alert" className="text-sm text-destructive">
+            {t("loadFailed")}
+          </p>
+        </div>
+        <DialogFooter className="shrink-0 border-t border-border/60 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] pc:pb-3">
+          <Button type="button" variant="outline" onClick={close}>
+            {t("cancelAssessment")}
+          </Button>
+          <Button type="button" onClick={() => void reloadDraft()}>
+            {t("retryAssessment")}
+          </Button>
+        </DialogFooter>
+      </div>
+    );
+  }
+
+  if (phase.step === "date") {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-3 sm:px-4">
+        <PlanStartCalendarPreview current={current} />
+        <PlanStartCalendarFooter
+          startDate={current.startDate}
+          earliestStartDate={current.earliestStartDate}
+          canChangeDate={!dateMutation.isPending}
+          onChangeDate={(nextDate) => dateMutation.mutate(nextDate)}
+          notice={
+            dateMutation.error ? (
+              <p role="alert" className="text-sm text-destructive">
+                {t("loadFailed")}
+              </p>
+            ) : null
+          }
+        >
           <Button
-            disabled={!date || date < earliestStart || dateMutation.isPending}
-            onClick={async () => {
-              if (!date || date < earliestStart) return;
-              const next = await dateMutation
-                .mutateAsync(
-                  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
-                )
-                .catch(() => null);
-              if (!next) return;
-              setEditingDate(false);
-              setEntered(true);
-            }}
+            type="button"
+            disabled={
+              current.startDate < current.earliestStartDate ||
+              dateMutation.isPending
+            }
+            onClick={() => void runAssessment(current)}
           >
             {t("evaluate")}
           </Button>
+        </PlanStartCalendarFooter>
+      </div>
+    );
+  }
+
+  const compactDateBar = (
+    <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/60 px-4 py-2 text-xs text-muted-foreground">
+      <span>
+        {current.startDate} · {current.calendarTimeZone}
+      </span>
+    </div>
+  );
+
+  if (phase.step === "evaluating") {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        {compactDateBar}
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 py-12 text-center"
+        >
+          <Loader2 className="size-6 animate-spin text-foreground" aria-hidden />
+          <p className="text-sm font-medium text-foreground">
+            {t("evaluatingTitle")}
+          </p>
+          <p className="max-w-md text-xs leading-5 text-muted-foreground">
+            {t("evaluatingHint")}
+          </p>
         </div>
-      )}
+        <DialogFooter className="shrink-0 border-t border-border/60 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] pc:pb-3">
+          <Button type="button" variant="outline" onClick={backToDate}>
+            {t("changeDate")}
+          </Button>
+        </DialogFooter>
+      </div>
+    );
+  }
+
+  if (phase.step === "error") {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        {compactDateBar}
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2.5 px-6 py-10 text-center">
+          <AlertCircle className="size-5 text-destructive" aria-hidden />
+          <p role="alert" className="max-w-md text-sm text-foreground">
+            {phase.conflict ? t("versionConflict") : t("assessmentFailed")}
+          </p>
+        </div>
+        <DialogFooter className="shrink-0 border-t border-border/60 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] pc:pb-3">
+          <Button type="button" variant="outline" onClick={backToDate}>
+            {t("changeDate")}
+          </Button>
+          {phase.conflict ? (
+            <Button type="button" onClick={() => void reloadDraft()}>
+              {t("reloadDraft")}
+            </Button>
+          ) : (
+            <Button type="button" onClick={() => void runAssessment(current)}>
+              {t("retryAssessment")}
+            </Button>
+          )}
+        </DialogFooter>
+      </div>
+    );
+  }
+
+  const { result } = phase;
+  const submitting = confirmMutation.isPending;
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      {compactDateBar}
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3">
+        {result.outcome === "CONFLICT" ? (
+          <section className="space-y-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
+              <AlertCircle className="size-4 shrink-0" aria-hidden />
+              {t("conflictHeading")}
+            </h3>
+            <ul className="space-y-1 text-xs leading-5 text-foreground">
+              {result.conflicts.map((item, idx) => (
+                <li key={`${item.code}-${item.date ?? idx}`}>
+                  {item.date ? (
+                    <span className="font-medium">{item.date}：</span>
+                  ) : null}
+                  {item.message}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {result.outcome === "INSUFFICIENT_DATA" ? (
+          <section className="space-y-2 rounded-md border border-border bg-muted/40 p-3">
+            <h3 className="text-sm font-semibold text-foreground">
+              {t("insufficientDataHeading")}
+            </h3>
+            {result.summary ? (
+              <p className="text-xs leading-5 text-muted-foreground">
+                {result.summary}
+              </p>
+            ) : null}
+            {result.missingEvidence.length ? (
+              <div className="space-y-1 pt-1">
+                <p className="text-xs font-medium text-foreground">
+                  {t("missingEvidenceLabel")}
+                </p>
+                <ul className="list-disc space-y-0.5 ps-4 text-xs leading-5 text-muted-foreground">
+                  {result.missingEvidence.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </section>
+        ) : result.summary ? (
+          <section className="space-y-1 rounded-md border border-border bg-muted/40 p-3">
+            <h3 className="text-xs font-semibold text-muted-foreground">
+              {t("coachRecommendation")}
+            </h3>
+            <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
+              {result.summary}
+            </p>
+          </section>
+        ) : null}
+
+        {(result.outcome === "SUGGESTED_CHANGES" ||
+          result.outcome === "CONFLICT") &&
+        result.proposal ? (
+          <CoachScheduleReview proposal={result.proposal} />
+        ) : null}
+      </div>
+
+      <DialogFooter className="shrink-0 flex-col gap-2 border-t border-border/60 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] sm:flex-col pc:pb-3">
+        {confirmError ? (
+          <p role="alert" className="w-full text-start text-xs text-destructive">
+            {confirmError}
+          </p>
+        ) : null}
+        <div className="flex w-full flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={submitting}
+              onClick={backToDate}
+            >
+              {t("changeDate")}
+            </Button>
+            {result.outcome === "CONFLICT" ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={submitting}
+                onClick={close}
+              >
+                {t("adjustSchedule")}
+              </Button>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {versionConflict ? (
+              <Button type="button" onClick={() => void reloadDraft()}>
+                {t("reloadDraft")}
+              </Button>
+            ) : (
+              <>
+                {result.outcome === "SUGGESTED_CHANGES" ? (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={submitting}
+                      onClick={() => confirmMutation.mutate("ORIGINAL")}
+                    >
+                      {t("startOriginal")}
+                    </Button>
+                    <Button
+                      type="button"
+                      disabled={submitting}
+                      onClick={() => confirmMutation.mutate("SUGGESTED")}
+                    >
+                      {submitting ? (
+                        <Loader2 className="me-1.5 size-4 animate-spin" aria-hidden />
+                      ) : null}
+                      {t("startWithSuggestions")}
+                    </Button>
+                  </>
+                ) : null}
+
+                {result.outcome === "CONFLICT" && result.proposal ? (
+                  <Button
+                    type="button"
+                    disabled={submitting}
+                    onClick={() => confirmMutation.mutate("SUGGESTED")}
+                  >
+                    {submitting ? (
+                      <Loader2 className="me-1.5 size-4 animate-spin" aria-hidden />
+                    ) : null}
+                    {t("startWithSuggestions")}
+                  </Button>
+                ) : null}
+
+                {result.outcome === "INSUFFICIENT_DATA" &&
+                result.originalCanStart ? (
+                  <Button
+                    type="button"
+                    disabled={submitting}
+                    onClick={() => confirmMutation.mutate("ORIGINAL")}
+                  >
+                    {submitting ? (
+                      <Loader2 className="me-1.5 size-4 animate-spin" aria-hidden />
+                    ) : null}
+                    {t("startOriginal")}
+                  </Button>
+                ) : null}
+              </>
+            )}
+          </div>
+        </div>
+      </DialogFooter>
     </div>
   );
 }
@@ -315,6 +539,8 @@ export function PlanStartConversationDialog({
   const activation = useTranslations("PlanActivationDialog");
   const titleId = useId();
   const invoker = useRef<HTMLElement | null>(null);
+  const [planTitle, setPlanTitle] = useState<string | null>(null);
+
   return (
     <Dialog open={open && Boolean(planId)} onOpenChange={onOpenChange}>
       <DialogContent
@@ -324,7 +550,7 @@ export function PlanStartConversationDialog({
             invoker.current = document.activeElement;
         }}
         className={cn(
-          "flex h-[min(840px,94dvh)] w-full flex-col gap-3 overflow-hidden p-0 pc:w-[calc(100%-2rem)]",
+          "flex h-[min(840px,94dvh)] w-full flex-col gap-0 overflow-hidden p-0 pc:w-[calc(100%-2rem)] pc:p-0",
           officialTitle ? "pc:max-w-6xl" : "pc:max-w-4xl",
         )}
         onCloseAutoFocus={(event) => {
@@ -332,17 +558,30 @@ export function PlanStartConversationDialog({
           invoker.current?.focus();
         }}
       >
-        <DialogHeader className="shrink-0 px-4 pt-4 pr-10">
-          <DialogTitle id={titleId}>{officialTitle ?? t("title")}</DialogTitle>
-          <DialogDescription className={officialTitle ? "sr-only" : undefined}>
+        <DialogHeader className="shrink-0 space-y-0.5 px-4 pt-3.5 pb-2.5 pr-10">
+          <DialogTitle id={titleId} className="truncate text-base">
+            {officialTitle ?? planTitle ?? t("title")}
+          </DialogTitle>
+          <DialogDescription
+            className={officialTitle ? "sr-only" : "text-xs"}
+          >
             {officialTitle ? activation("officialDescription") : t("description")}
           </DialogDescription>
         </DialogHeader>
         {open && planId ? (
           officialTitle ? (
-            <OfficialPlanStartCalendar key={planId} planId={planId} close={() => onOpenChange(false)} />
+            <OfficialPlanStartCalendar
+              key={planId}
+              planId={planId}
+              close={() => onOpenChange(false)}
+            />
           ) : (
-            <PlanCoachDialogBody key={planId} planId={planId} />
+            <PlanStartAssessmentBody
+              key={planId}
+              planId={planId}
+              close={() => onOpenChange(false)}
+              onTitleChange={setPlanTitle}
+            />
           )
         ) : null}
       </DialogContent>

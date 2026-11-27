@@ -15,6 +15,7 @@ import {
   type ActivityZone,
 } from '@prisma/client';
 import type { PmcListRangeOptions } from '@/training-load/pmc.service';
+import { localDateKeyToUtcDate } from '@/training-load/activity-local-date';
 import ComposedProfile, {
   UnifiedActivityAnalysisInput,
   type UnifiedActivityZone,
@@ -35,6 +36,7 @@ dayjs.extend(timezone);
 export type PmcCoachRangeRow = {
   date: Date;
   dailyValue: number;
+  activityCount: number;
   ATL: number;
   CTL: number;
   TSB: number;
@@ -229,6 +231,7 @@ function buildStrengthEvidence(activity: ActivityForCoachUnifiedInput) {
  * @param userId - 用户 ID。
  * @param profile - 用户配置。
  * @param pmc - PMC 服务。
+ * @param readCadenceStats - Recorded cadence statistics used by the detail chart.
  * @returns 统一活动分析输入。
  */
 export async function buildUnifiedActivityAnalysisInput(
@@ -243,12 +246,30 @@ export async function buildUnifiedActivityAnalysisInput(
       options?: PmcListRangeOptions,
     ) => Promise<PmcCoachRangeRow[]>;
   },
+  readCadenceStats?: () => Promise<{ avgValue?: number; maxValue?: number }>,
 ): Promise<UnifiedActivityAnalysisInput> {
   // 活动时长
   const durationSec: number | undefined =
     activity.timerTime ?? activity.elapsedTime ?? undefined;
   // 活动上下文
   const sportContext = resolveActivityCoachSportContext(activity);
+  const cadence: UnifiedActivityAnalysisInput['cadence'] = {};
+  if (activityCoachAllows(sportContext, 'cadence')) {
+    const recorded = await readCadenceStats?.();
+    const running = activity.sportType === SportType.RUN;
+    const cycling = activity.sportType === SportType.CYCLING;
+    const normalize = (value: number | null | undefined) => {
+      if (value == null || !Number.isFinite(value) || value <= 0) return undefined;
+      // The detail chart rounds the raw recording before converting running strides to steps.
+      const raw = round(value, 2);
+      return round(running && raw < 130 ? raw * 2 : raw);
+    };
+    cadence.avg = normalize(recorded?.avgValue) ?? normalize(activity.avgCadence);
+    cadence.max = normalize(recorded?.maxValue) ?? normalize(activity.maxCadence);
+    if (cadence.avg !== undefined || cadence.max !== undefined) {
+      cadence.unit = running ? 'spm' : cycling ? 'rpm' : undefined;
+    }
+  }
   // 用户时区
   let userTimezone = activity?.timezone || profile?.timezone || undefined;
   // 如果活动有经纬度，则尝试查找用户时区
@@ -286,48 +307,33 @@ export async function buildUnifiedActivityAnalysisInput(
     activityDay?.isValid() === true
       ? activityDay.format('YYYY-MM-DD')
       : undefined;
-  // PMCData.date is stored at UTC midnight for each calendar day; align the
-  // range query to the activity's local calendar date at UTC midnight.
-  const activityUtcDay = activityLocalDate
-    ? dayjs.utc(`${activityLocalDate}T00:00:00.000Z`)
-    : null;
+  const loadDate = snapshot?.pmcLocalDate ?? activityLocalDate;
+  const loadDay = loadDate ? dayjs.utc(localDateKeyToUtcDate(loadDate)) : null;
 
   const pmcRecords =
-    userId && activityUtcDay && pmc
+    userId && loadDay && pmc
       ? await pmc.listRange(
           userId,
-          activityUtcDay.subtract(13, 'day').toDate(),
-          activityUtcDay.toDate(),
+          loadDay.subtract(13, 'day').toDate(),
+          loadDay.toDate(),
           { orderBy: 'desc' },
         )
       : [];
-
-  const activeDays = pmcRecords.filter((r) => r.dailyValue >= 10).length;
-  const rest_days_last_14d = activityUtcDay ? 14 - activeDays : undefined;
   const latestPMC = pmcRecords[0];
-  const last7Days = activityUtcDay
-    ? Array.from({ length: 7 })
-        .map((_, i) => {
-          const targetYmd = activityUtcDay
-            .subtract(i, 'day')
-            .format('YYYY-MM-DD');
-          const record = pmcRecords.find(
-            (r) => dayjs.utc(r.date).format('YYYY-MM-DD') === targetYmd,
-          );
-          return record ? round(record.dailyValue, 1) : 0;
-        })
-        .reverse()
-    : undefined;
+  const weekStart = loadDay?.subtract(6, 'day').toDate();
+  const last7Days = weekStart
+    ? pmcRecords.filter((row) => row.date >= weekStart).reverse()
+    : [];
 
   return {
     sportType: activity.sportType,
     sport_context: sportContext,
     start_time,
-    temporal_context: activityLocalDate
+    temporal_context: activityLocalDate && loadDate
       ? {
           activity_local_date: activityLocalDate,
           activity_timezone: userTimezone,
-          historical_load_as_of: activityLocalDate,
+          historical_load_as_of: loadDate,
           historical_load_window_days: 14,
         }
       : undefined,
@@ -456,24 +462,7 @@ export async function buildUnifiedActivityAnalysisInput(
           : undefined,
       };
     })(),
-    cadence: {
-      avg:
-        activityCoachAllows(sportContext, 'cadence') && activity.avgCadence
-          ? round(
-              activity.sportType === SportType.RUN
-                ? activity.avgCadence * 2
-                : activity.avgCadence,
-            )
-          : undefined,
-      max:
-        activityCoachAllows(sportContext, 'cadence') && activity.maxCadence
-          ? round(
-              activity.sportType === SportType.RUN
-                ? activity.maxCadence * 2
-                : activity.maxCadence,
-            )
-          : undefined,
-    },
+    cadence,
     estimate: {
       ftp:
         activityCoachAllows(sportContext, 'power') && activity.eftp
@@ -503,17 +492,25 @@ export async function buildUnifiedActivityAnalysisInput(
         ? round(activity.trimp.trimp100)
         : undefined,
     },
-    historical_load: {
-      ATL: latestPMC ? round(latestPMC.ATL, 1) : undefined,
-      CTL: latestPMC ? round(latestPMC.CTL, 1) : undefined,
-      TSB: latestPMC ? round(latestPMC.TSB, 1) : undefined,
-      AC_ratio:
-        latestPMC && latestPMC.CTL > 0
-          ? round(latestPMC.ATL / latestPMC.CTL, 2)
-          : undefined,
-      daily_load_last_7d: last7Days,
-      rest_days_last_14d,
-    },
+    historical_load: latestPMC
+      ? {
+          ATL: round(latestPMC.ATL, 1),
+          CTL: round(latestPMC.CTL, 1),
+          TSB: round(latestPMC.TSB, 1),
+          AC_ratio:
+            latestPMC.CTL > 0
+              ? round(latestPMC.ATL / latestPMC.CTL, 2)
+              : undefined,
+          daily_load_last_7d:
+            last7Days.length === 7
+              ? last7Days.map((row) => round(row.dailyValue, 1))
+              : undefined,
+          days_without_recorded_activity_last_14d:
+            pmcRecords.length === 14
+              ? pmcRecords.filter((row) => row.activityCount === 0).length
+              : undefined,
+        }
+      : undefined,
     user_baseline: {
       max_hr: baselineMaxHr,
       rest_hr: baselineRestHr,

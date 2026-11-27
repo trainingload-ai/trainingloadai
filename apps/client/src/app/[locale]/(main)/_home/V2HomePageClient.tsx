@@ -1,7 +1,11 @@
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { isRollingPlan, type PlanPlanning } from "@/lib/rolling-plan";
+import {
+  generatedPlanThrough,
+  isRollingPlan,
+  type PlanPlanning,
+} from "@/lib/rolling-plan";
 import {
   ArrowRight,
   CalendarRange,
@@ -42,6 +46,7 @@ import {
 } from "@/api/v2-activities";
 import { TimezoneProfilePromptDialog } from "./components/timezone-profile-prompt-dialog";
 import { HomeSuggestionCardStack } from "./components/home-suggestion-card-stack";
+import { HomeContinuationProposalCard } from "./components/home-continuation-proposal-card";
 import {
   buildHomeWeeklyActualSummary,
   buildHomeWeeklySummary,
@@ -169,6 +174,12 @@ function buildHomeData(t: TranslateFn) {
       weekLabel: t("currentPlan.weekLabel"),
       todayFocus: t("currentPlan.noWorkoutToday"),
       weekTargetLoad: 0,
+      totalWorkouts: 0,
+      completedWorkouts: 0,
+      metaSummary: "",
+      nextSessionLabel: t("currentPlan.nextSession"),
+      nextSessionTitle: t("currentPlan.noUpcomingSession"),
+      nextSessionDate: null as string | null,
     },
     loadComparison: {
       days: [
@@ -1242,6 +1253,8 @@ function EmptyHomePage({
         </section>
       </header>
 
+      <HomeContinuationProposalCard />
+
       <HomeTwoColumnSection homeData={homeData} t={t} timeFormat={timeFormat} />
       {/* <VipPricingPlansSection /> */}
     </div>
@@ -1590,6 +1603,80 @@ export default function V2HomePageClient({
           }))
         : [];
 
+    const planRolling = activePlan ? isRollingPlan(activePlan) : false;
+    const weekSessionCount = currentWeekWorkouts.filter(
+      (workout) => workout.status !== "MOVED",
+    ).length;
+    const totalPlanWorkouts =
+      activePlan?.totalWorkoutCount ?? weekSessionCount;
+    const completedPlanWorkouts =
+      activePlan?.completedWorkoutCount ??
+      currentWeekWorkouts.filter((workout) => workout.status === "DONE").length;
+    const startDateKey = activePlan?.startDate
+      ? String(activePlan.startDate).slice(0, 10)
+      : null;
+    const generatedThroughKey = activePlan
+      ? generatedPlanThrough(activePlan)?.slice(0, 10) ?? null
+      : null;
+    const planMetaParts: string[] = [];
+    if (activePlan) {
+      if (planRolling) {
+        if (startDateKey && startDateKey > dateKey) {
+          planMetaParts.push(
+            t("currentPlan.startsOn", {
+              date: formatHomeMonthDay(locale, startDateKey),
+            }),
+          );
+        }
+        if (generatedThroughKey) {
+          planMetaParts.push(
+            rollingT("generatedThrough", {
+              date: formatHomeMonthDay(locale, generatedThroughKey),
+            }),
+          );
+        }
+        if (totalPlanWorkouts > 0) {
+          planMetaParts.push(
+            t("currentPlan.progress", {
+              completed: completedPlanWorkouts,
+              total: totalPlanWorkouts,
+            }),
+          );
+        }
+      } else {
+        if (weekSessionCount > 0) {
+          planMetaParts.push(
+            t("currentPlan.weekSessions", { count: weekSessionCount }),
+          );
+        }
+        if (totalPlanWorkouts > 0) {
+          planMetaParts.push(
+            t("currentPlan.progress", {
+              completed: completedPlanWorkouts,
+              total: totalPlanWorkouts,
+            }),
+          );
+        }
+      }
+    }
+    const nextPlanWorkout = activePlan?.nextWorkout ?? null;
+    const nextIsToday = Boolean(
+      nextPlanWorkout?.scheduledDate &&
+        nextPlanWorkout.scheduledDate === dateKey,
+    );
+    const nextSessionLabel = nextIsToday
+      ? t("currentPlan.todaySession")
+      : t("currentPlan.nextSession");
+    const nextSessionTitle =
+      nextPlanWorkout?.title?.trim() ||
+      nextPlanWorkout?.notes?.trim() ||
+      t("currentPlan.noUpcomingSession");
+    const nextSessionDate = nextPlanWorkout?.scheduledDate
+      ? nextIsToday
+        ? t("currentPlan.todayBadge")
+        : formatHomeMonthDay(locale, nextPlanWorkout.scheduledDate)
+      : null;
+
     return {
       ...baseHomeData,
       currentPlan: activePlan
@@ -1597,17 +1684,23 @@ export default function V2HomePageClient({
             ...baseHomeData.currentPlan,
             planning: activePlan,
             cycle: activePlan.title,
-            weekLabel: isRollingPlan(activePlan) ? rollingT("currentWeek", { week: currentWeekIndex }) : t("dynamic.weekLabel", {
-              current: currentWeekIndex,
-              total: activePlan.periodWeeks ?? 1,
-            }),
+            weekLabel: planRolling
+              ? rollingT("currentWeek", { week: currentWeekIndex })
+              : t("dynamic.weekLabel", {
+                  current: currentWeekIndex,
+                  total: activePlan.periodWeeks ?? 1,
+                }),
             todayFocus:
-              currentDayWorkouts[0]?.title?.trim() ||
-              currentDayWorkouts[0]?.notes?.trim() ||
+              activePlan.todayWorkouts[0]?.title?.trim() ||
+              activePlan.todayWorkouts[0]?.notes?.trim() ||
               baseHomeData.currentPlan.todayFocus,
-            weekTargetLoad: currentWeekWorkouts.filter(
-              (workout) => workout.status !== "MOVED",
-            ).length,
+            weekTargetLoad: weekSessionCount,
+            totalWorkouts: totalPlanWorkouts,
+            completedWorkouts: completedPlanWorkouts,
+            metaSummary: planMetaParts.join(" · "),
+            nextSessionLabel,
+            nextSessionTitle,
+            nextSessionDate,
           }
         : baseHomeData.currentPlan,
       aiTodaySuggestion: buildAiTodaySuggestionFromServer({
@@ -1761,35 +1854,64 @@ export default function V2HomePageClient({
                 href="/plan"
                 className="group flex min-h-[150px] min-w-0 flex-1 flex-col rounded-surface bg-neutral-100 px-4 pt-3 pb-2 text-foreground transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-surface-strong dark:hover:bg-muted"
               >
-                <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+                <div className="flex flex-wrap items-start gap-x-3 gap-y-1.5">
                   <h1 className="min-w-0 flex-[1_1_9rem] break-words text-base font-semibold leading-6 tracking-normal">
                     {displayedHomeData.currentPlan.cycle}
                   </h1>
-                  {rolling ? (
-                    <span className="ms-auto max-w-full break-words rounded-md bg-background px-2 py-1 text-mobile-caption text-muted-foreground pc:text-[11px]">
-                      {rollingT("shortTitle")}
-                    </span>
-                  ) : (
-                    <div className="ms-auto inline-flex shrink-0 rounded-md bg-background px-2 py-1 text-mobile-caption text-muted-foreground pc:text-[11px]">
-                      {t("header.weekTarget")}
-                      <span className="ml-1 font-semibold text-foreground">
-                        {displayedHomeData.currentPlan.weekTargetLoad}
-                      </span>
-                    </div>
-                  )}
+                  <span className="ms-auto max-w-full shrink-0 rounded-md bg-background px-2 py-0.5 text-mobile-caption text-muted-foreground pc:text-[11px]">
+                    {rolling
+                      ? rollingT("shortTitle")
+                      : displayedHomeData.currentPlan.weekLabel}
+                  </span>
                 </div>
 
-                {!rolling ? (
-                  <span className="mt-2 w-fit rounded-md bg-background px-2 py-1 text-mobile-caption text-muted-foreground pc:text-[11px]">
-                    {displayedHomeData.currentPlan.weekLabel}
-                  </span>
+                {displayedHomeData.currentPlan.metaSummary ? (
+                  <p className="mt-1 truncate text-mobile-caption text-muted-foreground pc:text-xs">
+                    {displayedHomeData.currentPlan.metaSummary}
+                  </p>
                 ) : null}
-                <div className="mt-2 min-w-0 pb-3">
-                  <div className="text-mobile-caption text-muted-foreground pc:text-[11px]">
-                    {t("currentPlan.todayFocus")}
+
+                {displayedHomeData.currentPlan.totalWorkouts > 0 ? (
+                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-foreground/10 dark:bg-white/10">
+                    <div
+                      aria-label={displayedHomeData.currentPlan.title}
+                      aria-valuemax={100}
+                      aria-valuemin={0}
+                      aria-valuenow={Math.min(
+                        100,
+                        Math.round(
+                          (displayedHomeData.currentPlan.completedWorkouts /
+                            displayedHomeData.currentPlan.totalWorkouts) *
+                            100,
+                        ),
+                      )}
+                      className="h-full rounded-full bg-[hsl(var(--emerald-500))] dark:bg-[hsl(var(--emerald-400))]"
+                      role="progressbar"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.round(
+                            (displayedHomeData.currentPlan.completedWorkouts /
+                              displayedHomeData.currentPlan.totalWorkouts) *
+                              100,
+                          ),
+                        )}%`,
+                      }}
+                    />
                   </div>
-                  <div className="mt-0.5 truncate text-sm font-medium leading-5">
-                    {displayedHomeData.currentPlan.todayFocus}
+                ) : null}
+
+                <div className="mt-3 min-w-0 pb-3">
+                  <div className="flex items-center justify-between gap-2 text-mobile-caption text-muted-foreground pc:text-[11px]">
+                    <span>{displayedHomeData.currentPlan.nextSessionLabel}</span>
+                    {displayedHomeData.currentPlan.nextSessionDate ? (
+                      <span className="shrink-0 tabular-nums">
+                        {displayedHomeData.currentPlan.nextSessionDate}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mt-0.5 truncate text-sm font-medium leading-5 text-foreground">
+                    {displayedHomeData.currentPlan.nextSessionTitle}
                   </div>
                 </div>
 

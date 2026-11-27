@@ -460,6 +460,24 @@ describe('ActivityQueryService', () => {
     );
   });
 
+  it('searches the activity-local date before applying the result limit', async () => {
+    const { service } = createService({
+      activities: [
+        { id: 3, startTime: new Date('2026-10-15T07:30:00Z'), timezone: 'America/Los_Angeles' },
+        { id: 2, startTime: new Date('2026-10-15T06:30:00Z'), timezone: 'America/Los_Angeles' },
+        { id: 1, startTime: new Date('2026-10-13T23:00:00Z'), timezone: null },
+      ],
+    });
+
+    const rows = await service.searchActivitiesForAi({
+      userId: 'user-1',
+      limit: 2,
+      calendar: { from: '2026-10-14', to: '2026-10-14', timezone: 'Asia/Shanghai' },
+    });
+
+    expect(rows.map((row) => row.id)).toEqual([2, 1]);
+  });
+
   it('enriches recent AI activities with the same resolved load as the feed', async () => {
     const { service } = createService({
       activities: [

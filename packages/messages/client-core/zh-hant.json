@@ -2810,6 +2810,7 @@
     "upload": "上載",
     "uploadSuccess": "上載成功",
     "checkDuplicatesFailed": "未能檢查重複檔案",
+    "invalidActivityFile": "無法讀取此檔案，請選擇有效的 FIT、TCX 或 GPX 檔案。",
     "uploadFailed": "上載失敗",
     "unknownError": "未知錯誤",
     "importProgress": {
@@ -3547,6 +3548,7 @@
     "expand": "展開",
     "aiDetailedAnalysis": "AI 詳細分析",
     "useCache": "使用快取",
+    "startReview": "開始複盤",
     "regenerate": "重新解讀",
     "emptyHint": "暫無教練復盤。",
     "standardMode": "標準模式",
@@ -4763,7 +4765,14 @@
       "cycle": "训练周期",
       "weekLabel": "当前周",
       "todayFocus": "今日安排",
-      "noWorkoutToday": "今日暫無計劃訓練"
+      "noWorkoutToday": "今日暫無計劃訓練",
+      "startsOn": "{date} 開始",
+      "progress": "已完成 {completed}/{total} 節",
+      "weekSessions": "本週 {count} 節",
+      "nextSession": "下一節計畫",
+      "todaySession": "今日計畫課次",
+      "todayBadge": "今天",
+      "noUpcomingSession": "暫無待執行計畫課次"
     },
     "weekday": {
       "mon": "一",
@@ -6697,7 +6706,24 @@
     "evaluatePrompt": "我想從 {date} 開始這個已儲存的計畫（日曆時區：{timeZone}）。請結合近期訓練和目前狀況評估完整課表，必要時先問我，再提供可確認的開始方案。",
     "loadFailed": "無法載入對話，請重試。",
     "activePlanConversation": "計畫已開始，可繼續討論後續安排。",
-    "activePlanCalendar": "目前計畫日曆"
+    "activePlanCalendar": "目前計畫日曆",
+    "evaluatingTitle": "正在評估計畫與目前訓練狀態的匹配度",
+    "evaluatingHint": "結合近期訓練負荷、恢復狀態與排期約束核對課表，適配時將直接開始。",
+    "cancelAssessment": "取消評估",
+    "coachRecommendation": "教練建議",
+    "startWithSuggestions": "按建議開始",
+    "startOriginal": "按原計畫開始",
+    "adjustSchedule": "調整課表",
+    "retryAssessment": "重試評估",
+    "conflictHeading": "原方案存在排期衝突",
+    "insufficientDataHeading": "目前訓練資料不足",
+    "missingEvidenceLabel": "缺少的評估依據",
+    "versionConflict": "草稿已有更新，請重新載入最新課表後再次評估。",
+    "reloadDraft": "重新載入最新草稿",
+    "assessmentFailed": "評估請求暫時失敗，草稿與所選日期已保留，請重試。",
+    "confirmFailed": "啟動計畫失敗，請重試。",
+    "startedToast": "計畫已開始",
+    "rollingCarryoverNote": "首週將發布至 {through}；已儲存的 {dates} 課程將保留原課並接續到次週。"
   },
   "CalendarMove": {
     "viewLatestAdjustment": "查看最新版本",

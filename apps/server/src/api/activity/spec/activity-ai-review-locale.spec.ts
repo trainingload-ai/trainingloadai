@@ -19,6 +19,7 @@ describe('ActivityAiReviewService locale lookup', () => {
       ActivityAiReviewService.prototype,
     ) as ActivityAiReviewService;
     Object.assign(service, {
+      users: { settings: () => ({ findUnique: async () => null }) },
       prisma: {
         activity: { findFirst: async () => ({ id: 42 }) },
         activityAiReview: {
@@ -43,6 +44,33 @@ describe('ActivityAiReviewService locale lookup', () => {
       }),
     ).resolves.toMatchObject({ markdown: null, summary: null, verdict: null });
   });
+
+  it.each([null, { id: 'old-review', promptVersion: 'obsolete' }])(
+    'returns a manual start state when automatic reviews are disabled and the result is %j',
+    async (row) => {
+      const service = Object.create(
+        ActivityAiReviewService.prototype,
+      ) as ActivityAiReviewService;
+      Object.assign(service, {
+        prisma: {
+          activity: { findFirst: async () => ({ id: 42 }) },
+          activityAiReview: { findFirst: async () => row },
+        },
+        users: {
+          settings: () => ({
+            findUnique: async () => ({ value: '{"activityReview":false}' }),
+          }),
+        },
+      });
+      await expect(
+        service.getAiReviewForActivityHash({
+          userId: 'test',
+          activityHashId: 'activity',
+          language: 'en',
+        }),
+      ).resolves.toMatchObject({ status: 'SKIPPED', markdown: null });
+    },
+  );
 
   it('refuses to persist generated Chinese prose for an English review', async () => {
     const write = jest.fn();
@@ -143,6 +171,77 @@ describe('ActivityAiReviewService locale lookup', () => {
     );
   });
 
+  it.each([
+    {
+      trigger: 'IMPORT',
+      consent: true,
+      allowed: true,
+      code: 'ACTIVITY_REVIEW_DISABLED',
+    },
+    { trigger: 'MANUAL', consent: true, allowed: true, code: null },
+    {
+      trigger: 'MANUAL',
+      consent: false,
+      allowed: true,
+      code: 'AI_DATA_CONSENT_REQUIRED',
+    },
+    {
+      trigger: 'MANUAL',
+      consent: true,
+      allowed: false,
+      code: 'AI_FEATURE_ACCESS_REQUIRED',
+    },
+  ])(
+    'applies the automatic review setting and access checks for %j',
+    async ({ trigger, consent, allowed, code }) => {
+      const update = jest.fn();
+      const service = Object.create(
+        ActivityAiReviewService.prototype,
+      ) as ActivityAiReviewService;
+      Object.assign(service, {
+        prisma: {
+          activityAiReview: {
+            findUnique: async () => ({
+              id: 'review',
+              activityId: 42,
+              userId: 'user-1',
+              trigger,
+              language: 'zh',
+            }),
+            update,
+          },
+        },
+        aiDataConsent: { isGranted: async () => consent },
+        featureAccess: {
+          evaluate: async () => ({
+            features: { 'ai.activityReview': { allowed } },
+          }),
+        },
+        users: {
+          settings: () => ({
+            findUnique: async () => ({ value: '{"activityReview":false}' }),
+          }),
+        },
+        buildCoachEvidenceBundle: async () => ({
+          evidenceSnapshot: {},
+          evidenceHash: 'same',
+        }),
+      });
+
+      const outcome = await service.prepareGeneration('review');
+      if (code) {
+        expect(outcome).toMatchObject({ outcome: 'SKIPPED', code });
+        expect(update).toHaveBeenCalledTimes(1);
+      } else {
+        expect(outcome).toMatchObject({
+          outcome: 'READY',
+          review: { trigger: 'MANUAL' },
+        });
+        expect(update).not.toHaveBeenCalled();
+      }
+    },
+  );
+
   it.each(['en', 'de', 'fr', 'es', 'pt-BR', 'it', 'ko', 'ja', 'zh', 'zh-hant'])(
     'reads the review stored for %s',
     async (language) => {
@@ -160,6 +259,7 @@ describe('ActivityAiReviewService locale lookup', () => {
         {} as never,
         {} as never,
         {} as never,
+        { settings: () => ({ findUnique: async () => null }) } as never,
         {} as never,
         {} as never,
         {} as never,
@@ -211,6 +311,7 @@ describe('ActivityAiReviewService locale lookup', () => {
     const service = new ActivityAiReviewService(
       prisma as never,
       aiUsage as never,
+      {} as never,
       {} as never,
       {} as never,
       {} as never,
@@ -275,6 +376,7 @@ describe('ActivityAiReviewService locale lookup', () => {
     const service = new ActivityAiReviewService(
       prisma as never,
       aiUsage as never,
+      {} as never,
       {} as never,
       {} as never,
       {} as never,

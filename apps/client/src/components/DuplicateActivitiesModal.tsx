@@ -77,7 +77,10 @@ export function DuplicateActivitiesModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[80dvh] flex-col overflow-hidden pc:max-w-2xl">
+      <DialogContent
+        className="flex max-h-[80dvh] flex-col overflow-hidden pc:max-w-2xl"
+        showFallbackTitle={false}
+      >
         <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             {t("title")}

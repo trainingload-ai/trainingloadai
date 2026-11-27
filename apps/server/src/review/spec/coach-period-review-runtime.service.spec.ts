@@ -54,6 +54,7 @@ function createService() {
       skipped: 0,
       moved: 0,
       incomplete: 1,
+      unverified: 0,
       plannedLoad: 100,
       actualLoad: 70,
       extraActivities: 0,

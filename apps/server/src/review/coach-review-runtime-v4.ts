@@ -30,6 +30,18 @@ export function normalizeCoachReviewJudgment(args: {
     args.judgment.rationale,
   );
   if (
+    args.context.executionSignals?.unverifiedWorkoutIds?.length > 0 &&
+    args.judgment.evidenceCodes.some(
+      (code) => !groundedEvidenceCodes.includes(code),
+    ) &&
+    !hasMeaningfulExecutionDeviation(args.context)
+  ) {
+    return suppressCoachReviewOutput(
+      { ...args.judgment, evidenceCodes: groundedEvidenceCodes },
+      'UNSUPPORTED_EXECUTION_CLAIM',
+    );
+  }
+  if (
     args.judgment.source !== 'llm' ||
     !isDisplayableModelRationale(args.context, rationale)
   ) {
@@ -448,17 +460,25 @@ function groundEvidenceCodes(
   const signals = context.executionSignals;
   if (!signals) return [...new Set(evidenceCodes)];
   const hasDeviation = hasMeaningfulExecutionDeviation(context);
-  const result = new Set(
-    evidenceCodes.filter((code) => !(hasDeviation && code === 'PLAN_ON_TRACK')),
-  );
-  if (signals.missedWorkoutIds.length > 0) result.add('MISSED_WORKOUT');
-  if (
+  const hasMissedWorkout = signals.missedWorkoutIds.length > 0;
+  const hasMissedStreak = signals.consecutiveMissedWorkouts > 1;
+  const hasLoadDeficit =
     signals.plannedLoadToDate >= 10 &&
     signals.loadCompletionRatio != null &&
-    signals.loadCompletionRatio < 0.7
-  ) {
-    result.add('LOAD_DEFICIT');
-  }
+    signals.loadCompletionRatio < 0.7;
+  const hasUnverified = signals.unverifiedWorkoutIds?.length > 0;
+  const result = new Set(
+    evidenceCodes.filter((code) => {
+      if (code === 'PLAN_ON_TRACK') return !hasDeviation && !hasUnverified;
+      if (code === 'MISSED_WORKOUT') return hasMissedWorkout;
+      if (code === 'MISSED_STREAK') return hasMissedStreak;
+      if (code === 'LOAD_DEFICIT') return hasLoadDeficit;
+      return true;
+    }),
+  );
+  if (hasMissedWorkout) result.add('MISSED_WORKOUT');
+  if (hasLoadDeficit) result.add('LOAD_DEFICIT');
+  if (hasUnverified) result.add('INSUFFICIENT_DATA');
   return [...result];
 }
 

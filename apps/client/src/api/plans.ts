@@ -19,6 +19,7 @@ import type {
   CalendarAdjustment,
   CalendarAdjustmentReceipt,
   PlanCalendarEdit,
+  PlanProposalPresentation,
 } from "@shared/plan-proposal";
 
 // 计划状态 定义
@@ -969,5 +970,119 @@ export async function openPlanStartConversation(
     },
   )) as PlanStartConversation | undefined;
   if (!result) throw new Error("START_CONVERSATION_UNAVAILABLE");
+  return result;
+}
+
+export type PlanStartDraft = {
+  plan: TrainingPlanDetail;
+  startDate: string;
+  earliestStartDate: string;
+  calendarTimeZone: string;
+  revision: string;
+};
+
+export type PlanStartConflict = {
+  date?: string;
+  code: string;
+  message: string;
+};
+
+export type PlanStartAssessmentResult =
+  | {
+      outcome: "STARTED";
+      alreadyActive: boolean;
+      startDate: string;
+      calendarTimeZone: string;
+      revision: string;
+      summary: string;
+      plan: TrainingPlanDetail;
+    }
+  | {
+      outcome: "SUGGESTED_CHANGES";
+      startDate: string;
+      calendarTimeZone: string;
+      revision: string;
+      summary: string;
+      originalCanStart: true;
+      previewId: string;
+      proposal: PlanProposalPresentation;
+    }
+  | {
+      outcome: "CONFLICT";
+      startDate: string;
+      calendarTimeZone: string;
+      revision: string;
+      summary: string;
+      conflicts: PlanStartConflict[];
+      originalCanStart: false;
+      previewId?: string;
+      proposal?: PlanProposalPresentation;
+    }
+  | {
+      outcome: "INSUFFICIENT_DATA";
+      startDate: string;
+      calendarTimeZone: string;
+      revision: string;
+      summary: string;
+      missingEvidence: string[];
+      originalCanStart: boolean;
+      conflicts: PlanStartConflict[];
+    };
+
+export type PlanStartConfirmResult = {
+  plan: TrainingPlanDetail;
+  started: boolean;
+  alreadyActive: boolean;
+};
+
+export async function fetchPlanStartDraft(
+  planId: string,
+  startDate?: string,
+): Promise<PlanStartDraft> {
+  const query = startDate ? `?startDate=${encodeURIComponent(startDate)}` : "";
+  const result = (await apiFetch(
+    `/ai/plans/${encodeURIComponent(planId)}/start-draft${query}`,
+    { suppressErrorToast: true },
+  )) as PlanStartDraft | undefined;
+  if (!result) throw new Error("START_DRAFT_UNAVAILABLE");
+  return result;
+}
+
+export async function assessPlanStart(
+  planId: string,
+  body: { startDate: string; revision?: string; lang?: string },
+  signal?: AbortSignal,
+): Promise<PlanStartAssessmentResult> {
+  const result = (await apiFetch(
+    `/ai/plans/${encodeURIComponent(planId)}/start-assessment`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+      signal,
+      suppressErrorToast: true,
+    },
+  )) as PlanStartAssessmentResult | undefined;
+  if (!result) throw new Error("START_ASSESSMENT_UNAVAILABLE");
+  return result;
+}
+
+export async function confirmPlanStart(
+  planId: string,
+  body: {
+    startDate: string;
+    revision: string;
+    choice: "ORIGINAL" | "SUGGESTED";
+    previewId?: string;
+  },
+): Promise<PlanStartConfirmResult> {
+  const result = (await apiFetch(
+    `/ai/plans/${encodeURIComponent(planId)}/start-confirm`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+      suppressErrorToast: true,
+    },
+  )) as PlanStartConfirmResult | undefined;
+  if (!result) throw new Error("START_CONFIRM_UNAVAILABLE");
   return result;
 }

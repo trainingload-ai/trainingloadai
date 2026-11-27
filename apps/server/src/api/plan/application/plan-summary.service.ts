@@ -157,10 +157,11 @@ export class PlanSummaryService {
       plan.startDate && plan.startDate > today ? plan.startDate : today;
     const from = new Date(anchor.getTime() - 28 * 86400000),
       through = new Date(anchor.getTime() + 84 * 86400000);
+    const bounded = plan.planningMode === 'ROLLING' && plan.status !== 'DRAFT';
     const workouts = (await this.workouts.findMany({
       where: {
         planId,
-        ...(plan.planningMode === 'ROLLING'
+        ...(bounded
           ? { scheduledDate: { gte: from, lte: through } }
           : {}),
       },
@@ -245,7 +246,7 @@ export class PlanSummaryService {
       planId: plan.id,
       status: plan.status as string,
       planningMode: plan.planningMode,
-      ...(plan.planningMode === 'ROLLING'
+      ...(bounded
         ? {
             workoutWindow: {
               from: from.toISOString().slice(0, 10),

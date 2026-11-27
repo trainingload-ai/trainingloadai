@@ -7,6 +7,7 @@ import {
   isCalendarMoveSession,
   PlanStartService,
 } from '../plan/application/plan-start.service';
+import { PlanStartAssessmentService } from './plan-start-assessment.service';
 import { ConflictException } from '@nestjs/common';
 import {
   TodaySuggestionGuidanceService,
@@ -326,6 +327,7 @@ export class AiController {
     private readonly assessmentCases: CoachAssessmentCaseService,
     private readonly todayGuidance: TodaySuggestionGuidanceService,
     private readonly planStarts: PlanStartService,
+    private readonly planStartAssessments: PlanStartAssessmentService,
   ) {}
 
   @Post('data-consent')
@@ -611,6 +613,66 @@ export class AiController {
       sid,
       previousConfirmationId,
     );
+  }
+
+  @Get('plans/:planId/start-draft')
+  getPlanStartDraft(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Query('startDate') startDate?: string,
+  ) {
+    return this.planStartAssessments.getStartDraft(userId, planId, startDate);
+  }
+
+  @Post('plans/:planId/start-assessment')
+  @RequiresRuntimeCapability('ai')
+  assessPlanStart(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Body()
+    body: {
+      startDate?: string;
+      revision?: string;
+      lang?: string;
+    },
+  ) {
+    if (!body?.startDate || typeof body.startDate !== 'string') {
+      throw new BadRequestException('startDate is required');
+    }
+    return this.planStartAssessments.assessStart(userId, planId, {
+      startDate: body.startDate,
+      revision: typeof body.revision === 'string' ? body.revision : undefined,
+      lang: typeof body.lang === 'string' ? body.lang : undefined,
+    });
+  }
+
+  @Post('plans/:planId/start-confirm')
+  confirmPlanStart(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Body()
+    body: {
+      startDate?: string;
+      revision?: string;
+      choice?: 'ORIGINAL' | 'SUGGESTED';
+      previewId?: string;
+    },
+  ) {
+    if (!body?.startDate || typeof body.startDate !== 'string') {
+      throw new BadRequestException('startDate is required');
+    }
+    if (!body?.revision || typeof body.revision !== 'string') {
+      throw new BadRequestException('revision is required');
+    }
+    if (body.choice !== 'ORIGINAL' && body.choice !== 'SUGGESTED') {
+      throw new BadRequestException('choice must be ORIGINAL or SUGGESTED');
+    }
+    return this.planStartAssessments.confirmStart(userId, planId, {
+      startDate: body.startDate,
+      revision: body.revision,
+      choice: body.choice,
+      previewId: typeof body.previewId === 'string' ? body.previewId : undefined,
+    });
   }
 
   @SkipThrottle({ default: true, ai: true })

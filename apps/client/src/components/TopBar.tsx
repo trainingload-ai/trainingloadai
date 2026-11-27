@@ -4,11 +4,21 @@ import { useGuestAccessText } from "@deployment/managed-ui";
 
 import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronsUpDown, User, Wrench } from "lucide-react";
+import { ChevronsUpDown, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { Button } from "./ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -82,6 +92,8 @@ function TopBarComponent({
   const tCompetition = useTranslations("CompetitionEvents");
   const tSettings = useTranslations("settings");
   const tSettingsPage = useTranslations("SettingsPage");
+  const tAccountDelete = useTranslations("AccountInner.deleteAccount");
+  const [signOutConfirmOpen, setSignOutConfirmOpen] = React.useState(false);
   const tPublicDemo = useGuestAccessText();
   const { canSignOut } = useSelfHostSessionPolicy();
   const showSessionPending = !hydrated || isPending;
@@ -148,13 +160,6 @@ function TopBarComponent({
     >
       <DropdownMenuGroup>
         <ManagedAccountMenuItem />
-        <Link href="/analysis" passHref>
-          <DropdownMenuItem className="flex items-center gap-2">
-            <Wrench className="h-4 w-4 text-muted-foreground" />
-            <span>{t("tools")}</span>
-          </DropdownMenuItem>
-        </Link>
-        <DropdownMenuSeparator />
         <Link href="/account" passHref>
           <DropdownMenuItem>{t("account")}</DropdownMenuItem>
         </Link>
@@ -209,11 +214,12 @@ function TopBarComponent({
         <>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            variant="destructive"
             disabled={publicDemo.active || signingOut}
             title={
               publicDemo.active ? tPublicDemo("readOnlyAction") : undefined
             }
-            onClick={onSignOutClick}
+            onClick={() => setSignOutConfirmOpen(true)}
           >
             {t("signOut")}
           </DropdownMenuItem>
@@ -221,6 +227,34 @@ function TopBarComponent({
       ) : null}
     </DropdownMenuContent>
   );
+
+  const signOutConfirmDialog = canSignOut ? (
+    <AlertDialog open={signOutConfirmOpen} onOpenChange={setSignOutConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t("signOut")}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {tAccountDelete("signOutDescription")}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={signingOut}>
+            {tAccountDelete("cancel")}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            disabled={signingOut}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => {
+              setSignOutConfirmOpen(false);
+              void onSignOutClick();
+            }}
+          >
+            {t("signOut")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  ) : null;
 
   const preferences = (
     <>
@@ -323,6 +357,7 @@ function TopBarComponent({
             {preferences}
           </div>
         ) : null}
+        {signOutConfirmDialog}
       </div>
     );
   }
@@ -407,6 +442,7 @@ function TopBarComponent({
           </div>
         </div>
       </div>
+      {signOutConfirmDialog}
     </>
   );
 }

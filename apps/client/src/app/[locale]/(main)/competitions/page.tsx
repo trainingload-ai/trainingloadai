@@ -108,92 +108,89 @@ export default function CompetitionsPage() {
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-3 px-1 pb-8">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-balance text-2xl font-semibold tracking-tight">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 pb-8">
+      <header className="flex flex-wrap items-center justify-between gap-2 py-0.5">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
             {t("page.title")}
           </h1>
+          <div className="inline-flex items-center gap-1 rounded-control bg-neutral-100 p-0.5 dark:bg-muted/45">
+            <Button
+              type="button"
+              size="icon-xs"
+              variant="ghost"
+              aria-label={t("page.previousYear")}
+              onClick={() => setYear(year - 1)}
+            >
+              <ChevronLeft aria-hidden="true" className="size-3.5" />
+            </Button>
+            <span className="px-1.5 text-xs font-medium tabular-nums text-foreground">
+              {t("page.yearLabel", { year })}
+            </span>
+            <Button
+              type="button"
+              size="icon-xs"
+              variant="ghost"
+              aria-label={t("page.nextYear")}
+              onClick={() => setYear(year + 1)}
+            >
+              <ChevronRight aria-hidden="true" className="size-3.5" />
+            </Button>
+          </div>
+          <span className="text-mobile-caption text-muted-foreground pc:text-xs">
+            {t("page.count", { count: events.length })}
+          </span>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <Button asChild variant="outline">
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Button asChild size="sm" variant="ghost">
             <Link href="/calendar">
-              <CalendarDays aria-hidden="true" className="mr-2 h-4 w-4" />
+              <CalendarDays aria-hidden="true" className="size-3.5" />
               {t("page.openCalendar")}
             </Link>
           </Button>
-          <Button type="button" onClick={openCreate}>
-            <Plus aria-hidden="true" className="mr-2 h-4 w-4" />
+          <Button type="button" size="sm" onClick={openCreate}>
+            <Plus aria-hidden="true" className="size-3.5" />
             {t("page.add")}
           </Button>
         </div>
       </header>
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold">
-              {t("page.yearLabel", { year })}
-            </h2>
-            <p className="mt-0.5 text-mobile-caption pc:text-xs text-muted-foreground">
-              {t("page.count", { count: events.length })}
-            </p>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              type="button"
-              size="icon"
-              variant="outline"
-              aria-label={t("page.previousYear")}
-              onClick={() => setYear(year - 1)}
-            >
-              <ChevronLeft aria-hidden="true" className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              size="icon"
-              variant="outline"
-              aria-label={t("page.nextYear")}
-              onClick={() => setYear(year + 1)}
-            >
-              <ChevronRight aria-hidden="true" className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
         {eventsQuery.isPending ? (
           <div
             aria-live="polite"
-            className="rounded-md bg-neutral-100 px-4 py-8 text-sm text-muted-foreground dark:bg-muted/45"
+            className="rounded-surface bg-neutral-100 px-4 py-8 text-sm text-muted-foreground dark:bg-muted/45"
           >
             {t("page.loading")}
           </div>
         ) : eventsQuery.isError ? (
           <div
             role="alert"
-            className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-8 text-sm text-destructive"
+            className="rounded-surface border border-destructive/30 bg-destructive/5 px-4 py-8 text-sm text-destructive"
           >
             {t("page.error")}
           </div>
         ) : grouped.length === 0 ? (
-          <div className="rounded-md border border-dashed border-border/70 bg-neutral-100 px-5 py-10 text-center dark:bg-muted/45">
-            <h2 className="text-sm font-semibold">
+          <div className="rounded-surface bg-neutral-100 px-6 py-12 text-center dark:bg-muted/45">
+            <h2 className="text-sm font-semibold text-foreground">
               {t("page.empty", { year })}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
               {t("page.emptyDescription")}
             </p>
             <Button
               type="button"
               size="sm"
+              variant="outline"
               className="mt-4"
               onClick={openCreate}
             >
+              <Plus aria-hidden="true" className="size-3.5" />
               {t("page.add")}
             </Button>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {grouped.map(([month, monthEvents]) => {
               const monthDate = new Date(
                 Number(month.slice(0, 4)),
@@ -201,11 +198,11 @@ export default function CompetitionsPage() {
                 1,
               );
               return (
-                <section key={month} className="space-y-2">
-                  <h3 className="px-1 text-mobile-caption pc:text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                <section key={month} className="space-y-1.5">
+                  <h3 className="px-1 text-mobile-caption font-medium text-muted-foreground pc:text-xs">
                     {monthFormatter.format(monthDate)}
                   </h3>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {monthEvents.map((event) => {
                       const eventDate = new Date(`${event.startDate}T00:00:00`);
                       return (
@@ -216,27 +213,27 @@ export default function CompetitionsPage() {
                             setSelectedEvent(event);
                             setDialogOpen(true);
                           }}
-                          className="block w-full rounded-md bg-neutral-100 px-4 py-3 text-left transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-muted/45 dark:hover:bg-muted/70"
+                          className="block w-full rounded-surface bg-neutral-100 px-4 py-3 text-left transition-colors hover:bg-neutral-200/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-muted/45 dark:hover:bg-muted/70"
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <span
                                 className={cn(
-                                  "truncate text-sm font-semibold",
+                                  "truncate text-sm font-semibold text-foreground",
                                   event.status === "CANCELLED" &&
                                     "line-through text-muted-foreground",
                                 )}
                               >
                                 {event.title}
                               </span>
-                              <span className="rounded-full bg-background px-2 py-0.5 text-mobile-caption pc:text-[11px] font-medium text-muted-foreground">
+                              <span className="rounded-compact bg-background/80 px-1.5 py-0.5 text-mobile-caption font-medium text-muted-foreground pc:text-[11px]">
                                 {t(`status.${event.status}`)}
                               </span>
-                              <span className="rounded-full bg-rose-50 px-2 py-0.5 text-mobile-caption pc:text-[11px] font-medium text-rose-700 dark:bg-rose-950/30 dark:text-rose-200">
+                              <span className="rounded-compact bg-rose-50 px-1.5 py-0.5 text-mobile-caption font-medium text-rose-700 dark:bg-rose-950/30 dark:text-rose-200 pc:text-[11px]">
                                 {t(`importance.${event.importance}.label`)}
                               </span>
                             </div>
-                            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-mobile-caption pc:text-xs text-muted-foreground">
+                            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-mobile-caption text-muted-foreground pc:text-xs">
                               <span>{dateFormatter.format(eventDate)}</span>
                               <span>{t(`sports.${event.sportType}`)}</span>
                               {event.distanceMeters ? (

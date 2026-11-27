@@ -702,6 +702,8 @@ export function uiSurfaceAssistantForToolResult(
               title: draft.title,
               description: draft.description,
               periodWeeks: draft.periodWeeks,
+              ...(draft.planningMode ? { planningMode: draft.planningMode } : {}),
+              ...(draft.goal !== undefined ? { goal: draft.goal } : {}),
               ...(draft.qualityContract
                 ? { qualityContract: draft.qualityContract }
                 : {}),

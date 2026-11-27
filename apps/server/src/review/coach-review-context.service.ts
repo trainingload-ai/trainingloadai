@@ -106,18 +106,20 @@ export type CoachReviewContext = {
     skipped: number;
     moved: number;
     incomplete: number;
+    unverified: number;
     plannedLoad: number;
-    actualLoad: number;
+    actualLoad: number | null;
     extraActivities: number;
     sportBreakdown: Record<string, { workouts: number; activities: number }>;
   };
   executionSignals: {
     missedWorkoutIds: string[];
+    unverifiedWorkoutIds: string[];
     consecutiveMissedWorkouts: number;
     plannedSessionsToDate: number;
     completedSessionsToDate: number;
     plannedLoadToDate: number;
-    actualLoadToDate: number;
+    actualLoadToDate: number | null;
     sessionCompletionRatio: number | null;
     loadCompletionRatio: number | null;
   };
@@ -264,7 +266,10 @@ export class CoachReviewContextService {
               : null,
           load: round(loads.get(row.id)?.actualLoad),
           sessionRpe: round(row.sessionRpe),
-          avgHeartRate: round(row.avgHeartRate),
+          avgHeartRate:
+            row.avgHeartRate != null && row.avgHeartRate > 0
+              ? round(row.avgHeartRate)
+              : null,
           avgPower: round(row.avgPower),
           linkedWorkoutId: linked?.planWorkoutId ?? null,
         },
@@ -523,8 +528,10 @@ function buildWindowSummary(
     moved: workouts.filter((row) => row.status === 'MOVED').length,
     incomplete: workouts.filter((row) => row.executionStatus === 'MISSED')
       .length,
+    unverified: workouts.filter((row) => row.executionStatus === 'UNVERIFIED')
+      .length,
     plannedLoad: roundSum(workouts.map((row) => row.expectedLoad)),
-    actualLoad: roundSum(activities.map((row) => row.load)),
+    actualLoad: sumRecordedLoad(activities.map((row) => row.load)),
     extraActivities: activities.filter((row) => !row.linkedWorkoutId).length,
     sportBreakdown,
   };
@@ -548,7 +555,7 @@ function resolveExecutionStatus(
       workout.expectedLoad != null &&
       activity.load >= workout.expectedLoad * 0.5,
   );
-  return comparable ? 'REPLACED_BY_ACTIVITY' : 'MISSED';
+  return comparable ? 'REPLACED_BY_ACTIVITY' : 'UNVERIFIED';
 }
 
 function buildExecutionSignals(args: {
@@ -572,6 +579,9 @@ function buildExecutionSignals(args: {
       ),
     );
   const missed = due.filter((workout) => workout.executionStatus === 'MISSED');
+  const unverified = due.filter(
+    (workout) => workout.executionStatus === 'UNVERIFIED',
+  );
   let consecutiveMissedWorkouts = 0;
   for (const workout of [...due].reverse()) {
     if (workout.executionStatus !== 'MISSED') break;
@@ -581,16 +591,15 @@ function buildExecutionSignals(args: {
     args.planStartDate && args.currentWeekIndex
       ? addDays(args.planStartDate, (args.currentWeekIndex - 1) * 7)
       : (due[0]?.date ?? addDays(args.anchorDate, -6));
-  const actualLoadToDate = roundSum(
-    args.activities
-      .filter(
-        (activity) =>
-          activity.date != null &&
-          activity.date >= weekStart &&
-          activity.date <= args.anchorDate,
-      )
-      .map((activity) => activity.load),
-  );
+  const weekLoads = args.activities
+    .filter(
+      (activity) =>
+        activity.date != null &&
+        activity.date >= weekStart &&
+        activity.date <= args.anchorDate,
+    )
+    .map((activity) => activity.load);
+  const actualLoadToDate = sumRecordedLoad(weekLoads);
   const plannedLoadToDate = roundSum(
     due.map((workout) => workout.expectedLoad),
   );
@@ -599,16 +608,20 @@ function buildExecutionSignals(args: {
   ).length;
   return {
     missedWorkoutIds: missed.map((workout) => workout.id),
+    unverifiedWorkoutIds: unverified.map((workout) => workout.id),
     consecutiveMissedWorkouts,
     plannedSessionsToDate: due.length,
     completedSessionsToDate,
     plannedLoadToDate,
     actualLoadToDate,
-    sessionCompletionRatio: due.length
+    sessionCompletionRatio: due.length > 0 && unverified.length === 0
       ? round(completedSessionsToDate / due.length, 3)
       : null,
     loadCompletionRatio:
-      plannedLoadToDate > 0
+      plannedLoadToDate > 0 &&
+      unverified.length === 0 &&
+      actualLoadToDate != null &&
+      weekLoads.every((load) => load != null)
         ? round(actualLoadToDate / plannedLoadToDate, 3)
         : null,
   };
@@ -683,6 +696,7 @@ function ymd(value: Date) {
 }
 
 function round(value: unknown, digits = 1): number | null {
+  if (value == null) return null;
   const number = Number(value);
   if (!Number.isFinite(number)) return null;
   const factor = 10 ** digits;
@@ -693,6 +707,10 @@ function roundSum(values: Array<number | null>) {
   return (
     round(values.reduce<number>((sum, value) => sum + (value ?? 0), 0)) ?? 0
   );
+}
+
+function sumRecordedLoad(values: Array<number | null>) {
+  return values.some((value) => value != null) ? roundSum(values) : null;
 }
 
 function sha256(value: string) {

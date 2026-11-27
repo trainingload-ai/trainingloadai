@@ -217,4 +217,26 @@ describe('ReviewScheduleService', () => {
       logSpy.mockRestore();
     }
   });
+
+  it('uses an explicit review date without postponing the job', async () => {
+    const { prisma, service } = createService();
+    prisma.userBodyMetric.findFirst.mockResolvedValueOnce({ value: 'Asia/Shanghai' });
+    jest.useFakeTimers();
+    const now = new Date('2026-11-26T12:00:00Z');
+    jest.setSystemTime(now);
+    try {
+      await service.triggerNow('user-1', 'WEEKLY', new Date('2026-12-06T21:00:00Z'));
+      expect(prisma.reviewJob.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          create: expect.objectContaining({
+            periodStart: new Date('2026-11-29T16:00:00Z'),
+            periodEnd: new Date('2026-12-06T16:00:00Z'),
+            availableAt: now,
+          }),
+        }),
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });

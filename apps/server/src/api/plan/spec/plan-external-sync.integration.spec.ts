@@ -16,7 +16,6 @@ import { ActivityReadService } from '../../activity/activity-read.service';
 import { PlanWriteSupport } from '../application/plan-write.support';
 import { PlanActivityLinkService } from '../application/plan-activity-link.service';
 import { ActivityService } from '../../activity/activity.service';
-import { isPrismaSerializableConflict } from '@/prisma/prisma-transaction-errors';
 import { readFileSync } from 'node:fs';
 import {
   planStartFixture,
@@ -1300,7 +1299,79 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     ? it
     : it.skip;
 
-  nativeIt('recovers from a concurrent match-state write without duplicating the workout completion', async () => {
+  nativeIt('commits an unrelated serializable workout write while matching another athlete', async () => {
+    const { activity, independent } = await independentScenario();
+    const edited = await service.createIndependentWorkout({
+      userId: 'other',
+      scheduledDate: independent.scheduledDate!,
+      sportType: 'RUN',
+      text: 'work 40m',
+      plannedDurationSeconds: 2400,
+      blocks: [],
+    });
+    const workouts = new PlanWorkoutRepository(prisma as never);
+    const findWorkouts = workouts.findMany.bind(workouts);
+    let notifyRead!: () => void;
+    let resumeMatch!: () => void;
+    const matchingRead = new Promise<void>((resolve) => { notifyRead = resolve; });
+    const editWritten = new Promise<void>((resolve) => { resumeMatch = resolve; });
+    jest.spyOn(workouts, 'findMany').mockImplementationOnce(async (args, tx) => {
+      // Force the table-level predicate reads seen in small PostgreSQL datasets.
+      await tx!.$executeRaw`SET LOCAL enable_indexscan = off`;
+      await tx!.$executeRaw`SET LOCAL enable_bitmapscan = off`;
+      await tx!.$queryRaw`
+        SELECT id FROM t_plan_workout_step WHERE workout_id = ${independent.id}
+      `;
+      const candidates = await findWorkouts(args, tx);
+      notifyRead();
+      await editWritten;
+      return candidates;
+    });
+    let matching: Promise<void> | undefined;
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SET LOCAL enable_indexscan = off`;
+        await tx.$executeRaw`SET LOCAL enable_bitmapscan = off`;
+        await tx.$queryRaw`
+          SELECT id FROM t_plan_workout_activity_link
+          WHERE plan_workout_id = ${edited.id}
+        `;
+        matching = matcher(workouts).tryAutoLinkForActivity(activity.id);
+        await Promise.race([
+          matchingRead,
+          matching.then(() => {
+            throw new Error('Activity matching did not reach the concurrent read');
+          }),
+        ]);
+        await tx.planWorkout.update({
+          where: { id: edited.id },
+          data: { plannedDurationSeconds: 1500, text: 'work 25m' },
+        });
+        await tx.planWorkoutStep.create({
+          data: {
+            workoutId: edited.id,
+            orderIndex: 0,
+            stepType: 'WORK',
+            durationType: 'TIME',
+            durationValue: 1500,
+            durationUnit: 'SECONDS',
+          },
+        });
+        resumeMatch();
+        await matching;
+      }, { isolationLevel: 'Serializable', timeout: 15_000 });
+    } finally {
+      resumeMatch();
+      await matching;
+    }
+    await expect(prisma.planWorkout.findUnique({ where: { id: edited.id } }))
+      .resolves.toMatchObject({ plannedDurationSeconds: 1500 });
+    await expect(prisma.planWorkoutActivityLink.findMany({
+      where: { activityId: activity.id, unlinkedAt: null },
+    })).resolves.toMatchObject([{ planWorkoutId: independent.id, source: 'AUTO_MATCH' }]);
+  }, 20_000);
+
+  nativeIt('waits for a concurrent match-state write and completes the workout once', async () => {
     const { activity, independent } = await independentScenario();
     const where = { activityId: activity.id };
     await prisma.planActivityMatchState.create({
@@ -1314,16 +1385,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     });
 
     const links = new PlanActivityLinkRepository(prisma as never);
-    const putMatchState = links.putMatchState.bind(links);
-    const conflicts: unknown[] = [];
-    jest.spyOn(links, 'putMatchState').mockImplementation(async (...args) => {
-      try {
-        return await putMatchState(...args);
-      } catch (error) {
-        conflicts.push(error);
-        throw error;
-      }
-    });
+    const putMatchState = jest.spyOn(links, 'putMatchState');
     const matching = matcher(undefined, links);
     const result = await raceWithUncommittedPlanWrite(
       prisma,
@@ -1336,7 +1398,9 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     );
 
     expect(result.status).toBe('fulfilled');
-    expect(conflicts.map(isPrismaSerializableConflict)).toEqual([true]);
+    expect(putMatchState.mock.calls.filter(([args]) =>
+      args.create.outcome === 'AUTO_LINKED',
+    )).toHaveLength(1);
     await expect(
       prisma.planActivityMatchState.findUniqueOrThrow({ where }),
     ).resolves.toMatchObject({ outcome: 'AUTO_LINKED', reason: 'MATCHED' });

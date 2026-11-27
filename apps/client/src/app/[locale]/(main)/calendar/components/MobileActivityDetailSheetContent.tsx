@@ -13,10 +13,13 @@ import { updateActivitySessionRpe } from "@/api/activity";
 import { getActivityPlanLink } from "@/api/activity-plan-link";
 import { useActivityMetricAvailability } from "@/api/useActivityMetric";
 import { ActivityDataChart } from "@/app/[locale]/(main)/activities/[activityId]/components/ActivityDataChart";
+import { ActivityCoachReview } from "@/app/[locale]/(main)/activities/[activityId]/components/AIAnalysis";
 import { ActivityStrengthSection } from "@/app/[locale]/(main)/activities/[activityId]/components/ActivityStrengthSection";
 import { Button } from "@/components/ui/button";
 import { formatValue, getUnit } from "@/hooks/useFormatterBySettings";
 import { useGetActivity } from "@/hooks/useActivities";
+import { ActivityDetailIdContext } from "@/hooks/useActivityId";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { Link } from "@/i18n/navigation";
 import { getActivityDataChartsForSport } from "@/lib/activity-data-charts";
 import { getActivityDetailPolicy } from "@/lib/activity-detail-policy";
@@ -25,6 +28,7 @@ import { getOtherActivitySummaryCapabilities } from "@/lib/activity-presentation
 import { invalidateActivityDerivedCaches } from "@/lib/query-invalidation";
 import { queryKeys } from "@/lib/query-keys";
 import { useStore } from "@/lib/store";
+import { resolveActivityDisplayTimezone } from "@/lib/user-timezone";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
 import { MobileActivityMapHero } from "./MobileActivityMapHero";
 import { ActivityDetailPlanLinkControl } from "@/components/plan/activity-plan-link-control";
@@ -391,6 +395,7 @@ export function MobileActivityDetailSheetContent({
   const activityId = previewActivity.hashId ?? String(previewActivity.id ?? "");
   const detailQuery = useGetActivity(activityId);
   const activity = detailQuery.data ?? previewActivity;
+  const { data: profile } = useUserProfile();
   const title = getLocalizedActivityTitle(
     activity,
     tActivityTitle,
@@ -400,6 +405,7 @@ export function MobileActivityDetailSheetContent({
     ? new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
+        timeZone: resolveActivityDisplayTimezone(activity, profile),
       }).format(new Date(activity.startTime))
     : null;
   const sportType = String(activity.sportType ?? "").toUpperCase();
@@ -635,6 +641,13 @@ export function MobileActivityDetailSheetContent({
           activity={activity}
           activityId={activityId}
         />
+
+        {showAnalysis && activity.hashId && sportType !== "SWIM" &&
+        getActivityDetailState(activity).canShowEnhancedDetail ? (
+          <ActivityDetailIdContext.Provider value={activity.hashId}>
+            <ActivityCoachReview />
+          </ActivityDetailIdContext.Provider>
+        ) : null}
 
         <ActivityStrengthSection activity={activity} />
 

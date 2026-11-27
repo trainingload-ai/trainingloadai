@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, ChevronLeft, PencilLine, X } from "lucide-react";
+import { Check, ChevronLeft, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -268,14 +268,13 @@ export function CoachQuestionCard({
       </div>
 
       <footer className="mx-4 flex flex-wrap items-end gap-x-2 gap-y-1 py-2 sm:mx-5">
-        <div className="relative min-w-24 flex-1">
-          <PencilLine
-            aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-2 size-5 rounded-full bg-muted p-1 text-muted-foreground"
-          />
+        <div className="min-w-36 flex-1">
+          <Label htmlFor={`${instanceId}-coach-q-${activeQuestion.id}-note`} className="sr-only">
+            {t("noteLabel")}
+          </Label>
           <Textarea
             id={`${instanceId}-coach-q-${activeQuestion.id}-note`}
-            aria-label={t("noteLabel")}
+            name={activeQuestion.id}
             value={notes[activeQuestion.id] ?? ""}
             disabled={disabled}
             rows={1}
@@ -289,7 +288,7 @@ export function CoachQuestionCard({
               }));
             }}
             placeholder={t("notePlaceholder")}
-            className="min-h-9 max-h-24 resize-none rounded-sm border-0 bg-transparent py-2 pl-8 pr-1 text-sm leading-5 shadow-none focus-visible:ring-inset"
+            className="min-h-11 max-h-32 resize-y leading-5 sm:min-h-9"
           />
         </div>
         <div className="ml-auto flex min-h-9 items-center gap-2">

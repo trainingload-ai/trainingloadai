@@ -113,14 +113,16 @@ export class RollingPlanService {
       tx,
     );
     const through = addCalendarDays(isoWeekStart(startDate), 6);
+    const starterWindowEnd = addCalendarDays(startDate, 6);
+    const allowedThrough = starterWindowEnd > through ? starterWindowEnd : through;
     for (const workout of workouts) {
       const scheduled = addCalendarDays(
         startDate,
         (workout.weekIndex - 1) * 7 + workout.dayIndex - 1,
       );
-      if (scheduled < startDate || scheduled > through || !authorized)
+      if (scheduled < startDate || scheduled > allowedThrough || !authorized)
         throw new UnprocessableEntityException(
-          'First rolling week must contain only the remaining ISO week and authorized sports',
+          'First rolling week must contain only the starter window and authorized sports',
         );
     }
     return { ...settings, generatedFrom: startDate, generatedThrough: through };
@@ -202,6 +204,21 @@ export class RollingPlanService {
           },
         },
         data: { generationId: generation.id },
+      },
+      tx,
+    );
+    // Preserve saved starter-draft workouts that carry over into the next ISO week
+    // so subsequent weekly automation keeps their original IDs without duplicating or overwriting them.
+    await this.workouts.updateMany(
+      {
+        where: {
+          planId,
+          userId,
+          scheduledDate: {
+            gt: date(settings.generatedThrough),
+          },
+        },
+        data: { automationProtected: true },
       },
       tx,
     );

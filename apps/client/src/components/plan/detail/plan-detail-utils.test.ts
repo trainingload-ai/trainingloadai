@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import dayjs from "dayjs";
+import { createTranslator, type AbstractIntlMessages } from "next-intl";
 import type { PlanWorkout, TrainingPlanDetail } from "@/api/plans";
 import {
   buildWeekGroups,
@@ -79,6 +80,14 @@ describe("plan workout display kind", () => {
         today,
       ),
     ).toBe("upcoming");
+  });
+
+  it("uses the plan-local day for a workout projected onto the earliest valid start", () => {
+    expect(getPlanWorkoutDisplayKind({
+      status: "PLANNED",
+      scheduledDate: "2026-09-21",
+      calendarTodayYmd: "2026-09-21",
+    })).toBe("upcoming");
   });
 });
 
@@ -296,9 +305,14 @@ describe("rollupPlanDetailExecution", () => {
     const started = {
       ...plan,
       startDate: "2026-11-25",
-      workouts: [workout({ dayIndex: 1, scheduledDate: "2026-11-25" })],
+      workouts: [workout({ id: "wednesday", status: "PLANNED", scheduledDate: "2026-11-25" })],
     };
-    const t = (key: string) => key;
+    const t = createTranslator<AbstractIntlMessages>({
+      locale: "en",
+      messages: {},
+      getMessageFallback: ({ key }) => key,
+      onError: () => {},
+    });
     expect(toDerivedWorkout(t, started, started.workouts[0]).dayLabel).toBe("weekday.wed");
     expect(buildWeekGroups(t, started)[0].days.slice(0, 2).map(({ dayLabel, dateKey }) => ({
       dayLabel,
@@ -307,6 +321,39 @@ describe("rollupPlanDetailExecution", () => {
       { dayLabel: "weekday.wed", dateKey: "2026-11-25" },
       { dayLabel: "weekday.thu", dateKey: "2026-11-26" },
     ]);
+  });
+
+  it("shows all saved rolling starter workouts before the plan has an activation date", () => {
+    const draft: TrainingPlanDetail = {
+      ...plan,
+      status: "DRAFT",
+      planningMode: "ROLLING",
+      periodWeeks: null,
+      startDate: null,
+      endDate: null,
+      generationMetadata: { qualityContract: { startDate: "2026-12-31" } },
+      workouts: [2, 4, 6].map((offset) => workout({
+        id: `starter-${offset}`, status: "PLANNED", scheduledDate: null,
+        dayOffset: offset, dayIndex: offset + 1,
+      })),
+    };
+    const t = createTranslator<AbstractIntlMessages>({
+      locale: "en", messages: {}, getMessageFallback: ({ key }) => key, onError: () => {},
+    });
+    expect(buildWeekGroups(t, draft).flatMap((week) => week.days.flatMap((day) =>
+      day.workouts.map(({ id, dateKey }) => [id, dateKey]),
+    ))).toEqual([
+      ["starter-2", "2027-01-02"], ["starter-4", "2027-01-04"], ["starter-6", "2027-01-06"],
+    ]);
+    expect(rollupPlanDetailExecution(draft, dayjs("2027-01-07"))).toMatchObject({
+      incomplete: 0, upcoming: 3,
+    });
+
+    const later = workout({
+      id: "later", status: "PLANNED", weekIndex: 12, dayOffset: 77, scheduledDate: null,
+    });
+    expect(buildWeekGroups(t, { ...draft, workouts: [...draft.workouts, later] })
+      .map(({ weekIndex }) => weekIndex)).toEqual([1, 12]);
   });
 
   it("falls back to plan day when scheduledDate is missing", () => {
