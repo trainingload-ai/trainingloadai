@@ -151,6 +151,10 @@
       "types": "./src/ai-data-consent/ai-data-consent.service.ts",
       "default": "./src/ai-data-consent/ai-data-consent.service.ts"
     },
+    "./analyze/activity-recompute-job.writer": {
+      "types": "./src/analyze/activity-recompute-job.writer.ts",
+      "default": "./src/analyze/activity-recompute-job.writer.ts"
+    },
     "./analyze/analyze.module": {
       "types": "./src/analyze/analyze.module.ts",
       "default": "./src/analyze/analyze.module.ts"
