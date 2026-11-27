@@ -968,7 +968,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 147
+          "line": 150
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
