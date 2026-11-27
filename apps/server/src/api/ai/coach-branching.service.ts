@@ -162,16 +162,28 @@ export class CoachBranchingService {
     });
   }
 
-  private async requireContextOwner(userId: string, contextId: string) {
-    const context = await this.planQuery.findContextById(contextId);
+  private async requireContextOwner(
+    userId: string,
+    contextId: string,
+    tx?: PrismaTx,
+  ) {
+    const context = await this.planQuery.findContextById(
+      contextId,
+      undefined,
+      tx,
+    );
     if (!context || context.userId !== userId) {
       this.fail('Coach context not found');
     }
     return context;
   }
 
-  private async requireBranchOwner(userId: string, branchId: string) {
-    const branch = await this.prisma.coachBranch.findUnique({
+  private async requireBranchOwner(
+    userId: string,
+    branchId: string,
+    tx?: PrismaTx,
+  ) {
+    const branch = await (tx ?? this.prisma).coachBranch.findUnique({
       where: { id: branchId },
       include: {
         context: true,
@@ -228,21 +240,25 @@ export class CoachBranchingService {
     return thread.headMsgSeq;
   }
 
-  async openBranch(args: {
-    userId: string;
-    contextId?: string;
-    planId?: string;
-    anchor?: { baseEventSeq?: number; baseCommitId?: string | null };
-    openReason?: string;
-    sourceNode?: unknown;
-    allowFinalized?: boolean;
-  }) {
+  async openBranch(
+    args: {
+      userId: string;
+      contextId?: string;
+      planId?: string;
+      anchor?: { baseEventSeq?: number; baseCommitId?: string | null };
+      openReason?: string;
+      sourceNode?: unknown;
+      allowFinalized?: boolean;
+    },
+    transaction?: PrismaTx,
+  ) {
     const context = args.contextId
-      ? await this.requireContextOwner(args.userId, args.contextId)
+      ? await this.requireContextOwner(args.userId, args.contextId, transaction)
       : args.planId
         ? await this.coachContext.ensureContext({
             userId: args.userId,
             planId: args.planId,
+            tx: transaction,
           })
         : null;
     if (!context || context.userId !== args.userId) {
@@ -268,7 +284,7 @@ export class CoachBranchingService {
       this.fail('BASE_VERSION_MISMATCH');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const write = async (tx: PrismaTx) => {
       const thread = await this.getOrCreateMainThread(tx, context.id);
       const latestCommit = await tx.coachCommit.findFirst({
         where: { contextId: context.id },
@@ -308,7 +324,8 @@ export class CoachBranchingService {
       }
 
       return { branch };
-    });
+    };
+    return transaction ? write(transaction) : this.prisma.$transaction(write);
   }
 
   async bindStartConversationBranch(args: {
@@ -505,26 +522,33 @@ export class CoachBranchingService {
     return { compaction };
   }
 
-  async squashBranch(args: {
-    userId: string;
-    branchId: string;
-    mode?: 'AUTO' | 'MANUAL';
-    riskTier?: 'LOW' | 'HIGH';
-    decisionType?: string;
-    binding?: { sid: string; branchId: string; userMessageId?: string };
-    payload?: unknown;
-    rationale?: string;
-    confidence?: number;
-    options?: Array<{
-      optionKey: string;
-      title?: string;
-      pros?: unknown;
-      cons?: unknown;
-      impact?: unknown;
-      isSelected?: boolean;
-    }>;
-  }) {
-    const branch = await this.requireBranchOwner(args.userId, args.branchId);
+  async squashBranch(
+    args: {
+      userId: string;
+      branchId: string;
+      mode?: 'AUTO' | 'MANUAL';
+      riskTier?: 'LOW' | 'HIGH';
+      decisionType?: string;
+      binding?: { sid: string; branchId: string; userMessageId?: string };
+      payload?: unknown;
+      rationale?: string;
+      confidence?: number;
+      options?: Array<{
+        optionKey: string;
+        title?: string;
+        pros?: unknown;
+        cons?: unknown;
+        impact?: unknown;
+        isSelected?: boolean;
+      }>;
+    },
+    transaction?: PrismaTx,
+  ) {
+    const branch = await this.requireBranchOwner(
+      args.userId,
+      args.branchId,
+      transaction,
+    );
     if (
       branch.status !== CoachFlowStatus.OPEN &&
       branch.status !== CoachFlowStatus.SQUASHED &&
@@ -716,7 +740,7 @@ export class CoachBranchingService {
       };
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const write = async (tx: PrismaTx) => {
       await acquireHashtextAdvisoryXactLock(tx, args.userId);
       const latestContext =
         typeof tx.coachContext?.findUnique === 'function'
@@ -831,7 +855,8 @@ export class CoachBranchingService {
       });
 
       return { decision, options };
-    });
+    };
+    return transaction ? write(transaction) : this.prisma.$transaction(write);
   }
 
   async canUseDecisionTools(args: {

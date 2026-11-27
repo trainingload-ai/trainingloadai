@@ -28,8 +28,12 @@ describe('next cycle recommendation eligibility', () => {
     ).toEqual(['old']);
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { userId: 'owner', status: { not: 'DRAFT' } },
+        where: expect.objectContaining({
+          userId: 'owner',
+          status: { not: 'DRAFT' },
+        }),
       }),
+      undefined,
     );
   });
   it.each(['ACTIVE', 'SCHEDULED', 'PAUSED'])(

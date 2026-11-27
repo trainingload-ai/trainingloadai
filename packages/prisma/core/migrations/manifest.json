@@ -220,7 +220,12 @@
       "id": "0044_import_item_utc_availability",
       "file": "0044_import_item_utc_availability/migration.sql",
       "sha256": "59f7dad8a05c7c41790a3d7f81fff4e27db27ab1146b1abd52bbc1c07a6ad980"
+    },
+    {
+      "id": "0045_coach_cycle_review_queue",
+      "file": "0045_coach_cycle_review_queue/migration.sql",
+      "sha256": "eb6fc7e66423bbbe479b7bd92d15115831a2e5b465b391e3098e6bc8943eaee9"
     }
   ],
-  "schemaChecksum": "7b196e317d3b63144be80625ed880a8fddfa256ac4b418a45d06b0edb26bf769"
+  "schemaChecksum": "c270cbf486897b93ee6078d395ebf190a738e2ea876e150a3911489bf10d9179"
 }

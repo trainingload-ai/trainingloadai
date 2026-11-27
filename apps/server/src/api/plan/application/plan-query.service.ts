@@ -618,11 +618,11 @@ export class PlanQueryService {
     });
   }
 
-  findPlanTitle(planId: string) {
-    return this.plans.findUnique({
-      where: { id: planId },
-      select: { id: true, title: true },
-    });
+  findPlanTitle(planId: string, db?: PlanDb) {
+    return this.plans.findUnique(
+      { where: { id: planId }, select: { id: true, title: true } },
+      db,
+    );
   }
 
   /** A completed cycle needs a next-plan suggestion only until a successor exists.
@@ -632,12 +632,28 @@ export class PlanQueryService {
   async findNextCycleEligiblePlanIds(
     userId: string,
     planIds: string[],
+    db?: PlanDb,
   ): Promise<string[]> {
     if (!planIds.length) return [];
-    const plans = await this.plans.findMany({
-      where: { userId, status: { not: 'DRAFT' } },
-      select: { id: true, status: true, completedAt: true, activatedAt: true },
-    });
+    const plans = await this.plans.findMany(
+      {
+        where: {
+          userId,
+          status: { not: 'DRAFT' },
+          OR: [
+            { status: { not: 'SCHEDULED' } },
+            scheduledReplacementReservationWhere(userId),
+          ],
+        },
+        select: {
+          id: true,
+          status: true,
+          completedAt: true,
+          activatedAt: true,
+        },
+      },
+      db,
+    );
     return plans
       .filter(
         (source) =>
@@ -1336,11 +1352,14 @@ export class PlanQueryService {
     );
   }
 
-  findContextByPlan(userId: string, planId: string) {
-    return this.contexts.findFirst({
-      where: { userId, planId },
-      select: { id: true, planId: true, status: true },
-    });
+  findContextByPlan(userId: string, planId: string, db?: PlanDb) {
+    return this.contexts.findFirst(
+      {
+        where: { userId, planId },
+        select: { id: true, planId: true, status: true },
+      },
+      db,
+    );
   }
 
   findRecentReviewEvents(args: {

@@ -218,4 +218,12 @@ export class CoachContextRepository {
   ) {
     return this.db(tx).coachSummary.findUnique(args);
   }
+
+  enqueueCycleReview(contextId: string, tx: PlanDb) {
+    return this.db(tx).coachCycleReviewJob.upsert({
+      where: { contextId },
+      create: { contextId },
+      update: {},
+    });
+  }
 }

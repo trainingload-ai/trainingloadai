@@ -232,6 +232,7 @@ export class PlanWriteSupport {
    */
   private async attachActualLoadToWorkouts(
     plan?: { workouts?: unknown } | null,
+    tx?: Tx,
   ) {
     if (!plan || !Array.isArray(plan.workouts)) return;
     const ids: number[] = [];
@@ -250,7 +251,7 @@ export class PlanWriteSupport {
     }
     if (ids.length === 0) return;
 
-    const map = await this.loadReadout.batchGetActualLoad(ids);
+    const map = await this.loadReadout.batchGetActualLoad(ids, tx);
     for (const workout of plan.workouts) {
       const links = mutableWorkoutLinks(workout);
       if (!links) continue;
@@ -3764,7 +3765,7 @@ export class PlanWriteSupport {
         tx,
       );
 
-      await this.attachActualLoadToWorkouts(updated);
+      await this.attachActualLoadToWorkouts(updated, tx);
 
       const finalized = await this.coachContext.finalizeContext({
         tx,

@@ -1,7 +1,10 @@
 import { PlanCalendarValidationService } from '../application/plan-calendar-validation.service';
 import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PLAN_WORKOUTS_CHANGED_EVENT } from '../events/plan.events';
+import {
+  PLAN_COMPLETED_EVENT,
+  PLAN_WORKOUTS_CHANGED_EVENT,
+} from '../events/plan.events';
 import { CoachBranchingService } from '../../ai/coach-branching.service';
 import { PlanWorkoutsChangedEvent } from '../events/plan.events';
 import { fork, type ChildProcess } from 'node:child_process';
@@ -9,6 +12,12 @@ import { resolve } from 'node:path';
 import { PrismaClient, type Prisma } from '@prisma/client';
 import { PlanExternalSyncService } from '../application/plan-external-sync.service';
 import { PlanRepository } from '../persistence/plan.repository';
+import { CoachContextRepository } from '../persistence/coach-context.repository';
+import { CoachContextService } from '../application/coach-context.service';
+import { PlanQueryService } from '../application/plan-query.service';
+import { PlanSummaryService } from '../application/plan-summary.service';
+import { CoachCycleReviewRuntimeService } from '@/review/coach-cycle-review-runtime.service';
+import { featureAccessSnapshot } from '@/access/feature-access.types';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
 import { PlanLinkMatcherService } from '../application/plan-link-matcher.service';
@@ -275,6 +284,180 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     });
     return write;
   }
+
+  function cycleReview() {
+    const plans = new PlanRepository(prisma as never);
+    const contexts = new CoachContextRepository(prisma as never);
+    const query = new PlanQueryService(
+      prisma as never,
+      plans,
+      {} as never,
+      {} as never,
+      contexts,
+      {} as never,
+    );
+    const events = new EventEmitter2();
+    const coachContext = new CoachContextService(
+      prisma as never,
+      new PlanSummaryService(
+        prisma as never,
+        {} as never,
+        plans,
+        new PlanWorkoutRepository(prisma as never),
+      ),
+      contexts,
+      plans,
+      {} as never,
+      events,
+    );
+    const write = manualLinks();
+    Object.assign(write, { coachContext });
+    const branching = new CoachBranchingService(
+      prisma as never,
+      {} as never,
+      coachContext,
+      query,
+      {} as never,
+      {} as never,
+    );
+    const worker = (getPreferredLocale = async () => 'en') =>
+      new CoachCycleReviewRuntimeService(
+        prisma as never,
+        branching,
+        { getPreferredLocale } as never,
+        {
+          evaluate: async () =>
+            featureAccessSnapshot({ allowed: true, reason: 'GRANTED' }),
+        } as never,
+        { t: (key: string) => key } as never,
+        query,
+      );
+    const complete = (planId: string, tx: Prisma.TransactionClient) =>
+      write.completePlan('user', planId, undefined, undefined, undefined, {
+        tx,
+      });
+    return { complete, worker, branching, events };
+  }
+
+  const activePlan = () =>
+    prisma.plan.create({
+      data: {
+        userId: 'user',
+        title: 'Cycle plan',
+        periodWeeks: 2,
+        status: 'ACTIVE',
+        startDate: new Date('2026-01-02'),
+        endDate: new Date('2026-01-15'),
+      },
+    });
+
+  it('commits the cycle job with plan completion and recovers it without a process event', async () => {
+    const historical = await prisma.plan.create({
+      data: {
+        userId: 'user', title: 'Historical plan', periodWeeks: 1, status: 'COMPLETED',
+        completedAt: new Date('2025-10-01'),
+        coachContext: { create: { userId: 'user', status: 'FINALIZED' } },
+      },
+    });
+    const cancelled = await prisma.plan.create({
+      data: { userId: 'user', title: 'Old cancelled plan', periodWeeks: 1, status: 'CANCELLED' },
+    });
+    await prisma.plan.create({
+      data: {
+        userId: 'user', title: 'Orphaned replacement', periodWeeks: 1,
+        status: 'SCHEDULED', scheduledActivationAt: new Date('2026-01-15'),
+        supersedesPlanId: cancelled.id,
+      },
+    });
+    const plan = await activePlan();
+    const { complete, worker, events } = cycleReview();
+    const notice = jest.fn();
+    events.on(PLAN_COMPLETED_EVENT, notice);
+    await worker().drain();
+    expect(await prisma.coachCycleReviewJob.count({
+      where: { context: { planId: historical.id } },
+    })).toBe(0);
+    await expect(
+      prisma.$transaction(async (tx) => {
+        await complete(plan.id, tx);
+        expect(await tx.coachCycleReviewJob.count()).toBe(1);
+        throw new Error('completion interrupted before commit');
+      }),
+    ).rejects.toThrow('completion interrupted before commit');
+    expect(await prisma.coachCycleReviewJob.count()).toBe(0);
+    expect(
+      await prisma.plan.findUnique({ where: { id: plan.id } }),
+    ).toMatchObject({ status: 'ACTIVE' });
+
+    const committed = await prisma.$transaction((tx) => complete(plan.id, tx));
+    expect(notice).not.toHaveBeenCalled();
+    const first = worker();
+    const second = worker();
+    await Promise.all([first.drain(), second.drain()]);
+    await first.drain();
+    expect(await prisma.coachCycleReviewJob.findMany()).toMatchObject([
+      { completedAt: expect.any(Date), attempts: 1, claimToken: null },
+    ]);
+    expect(await prisma.coachDecision.findMany()).toMatchObject([
+      {
+        decisionType: 'PLAN_LIFECYCLE',
+        payload: { planId: plan.id, action: 'open_next' },
+      },
+    ]);
+    expect(await prisma.coachBranch.count()).toBe(1);
+    await committed.afterCommit?.();
+    expect(notice).toHaveBeenCalledTimes(1);
+  });
+
+  it('rolls back a partial proposal and ignores a worker whose claim expired', async () => {
+    const plan = await activePlan();
+    const { complete, worker, branching } = cycleReview();
+    await prisma.$transaction((tx) => complete(plan.id, tx));
+    const interrupted = jest
+      .spyOn(branching, 'squashBranch')
+      .mockRejectedValueOnce(
+        new Error('interrupted while publishing proposal'),
+      );
+    try {
+      await worker().drain();
+    } finally {
+      interrupted.mockRestore();
+    }
+    expect(await prisma.coachBranch.count()).toBe(0);
+    expect(await prisma.coachCycleReviewJob.findFirst()).toMatchObject({
+      completedAt: null,
+      attempts: 1,
+      claimToken: null,
+    });
+    await prisma.coachCycleReviewJob.updateMany({
+      data: { availableAt: new Date(0) },
+    });
+
+    const entered = Promise.withResolvers<void>();
+    const resume = Promise.withResolvers<void>();
+    const stale = worker(async () => {
+      entered.resolve();
+      await resume.promise;
+      return 'en';
+    }).drain();
+    try {
+      await Promise.race([entered.promise, stale]);
+      await prisma.coachCycleReviewJob.updateMany({
+        data: { leaseExpiresAt: new Date(0) },
+      });
+      await worker().drain();
+    } finally {
+      resume.resolve();
+      await stale;
+    }
+    expect(await prisma.coachCycleReviewJob.findFirst()).toMatchObject({
+      completedAt: expect.any(Date),
+      attempts: 3,
+      claimToken: null,
+    });
+    expect(await prisma.coachBranch.count()).toBe(1);
+    expect(await prisma.coachDecision.count()).toBe(1);
+  });
 
   async function independentScenario() {
     const f = await matchingScenario();

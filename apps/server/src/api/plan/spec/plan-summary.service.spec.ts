@@ -183,9 +183,10 @@ describe('PlanSummaryService.summarize', () => {
         periodWeeks: true,
       },
     });
-    expect(loadReadout.batchGetActualLoad).toHaveBeenCalledWith([
-      101, 102, 103,
-    ]);
+    expect(loadReadout.batchGetActualLoad).toHaveBeenCalledWith(
+      [101, 102, 103],
+      undefined,
+    );
     expect(summary.totals).toMatchObject({
       workoutCount: 4,
       doneCount: 2,

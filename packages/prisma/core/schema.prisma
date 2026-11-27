@@ -5592,12 +5592,27 @@ model CoachContext {
   decisions       CoachDecision[]
   commits         CoachCommit[]
   assessmentCases CoachAssessmentCase[]
+  cycleReviewJob  CoachCycleReviewJob?
 
   @@unique([userId, planId])
   @@index([userId, headEventSeq])
   @@index([userId, status, updatedAt(sort: Desc)])
   @@index([planId])
   @@map("t_coach_context")
+}
+
+model CoachCycleReviewJob {
+  contextId      String    @id @map("context_id")
+  context        CoachContext @relation(fields: [contextId], references: [id], onDelete: Cascade)
+  availableAt    DateTime  @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)")) @map("available_at")
+  claimToken     String?   @map("claim_token")
+  leaseExpiresAt DateTime? @map("lease_expires_at")
+  completedAt    DateTime? @map("completed_at")
+  attempts       Int       @default(0)
+  lastError      String?   @map("last_error")
+
+  @@index([completedAt, availableAt])
+  @@map("t_coach_cycle_review_job")
 }
 
 /// 教练上下文事件（仅追加，不可变）

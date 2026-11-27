@@ -197,6 +197,10 @@
       "0044_import_item_utc_availability": {
         "phase": "expand",
         "releaseVersion": "1.1.27"
+      },
+      "0045_coach_cycle_review_queue": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
       }
     }
   }

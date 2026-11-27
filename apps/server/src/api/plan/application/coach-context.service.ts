@@ -183,7 +183,8 @@ export class CoachContextService {
                 : []),
               ...(Array.isArray(change?.workoutIds)
                 ? change.workoutIds.filter(
-                    (id): id is string => typeof id === 'string' && id.length > 0,
+                    (id): id is string =>
+                      typeof id === 'string' && id.length > 0,
                   )
                 : []),
             ]),
@@ -297,7 +298,7 @@ export class CoachContextService {
     source?: EventSource;
     occurredAt?: Date;
     reason?: string | null;
-    tx?: PlanDb;
+    tx: PlanDb;
   }) {
     const context = await this.ensureContext({
       userId: args.userId,
@@ -327,7 +328,11 @@ export class CoachContextService {
       return null;
     }
 
-    const summary = await this.planSummary.summarize(args.userId, args.planId);
+    const summary = await this.planSummary.summarize(
+      args.userId,
+      args.planId,
+      args.tx,
+    );
     const progressLabel = this.toProgressLabel({
       completionRate: summary.totals.completionRate,
       complianceRate: summary.totals.complianceRate,
@@ -432,6 +437,10 @@ export class CoachContextService {
       );
     }
 
+    if (args.planStatus === 'COMPLETED') {
+      await this.contexts.enqueueCycleReview(context.id, args.tx);
+    }
+
     const afterCommit = () =>
       this.emitAfterFinalize({
         userId: args.userId,
@@ -443,12 +452,10 @@ export class CoachContextService {
         summary,
         progressLabel,
       });
-    if (!args.tx) await afterCommit();
-
     return {
       progressLabel,
       adherenceScore,
-      afterCommit: args.tx ? afterCommit : undefined,
+      afterCommit,
     };
   }
 
