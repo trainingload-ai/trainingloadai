@@ -69,6 +69,7 @@
     "account_not_found": "Esta conta não foi encontrada.",
     "account_deletion_in_progress": "A solicitação de exclusão da sua conta já está sendo processada.",
     "account_deletion_confirmations_required": "Confirme todos os avisos sobre a exclusão da conta antes de continuar.",
+    "plan_schedule_invalid": "Revise o calendário do plano e ajuste os treinos em conflito.",
     "unprocessable_entity": "Não foi possível processar a solicitação",
     "workout_definition_invalid": "A definição do treino é inválida",
     "workout_definitions_invalid": "Uma ou mais definições de treino são inválidas",

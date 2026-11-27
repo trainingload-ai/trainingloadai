@@ -1,3 +1,4 @@
+import { readPlanScheduleIssues } from '@/api/plan/application/plan-schedule-error';
 import {
   ExceptionFilter,
   Catch,
@@ -289,6 +290,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? structuredResponse.code
         : null;
 
+    const issues = readPlanScheduleIssues(structuredResponse);
+    const originalData = structuredResponse?.data;
+    const data = issues
+      ? {
+          ...(originalData && typeof originalData === 'object' && !Array.isArray(originalData)
+            ? originalData
+            : {}),
+          issues,
+        }
+      : originalData ?? null;
+
     const errorResponse = {
       code: status,
       ...(stableCode
@@ -300,7 +312,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
           }
         : {}),
       message,
-      data: structuredResponse?.data ?? null,
+      data,
       date: new Date().getTime(),
       path: diagnosticUrl,
     };

@@ -1,3 +1,4 @@
+import { readPlanScheduleIssues } from '@/api/plan/application/plan-schedule-error';
 import {
   jsonSchema,
   type Tool,
@@ -557,8 +558,9 @@ async function executeCoachTool(args: {
     }
     logger.warn(`[AI][教练][工具] 失败 name=${providerToolName} ${msg}`);
     const problem = err instanceof HttpException ? asRecord(err.getResponse()) : null;
-    if (problem?.code === 'PLAN_SCHEDULE_INVALID' && Array.isArray(problem.issues)) {
-      return { error: msg, code: problem.code, issues: problem.issues, stage: 'execute' };
+    const issues = readPlanScheduleIssues(problem);
+    if (issues) {
+      return { error: msg, code: 'PLAN_SCHEDULE_INVALID', issues, stage: 'execute' };
     }
     if (
       problem?.code === 'COACH_MUTATION_INVOCATION_MISMATCH' ||

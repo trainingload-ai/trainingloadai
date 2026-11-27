@@ -74,6 +74,7 @@
     "account_not_found": "このアカウントは見つかりませんでした。",
     "account_deletion_in_progress": "アカウント削除リクエストはすでに処理中です。",
     "account_deletion_confirmations_required": "続行する前に、アカウント削除に関するすべての確認事項に同意してください。",
+    "plan_schedule_invalid": "プランの日程を確認し、競合するワークアウトを調整してください。",
     "unprocessable_entity": "リクエストを処理できませんでした",
     "too_many_requests": "リクエストが多すぎます。しばらくしてからもう一度お試しください。",
     "workout_definition_invalid": "ワークアウト定義が正しくありません",

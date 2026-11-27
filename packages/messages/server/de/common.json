@@ -69,6 +69,7 @@
     "account_not_found": "Dieses Konto wurde nicht gefunden.",
     "account_deletion_in_progress": "Die Löschung deines Kontos wird bereits bearbeitet.",
     "account_deletion_confirmations_required": "Bestätige alle Hinweise zur Kontolöschung, bevor du fortfährst.",
+    "plan_schedule_invalid": "Prüfe den Trainingsplan und passe die betroffenen Einheiten an.",
     "unprocessable_entity": "Die Anfrage konnte nicht verarbeitet werden",
     "workout_definition_invalid": "Die Trainingsdefinition ist ungültig",
     "workout_definitions_invalid": "Eine oder mehrere Trainingsdefinitionen sind ungültig",

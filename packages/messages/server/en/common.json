@@ -74,6 +74,7 @@
     "account_not_found": "This account could not be found.",
     "account_deletion_in_progress": "Your account deletion request is already being processed.",
     "account_deletion_confirmations_required": "Confirm all account deletion acknowledgements before continuing.",
+    "plan_schedule_invalid": "Review the plan schedule and adjust the conflicting workouts.",
     "unprocessable_entity": "The request could not be processed",
     "workout_definition_invalid": "The workout definition is invalid",
     "workout_definitions_invalid": "One or more workout definitions are invalid",

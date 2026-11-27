@@ -1,5 +1,6 @@
 import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { planScheduleInvalid } from './plan-schedule-error';
 import {
   addCalendarDays,
   calendarIsoWeekday,
@@ -62,12 +63,7 @@ export class PlanCalendarValidationService {
           issue.date ? `${issue.code}@${issue.date}` : issue.code,
         )
         .join(', ');
-      throw new UnprocessableEntityException({
-        code: 'PLAN_SCHEDULE_INVALID',
-        message: `PLAN_SCHEDULE_INVALID: ${summary}`,
-        issues,
-        data: { issues },
-      });
+      throw planScheduleInvalid(issues, `PLAN_SCHEDULE_INVALID: ${summary}`);
     }
   }
 

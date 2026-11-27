@@ -74,6 +74,7 @@
     "account_not_found": "找不到此帳戶。",
     "account_deletion_in_progress": "帳戶刪除請求正在處理中。",
     "account_deletion_confirmations_required": "繼續前請確認所有帳戶刪除事項。",
+    "plan_schedule_invalid": "請檢查計畫排程，調整有衝突的課次。",
     "unprocessable_entity": "無法處理此請求",
     "too_many_requests": "請求過於頻繁，請稍後再試。",
     "workout_definition_invalid": "訓練定義不合法",

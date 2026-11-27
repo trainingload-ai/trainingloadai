@@ -1,3 +1,4 @@
+import { planScheduleInvalid } from './plan-schedule-error';
 import { createHash } from 'node:crypto';
 import { generationCoverage } from '@shared/rolling-plan';
 import { PlanCalendarValidationService } from './plan-calendar-validation.service';
@@ -2798,10 +2799,7 @@ export class PlanWriteSupport {
       };
       const report = assessPlanSchedule(input);
       if (!report.valid)
-        throw new UnprocessableEntityException({
-          code: 'PLAN_SCHEDULE_INVALID',
-          issues: report.issues,
-        });
+        throw planScheduleInvalid(report.issues);
       await this.calendarValidation.assertCandidate(input, tx);
     } else
       await this.calendarValidation.assertStored(plan.userId, changedIds, tx);
@@ -2868,10 +2866,7 @@ export class PlanWriteSupport {
           constraints: scheduleConstraints,
         });
         if (projection.conflicts.length)
-          throw new UnprocessableEntityException({
-            code: 'PLAN_SCHEDULE_INVALID',
-            issues: projection.conflicts,
-          });
+          throw planScheduleInvalid(projection.conflicts);
       }
       const qualityReport =
         dto.planningMode === 'ROLLING' && !dto.workouts.length

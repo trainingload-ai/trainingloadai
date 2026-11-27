@@ -69,6 +69,7 @@
     "account_not_found": "Ce compte est introuvable.",
     "account_deletion_in_progress": "La suppression de votre compte est déjà en cours de traitement.",
     "account_deletion_confirmations_required": "Confirmez tous les éléments relatifs à la suppression du compte avant de continuer.",
+    "plan_schedule_invalid": "Vérifiez le calendrier du plan et ajustez les séances en conflit.",
     "unprocessable_entity": "La requête n’a pas pu être traitée",
     "workout_definition_invalid": "La définition de l’entraînement n’est pas valide",
     "workout_definitions_invalid": "Une ou plusieurs définitions d’entraînement ne sont pas valides",

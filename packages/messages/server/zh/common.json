@@ -74,6 +74,7 @@
     "account_not_found": "未找到该账户。",
     "account_deletion_in_progress": "账户删除申请正在处理中。",
     "account_deletion_confirmations_required": "继续前请确认所有账户删除事项。",
+    "plan_schedule_invalid": "请检查计划排期，调整有冲突的课次。",
     "unprocessable_entity": "无法处理该请求",
     "workout_definition_invalid": "训练定义不合法",
     "workout_definitions_invalid": "一个或多个训练定义不合法",

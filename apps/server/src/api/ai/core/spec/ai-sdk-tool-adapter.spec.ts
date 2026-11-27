@@ -53,7 +53,7 @@ function baseTool(overrides: Partial<AiToolDef> = {}): AiToolDef {
 }
 
 describe('createAiSdkCoachTools', () => {
-  it('returns structured calendar problems to a Coach confirmation tool', async () => {
+  it.each(['data', 'legacy'])('returns %s calendar problems to a Coach confirmation tool', async (shape) => {
     const issues = [{ code: 'FIXED_REST_DAY', date: '2099-11-23' }];
     const tools = createAiSdkCoachTools({
       ctx: createCtx(),
@@ -62,8 +62,7 @@ describe('createAiSdkCoachTools', () => {
         execute: async () => { throw new UnprocessableEntityException({
           code: 'PLAN_SCHEDULE_INVALID',
           message: 'PLAN_SCHEDULE_INVALID: FIXED_REST_DAY@2099-11-23',
-          issues,
-          data: { issues },
+          ...(shape === 'data' ? { data: { issues } } : { issues }),
         }); },
       })],
     });

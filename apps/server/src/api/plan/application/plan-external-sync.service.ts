@@ -1,3 +1,4 @@
+import { planScheduleInvalid } from './plan-schedule-error';
 import { PlanCalendarValidationService } from './plan-calendar-validation.service';
 import { setPlanWorkoutChangeSource, type PlanWorkoutChangeSource } from './plan-workout-change';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
@@ -692,10 +693,7 @@ export class PlanExternalSyncService {
               scheduleRuleMetadata: metadata,
             });
             if (!report.valid)
-              throw new UnprocessableEntityException({
-                code: 'PLAN_SCHEDULE_INVALID',
-                issues: report.issues,
-              });
+              throw planScheduleInvalid(report.issues);
           }
         } catch (error) {
           if (error instanceof UnprocessableEntityException) throw error;
