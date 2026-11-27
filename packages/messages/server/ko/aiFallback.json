@@ -147,5 +147,8 @@
       "CREATE_TODAY_WORKOUT": "오늘의 훈련으로 추가",
       "SCHEDULE_REMINDER": "나중에 알림"
     }
+  },
+  "planStart": {
+    "emptyDraft": "이 플랜 초안에는 아직 세션이 없습니다. 시작하기 전에 세션을 추가하거나 생성해 주세요."
   }
 }

@@ -1,10 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
+import { I18nService } from 'nestjs-i18n';
 import type { PlanProposalPresentation, PlanStartPreviewRequest } from '@shared/plan-proposal';
 import type { RollingStartSettings } from '@shared/rolling-plan';
 import { z } from 'zod';
+import { resolveSupportedLocale } from '@/utils/locale.util';
 import { PlanStartService } from '../plan/application/plan-start.service';
 import { AiService } from './ai.service';
+import { aiFallbackText } from './core/ai-fallback-copy';
 
 const PLAN_START_ASSESSMENT_READ_TOOLS = [
   'plan.by_id',
@@ -102,6 +105,7 @@ export class PlanStartAssessmentService {
   constructor(
     private readonly ai: AiService,
     private readonly planStarts: PlanStartService,
+    private readonly i18n: I18nService,
   ) {}
 
   getStartDraft(userId: string, planId: string, selectedDate?: string) {
@@ -149,14 +153,12 @@ export class PlanStartAssessmentService {
       };
     }
 
-    const lang = input.lang?.trim() || 'zh';
+    const lang = resolveSupportedLocale(input.lang);
     const activeWorkouts = preflight.source.workouts.filter(
       (w) => w.status !== 'MOVED',
     );
     if (activeWorkouts.length === 0) {
-      const message = lang.toLowerCase().startsWith('zh')
-        ? '该计划草稿目前没有任何课次，请先在计划中添加或生成课次后再开始。'
-        : 'This draft plan has no workouts yet. Add or generate workouts before starting it.';
+      const message = aiFallbackText(this.i18n, lang, 'planStart.emptyDraft');
       return {
         outcome: 'CONFLICT',
         startDate: preflight.startDate,

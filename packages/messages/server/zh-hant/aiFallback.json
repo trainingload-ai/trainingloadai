@@ -147,5 +147,8 @@
       "CREATE_TODAY_WORKOUT": "加入為今日課次",
       "SCHEDULE_REMINDER": "稍後提醒"
     }
+  },
+  "planStart": {
+    "emptyDraft": "此計畫草稿目前沒有任何課次，請先在計畫中新增或產生課次後再開始。"
   }
 }

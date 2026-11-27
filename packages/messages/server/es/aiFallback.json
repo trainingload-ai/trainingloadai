@@ -147,5 +147,8 @@
       "CREATE_TODAY_WORKOUT": "Añadir como entrenamiento de hoy",
       "SCHEDULE_REMINDER": "Recordármelo más tarde"
     }
+  },
+  "planStart": {
+    "emptyDraft": "Este borrador de plan aún no tiene sesiones. Añade o genera sesiones antes de iniciarlo."
   }
 }

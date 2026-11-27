@@ -37,8 +37,15 @@ describe('PlanStartAssessmentService', () => {
       createDirectStartPreview: jest.fn(),
       confirmDirectStart: jest.fn(),
     };
-    const service = new PlanStartAssessmentService(ai as never, planStarts as never);
-    return { service, ai, planStarts };
+    const i18n = {
+      t: jest.fn((key: string) => key),
+    };
+    const service = new PlanStartAssessmentService(
+      ai as never,
+      planStarts as never,
+      i18n as never,
+    );
+    return { service, ai, planStarts, i18n };
   }
 
   it('starts the same draft directly when verdict is FIT and originalCanStart is true', async () => {

@@ -147,5 +147,8 @@
       "CREATE_TODAY_WORKOUT": "Ajouter comme entraînement du jour",
       "SCHEDULE_REMINDER": "Me rappeler plus tard"
     }
+  },
+  "planStart": {
+    "emptyDraft": "Ce brouillon de plan ne contient encore aucune séance. Ajoutez ou générez des séances avant de le démarrer."
   }
 }
