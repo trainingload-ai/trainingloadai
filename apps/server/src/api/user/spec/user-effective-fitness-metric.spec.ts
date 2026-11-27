@@ -1,5 +1,10 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { MetricSource, SportType, UserFitnessMetricType } from '@prisma/client';
+import {
+  ChangeSource,
+  MetricSource,
+  SportType,
+  UserFitnessMetricType,
+} from '@prisma/client';
 
 import { UserService } from '../user.service';
 import { UserQueryService } from '../user-query.service';
@@ -90,6 +95,10 @@ describe('UserService effective fitness metric reads', () => {
         source: { in: [MetricSource.MANUAL, MetricSource.AUTO] },
         sport: { in: [SportType.RUN, SportType.UNKNOWN] },
         recordedAt: { lte: at },
+        NOT: {
+          source: MetricSource.MANUAL,
+          changeSource: ChangeSource.SYSTEM_CALCULATED,
+        },
       },
       orderBy: { recordedAt: 'desc' },
       distinct: ['sport', 'source'],
@@ -232,6 +241,10 @@ describe('UserService effective fitness metric reads', () => {
         source: MetricSource.AUTO,
         sport: SportType.CYCLING,
         recordedAt: { lte: at },
+        NOT: {
+          source: MetricSource.MANUAL,
+          changeSource: ChangeSource.SYSTEM_CALCULATED,
+        },
       },
       orderBy: { recordedAt: 'desc' },
     });
@@ -242,6 +255,10 @@ describe('UserService effective fitness metric reads', () => {
         source: MetricSource.AUTO,
         sport: SportType.UNKNOWN,
         recordedAt: { lte: at },
+        NOT: {
+          source: MetricSource.MANUAL,
+          changeSource: ChangeSource.SYSTEM_CALCULATED,
+        },
       },
       orderBy: { recordedAt: 'desc' },
     });

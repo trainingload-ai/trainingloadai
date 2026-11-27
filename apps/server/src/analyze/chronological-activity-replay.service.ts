@@ -31,6 +31,10 @@ import {
   UserService,
   type TimelineFitnessProjection,
 } from '@/api/user/user.service';
+import {
+  isSystemCalculatedManualMirror,
+  withoutSystemCalculatedManualMirrors,
+} from '@/api/user/fitness-metric-adoption';
 import { ActivityMetricsPipelineService } from '@/api/activity/metrics/activity-metrics-pipeline.service';
 import { FitnessTimelineObservationService } from './fitness-timeline-observation.service';
 import { ActivityFitnessContextResolverService } from './activity-fitness-context-resolver.service';
@@ -239,6 +243,9 @@ function supportedMetric(type: UserFitnessMetricType) {
 }
 
 function timelineValue(row: UserFitnessMetric): FitnessTimelineValue {
+  if (isSystemCalculatedManualMirror(row)) {
+    throw new Error('SYSTEM_CALCULATED_MANUAL_FORBIDDEN');
+  }
   return {
     metric: row.type as FitnessTimelineMetric,
     sport: timelineSport(row.sport),
@@ -407,7 +414,7 @@ export class ChronologicalActivityReplayService {
           page.replayTo > replayTo ? page.replayTo : replayTo,
         )
       : Promise.resolve(replayTo);
-    const [metricRows, priorActivities, page, autoUpdateVersions] =
+    const [loadedMetricRows, priorActivities, page, autoUpdateVersions] =
       await Promise.all([
         evidenceThrough.then((through) =>
           this.users.listTimelineFitnessMetrics(request.userId, through),
@@ -437,6 +444,9 @@ export class ChronologicalActivityReplayService {
     if ((await this.readRevision(request.userId)) !== initialRevision) {
       throw new FitnessEvidenceRevisionDriftError();
     }
+    // 历史 AUTO→MANUAL 镜像不是用户采用。忽略它们，不改写成 AUTO，也不作为
+    // EXTERNAL_METRIC 重新进入因果集。漏网行在 timelineValue 里失败关闭。
+    const metricRows = withoutSystemCalculatedManualMirrors(loadedMetricRows);
 
     const activities = page.activities;
     const effectiveReplayTo = page.replayTo;

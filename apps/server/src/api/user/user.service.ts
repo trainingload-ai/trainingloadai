@@ -73,6 +73,11 @@ import {
   validateFitnessMetricCandidate,
 } from './fitness-metric-validator';
 import {
+  excludeSystemCalculatedManualMirror,
+  rejectSystemCalculatedManualWrite,
+  withoutSystemCalculatedManualMirrors,
+} from './fitness-metric-adoption';
+import {
   derivedPowerMetricNeedsEvidence,
   hasPowerPeakEvidence,
   isDerivedPowerMetric,
@@ -636,14 +641,17 @@ export class UserService {
    * 数据访问留在 UsersModule 内，AnalyzeModule 只消费领域结果。
    */
   listTimelineFitnessMetrics(userId: string, at: Date) {
-    return this.users.fitnessMetrics().findMany({
-      where: {
-        userId,
-        source: { in: [MetricSource.MANUAL, MetricSource.AUTO] },
-        recordedAt: { lte: at },
-      },
-      orderBy: [{ recordedAt: 'asc' }, { createdAt: 'asc' }],
-    });
+    return this.users
+      .fitnessMetrics()
+      .findMany({
+        where: excludeSystemCalculatedManualMirror({
+          userId,
+          source: { in: [MetricSource.MANUAL, MetricSource.AUTO] },
+          recordedAt: { lte: at },
+        }),
+        orderBy: [{ recordedAt: 'asc' }, { createdAt: 'asc' }],
+      })
+      .then((rows) => withoutSystemCalculatedManualMirrors(rows));
   }
 
   findNextManualFitnessMetric(args: {
@@ -654,13 +662,13 @@ export class UserService {
     beforeOrAt: Date;
   }) {
     return this.users.fitnessMetrics().findFirst({
-      where: {
+      where: excludeSystemCalculatedManualMirror({
         userId: args.userId,
         type: args.type,
         source: MetricSource.MANUAL,
         sport: args.sport,
         recordedAt: { gt: args.after, lte: args.beforeOrAt },
-      },
+      }),
       orderBy: [{ recordedAt: 'asc' }, { createdAt: 'asc' }],
       select: { recordedAt: true },
     });
@@ -1437,15 +1445,17 @@ export class UserService {
     at?: Date,
     tx?: Prisma.TransactionClient,
   ): Promise<FitnessMetricValidationContext> {
-    const candidates = await this.users.fitnessMetrics(tx).findMany({
-      where: {
-        userId,
-        source: { in: [MetricSource.MANUAL, MetricSource.AUTO] },
-        sport: { in: [sport, SportType.UNKNOWN] },
-        ...(at ? { recordedAt: { lte: at } } : {}),
-      },
-      orderBy: { recordedAt: 'desc' },
-    });
+    const candidates = withoutSystemCalculatedManualMirrors(
+      await this.users.fitnessMetrics(tx).findMany({
+        where: excludeSystemCalculatedManualMirror({
+          userId,
+          source: { in: [MetricSource.MANUAL, MetricSource.AUTO] },
+          sport: { in: [sport, SportType.UNKNOWN] },
+          ...(at ? { recordedAt: { lte: at } } : {}),
+        }),
+        orderBy: { recordedAt: 'desc' },
+      }),
+    );
     const context: FitnessMetricValidationContext = {};
     for (const type of Object.values(UserFitnessMetricType)) {
       const selected = selectEffectiveFitnessMetric(candidates, type, sport);
@@ -1525,6 +1535,11 @@ export class UserService {
       return null;
     }
     const originData = this.buildOriginWriteData(source, origin);
+    // 已删除的 AUTO→MANUAL 镜像。不改写来源，直接拒绝。
+    rejectSystemCalculatedManualWrite({
+      source,
+      changeSource: originData.changeSource,
+    });
     // 先根据 recordedAt 来获取当前最新的
     const current = await this.users.fitnessMetrics(tx).findFirst({
       where: {
@@ -1630,13 +1645,14 @@ export class UserService {
       sport: SportType;
       at?: Date;
     }) => {
-      const where: Prisma.UserFitnessMetricWhereInput = {
-        userId,
-        type,
-        source: options.source,
-        sport: options.sport,
-      };
-      if (options.at) where.recordedAt = { lte: options.at };
+      const where: Prisma.UserFitnessMetricWhereInput =
+        excludeSystemCalculatedManualMirror({
+          userId,
+          type,
+          source: options.source,
+          sport: options.sport,
+          ...(options.at ? { recordedAt: { lte: options.at } } : {}),
+        });
       return this.users.fitnessMetrics().findFirst({
         where,
         orderBy: { recordedAt: 'desc' },
@@ -1678,26 +1694,28 @@ export class UserService {
       sport === SportType.UNKNOWN
         ? [SportType.UNKNOWN]
         : [sport, SportType.UNKNOWN];
-    const candidates = await this.users.fitnessMetrics(tx).findMany({
-      where: {
-        userId,
-        type,
-        source: { in: [MetricSource.MANUAL, MetricSource.AUTO] },
-        sport: { in: sports },
-        ...(type === UserFitnessMetricType.CS && sport === SportType.RUN
-          ? {
-              NOT: {
-                sport: SportType.RUN,
-                source: MetricSource.AUTO,
-                value: { lt: 1.8 },
-              },
-            }
-          : {}),
-        ...(at ? { recordedAt: { lte: at } } : {}),
-      },
-      orderBy: { recordedAt: 'desc' },
-      distinct: ['sport', 'source'],
-    });
+    const candidates = withoutSystemCalculatedManualMirrors(
+      await this.users.fitnessMetrics(tx).findMany({
+        where: excludeSystemCalculatedManualMirror({
+          userId,
+          type,
+          source: { in: [MetricSource.MANUAL, MetricSource.AUTO] },
+          sport: { in: sports },
+          ...(type === UserFitnessMetricType.CS && sport === SportType.RUN
+            ? {
+                NOT: {
+                  sport: SportType.RUN,
+                  source: MetricSource.AUTO,
+                  value: { lt: 1.8 },
+                },
+              }
+            : {}),
+          ...(at ? { recordedAt: { lte: at } } : {}),
+        }),
+        orderBy: { recordedAt: 'desc' },
+        distinct: ['sport', 'source'],
+      }),
+    );
 
     return selectEffectiveFitnessMetric(candidates, type, sport) ?? null;
   }
@@ -2747,6 +2765,10 @@ export class UserService {
           originExternalId: args.calculationId,
           originPayload: args.provenance,
         };
+        rejectSystemCalculatedManualWrite({
+          source: MetricSource.MANUAL,
+          changeSource: data.changeSource,
+        });
         await this.users.fitnessMetrics(tx).upsert({
           where: {
             userId_type_source_sport_recordedAt: {
@@ -2920,6 +2942,10 @@ export class UserService {
         rows.map(async (r) => {
           const manualOrigin = this.buildOriginWriteData(MetricSource.MANUAL, {
             changeSource: ChangeSource.USER_MANUAL,
+          });
+          rejectSystemCalculatedManualWrite({
+            source: MetricSource.MANUAL,
+            changeSource: manualOrigin.changeSource,
           });
           return this.users.fitnessMetrics(tx).upsert({
             where: {
@@ -3270,11 +3296,15 @@ export class UserService {
     cutoff: Date,
     tx?: PrismaTx,
   ) {
-    return this.users.fitnessMetrics(tx).findMany({
-      where: composedFitnessMetricWhere(userId, sport, cutoff),
-      orderBy: { recordedAt: 'desc' },
-      distinct: ['type', 'sport', 'source'],
-    });
+    return withoutSystemCalculatedManualMirrors(
+      await this.users.fitnessMetrics(tx).findMany({
+        where: excludeSystemCalculatedManualMirror(
+          composedFitnessMetricWhere(userId, sport, cutoff),
+        ),
+        orderBy: { recordedAt: 'desc' },
+        distinct: ['type', 'sport', 'source'],
+      }),
+    );
   }
 
   /**
