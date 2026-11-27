@@ -5,6 +5,7 @@ import { APIConnectionTimeoutError } from 'openai';
 import { ConflictException } from '@nestjs/common';
 import { COACH_QUESTION_STALE_ERROR_CODE } from '@shared/coach-turn-error';
 import { AiController } from '../ai.controller';
+import { CoachTurnOrchestrator } from '../coach-turn-orchestrator.service';
 import type { AiService } from '../ai.service';
 import type { CoachActivityEvent, CoachRunStatus } from '@shared/ai-coach-run-contract';
 import type { CoachUiStreamYield } from '../core/coach-ui-message-stream';
@@ -178,7 +179,7 @@ function setup(events: CoachUiStreamYield[]) {
   const planStarts = {
     calendarCoachSession: jest.fn<PlanStartService['calendarCoachSession']>(),
   };
-  Object.assign(controller, {
+  const coachTurns = Object.assign(Object.create(CoachTurnOrchestrator.prototype), {
     prisma: {
       aiCoachSession: { findUnique: jest.fn(async () => null) },
     },
@@ -192,6 +193,7 @@ function setup(events: CoachUiStreamYield[]) {
     i18n: { t: (key: string) => key },
     logger,
   });
+  Object.assign(controller, { coachTurns, i18n: { t: (key: string) => key }, logger });
   const wire: string[] = [];
   const response = Object.assign(new EventEmitter(), {
     writableEnded: false,

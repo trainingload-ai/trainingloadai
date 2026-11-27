@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2599
+          "line": 917
         }
       ]
     },
@@ -1077,12 +1077,12 @@
       ],
       "references": [
         {
-          "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1310
-        },
-        {
           "file": "apps/server/src/api/ai/ai.service.ts",
           "line": 2942
+        },
+        {
+          "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
+          "line": 477
         }
       ]
     },
@@ -1097,10 +1097,6 @@
         "apps"
       ],
       "references": [
-        {
-          "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1312
-        },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
           "line": 2472
@@ -1120,6 +1116,10 @@
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
           "line": 2926
+        },
+        {
+          "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
+          "line": 479
         }
       ]
     },
@@ -1157,7 +1157,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 309
+          "line": 195
         }
       ]
     },
@@ -1174,7 +1174,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 308
+          "line": 194
         }
       ]
     },
@@ -1304,8 +1304,8 @@
       ],
       "references": [
         {
-          "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1348
+          "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
+          "line": 515
         }
       ]
     },
@@ -1397,8 +1397,8 @@
       ],
       "references": [
         {
-          "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 162
+          "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
+          "line": 106
         }
       ]
     },
@@ -1592,7 +1592,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 318
+          "line": 204
         }
       ]
     },
@@ -1609,7 +1609,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 317
+          "line": 203
         }
       ]
     },
