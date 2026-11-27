@@ -907,6 +907,18 @@
       "types": "./src/public-demo/public-demo-runtime.port.ts",
       "default": "./src/public-demo/public-demo-runtime.port.ts"
     },
+    "./public-demo/allow-public-demo.decorator": {
+      "types": "./src/public-demo/allow-public-demo.decorator.ts",
+      "default": "./src/public-demo/allow-public-demo.decorator.ts"
+    },
+    "./public-demo/current-public-demo.decorator": {
+      "types": "./src/public-demo/current-public-demo.decorator.ts",
+      "default": "./src/public-demo/current-public-demo.decorator.ts"
+    },
+    "./public-demo/public-demo-localized-text": {
+      "types": "./src/public-demo/public-demo-localized-text.ts",
+      "default": "./src/public-demo/public-demo-localized-text.ts"
+    },
     "./importing/raw-association-recovery": {
       "types": "./src/importing/raw-association-recovery.ts",
       "default": "./src/importing/raw-association-recovery.ts"
