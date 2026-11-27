@@ -1017,6 +1017,20 @@ export class ActivityService {
         });
       }
       const result = await this.prisma.$transaction(async (tx) => {
+        const autoCompletedWorkoutIds = Array.from(
+          new Set(
+            (
+              await Promise.all(
+                activityIds.map((activityId) =>
+                  this.planActivityLinks.findAutoCompletedWorkoutIdsForActivity(
+                    activityId,
+                    tx,
+                  ),
+                ),
+              )
+            ).flat(),
+          ),
+        );
         const [mappings, parquetFiles, mapThumbs] = await Promise.all([
           tx.activityThirdPartyMapping.findMany({
             where: { activityId: { in: activityIds } },
@@ -1074,6 +1088,12 @@ export class ActivityService {
           triggerSource: 'activities_batch_deleted',
           affectedPipelines: ['FITNESS_TIMELINE', 'TRAINING_LOAD', 'PMC'],
         });
+        if (autoCompletedWorkoutIds.length > 0) {
+          await this.planActivityLinks.restoreOrphanedAutoCompletedWorkouts(
+            autoCompletedWorkoutIds,
+            tx,
+          );
+        }
         return deleted;
       });
 

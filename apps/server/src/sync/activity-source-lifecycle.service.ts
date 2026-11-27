@@ -1,7 +1,8 @@
 import { inheritedImportAuthorization } from '@/importing/import-publication-authorization';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { PlanActivityLinkService } from '@/api/plan/application/plan-activity-link.service';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { ImportingJobService } from '@/importing/importing-job.service';
 import {
@@ -143,6 +144,7 @@ export class ActivitySourceLifecycleService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly importJobs: ImportingJobService,
+    @Optional() private readonly planActivityLinks?: PlanActivityLinkService,
   ) {}
 
   async deactivateThirdPartyActivity(id: number) {
@@ -611,6 +613,13 @@ export class ActivitySourceLifecycleService {
                 },
               })
             : { count: 0 };
+          if (hiddenActivityIds.length > 0 && this.planActivityLinks) {
+            await this.planActivityLinks.unlinkHiddenActivitiesInTransaction(
+              hiddenActivityIds,
+              tx,
+              processingUpdatedAt,
+            );
+          }
           for (const activityId of hiddenActivityIds) {
             const fact = activityFacts.get(activityId);
             if (fact?.state !== 1 || !fact.startTime) continue;

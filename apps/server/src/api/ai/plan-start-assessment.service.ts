@@ -313,25 +313,42 @@ export class PlanStartAssessmentService {
     }
 
     // Branch 3: Coach suggests adjustments and they validate cleanly
-    if (model.verdict === 'SUGGEST_ADJUSTMENT' && hasSuggestedEdits) {
-      const preview = await tryBuildSuggestedPreview();
-      if (preview) {
-        const changedRows = preview.presentation.rows.filter(
-          (row) => row.changeKind && row.changeKind !== 'PRESERVED',
-        );
-        if (changedRows.length > 0) {
-          return {
-            outcome: 'SUGGESTED_CHANGES',
-            startDate: preflight.startDate,
-            calendarTimeZone: preflight.calendarTimeZone,
-            revision: preflight.revision,
-            summary: model.summary,
-            originalCanStart: true,
-            previewId: preview.previewId,
-            proposal: preview.presentation,
-          };
+    if (model.verdict === 'SUGGEST_ADJUSTMENT') {
+      if (hasSuggestedEdits) {
+        const preview = await tryBuildSuggestedPreview();
+        if (preview) {
+          const changedRows = preview.presentation.rows.filter(
+            (row) => row.changeKind && row.changeKind !== 'PRESERVED',
+          );
+          if (changedRows.length > 0) {
+            return {
+              outcome: 'SUGGESTED_CHANGES',
+              startDate: preflight.startDate,
+              calendarTimeZone: preflight.calendarTimeZone,
+              revision: preflight.revision,
+              summary: model.summary,
+              originalCanStart: true,
+              previewId: preview.previewId,
+              proposal: preview.presentation,
+            };
+          }
         }
       }
+      // Never silently auto-start the unmodified plan when the coach recommended
+      // adjustments but the preview could not be built; require explicit user confirmation.
+      this.logger.warn(
+        `PlanStartAssessment suggested adjustments for plan=${planId} but no valid preview was produced; requiring explicit confirmation`,
+      );
+      return {
+        outcome: 'INSUFFICIENT_DATA',
+        startDate: preflight.startDate,
+        calendarTimeZone: preflight.calendarTimeZone,
+        revision: preflight.revision,
+        summary: model.summary,
+        missingEvidence: model.missingEvidence ?? [],
+        originalCanStart: true,
+        conflicts: [],
+      };
     }
 
     // Branch 4: Original schedule fits — start directly

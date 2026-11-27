@@ -184,11 +184,18 @@ export class PlanCalendarValidationService {
     plan: {
       status: string;
       startDate: Date | null;
-      supersededBy: { status: string; startDate: Date | null } | null;
+      activationBlockedAt?: Date | null;
+      supersededBy: {
+        status: string;
+        startDate: Date | null;
+        activationBlockedAt?: Date | null;
+      } | null;
     } | null;
   }) {
     if (!w.plan) return true;
     if (!['ACTIVE', 'PAUSED', 'SCHEDULED'].includes(w.plan.status))
+      return false;
+    if (w.plan.status === 'SCHEDULED' && w.plan.activationBlockedAt)
       return false;
     const date = ymd(w.scheduledDate);
     const start = ymd(w.plan.startDate);
@@ -196,6 +203,7 @@ export class PlanCalendarValidationService {
     const successor = w.plan.supersededBy;
     return !(
       successor?.status === 'SCHEDULED' &&
+      !successor.activationBlockedAt &&
       ymd(successor.startDate) &&
       date >= ymd(successor.startDate)!
     );

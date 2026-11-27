@@ -67,6 +67,44 @@ export class PlanActivityLinkService {
     );
   }
 
+  /**
+   * Unlink active plan workout links for activities soft-hidden (`state = 0`)
+   * when an external source is deactivated, and restore auto-completed workouts
+   * that no longer have any active primary activity link.
+   */
+  async unlinkHiddenActivitiesInTransaction(
+    activityIds: number[],
+    tx: PlanDb,
+    unlinkedAt = new Date(),
+  ): Promise<void> {
+    if (activityIds.length === 0) return;
+    const autoCompletedWorkoutIds = Array.from(
+      new Set(
+        (
+          await Promise.all(
+            activityIds.map((activityId) =>
+              this.findAutoCompletedWorkoutIdsForActivity(activityId, tx),
+            ),
+          )
+        ).flat(),
+      ),
+    );
+    await this.links.updateMany(
+      {
+        where: {
+          activityId: { in: activityIds },
+          unlinkedAt: null,
+        },
+        data: { unlinkedAt },
+      },
+      tx,
+    );
+    await this.restoreOrphanedAutoCompletedWorkouts(
+      autoCompletedWorkoutIds,
+      tx,
+    );
+  }
+
   getWorkoutLinks(userId: string, planId: string, workoutId: string) {
     return this.write.getWorkoutLinks(userId, planId, workoutId);
   }

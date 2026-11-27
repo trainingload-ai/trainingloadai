@@ -576,31 +576,51 @@ export class PlanLinkMatcherService {
     if (this.sweeping) return;
     this.sweeping = true;
     try {
-      const states = await this.links.findMatchStates({
+      const activeActivityWhere: Prisma.ActivityWhereInput = {
+        state: 1,
+        mergedIntoActivityId: null,
+        startTime: { not: null },
+        OR: [{ status: 'FINISHED' }, { processingStatus: 'READY' }],
+        planWorkoutLinks: {
+          none: {
+            unlinkedAt: null,
+            OR: [
+              { source: { not: 'AUTO_MATCH' } },
+              { autoMarkedWorkoutDone: false },
+              { planWorkout: { plan: { status: { not: 'ACTIVE' } } } },
+            ],
+          },
+        },
+      };
+      // Prioritize freshly pending match states before sweeping historical NO_MATCH rows
+      // so new activities are never starved behind a large backlog.
+      const pendingStates = await this.links.findMatchStates({
         where: {
           suppressedAt: null,
+          reason: 'PENDING',
           outcome: { in: ['NO_MATCH', 'NEEDS_REVIEW', 'AUTO_LINKED'] },
-          activity: {
-            state: 1,
-            mergedIntoActivityId: null,
-            startTime: { not: null },
-            OR: [{ status: 'FINISHED' }, { processingStatus: 'READY' }],
-            planWorkoutLinks: {
-              none: {
-                unlinkedAt: null,
-                OR: [
-                  { source: { not: 'AUTO_MATCH' } },
-                  { autoMarkedWorkoutDone: false },
-                  { planWorkout: { plan: { status: { not: 'ACTIVE' } } } },
-                ],
-              },
-            },
-          },
+          activity: activeActivityWhere,
         },
         orderBy: { updatedAt: 'asc' },
         take: 100,
         select: { activityId: true },
       });
+      const remainingSlots = Math.max(0, 100 - pendingStates.length);
+      const otherStates =
+        remainingSlots > 0
+          ? await this.links.findMatchStates({
+              where: {
+                suppressedAt: null,
+                reason: { not: 'PENDING' },
+                outcome: { in: ['NO_MATCH', 'NEEDS_REVIEW', 'AUTO_LINKED'] },
+                activity: activeActivityWhere,
+              },
+              orderBy: { updatedAt: 'asc' },
+              take: remainingSlots,
+              select: { activityId: true },
+            })
+          : [];
+      const states = [...pendingStates, ...otherStates];
       // A failed initial transaction leaves no match state. The persisted
       // activity can still be discovered after a process restart.
       const cutoff = new Date(Date.now() - MATCH_REGISTRATION_LOOKBACK_MS);

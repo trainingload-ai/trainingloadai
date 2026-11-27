@@ -210,4 +210,37 @@ describe('PlanStartAssessmentService', () => {
       ],
     });
   });
+
+  it('requires explicit confirmation instead of auto-starting original when SUGGEST_ADJUSTMENT preview fails', async () => {
+    const { service, ai, planStarts } = setup();
+    ai.runBackgroundCoachTask.mockResolvedValue({
+      result: {
+        verdict: 'SUGGEST_ADJUSTMENT',
+        summary: '近期负荷偏高，建议首周减量 20%。',
+        changes: [
+          {
+            sourceWorkoutId: 'w-1',
+            expectedRevision: 1,
+            workout: { title: 'Reduced Easy Run' },
+          },
+        ],
+      },
+    } as never);
+    planStarts.createDirectStartPreview.mockRejectedValue(
+      new Error('PLAN_SCHEDULE_INVALID: REST_DAY_CONFLICT@2026-12-31'),
+    );
+
+    const result = await service.assessStart('user-1', 'plan-1', {
+      startDate: '2026-12-31',
+      revision: 'rev-1',
+      lang: 'zh',
+    });
+
+    expect(planStarts.confirmDirectStart).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      outcome: 'INSUFFICIENT_DATA',
+      originalCanStart: true,
+      summary: '近期负荷偏高，建议首周减量 20%。',
+    });
+  });
 });

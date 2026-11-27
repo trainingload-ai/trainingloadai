@@ -79,8 +79,17 @@ export class TodaySuggestionEngagementService {
         where: { userId: args.userId },
       });
       if (current?.generationToken === args.generationToken) return current;
-      if (current && current.suggestionDate > args.suggestionDate)
-        return current;
+      // Allow a 1-day backward date shift when a user travels west across timezones
+      // (e.g. UTC+8 -> UTC-8), while still rejecting truly stale older-date rollovers.
+      if (current && current.suggestionDate > args.suggestionDate) {
+        const currentMs = Date.parse(`${current.suggestionDate}T00:00:00.000Z`);
+        const nextMs = Date.parse(`${args.suggestionDate}T00:00:00.000Z`);
+        const backwardDays =
+          Number.isFinite(currentMs) && Number.isFinite(nextMs)
+            ? (currentMs - nextMs) / 86_400_000
+            : Number.POSITIVE_INFINITY;
+        if (backwardDays > 1) return current;
+      }
       const continuesUnresolved = Boolean(
         current?.firstPresentedAt &&
         !current.resolvedAt &&
