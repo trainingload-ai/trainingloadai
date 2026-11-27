@@ -55,6 +55,7 @@
     "unauthorized": "请先登录后再继续",
     "forbidden": "你没有权限执行此操作",
     "not_found": "未找到请求的内容",
+    "plan_scheduled_activation_pending": "已有另一份计划排期生效。请先取消那份已排期的计划，再激活当前计划。",
     "conflict": "请求与当前状态冲突",
     "invalid_idempotency_key": "删除请求标识无效，请重试。",
     "idempotency_key_already_used": "该删除请求标识已被使用，请重新开始删除流程。",

@@ -35,7 +35,10 @@ import type {
 } from '@shared/plan-proposal';
 import type { EnduranceWorkoutStepTarget } from '@shared/endurance-workout-ir';
 import { PlanLoadEstimatorService } from './plan-load-estimator.service';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
 import { PlanProposalRepository } from '../persistence/plan-proposal.repository';
 import type { PlanDb } from '../persistence/plan-db';
 
@@ -728,7 +731,7 @@ export class PlanProposalService {
     if (source.supersededBy?.status === 'SCHEDULED')
       invalid('This plan already has a scheduled successor');
     const scheduled = await this.plans.findFirst({
-      where: { userId, status: 'SCHEDULED' },
+      where: scheduledReplacementReservationWhere(userId),
       select: { id: true },
     });
     if (scheduled)

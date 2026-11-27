@@ -50,6 +50,7 @@
     "unauthorized": "Vous devez vous connecter",
     "forbidden": "Vous n’avez pas l’autorisation d’effectuer cette action",
     "not_found": "La ressource demandée est introuvable",
+    "plan_scheduled_activation_pending": "Le démarrage d’un autre plan est déjà prévu. Annule ce plan programmé avant d’activer celui-ci.",
     "conflict": "La requête est incompatible avec l’état actuel",
     "invalid_idempotency_key": "L’identifiant de la demande de suppression est invalide. Veuillez réessayer.",
     "idempotency_key_already_used": "Cet identifiant de demande de suppression a déjà été utilisé. Veuillez recommencer la procédure.",

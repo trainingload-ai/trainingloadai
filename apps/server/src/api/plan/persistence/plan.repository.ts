@@ -3,6 +3,44 @@ import type { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { planDb, type PlanDb } from './plan-db';
 
+export function scheduledReplacementReservationWhere(
+  userId: string,
+  exceptSourcePlanId?: string,
+): Prisma.PlanWhereInput {
+  return {
+    userId,
+    status: 'SCHEDULED',
+    activationBlockedAt: null,
+    scheduledActivationAt: { not: null },
+    supersedes: {
+      userId,
+      ...(exceptSourcePlanId ? { id: { not: exceptSourcePlanId } } : {}),
+      status: { in: ['ACTIVE', 'PAUSED', 'COMPLETED'] },
+    },
+  };
+}
+
+export function scheduledReplacementCutoff(
+  userId: string,
+  successor: {
+    userId: string;
+    status: string;
+    startDate: Date | null;
+    scheduledActivationAt: Date | null;
+    activationBlockedAt: Date | null;
+  } | null,
+): string | null {
+  if (
+    successor?.userId !== userId ||
+    successor.status !== 'SCHEDULED' ||
+    successor.activationBlockedAt ||
+    !successor.scheduledActivationAt
+  ) {
+    return null;
+  }
+  return successor.startDate?.toISOString().slice(0, 10) ?? null;
+}
+
 @Injectable()
 export class PlanRepository {
   constructor(private readonly prisma: PrismaService) {}

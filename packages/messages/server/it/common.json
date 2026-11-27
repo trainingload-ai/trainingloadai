@@ -50,6 +50,7 @@
     "unauthorized": "È necessario accedere",
     "forbidden": "Non hai l’autorizzazione per eseguire questa azione",
     "not_found": "La risorsa richiesta non è stata trovata",
+    "plan_scheduled_activation_pending": "L’avvio di un altro piano è già programmato. Annulla quel piano programmato prima di attivare questo.",
     "conflict": "La richiesta è in conflitto con lo stato attuale",
     "invalid_idempotency_key": "L’identificatore della richiesta di eliminazione non è valido. Riprova.",
     "idempotency_key_already_used": "Questo identificatore della richiesta di eliminazione è già stato utilizzato. Riavvia la procedura.",

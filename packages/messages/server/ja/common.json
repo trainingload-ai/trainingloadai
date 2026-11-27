@@ -55,6 +55,7 @@
     "unauthorized": "ログインが必要です",
     "forbidden": "この操作を行う権限がありません",
     "not_found": "リクエストされた項目が見つかりません",
+    "plan_scheduled_activation_pending": "別のプランの開始がすでに予定されています。その予定を取り消してから、このプランを開始してください。",
     "conflict": "リクエストが現在の状態と競合しています",
     "invalid_idempotency_key": "削除リクエストの識別子が無効です。もう一度お試しください。",
     "idempotency_key_already_used": "この削除リクエスト識別子はすでに使用されています。削除手続きをやり直してください。",

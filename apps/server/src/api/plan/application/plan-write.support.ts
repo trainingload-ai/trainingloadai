@@ -97,7 +97,10 @@ import {
 import { WorkoutDefinitionValidationError } from '../../workout/codecs/workout-codec';
 import { WorkoutPersistenceService } from '../persistence/workout-persistence.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
 import type { PlanDb } from '../persistence/plan-db';
@@ -3470,6 +3473,20 @@ export class PlanWriteSupport {
         });
       }
 
+      const scheduled = await this.plans.findFirst(
+        {
+          where: scheduledReplacementReservationWhere(userId, planId),
+          select: { id: true },
+        },
+        tx,
+      );
+      if (scheduled) {
+        throw new ConflictException({
+          code: 'PLAN_SCHEDULED_ACTIVATION_PENDING',
+          data: { scheduledPlanId: scheduled.id },
+        });
+      }
+
       if (plan.status === 'DRAFT' && !options?.validatedStartPreview)
         throw new UnprocessableEntityException({
           code: 'PLAN_START_REASSESSMENT_REQUIRED',
@@ -3798,67 +3815,97 @@ export class PlanWriteSupport {
       }
 
       const cancelled = new Date();
-      if (plan.planningMode === 'ROLLING')
-        await this.plans.fenceAutomationJobs(planId, 'CANCELLED', true, tx);
-      const updated = await this.plans.update(
-        {
-          where: { id: planId },
-          data: {
-            status: 'CANCELLED',
-            cancelledAt: cancelled,
-            endDate: plan.planningMode === 'ROLLING' ? null : cancelled,
-            currentWeekIndex: null,
-            currentDayIndex: null,
-            scheduledActivationAt: null,
-            ...(plan.status === 'SCHEDULED' ? { supersedesPlanId: null } : {}),
-          },
-          include: this.buildPlanInclude(),
-        },
-        tx,
-      );
-
-      await this.attachActualLoadToWorkouts(updated);
-
-      if (plan.status === 'SCHEDULED') {
-        await this.markExternalMappings(
-          tx,
-          updated.workouts.map((workout) => workout.id),
-          'LOCAL_DELETED',
-        );
-        if (plan.supersedesPlanId) {
-          const restored = await this.workouts.findMany(
+      const successor = plan.supersededBy?.status === 'SCHEDULED'
+        ? await this.plans.findFirst(
             {
-              where: {
-                planId: plan.supersedesPlanId,
-                scheduledDate: plan.startDate
-                  ? { gte: plan.startDate }
-                  : undefined,
-              },
-              select: { id: true },
+              where: { userId, supersedesPlanId: planId, status: 'SCHEDULED' },
             },
             tx,
-          );
+          )
+        : null;
+
+      const cancelOne = async (
+        target: Pick<
+          typeof plan,
+          'id' | 'status' | 'planningMode' | 'supersedesPlanId' | 'startDate'
+        >,
+        preserveSupersession = false,
+      ) => {
+        if (target.planningMode === 'ROLLING')
+          await this.plans.fenceAutomationJobs(target.id, 'CANCELLED', true, tx);
+        const updated = await this.plans.update(
+          {
+            where: { id: target.id },
+            data: {
+              status: 'CANCELLED',
+              cancelledAt: cancelled,
+              endDate: target.planningMode === 'ROLLING' ? null : cancelled,
+              currentWeekIndex: null,
+              currentDayIndex: null,
+              scheduledActivationAt: null,
+              ...(target.status === 'SCHEDULED' && !preserveSupersession
+                ? { supersedesPlanId: null }
+                : {}),
+            },
+            include: this.buildPlanInclude(),
+          },
+          tx,
+        );
+
+        if (target.status === 'SCHEDULED') {
           await this.markExternalMappings(
             tx,
-            restored.map((workout) => workout.id),
-            'LOCAL_CHANGED',
+            updated.workouts.map((workout) => workout.id),
+            'LOCAL_DELETED',
           );
+          if (target.supersedesPlanId && !preserveSupersession) {
+            const restored = await this.workouts.findMany(
+              {
+                where: {
+                  planId: target.supersedesPlanId,
+                  scheduledDate: target.startDate
+                    ? { gte: target.startDate }
+                    : undefined,
+                },
+                select: { id: true },
+              },
+              tx,
+            );
+            await this.markExternalMappings(
+              tx,
+              restored.map((workout) => workout.id),
+              'LOCAL_CHANGED',
+            );
+          }
         }
-      }
 
-      const finalized = await this.coachContext.finalizeContext({
-        tx,
-        userId,
-        planId,
-        planStatus: 'CANCELLED',
-        source: meta?.source ?? 'system',
-        reason: meta?.reason ?? _reason ?? null,
-        occurredAt: updated.cancelledAt ?? new Date(),
-      });
+        const finalized = await this.coachContext.finalizeContext({
+          tx,
+          userId,
+          planId: target.id,
+          planStatus: 'CANCELLED',
+          source: meta?.source ?? 'system',
+          reason: meta?.reason ?? _reason ?? null,
+          occurredAt: cancelled,
+        });
 
+        return { updated, afterCommit: finalized?.afterCommit };
+      };
+
+      // A cancelled source cannot be replaced again. Keep the historical link
+      // without reopening its workouts in provider calendars.
+      const cancelledSuccessor = successor
+        ? await cancelOne(successor, true)
+        : undefined;
+      const result = await cancelOne(plan);
+      await this.attachActualLoadToWorkouts(result.updated);
       return {
-        plan: this.normalizePlanRow(updated),
-        afterCommit: finalized?.afterCommit,
+        plan: this.normalizePlanRow(result.updated),
+        afterCommit: async () => {
+          await result.afterCommit?.();
+          await cancelledSuccessor?.afterCommit?.();
+          await this.emitWorkoutsChanged(userId, 'plan_cancel', [], planId);
+        },
       };
     };
     const result = options?.tx
@@ -3867,8 +3914,7 @@ export class PlanWriteSupport {
           this.prisma.$transaction(run, { timeout: 60_000 }),
         );
     if (!options?.tx) {
-      await result.afterCommit?.();
-      await this.emitWorkoutsChanged(userId, 'plan_cancel', [], planId);
+      await result.afterCommit();
     }
     return result;
   }

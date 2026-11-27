@@ -18,7 +18,10 @@ import type { CanonicalPlanProposal } from './plan-proposal.service';
 import type { CreatePlanDto } from '../dto/create-plan.dto';
 import type { UpdatePlanWorkoutDto } from '../dto/update-plan-workout.dto';
 import type { PlanProposalPresentation } from '@shared/plan-proposal';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanProposalRepository } from '../persistence/plan-proposal.repository';
 import { PlanLoadEstimatorService } from './plan-load-estimator.service';
@@ -340,10 +343,7 @@ export class PlanProposalApplyService {
     }
     const anotherScheduled = await this.plans.findFirst(
       {
-        where: {
-          userId: args.userId,
-          status: 'SCHEDULED',
-        },
+        where: scheduledReplacementReservationWhere(args.userId),
         select: { id: true },
       },
       args.tx,

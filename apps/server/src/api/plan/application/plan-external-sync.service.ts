@@ -19,7 +19,11 @@ import {
   type WorkoutPlanStepDraft,
 } from '@/api/workout/workout.service';
 import { PlanLoadEstimatorService } from './plan-load-estimator.service';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementCutoff,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
 import { Prisma, SportType, type PlanWorkoutStatus } from '@prisma/client';
@@ -32,7 +36,15 @@ import { PlanWorkoutTargetResolver } from './plan-workout-target-resolver.servic
 const WORKOUT_TREE_INCLUDE = {
   plan: {
     include: {
-      supersededBy: { select: { status: true, startDate: true } },
+      supersededBy: {
+        select: {
+          userId: true,
+          status: true,
+          startDate: true,
+          scheduledActivationAt: true,
+          activationBlockedAt: true,
+        },
+      },
     },
   },
   steps: {
@@ -138,7 +150,12 @@ export class PlanExternalSyncService {
           { planId: null },
           {
             plan: {
-              is: { status: { in: ['ACTIVE', 'PAUSED', 'SCHEDULED'] } },
+              is: {
+                OR: [
+                  { status: { in: ['ACTIVE', 'PAUSED'] } },
+                  scheduledReplacementReservationWhere(args.userId),
+                ],
+              },
             },
           },
         ],
@@ -154,10 +171,7 @@ export class PlanExternalSyncService {
         const starts = workout.plan.startDate?.toISOString().slice(0, 10);
         return Boolean(starts && date >= starts);
       }
-      const cutoff =
-        workout.plan.supersededBy?.status === 'SCHEDULED'
-          ? workout.plan.supersededBy.startDate?.toISOString().slice(0, 10)
-          : null;
+      const cutoff = scheduledReplacementCutoff(args.userId, workout.plan.supersededBy);
       return !cutoff || date < cutoff;
     });
     return this.workoutTargetResolver

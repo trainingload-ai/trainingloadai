@@ -55,6 +55,7 @@
     "unauthorized": "請先登入後再繼續",
     "forbidden": "你沒有權限執行此操作",
     "not_found": "找不到請求的內容",
+    "plan_scheduled_activation_pending": "已有另一份計畫排程生效。請先取消那份已排程的計畫，再啟用目前的計畫。",
     "conflict": "請求與目前狀態衝突",
     "invalid_idempotency_key": "刪除請求識別碼無效，請重試。",
     "idempotency_key_already_used": "此刪除請求識別碼已被使用，請重新開始刪除流程。",

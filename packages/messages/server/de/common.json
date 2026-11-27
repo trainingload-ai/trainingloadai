@@ -50,6 +50,7 @@
     "unauthorized": "Eine Anmeldung ist erforderlich",
     "forbidden": "Du bist nicht berechtigt, diese Aktion auszuführen",
     "not_found": "Die angeforderte Ressource wurde nicht gefunden",
+    "plan_scheduled_activation_pending": "Der Start eines anderen Plans ist bereits geplant. Sage diesen geplanten Start ab, bevor du diesen Plan aktivierst.",
     "conflict": "Die Anfrage steht im Konflikt mit dem aktuellen Status",
     "invalid_idempotency_key": "Die Kennung der Löschanfrage ist ungültig. Bitte versuche es erneut.",
     "idempotency_key_already_used": "Diese Kennung der Löschanfrage wurde bereits verwendet. Starte den Löschvorgang erneut.",

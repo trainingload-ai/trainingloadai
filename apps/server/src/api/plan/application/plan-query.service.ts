@@ -8,7 +8,11 @@ import {
   Optional,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementCutoff,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
 import { CoachContextRepository } from '../persistence/coach-context.repository';
@@ -655,7 +659,10 @@ export class PlanQueryService {
     const plans = await this.plans.findMany({
       where: {
         userId,
-        status: { in: ['ACTIVE', 'PAUSED', 'SCHEDULED'] },
+        OR: [
+          { status: { in: ['ACTIVE', 'PAUSED'] } },
+          scheduledReplacementReservationWhere(userId),
+        ],
       },
       orderBy: [{ startDate: 'asc' }, { updatedAt: 'desc' }],
       select: {
@@ -664,7 +671,13 @@ export class PlanQueryService {
         status: true,
         startDate: true,
         supersededBy: {
-          select: { status: true, startDate: true },
+          select: {
+            userId: true,
+            status: true,
+            startDate: true,
+            scheduledActivationAt: true,
+            activationBlockedAt: true,
+          },
         },
         updatedAt: true,
         workouts: {
@@ -686,10 +699,7 @@ export class PlanQueryService {
     });
     return plans.map((plan) => {
       const starts = plan.startDate?.toISOString().slice(0, 10) ?? null;
-      const cutoff =
-        plan.supersededBy?.status === 'SCHEDULED'
-          ? (plan.supersededBy.startDate?.toISOString().slice(0, 10) ?? null)
-          : null;
+      const cutoff = scheduledReplacementCutoff(userId, plan.supersededBy);
       return {
         ...plan,
         workouts: plan.workouts.filter((workout) => {

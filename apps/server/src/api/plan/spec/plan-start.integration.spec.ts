@@ -1,9 +1,19 @@
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
-import { planStartFixture } from './plan-start.fixture';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  planStartFixture,
+  raceWithPlanWriteCheckpoint,
+  raceWithUncommittedPlanWrite,
+} from './plan-start.fixture';
 import type { PlanStartPreviewRequest } from '@shared/plan-proposal';
 import { PlanLoadEstimatorService } from '../application/plan-load-estimator.service';
+import { PlanScheduledActivationWorker } from '../application/plan-scheduled-activation.worker';
+import { PlanExternalSyncService } from '../application/plan-external-sync.service';
+import { PlanRepository } from '../persistence/plan.repository';
+import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
+import { PLAN_WORKOUTS_CHANGED_EVENT } from '../events/plan.events';
 
 describe('saved draft START / PostgreSQL', () => {
   let database: ChildProcess;
@@ -35,6 +45,16 @@ describe('saved draft START / PostgreSQL', () => {
     });
     await prisma.$connect();
     f = planStartFixture(prisma);
+    Object.assign(f.context, {
+      planSummary: {
+        summarize: async () => ({
+          totals: {
+            completionRate: 0, complianceRate: null, doneCount: 0,
+            workoutCount: 0, skippedCount: 0, movedCount: 0,
+          },
+        }),
+      },
+    });
   }, 30000);
   afterAll(async () => {
     await prisma?.$disconnect();
@@ -50,6 +70,282 @@ describe('saved draft START / PostgreSQL', () => {
       "INSERT INTO t_user(id) VALUES ('user'),('other')",
     );
   });
+  const nativeIt = process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN ? it : it.skip;
+
+  async function scheduledReplacement(
+    sourceStatus: 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED' = 'ACTIVE',
+  ) {
+    const startDate = new Date('2026-01-01T00:00:00.000Z');
+    const source = await prisma.plan.create({
+      data: {
+        userId: 'user',
+        title: 'Source plan',
+        periodWeeks: 2,
+        status: sourceStatus,
+        startDate,
+      },
+    });
+    const successor = await prisma.plan.create({
+      data: {
+        userId: 'user',
+        title: 'Scheduled successor',
+        periodWeeks: 2,
+        status: 'SCHEDULED',
+        supersedesPlanId: source.id,
+        scheduledActivationAt: startDate,
+        startDate,
+      },
+    });
+    await f.context.ensureContext({
+      userId: 'user', planId: source.id, startDate,
+      status: sourceStatus === 'ACTIVE' || sourceStatus === 'PAUSED'
+        ? 'ACTIVE' : 'FINALIZED',
+    });
+    await f.context.ensureContext({
+      userId: 'user', planId: successor.id, startDate, status: 'SCHEDULED',
+    });
+    return { source, successor };
+  }
+
+  function activationWorker(context = f.context) {
+    return new PlanScheduledActivationWorker(
+      prisma as never,
+      new PlanRepository(prisma as never),
+      context,
+      { ensureNotification: async () => undefined } as never,
+    );
+  }
+
+  it('cancels only the linked scheduled successor and releases activation for a new draft', async () => {
+    const next = await draft(1);
+    const unrelatedForUser = await prisma.plan.create({
+      data: { userId: 'user', title: 'Different schedule', status: 'SCHEDULED', periodWeeks: 1 },
+    });
+    const { source, successor } = await scheduledReplacement();
+    const unrelated = await prisma.plan.create({
+      data: {
+        userId: 'other', title: 'Other scheduled plan', status: 'SCHEDULED',
+        periodWeeks: 1,
+      },
+    });
+    const workout = await prisma.planWorkout.create({
+      data: {
+        userId: 'user', planId: successor.id, dayOffset: 0, sportType: 'RUN',
+        text: 'work 20m', scheduledDate: successor.startDate,
+      },
+    });
+    const mapping = await prisma.planWorkoutExternalMapping.create({
+      data: {
+        userId: 'user', provider: 'intervals_icu', planWorkoutId: workout.id,
+        externalEventId: 'scheduled-successor',
+      },
+    });
+    const notifications: unknown[] = [];
+    const events = new EventEmitter2();
+    events.on(PLAN_WORKOUTS_CHANGED_EVENT, (event) => { notifications.push(event); });
+    Object.assign(f.write, { events });
+
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const cancellation = await f.write.cancelPlan('user', source.id, undefined, undefined, { tx });
+        expect(notifications).toHaveLength(0);
+        return cancellation;
+      });
+      expect(notifications).toHaveLength(0);
+      await result.afterCommit();
+    } finally {
+      Object.assign(f.write, { events: undefined });
+    }
+    expect(notifications).toEqual([
+      expect.objectContaining({ userId: 'user', reason: 'plan_cancel', planId: source.id }),
+    ]);
+    await expect(prisma.planWorkoutExternalMapping.findUniqueOrThrow({
+      where: { id: mapping.id },
+    })).resolves.toMatchObject({ syncState: 'LOCAL_DELETED', localDeletedAt: expect.any(Date) });
+    await activationWorker().tick();
+    await expect(prisma.plan.findUniqueOrThrow({ where: { id: successor.id } }))
+      .resolves.toMatchObject({
+        status: 'CANCELLED',
+        supersedesPlanId: source.id,
+        scheduledActivationAt: null,
+        cancelledAt: expect.any(Date),
+      });
+    await expect(prisma.plan.findMany({
+      where: { id: { in: [unrelated.id, unrelatedForUser.id] } },
+      select: { status: true },
+    })).resolves.toEqual([{ status: 'SCHEDULED' }, { status: 'SCHEDULED' }]);
+    await expect(f.write.activatePlan(
+      'user', next.planId, '2099-11-22', undefined, { validatedStartPreview: true },
+    )).resolves.toMatchObject({ plan: { status: 'ACTIVE' } });
+  });
+
+  it('blocks a competing draft activation while a valid replacement is scheduled', async () => {
+    const { successor } = await scheduledReplacement('COMPLETED');
+    const next = await draft(1);
+    const activate = () => f.write.activatePlan(
+      'user', next.planId, '2099-11-22', undefined, { validatedStartPreview: true },
+    );
+    await expect(activate()).rejects.toMatchObject({
+      response: {
+        code: 'PLAN_SCHEDULED_ACTIVATION_PENDING',
+        data: { scheduledPlanId: successor.id },
+      },
+    });
+    await f.service.cancelPlan('user', successor.id);
+    await expect(prisma.plan.findUniqueOrThrow({ where: { id: successor.id } }))
+      .resolves.toMatchObject({ status: 'CANCELLED', supersedesPlanId: null });
+    await expect(activate()).resolves.toMatchObject({ plan: { status: 'ACTIVE' } });
+  });
+
+  it('does not reserve activation or replacement for a historical schedule with a cancelled source', async () => {
+    const { source, successor } = await scheduledReplacement('CANCELLED');
+    const ghostWorkout = await prisma.planWorkout.create({
+      data: {
+        userId: 'user', planId: successor.id, dayOffset: 0, sportType: 'RUN',
+        text: 'work 20m', scheduledDate: successor.startDate,
+      },
+    });
+    const next = await draft(1);
+    const staleSchedules = () => prisma.plan.findMany({
+      where: {
+        userId: 'user', status: 'SCHEDULED', supersedes: { status: 'CANCELLED' },
+      },
+      select: { id: true, supersedesPlanId: true },
+    });
+    await expect(staleSchedules()).resolves.toEqual([
+      { id: successor.id, supersedesPlanId: source.id },
+    ]);
+    await expect(f.write.activatePlan(
+      'user', next.planId, '2099-11-22', undefined, { validatedStartPreview: true },
+    )).resolves.toMatchObject({ plan: { status: 'ACTIVE' } });
+    const preview = await f.proposals.createPreview('user', {
+      mode: 'SUPERSEDE',
+      sourcePlanId: next.planId,
+      effectiveFrom: '2099-11-24',
+      rationale: 'Preserve the flexible training schedule.',
+      evidenceRefs: [{ type: 'recent_load', label: 'Recent training load' }],
+      plan: {
+        title: 'New replacement',
+        periodWeeks: 1,
+        workouts: [{ weekIndex: 1, dayIndex: 1, sportType: 'RUN', text: 'work 25m' }],
+      },
+    });
+    const branch = await prisma.coachBranch.findUniqueOrThrow({
+      where: { id: next.binding.branchId },
+    });
+    const decision = await prisma.coachDecision.create({
+      data: {
+        branchId: branch.id,
+        contextId: branch.contextId,
+        decisionType: 'PLAN_SUPERSESSION',
+        state: 'APPROVED',
+        payload: preview.decisionPayload,
+      },
+    });
+    await prisma.$transaction(async (tx) => {
+      await f.proposals.claimDecision({
+        previewId: preview.previewId,
+        decisionId: decision.id,
+        userId: 'user',
+        sourcePlanId: next.planId,
+        tx,
+      });
+      await f.apply.apply({
+        userId: 'user',
+        branchId: branch.id,
+        decisionId: decision.id,
+        contextPlanId: next.planId,
+        previewId: preview.previewId,
+        tx,
+      });
+    });
+    const replacement = await prisma.plan.findUniqueOrThrow({
+      where: { supersedesPlanId: next.planId },
+    });
+    expect(replacement.status).toBe('SCHEDULED');
+    await expect(staleSchedules()).resolves.toHaveLength(1);
+
+    const feedPlanIds = (await f.query.findCalendarFeedPlans('user')).map(({ id }) => id);
+    expect(feedPlanIds).toContain(replacement.id);
+    expect(feedPlanIds).not.toContain(successor.id);
+    const sync = Object.assign(
+      Object.create(PlanExternalSyncService.prototype) as PlanExternalSyncService,
+      { workouts: new PlanWorkoutRepository(prisma as never) },
+    );
+    const exported = await sync.findExportWindowWorkouts({
+      userId: 'user',
+      start: ghostWorkout.scheduledDate!,
+      end: new Date('2099-11-28'),
+    });
+    expect(exported.map(({ planId }) => planId)).toContain(replacement.id);
+    expect(exported.map(({ id }) => id)).not.toContain(ghostWorkout.id);
+  });
+
+  it('can resume a paused source until its own scheduled successor takes over', async () => {
+    const { source, successor } = await scheduledReplacement('PAUSED');
+    await expect(f.write.activatePlan('user', source.id))
+      .resolves.toMatchObject({ plan: { status: 'ACTIVE' } });
+    await expect(prisma.plan.findUniqueOrThrow({ where: { id: successor.id } }))
+      .resolves.toMatchObject({ status: 'SCHEDULED', supersedesPlanId: source.id });
+  });
+
+  it('leaves the active replacement intact if scheduled activation won first', async () => {
+    const { source, successor } = await scheduledReplacement();
+    await activationWorker().tick();
+    await expect(f.service.cancelPlan('user', source.id)).rejects.toThrow(
+      'Plan cannot be cancelled',
+    );
+    await expect(prisma.plan.findUniqueOrThrow({ where: { id: successor.id } }))
+      .resolves.toMatchObject({ status: 'ACTIVE' });
+  });
+
+  it('rolls both cancellations back with the caller transaction', async () => {
+    const { source, successor } = await scheduledReplacement();
+    await expect(prisma.$transaction(async (tx) => {
+      await f.write.cancelPlan('user', source.id, undefined, undefined, { tx });
+      throw new Error('abort plan cancellation');
+    })).rejects.toThrow('abort plan cancellation');
+    await expect(prisma.plan.findMany({
+      where: { id: { in: [source.id, successor.id] } },
+      select: { status: true },
+    })).resolves.toEqual(expect.arrayContaining([
+      { status: 'ACTIVE' }, { status: 'SCHEDULED' },
+    ]));
+  });
+
+  nativeIt('serializes a scheduled activation behind a source cancellation', async () => {
+    const { source, successor } = await scheduledReplacement();
+    await expect(raceWithUncommittedPlanWrite(
+      prisma,
+      (tx) => f.write.cancelPlan('user', source.id, undefined, undefined, { tx }),
+      () => activationWorker().tick(),
+    )).resolves.toMatchObject({ status: 'fulfilled' });
+    await expect(prisma.plan.findUniqueOrThrow({ where: { id: successor.id } }))
+      .resolves.toMatchObject({ status: 'CANCELLED' });
+  });
+
+  nativeIt('serializes a source cancellation behind a scheduled activation', async () => {
+    const { source, successor } = await scheduledReplacement();
+    const result = await raceWithPlanWriteCheckpoint(
+      prisma,
+      (hold) => {
+        const context = Object.create(f.context) as typeof f.context;
+        context.ensureContext = async (args) => {
+          const saved = await f.context.ensureContext(args);
+          if (args.planId === successor.id) await hold();
+          return saved;
+        };
+        return activationWorker(context).tick();
+      },
+      () => f.service.cancelPlan('user', source.id),
+    );
+    expect(result).toMatchObject({
+      status: 'rejected', reason: { message: 'Plan cannot be cancelled' },
+    });
+    await expect(prisma.plan.findUniqueOrThrow({ where: { id: successor.id } }))
+      .resolves.toMatchObject({ status: 'ACTIVE' });
+  });
+
   async function draft(
     count = 2,
     overrides?: Partial<Parameters<typeof f.service.createPlan>[1]>,

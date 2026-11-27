@@ -55,6 +55,7 @@
     "unauthorized": "Authentication is required",
     "forbidden": "You do not have permission to perform this action",
     "not_found": "The requested resource was not found",
+    "plan_scheduled_activation_pending": "Another plan is already scheduled to start. Cancel that scheduled plan before activating this one.",
     "conflict": "The request conflicts with the current state",
     "invalid_idempotency_key": "The deletion request identifier is invalid. Please try again.",
     "idempotency_key_already_used": "This deletion request identifier has already been used. Please restart the deletion flow.",
