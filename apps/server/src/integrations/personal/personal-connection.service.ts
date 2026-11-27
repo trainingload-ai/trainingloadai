@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { createHash, randomBytes } from 'crypto';
+import { createHash, randomBytes, randomUUID } from 'crypto';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { z } from 'zod';
 import { Prisma, type ExternalProviderConnection } from '@prisma/client';
 import type {
@@ -27,6 +28,15 @@ import { validTimezone } from './personal-dates';
 import { personalSyncJobResult } from './personal-sync-summary';
 import { personalAccountRef } from './personal-identity';
 import { matchesConfiguredBrowserOrigin } from '@/self-host/self-host-local-access-policy';
+
+const COROS_REFRESH_LEASE_MS = 45_000;
+const COROS_REFRESH_WAIT_MS = 5_000;
+
+type CorosRefreshClaim = {
+  connectionId: string;
+  credentialVersion: string;
+  claimToken: string;
+};
 
 const settingsSchema = z
   .object({
@@ -195,8 +205,7 @@ export class PersonalConnectionService {
         const body = record(payload);
         return {
           ...job,
-          startDate:
-            typeof body.startDate === 'string' ? body.startDate : null,
+          startDate: typeof body.startDate === 'string' ? body.startDate : null,
           endDate: typeof body.endDate === 'string' ? body.endDate : null,
           trigger: typeof body.trigger === 'string' ? body.trigger : null,
           reconciling:
@@ -322,7 +331,6 @@ export class PersonalConnectionService {
    * @returns
    */
   async connectGarmin(userId: string, input: unknown) {
-
     // Validate the input
     const body = z
       .object({
@@ -642,67 +650,55 @@ export class PersonalConnectionService {
       data: { status: 'CANCELLED', leaseUntil: null, dedupKey: null },
     });
   }
-  /** Serialize rotating tokens in PostgreSQL, including across server processes. */
   async credential(
     connectionId: string,
     force = false,
     rejectedToken?: string,
-  ): Promise<{ connection: ExternalProviderConnection; token: string }> {
+  ): Promise<{
+    connection: ExternalProviderConnection;
+    token: string;
+  }> {
+    const observed = this.requireActiveConnection(
+      await this.providerConnections.model().findUnique({
+        where: { id: connectionId },
+      }),
+    );
+    if (observed.provider === 'coros')
+      return this.corosCredential(observed, force, rejectedToken);
+
+    // Garmin's Personal API key exchange retains its existing retry and authorization behavior.
     return this.prisma.$transaction(
       async (tx) => {
-        const [lock] = await tx.$queryRaw<
-          Array<{ locked: boolean }>
-        >`SELECT pg_try_advisory_xact_lock(hashtextextended(${`personal-token:${connectionId}`}, 0)) AS locked`;
+        const [lock] = await tx.$queryRaw<Array<{ locked: boolean }>>`
+        SELECT pg_try_advisory_xact_lock(hashtextextended(${`personal-token:${connectionId}`}, 0)) AS locked
+      `;
         if (!lock.locked)
           throw new PersonalProviderError('PROVIDER_BUSY', 5000, 409);
-        let connection = await this.providerConnections.model(tx).findUnique({
-          where: { id: connectionId },
-        });
-        if (
-          !connection ||
-          !isPersonalConnection(connection) ||
-          connection.status !== 'ACTIVE'
-        )
-          throw new PersonalProviderError(
-            'PROVIDER_AUTH_REQUIRED',
-            undefined,
-            401,
-          );
-        const old = JSON.parse(
-          this.vault.decrypt(connection.credentialCiphertext),
+        const connection = this.requireActiveConnection(
+          await this.providerConnections.model(tx).findUnique({
+            where: { id: connectionId },
+          }),
         );
-        let credential = old;
-        const oldToken =
-          connection.provider === 'garmin' ? old.token : old.accessToken;
+        let credential = JSON.parse(
+          this.vault.decrypt(connection.credentialCiphertext),
+        ) as GarminCredential;
         if (
-          (force && (!rejectedToken || rejectedToken === oldToken)) ||
-          !old.expiresAt ||
-          old.expiresAt - 60_000 <= Date.now()
+          this.needsRefresh(
+            credential.expiresAt,
+            credential.token,
+            force,
+            rejectedToken,
+          )
         ) {
-          if (connection.provider === 'garmin')
-            credential = await this.garmin.exchange(
-              personalRegion(connection),
-              old.apiKey,
-            );
-          else {
-            if (!old.refreshToken)
-              throw new PersonalProviderError(
-                'PROVIDER_AUTH_REQUIRED',
-                undefined,
-                401,
-              );
-            credential = await this.coros.token(
-              personalRegion(connection),
-              old.clientId,
-              { grant_type: 'refresh_token', refresh_token: old.refreshToken },
-            );
-            credential.refreshToken ??= old.refreshToken;
-          }
+          credential = await this.garmin.exchange(
+            personalRegion(connection),
+            credential.apiKey,
+          );
           const changed = await this.providerConnections.model(tx).updateMany({
             where: {
               id: connection.id,
-              credentialCiphertext: connection.credentialCiphertext,
               status: 'ACTIVE',
+              credentialCiphertext: connection.credentialCiphertext,
             },
             data: {
               credentialCiphertext: this.vault.encrypt(
@@ -710,24 +706,293 @@ export class PersonalConnectionService {
               ),
             },
           });
-          if (changed.count !== 1)
+          if (!changed.count)
             throw new PersonalProviderError(
               'PROVIDER_CONNECTION_CHANGED',
               undefined,
               409,
             );
         }
-        return {
-          connection,
-          token:
-            connection.provider === 'garmin'
-              ? credential.token
-              : credential.accessToken,
-        };
+        return { connection, token: credential.token };
       },
       { timeout: 90_000 },
     );
   }
+
+  private async corosCredential(
+    observed: ExternalProviderConnection,
+    force: boolean,
+    rejectedToken?: string,
+  ) {
+    const deadline = Date.now() + COROS_REFRESH_WAIT_MS;
+    for (;;) {
+      const result = await this.prisma.$transaction(async (tx) => {
+        const now = await this.tryRefreshLock(tx, observed.id);
+        if (!now) return { waiting: true } as const;
+        const connection = this.requireActiveConnection(
+          await this.providerConnections.model(tx).findUnique({
+            where: { id: observed.id },
+          }),
+        );
+        if (!this.sameAuthorization(observed, connection))
+          throw new PersonalProviderError(
+            'PROVIDER_CONNECTION_CHANGED',
+            undefined,
+            409,
+          );
+        const credential = JSON.parse(
+          this.vault.decrypt(connection.credentialCiphertext),
+        ) as CorosCredential;
+        if (
+          !this.needsRefresh(
+            credential.expiresAt,
+            credential.accessToken,
+            force,
+            rejectedToken,
+          )
+        )
+          return { cached: { connection, token: credential.accessToken } };
+        if (!credential.refreshToken) return { authRequired: true } as const;
+
+        const credentialVersion = createHash('sha256')
+          .update(connection.credentialCiphertext)
+          .digest('hex');
+        const existing = await tx.personalOAuthRefresh.findUnique({
+          where: { connectionId: connection.id },
+        });
+        if (existing?.credentialVersion === credentialVersion) {
+          if (existing.leaseExpiresAt > now) return { waiting: true } as const;
+          if (existing.dispatchedAt) {
+            await this.invalidateConnection(tx, this.refreshFence(connection));
+            return { authRequired: true } as const;
+          }
+        }
+        const owner = {
+          connectionId: connection.id,
+          credentialVersion,
+          claimToken: randomUUID(),
+        };
+        const data = {
+          ...owner,
+          dispatchedAt: null,
+          leaseExpiresAt: new Date(now.getTime() + COROS_REFRESH_LEASE_MS),
+        };
+        await tx.personalOAuthRefresh.upsert({
+          where: { connectionId: connection.id },
+          create: data,
+          update: data,
+        });
+        return { refresh: { connection, credential, owner } };
+      });
+
+      if (result.cached) return result.cached;
+      if (result.authRequired)
+        throw new PersonalProviderError(
+          'PROVIDER_AUTH_REQUIRED',
+          undefined,
+          401,
+        );
+      if (result.refresh) {
+        const { connection, credential, owner } = result.refresh;
+        return this.exchangeCoros(connection, credential, owner);
+      }
+      if (Date.now() >= deadline)
+        throw new PersonalProviderError('PROVIDER_BUSY', 5000, 409);
+      await sleep(100);
+    }
+  }
+
+  private async exchangeCoros(
+    connection: ExternalProviderConnection,
+    credential: CorosCredential,
+    owner: CorosRefreshClaim,
+  ) {
+    let dispatched = false;
+    let next: CorosCredential;
+    try {
+      next = await this.coros.token(
+        personalRegion(connection),
+        credential.clientId,
+        {
+          grant_type: 'refresh_token',
+          refresh_token: credential.refreshToken!,
+        },
+        async () => {
+          // Discovery and endpoint checks finish before the refresh token can be consumed.
+          dispatched = await this.allowCorosDispatch(connection, owner);
+          if (!dispatched)
+            throw new PersonalProviderError(
+              'PROVIDER_CONNECTION_CHANGED',
+              undefined,
+              409,
+            );
+        },
+      );
+    } catch (error) {
+      const status =
+        error instanceof PersonalProviderError
+          ? error.upstreamHttpStatus
+          : undefined;
+      const rejected =
+        status !== undefined && status >= 400 && status < 500 && status !== 408;
+      if (!dispatched || (rejected && status !== 401)) {
+        await this.prisma.personalOAuthRefresh
+          .deleteMany({ where: owner })
+          .catch(() => undefined);
+      } else {
+        await this.prisma.$transaction(async (tx) => {
+          if (!(await tx.personalOAuthRefresh.findFirst({ where: owner })))
+            return;
+          await this.invalidateConnection(tx, this.refreshFence(connection));
+        });
+      }
+      throw error;
+    }
+
+    next.refreshToken ??= credential.refreshToken;
+    const ciphertext = this.vault.encrypt(JSON.stringify(next));
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const saved = await this.prisma.$transaction(async (tx) => {
+          const now = await this.tryRefreshLock(tx, connection.id);
+          if (!now) throw new PersonalProviderError('PROVIDER_BUSY', 5000, 409);
+          const current = await this.providerConnections
+            .model(tx)
+            .findUnique({ where: { id: connection.id } });
+          if (
+            !current ||
+            !this.sameAuthorization(connection, current) ||
+            current.status !== 'ACTIVE'
+          )
+            return false;
+          if (current.credentialCiphertext === ciphertext) return true;
+          const held = await tx.personalOAuthRefresh.findFirst({
+            where: {
+              ...owner,
+              dispatchedAt: { not: null },
+              leaseExpiresAt: { gt: now },
+            },
+          });
+          if (!held) return false;
+          const changed = await this.providerConnections.model(tx).updateMany({
+            where: this.refreshFence(connection),
+            data: { credentialCiphertext: ciphertext },
+          });
+          if (changed.count)
+            await tx.personalOAuthRefresh.deleteMany({ where: owner });
+          return changed.count === 1;
+        });
+        if (!saved)
+          throw new PersonalProviderError(
+            'PROVIDER_CONNECTION_CHANGED',
+            undefined,
+            409,
+          );
+        return { connection, token: next.accessToken };
+      } catch (error) {
+        if (
+          error instanceof PersonalProviderError &&
+          error.code === 'PROVIDER_CONNECTION_CHANGED'
+        )
+          throw error;
+        if (attempt === 2)
+          throw new PersonalProviderError('PROVIDER_REQUEST_FAILED');
+        await sleep(50 * (attempt + 1));
+      }
+    }
+    throw new PersonalProviderError('PROVIDER_REQUEST_FAILED');
+  }
+
+  private allowCorosDispatch(
+    connection: ExternalProviderConnection,
+    owner: CorosRefreshClaim,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const now = await this.tryRefreshLock(tx, connection.id);
+      if (!now) throw new PersonalProviderError('PROVIDER_BUSY', 5000, 409);
+      const current = await this.providerConnections
+        .model(tx)
+        .findUnique({ where: { id: connection.id } });
+      if (
+        !current ||
+        !this.sameAuthorization(connection, current) ||
+        current.status !== 'ACTIVE' ||
+        current.credentialCiphertext !== connection.credentialCiphertext
+      )
+        return false;
+      const dispatched = await tx.personalOAuthRefresh.updateMany({
+        where: { ...owner, dispatchedAt: null, leaseExpiresAt: { gt: now } },
+        data: {
+          dispatchedAt: now,
+          leaseExpiresAt: new Date(now.getTime() + COROS_REFRESH_LEASE_MS),
+        },
+      });
+      return dispatched.count === 1;
+    });
+  }
+
+  private async tryRefreshLock(
+    tx: Prisma.TransactionClient,
+    connectionId: string,
+  ) {
+    const [lock] = await tx.$queryRaw<Array<{ locked: boolean; now: Date }>>`
+      SELECT pg_try_advisory_xact_lock(hashtextextended(${`personal-token:${connectionId}`}, 0)) AS locked,
+        clock_timestamp() AS now
+    `;
+    return lock.locked ? lock.now : null;
+  }
+
+  private requireActiveConnection(
+    connection: ExternalProviderConnection | null,
+  ) {
+    if (
+      !connection ||
+      !isPersonalConnection(connection) ||
+      connection.status !== 'ACTIVE'
+    )
+      throw new PersonalProviderError('PROVIDER_AUTH_REQUIRED', undefined, 401);
+    return connection;
+  }
+
+  private needsRefresh(
+    expiresAt: number,
+    token: string,
+    force: boolean,
+    rejectedToken?: string,
+  ) {
+    return (
+      (force && (!rejectedToken || rejectedToken === token)) ||
+      !expiresAt ||
+      expiresAt - 60_000 <= Date.now()
+    );
+  }
+
+  private sameAuthorization(
+    expected: ExternalProviderConnection,
+    current: ExternalProviderConnection,
+  ) {
+    return (
+      expected.credentialFingerprint === current.credentialFingerprint &&
+      personalMetadata(expected).authorizationRevision ===
+        personalMetadata(current).authorizationRevision
+    );
+  }
+
+  private refreshFence(
+    connection: ExternalProviderConnection,
+  ): Prisma.ExternalProviderConnectionWhereInput & { id: string } {
+    const revision = personalMetadata(connection).authorizationRevision;
+    return {
+      id: connection.id,
+      status: 'ACTIVE',
+      credentialFingerprint: connection.credentialFingerprint,
+      credentialCiphertext: connection.credentialCiphertext,
+      ...(typeof revision === 'string'
+        ? { metadata: { path: ['authorizationRevision'], equals: revision } }
+        : {}),
+    };
+  }
+
   async authorized<T>(
     connectionId: string,
     work: (connection: ExternalProviderConnection, token: string) => Promise<T>,
@@ -755,33 +1020,40 @@ export class PersonalConnectionService {
         observed &&
         isPersonalConnection(observed)
       ) {
-        await this.prisma.$transaction(async (tx) => {
-          const invalidated = await this.providerConnections.model(tx).updateMany({
-            where: {
-              id: connectionId,
-              status: 'ACTIVE',
-              credentialFingerprint: observed.credentialFingerprint,
-            },
-            data: { status: 'INVALID', lastError: error.code },
-          });
-          if (invalidated.count)
-            await tx.personalProviderJob.updateMany({
-              where: {
-                connectionId,
-                kind: { not: 'WRITE' },
-                status: { in: ['QUEUED', 'RUNNING', 'WAITING'] },
-              },
-              data: {
-                status: 'FAILED',
-                errorCode: error.code,
-                leaseUntil: null,
-              },
-            });
-        });
+        await this.prisma.$transaction((tx) =>
+          this.invalidateConnection(tx, {
+            id: connectionId,
+            status: 'ACTIVE',
+            credentialFingerprint: observed.credentialFingerprint,
+          }),
+        );
       }
       throw error;
     }
   }
+  private async invalidateConnection(
+    tx: Prisma.TransactionClient,
+    where: Prisma.ExternalProviderConnectionWhereInput & { id: string },
+  ) {
+    const invalidated = await this.providerConnections.model(tx).updateMany({
+      where,
+      data: { status: 'INVALID', lastError: 'PROVIDER_AUTH_REQUIRED' },
+    });
+    if (!invalidated.count) return;
+    await tx.personalProviderJob.updateMany({
+      where: {
+        connectionId: where.id,
+        kind: { not: 'WRITE' },
+        status: { in: ['QUEUED', 'RUNNING', 'WAITING'] },
+      },
+      data: {
+        status: 'FAILED',
+        errorCode: 'PROVIDER_AUTH_REQUIRED',
+        leaseUntil: null,
+      },
+    });
+  }
+
   tools(connection: ExternalProviderConnection): CorosTool[] {
     const tools = personalMetadata(connection).tools;
     return Array.isArray(tools) ? (tools as CorosTool[]) : [];

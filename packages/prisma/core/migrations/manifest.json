@@ -240,7 +240,12 @@
       "id": "0048_plan_workout_change_revision",
       "file": "0048_plan_workout_change_revision/migration.sql",
       "sha256": "497b979f68f93ae43eedb01b18c02a9d69ed458a61e425407ce76a042466c1b9"
+    },
+    {
+      "id": "0049_personal_oauth_refresh_claim",
+      "file": "0049_personal_oauth_refresh_claim/migration.sql",
+      "sha256": "7e68cc1a71e5e0a8fc81ff079f5dee5a8c9bfb1ba1c96111002d15d2df7ea703"
     }
   ],
-  "schemaChecksum": "cf50d847a3fd2887e19fc7a44b57fc5db432a1a02545c403df2502d284a972fa"
+  "schemaChecksum": "712b24db13aa7a6ac889e72cdbc32b8e418e6143744030a22353461bb9d5761e"
 }

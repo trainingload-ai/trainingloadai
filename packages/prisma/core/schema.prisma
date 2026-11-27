@@ -1456,6 +1456,7 @@ model ExternalProviderConnection {
   planWorkoutMappings PlanWorkoutExternalMapping[]
   routeMappings       RouteExternalMapping[]
   personalJobs        PersonalProviderJob[]
+  personalOAuthRefresh PersonalOAuthRefresh?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1469,6 +1470,17 @@ model ExternalProviderConnection {
 
 /// Personal integrations use durable discovery/checkpoint and delivery jobs.
 /// Payload/result never contain credentials or signed download URLs.
+model PersonalOAuthRefresh {
+  connectionId      String                     @id @map("connection_id")
+  connection        ExternalProviderConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  credentialVersion String                     @map("credential_version")
+  claimToken        String                     @map("claim_token")
+  leaseExpiresAt    DateTime                   @map("lease_expires_at") @db.Timestamptz(3)
+  dispatchedAt      DateTime?                  @map("dispatched_at") @db.Timestamptz(3)
+
+  @@map("t_personal_oauth_refresh")
+}
+
 model PersonalProviderJob {
   id            String                     @id @default(cuid())
   connectionId  String                     @map("connection_id")

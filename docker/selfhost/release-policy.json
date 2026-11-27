@@ -213,6 +213,10 @@
       "0048_plan_workout_change_revision": {
         "phase": "expand",
         "releaseVersion": "1.1.27"
+      },
+      "0049_personal_oauth_refresh_claim": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
       }
     }
   }
