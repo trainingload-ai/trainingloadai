@@ -26,6 +26,11 @@ import {
   datasetRepairFingerprint,
   type ActivityDatasetRepair,
 } from '@/importing/activity-dataset-repair';
+import {
+  unresolvedAssociationSegments,
+  type AssociationGap,
+  type RawSegment,
+} from './raw-association-recovery';
 import { PrismaService } from '@/prisma/prisma.service';
 import { STORAGE_PORT, type StoragePort } from '@/storage/storage.port';
 
@@ -99,6 +104,8 @@ export type FitActivityRepairScanOptions = {
   userId?: string;
   sourceKind?: ImportSourceKind;
   failFast?: boolean;
+  /** Collect every association gap in the page instead of stopping at the first. */
+  reviewAssociations?: boolean;
   migrationId?: string;
 };
 
@@ -133,6 +140,8 @@ export type FitActivityRepairScanResult = {
   lastCandidateId: string | null;
   lastScannedId: string | null;
   failures: Array<{ sourceObjectId: string; code: string }>;
+  associationGaps: AssociationGap[];
+  scannedSourceIds: string[];
   integrityAudits?: LegacyDiscoveryIntegrityAudit[];
   sourceOutcomes: RawSourceScanOutcome[];
   hasMore: boolean;
@@ -335,6 +344,8 @@ export class FitActivityDataRepairService {
       lastCandidateId: null,
       lastScannedId: null,
       failures: [],
+      associationGaps: [],
+      scannedSourceIds: [],
       integrityAudits: [],
       sourceOutcomes: [],
       hasMore: false,
@@ -384,10 +395,12 @@ export class FitActivityDataRepairService {
           importRevision: true,
           metadata: true,
           activitySources: {
-            where: { isActive: true, isPrimary: true, activity: { state: 1 } },
+            where: { isActive: true, activity: { state: 1 } },
             select: {
               id: true,
               sourceUid: true,
+              isPrimary: true,
+              sourceObjectId: true,
               sourceChecksum: true,
               canonicalSnapshotId: true,
               metadata: true,
@@ -512,7 +525,10 @@ export class FitActivityDataRepairService {
                 : 0,
             }),
           );
-          const stored = sourceObject.activitySources.map(
+          const primarySources = sourceObject.activitySources.filter(
+            (source) => source.isPrimary !== false,
+          );
+          const stored = primarySources.map(
             (source): StoredActivityDataset => ({
               sourceUid: source.sourceUid,
               activityId: source.activityId,
@@ -559,13 +575,80 @@ export class FitActivityDataRepairService {
             );
             comparison = compareRecoverableFitData({ raw, stored });
           }
-          result.unmappedRawActivities += comparison.unmapped;
-          if (comparison.unmapped) {
+          const segments: RawSegment[] = raw.map((dataset, index) => {
+            const activity = decoded.activity.activities?.[index] as unknown as
+              | {
+                  startTime?: Date | string;
+                  endTime?: Date | string;
+                  sport?: string;
+                }
+              | undefined;
+            const start = activity?.startTime
+              ? new Date(activity.startTime).getTime()
+              : Number.NaN;
+            const end = activity?.endTime
+              ? new Date(activity.endTime).getTime()
+              : Number.NaN;
+            return {
+              segmentIndex: index,
+              sourceUid: dataset.sourceUid,
+              startTimeMs: Number.isFinite(start) ? start : null,
+              endTimeMs: Number.isFinite(end) ? end : null,
+              sportType: activity?.sport ? String(activity.sport) : null,
+              recordCount: dataset.recordCount,
+              strengthSetCount: dataset.strengthSetCount,
+            };
+          });
+          const storedSources = sourceObject.activitySources.map((source) => {
+            const metadata =
+              source.metadata &&
+              typeof source.metadata === 'object' &&
+              !Array.isArray(source.metadata)
+                ? (source.metadata as { associationRole?: unknown })
+                : {};
+            return {
+              sourceUid: source.sourceUid,
+              activityId: source.activityId,
+              sourceId: source.id,
+              sourceObjectId: source.sourceObjectId ?? sourceObject.id,
+              sourceKind: sourceObject.sourceKind,
+              isPrimary: source.isPrimary !== false,
+              associationRole:
+                metadata.associationRole === 'cover'
+                  ? ('cover' as const)
+                  : null,
+            };
+          });
+          // Core proves checksum, start time and complete materialization
+          // before including a cross-container duplicate in stored.
+          const coveredDatasetUids = new Set(
+            stored.map((dataset) => dataset.sourceUid),
+          );
+          const unresolved = unresolvedAssociationSegments({
+            segments,
+            storedSources,
+            singlePrimaryLegacyMapped:
+              segments.length === 1 && primarySources.length === 1,
+          }).filter((segment) => !coveredDatasetUids.has(segment.sourceUid));
+          result.unmappedRawActivities += unresolved.length;
+          result.scannedSourceIds.push(sourceObject.id);
+          if (unresolved.length) {
             result.failures.push({
               sourceObjectId: sourceObject.id,
               code: 'RAW_ACTIVITY_ASSOCIATION_MISSING',
             });
-            if (options.failFast) break scan;
+            result.associationGaps.push({
+              sourceObjectId: sourceObject.id,
+              sourceKind: String(sourceObject.sourceKind ?? ''),
+              segments: unresolved,
+            });
+            conclude({
+              sourceObjectId: sourceObject.id,
+              disposition: 'UNRECOVERABLE',
+              code: 'RAW_ACTIVITY_ASSOCIATION_MISSING',
+            });
+            if (options.failFast && !options.reviewAssociations) break scan;
+            continue;
           }
           if (comparison.reasons.length === 0) {
             result.noRecoverableData += 1;

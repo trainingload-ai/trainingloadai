@@ -16,6 +16,15 @@ import {
   applyUnknownActivitySportRepairs,
   scanUnknownActivitySports,
 } from './unknown-activity-sport-repair';
+import {
+  activeManifestAfterRestart,
+  assertCanMarkVerified,
+  mergeReviewedRawScope,
+  assertRetryAllowed,
+  reviewCounts,
+  type AssociationGap,
+  type ReviewedRawScope,
+} from './raw-association-recovery';
 
 const LOCK = 'activity-data-migration';
 const STABLE_UNRECOVERABLE_SOURCE = new Set([
@@ -23,7 +32,6 @@ const STABLE_UNRECOVERABLE_SOURCE = new Set([
   'RAW_CHECKSUM_MISMATCH',
   'RAW_DECODE_FAILED',
   'RAW_CANONICAL_MAPPING_FAILED',
-  'RAW_ACTIVITY_ASSOCIATION_MISSING',
 ]);
 const json = (value: unknown) =>
   JSON.parse(
@@ -457,9 +465,13 @@ export class ActivityDataMigrationService {
           afterId: row.rawCursor ?? undefined,
           migrationId: row.id,
           failFast: true,
+          reviewAssociations: true,
         });
         await this.recordIntegrityAudits(row, scan.integrityAudits ?? []);
-        if (scan.failures.length) throw new Error(scan.failures[0].code);
+        const blocking = (scan.failures ?? []).filter(
+          (failure) => failure.code !== 'RAW_ACTIVITY_ASSOCIATION_MISSING',
+        );
+        if (blocking.length) throw new Error(blocking[0].code);
         if (scan.alreadyQueued)
           return {
             completed: false,
@@ -645,6 +657,7 @@ export class ActivityDataMigrationService {
             if (String(revision?.revision ?? 0) !== report.revision)
               throw new Error('ACTIVITY_MIGRATION_REVISION_DRIFT');
             await this.assertScanClosure(tx, row.userId, row.beforeManifest);
+            assertCanMarkVerified(reviewCounts(row.beforeManifest));
             await tx.activityDataMigration.update({
               where: { id: row.id },
               data: {
@@ -670,10 +683,34 @@ export class ActivityDataMigrationService {
         error instanceof Error && /^[A-Z][A-Z0-9_]+$/.test(error.message)
           ? error.message
           : 'ACTIVITY_MIGRATION_STEP_FAILED';
-      await this.prisma.activityDataMigration.update({
-        where: { id: row.id },
-        data: { status: 'FAILED', errorCode: code },
-      });
+      const reviewFailure = error as {
+        reviewedRawScope?: ReviewedRawScope;
+        pendingRawSourceCount?: number;
+      };
+      if (reviewFailure.reviewedRawScope) {
+        const current = await this.prisma.activityDataMigration.findUniqueOrThrow(
+          { where: { id: row.id } },
+        );
+        await this.prisma.activityDataMigration.update({
+          where: { id: row.id },
+          data: {
+            status: 'FAILED',
+            errorCode: code,
+            beforeManifest: json({
+              ...((current.beforeManifest as object) ?? {}),
+              reviewedRawScope: reviewFailure.reviewedRawScope,
+              pendingRawSourceCount:
+                reviewFailure.pendingRawSourceCount ??
+                reviewFailure.reviewedRawScope.pending.length,
+            }),
+          },
+        });
+      } else {
+        await this.prisma.activityDataMigration.update({
+          where: { id: row.id },
+          data: { status: 'FAILED', errorCode: code },
+        });
+      }
       throw Object.assign(new Error(code), { cause: error });
     }
   }
@@ -723,6 +760,8 @@ export class ActivityDataMigrationService {
       hasMore: boolean;
       lastScannedId: string | null;
       sourceOutcomes?: RawSourceScanOutcome[];
+      scannedSourceIds?: string[];
+      associationGaps?: AssociationGap[];
     },
   ) {
     await this.prisma.$transaction(async (tx) => {
@@ -734,6 +773,17 @@ export class ActivityDataMigrationService {
         throw new Error('ACTIVITY_MIGRATION_RAW_SCAN_CONFLICT');
       }
       const before = (current.beforeManifest ?? {}) as Record<string, any>;
+      const scope = mergeReviewedRawScope(before.reviewedRawScope, {
+        scannedSourceIds: scan.scannedSourceIds ?? [],
+        gaps: scan.associationGaps ?? [],
+      });
+      if (!scan.hasMore) {
+        assertCanMarkVerified({
+          pendingAssociationMissing: scope.pending.length,
+          pendingRawSourceCount: scope.pending.length,
+          reviewedRawScope: scope,
+        });
+      }
       const merged = new Map<string, RawSourceScanOutcome>(
         ((before.rawSourceOutcomes ?? []) as RawSourceScanOutcome[]).map(
           (outcome) => [outcome.sourceObjectId, outcome],
@@ -763,6 +813,8 @@ export class ActivityDataMigrationService {
             ...before,
             rawSourceOutcomes: outcomes,
             rawScanExhausted: exhausted,
+            reviewedRawScope: scope,
+            pendingRawSourceCount: scope.pending.length,
           }),
         },
       });
@@ -996,6 +1048,7 @@ export class ActivityDataMigrationService {
       ].filter((d): d is Date => d != null);
       if (!dates.length) {
         await this.assertScanClosure(tx, row.userId, row.beforeManifest);
+        assertCanMarkVerified(reviewCounts(row.beforeManifest));
         await tx.activityDataMigration.update({
           where: { id: row.id },
           data: {
@@ -1193,6 +1246,7 @@ export class ActivityDataMigrationService {
       });
       if (row.status !== 'FAILED')
         throw new Error('ACTIVITY_MIGRATION_NOT_FAILED');
+      assertRetryAllowed(row.errorCode);
       await this.lockUser(tx, row.userId);
       if (
         row.phase === 'WAIT_VERIFY_REPLAY' &&
@@ -1393,7 +1447,6 @@ export class ActivityDataMigrationService {
           skipDuplicates: true,
         });
         const old = (row.beforeManifest ?? {}) as Record<string, any>;
-        const { restartHistory: history = [], ...prior } = old;
         const restarted = await tx.activityDataMigration.update({
           where: { id },
           data: {
@@ -1404,21 +1457,16 @@ export class ActivityDataMigrationService {
             recomputeJobId: null,
             errorCode: null,
             verification: Prisma.DbNull,
-            beforeManifest: json({
-              ...before,
-              generation: randomUUID(),
-              restartHistory: [
-                ...history,
-                {
-                  at: new Date().toISOString(),
-                  before: prior,
-                  batchIds: ids,
-                  recomputeJobId: row.recomputeJobId,
-                  errorCode: row.errorCode,
-                  verification: row.verification,
-                },
-              ],
-            }),
+            beforeManifest: json(
+              activeManifestAfterRestart(before, old, {
+                at: new Date().toISOString(),
+                batchIds: ids,
+                recomputeJobId: row.recomputeJobId,
+                errorCode: row.errorCode,
+                verification: row.verification,
+                generation: randomUUID(),
+              }),
+            ),
           },
         });
         const sportRepairs = await applyUnknownActivitySportRepairs(

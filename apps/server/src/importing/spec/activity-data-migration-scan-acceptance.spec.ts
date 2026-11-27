@@ -66,6 +66,28 @@ function migration(phase: string) {
 }
 
 describe('historical migration scan acceptance', () => {
+  it('keeps a completed replay pending when its raw association still needs review', async () => {
+    const h = migration('WAIT_VERIFY_REPLAY');
+    h.row.beforeManifest = {
+      rawScanExhausted: true,
+      rawSourceOutcomes: [
+        { sourceObjectId: 'source-1', disposition: 'NO_RECOVERABLE_DATA' },
+        { sourceObjectId: 'source-2', disposition: 'NO_RECOVERABLE_DATA' },
+      ],
+      pendingRawSourceCount: 1,
+      reviewedRawScope: {
+        satisfied: false,
+        sourceObjectIds: ['source-1', 'source-2'],
+        pending: [{ sourceObjectId: 'source-2', sourceKind: 'FIT', segments: [] }],
+      },
+    };
+    await expect(h.service.advance('run')).rejects.toThrow(
+      'ACTIVITY_MIGRATION_RAW_SOURCE_REVIEW_REQUIRED',
+    );
+    expect(h.row.status).toBe('FAILED');
+    expect(h.updates.some((update) => update.status === 'VERIFIED')).toBe(false);
+  });
+
   it('does not leave RAW_SCAN when the cursor page is shorter than the eligible sources', async () => {
     const h = migration('RAW_SCAN');
     h.repair.scan.mockResolvedValue({
