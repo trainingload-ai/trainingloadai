@@ -6,7 +6,11 @@ import { Injectable } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, type ActivityDataMigration } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
-import { FitActivityDataRepairService } from './fit-activity-data-repair.service';
+import { ACTIVITY_MATERIALIZATION_VERSION } from './activity-dataset-repair';
+import {
+  FitActivityDataRepairService,
+  type RawSourceScanOutcome,
+} from './fit-activity-data-repair.service';
 import type { LegacyDiscoveryIntegrityAudit } from './raw-file-checksum';
 import {
   applyUnknownActivitySportRepairs,
@@ -14,6 +18,13 @@ import {
 } from './unknown-activity-sport-repair';
 
 const LOCK = 'activity-data-migration';
+const STABLE_UNRECOVERABLE_SOURCE = new Set([
+  'RAW_FILE_UNAVAILABLE',
+  'RAW_CHECKSUM_MISMATCH',
+  'RAW_DECODE_FAILED',
+  'RAW_CANONICAL_MAPPING_FAILED',
+  'RAW_ACTIVITY_ASSOCIATION_MISSING',
+]);
 const json = (value: unknown) =>
   JSON.parse(
     JSON.stringify(value, (_key, v) =>
@@ -456,13 +467,7 @@ export class ActivityDataMigrationService {
             userId: row.userId,
           };
         await this.repair.enqueue(scan.candidates);
-        await this.prisma.activityDataMigration.update({
-          where: { id: row.id },
-          data: {
-            rawCursor: scan.lastScannedId ?? row.rawCursor,
-            phase: scan.hasMore ? 'RAW_SCAN' : 'WAIT_IMPORT',
-          },
-        });
+        await this.persistRawScan(row.id, scan);
       } else if (row.phase === 'WAIT_IMPORT') {
         const ids = row.importBatchIds as string[];
         const batches = await this.jobs.batchJobs().findMany({
@@ -639,6 +644,7 @@ export class ActivityDataMigrationService {
             >`SELECT revision FROM t_fitness_evidence_revision WHERE user_id=${row.userId}`;
             if (String(revision?.revision ?? 0) !== report.revision)
               throw new Error('ACTIVITY_MIGRATION_REVISION_DRIFT');
+            await this.assertScanClosure(tx, row.userId, row.beforeManifest);
             await tx.activityDataMigration.update({
               where: { id: row.id },
               data: {
@@ -709,6 +715,150 @@ export class ActivityDataMigrationService {
         },
       });
     });
+  }
+
+  private async persistRawScan(
+    migrationId: string,
+    scan: {
+      hasMore: boolean;
+      lastScannedId: string | null;
+      sourceOutcomes?: RawSourceScanOutcome[];
+    },
+  ) {
+    await this.prisma.$transaction(async (tx) => {
+      await this.lock(tx);
+      const current = await tx.activityDataMigration.findUniqueOrThrow({
+        where: { id: migrationId },
+      });
+      if (current.status !== 'MIGRATING' || current.phase !== 'RAW_SCAN') {
+        throw new Error('ACTIVITY_MIGRATION_RAW_SCAN_CONFLICT');
+      }
+      const before = (current.beforeManifest ?? {}) as Record<string, any>;
+      const merged = new Map<string, RawSourceScanOutcome>(
+        ((before.rawSourceOutcomes ?? []) as RawSourceScanOutcome[]).map(
+          (outcome) => [outcome.sourceObjectId, outcome],
+        ),
+      );
+      for (const outcome of scan.sourceOutcomes ?? []) {
+        merged.set(outcome.sourceObjectId, outcome);
+      }
+      const outcomes = [...merged.values()];
+      let exhausted = false;
+      if (!scan.hasMore) {
+        const eligible = await this.repair.listEligibleSourceIds(
+          current.userId,
+          this.jobs.sourceObjects(tx) as never,
+        );
+        if (eligible.some((id) => !merged.has(id))) {
+          throw new Error('ACTIVITY_MIGRATION_RAW_SCAN_INCOMPLETE');
+        }
+        exhausted = true;
+      }
+      await tx.activityDataMigration.update({
+        where: { id: migrationId },
+        data: {
+          rawCursor: scan.lastScannedId ?? current.rawCursor,
+          phase: scan.hasMore ? 'RAW_SCAN' : 'WAIT_IMPORT',
+          beforeManifest: json({
+            ...before,
+            rawSourceOutcomes: outcomes,
+            rawScanExhausted: exhausted,
+          }),
+        },
+      });
+    });
+  }
+
+  /** VERIFIED requires every eligible source to have been scanned, and each recoverable repair to be materialized. */
+  private async assertScanClosure(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    beforeManifest: unknown,
+  ) {
+    const before = (beforeManifest ?? {}) as Record<string, any>;
+    const outcomes = (before.rawSourceOutcomes ?? []) as RawSourceScanOutcome[];
+    if (before.rawScanExhausted !== true || !Array.isArray(outcomes)) {
+      throw new Error('ACTIVITY_MIGRATION_RAW_SCAN_INCOMPLETE');
+    }
+    const bySource = new Map(
+      outcomes.map((outcome) => [outcome.sourceObjectId, outcome]),
+    );
+    const eligible = await this.repair.listEligibleSourceIds(
+      userId,
+      this.jobs.sourceObjects(tx) as never,
+    );
+    if (eligible.some((id) => !bySource.has(id))) {
+      throw new Error('ACTIVITY_MIGRATION_RAW_SCAN_INCOMPLETE');
+    }
+    const repairs = eligible.flatMap((id) => {
+      const outcome = bySource.get(id)!;
+      if (outcome.disposition === 'NO_RECOVERABLE_DATA') return [];
+      if (outcome.disposition === 'UNRECOVERABLE') {
+        if (!outcome.code || !STABLE_UNRECOVERABLE_SOURCE.has(outcome.code)) {
+          throw new Error('ACTIVITY_MIGRATION_RAW_SCAN_INCOMPLETE');
+        }
+        return [];
+      }
+      if (
+        outcome.disposition !== 'REPAIR_REQUIRED' ||
+        !outcome.activities?.length
+      ) {
+        throw new Error('ACTIVITY_MIGRATION_RAW_SCAN_INCOMPLETE');
+      }
+      return outcome.activities.map((activity) => ({
+        ...activity,
+        sourceObjectId: id,
+      }));
+    });
+    if (!repairs.length) return;
+    const stored = await tx.activitySource.findMany({
+      where: {
+        userId,
+        id: { in: repairs.map((repair) => repair.primarySourceId) },
+        isActive: true,
+        isPrimary: true,
+        activity: { state: 1 },
+      },
+      select: {
+        id: true,
+        activityId: true,
+        metadata: true,
+        activity: {
+          select: {
+            parquetFiles: { select: { type: true, pointCount: true } },
+            strengthExercises: { select: { _count: { select: { sets: true } } } },
+          },
+        },
+      },
+    });
+    const storedById = new Map(stored.map((source) => [source.id, source]));
+    for (const repair of repairs) {
+      const source = storedById.get(repair.primarySourceId);
+      const version = Number(
+        (source?.metadata as Record<string, unknown> | null)
+          ?.materializationVersion ?? 0,
+      );
+      const recordCount =
+        source?.activity.parquetFiles.reduce(
+          (count, file) =>
+            count + (file.type === 'record' ? Math.max(0, file.pointCount) : 0),
+          0,
+        ) ?? -1;
+      const strengthSetCount =
+        source?.activity.strengthExercises.reduce(
+          (count, exercise) => count + exercise._count.sets,
+          0,
+        ) ?? -1;
+      if (
+        !source ||
+        source.activityId !== repair.activityId ||
+        version < ACTIVITY_MATERIALIZATION_VERSION ||
+        recordCount < repair.recordCount ||
+        strengthSetCount < repair.strengthSetCount
+      ) {
+        throw new Error('ACTIVITY_MIGRATION_REPAIR_NOT_MATERIALIZED');
+      }
+    }
   }
 
   private async queueReplay(
@@ -845,6 +995,7 @@ export class ActivityDataMigrationService {
         row.replayFrom,
       ].filter((d): d is Date => d != null);
       if (!dates.length) {
+        await this.assertScanClosure(tx, row.userId, row.beforeManifest);
         await tx.activityDataMigration.update({
           where: { id: row.id },
           data: {
