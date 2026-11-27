@@ -235,7 +235,12 @@
       "id": "0047_coach_mutation_invocation",
       "file": "0047_coach_mutation_invocation/migration.sql",
       "sha256": "5425732a9e001ad92a949a53c0427645c8bfad1ff9c87a9f1a0bb563986d5b80"
+    },
+    {
+      "id": "0048_plan_workout_change_revision",
+      "file": "0048_plan_workout_change_revision/migration.sql",
+      "sha256": "497b979f68f93ae43eedb01b18c02a9d69ed458a61e425407ce76a042466c1b9"
     }
   ],
-  "schemaChecksum": "380477a6828e18ca703bc755d7791e6b019f3a4188aa0c4f41fd1411af0d2097"
+  "schemaChecksum": "cf50d847a3fd2887e19fc7a44b57fc5db432a1a02545c403df2502d284a972fa"
 }

@@ -291,6 +291,10 @@
       "types": "./src/api/plan/application/plan-summary.service.ts",
       "default": "./src/api/plan/application/plan-summary.service.ts"
     },
+    "./api/plan/application/plan-workout-change": {
+      "types": "./src/api/plan/application/plan-workout-change.ts",
+      "default": "./src/api/plan/application/plan-workout-change.ts"
+    },
     "./api/plan/application/plan-workout-command.service": {
       "types": "./src/api/plan/application/plan-workout-command.service.ts",
       "default": "./src/api/plan/application/plan-workout-command.service.ts"

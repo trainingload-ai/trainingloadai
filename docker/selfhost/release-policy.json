@@ -209,6 +209,10 @@
       "0047_coach_mutation_invocation": {
         "phase": "expand",
         "releaseVersion": "1.1.27"
+      },
+      "0048_plan_workout_change_revision": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
       }
     }
   }

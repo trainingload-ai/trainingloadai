@@ -1202,6 +1202,7 @@ model T_user {
   thirdPartyActivity                ThirdPartyActivity[]
   pmcData                           PMCData[]
   plans                             Plan[]
+  planWorkoutChangeRevision         PlanWorkoutChangeRevision?
   planProposalPreviews              PlanProposalPreview[]
   independentWorkoutCreations       IndependentWorkoutCreation[]
   planTemplatePreviews              PlanTemplatePreview[]
@@ -5407,6 +5408,21 @@ model PlanFixedCompletionPolicy {
   enabledFrom DateTime @map("enabled_from") @db.Timestamptz(3)
 
   @@map("t_plan_fixed_completion_policy")
+}
+
+/// Latest committed workout change per athlete. The outbound counter ignores Garmin imports.
+model PlanWorkoutChangeRevision {
+  userId                      String   @id @map("user_id")
+  user                        T_user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revision                    BigInt
+  outboundRevision            BigInt   @map("outbound_revision")
+  source                      String
+  outboundSource              String?  @map("outbound_source")
+  calendarRevision            BigInt   @default(0) @map("calendar_revision")
+  calendarAdjustmentVersionId String?  @map("calendar_adjustment_version_id")
+  updatedAt                   DateTime @map("updated_at") @db.Timestamptz(3)
+
+  @@map("t_plan_workout_change_revision")
 }
 
 /// 用户确认前的服务端规范化计划提案。提案不可由模型在确认阶段改写，且短期过期。

@@ -1,4 +1,5 @@
 import { PlanCalendarValidationService } from './plan-calendar-validation.service';
+import { setPlanWorkoutChangeSource, type PlanWorkoutChangeSource } from './plan-workout-change';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { UnprocessableEntityException } from '@nestjs/common';
 import {
@@ -92,8 +93,14 @@ export class PlanExternalSyncService {
     );
   }
 
-  runTransaction<T>(fn: (tx: PlanDb) => Promise<T>): Promise<T> {
-    return this.prisma.$transaction((tx) => fn(tx));
+  runTransaction<T>(
+    fn: (tx: PlanDb) => Promise<T>,
+    changeSource?: PlanWorkoutChangeSource,
+  ): Promise<T> {
+    return this.prisma.$transaction(async (tx) => {
+      if (changeSource) await setPlanWorkoutChangeSource(tx, changeSource);
+      return fn(tx);
+    });
   }
 
   findActivePausedPlans(userId: string) {
@@ -194,6 +201,7 @@ export class PlanExternalSyncService {
     workoutId: string;
     updatedAt?: Date;
     revision?: number;
+    changeSource?: PlanWorkoutChangeSource;
   }): Promise<'deleted' | 'missing' | 'changed' | 'protected'> {
     return this.runTransaction(async (tx) => {
       await acquireHashtextAdvisoryXactLock(tx, args.userId);
@@ -230,7 +238,7 @@ export class PlanExternalSyncService {
         tx,
       );
       return result.count === 1 ? 'deleted' : 'changed';
-    });
+    }, args.changeSource);
   }
 
   findMapping<T extends Prisma.PlanWorkoutExternalMappingFindFirstArgs>(
@@ -415,6 +423,7 @@ export class PlanExternalSyncService {
       blocks: PlanBlock[];
       structureKind?: 'ENDURANCE' | 'FREEFORM';
       plannedDurationSeconds?: number | null;
+      changeSource?: PlanWorkoutChangeSource;
     },
     initializeMapping?: (
       workout: SyncedWorkout,
@@ -488,7 +497,7 @@ export class PlanExternalSyncService {
         }
       }
       return stored;
-    });
+    }, args.changeSource);
   }
 
   async updateImportedWorkout(
@@ -510,6 +519,7 @@ export class PlanExternalSyncService {
       plannedDurationSeconds?: number | null;
       dayOffset: number;
       expectedUpdatedAt?: Date;
+      changeSource?: PlanWorkoutChangeSource;
     },
     persistMapping?: (
       workout: SyncedWorkout,
@@ -728,7 +738,7 @@ export class PlanExternalSyncService {
         );
       }
       return stored;
-    });
+    }, args.changeSource);
   }
 
   async replaceWorkoutSteps(

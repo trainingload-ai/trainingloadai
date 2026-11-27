@@ -11,6 +11,7 @@ import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
 import { PrismaClient, type Prisma } from '@prisma/client';
 import { PlanExternalSyncService } from '../application/plan-external-sync.service';
+import { readPlanWorkoutChange } from '../application/plan-workout-change';
 import { PlanRepository } from '../persistence/plan.repository';
 import { CoachContextRepository } from '../persistence/coach-context.repository';
 import { CoachContextService } from '../application/coach-context.service';
@@ -255,6 +256,38 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       }
     },
   );
+
+  it('persists local revisions and Garmin origins inside the workout write transaction', async () => {
+    const initial = await readPlanWorkoutChange(prisma, 'user');
+    const create = {
+      userId: 'user',
+      scheduledDate: new Date('2026-07-06'),
+      sportType: 'RUN' as const,
+      text: '30 minutes',
+      blocks: [],
+    };
+    await expect(service.createIndependentWorkout(create, () => {
+      throw new Error('Injected failure after the workout was written');
+    })).rejects.toThrow('Injected failure');
+    expect(await readPlanWorkoutChange(prisma, 'user')).toEqual(initial);
+
+    const first = await service.createIndependentWorkout(create);
+    const committed = await readPlanWorkoutChange(prisma, 'user');
+    expect(committed?.outboundRevision).toBeGreaterThan(initial?.outboundRevision ?? 0n);
+    await service.createIndependentWorkout({ ...create, changeSource: 'garmin_schedule_import' });
+    const pulled = await readPlanWorkoutChange(prisma, 'user');
+    expect(pulled).toMatchObject({
+      source: 'garmin_schedule_import',
+      outboundRevision: committed?.outboundRevision,
+      outboundSource: committed?.outboundSource,
+    });
+    expect(pulled?.revision).toBeGreaterThan(committed?.revision ?? 0n);
+
+    await service.deleteSyncedWorkout({ userId: 'user', workoutId: first.id });
+    expect(await readPlanWorkoutChange(prisma, 'user')).toMatchObject({
+      source: 'workout_delete', outboundSource: 'workout_delete',
+    });
+  });
 
   function matcher(
     workouts = new PlanWorkoutRepository(prisma as never),
