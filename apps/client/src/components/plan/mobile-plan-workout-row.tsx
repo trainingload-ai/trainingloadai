@@ -21,7 +21,7 @@ import {
   buildWorkoutListNotes,
   buildWorkoutListTitle,
   formatSportTypeLabel,
-  getPlanWorkoutDisplayKind,
+  getPlanDetailWorkoutDisplayKind,
   getPlanWorkoutMovedByLabel,
   getPlanWorkoutStatusLabel,
   getWorkoutDate,
@@ -355,10 +355,7 @@ export function MobilePlanWorkoutRow({
     ? new Intl.DateTimeFormat(locale, { month: "short" }).format(date.toDate())
     : t("mobile.unscheduled");
   const displayKind = workout
-    ? getPlanWorkoutDisplayKind({
-        status: workout.status,
-        scheduledDate: date?.format("YYYY-MM-DD") ?? workout.scheduledDate,
-      })
+    ? getPlanDetailWorkoutDisplayKind(plan, workout, date)
     : "upcoming";
   const statusLabel = workout ? getPlanWorkoutStatusLabel(t, displayKind) : "";
   const movedByLabel = workout

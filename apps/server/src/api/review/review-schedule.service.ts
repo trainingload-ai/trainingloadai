@@ -114,11 +114,11 @@ export class ReviewScheduleService {
     return row;
   }
 
-  async triggerNow(userId: string, type: ReviewDigestType) {
+  async triggerNow(userId: string, type: ReviewDigestType, asOf = new Date()) {
     const tz = await this.getUserTimezone(userId);
     const { periodStart, periodEnd } = completedReviewWindow(
       type,
-      new Date(),
+      asOf,
       tz,
     );
 

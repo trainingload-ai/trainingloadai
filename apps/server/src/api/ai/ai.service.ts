@@ -2,6 +2,8 @@ import {
   projectStartDecisionCards,
   startDecisionCardIds,
 } from './core/coach-start-card-state';
+import { buildUnifiedActivityAnalysisInput } from './activity-coach-unified-input';
+import { hashActivityCoachDedupe } from './activity-coach-evidence-hash';
 import { CoachFactContextService } from './core/coach-fact-context.service';
 import {
   changedPlanQuestionEvidence,
@@ -109,11 +111,7 @@ import { ActivityAiReviewService } from '../activity/activity-ai-review.service'
 import { PMCService } from '@/training-load/pmc.service';
 import { ReviewDigestQueryService } from '@/review/review-digest-query.service';
 import { CoachBranchingService } from './coach-branching.service';
-import {
-  buildActivityReviewGenerationContext,
-  buildUnifiedActivityAnalysisInput,
-} from './activity-coach-unified-input';
-import { hashActivityCoachDedupe } from './activity-coach-evidence-hash';
+import { buildActivityReviewGenerationContext } from './activity-coach-unified-input';
 import {
   compileActivityCoachMessages,
   formatActivityCoachCompiledPromptLog,
@@ -2089,14 +2087,10 @@ export class AiService {
       });
     }
 
-    const activity =
-      await this.activityAiReviewService.loadActivityForCoachAnalysis(
-        activityIdentity.id,
-        userId,
-      );
+    const { id: activityId } = activityIdentity;
 
     const runningKey = this.getAnalysisRunningKey(
-      activity.id,
+      activityId,
       userId,
       requestedLang,
       purpose,
@@ -2104,39 +2098,32 @@ export class AiService {
     const existing = this.running.get(runningKey);
     if (existing) {
       this.logger.log(
-        `[ai][analysis] 等待进行中任务 活动ID=${activity.id} 用户ID=${userId} 运行键=${runningKey}`,
+        `[ai][analysis] 等待进行中任务 活动ID=${activityId} 用户ID=${userId} 运行键=${runningKey}`,
       );
       return this.waitForRunningAnalysis(existing.done, {
-        activityId: activity.id,
+        activityId,
         userId,
         runningKey,
       });
     }
-    const profile = await this.userService.getComposedUserProfile(
-      userId,
-      activity.sportType,
-    );
-    const unifiedInput = await buildUnifiedActivityAnalysisInput(
-      activity,
-      userId,
-      profile,
-      this.pmcService,
-    );
-    const evidenceHash = await hashActivityCoachDedupe({
-      unifiedInput,
-      lang: requestedLang,
-    });
-    const cached = useCache
-      ? await this.resolveSucceededReviewMarkdown(
+    let cached: Awaited<ReturnType<AiService['resolveSucceededReviewMarkdown']>>;
+    if (useCache) {
+      const { evidenceHash } =
+        await this.activityAiReviewService.buildCoachEvidenceBundle({
+          activityId,
           userId,
-          activityHashId,
-          evidenceHash,
-          requestedLang,
-        )
-      : undefined;
+          lang: requestedLang,
+        });
+      cached = await this.resolveSucceededReviewMarkdown(
+        userId,
+        activityHashId,
+        evidenceHash,
+        requestedLang,
+      );
+    }
     if (cached && 'content' in cached) {
       this.logger.log(
-        `Activity review cache hit activityId=${activity.id} length=${cached.content.length}`,
+        `Activity review cache hit activityId=${activityId} length=${cached.content.length}`,
       );
       return AiService.staticContentStream(
         cached.content,
@@ -2149,7 +2136,7 @@ export class AiService {
       throw new Error('Activity analysis is missing operationId');
     const done = (async (): Promise<ActivityAnalysisResult> => {
       const queued = await this.activityAiReviewService.enqueueForActivity({
-        activityId: activity.id,
+        activityId,
         userId,
         trigger: $Enums.ActivityAiReviewTrigger.MANUAL,
         language: requestedLang,
@@ -2191,12 +2178,12 @@ export class AiService {
     this.running.set(runningKey, { createdAt: startedAt, done });
     void done.catch(() => undefined);
     this.logger.log(
-      `[ai][analysis] 开始 Agent 复盘 活动ID=${activity.id} 用户ID=${userId} 运行键=${runningKey}`,
+      `[ai][analysis] 开始 Agent 复盘 活动ID=${activityId} 用户ID=${userId} 运行键=${runningKey}`,
     );
     try {
       const result = await done;
       this.logger.log(
-        `[ai][analysis] Agent 复盘完成 活动ID=${activity.id} 用户ID=${userId} 运行键=${runningKey} 持续毫秒=${Date.now() - startedAt} 内容长度=${result.content.length}`,
+        `[ai][analysis] Agent 复盘完成 活动ID=${activityId} 用户ID=${userId} 运行键=${runningKey} 持续毫秒=${Date.now() - startedAt} 内容长度=${result.content.length}`,
       );
       return AiService.staticContentStream(
         result.content,

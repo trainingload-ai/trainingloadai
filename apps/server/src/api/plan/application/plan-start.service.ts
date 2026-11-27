@@ -2,7 +2,15 @@ import { findConsumedTemplatePlan } from '@/api/plan-template/persistence/plan-t
 import type { WorkoutStructure } from '@shared/workout-structure';
 import { RollingPlanAuthorizationService } from './rolling-plan-authorization.service';
 import { RollingPlanService } from './rolling-plan.service';
-import { isoWeekStart, parseRollingStartSettings } from '@shared/rolling-plan';
+import {
+  calendarMonthEnd,
+  conflictingRollingMonthTargets,
+  isoWeekStart,
+  isoWeekStarts,
+  parseRollingStartSettings,
+  type RollingMonthDraft,
+  type RollingStartSettings,
+} from '@shared/rolling-plan';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { HealthDataRepository } from '@/health-data/persistence/health-data.repository';
 import { UserQueryService } from '@/api/user/user-query.service';
@@ -1031,6 +1039,513 @@ export class PlanStartService {
         { isolationLevel: 'Serializable', timeout: 60000 },
       ),
     );
+  }
+
+  private defaultRollingStartSettings(
+    source: Source,
+    startDate: string,
+    candidate?: Partial<RollingStartSettings> | null,
+  ): RollingStartSettings {
+    const goal =
+      candidate?.policy?.goal?.trim() ||
+      source.goal?.trim() ||
+      source.title.trim() ||
+      'Continuous training';
+    const rawSports = candidate?.policy?.sportTypes?.length
+      ? candidate.policy.sportTypes
+      : [
+          ...new Set(
+            source.workouts.map((w) =>
+              w.structureKind === 'STRENGTH' ? 'STRENGTH' : w.sportType,
+            ),
+          ),
+        ];
+    const sportTypes = rawSports.length ? rawSports : ['RUN'];
+    const end = addCalendarDays(isoWeekStart(startDate), 6);
+    const months = [...new Set([startDate.slice(0, 7), end.slice(0, 7)])];
+    const starterMinutes = source.workouts.reduce(
+      (sum, w) => sum + Math.round((w.plannedDurationSeconds ?? 1800) / 60),
+      0,
+    );
+    const baselineWeekMin = Math.max(20, Math.round((starterMinutes || 60) * 0.8));
+    const baselineWeekMax = Math.max(baselineWeekMin + 15, Math.round((starterMinutes || 60) * 1.25));
+
+    const monthStrategies: RollingMonthDraft[] = months.map((month) => {
+      const monthStart = `${month}-01`;
+      const monthEnd = calendarMonthEnd(monthStart);
+      const effectiveFrom = monthStart < startDate ? startDate : monthStart;
+      const existing = candidate?.monthStrategies?.find(
+        (m) => m.monthStart === monthStart,
+      );
+      const weekStarts = isoWeekStarts(effectiveFrom, monthEnd);
+      const existingWeeks = new Map(
+        (existing?.weekFocus ?? []).map((w) => [w.weekStart, w]),
+      );
+      const weekFocus = weekStarts.map((weekStart) => {
+        const w = existingWeeks.get(weekStart);
+        const weekEnd = addCalendarDays(weekStart, 6);
+        const overlapFrom = weekStart < effectiveFrom ? effectiveFrom : weekStart;
+        const overlapTo = weekEnd > monthEnd ? monthEnd : weekEnd;
+        const days = Math.max(
+          1,
+          Math.round(
+            (new Date(`${overlapTo}T00:00:00Z`).getTime() -
+              new Date(`${overlapFrom}T00:00:00Z`).getTime()) /
+              86400000,
+          ) + 1,
+        );
+        const ratio = Math.min(1, days / 7);
+        const fallbackMin = Math.max(15, Math.round(baselineWeekMin * ratio));
+        const fallbackMax = Math.max(fallbackMin + 10, Math.round(baselineWeekMax * ratio));
+        return {
+          weekStart,
+          focus: w?.focus?.trim() || 'Steady aerobic progression',
+          loadRange: w?.loadRange ?? null,
+          durationMinutesRange:
+            w?.durationMinutesRange !== undefined
+              ? w.durationMinutesRange
+              : { min: fallbackMin, max: fallbackMax },
+        };
+      });
+
+      const draft: RollingMonthDraft = {
+        monthStart,
+        objective:
+          existing?.objective?.trim() ||
+          `Build consistent training rhythm toward ${goal}.`,
+        loadRange: existing?.loadRange ?? null,
+        durationMinutesRange:
+          existing?.durationMinutesRange !== undefined
+            ? existing.durationMinutesRange
+            : null,
+        runningDistanceKmRange: existing?.runningDistanceKmRange ?? null,
+        monthOverMonthReason: existing?.monthOverMonthReason ?? null,
+        weekFocus,
+      };
+
+      const conflicts = conflictingRollingMonthTargets(draft);
+      if (
+        conflicts.includes('durationMinutesRange') ||
+        (draft.durationMinutesRange === null &&
+          weekFocus.every((w) => w.durationMinutesRange))
+      ) {
+        const min = weekFocus.reduce(
+          (sum, w) => sum + (w.durationMinutesRange?.min ?? 0),
+          0,
+        );
+        const max = weekFocus.reduce(
+          (sum, w) => sum + (w.durationMinutesRange?.max ?? 0),
+          0,
+        );
+        draft.durationMinutesRange = max > 0 ? { min, max } : null;
+      }
+      if (conflicts.includes('loadRange')) {
+        const min = weekFocus.reduce(
+          (sum, w) => sum + (w.loadRange?.min ?? 0),
+          0,
+        );
+        const max = weekFocus.reduce(
+          (sum, w) => sum + (w.loadRange?.max ?? 0),
+          0,
+        );
+        draft.loadRange =
+          max > 0 ? { unit: 'NORMALIZED_LOAD', min, max } : null;
+      }
+      return draft;
+    });
+
+    return parseRollingStartSettings(
+      {
+        policy: {
+          goal,
+          sportTypes,
+          autoPlanMonths: true,
+          autoGenerateWeeks: true,
+          autoAdjustFuture: true,
+        },
+        monthStrategies,
+      },
+      startDate,
+    );
+  }
+
+  async getStartDraft(userId: string, planId: string, selectedDate?: string) {
+    if (selectedDate !== undefined && !isCalendarDate(selectedDate))
+      throw new UnprocessableEntityException('Invalid calendar start date');
+    return this.calendarTransaction(userId, async (tx) => {
+      const source = await this.source(userId, planId, tx, true);
+      const calendarTimeZone =
+        this.constraints(
+          (source.generationMetadata as Record<string, unknown> | null)
+            ?.scheduleConstraints,
+        )?.calendarTimeZone ??
+        (await this.users.getPreferredTimezone(userId, tx)) ??
+        'UTC';
+      const earliestStartDate = this.earliestStartDate(calendarTimeZone);
+      const draftAnchor =
+        source.sourceType === 'AI' && source.status === 'DRAFT'
+          ? (
+              source.generationMetadata as {
+                qualityContract?: { startDate?: unknown };
+              } | null
+            )?.qualityContract?.startDate
+          : undefined;
+      const suggestedDate =
+        typeof draftAnchor === 'string' && isCalendarDate(draftAnchor)
+          ? draftAnchor
+          : earliestStartDate;
+      const savedDate =
+        selectedDate ??
+        (source.status === 'ACTIVE' && source.startDate
+          ? source.startDate.toISOString().slice(0, 10)
+          : suggestedDate);
+      const startDate =
+        source.status === 'DRAFT' &&
+        selectedDate === undefined &&
+        savedDate < earliestStartDate
+          ? earliestStartDate
+          : savedDate;
+      if (!startDate) fail('Invalid calendar timezone');
+      if (source.status === 'DRAFT')
+        this.assertFutureStart(startDate, calendarTimeZone);
+      const plan = normalizePlanRow(source, {
+        workoutService: this.workout,
+        workoutDefinitionService: this.definitions,
+        workoutPersistence: this.persistence,
+      })!;
+      return {
+        plan,
+        startDate,
+        earliestStartDate,
+        calendarTimeZone,
+        revision: this.fingerprint(source),
+      };
+    });
+  }
+
+  async preflightStart(
+    userId: string,
+    planId: string,
+    startDate: string,
+    expectedRevision?: string,
+  ) {
+    if (!isCalendarDate(startDate))
+      throw new UnprocessableEntityException('Invalid calendar start date');
+    return this.calendarTransaction(userId, async (tx) => {
+      const source = await this.source(userId, planId, tx, true);
+      const revision = this.fingerprint(source);
+      const plan = normalizePlanRow(source, {
+        workoutService: this.workout,
+        workoutDefinitionService: this.definitions,
+        workoutPersistence: this.persistence,
+      })!;
+      if (source.status === 'ACTIVE') {
+        const activeStart = source.startDate?.toISOString().slice(0, 10);
+        if (activeStart === startDate) {
+          return {
+            alreadyActive: true as const,
+            plan,
+            revision,
+            startDate,
+            calendarTimeZone: source.activationTimezone ?? 'UTC',
+          };
+        }
+        fail('An active plan cannot change its start date');
+      }
+      if (expectedRevision && expectedRevision !== revision) {
+        throw new ConflictException({
+          code: 'PLAN_START_REASSESSMENT_REQUIRED',
+          message: 'The draft changed. Review the latest calendar before starting.',
+        });
+      }
+      const metadata = (source.generationMetadata ?? {}) as Record<
+        string,
+        unknown
+      >;
+      const constraints = this.constraints(metadata.scheduleConstraints);
+      const calendarTimeZone =
+        constraints?.calendarTimeZone ??
+        (await this.users.getPreferredTimezone(userId, tx)) ??
+        'UTC';
+      this.assertFutureStart(startDate, calendarTimeZone);
+      const contract = parsePlanQualityContract(metadata.qualityContract);
+      const workouts = (plan.workouts ?? []).map((w, idx) => ({
+        ...w,
+        id: w.id ?? String(idx),
+        dayOffset: (w.weekIndex - 1) * 7 + w.dayIndex - 1,
+        sessionIndex: w.sessionIndex ?? 1,
+        status: 'PLANNED' as const,
+        sportType: w.sportType ?? 'UNKNOWN',
+        durationSeconds: w.summary?.durationSeconds ?? null,
+      }));
+      const conflicts: Array<{ date?: string; code: string; message: string }> =
+        [];
+      const schedule = assessPlanSchedule({
+        planningMode: source.planningMode,
+        periodWeeks: source.periodWeeks,
+        workouts,
+        changedWorkoutIds: workouts.map((w) => w.id),
+        startDate,
+        constraints: constraints ?? undefined,
+        qualityContract: contract,
+        projectDates: true,
+        scheduleRuleMetadata: metadata,
+      });
+      if (!schedule.valid) {
+        for (const issue of schedule.issues) {
+          conflicts.push({
+            date: issue.date,
+            code: issue.code,
+            message: issue.code,
+          });
+        }
+      }
+      try {
+        await this.calendarValidation.assertCandidate(
+          {
+            planningMode: source.planningMode,
+            periodWeeks: source.periodWeeks,
+            workouts,
+            changedWorkoutIds: workouts.map((w) => w.id),
+            startDate,
+            constraints: constraints ?? undefined,
+            qualityContract: contract,
+            projectDates: true,
+            scheduleRuleMetadata: metadata,
+            userId,
+            planId: source.id,
+          },
+          tx,
+        );
+      } catch (err) {
+        const response =
+          err instanceof UnprocessableEntityException
+            ? (err.getResponse() as {
+                message?: string;
+                issues?: Array<{ date?: string; code?: string; message?: string }>;
+              })
+            : null;
+        if (response?.issues?.length) {
+          for (const issue of response.issues) {
+            conflicts.push({
+              date: issue.date,
+              code: issue.code ?? 'PLAN_SCHEDULE_INVALID',
+              message: issue.message ?? 'Schedule conflict',
+            });
+          }
+        } else {
+          conflicts.push({
+            code: 'PLAN_SCHEDULE_INVALID',
+            message:
+              err instanceof Error ? err.message : 'Schedule validation failed',
+          });
+        }
+      }
+      const candidateWeeks =
+        source.periodWeeks ??
+        Math.max(1, ...workouts.map((w) => w.weekIndex));
+      const evidence = await this.automationEvidence(
+        userId,
+        source.id,
+        startDate,
+        candidateWeeks,
+        tx,
+      );
+      const defaultRollingSettings =
+        source.planningMode === 'ROLLING'
+          ? this.defaultRollingStartSettings(source, startDate)
+          : undefined;
+      return {
+        alreadyActive: false as const,
+        plan,
+        source,
+        revision,
+        factFingerprint: hash(evidence),
+        startDate,
+        calendarTimeZone,
+        originalCanStart: conflicts.length === 0,
+        conflicts,
+        evidence,
+        defaultRollingSettings,
+      };
+    });
+  }
+
+  normalizeRollingForStart(
+    source: Source,
+    startDate: string,
+    candidate?: Partial<RollingStartSettings> | null,
+  ) {
+    return this.defaultRollingStartSettings(source, startDate, candidate);
+  }
+
+  async createDirectStartPreview(
+    userId: string,
+    request: PlanStartPreviewRequest,
+  ): Promise<PlanProposalPreviewResult> {
+    return this.preparePreview(userId, request, undefined, undefined, undefined, true);
+  }
+
+  async confirmDirectStart(
+    userId: string,
+    planId: string,
+    input: {
+      startDate: string;
+      revision: string;
+      choice: 'ORIGINAL' | 'SUGGESTED';
+      previewId?: string;
+      rollingSettings?: RollingStartSettings;
+    },
+  ) {
+    if (!isCalendarDate(input.startDate))
+      throw new UnprocessableEntityException('Invalid calendar start date');
+    const result = await this.calendarTransaction(userId, async (tx) => {
+      const source = await this.source(userId, planId, tx, true);
+      if (source.status === 'ACTIVE') {
+        const activeStart = source.startDate?.toISOString().slice(0, 10);
+        if (activeStart !== input.startDate)
+          fail('An active plan cannot change its start date');
+        const plan = normalizePlanRow(source, {
+          workoutService: this.workout,
+          workoutDefinitionService: this.definitions,
+          workoutPersistence: this.persistence,
+        })!;
+        return { plan, started: false, alreadyActive: true };
+      }
+      const currentRevision = this.fingerprint(source);
+      if (currentRevision !== input.revision) {
+        throw new ConflictException({
+          code: 'PLAN_START_REASSESSMENT_REQUIRED',
+          message: 'The draft changed. Review the latest calendar before starting.',
+        });
+      }
+
+      if (input.choice === 'SUGGESTED') {
+        if (!input.previewId)
+          fail('A validated start preview is required to apply suggestions');
+        const preview = await tx.planProposalPreview.findUnique({
+          where: { id: input.previewId },
+        });
+        if (
+          !preview ||
+          preview.userId !== userId ||
+          preview.sourcePlanId !== planId ||
+          preview.mode !== 'START' ||
+          preview.discardedAt ||
+          preview.expiresAt < new Date()
+        ) {
+          throw new ConflictException({
+            code: 'PLAN_START_REASSESSMENT_REQUIRED',
+            message: 'The start suggestion expired. Re-evaluate before starting.',
+          });
+        }
+        const proposal = preview.proposal as unknown as CanonicalStartProposal;
+        if (
+          proposal.startDate !== input.startDate ||
+          proposal.sourceFingerprint !== currentRevision
+        ) {
+          throw new ConflictException({
+            code: 'PLAN_START_REASSESSMENT_REQUIRED',
+            message: 'The draft or start date changed. Re-evaluate before starting.',
+          });
+        }
+        if (preview.appliedAt) {
+          const refreshed = await this.storage.readback(planId, tx);
+          return {
+            plan: normalizePlanRow(refreshed, {
+              workoutService: this.workout,
+              workoutDefinitionService: this.definitions,
+              workoutPersistence: this.persistence,
+            })!,
+            started: false,
+            alreadyActive: true,
+          };
+        }
+        const receipt = await this.applyCandidate(
+          {
+            userId,
+            contextPlanId: planId,
+            tx,
+          },
+          proposal,
+          'direct_start',
+        );
+        await tx.planProposalPreview.update({
+          where: { id: preview.id },
+          data: { appliedAt: new Date() },
+        });
+        const refreshed = await this.storage.readback(planId, tx);
+        return {
+          plan: normalizePlanRow(refreshed, {
+            workoutService: this.workout,
+            workoutDefinitionService: this.definitions,
+            workoutPersistence: this.persistence,
+          })!,
+          receipt,
+          started: true,
+          alreadyActive: false,
+        };
+      }
+
+      // choice === 'ORIGINAL'
+      const rolling =
+        source.planningMode === 'ROLLING'
+          ? this.defaultRollingStartSettings(
+              source,
+              input.startDate,
+              input.rollingSettings,
+            )
+          : undefined;
+      const preview = await this.preparePreview(
+        userId,
+        {
+          mode: 'START',
+          planId,
+          startDate: input.startDate,
+          rationale: 'Start original draft schedule',
+          evidenceRefs: [{ type: 'plan_draft', label: 'Saved draft' }],
+          changes: [],
+          additions: [],
+          deletions: [],
+          preserveUnmentioned: true,
+          ...(rolling ? { rolling } : {}),
+        },
+        undefined,
+        undefined,
+        tx,
+        true,
+      );
+      const stored = await tx.planProposalPreview.findUniqueOrThrow({
+        where: { id: preview.previewId },
+      });
+      const proposal = stored.proposal as unknown as CanonicalStartProposal;
+      const receipt = await this.applyCandidate(
+        {
+          userId,
+          contextPlanId: planId,
+          tx,
+        },
+        proposal,
+        'direct_start',
+      );
+      await tx.planProposalPreview.update({
+        where: { id: stored.id },
+        data: { appliedAt: new Date() },
+      });
+      const refreshed = await this.storage.readback(planId, tx);
+      return {
+        plan: normalizePlanRow(refreshed, {
+          workoutService: this.workout,
+          workoutDefinitionService: this.definitions,
+          workoutPersistence: this.persistence,
+        })!,
+        receipt,
+        started: true,
+        alreadyActive: false,
+      };
+    });
+    if (result.started) await this.plans.notifyWorkoutChanges(userId, planId);
+    return result;
   }
 
   async assertBinding(
@@ -2375,6 +2890,7 @@ export class PlanStartService {
     binding?: PlanStartBinding,
     automation?: { jobId: string; claimToken: string },
     transaction?: PlanDb,
+    directStart = false,
   ): Promise<PlanProposalPreviewResult & { calendarAdjustmentProposal?: CanonicalStartProposal }> {
     const run = (operation: (tx: PlanDb) => Promise<
       PlanProposalPreviewResult & { calendarAdjustmentProposal?: CanonicalStartProposal }
@@ -2458,7 +2974,7 @@ export class PlanStartService {
             this.assertAutomationSettings(request);
           }
           const session =
-            automationJob || calendarMove || adjustment
+            automationJob || calendarMove || adjustment || directStart
               ? null
               : await this.assertBinding(
                   userId,
@@ -2558,7 +3074,7 @@ export class PlanStartService {
               ? source.supersededBy
               : null;
           const protectedReason = (row: Source['workouts'][number]) =>
-            automation && row.automationProtected
+            automation && (row.automationProtected || !row.generationId)
               ? 'USER_EXCEPTION'
               : schedule
                 ? workoutImmutabilityReason({
@@ -3111,7 +3627,9 @@ export class PlanStartService {
                     ? byId.get(item.sourceWorkoutId)?.scheduledDate?.toISOString().slice(0, 10) ??
                       (dayShift && draftAnchor && before
                         ? addCalendarDays(draftAnchor, (before.weekIndex - 1) * 7 + before.dayIndex - 1)
-                        : undefined)
+                        : directStart && before
+                          ? addCalendarDays(startDate, (before.weekIndex - 1) * 7 + before.dayIndex - 1)
+                          : undefined)
                     : undefined,
                   name: w.name ?? w.sportType,
                   ...(before && before.name !== w.name
@@ -3162,16 +3680,21 @@ export class PlanStartService {
             ],
             warnings: [],
           };
-          if (adjustment) {
+          if (adjustment || directStart) {
             const weeks = [...new Set(presentation.rows.flatMap((row) =>
               row.changeKind && row.changeKind !== 'PRESERVED'
                 ? [row.beforeScheduledDate, row.scheduledDate].filter(isCalendarDate).map(isoWeekStart)
                 : [],
             ))].sort();
-            const before = source.workouts.flatMap((w) =>
-              w.scheduledDate && !['MOVED', 'SKIPPED'].includes(w.status)
-                ? [{ ...w, day: w.scheduledDate.toISOString().slice(0, 10) }] : [],
-            );
+            const before = source.workouts.flatMap((w) => {
+              if (['MOVED', 'SKIPPED'].includes(w.status)) return [];
+              const day = w.scheduledDate
+                ? w.scheduledDate.toISOString().slice(0, 10)
+                : directStart
+                  ? addCalendarDays(startDate, w.dayOffset)
+                  : null;
+              return day ? [{ ...w, day }] : [];
+            });
             const changed = new Set(request.changes.map((w) => w.sourceWorkoutId));
             const index = new Map(source.workouts.map((w) => [w.id, w]));
             const updates = display.filter((w) => !w.sourceWorkoutId || changed.has(w.sourceWorkoutId));
@@ -3231,18 +3754,20 @@ export class PlanStartService {
                   }
                 : binding
                 ? { binding, conversationRevision: session!.planStartRevision }
-                : {
-                    automationJobId: automation!.jobId,
-                    automationMonthStrategyIds:
-                      await this.rolling.weekDependencies(
-                        source.id,
-                        isoWeekStart(
+                : automation
+                  ? {
+                      automationJobId: automation.jobId,
+                      automationMonthStrategyIds:
+                        await this.rolling.weekDependencies(
+                          source.id,
+                          isoWeekStart(
+                            (request as PlanSchedulePreviewRequest).range.from,
+                          ),
+                          tx,
                           (request as PlanSchedulePreviewRequest).range.from,
                         ),
-                        tx,
-                        (request as PlanSchedulePreviewRequest).range.from,
-                      ),
-                  }),
+                    }
+                  : {}),
             startDate,
             calendarTimeZone,
             sourceFingerprint: this.fingerprint(source),
@@ -3321,7 +3846,9 @@ export class PlanStartService {
                 : adjustment ? { calendarAdjustmentId: adjustment.id }
                   : binding
                   ? { binding }
-                  : { automationJobId: automation!.jobId }),
+                  : automation
+                    ? { automationJobId: automation.jobId }
+                    : { directStart: true }),
             },
             presentation: json(presentation) as Prisma.InputJsonValue,
             expiresAt,
@@ -3640,7 +4167,7 @@ export class PlanStartService {
       tx: PlanDb;
     },
     proposal: CanonicalStartProposal,
-    execution: 'coach' | 'automation' | 'calendar' = 'coach',
+    execution: 'coach' | 'automation' | 'calendar' | 'direct_start' = 'coach',
   ) {
     const tx = args.tx;
     const automation = execution === 'automation';
@@ -3918,7 +4445,7 @@ export class PlanStartService {
             {
               userId: args.userId,
               planId: source.id,
-              decisionId: args.decisionId,
+              decisionId: args.decisionId ?? `direct-start:${randomUUID()}`,
               startDate: proposal.startDate,
               settings: parseRollingStartSettings(
                 proposal.request.rolling,

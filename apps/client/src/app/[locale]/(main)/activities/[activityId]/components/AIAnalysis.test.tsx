@@ -196,6 +196,20 @@ describe("AIAnalysis feature access", () => {
     expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith("activity-1", true, 0, false);
   });
 
+  it("offers a first review when automatic generation was skipped", () => {
+    mocks.accessAllowed = true;
+    mocks.reviewQuery.data = { found: true, status: "SKIPPED", markdown: "" };
+    render(<AIAnalysis />);
+
+    expect(screen.getByText("emptyHint")).toBeVisible();
+    expect(screen.queryByText("analysisFailed")).not.toBeInTheDocument();
+    expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith("activity-1", true, 0, false);
+
+    fireEvent.click(screen.getByRole("button", { name: "startReview" }));
+
+    expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith("activity-1", true, 1, true);
+  });
+
   it("retries a terminal failure inside the card without navigating", () => {
     mocks.accessAllowed = true;
     mocks.reviewQuery.data = { found: true, status: "DEAD", markdown: "" };

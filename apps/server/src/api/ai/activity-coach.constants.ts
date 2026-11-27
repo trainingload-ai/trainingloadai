@@ -3,8 +3,8 @@ export { ACTIVITY_AI_REVIEW_PROMPT_VERSION } from './core/prompt-contracts/activ
 
 /**
  * 证据快照版本：与 buildUnifiedActivityAnalysisInput 的字段集合绑定。
- * v6 = 增加服务端格式化的平均配速，避免模型自行换算秒数。
+ * v8 uses the same recorded cadence statistics as the activity detail chart.
  */
-export const ACTIVITY_COACH_EVIDENCE_VERSION = 'activity_review_evidence_v6';
+export const ACTIVITY_COACH_EVIDENCE_VERSION = 'activity_review_evidence_v8';
 
 export const ACTIVITY_COACH_MARKDOWN_FORMAT = 'activity_coach_markdown_v1';

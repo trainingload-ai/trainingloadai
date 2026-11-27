@@ -111,7 +111,7 @@ export function PlanShareWorkoutDialog({
           </div>
         </div>
 
-        <DialogFooter className="relative z-10 shrink-0 border-t border-border/60 bg-background px-4 py-3 pc:px-0 pc:pb-0 pc:pt-3">
+        <DialogFooter className="relative z-10 shrink-0 border-t border-border/60 px-4 py-3 pc:px-0 pc:pb-0 pc:pt-3">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
             {closeLabel}
           </Button>

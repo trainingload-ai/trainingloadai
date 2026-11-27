@@ -67,6 +67,25 @@ describe('resolveActivityCoachSportContext', () => {
 });
 
 describe('buildUnifiedActivityAnalysisInput', () => {
+  it.each([
+    { sportType: SportType.RUN, saved: null, stats: { avgValue: 82, maxValue: 92 }, expected: { avg: 164, max: 184, unit: 'spm' } },
+    { sportType: SportType.RUN, saved: 71, stats: { avgValue: 164, maxValue: 185 }, expected: { avg: 164, max: 185, unit: 'spm' } },
+    { sportType: SportType.CYCLING, saved: null, stats: { avgValue: 82, maxValue: 92 }, expected: { avg: 82, max: 92, unit: 'rpm' } },
+    { sportType: SportType.RUN, saved: 81, stats: {}, expected: { avg: 162, unit: 'spm' } },
+    { sportType: SportType.RUN, saved: null, stats: { avgValue: 0, maxValue: 0 }, expected: {} },
+  ])('uses chart cadence statistics for $sportType with session cadence $saved', async ({ sportType, saved, stats, expected }) => {
+    const readCadenceStats = jest.fn(async () => stats);
+    const input = await buildUnifiedActivityAnalysisInput(
+      { sportType, avgCadence: saved } as never,
+      undefined,
+      undefined,
+      undefined,
+      readCadenceStats,
+    );
+    expect(readCadenceStats).toHaveBeenCalledTimes(1);
+    expect(input.cadence).toEqual(expected);
+  });
+
   it('reports distance/time pace and actual pace load without inventing heart-rate evidence', async () => {
     const input = await buildUnifiedActivityAnalysisInput({
       sportType: SportType.RUN,
@@ -140,7 +159,60 @@ describe('buildUnifiedActivityAnalysisInput', () => {
     expect(input.start_time).toBeUndefined();
     expect(input.temporal_context).toBeUndefined();
     expect(input.historical_load?.daily_load_last_7d).toBeUndefined();
-    expect(input.historical_load?.rest_days_last_14d).toBeUndefined();
+    expect(input.historical_load?.days_without_recorded_activity_last_14d).toBeUndefined();
+  });
+
+  it('uses PMC calendar keys and counts recorded activities even without a load score', async () => {
+    const rows = Array.from({ length: 14 }, (_, index) => ({
+      date: new Date(Date.UTC(2026, 10, 26 - index)),
+      dailyValue: 0,
+      activityCount: index === 0 || index === 3 ? 1 : 0,
+      ATL: 0,
+      CTL: 0,
+      TSB: 0,
+    }));
+    const listRange = jest.fn(async () => rows);
+    const activity = {
+      sportType: SportType.RUN,
+      startTime: new Date('2026-11-26T02:00:00.000Z'),
+      timezone: 'Asia/Shanghai',
+    } as never;
+
+    const complete = await buildUnifiedActivityAnalysisInput(
+      activity,
+      'user-1',
+      {},
+      { listRange },
+    );
+    expect(listRange).toHaveBeenCalledWith(
+      'user-1',
+      new Date('2026-11-13T00:00:00.000Z'),
+      new Date('2026-11-26T00:00:00.000Z'),
+      { orderBy: 'desc' },
+    );
+    expect(complete.historical_load).toMatchObject({
+      daily_load_last_7d: [0, 0, 0, 0, 0, 0, 0],
+      days_without_recorded_activity_last_14d: 12,
+    });
+
+    listRange.mockResolvedValueOnce(rows.slice(0, 3));
+    const partial = await buildUnifiedActivityAnalysisInput(
+      activity,
+      'user-1',
+      {},
+      { listRange },
+    );
+    expect(partial.historical_load?.daily_load_last_7d).toBeUndefined();
+    expect(partial.historical_load?.days_without_recorded_activity_last_14d).toBeUndefined();
+
+    listRange.mockResolvedValueOnce([]);
+    const unavailable = await buildUnifiedActivityAnalysisInput(
+      activity,
+      'user-1',
+      {},
+      { listRange },
+    );
+    expect(unavailable.historical_load).toBeUndefined();
   });
 
   it('marks an old imported activity as historical without changing stable evidence', async () => {

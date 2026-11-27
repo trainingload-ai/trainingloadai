@@ -28,6 +28,7 @@ import { formatPaceSeconds } from '@shared/vdot';
 import { ActivityService } from '@/api/activity/activity.service';
 import { ActivityQueryService } from '@/api/activity/activity-query.service';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
+import { resolveActivityCalendarDayStr } from '@/api/plan/plan-link-calendar.util';
 import { UserQueryService } from '@/api/user/user-query.service';
 import type { UserProfileResponse } from '@/api/user/user.interface';
 import { validateFitnessMetricCandidate } from '@/api/user/fitness-metric-validator';
@@ -673,6 +674,10 @@ export class CoachToolsService {
       activityName?: string | null;
       description?: string | null;
       startTime?: Date | string | null;
+      timezone?: string | null;
+      planWorkoutLinks?: Array<{
+        planWorkout: { id: string; planId: string | null; name: string | null };
+      }>;
       timerTime?: number | null;
       elapsedTime?: number | null;
       distance?: number | null;
@@ -689,6 +694,7 @@ export class CoachToolsService {
     extras?: {
       mapThumbnailUrl?: string;
       variant?: 'summary' | 'search';
+      calendarTimezone?: string;
       vo2MaxPreference?: string | null;
       vo2MaxCorrectionFactor?: number | null;
     },
@@ -702,9 +708,23 @@ export class CoachToolsService {
     const distanceKm =
       typeof a.distance === 'number' ? round(a.distance / 1000, 2) : undefined;
     const avgHr =
-      typeof a.avgHeartRate === 'number' ? round(a.avgHeartRate) : undefined;
+      typeof a.avgHeartRate === 'number' && a.avgHeartRate > 0
+        ? round(a.avgHeartRate)
+        : undefined;
     const avgPower =
       typeof a.avgPower === 'number' ? round(a.avgPower) : undefined;
+    const calendar =
+      extras?.calendarTimezone && a.startTime
+        ? {
+            activityDate: resolveActivityCalendarDayStr(
+              a.startTime,
+              a.timezone,
+              null,
+              extras.calendarTimezone,
+            ),
+            linkedWorkout: a.planWorkoutLinks?.[0]?.planWorkout ?? null,
+          }
+        : {};
     if (extras?.variant === 'search') {
       return {
         hashId: a.hashId,
@@ -712,6 +732,7 @@ export class CoachToolsService {
         description: a.description ?? undefined,
         sportType: a.sportType ? String(a.sportType) : undefined,
         startTime: a.startTime ? dayjs(a.startTime).toISOString() : undefined,
+        ...calendar,
         durationMin,
         distanceKm,
         avgHr,
@@ -742,6 +763,7 @@ export class CoachToolsService {
       sportType: String(a.sportType),
       mapThumbnailUrl: extras?.mapThumbnailUrl,
       startTime: a.startTime ? dayjs(a.startTime).toISOString() : undefined,
+      ...calendar,
       durationMin,
       distanceKm,
       avgHr,
@@ -1526,11 +1548,15 @@ export class CoachToolsService {
       activity.sportType,
     );
 
+    const { activitySeries } = ctx;
     return buildUnifiedActivityAnalysisInput(
       activity as ActivityForCoachUnifiedInput,
       userId,
       profile,
       ctx.pmc,
+      activitySeries
+        ? () => activitySeries.readCadenceStats(activity.id)
+        : undefined,
     );
   }
 
@@ -2132,11 +2158,10 @@ export class CoachToolsService {
           ctx.i18n.t('common.error.invalid_date_range') ?? 'Invalid date',
       });
     }
-    const athleteTimezone = ctx.currentTurnCalendar?.timezone ??
-      (await ctx.userService.getPreferredTimezone(userId)) ?? 'UTC';
-    const day = dayjs.tz(dateStr, athleteTimezone);
-    const from = day.toDate();
-    const to = day.endOf('day').toDate();
+    const athleteTimezone =
+      ctx.currentTurnCalendar?.timezone ??
+      (await ctx.userService.getPreferredTimezone(userId)) ??
+      'UTC';
     const sportType = this.normalizeSportType(input.sportType);
     if (input.sportType && !sportType) {
       throw new BusinessException({
@@ -2150,8 +2175,7 @@ export class CoachToolsService {
         userId,
         limit: 20,
         sportType,
-        from,
-        to,
+        calendar: { from: dateStr, to: dateStr, timezone: athleteTimezone },
         sortBy: 'startTime',
         order: 'asc',
       }),
@@ -2161,6 +2185,7 @@ export class CoachToolsService {
 
     const items = rows.map((a) =>
       this.mapActivityListItem(a, {
+        calendarTimezone: athleteTimezone,
         mapThumbnailUrl: thumbUrlMap.get(a.id) ?? undefined,
         vo2MaxPreference: profile?.defaultVdotSource,
         vo2MaxCorrectionFactor: profile?.vo2maxCorrectionFactor,
@@ -2198,12 +2223,11 @@ export class CoachToolsService {
       });
     }
 
-    const from = input?.from ? dayjs(input.from).startOf('day') : undefined;
-    const to = input?.to ? dayjs(input.to).endOf('day') : undefined;
+    const { from, to } = input;
     if (
-      (from && !from.isValid()) ||
-      (to && !to.isValid()) ||
-      (from && to && to.isBefore(from))
+      (from && !isCalendarDate(from)) ||
+      (to && !isCalendarDate(to)) ||
+      (from && to && to < from)
     ) {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
@@ -2213,20 +2237,26 @@ export class CoachToolsService {
     }
 
     const limit = Math.max(1, Math.min(20, Math.floor(input?.limit ?? 8)));
+    const athleteTimezone =
+      ctx.currentTurnCalendar?.timezone ??
+      (await ctx.userService.getPreferredTimezone(userId)) ??
+      'UTC';
     const rows = await this.activityQuery.searchActivitiesForAi({
       userId,
       limit,
       sportType: input?.sportType,
       search: input?.text,
-      from: from?.toDate(),
-      to: to?.toDate(),
+      calendar: from || to ? { from, to, timezone: athleteTimezone } : undefined,
       sortBy: input?.sortBy,
       order: input?.order,
     });
 
     return {
       items: rows.map((a) =>
-        this.mapActivityListItem(a, { variant: 'search' }),
+        this.mapActivityListItem(a, {
+          variant: 'search',
+          calendarTimezone: athleteTimezone,
+        }),
       ),
     };
   }
@@ -2916,16 +2946,20 @@ export class CoachToolsService {
       });
     }
 
-    const anchor = input?.asOf
-      ? dayjs(input.asOf).startOf('day')
-      : dayjs().startOf('day');
-    if (!anchor.isValid()) {
+    const athleteTimezone =
+      ctx.currentTurnCalendar?.timezone ??
+      (await ctx.userService.getPreferredTimezone(userId)) ??
+      'UTC';
+    const anchorDate =
+      input?.asOf ?? dayjs().tz(athleteTimezone).format('YYYY-MM-DD');
+    if (!isCalendarDate(anchorDate)) {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
         message:
           ctx.i18n.t('common.error.invalid_date_range') ?? 'Invalid date range',
       });
     }
+    const anchor = dayjs.utc(anchorDate);
 
     const weekOffset = Math.max(
       0,
@@ -2937,6 +2971,10 @@ export class CoachToolsService {
     const weekEnd = weekStart.endOf('isoWeek');
     const previousWeekStart = weekStart.subtract(1, 'week').startOf('isoWeek');
     const previousWeekEnd = weekStart.subtract(1, 'day').endOf('day');
+    const activityWeekBounds = (from: dayjs.Dayjs, to: dayjs.Dayjs) => ({
+      gte: dayjs.tz(from.format('YYYY-MM-DD'), athleteTimezone).toDate(),
+      lte: dayjs.tz(to.format('YYYY-MM-DD'), athleteTimezone).endOf('day').toDate(),
+    });
 
     const [pmcRows, activities, previousPmcRows, previousActivities] =
       await Promise.all([
@@ -2946,15 +2984,18 @@ export class CoachToolsService {
         this.activities(ctx).findMany({
           where: readyActivityWhere({
             userId,
-            startTime: {
-              gte: weekStart.toDate(),
-              lte: weekEnd.toDate(),
-            },
+            startTime: activityWeekBounds(weekStart, weekEnd),
             ...(sportType ? { sportType } : {}),
           }),
           orderBy: { startTime: 'desc' },
-          take: 12,
-          include: { trimp: true, coggan: true },
+          take: 50,
+          include: {
+            trimp: true,
+            coggan: true,
+            fitnessMetricsSnapshot: {
+              select: { actualLoad: true, actualLoadSource: true },
+            },
+          },
         }),
         ctx.pmc.listRange(
           userId,
@@ -2965,17 +3006,49 @@ export class CoachToolsService {
         this.activities(ctx).findMany({
           where: readyActivityWhere({
             userId,
-            startTime: {
-              gte: previousWeekStart.toDate(),
-              lte: previousWeekEnd.toDate(),
-            },
+            startTime: activityWeekBounds(previousWeekStart, previousWeekEnd),
             ...(sportType ? { sportType } : {}),
           }),
           orderBy: { startTime: 'desc' },
-          take: 12,
-          include: { trimp: true, coggan: true },
+          take: 50,
+          include: {
+            trimp: true,
+            coggan: true,
+            fitnessMetricsSnapshot: {
+              select: { actualLoad: true, actualLoadSource: true },
+            },
+          },
         }),
       ]);
+
+    const readActivityActualLoad = (row: {
+      fitnessMetricsSnapshot?: {
+        actualLoad?: number | null;
+        actualLoadSource?: string | null;
+      } | null;
+      coggan?: { bikeStress?: number | null } | null;
+      trimp?: { trimp100?: number | null } | null;
+    }): number | null => {
+      if (
+        typeof row.fitnessMetricsSnapshot?.actualLoad === 'number' &&
+        Number.isFinite(row.fitnessMetricsSnapshot.actualLoad)
+      ) {
+        return row.fitnessMetricsSnapshot.actualLoad;
+      }
+      if (
+        typeof row.coggan?.bikeStress === 'number' &&
+        Number.isFinite(row.coggan.bikeStress)
+      ) {
+        return row.coggan.bikeStress;
+      }
+      if (
+        typeof row.trimp?.trimp100 === 'number' &&
+        Number.isFinite(row.trimp.trimp100)
+      ) {
+        return row.trimp.trimp100;
+      }
+      return null;
+    };
 
     const summarizePmcRows = (rows: PMCData[], days = 7) => {
       const totalLoad = rows.reduce(
@@ -2987,8 +3060,7 @@ export class CoachToolsService {
       ).length;
       const last = rows.at(-1);
       return {
-        totalLoad: round(totalLoad, 1),
-        avgDailyLoad: round(totalLoad / Math.max(days, 1), 1),
+        pmcTotalLoad: round(totalLoad, 1),
         activeDays,
         restDays: Math.max(days - activeDays, 0),
         ATL: typeof last?.ATL === 'number' ? round(last.ATL, 1) : undefined,
@@ -3003,7 +3075,18 @@ export class CoachToolsService {
       };
     };
 
-    const summarizeActivities = (rows: ActivityDurationRow[]) => {
+    const summarizeActivities = (
+      rows: Array<
+        ActivityDurationRow & {
+          fitnessMetricsSnapshot?: {
+            actualLoad?: number | null;
+            actualLoadSource?: string | null;
+          } | null;
+          coggan?: { bikeStress?: number | null } | null;
+          trimp?: { trimp100?: number | null } | null;
+        }
+      >,
+    ) => {
       const totalDurationMin = rows.reduce((sum, row) => {
         const seconds =
           typeof row?.timerTime === 'number'
@@ -3017,8 +3100,30 @@ export class CoachToolsService {
         (sum, row) => sum + Number(row?.distance ?? 0) / 1000,
         0,
       );
+      let recordedLoadSum = 0;
+      let loadSamples = 0;
+      for (const row of rows) {
+        const load = readActivityActualLoad(row);
+        if (load !== null) {
+          recordedLoadSum += load;
+          loadSamples += 1;
+        }
+      }
+      const missingLoadCount = Math.max(rows.length - loadSamples, 0);
+      const recordedLoad =
+        rows.length === 0
+          ? 0
+          : loadSamples > 0
+            ? round(recordedLoadSum, 2)
+            : null;
       return {
         activityCount: rows.length,
+        totalLoad: recordedLoad,
+        loadSamples,
+        missingLoadCount,
+        loadComplete: missingLoadCount === 0,
+        avgDailyLoad:
+          recordedLoad !== null ? round(recordedLoad / 7, 1) : null,
         totalDurationMin: round(totalDurationMin, 1),
         totalDistanceKm: round(totalDistanceKm, 2),
         avgSessionDurationMin:
@@ -3049,6 +3154,11 @@ export class CoachToolsService {
     const previousWeekPmc = summarizePmcRows(previousPmcRows, 7);
     const weekActivities = summarizeActivities(activities);
     const previousWeekActivities = summarizeActivities(previousActivities);
+    const comparableLoad =
+      weekActivities.loadComplete &&
+      previousWeekActivities.loadComplete &&
+      weekActivities.totalLoad !== null &&
+      previousWeekActivities.totalLoad !== null;
 
     return {
       sportType,
@@ -3064,25 +3174,35 @@ export class CoachToolsService {
         ...weekPmc,
         ...weekActivities,
         loadPerActiveDay:
-          weekPmc.activeDays > 0
-            ? round(weekPmc.totalLoad / weekPmc.activeDays, 1)
-            : 0,
+          weekActivities.totalLoad !== null && weekPmc.activeDays > 0
+            ? round(weekActivities.totalLoad / weekPmc.activeDays, 1)
+            : null,
       },
       comparison: {
         previousWeek: {
           from: previousWeekStart.format('YYYY-MM-DD'),
           to: previousWeekEnd.format('YYYY-MM-DD'),
-          totalLoad: previousWeekPmc.totalLoad,
+          totalLoad: previousWeekActivities.totalLoad,
+          pmcTotalLoad: previousWeekPmc.pmcTotalLoad,
+          loadSamples: previousWeekActivities.loadSamples,
+          missingLoadCount: previousWeekActivities.missingLoadCount,
+          loadComplete: previousWeekActivities.loadComplete,
           activityCount: previousWeekActivities.activityCount,
           totalDurationMin: previousWeekActivities.totalDurationMin,
           totalDistanceKm: previousWeekActivities.totalDistanceKm,
         },
-        loadDelta: round(weekPmc.totalLoad - previousWeekPmc.totalLoad, 1),
+        loadDelta: comparableLoad
+          ? round(
+              weekActivities.totalLoad! - previousWeekActivities.totalLoad!,
+              1,
+            )
+          : null,
         loadDeltaPct:
-          previousWeekPmc.totalLoad > 0
+          comparableLoad && previousWeekActivities.totalLoad! > 0
             ? round(
-                ((weekPmc.totalLoad - previousWeekPmc.totalLoad) /
-                  previousWeekPmc.totalLoad) *
+                ((weekActivities.totalLoad! -
+                  previousWeekActivities.totalLoad!) /
+                  previousWeekActivities.totalLoad!) *
                   100,
                 1,
               )
@@ -3100,34 +3220,32 @@ export class CoachToolsService {
           2,
         ),
       },
-      activities: activities.map((a) => ({
-        hashId: a.hashId,
-        activityName: a.activityName ?? undefined,
-        sportType: String(a.sportType),
-        startTime: a.startTime ? dayjs(a.startTime).toISOString() : undefined,
-        durationMin:
-          typeof a.timerTime === 'number'
-            ? round(a.timerTime / 60, 1)
-            : typeof a.elapsedTime === 'number'
-              ? round(a.elapsedTime / 60, 1)
+      activities: activities.slice(0, 12).map((a) => {
+        const actualLoad = readActivityActualLoad(a);
+        return {
+          hashId: a.hashId,
+          activityName: a.activityName ?? undefined,
+          sportType: String(a.sportType),
+          startTime: a.startTime ? dayjs(a.startTime).toISOString() : undefined,
+          durationMin:
+            typeof a.timerTime === 'number'
+              ? round(a.timerTime / 60, 1)
+              : typeof a.elapsedTime === 'number'
+                ? round(a.elapsedTime / 60, 1)
+                : undefined,
+          distanceKm:
+            typeof a.distance === 'number'
+              ? round(a.distance / 1000, 2)
               : undefined,
-        distanceKm:
-          typeof a.distance === 'number'
-            ? round(a.distance / 1000, 2)
-            : undefined,
-        avgHr:
-          typeof a.avgHeartRate === 'number'
-            ? round(a.avgHeartRate)
-            : undefined,
-        avgPower:
-          typeof a.avgPower === 'number' ? round(a.avgPower) : undefined,
-        load:
-          typeof a.coggan?.bikeStress === 'number'
-            ? round(a.coggan.bikeStress)
-            : typeof a.trimp?.trimp100 === 'number'
-              ? round(a.trimp.trimp100)
+          avgHr:
+            typeof a.avgHeartRate === 'number' && a.avgHeartRate > 0
+              ? round(a.avgHeartRate)
               : undefined,
-      })),
+          avgPower:
+            typeof a.avgPower === 'number' ? round(a.avgPower) : undefined,
+          load: actualLoad !== null ? round(actualLoad, 2) : null,
+        };
+      }),
     };
   }
 

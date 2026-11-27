@@ -9,7 +9,7 @@ import { useStore } from "@/lib/store";
 import { DashboardPageLayout } from "./components/DashboardPageLayout";
 import FitnessStatus from "./components/FitnessStatus/FitnessStatus";
 import { Button } from "@/components/ui/button";
-import { Pencil, Save, X } from "lucide-react";
+import { Check, LayoutGrid, X } from "lucide-react";
 import { useFitnessStatusConfig } from "@/hooks/useFitnessStatusConfig";
 import { useDashboardEditMode } from "@/hooks/useDashboardEditMode";
 import { useDashboardOverviewConfig } from "@/hooks/useDashboardOverviewConfig";
@@ -62,8 +62,8 @@ const DashboardPage = () => {
     ? [
         <Button
           key="fitness-cancel"
-          size="sm"
-          variant="outline"
+          size="icon-sm"
+          variant="ghost"
           className="hidden md:inline-flex"
           onClick={() => {
             cancelDashboardEditing();
@@ -71,13 +71,14 @@ const DashboardPage = () => {
             cancelOverviewEditing();
           }}
           disabled={isSaving}
+          aria-label={tFitness("cancel")}
+          title={tFitness("cancel")}
         >
-          <X className="h-4 w-4 sm:mr-1" />
-          <span className="hidden sm:inline">{tFitness("cancel")}</span>
+          <X className="size-4" aria-hidden />
         </Button>,
         <Button
           key="fitness-save"
-          size="sm"
+          size="icon-sm"
           className="hidden md:inline-flex"
           onClick={async () => {
             setDashboardSaving(true);
@@ -90,16 +91,17 @@ const DashboardPage = () => {
             }
           }}
           disabled={isSaving}
+          aria-label={tFitness("save")}
+          title={tFitness("save")}
         >
-          <Save className="h-4 w-4 sm:mr-1" />
-          <span className="hidden sm:inline">{tFitness("save")}</span>
+          <Check className="size-4" aria-hidden />
         </Button>,
       ]
     : [
         <Button
           key="fitness-edit"
-          size="sm"
-          variant="outline"
+          size="icon-sm"
+          variant="ghost"
           className="hidden md:inline-flex"
           onClick={() => {
             if (publicDemo.active) return;
@@ -108,10 +110,10 @@ const DashboardPage = () => {
             startOverviewEditing();
           }}
           disabled={publicDemo.active}
-          title={publicDemo.active ? demoText("readOnlyAction") : undefined}
+          aria-label={tFitness("edit")}
+          title={publicDemo.active ? demoText("readOnlyAction") : tFitness("edit")}
         >
-          <Pencil className="h-4 w-4 sm:mr-1" />
-          <span className="hidden sm:inline">{tFitness("edit")}</span>
+          <LayoutGrid className="size-4" aria-hidden />
         </Button>,
       ];
 

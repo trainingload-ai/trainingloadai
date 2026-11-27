@@ -16,6 +16,11 @@ export class ActivitySeriesQueryService {
     private readonly sensors: SensorDataService,
   ) {}
 
+  /** The caller has already loaded the owned, ready activity. */
+  readCadenceStats(activityId: number) {
+    return this.sensors.getRecordSeriesStats(activityId, 'cadence');
+  }
+
   async chart(
     userId: string,
     hashId: string,

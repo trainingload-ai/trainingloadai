@@ -297,15 +297,15 @@ export const ViewWorkoutDialog: React.FC<ViewWorkoutDialogProps> = ({
           ) : null}
         </div>
 
-        <DialogFooter className="relative z-10 shrink-0 flex-row gap-1.5 border-t border-border/60 bg-background px-4 py-3 pc:gap-2 pc:px-0 pc:pb-0 pc:pt-3 sm:justify-between">
-          <div className="flex min-w-0 flex-1 flex-nowrap gap-1.5 pc:flex-wrap pc:gap-2">
+        <DialogFooter className="relative z-10 shrink-0 flex-row gap-1.5 border-t border-border/60 px-4 py-3 pc:gap-2 pc:px-0 pc:pb-0 pc:pt-3 sm:justify-between">
+          <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-1.5 pc:flex-wrap pc:gap-2">
             {detail && workoutId ? (
               <PlanWorkoutActivityLinkControl
                 workoutId={workoutId}
                 sportType={detail.sportType}
                 scheduledDateKey={detail.scheduledDate?.slice(0, 10) ?? null}
                 links={detail.links}
-                compact
+                buttonSize="sm"
               />
             ) : null}
             <ManagedWorkoutExternalActions

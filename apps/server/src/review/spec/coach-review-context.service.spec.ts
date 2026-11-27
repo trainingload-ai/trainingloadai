@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { CoachReviewContextService } from '../coach-review-context.service';
 
 describe('CoachReviewContextService', () => {
-  it('assembles recent activities, daily PMC, profiles, and full upcoming workouts', async () => {
+  it.each([26.9, null])('assembles activity evidence and ratios with a recorded load of %s', async (actualLoad) => {
     const service = new CoachReviewContextService(
       {
         findReviewWindowWorkouts: jest.fn(async () => [
@@ -46,7 +46,7 @@ describe('CoachReviewContextService', () => {
       } as never,
       {
         batchGetActualLoad: jest.fn(
-          async () => new Map([[1, { actualLoad: 26.9 }]]),
+          async () => new Map([[1, { actualLoad }]]),
         ),
       } as never,
       {
@@ -144,7 +144,7 @@ describe('CoachReviewContextService', () => {
           hashId: 'activity-1',
           dayPeriod: 'evening',
           sessionRpe: 6,
-          load: 26.9,
+          load: actualLoad,
         }),
       ],
     });
@@ -163,7 +163,72 @@ describe('CoachReviewContextService', () => {
       athleteToday: '2026-08-26',
       timezone: 'Asia/Shanghai',
     });
+    expect(result.executionSignals.loadCompletionRatio)
+      .toBe(actualLoad == null ? null : 1.281);
     expect(result.reviewFactHash).toHaveLength(64);
+  });
+
+  it.each([
+    [[], 0],
+    [['PLANNED', 'PLANNED', 'SKIPPED'], 2],
+  ])('keeps missing completion evidence distinct from rest and skipped sessions (%j)', async (statuses, unverified) => {
+    const service = new CoachReviewContextService(
+      {
+        findReviewWindowWorkouts: jest.fn(async () => statuses.map((status, index) => ({
+          id: `workout-${index}`,
+          scheduledDate: new Date(`2026-10-${12 + index * 2}T00:00:00Z`),
+          dayOffset: 14 + index * 2,
+          sessionIndex: 1,
+          sportType: 'RUN',
+          status,
+          name: 'Easy run',
+          text: 'work 20m',
+          structureKind: 'ENDURANCE',
+          dslVersion: 1,
+          estimatedLoad: 20,
+          links: [],
+        }))),
+      } as never,
+      { findMany: jest.fn(async () => []) } as never,
+      { batchGetActualLoad: jest.fn(async () => new Map()) } as never,
+      { getStoredSliceAsOf: jest.fn(async () => ({ latest: null, daily: [] })) } as never,
+      { getComposedUserProfile: jest.fn(async () => null) } as never,
+      { get: jest.fn(() => undefined) } as never,
+    );
+    const result = await service.build({
+      userId: 'user-1',
+      lang: 'en',
+      scale: 'weekly',
+      periodStart: new Date('2026-10-11T16:00:00Z'),
+      periodEnd: new Date('2026-10-18T16:00:00Z'),
+      context: {
+        anchor: { anchorDate: '2026-10-18', timezone: 'Asia/Shanghai' },
+        plan: { id: 'plan-1', startDate: '2026-09-28', currentWeekIndex: 3 },
+        tomorrow: { plannedWorkouts: [] },
+        nextWorkouts: [],
+        recentLoad: {},
+        competitionContext: { status: 'UNAVAILABLE' },
+        recentEvents: [],
+      } as never,
+    });
+
+    expect(result.recent7Days.flatMap((day) => day.plannedWorkouts).map(
+      (workout) => workout.executionStatus,
+    )).toEqual(statuses.map((status) => status === 'PLANNED' ? 'UNVERIFIED' : status));
+    expect(result.reviewWindowSummary).toMatchObject({
+      planned: statuses.length,
+      skipped: statuses.length - unverified,
+      incomplete: 0,
+      unverified,
+      actualLoad: null,
+    });
+    expect(result.executionSignals).toMatchObject({
+      missedWorkoutIds: [],
+      unverifiedWorkoutIds: Array.from({ length: unverified }, (_, index) => `workout-${index}`),
+      consecutiveMissedWorkouts: 0,
+      sessionCompletionRatio: null,
+      loadCompletionRatio: null,
+    });
   });
 
   it.each([

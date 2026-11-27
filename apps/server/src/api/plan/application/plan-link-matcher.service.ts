@@ -208,8 +208,8 @@ export class PlanLinkMatcherService {
     const result = await withSerializableRetry(() =>
       this.prisma.$transaction(
         async (tx) => {
-          // Acquire the per-user advisory lock before day/row locks to match the
-          // outer lock order used by plan and coach-decision writes.
+          // Share the user lock with plan writers and read the committed state
+          // after waiting for it. The day and row locks protect matching writes.
           await acquireHashtextAdvisoryXactLock(tx, userId);
           await this.links.lockMatchDay(userId, day, tx);
           const activityWhere: Prisma.ActivityWhereInput = {
@@ -498,7 +498,7 @@ export class PlanLinkMatcherService {
         },
         {
           timeout: 30_000,
-          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+          isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
         },
       ),
     );

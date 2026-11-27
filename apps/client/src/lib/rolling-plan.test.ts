@@ -116,6 +116,9 @@ describe("continuous plan consumers", () => {
       "2026-12-01",
       "2026-12-02",
     ]);
+    expect(home.totalWorkoutCount).toBe(3);
+    expect(home.completedWorkoutCount).toBe(0);
+    expect(home.nextWorkout?.scheduledDate).toBe("2026-12-02");
     expect(home.generationCoverage).toEqual(plan.generationCoverage);
     const weeks = buildWeekGroups(((key: string) => key) as never, detail);
     const crossMonth = weeks.find(

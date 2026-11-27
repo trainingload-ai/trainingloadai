@@ -1020,7 +1020,7 @@ export function WorkoutEditorSheet({
         ) : null}
 
         <Footer className={cn(
-          "shrink-0 gap-2 border-t border-border/60 bg-background px-4 py-3 pc:px-4 pc:py-2.5",
+          "shrink-0 gap-2 border-t border-border/60 px-4 py-3 pc:px-4 pc:py-2.5",
           readOnly && footerActions && "flex-row flex-wrap items-center justify-between sm:justify-between",
         )}>
           {readOnly ? footerActions : null}

@@ -72,6 +72,44 @@ describe('continuous training / PostgreSQL', () => {
       status: 'DRAFT',
     });
   });
+  it('saves a dated rolling starter with fixed weekdays while keeping the plan open-ended', async () => {
+    const { plan } = await f.service.createPlan('user', {
+      title: 'Continuous running',
+      planningMode: 'ROLLING',
+      periodWeeks: null,
+      generationMetadata: {
+        qualityContract: { startDate: '2026-12-31' },
+        scheduleConstraints: {
+          version: 1, revision: 1, calendarTimeZone: 'Asia/Shanghai',
+        fixedRestWeekdays: [2, 4, 5, 7],
+          unavailableDates: [], availableDateOverrides: [],
+          effectiveFrom: '2026-12-31',
+          confirmation: { source: 'USER', reference: 'starter-weekdays' },
+        },
+      },
+      workouts: [3, 5, 7].map((dayIndex) => ({
+        weekIndex: 1,
+        dayIndex,
+        sportType: 'RUN' as const,
+        definition: {
+          kind: 'FREEFORM' as const,
+          version: 1 as const,
+          source: 'TEXT' as const,
+          text: 'Easy run 20m',
+        },
+      })),
+    });
+    const detail = await f.service.getPlanDetail('user', plan!.id);
+    expect(detail.plan).toMatchObject({
+      planningMode: 'ROLLING', status: 'DRAFT', startDate: null,
+      periodWeeks: null, endDate: null,
+    });
+    expect(detail.plan?.workouts?.map(({ dayOffset }) => dayOffset)).toEqual([2, 4, 6]);
+    const identity = ({ id, structure, scheduledDate }: NonNullable<typeof plan>['workouts'][number]) =>
+      ({ id, structure, scheduledDate });
+    expect(detail.plan?.workouts?.map(identity)).toEqual(plan!.workouts.map(identity));
+    expect(detail.plan).not.toHaveProperty('workoutWindow');
+  });
   async function ready(
     startDate = '2099-11-18',
     configure?: (request: PlanStartPreviewRequest) => void,

@@ -17,6 +17,7 @@ import { HealthDataModule } from '@/health-data/health-data.module';
 import { PowerModule } from '@/power/power.module';
 import { Module } from '@nestjs/common';
 import { AiService } from './ai.service';
+import { PlanStartAssessmentService } from './plan-start-assessment.service';
 import { TrainingCoachAgent } from './agents/training-coach-agent.service';
 import { AiController } from './ai.controller';
 import { PrismaModule } from '@/prisma/prisma.module';
@@ -109,6 +110,7 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
     CoachRunStore,
     TrainingDataCoverageQueryService,
     AiService,
+    PlanStartAssessmentService,
     TrainingCoachAgent,
     FitnessAssessmentApplyService,
     FitnessAssessmentFollowupService,
@@ -150,6 +152,7 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
   exports: [
     FitnessAssessmentFollowupService,
     AiService,
+    PlanStartAssessmentService,
     TrainingCoachAgent,
     AiUsageModule,
     CoachBranchingService,

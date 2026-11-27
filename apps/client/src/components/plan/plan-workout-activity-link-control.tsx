@@ -51,6 +51,7 @@ export function PlanWorkoutActivityLinkControl({
   scheduledDateKey,
   links,
   compact,
+  buttonSize,
   mobileAction,
 }: {
   workoutId: string;
@@ -59,6 +60,7 @@ export function PlanWorkoutActivityLinkControl({
   links?: PlanWorkoutLink[];
   /** 今日卡片略紧凑 */
   compact?: boolean;
+  buttonSize?: "xs" | "compact" | "sm";
   /** 移动端训练详情底部的整行操作 */
   mobileAction?: boolean;
 }) {
@@ -167,14 +169,16 @@ export function PlanWorkoutActivityLinkControl({
             <Button
               type="button"
               variant="ghost"
-              size={mobileAction ? "touch" : compact ? "xs" : "compact"}
+              size={mobileAction ? "touch" : (buttonSize ?? (compact ? "xs" : "compact"))}
               disabled={pending || !scheduledDateKey || publicDemo.active}
               className={cn(
                 mobileAction
                   ? "h-11 w-full max-w-none rounded-control-lg bg-neutral-100 px-4 font-semibold text-foreground shadow-none hover:bg-neutral-200 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-                  : compact
-                    ? "min-w-0 max-w-full font-normal shadow-none pc:text-[11px]"
-                    : "min-w-0 max-w-[min(100%,14rem)] font-normal shadow-none",
+                  : buttonSize === "sm"
+                    ? "min-w-0 max-w-full font-medium shadow-none"
+                    : compact
+                      ? "min-w-0 max-w-full font-normal shadow-none pc:text-[11px]"
+                      : "min-w-0 max-w-[min(100%,14rem)] font-normal shadow-none",
                 "[&_svg]:size-3.5 data-[state=open]:bg-muted/80",
                 linkedActivity
                   ? "bg-muted/60 text-foreground hover:bg-muted/80 hover:text-foreground"

@@ -22,6 +22,8 @@ export type ActivityDayViewToolOutput = {
     sportType: string;
     mapThumbnailUrl?: string;
     startTime?: string;
+    activityDate?: string | null;
+    linkedWorkout?: { id: string; planId: string | null; name: string | null } | null;
     durationMin?: number;
     distanceKm?: number;
     avgHr?: number;
@@ -39,7 +41,7 @@ export const activityDayViewTool: AiToolDef<Input, ActivityDayViewToolOutput> =
     name: 'activity.day_view',
     aliases: ['activity_day_view', 'activities_on_day'],
     description:
-      'Completed logged activities on one athlete-local calendar date. Use to show or open an activity on a named date. Each matching activity is clickable. Specify section to open a requested analysis section. If multiple activities match, let the athlete choose.',
+      'Completed logged activities on one calendar date in each activity’s recorded timezone, falling back to the athlete timezone. Use activityDate and linkedWorkout as the recorded day and existing course match. Each matching activity is clickable. Specify section to open a requested analysis section. If multiple activities match, let the athlete choose.',
     cost: 'low',
     searchHint: 'activities on date day summary completed workouts',
     isEnabled: async (ctx) => hasSignedInUser(ctx),

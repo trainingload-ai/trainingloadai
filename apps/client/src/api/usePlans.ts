@@ -96,18 +96,32 @@ export function useActivePlan(enabled = true) {
     return map;
   }, [startDate, workouts, query.data?.plan]);
 
-  // Plan range should start from activation start date (not natural week start), lasting periodWeeks weeks
+  // Plan range starts from activation start date. Fixed plans span periodWeeks;
+  // rolling plans cover through generatedThrough (or the latest saved workout date).
   const rolling = isRollingPlan(query.data?.plan);
-  const range = React.useMemo(
-    () =>
-      !rolling && startDate && periodWeeks
-        ? {
-            startOfWeek: startDate.startOf("day"),
-            end: startDate.add(periodWeeks * 7 - 1, "day").endOf("day"),
-          }
-        : null,
-    [periodWeeks, startDate, rolling],
-  );
+  const generatedThrough = query.data?.plan?.generatedThrough ?? null;
+  const range = React.useMemo(() => {
+    if (!startDate) return null;
+    if (!rolling && periodWeeks) {
+      return {
+        startOfWeek: startDate.startOf("day"),
+        end: startDate.add(periodWeeks * 7 - 1, "day").endOf("day"),
+      };
+    }
+    if (rolling) {
+      const candidates: string[] = [startDate.format("YYYY-MM-DD")];
+      if (generatedThrough) candidates.push(generatedThrough.slice(0, 10));
+      for (const dateKey of Object.keys(workoutsByDate)) {
+        candidates.push(dateKey);
+      }
+      const maxDate = candidates.sort().at(-1)!;
+      return {
+        startOfWeek: startDate.startOf("day"),
+        end: dayjs(maxDate).endOf("day"),
+      };
+    }
+    return null;
+  }, [periodWeeks, startDate, rolling, generatedThrough, workoutsByDate]);
 
   return {
     ...query,

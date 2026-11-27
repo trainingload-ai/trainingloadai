@@ -46,6 +46,7 @@ function createAiService(args?: {
     {} as never,
     {} as never,
     args?.guard ?? new ReviewModelCallGuard(),
+    { batchGetActualLoad: jest.fn(async () => new Map()) } as never,
     undefined,
     { isGranted: jest.fn(async () => true) } as never,
     { runBackgroundCoachTask: create } as never,

@@ -7,6 +7,7 @@ import { AiUsageService, type ParsedAiUsage } from '@/api/ai/ai-usage.service';
 import { parseAiReviewModeFeatures } from '@/api/ai/review-mode-features.util';
 import { UserService } from '@/api/user/user.service';
 import { PMCService } from '@/training-load/pmc.service';
+import { SensorDataService } from '@/sensor/sensor-data.service';
 import {
   buildUnifiedActivityAnalysisInput,
   type ActivityForCoachUnifiedInput,
@@ -78,6 +79,7 @@ export class ActivityAiReviewService {
     private readonly loadReadout: LoadReadoutService,
     @Inject(FEATURE_ACCESS_POLICY)
     private readonly featureAccess: FeatureAccessPolicy,
+    private readonly sensors: SensorDataService,
     private readonly capabilities?: RuntimeCapabilityService,
   ) {}
 
@@ -121,18 +123,12 @@ export class ActivityAiReviewService {
         message: 'Activity AI review is not enabled for this account',
       };
     }
+    // Explicit requests use the access checks above. This setting governs automatic reviews.
+    if (args.trigger === $Enums.ActivityAiReviewTrigger.MANUAL) {
+      return { ok: true };
+    }
 
-    const reviewSetting = await this.users.settings().findUnique({
-      where: {
-        userId_category: {
-          userId: args.userId,
-          category: $Enums.SettingCategory.AI_REVIEW_MODE,
-        },
-      },
-      select: { value: true },
-    });
-    const reviewFeatures = parseAiReviewModeFeatures(reviewSetting?.value);
-    if (!reviewFeatures.activityReview) {
+    if (!(await this.isAutomaticReviewEnabled(args.userId))) {
       return {
         ok: false,
         code: 'ACTIVITY_REVIEW_DISABLED',
@@ -141,6 +137,19 @@ export class ActivityAiReviewService {
     }
 
     return { ok: true };
+  }
+
+  private async isAutomaticReviewEnabled(userId: string): Promise<boolean> {
+    const reviewSetting = await this.users.settings().findUnique({
+      where: {
+        userId_category: {
+          userId,
+          category: $Enums.SettingCategory.AI_REVIEW_MODE,
+        },
+      },
+      select: { value: true },
+    });
+    return parseAiReviewModeFeatures(reviewSetting?.value).activityReview;
   }
   /**
    * 标记活动 AI 分析复盘为跳过。
@@ -235,6 +244,7 @@ export class ActivityAiReviewService {
       args.userId,
       profile,
       this.pmcService,
+      () => this.sensors.getRecordSeriesStats(activity.id, 'cadence'),
     );
     // 计算教练证据包哈希
     const evidenceHash = await hashActivityCoachDedupe({
@@ -734,37 +744,27 @@ export class ActivityAiReviewService {
       language,
     });
 
-    if (!row) {
-      return {
-        found: true as const,
-        activityId: activity.id,
-        reviewId: null,
-        status: null,
-        needsLanguageRepair: false,
-        markdown: null,
-        summary: null,
-        verdict: null,
-        evidenceHash: null,
-        updatedAt: null,
-      };
-    }
-
     const currentContract =
-      row.promptVersion === ACTIVITY_AI_REVIEW_PROMPT_VERSION &&
+      row?.promptVersion === ACTIVITY_AI_REVIEW_PROMPT_VERSION &&
       row.evidenceVersion === ACTIVITY_COACH_EVIDENCE_VERSION;
-    const succeeded = row.status === $Enums.ActivityAiReviewStatus.SUCCEEDED;
+    const succeeded = row?.status === $Enums.ActivityAiReviewStatus.SUCCEEDED;
     const markdown =
       currentContract && succeeded
         ? readStoredCoachMarkdown(row.content, language)
         : null;
     const usable = currentContract && (!succeeded || Boolean(markdown));
     const needsLanguageRepair = currentContract && succeeded && !markdown;
+    const status = usable
+      ? row.status
+      : (await this.isAutomaticReviewEnabled(args.userId))
+        ? null
+        : $Enums.ActivityAiReviewStatus.SKIPPED;
 
     return {
       found: true as const,
       activityId: activity.id,
-      reviewId: row.id,
-      status: usable ? row.status : null,
+      reviewId: row?.id ?? null,
+      status,
       needsLanguageRepair,
       markdown,
       summary: usable ? row.summary : null,

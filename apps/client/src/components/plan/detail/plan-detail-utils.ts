@@ -224,8 +224,8 @@ export function getWeekWorkoutStatusLabelClass(
 }
 
 export function getPlanWorkoutDisplayKind(
-  workout: Pick<PlanWorkout, "status" | "scheduledDate">,
-  today = dayjs().startOf("day"),
+  workout: Pick<PlanWorkout, "status" | "scheduledDate" | "calendarTodayYmd">,
+  today = dayjs(workout.calendarTodayYmd).startOf("day"),
 ): PlanWorkoutDisplayKind {
   if (workout.status === "DONE") return "done";
   if (workout.status === "SKIPPED") return "skipped";
@@ -252,23 +252,31 @@ export function rollupPlanDetailExecution(
   };
   for (const workout of plan.workouts) {
     const date = getWorkoutDate(plan, workout);
-    const kind = getPlanWorkoutDisplayKind(
-      {
-        status: workout.status,
-        scheduledDate: date?.format("YYYY-MM-DD") ?? workout.scheduledDate,
-      },
-      today,
-    );
+    const kind = getPlanDetailWorkoutDisplayKind(plan, workout, date, today);
     counts[kind] += 1;
   }
   return counts;
+}
+
+export function getPlanDetailWorkoutDisplayKind(
+  plan: Pick<TrainingPlanDetail, "status"> | undefined,
+  workout: PlanWorkout,
+  date: dayjs.Dayjs | null,
+  today?: dayjs.Dayjs,
+) {
+  return getPlanWorkoutDisplayKind({
+    status: workout.status,
+    scheduledDate: plan?.status === "DRAFT" ? null : date?.format("YYYY-MM-DD") ?? workout.scheduledDate,
+    calendarTodayYmd: workout.calendarTodayYmd,
+  }, today);
 }
 
 export function getWorkoutDate(plan: TrainingPlanDetail, workout: PlanWorkout) {
   if (workout.scheduledDate) {
     return dayjs(workout.scheduledDate.slice(0, 10)).startOf("day");
   }
-  if (!plan.startDate) {
+  const startDate = plan.startDate ?? rollingDraftAnchor(plan);
+  if (!startDate) {
     return null;
   }
 
@@ -277,7 +285,13 @@ export function getWorkoutDate(plan: TrainingPlanDetail, workout: PlanWorkout) {
       ? workout.dayOffset
       : (workout.weekIndex - 1) * 7 + (workout.dayIndex - 1);
 
-  return dayjs(plan.startDate.slice(0, 10)).startOf("day").add(offsetDays, "day");
+  return dayjs(startDate.slice(0, 10)).startOf("day").add(offsetDays, "day");
+}
+
+function rollingDraftAnchor(plan: TrainingPlanDetail) {
+  if (plan.status !== "DRAFT" || !isRollingPlan(plan)) return null;
+  const contract = plan.generationMetadata?.qualityContract as { startDate?: unknown } | undefined;
+  return isCalendarDate(contract?.startDate) ? contract.startDate : null;
 }
 
 export function getPlanWorkoutStatusLabel(
@@ -316,10 +330,7 @@ export function toDerivedWorkout(
 ): DerivedWorkout {
   const date = getWorkoutDate(plan, workout);
   const dateKey = date?.format("YYYY-MM-DD") ?? null;
-  const displayKind = getPlanWorkoutDisplayKind({
-    status: workout.status,
-    scheduledDate: dateKey ?? workout.scheduledDate,
-  });
+  const displayKind = getPlanDetailWorkoutDisplayKind(plan, workout, date);
 
   return {
     ...workout,
@@ -351,7 +362,8 @@ export function buildWeekGroups(
   t: TranslateFn,
   plan: TrainingPlanDetail,
 ): WeekGroup[] {
-  if (isRollingPlan(plan)) {
+  const rolling = isRollingPlan(plan);
+  if (rolling && (plan.status !== "DRAFT" || plan.startDate)) {
     if (!plan.startDate) return [];
     const start = plan.startDate.slice(0, 10);
     const firstMonday = naturalWeekStart(start);
@@ -388,10 +400,12 @@ export function buildWeekGroups(
         }),
       }));
   }
-  return Array.from(
-    { length: Math.max(1, plan.periodWeeks || 1) },
-    (_, weekOffset) => {
-      const weekIndex = weekOffset + 1;
+  const startDate = plan.startDate ?? rollingDraftAnchor(plan);
+  const weekIndices = rolling
+    ? [...new Set(plan.workouts.map(({ weekIndex }) => weekIndex))].sort((a, b) => a - b)
+    : Array.from({ length: Math.max(1, plan.periodWeeks || 1) }, (_, offset) => offset + 1);
+  return weekIndices.map(
+    (weekIndex) => {
       const workouts = plan.workouts
         .filter((item) => item.weekIndex === weekIndex)
         .map((item) => toDerivedWorkout(t, plan, item));
@@ -403,8 +417,8 @@ export function buildWeekGroups(
           .sort((a, b) => (a.sessionIndex ?? 1) - (b.sessionIndex ?? 1));
         const firstWorkout = dayWorkouts[0];
         const fallbackDate =
-          plan.startDate != null
-            ? dayjs(plan.startDate.slice(0, 10))
+          startDate != null
+            ? dayjs(startDate.slice(0, 10))
                 .startOf("day")
                 .add((weekIndex - 1) * 7 + dayOffset, "day")
             : null;

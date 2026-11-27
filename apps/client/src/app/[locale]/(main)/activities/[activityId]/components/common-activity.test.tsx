@@ -57,14 +57,18 @@ vi.mock("./ActivityMap", () => ({
 vi.mock("./ActivityHeader", () => ({
   ActivityHeader: () => <h1>上午跑步</h1>,
 }));
-vi.mock("./AIAnalysis", () => ({
-  default: function Review() {
+vi.mock("./AIAnalysis", () => {
+  function Review() {
     React.useEffect(() => {
       state.mounts++;
     }, []);
     return <div data-testid="review">正在分析运动数据</div>;
-  },
-}));
+  }
+  return {
+    default: Review,
+    ActivityCoachReview: Review,
+  };
+});
 vi.mock("./activity-analysis-link-context", () => ({
   ActivityAnalysisLinkProvider: ({ children }: React.PropsWithChildren) =>
     children,

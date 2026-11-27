@@ -21,7 +21,7 @@ export function DashboardSubHeader({
 }: DashboardSubHeaderProps) {
   return (
     <div >
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-neutral-100 px-2.5 py-2 dark:bg-muted/45">
+      <div className="flex flex-wrap items-center justify-between gap-2 py-0.5">
         <div className="flex min-w-0 items-center gap-2">
           {setSportType && selectedSportType ? (
             <SportTypeFilter

@@ -56,6 +56,9 @@ export type V2HomeActivePlan = {
   currentDayIndex: number | null;
   todayWorkouts: V2HomePlanWorkout[];
   currentWeekWorkouts: V2HomePlanWorkout[];
+  totalWorkoutCount?: number;
+  completedWorkoutCount?: number;
+  nextWorkout?: V2HomePlanWorkout | null;
 };
 
 export type V2HomeRecentActivity = Pick<
@@ -324,6 +327,27 @@ export function mapTrainingPlanToHomePlan(
   );
 
   const currentWeek = plan.currentWeekIndex ?? 1;
+  const activeWorkouts = workouts.filter(
+    (workout) => workout.status !== "MOVED",
+  );
+  const totalWorkoutCount = activeWorkouts.length;
+  const completedWorkoutCount = activeWorkouts.filter(
+    (workout) => workout.status === "DONE",
+  ).length;
+  const nextWorkout =
+    activeWorkouts
+      .filter(
+        (workout) =>
+          (workout.status === "PLANNED" || workout.status === "IN_PROGRESS") &&
+          Boolean(workout.scheduledDate) &&
+          (workout.scheduledDate as string) >= todayKey,
+      )
+      .sort(
+        (a, b) =>
+          (a.scheduledDate ?? "").localeCompare(b.scheduledDate ?? "") ||
+          a.sessionIndex - b.sessionIndex ||
+          a.id.localeCompare(b.id),
+      )[0] ?? null;
 
   return {
     id: plan.id,
@@ -340,6 +364,9 @@ export function mapTrainingPlanToHomePlan(
     endDate: plan.endDate,
     currentWeekIndex: plan.currentWeekIndex,
     currentDayIndex: plan.currentDayIndex,
+    totalWorkoutCount,
+    completedWorkoutCount,
+    nextWorkout,
     todayWorkouts: workouts
       .filter((workout) => workout.scheduledDate === todayKey)
       .sort((a, b) => a.sessionIndex - b.sessionIndex),

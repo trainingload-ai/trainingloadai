@@ -79,7 +79,11 @@ import {
   scheduledDateFromCalendar,
 } from '../plan-link-calendar.util';
 import { CoachContextService } from './coach-context.service';
-import { normalizeSportDefinitionCode } from '@/sports/sport-catalog.types';
+import {
+  defaultSportDefinitionCode,
+  normalizeSportDefinitionCode,
+} from '@/sports/sport-catalog.types';
+import { readWorkoutSportDefinitions } from '@/sports/persistence/sport-catalog.repository';
 import type { EndurancePlanBlock } from '../../../../../../packages/shared/endurance-workout-ir';
 import type {
   WorkoutDefinitionInput,
@@ -925,6 +929,18 @@ export class PlanWriteSupport {
       userId,
       scheduledDate,
     );
+    const candidateSportCode = normalizeSportDefinitionCode(
+      dto.sportType,
+      dto.sportDefinitionCode,
+    );
+    const matchedSports = await readWorkoutSportDefinitions(tx, [
+      candidateSportCode,
+    ]);
+    const sportDefinitionCode =
+      matchedSports.find(
+        (sport) =>
+          sport.code === candidateSportCode && sport.family === dto.sportType,
+      )?.code ?? defaultSportDefinitionCode(dto.sportType);
     const row = await this.workouts.create(
       {
         data: {
@@ -934,10 +950,7 @@ export class PlanWriteSupport {
           sessionIndex,
           scheduledDate,
           sportType: dto.sportType,
-          sportDefinitionCode: normalizeSportDefinitionCode(
-            dto.sportType,
-            dto.sportDefinitionCode,
-          ),
+          sportDefinitionCode,
           name: dto.name ?? null,
           text: definition.text,
           notes: dto.notes ?? null,
@@ -2492,6 +2505,7 @@ export class PlanWriteSupport {
               planId: { in: planIds },
               OR: [
                 { plan: { planningMode: 'FIXED' } },
+                { plan: { planningMode: 'ROLLING', status: 'DRAFT' } },
                 {
                   plan: { planningMode: 'ROLLING' },
                   scheduledDate: {
@@ -2560,7 +2574,7 @@ export class PlanWriteSupport {
             weekStart: normalizePlanDate(g.weekStart)!,
           })),
         ),
-        ...(plan.planningMode === 'ROLLING'
+        ...(plan.planningMode === 'ROLLING' && plan.status !== 'DRAFT'
           ? {
               workoutWindow: {
                 from: normalizePlanDate(this.addDays(new Date(), -28)),
@@ -2601,9 +2615,10 @@ export class PlanWriteSupport {
 
   private rollingReadWindow(plan: {
     planningMode?: string;
+    status: string;
     startDate?: Date | null;
   }) {
-    if (plan.planningMode !== 'ROLLING') return undefined;
+    if (plan.planningMode !== 'ROLLING' || plan.status === 'DRAFT') return undefined;
     const today = new Date(
       new Date().toISOString().slice(0, 10) + 'T00:00:00Z',
     );
@@ -2830,9 +2845,12 @@ export class PlanWriteSupport {
             );
       if (dto.generationMetadata?.planAssessment != null && !planAssessment)
         throw new UnprocessableEntityException('Invalid plan assessment');
+      const draftWeeks = dto.planningMode === 'ROLLING'
+        ? Math.max(1, ...dto.workouts.map(({ weekIndex }) => weekIndex))
+        : dto.periodWeeks;
       if (scheduleConstraints && qualityContract?.startDate) {
         const projection = projectPlanCalendar({
-          periodWeeks: dto.periodWeeks,
+          periodWeeks: draftWeeks,
           workouts: dto.workouts,
           startDate: qualityContract.startDate,
           calendarTimeZone: scheduleConstraints.calendarTimeZone,
@@ -2849,9 +2867,7 @@ export class PlanWriteSupport {
           ? { valid: true, weeks: [], issues: [] }
           : await this.planLoadEstimator.assessPlanQualityForViewer(
               userId,
-              dto.planningMode === 'ROLLING'
-                ? Math.max(1, ...dto.workouts.map((w) => w.weekIndex))
-                : dto.periodWeeks,
+              draftWeeks,
               dto.workouts.map((workout) => {
                 const definition = this.resolveWorkoutDefinitionInput(workout);
                 return {

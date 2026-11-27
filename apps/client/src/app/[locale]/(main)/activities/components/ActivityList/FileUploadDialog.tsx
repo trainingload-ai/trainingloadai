@@ -159,7 +159,7 @@ export function FileUploadDialog({
               const item = items[index];
               next[fileIdentity(file)] = item?.valid
                 ? { inspection: item.inspection }
-                : { error: item?.error ?? t("unknownError") };
+                : { error: t("invalidActivityFile") };
             });
             return next;
           });
@@ -275,6 +275,7 @@ export function FileUploadDialog({
         <AdaptiveDialogContent
           className="flex max-h-[96dvh] flex-col overflow-hidden"
           desktopClassName="sm:max-w-[600px]"
+          desktopProps={{ showFallbackTitle: false }}
         >
           <AdaptiveDialogHeader className="shrink-0">
             <AdaptiveDialogTitle>

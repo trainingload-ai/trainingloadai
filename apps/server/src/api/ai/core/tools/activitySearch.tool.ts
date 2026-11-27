@@ -22,6 +22,8 @@ type Output = {
     description?: string;
     sportType?: string;
     startTime?: string;
+    activityDate?: string | null;
+    linkedWorkout?: { id: string; planId: string | null; name: string | null } | null;
     durationMin?: number;
     distanceKm?: number;
     avgHr?: number;
@@ -33,7 +35,7 @@ type Output = {
 export const activitySearchTool: AiToolDef<Input, Output> = buildAiTool({
   name: 'activity.search',
   description:
-    'Search and rank the signed-in user’s activities by date range, sport type, text, and sort order. Use this to find a workout before calling activity.byHashId.',
+    'Search and rank logged activities using their recorded local dates, or the athlete timezone when an activity has none. Use activityDate for the calendar day and linkedWorkout for an existing course match; startTime is a UTC instant. Use this to find a workout before calling activity.byHashId.',
   cost: 'low',
   searchHint: 'find workout by date',
   maxResultChars: 2_500,
@@ -65,6 +67,8 @@ export const activitySearchTool: AiToolDef<Input, Output> = buildAiTool({
       activityName: item.activityName,
       sportType: item.sportType,
       startTime: item.startTime,
+      activityDate: item.activityDate,
+      linkedWorkout: item.linkedWorkout,
       durationMin: item.durationMin,
       distanceKm: item.distanceKm,
       load: item.load,

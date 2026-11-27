@@ -7,6 +7,7 @@ import { PMCModule } from '@/training-load/pmc.module';
 import { ActivityAiReviewService } from './activity-ai-review.service';
 import { AiDataConsentModule } from '@/ai-data-consent/ai-data-consent.module';
 import { LoadReadoutModule } from './load-readout.module';
+import { SensorDataModule } from '@/sensor/sensor-data.module';
 
 /**
  * 活动 AI 复盘能力模块。
@@ -23,6 +24,7 @@ import { LoadReadoutModule } from './load-readout.module';
     PMCModule,
     AiDataConsentModule,
     LoadReadoutModule,
+    SensorDataModule,
   ],
   providers: [ActivityAiReviewService],
   exports: [ActivityAiReviewService],

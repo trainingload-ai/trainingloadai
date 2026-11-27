@@ -422,6 +422,45 @@ describe('review report', () => {
     ]);
   });
 
+  it.each([
+    [54, 54],
+    [null, null],
+  ])('uses the canonical session load and retains unknown coverage (%s)', async (actualLoad, expected) => {
+    const loadReadout = {
+      batchGetActualLoad: jest.fn(async () => new Map([
+        [1, { actualLoad, actualLoadSource: actualLoad == null ? null : 'SESSIONRPE' }],
+      ])),
+    };
+    const service = new ReviewDigestService(
+      {} as never,
+      {} as never,
+      {
+        findMany: async () => [
+          { id: 1, sportType: 'RUN', timerTime: 3240, trimp: null, govss: null },
+          { id: 2, sportType: 'RUN', timerTime: 2400, trimp: null, govss: null },
+        ],
+      } as never,
+      {} as never,
+      new ReviewModelCallGuard(),
+      loadReadout as never,
+    );
+
+    const result = await service.aggregateWindow({
+      userId: 'user-1',
+      periodStart: new Date('2026-11-15T16:00:00Z'),
+      periodEnd: new Date('2026-11-22T16:00:00Z'),
+    });
+
+    expect(result.totals).toMatchObject({
+      totalSessions: 2,
+      totalLoad: expected,
+      loadSamples: actualLoad == null ? 0 : 1,
+    });
+    expect(result.activities.map((activity) => activity.actualLoad)).toEqual([
+      actualLoad, null,
+    ]);
+  });
+
   it('publishes and updates the notification with factual tables without AI', async () => {
     const update = jest.fn(async () => undefined);
     const updateBodyMarkdownByKey = jest.fn(async () => undefined);
@@ -453,6 +492,7 @@ describe('review report', () => {
       } as never,
       { digests: () => ({ update }) } as never,
       new ReviewModelCallGuard(),
+      { batchGetActualLoad: jest.fn(async () => new Map()) } as never,
       undefined,
       undefined,
       undefined,
@@ -513,6 +553,7 @@ describe('review report', () => {
       { findMany } as never,
       { digests: () => ({ update: jest.fn() }) } as never,
       new ReviewModelCallGuard(),
+      { batchGetActualLoad: jest.fn(async () => new Map()) } as never,
     );
     jest.spyOn(service, 'writeSnapshotAndDetails').mockResolvedValue(undefined);
 

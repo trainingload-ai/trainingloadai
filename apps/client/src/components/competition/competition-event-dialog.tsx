@@ -864,7 +864,7 @@ export function CompetitionEventDialog({
             ) : null}
           </div>
 
-          <AdaptiveDialogFooter className="flex-col-reverse items-stretch gap-2 border-t bg-background px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <AdaptiveDialogFooter className="flex-col-reverse items-stretch gap-2 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div className="flex min-w-0 justify-between gap-1 sm:justify-start">
               {event && mode === "view" && event.status === "PLANNED" ? (
                 <Button

@@ -218,6 +218,7 @@ export interface UnifiedActivityAnalysisInput {
   cadence: {
     avg?: number;
     max?: number;
+    unit?: 'spm' | 'rpm';
   };
   strength?: {
     exercise_count: number;
@@ -268,7 +269,7 @@ export interface UnifiedActivityAnalysisInput {
     TSB?: number;
     AC_ratio?: number;
     daily_load_last_7d?: number[];
-    rest_days_last_14d?: number;
+    days_without_recorded_activity_last_14d?: number;
   };
   user_baseline: {
     max_hr?: number;

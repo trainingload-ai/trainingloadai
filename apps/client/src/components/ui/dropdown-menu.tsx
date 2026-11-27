@@ -29,11 +29,15 @@ function DropdownMenuTrigger({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger> &
   ButtonProps & { unstyled?: boolean }) {
+  const skipDefaultButtonVariants =
+    unstyled || (props.asChild && variant === undefined && size === undefined);
   return (
     <DropdownMenuPrimitive.Trigger
       data-slot="dropdown-menu-trigger"
       className={
-        unstyled ? className : cn(buttonVariants({ variant, size, className }))
+        skipDefaultButtonVariants
+          ? className
+          : cn(buttonVariants({ variant, size, className }))
       }
       {...props}
     />

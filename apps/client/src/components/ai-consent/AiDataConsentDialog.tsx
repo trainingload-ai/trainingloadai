@@ -86,7 +86,7 @@ export function AiDataConsentDialog({
         </div>
 
         <AdaptiveDialogFooter
-          className={`${adaptiveDialogFooterActionsClassName} border-t border-border bg-background p-4 pc:px-6`}
+          className={`${adaptiveDialogFooterActionsClassName} border-t border-border p-4 pc:px-6`}
         >
           <Button
             type="button"

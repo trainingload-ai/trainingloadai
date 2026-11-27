@@ -10,6 +10,7 @@ import { PlanQueryService } from '@/api/plan/application/plan-query.service';
 import {
   normalizePlanLinkTimeZone,
   resolveActivityCalendarDayStr,
+  scheduledDateFromCalendar,
 } from '@/api/plan/plan-link-calendar.util';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { BusinessException } from '@/filters/business-exception/business.exception';
@@ -1162,6 +1163,7 @@ export class ActivityQueryService {
     search?: string;
     from?: Date;
     to?: Date;
+    calendar?: { from?: string; to?: string; timezone: string };
     sortBy?: 'startTime' | 'distance' | 'duration' | 'load';
     order?: 'asc' | 'desc';
   }) {
@@ -1173,6 +1175,7 @@ export class ActivityQueryService {
       search,
       from,
       to,
+      calendar,
       sortBy,
       order,
     } = args;
@@ -1184,10 +1187,27 @@ export class ActivityQueryService {
     const where: Prisma.ActivityWhereInput = isSportType(value)
       ? readyActivityWhere({ userId, sportType: value })
       : readyActivityWhere({ userId });
-    if (from || to) {
-      where.startTime = {};
-      if (from) where.startTime.gte = from;
-      if (to) where.startTime.lte = to;
+    if (calendar) {
+      const dayMs = 86_400_000;
+      // Query the UTC superset first, then apply each activity's calendar day.
+      where.startTime = {
+        ...(calendar.from
+          ? {
+              gte: new Date(
+                scheduledDateFromCalendar(calendar.from).getTime() - dayMs,
+              ),
+            }
+          : {}),
+        ...(calendar.to
+          ? {
+              lt: new Date(
+                scheduledDateFromCalendar(calendar.to).getTime() + 2 * dayMs,
+              ),
+            }
+          : {}),
+      };
+    } else if (from || to) {
+      where.startTime = { gte: from, lte: to };
     }
     const query = String(search ?? '').trim();
     if (query) {
@@ -1203,21 +1223,43 @@ export class ActivityQueryService {
           ? ({ timerTime: direction } as const)
           : ({ startTime: direction } as const);
     const loadSort = sortBy === 'load';
-    const rows = await this.prisma.activity.findMany({
-      where,
-      orderBy,
-      ...(loadSort
-        ? { take: MAX_AI_LOAD_SORT_CANDIDATES + 1 }
-        : { skip, take }),
-      include: {
-        trimp: true,
-        coggan: true,
-        vo2max: true,
-        fitnessMetricsSnapshot: true,
-      },
-    });
-    if (loadSort && rows.length > MAX_AI_LOAD_SORT_CANDIDATES) {
-      throw new ActivityLoadSortLimitError();
+    const queryBatch = (offset: number, limit: number) =>
+      this.prisma.activity.findMany({
+        where,
+        orderBy: [orderBy, { id: direction }],
+        ...(offset ? { skip: offset } : {}),
+        take: limit,
+        include: {
+          trimp: true,
+          coggan: true,
+          vo2max: true,
+          fitnessMetricsSnapshot: true,
+          planWorkoutLinks: ACTIVITY_LIST_INCLUDE.planWorkoutLinks,
+        },
+      });
+    let rows: Awaited<ReturnType<typeof queryBatch>>;
+    if (calendar && !loadSort) {
+      rows = [];
+      const batchSize = 100;
+      for (let offset = 0; rows.length < skip + take; offset += batchSize) {
+        const batch = await queryBatch(offset, batchSize);
+        rows.push(
+          ...batch.filter((row) => matchesAiActivityCalendar(row, calendar)),
+        );
+        if (batch.length < batchSize) break;
+      }
+      rows = rows.slice(skip, skip + take);
+    } else {
+      rows = await queryBatch(
+        loadSort ? 0 : skip,
+        loadSort ? MAX_AI_LOAD_SORT_CANDIDATES + 1 : take,
+      );
+      if (loadSort && rows.length > MAX_AI_LOAD_SORT_CANDIDATES) {
+        throw new ActivityLoadSortLimitError();
+      }
+      if (calendar) {
+        rows = rows.filter((row) => matchesAiActivityCalendar(row, calendar));
+      }
     }
     const loads = await this.loadReadout.batchGetActualLoad(
       rows.map((row) => row.id),
@@ -1326,4 +1368,22 @@ export class ActivityQueryService {
       }),
     });
   }
+}
+
+function matchesAiActivityCalendar(
+  row: { startTime: Date | null; timezone: string | null },
+  calendar: { from?: string; to?: string; timezone: string },
+) {
+  if (!row.startTime) return false;
+  const date = resolveActivityCalendarDayStr(
+    row.startTime,
+    row.timezone,
+    null,
+    calendar.timezone,
+  );
+  return (
+    date != null &&
+    (!calendar.from || date >= calendar.from) &&
+    (!calendar.to || date <= calendar.to)
+  );
 }

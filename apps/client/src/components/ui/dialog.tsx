@@ -51,9 +51,11 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  showFallbackTitle = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  showFallbackTitle?: boolean;
 }) {
   const t = useTranslations("SharedUI");
 
@@ -70,9 +72,11 @@ function DialogContent({
         )}
         {...props}
       >
-        <DialogPrimitive.Title className="sr-only">
-          {t("dialog")}
-        </DialogPrimitive.Title>
+        {showFallbackTitle && (
+          <DialogPrimitive.Title className="sr-only">
+            {t("dialog")}
+          </DialogPrimitive.Title>
+        )}
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close

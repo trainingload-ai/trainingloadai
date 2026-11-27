@@ -1367,8 +1367,8 @@ export default function V2PlanPage() {
         <header className="hidden pc:block">
           <section className="rounded-surface bg-neutral-100 p-2.5 dark:bg-muted/45">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-mobile-caption pc:text-xs text-muted-foreground">
-                <CalendarDays className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-1.5 text-mobile-caption leading-none text-muted-foreground pc:text-xs pc:leading-none">
+                <CalendarDays className="size-3.5 shrink-0 -translate-y-[0.5px]" aria-hidden />
                 <span>{t(rolling ? "header.title" : "header.currentCycle")}</span>
               </div>
               <div className="flex items-center gap-1.5">
