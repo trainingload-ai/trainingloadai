@@ -1,4 +1,8 @@
-import { ImportSourceObjectType, importJsonValue } from './import-item-job.types';
+import {
+  IMPORT_ACTIVITY_START_IN_FUTURE,
+  ImportSourceObjectType,
+  importJsonValue,
+} from './import-item-job.types';
 import type { IntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { createHash } from 'crypto';
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
@@ -261,8 +265,8 @@ export class ImportBatchService {
    * @param userId 用户ID
    * @returns 用户是否可以导入
    */
-  async assertUserCanImport(userId: string) {
-    const user = await this.users.users().findUnique({
+  async assertUserCanImport(userId: string, tx?: Prisma.TransactionClient) {
+    const user = await this.users.users(tx).findUnique({
       where: { id: userId },
       select: { accountDeletionRequestedAt: true },
     });
@@ -523,14 +527,18 @@ export class ImportBatchService {
    * 为由部署适配器拥有的归档导入创建空批次。
    * Core 只维护批次生命周期，不解释 provider、区域或下载方式。
    */
-  async createExternalArchiveImportBatch(args: {
-    userId: string;
-    sourceKind: ImportSourceKind;
-    requestContext: Record<string, unknown>;
-    summary: Record<string, unknown>;
-  }) {
-    await this.assertUserCanImport(args.userId);
-    const active = await this.importJobs.batchJobs().findFirst({
+  async createExternalArchiveImportBatch(
+    args: {
+      userId: string;
+      sourceKind: ImportSourceKind;
+      requestContext: Record<string, unknown>;
+      summary: Record<string, unknown>;
+    },
+    tx?: Prisma.TransactionClient,
+  ) {
+    await this.assertUserCanImport(args.userId, tx);
+    const jobs = this.importJobs.batchJobs(tx);
+    const active = await jobs.findFirst({
       where: {
         userId: args.userId,
         sourceKind: args.sourceKind,
@@ -540,7 +548,7 @@ export class ImportBatchService {
     });
     if (active) return active;
 
-    return this.importJobs.batchJobs().create({
+    return jobs.create({
       data: {
         userId: args.userId,
         sourceKind: args.sourceKind,
@@ -1394,6 +1402,10 @@ export class ImportBatchService {
           where: {
             userId,
             createdByBatchJobId: batch.id,
+            // These activities already contribute to the batch's failed item count.
+            importItemJobs: {
+              none: { batchJobId: batch.id, status: 'DEAD', lastErrorCode: IMPORT_ACTIVITY_START_IN_FUTURE },
+            },
           },
           _count: { _all: true },
         })
@@ -1417,7 +1429,7 @@ export class ImportBatchService {
     );
     const processingActivities = Math.max(
       0,
-      batch._count.createdActivities -
+      activityProcessingStatusCounts.reduce((total, row) => total + row._count._all, 0) -
         readyActivities -
         analysisFailedActivities,
     );
@@ -1570,6 +1582,8 @@ export class ImportBatchService {
 }
 
 function importFailurePresentation(item: { outcome: string | null; lastErrorCode: string | null }) {
+  if (item.lastErrorCode === IMPORT_ACTIVITY_START_IN_FUTURE)
+    return { code: item.lastErrorCode, key: 'common.error.import_activity_start_in_future' as const };
   if (item.lastErrorCode === 'IMPORT_IDENTITY_CONFLICT')
     return { code: item.lastErrorCode, key: 'common.error.import_identity_conflict' as const };
   if (item.outcome === 'UPSTREAM_ACCESS_DENIED')

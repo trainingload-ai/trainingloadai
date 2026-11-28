@@ -26,6 +26,7 @@ import {
 } from "@/lib/chart-data-utils";
 import {
   formatHealthDate as formatDate,
+  formatHealthDuration as formatDuration,
   getHealthBaselineStatus,
   getSleepTimelineRow,
   type HealthBaseline,
@@ -49,15 +50,6 @@ function formatTime(value: string | number, locale: string) {
   }).format(date);
 }
 
-function formatDuration(seconds: number, locale: string) {
-  const minutes = Math.round(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  return locale.startsWith("zh")
-    ? `${hours}小时${rest}分`
-    : `${hours}h ${rest}m`;
-}
-
 function formatPointValue(
   card: HealthOverviewCard,
   value: number,
@@ -76,7 +68,13 @@ function formatAxisValue(
   locale: string,
 ) {
   if (!Number.isFinite(value)) return "";
-  if (card.key === "sleep") return `${Math.round(value / 3600)}h`;
+  if (card.key === "sleep") {
+    return new Intl.NumberFormat(locale, {
+      style: "unit",
+      unit: "hour",
+      unitDisplay: "narrow",
+    }).format(Math.round(value / 3600));
+  }
   return new Intl.NumberFormat(locale, {
     notation: Math.abs(value) >= 1000 ? "compact" : "standard",
     maximumFractionDigits: card.key === "spo2" ? 1 : 0,
@@ -100,33 +98,19 @@ function HealthTooltip({
 }) {
   const t = useTranslations("HealthOverview");
   if (!active || !point) return null;
-  const labels = locale.startsWith("zh")
-    ? {
-        current: "本期",
-        previous: "上期",
-        range: "范围",
-        baseline: "个人基线",
-        totalSleep: "睡眠时长",
-        timeInBed: t("timeInBed"),
-        unclassifiedSleep: t("unclassifiedSleep"),
-        core: "核心睡眠",
-        deep: "深睡",
-        rem: "REM",
-        awake: "清醒",
-      }
-    : {
-        current: "Current",
-        previous: "Previous",
-        range: "Range",
-        baseline: "Personal baseline",
-        totalSleep: "Sleep duration",
-        timeInBed: t("timeInBed"),
-        unclassifiedSleep: t("unclassifiedSleep"),
-        core: "Core",
-        deep: "Deep",
-        rem: "REM",
-        awake: "Awake",
-      };
+  const labels = {
+    current: t("chart.current"),
+    previous: t("chart.previous"),
+    range: t("chart.range"),
+    baseline: t("chart.baseline"),
+    totalSleep: t("chart.sleepDuration"),
+    timeInBed: t("timeInBed"),
+    unclassifiedSleep: t("unclassifiedSleep"),
+    core: t("chart.core"),
+    deep: t("chart.deep"),
+    rem: "REM",
+    awake: t("chart.awake"),
+  };
   const rows: Array<{ color: string; label: string; value: string }> = [];
   const accentColor = getMetricColor(card.key);
   const comparisonColor = getMetricComparisonColor(card.key);
@@ -293,7 +277,7 @@ function SleepIntradayTimeline({
   if (points.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-mobile-caption pc:text-xs text-muted-foreground">
-        {locale.startsWith("zh") ? "当天暂无明细数据" : "No intraday details"}
+        {t("chart.noIntraday")}
       </div>
     );
   }
@@ -304,26 +288,24 @@ function SleepIntradayTimeline({
     ...points.map((point) => new Date(point.endTime ?? point.time).getTime()),
   );
   const span = Math.max(end - start, 1);
-  const stageLabel = (stage?: string) => {
-    const normalized = (stage ?? "sleep").toLowerCase();
-    if (!locale.startsWith("zh")) return normalized;
-    return (
-      {
-        awake: "清醒",
-        rem: "REM",
-        deep: "深睡",
-        core: "核心睡眠",
-        light: "浅睡",
-        sleep: "睡眠",
-        unmeasurable: "无法测量",
-      }[normalized] ??
-      stage ??
-      "睡眠"
-    );
+  const stageLabels: Record<string, string> = {
+    awake: t("chart.awake"),
+    rem: "REM",
+    deep: t("chart.deep"),
+    core: t("chart.core"),
+    light: t("chart.light"),
+    sleep: t("chart.sleep"),
+    unmeasurable: t("chart.unmeasurable"),
   };
-  const stageRows = locale.startsWith("zh")
-    ? ["清醒", "REM", "浅睡", "深睡", t("unclassified")]
-    : ["Awake", "REM", "Light", "Deep", t("unclassified")];
+  const stageLabel = (stage?: string) =>
+    stageLabels[(stage ?? "sleep").toLowerCase()] ?? stage ?? stageLabels.sleep;
+  const stageRows = [
+    stageLabels.awake,
+    stageLabels.rem,
+    stageLabels.light,
+    stageLabels.deep,
+    t("unclassified"),
+  ];
   const rowPercent = 100 / stageRows.length;
   const axisTicks = [start, start + span / 2, end];
   return (
@@ -475,7 +457,7 @@ function LatestValueSummary({
   const arrow =
     delta == null || Math.abs(delta) < 0.05 ? "→" : delta > 0 ? "↑" : "↓";
   const date = intraday?.currentDate ?? currentPoints.at(-1)?.date;
-  const comparisonLabel = locale.startsWith("zh") ? "环比" : "vs prior";
+  const t = useTranslations("HealthOverview");
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center">
@@ -498,10 +480,14 @@ function LatestValueSummary({
         </span>
         <span>
           {delta == null
-            ? locale.startsWith("zh")
-              ? "暂无前一天数据"
-              : "No previous-day data"
-            : `${comparisonLabel} ${Math.abs(delta).toFixed(Math.abs(delta) >= 10 ? 0 : 1)} ${card.latestUnit}`}
+            ? t("chart.noPreviousDay")
+            : t("chart.comparison", {
+                value: new Intl.NumberFormat(locale, {
+                  minimumFractionDigits: Math.abs(delta) >= 10 ? 0 : 1,
+                  maximumFractionDigits: Math.abs(delta) >= 10 ? 0 : 1,
+                }).format(Math.abs(delta)),
+                unit: card.latestUnit,
+              })}
         </span>
       </div>
       {date ? (
@@ -562,6 +548,7 @@ export function HealthMetricMiniChart({
   intraday?: HealthIntradayResponse;
   sleepByDay?: boolean;
 }) {
+  const t = useTranslations("HealthOverview");
   const hasIntraday = intraday != null && intraday.current.length > 0;
   if (rangeDays === "latest" && card.key === "sleep" && hasIntraday) {
     return <SleepIntradayTimeline intraday={intraday!} locale={locale} />;
@@ -727,22 +714,13 @@ export function HealthMetricMiniChart({
       latestValue == null || baseline == null
         ? null
         : getHealthBaselineStatus(latestValue, baseline);
-    const statusLabel =
-      baseline == null
-        ? locale.startsWith("zh")
-          ? "正在建立个人基线"
-          : "Building personal baseline"
-        : status === "within"
-          ? locale.startsWith("zh")
-            ? "当前读数位于个人基线内"
-            : "Current reading is within the personal baseline"
-          : status === "above"
-            ? locale.startsWith("zh")
-              ? "当前读数高于个人基线"
-              : "Current reading is above the personal baseline"
-            : locale.startsWith("zh")
-              ? "当前读数低于个人基线"
-              : "Current reading is below the personal baseline";
+    const statusLabel = baseline == null
+      ? t("chart.buildingBaseline")
+      : status === "within"
+        ? t("chart.withinBaseline")
+        : status === "above"
+          ? t("chart.aboveBaseline")
+          : t("chart.belowBaseline");
     return (
       <div className="h-full" role="img" aria-label={statusLabel}>
         <ResponsiveContainer width="100%" height="100%">

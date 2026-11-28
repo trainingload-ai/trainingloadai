@@ -35,6 +35,18 @@
     "cycleRationale": "「{planTitle}」이(가) 완료되었습니다. 완료율 {completionRate}%. 이 주기 요약을 바탕으로 다음 계획을 시작하세요.",
     "cycleNextPlanPrompt": "이전 주기 「{planTitle}」 요약을 바탕으로 다음 계획을 시작합니다. 완료율 {completionRate}%. 먼저 요약을 읽고, 그다음 목표와 제약을 물어보세요."
   },
+  "planReplacementRules": {
+    "restDays": "휴식일",
+    "unavailableDates": "훈련 불가 날짜",
+    "availableDates": "훈련 가능 예외 날짜",
+    "dailyLimit": "일일 훈련 시간 상한",
+    "weekdayLimits": "요일별 훈련 시간 상한",
+    "weeklyLimit": "주간 최대 훈련 일수",
+    "relativeDays": "계획 주차 내 훈련 가능 요일",
+    "weekPhases": "훈련 단계",
+    "requiredSports": "필수 스포츠",
+    "raceDiscipline": "대회 종목"
+  },
   "error": {
     "track_file_output_invalid": "변환 결과가 검증을 통과하지 못해 다운로드를 차단했습니다. 원본 파일을 보관하고 다른 형식을 시도하거나 지원팀에 문의하세요.",
     "track_file_conversion_service_failed": "변환 서비스가 처리를 완료하지 못했으며 다운로드가 시작되지 않았습니다. 원본 파일을 보관하고 다른 형식을 시도하거나 지원팀에 문의하세요.",
@@ -50,12 +62,14 @@
     "unauthorized": "로그인이 필요합니다",
     "forbidden": "이 작업을 수행할 권한이 없습니다",
     "not_found": "요청한 항목을 찾을 수 없습니다",
+    "plan_scheduled_activation_pending": "이미 시작이 예정된 다른 계획이 있습니다. 해당 계획의 일정을 취소한 후 이 계획을 활성화하세요.",
     "conflict": "요청이 현재 상태와 충돌합니다",
     "invalid_idempotency_key": "삭제 요청 식별자가 올바르지 않습니다. 다시 시도해 주세요.",
     "idempotency_key_already_used": "이 삭제 요청 식별자는 이미 사용되었습니다. 삭제 절차를 다시 시작해 주세요.",
     "account_not_found": "이 계정을 찾을 수 없습니다.",
     "account_deletion_in_progress": "계정 삭제 요청을 이미 처리 중입니다.",
     "account_deletion_confirmations_required": "계속하기 전에 계정 삭제 관련 확인 사항에 모두 동의해 주세요.",
+    "plan_schedule_invalid": "계획 일정을 확인하고 충돌하는 운동을 조정하세요.",
     "unprocessable_entity": "요청을 처리할 수 없습니다",
     "workout_definition_invalid": "운동 정의가 올바르지 않습니다",
     "workout_definitions_invalid": "하나 이상의 운동 정의가 올바르지 않습니다",
@@ -236,6 +250,7 @@
     "polar_webhook_signature_invalid": "Invalid Polar webhook signature",
     "polar_webhook_secret_missing": "Polar webhook secret is not configured",
     "polar_webhook_raw_body_missing": "Unable to read raw request body for webhook signature verification",
+    "import_activity_start_in_future": "활동 시작 시간이 현재보다 24시간 넘게 앞서 있습니다. 활동 시간을 확인한 후 다시 가져오세요.",
     "import_identity_conflict": "활동 소유권이 충돌합니다. 가져오기 문제를 해결하려면 지원팀에 문의하세요.",
     "intervals_icu_athlete_identity_missing": "Intervals.icu 계정 신원을 확인할 수 없습니다. 다시 인증해 주세요."
   },
@@ -428,6 +443,7 @@
     "importBatch": {
       "titleCompleted": "가져오기 배치가 완료되었습니다",
       "titleCompletedWithFailures": "가져오기 배치가 완료되었지만 실패한 항목이 있습니다",
+      "bodyPostProcessingFailed": "\n\n활동 분석을 완료하지 못했습니다. 이미 준비된 활동은 계속 확인할 수 있습니다.",
       "bodyBatchSummary": "소스 객체 {totalCount}개를 처리했습니다.\n\n- 성공: {successCount}\n- 실패: {failedCount}\n- 건너뜀: {skippedCount}",
       "bodyThirdPartyExportFailures": "\n\n{providers} 업로드가 {failedCount}개 활동에서 실패했습니다. 연결 설정을 확인하거나 활동 화면에서 다시 시도하세요."
     }

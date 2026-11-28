@@ -5,6 +5,7 @@ import { coachDecisionDraftTool } from '../coachDecisionDraft.tool';
 import { resolveCoachActiveSkill } from '../../coach-skill-resolution';
 import { toolSchemaValidator } from '../../tool-input-validation';
 import { addCalendarDays } from '@shared/plan-calendar';
+import { UnprocessableEntityException } from '@nestjs/common';
 
 const request = {
   mode: 'START',
@@ -19,6 +20,27 @@ const request = {
 } as const;
 
 describe('saved draft start tools', () => {
+  it.each(['data', 'legacy'] as const)('returns rescheduling guidance for a %s schedule conflict', async (shape) => {
+    const issues = [{ code: 'FIXED_REST_DAY', date: '2026-11-23' }];
+    const response = {
+      code: 'PLAN_SCHEDULE_INVALID',
+      ...(shape === 'data' ? { data: { issues } } : { issues }),
+    };
+    await expect(planProposalPreviewTool.execute({
+      session: { user: { id: 'u' } },
+      sid: 's',
+      branchId: 'b',
+      currentUserMessageId: 'input',
+      coachBranching: {
+        createPlanProposalPreview: async () => {
+          throw new UnprocessableEntityException(response);
+        },
+      },
+    } as never, request as never)).rejects.toThrow(
+      'FIXED_REST_DAY on 2026-11-23. Recalculate workout positions',
+    );
+  });
+
   it('resolves the explicit start entry without routing it to new-plan generation', () => {
     expect(
       resolveCoachActiveSkill({

@@ -1532,6 +1532,10 @@ export class AiService {
     const refresh = params.planQuestionRefresh;
     const planQuestionReview = refresh?.review;
     const toolCtx = {
+      mutationRun:
+        params.runtimeRunId && params.runtimeAttemptId
+          ? { runId: params.runtimeRunId, attemptId: params.runtimeAttemptId }
+          : undefined,
       onPlanValidationRejected: params.onPlanValidationRejected,
       onActivity: async (event: CoachActivityEvent) => {
         if (event.mutation && event.status === 'running')

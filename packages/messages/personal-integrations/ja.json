@@ -1,0 +1,63 @@
+{
+  "garmin": {
+    "description": "Garmin の個人用キーでアクティビティ、睡眠、回復データを取り込みます。",
+    "createKey": "Garmin Connect でキーを作成",
+    "apiKey": "個人用 API キー"
+  },
+  "coros": {
+    "description": "COROS アカウントを連携してトレーニングデータを取得し、確認済みのワークアウト、プラン、ルートを送信します。"
+  },
+  "manage": "接続設定",
+  "reconcile": "再確認",
+  "reconciling": "サービス側の結果を確認中",
+  "reconnect": "キーを交換するか再認証",
+  "loading": "読み込み中…",
+  "working": "処理中…",
+  "region": "アカウントのリージョン",
+  "timezone": "アカウントのタイムゾーン",
+  "account": "接続済みアカウント：{id}",
+  "lastSync": "最後に完了した同期：{date}",
+  "settings": {
+    "automatic": "自動で同期",
+    "activities": "完了済みのアクティビティを取り込む",
+    "wellness": "睡眠と回復データを読み込む"
+  },
+  "save": "設定を保存",
+  "connect": "Garmin を接続",
+  "authorize": "COROS で認証",
+  "connected": "連携済み",
+  "syncTitle": "データ同期",
+  "startDate": "開始日",
+  "sync": "今すぐ同期",
+  "queued": "キューに追加しました。進捗は保存され、下に表示されます。",
+  "jobs": "最近のジョブ",
+  "states": {
+    "PREVIEW": "確認待ち",
+    "QUEUED": "待機中",
+    "RUNNING": "ランニング",
+    "WAITING": "再試行待ち",
+    "SUCCEEDED": "完了",
+    "FAILED": "失敗",
+    "CANCELLED": "キャンセル済み"
+  },
+  "disconnect": "接続を解除",
+  "confirmDisconnect": "接続解除を確認",
+  "cancel": "キャンセル",
+  "fields": {
+    "date": "日付",
+    "startDate": "開始日"
+  },
+  "tools": {
+    "activities": "アクティビティ",
+    "activity": "アクティビティ詳細",
+    "heartRate": "心拍数",
+    "getActivityDetail": "アクティビティ詳細",
+    "queryActivityLapData": "ラップ",
+    "querySleepOverview": "睡眠",
+    "queryAvgHeartRate": "平均心拍数",
+    "queryRestingHeartRate": "安静時心拍数",
+    "queryFitnessAssessmentOverview": "体力評価",
+    "queryWorkoutDetails": "トレーニング詳細",
+    "uploadRouteFile": "ルートを取り込む"
+  }
+}

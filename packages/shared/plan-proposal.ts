@@ -171,6 +171,8 @@ export type PlanSupersessionPreviewRequest = {
   rationale: string;
   evidenceRefs: PlanProposalEvidenceRef[];
   plan: PlanReplacementDraft;
+  scheduleConstraints?: ScheduleConstraints;
+  qualityContract?: PlanQualityContract;
 };
 
 export type PlanStartWorkoutDraft = {

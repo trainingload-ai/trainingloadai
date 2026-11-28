@@ -1009,7 +1009,11 @@ describe('remaining schedule / PostgreSQL', () => {
       versionId: id,
       edits: [{ kind: 'UPDATE', workoutId: first.id, expectedRevision: first.revision, targetDate: '2099-11-26' }],
     });
+    const before = await prisma.planWorkoutChangeRevision.findUnique({ where: { userId: 'user' } });
     await f.starts.confirmCalendarAdjustment('user', planId, id, saved.versionId);
+    const committed = await prisma.planWorkoutChangeRevision.findUniqueOrThrow({ where: { userId: 'user' } });
+    expect(committed.calendarAdjustmentVersionId).toBe(saved.versionId);
+    expect(committed.calendarRevision).toBeGreaterThan(before?.calendarRevision ?? 0n);
     const bus = new EventEmitter2();
     const worker = new CalendarAdjustmentSyncWorker(prisma as never, bus);
     const delivery: string[] = [];
@@ -1024,6 +1028,8 @@ describe('remaining schedule / PostgreSQL', () => {
     expect((await record()).calendarSyncSentAt).toBeInstanceOf(Date);
     await worker.drain();
     expect(delivery).toEqual([saved.versionId, saved.versionId]);
+    expect(await prisma.planWorkoutChangeRevision.findUnique({ where: { userId: 'user' } }))
+      .toEqual(committed);
     expect((await prisma.planWorkout.findUniqueOrThrow({ where: { id: first.id } })).revision).toBe(first.revision + 1);
   });
 

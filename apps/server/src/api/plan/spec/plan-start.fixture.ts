@@ -61,6 +61,7 @@ export function planStartFixture(prisma: PrismaClient) {
     {} as never,
   );
   const write = Object.create(PlanWriteSupport.prototype) as PlanWriteSupport;
+  const calendarValidation = new PlanCalendarValidationService(new PlanCalendarRepository());
   const loads = new PlanLoadEstimatorService(
     prisma as never,
     users,
@@ -70,9 +71,7 @@ export function planStartFixture(prisma: PrismaClient) {
   );
   Object.assign(write, {
     prisma,
-    calendarValidation: new PlanCalendarValidationService(
-      new PlanCalendarRepository(),
-    ),
+    calendarValidation,
     workoutService: codec,
     userService: users,
     logger: { error: () => undefined, warn: () => undefined },
@@ -108,7 +107,7 @@ export function planStartFixture(prisma: PrismaClient) {
     persistence,
     new PlanStartRepository(),
     loads,
-    new PlanCalendarValidationService(new PlanCalendarRepository()),
+    calendarValidation,
     new ActivityReadService(prisma as never),
     new HealthDataRepository(prisma as never),
     new UserQueryService(new UserIdentityRepository(prisma as never)),
@@ -139,6 +138,7 @@ export function planStartFixture(prisma: PrismaClient) {
     {} as never,
     loads as never,
     starts,
+    calendarValidation,
   );
   const query = new PlanQueryService(
     prisma as never,
@@ -158,7 +158,7 @@ export function planStartFixture(prisma: PrismaClient) {
     undefined,
     new ActivityReadService(prisma as never),
   );
-  return { starts, service, write, context, proposals, apply, users, query, codecs };
+  return { starts, service, write, context, proposals, apply, users, query, codecs, calendarValidation };
 }
 
 export function raceWithUncommittedPlanWrite<T>(

@@ -26,10 +26,15 @@ import {
   type FitnessTimelineSport,
   type FitnessTimelineValue,
 } from '@/algorithm/fitness-timeline';
+import { isCausalTimelineFitnessMetric } from '@/algorithm/causal-fitness-metric';
 import {
   UserService,
   type TimelineFitnessProjection,
 } from '@/api/user/user.service';
+import {
+  isSystemCalculatedManualMirror,
+  withoutSystemCalculatedManualMirrors,
+} from '@/api/user/fitness-metric-adoption';
 import { ActivityMetricsPipelineService } from '@/api/activity/metrics/activity-metrics-pipeline.service';
 import { FitnessTimelineObservationService } from './fitness-timeline-observation.service';
 import { ActivityFitnessContextResolverService } from './activity-fitness-context-resolver.service';
@@ -69,6 +74,8 @@ export type ChronologicalReplayRequest = {
   sourceJobId: string;
   effectiveFrom: Date;
   effectiveTo?: Date | null;
+  /** Cover selected activities' end events while keeping effectiveTo as the latest eligible start. */
+  includeActivityEnds?: boolean;
   priority?: number;
   dataRepair?: boolean;
   includeActivityIds?: readonly number[];
@@ -236,6 +243,9 @@ function supportedMetric(type: UserFitnessMetricType) {
 }
 
 function timelineValue(row: UserFitnessMetric): FitnessTimelineValue {
+  if (isSystemCalculatedManualMirror(row)) {
+    throw new Error('SYSTEM_CALCULATED_MANUAL_FORBIDDEN');
+  }
   return {
     metric: row.type as FitnessTimelineMetric,
     sport: timelineSport(row.sport),
@@ -398,9 +408,17 @@ export class ChronologicalActivityReplayService {
     const evidenceLookbackStart = new Date(
       request.effectiveFrom.getTime() - 180 * 86_400_000,
     );
-    const [metricRows, priorActivities, page, autoUpdateVersions] =
+    const activityPage = this.loadCausallyClosedActivityPage(request, replayTo);
+    const evidenceThrough = request.includeActivityEnds
+      ? activityPage.then((page) =>
+          page.replayTo > replayTo ? page.replayTo : replayTo,
+        )
+      : Promise.resolve(replayTo);
+    const [loadedMetricRows, priorActivities, page, autoUpdateVersions] =
       await Promise.all([
-        this.users.listTimelineFitnessMetrics(request.userId, replayTo),
+        evidenceThrough.then((through) =>
+          this.users.listTimelineFitnessMetrics(request.userId, through),
+        ),
         this.prisma.activity.findMany({
           where: readyActivityWhere({
             userId: request.userId,
@@ -418,12 +436,17 @@ export class ChronologicalActivityReplayService {
             elapsedTime: true,
           },
         }),
-        this.loadCausallyClosedActivityPage(request, replayTo),
-        this.analysisConfigs.listAutoUpdateVersions(request.userId, replayTo),
+        activityPage,
+        evidenceThrough.then((through) =>
+          this.analysisConfigs.listAutoUpdateVersions(request.userId, through),
+        ),
       ]);
     if ((await this.readRevision(request.userId)) !== initialRevision) {
       throw new FitnessEvidenceRevisionDriftError();
     }
+    // 历史 AUTO→MANUAL 镜像不是用户采用。忽略它们，不改写成 AUTO，也不作为
+    // EXTERNAL_METRIC 重新进入因果集。漏网行在 timelineValue 里失败关闭。
+    const metricRows = withoutSystemCalculatedManualMirrors(loadedMetricRows);
 
     const activities = page.activities;
     const effectiveReplayTo = page.replayTo;
@@ -452,7 +475,22 @@ export class ChronologicalActivityReplayService {
       })}`,
     );
 
-    const seeds = metricRows
+    const causalMetricRows = metricRows.filter((row) => {
+      if (isCausalTimelineFitnessMetric(row)) return true;
+      this.logger.warn(
+        `[activity-replay] 忽略非因果 AUTO 日历日零点投影 ${JSON.stringify({
+          userId: request.userId,
+          sourceJobType: request.sourceJobType,
+          dataRepair: request.dataRepair ?? false,
+          id: row.id,
+          type: row.type,
+          sport: row.sport,
+          recordedAt: row.recordedAt.toISOString(),
+        })}`,
+      );
+      return false;
+    });
+    const seeds = causalMetricRows
       .filter(
         (row) =>
           supportedMetric(row.type) && row.recordedAt < request.effectiveFrom,
@@ -466,7 +504,7 @@ export class ChronologicalActivityReplayService {
         : [];
     });
     const events: ReplayEvent[] = [
-      ...metricRows
+      ...causalMetricRows
         .filter(
           (row) =>
             supportedMetric(row.type) &&
@@ -955,7 +993,10 @@ export class ChronologicalActivityReplayService {
     if (!next?.startTime) {
       return {
         activities: selected,
-        replayTo: requestedReplayTo,
+        replayTo:
+          request.includeActivityEnds && causalCutoff > requestedReplayTo
+            ? causalCutoff
+            : requestedReplayTo,
         nextCheckpoint: null,
       };
     }

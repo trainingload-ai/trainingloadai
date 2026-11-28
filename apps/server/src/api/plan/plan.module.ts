@@ -52,7 +52,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
 
 /**
  * 计划模块。不要在这里 import ReviewModule。
- * 计划完成后的周期 Runtime 通过 plan.finalized 事件解耦。
+ * The durable cycle-review job keeps ReviewModule outside PlanModule.
  */
 @Module({
   imports: [

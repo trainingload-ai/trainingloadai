@@ -168,17 +168,21 @@ export class CorosMcpClient {
     region: PersonalRegion,
     clientId: string,
     grant: Record<string, string>,
+    beforeDispatch?: () => Promise<void>,
   ): Promise<CorosCredential> {
     const { origin, metadata } = await this.discover(region);
+    const endpoint = new URL(metadata.token_endpoint);
+    const body = new URLSearchParams({
+      client_id: clientId,
+      resource: `${origin}/mcp`,
+      ...grant,
+    }).toString();
+    await beforeDispatch?.();
     const result = record(
-      await providerJson(new URL(metadata.token_endpoint), {
+      await providerJson(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: clientId,
-          resource: `${origin}/mcp`,
-          ...grant,
-        }).toString(),
+        body,
       }),
     );
     if (

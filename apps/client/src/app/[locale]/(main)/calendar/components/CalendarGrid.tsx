@@ -9,18 +9,14 @@ import type { PlanWorkout } from "@/api/plans";
 import { cn } from "@/lib/utils";
 import { useSportCatalog } from "@/api/sports";
 
-import "dayjs/locale/zh-cn";
+import { calendarWeekdayLabels } from "./calendar-weekday-labels";
 
-const WeekdaysHeader: React.FC = () => {
+const WeekdaysHeader: React.FC<{ firstWeekday: number }> = ({ firstWeekday }) => {
   const locale = useLocale();
-  const labels = React.useMemo(() => {
-    const dayjsLocale = locale.startsWith("zh") ? "zh-cn" : "en";
-    dayjs.locale(dayjsLocale);
-    const startOfWeek = dayjs().startOf("week");
-    return Array.from({ length: 7 }, (_, i) =>
-      startOfWeek.add(i, "day").format("ddd"),
-    );
-  }, [locale]);
+  const labels = React.useMemo(
+    () => calendarWeekdayLabels(locale, firstWeekday),
+    [locale, firstWeekday],
+  );
   return (
     <>
       {labels.map((w, i) => (
@@ -67,7 +63,7 @@ const CalendarGrid: React.FC<{
         </div>
       </div>
       <div className="grid grid-cols-7 shrink-0 rounded-t-xl border border-b-0 border-border/70 bg-neutral-100 dark:bg-muted/45">
-        <WeekdaysHeader />
+        <WeekdaysHeader firstWeekday={weeks[0]?.[0]?.day() ?? 0} />
       </div>
 
       <div className="overflow-hidden rounded-b-xl border border-border/70 bg-border/70">

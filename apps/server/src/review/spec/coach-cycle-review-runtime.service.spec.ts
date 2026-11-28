@@ -9,6 +9,7 @@ function createService(args?: {
   successorExists?: boolean;
 }) {
   const prisma = {
+    $transaction: (work: (tx: unknown) => Promise<unknown>) => work(prisma),
     coachSummary: {
       findUnique: jest.fn(
         async () =>
@@ -108,7 +109,7 @@ describe('CoachCycleReviewRuntimeService', () => {
   });
 
   it('proposes opening the next plan after a completed cycle', async () => {
-    const { service, branching } = createService();
+    const { service, branching, prisma } = createService();
     const result = await service.runAfterFinalize({
       userId: 'user-1',
       planId: 'plan-1',
@@ -125,6 +126,7 @@ describe('CoachCycleReviewRuntimeService', () => {
         openReason: 'runtime_cycle_review',
         allowFinalized: true,
       }),
+      prisma,
     );
     expect(branching.squashBranch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -147,6 +149,7 @@ describe('CoachCycleReviewRuntimeService', () => {
           }),
         ],
       }),
+      prisma,
     );
   });
 

@@ -118,6 +118,7 @@ function fixture() {
   const tx = {
     $executeRaw: jest.fn<any>().mockResolvedValue(1),
     externalProviderConnection: connections,
+    personalOAuthRefresh: { findUnique: jest.fn(async () => null) },
     personalProviderJob: tasks,
   };
   const db = {

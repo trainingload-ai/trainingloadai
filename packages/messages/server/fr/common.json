@@ -35,6 +35,18 @@
     "cycleRationale": "« {planTitle} » est terminé. Achèvement {completionRate} %. Démarre le plan suivant à partir de ce bilan de cycle.",
     "cycleNextPlanPrompt": "Démarre le plan suivant à partir du bilan du cycle « {planTitle} ». Achèvement {completionRate}. Lis d'abord le bilan, puis demande-moi les objectifs et les contraintes."
   },
+  "planReplacementRules": {
+    "restDays": "Jours de repos",
+    "unavailableDates": "Dates indisponibles",
+    "availableDates": "Exceptions de disponibilité",
+    "dailyLimit": "Limite quotidienne d’entraînement",
+    "weekdayLimits": "Limites d’entraînement par jour de la semaine",
+    "weeklyLimit": "Nombre maximal de jours d’entraînement par semaine",
+    "relativeDays": "Jours autorisés dans la semaine du plan",
+    "weekPhases": "Phases d’entraînement",
+    "requiredSports": "Sports requis",
+    "raceDiscipline": "Discipline de compétition"
+  },
   "error": {
     "track_file_output_invalid": "Le fichier converti n’a pas réussi la validation et son téléchargement a été bloqué. Conservez l’original et essayez un autre format ou contactez l’assistance.",
     "track_file_conversion_service_failed": "Le service de conversion n’a pas pu terminer la demande. Aucun téléchargement n’a été lancé. Conservez l’original et essayez un autre format ou contactez l’assistance.",
@@ -50,12 +62,14 @@
     "unauthorized": "Vous devez vous connecter",
     "forbidden": "Vous n’avez pas l’autorisation d’effectuer cette action",
     "not_found": "La ressource demandée est introuvable",
+    "plan_scheduled_activation_pending": "Le démarrage d’un autre plan est déjà prévu. Annule ce plan programmé avant d’activer celui-ci.",
     "conflict": "La requête est incompatible avec l’état actuel",
     "invalid_idempotency_key": "L’identifiant de la demande de suppression est invalide. Veuillez réessayer.",
     "idempotency_key_already_used": "Cet identifiant de demande de suppression a déjà été utilisé. Veuillez recommencer la procédure.",
     "account_not_found": "Ce compte est introuvable.",
     "account_deletion_in_progress": "La suppression de votre compte est déjà en cours de traitement.",
     "account_deletion_confirmations_required": "Confirmez tous les éléments relatifs à la suppression du compte avant de continuer.",
+    "plan_schedule_invalid": "Vérifiez le calendrier du plan et ajustez les séances en conflit.",
     "unprocessable_entity": "La requête n’a pas pu être traitée",
     "workout_definition_invalid": "La définition de l’entraînement n’est pas valide",
     "workout_definitions_invalid": "Une ou plusieurs définitions d’entraînement ne sont pas valides",
@@ -236,6 +250,7 @@
     "polar_webhook_signature_invalid": "Invalid Polar webhook signature",
     "polar_webhook_secret_missing": "Polar webhook secret is not configured",
     "polar_webhook_raw_body_missing": "Unable to read raw request body for webhook signature verification",
+    "import_activity_start_in_future": "L’activité commence dans plus de 24 heures. Vérifiez son heure de début et importez-la à nouveau.",
     "import_identity_conflict": "Conflit de propriété de l’activité. Contactez l’assistance pour résoudre cet import.",
     "intervals_icu_athlete_identity_missing": "L’identité du compte Intervals.icu n’a pas pu être vérifiée. Veuillez autoriser à nouveau."
   },
@@ -428,6 +443,7 @@
     "importBatch": {
       "titleCompleted": "Lot d'import terminé",
       "titleCompletedWithFailures": "Lot d'import terminé avec des échecs",
+      "bodyPostProcessingFailed": "\n\nL’analyse des activités n’a pas pu aboutir. Les activités déjà prêtes restent disponibles.",
       "bodyBatchSummary": "{totalCount} objets source traités.\n\n- Réussis : {successCount}\n- Échoués : {failedCount}\n- Ignorés : {skippedCount}",
       "bodyThirdPartyExportFailures": "\n\nL’envoi vers {providers} a échoué pour {failedCount} activités. Vérifiez les paramètres de connexion ou réessayez depuis l’activité."
     }

@@ -4,7 +4,7 @@ import {
   type CanonicalStartProposal,
   type PlanStartBinding,
 } from './plan-start.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { UserService } from '@/api/user/user.service';
 import { BusinessException } from '@/filters/business-exception/business.exception';
@@ -34,8 +34,24 @@ import type {
   PlanSupersessionPreviewRequest,
 } from '@shared/plan-proposal';
 import type { EnduranceWorkoutStepTarget } from '@shared/endurance-workout-ir';
+import {
+  isCalendarDate,
+  parseScheduleConstraints,
+  resolveScheduleRulesAtDate,
+  scheduleRulePeriods,
+  type ScheduleConstraints,
+} from '@shared/plan-calendar';
+import {
+  parsePlanQualityContract,
+  type PlanQualityContract,
+} from '@shared/plan-quality';
+import { inheritReplacementRules } from './plan-supersession-rules';
+import { I18nService } from 'nestjs-i18n';
 import { PlanLoadEstimatorService } from './plan-load-estimator.service';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
 import { PlanProposalRepository } from '../persistence/plan-proposal.repository';
 import type { PlanDb } from '../persistence/plan-db';
 
@@ -103,6 +119,9 @@ type CanonicalSupersedeProposal = {
   activationTimezone: string;
   rationale: string;
   plan: PlanReplacementDraft;
+  scheduleConstraints?: ScheduleConstraints;
+  qualityContract?: PlanQualityContract;
+  rules?: ReturnType<typeof inheritReplacementRules>;
 };
 
 export type CanonicalPlanProposal =
@@ -298,6 +317,7 @@ export class PlanProposalService {
     private readonly prescriptions: WorkoutPrescriptionService,
     private readonly loads: PlanLoadEstimatorService,
     private readonly starts: PlanStartService,
+    @Optional() private readonly i18n?: I18nService,
   ) {}
 
   async createPreview(
@@ -728,7 +748,7 @@ export class PlanProposalService {
     if (source.supersededBy?.status === 'SCHEDULED')
       invalid('This plan already has a scheduled successor');
     const scheduled = await this.plans.findFirst({
-      where: { userId, status: 'SCHEDULED' },
+      where: scheduledReplacementReservationWhere(userId),
       select: { id: true },
     });
     if (scheduled)
@@ -737,17 +757,65 @@ export class PlanProposalService {
       this.users.getPreferredTimezone(userId),
       this.users.getPreferredLocale(userId),
     ]);
-    const activationTimezone = timezone ?? 'UTC';
     const zh = isChineseLocale(locale);
-    const today =
-      activityCalendarYmdInZone(new Date(), timezone) ??
-      new Date().toISOString().slice(0, 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(request.effectiveFrom))
+    if (!isCalendarDate(request.effectiveFrom))
       invalid('effectiveFrom must be YYYY-MM-DD');
-    if (request.effectiveFrom < today)
-      invalid('effectiveFrom cannot be in the past');
     const replacementPlan = this.normalizeReplacementDraft(request.plan);
     this.validateReplacementDraft(replacementPlan);
+    let scheduleConstraints: ScheduleConstraints | undefined;
+    let qualityContract: PlanQualityContract | undefined;
+    try {
+      scheduleConstraints = parseScheduleConstraints(
+        request.scheduleConstraints,
+      );
+      qualityContract = parsePlanQualityContract(request.qualityContract);
+    } catch (error) {
+      invalid(
+        error instanceof Error
+          ? error.message
+          : 'Invalid replacement plan rules',
+      );
+    }
+    if (
+      qualityContract?.startDate &&
+      qualityContract.startDate !== request.effectiveFrom
+    ) {
+      invalid(
+        'qualityContract.startDate must match the replacement effective date',
+      );
+    }
+    const rules = inheritReplacementRules(source.generationMetadata, {
+      effectiveFrom: request.effectiveFrom,
+      scheduleConstraints,
+      qualityContract,
+    });
+    const effectiveRules = resolveScheduleRulesAtDate(
+      rules,
+      request.effectiveFrom,
+    );
+    const periods = scheduleRulePeriods(
+      rules,
+      request.effectiveFrom,
+      addYmdDays(request.effectiveFrom, replacementPlan.periodWeeks * 7 - 1),
+    );
+    const activationTimezone =
+      source.activationTimezone ??
+      effectiveRules.constraints?.calendarTimeZone ??
+      scheduleConstraints?.calendarTimeZone ??
+      timezone ??
+      'UTC';
+    if (
+      periods.some(
+        ({ scheduleConstraints: rules }) =>
+          rules && rules.calendarTimeZone !== activationTimezone,
+      )
+    )
+      invalid('Schedule rules must use the replacement calendar time zone');
+    const today =
+      activityCalendarYmdInZone(new Date(), activationTimezone) ??
+      new Date().toISOString().slice(0, 10);
+    if (request.effectiveFrom < today)
+      invalid('effectiveFrom cannot be in the past');
     const expectedReplacementZones =
       await this.resolveReplacementZoneExpectations(userId, replacementPlan);
     const futureOld = source.workouts.filter(
@@ -771,6 +839,9 @@ export class PlanProposalService {
       activationTimezone,
       rationale,
       plan: replacementPlan,
+      rules,
+      ...(scheduleConstraints ? { scheduleConstraints } : {}),
+      ...(qualityContract ? { qualityContract } : {}),
     };
     const replacementLoads = await this.loads.estimateForViewerWorkouts(
       userId,
@@ -805,8 +876,13 @@ export class PlanProposalService {
             : `The old plan continues until the day before ${request.effectiveFrom}; the new plan takes over automatically.`,
       mode: 'SUPERSEDE',
       effectiveFrom: request.effectiveFrom,
+      calendarTimeZone: activationTimezone,
+      scheduleConstraints: effectiveRules.constraints,
+      qualityContract: effectiveRules.qualityContract,
+      scheduleRulePeriods: periods,
       facts: this.uniqueFacts([
         ...evidenceRefs,
+        ...this.replacementRuleFacts(periods, locale, qualityContract),
         {
           type: 'effective_date',
           label: zh ? '接管日期' : 'Effective date',
@@ -1228,6 +1304,116 @@ export class PlanProposalService {
       seen.add(key);
       return true;
     });
+  }
+
+  private replacementRuleFacts(
+    periods: ReturnType<typeof scheduleRulePeriods>,
+    locale: string,
+    override?: PlanQualityContract,
+  ) {
+    const weekday = new Intl.DateTimeFormat(locale, {
+      weekday: 'short',
+      timeZone: 'UTC',
+    });
+    const minutes = new Intl.NumberFormat(locale, {
+      style: 'unit',
+      unit: 'minute',
+      unitDisplay: 'short',
+    });
+    const list = (values: readonly string[]) =>
+      values.join(isChineseLocale(locale) || locale === 'ja' ? '、' : ', ');
+    const weekdayName = (day: number) =>
+      weekday.format(new Date(Date.UTC(2026, 0, 4 + day)));
+    const label = (type: string, fallback: string) => {
+      const key = `common.planReplacementRules.${type}`;
+      const text = this.i18n?.t(key, { lang: locale });
+      return typeof text === 'string' && text !== key ? text : fallback;
+    };
+    const scoped = periods.flatMap(
+      ({ from, to, scheduleConstraints, allowedDays, availability }) => {
+        const span = from === to ? from : `${from} – ${to}`;
+        const facts: PlanProposalEvidenceRef[] = [];
+        const add = (
+          type: string,
+          fallback: string,
+          value: string | number,
+        ) => {
+          facts.push({
+            type: `replacement_${type}`,
+            label: `${label(type, fallback)} · ${span}`,
+            value,
+          });
+        };
+        if (scheduleConstraints) {
+          add(
+            'restDays',
+            'Rest days',
+            list(scheduleConstraints.fixedRestWeekdays.map(weekdayName)) || '—',
+          );
+          if (scheduleConstraints.unavailableDates.length)
+            add(
+              'unavailableDates',
+              'Unavailable dates',
+              list(scheduleConstraints.unavailableDates),
+            );
+          if (scheduleConstraints.availableDateOverrides.length)
+            add(
+              'availableDates',
+              'Availability exceptions',
+              list(scheduleConstraints.availableDateOverrides),
+            );
+        }
+        if (availability.maxDailyMinutes !== undefined)
+          add(
+            'dailyLimit',
+            'Daily training limit',
+            minutes.format(availability.maxDailyMinutes),
+          );
+        if (availability.maxMinutesByIsoWeekday)
+          add(
+            'weekdayLimits',
+            'Weekday training limits',
+            list(
+              Object.entries(availability.maxMinutesByIsoWeekday).map(
+                ([day, limit]) =>
+                  `${weekdayName(Number(day))} ${minutes.format(limit!)}`,
+              ),
+            ),
+          );
+        if (availability.maxTrainingDaysPerWeek !== undefined)
+          add(
+            'weeklyLimit',
+            'Maximum training days per week',
+            availability.maxTrainingDaysPerWeek,
+          );
+        if (allowedDays)
+          add(
+            'relativeDays',
+            'Allowed days in the plan week',
+            list(allowedDays.map(String)),
+          );
+        return facts;
+      },
+    );
+    const planFields = [
+      ['weekPhases', 'Training phases', override?.weekPhases],
+      ['requiredSports', 'Required sports', override?.requiredSports],
+      ['raceDiscipline', 'Race discipline', override?.raceDiscipline],
+    ] as const;
+    return [
+      ...scoped,
+      ...planFields.flatMap(([type, fallback, value]) =>
+        value === undefined
+          ? []
+          : [
+              {
+                type: `replacement_${type}`,
+                label: label(type, fallback),
+                value: typeof value === 'string' ? value : list(value) || '—',
+              },
+            ],
+      ),
+    ];
   }
 
   private async persistPreview(args: {

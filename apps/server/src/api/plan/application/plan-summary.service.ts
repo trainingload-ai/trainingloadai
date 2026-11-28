@@ -125,6 +125,7 @@ export class PlanSummaryNotFoundError extends Error {
 
 import { PlanRepository } from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
+import type { PlanDb } from '../persistence/plan-db';
 
 @Injectable()
 export class PlanSummaryService {
@@ -136,18 +137,25 @@ export class PlanSummaryService {
     private readonly workouts: PlanWorkoutRepository,
   ) {}
 
-  async summarize(userId: string, planId: string): Promise<PlanSummary> {
-    const plan = await this.plans.findUnique({
-      where: { id: planId },
-      select: {
-        id: true,
-        userId: true,
-        status: true,
-        planningMode: true,
-        startDate: true,
-        periodWeeks: true,
+  async summarize(
+    userId: string,
+    planId: string,
+    tx?: PlanDb,
+  ): Promise<PlanSummary> {
+    const plan = await this.plans.findUnique(
+      {
+        where: { id: planId },
+        select: {
+          id: true,
+          userId: true,
+          status: true,
+          planningMode: true,
+          startDate: true,
+          periodWeeks: true,
+        },
       },
-    });
+      tx,
+    );
     if (!plan || plan.userId !== userId) {
       throw new PlanSummaryNotFoundError();
     }
@@ -158,30 +166,31 @@ export class PlanSummaryService {
     const from = new Date(anchor.getTime() - 28 * 86400000),
       through = new Date(anchor.getTime() + 84 * 86400000);
     const bounded = plan.planningMode === 'ROLLING' && plan.status !== 'DRAFT';
-    const workouts = (await this.workouts.findMany({
-      where: {
-        planId,
-        ...(bounded
-          ? { scheduledDate: { gte: from, lte: through } }
-          : {}),
-      },
-      orderBy: [{ dayOffset: 'asc' }, { sessionIndex: 'asc' }],
-      select: {
-        id: true,
-        status: true,
-        sportType: true,
-        dayOffset: true,
-        estimatedLoad: true,
-        links: {
-          where: { unlinkedAt: null },
-          select: { role: true, unlinkedAt: true, activityId: true },
+    const workouts = (await this.workouts.findMany(
+      {
+        where: {
+          planId,
+          ...(bounded ? { scheduledDate: { gte: from, lte: through } } : {}),
+        },
+        orderBy: [{ dayOffset: 'asc' }, { sessionIndex: 'asc' }],
+        select: {
+          id: true,
+          status: true,
+          sportType: true,
+          dayOffset: true,
+          estimatedLoad: true,
+          links: {
+            where: { unlinkedAt: null },
+            select: { role: true, unlinkedAt: true, activityId: true },
+          },
         },
       },
-    })) as WorkoutRow[];
+      tx,
+    )) as WorkoutRow[];
 
     const activityIds = collectPrimaryActivityIds(workouts);
     const actualMap = activityIds.length
-      ? await this.loadReadout.batchGetActualLoad(activityIds)
+      ? await this.loadReadout.batchGetActualLoad(activityIds, tx)
       : new Map<number, { actualLoad: number | null }>();
 
     const totals = makeEmptyTotals();

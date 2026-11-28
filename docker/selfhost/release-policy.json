@@ -197,6 +197,26 @@
       "0044_import_item_utc_availability": {
         "phase": "expand",
         "releaseVersion": "1.1.27"
+      },
+      "0045_coach_cycle_review_queue": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
+      },
+      "0046_fixed_plan_completion": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
+      },
+      "0047_coach_mutation_invocation": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
+      },
+      "0048_plan_workout_change_revision": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
+      },
+      "0049_personal_oauth_refresh_claim": {
+        "phase": "expand",
+        "releaseVersion": "1.1.27"
       }
     }
   }

@@ -10,6 +10,7 @@ import {
   SportType,
 } from '@prisma/client';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import { PrismaService } from '@/prisma/prisma.service';
 import { BusinessException } from '@/filters/business-exception/business.exception';
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
@@ -349,9 +350,17 @@ export class StrengthActivityService {
     activityHashId: string,
     userId: string,
   ): Promise<ActivityStrengthResponse> {
-    const activity = await this.loadOwnedActivity(activityHashId, userId);
+    return this.readStrength(activityHashId, userId);
+  }
+
+  private async readStrength(
+    activityHashId: string,
+    userId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<ActivityStrengthResponse> {
+    const activity = await this.loadOwnedActivity(activityHashId, userId, tx);
     const exercises = this.hydrateExercises(activity.strengthExercises);
-    const planned = await this.loadPlanned(activity.id);
+    const planned = await this.loadPlanned(activity.id, tx);
     return {
       activityId: activity.id,
       activityHashId: activity.hashId,
@@ -373,14 +382,56 @@ export class StrengthActivityService {
   }
 
   /**
-   * 导入/同步覆盖写入。已结束的活动也允许由外部适配器写入。
+   * Replace the strength record for an imported activity, including finished activities.
+   * A caller-owned transaction can also publish the source and replay job. The
+   * checks, review invalidation and returned record use that same transaction.
    */
   async replaceImported(
     activityHashId: string,
     userId: string,
     input: ReplaceActivityStrengthDto,
+    tx?: Prisma.TransactionClient,
   ): Promise<ActivityStrengthResponse> {
-    return this.replaceInternal(activityHashId, userId, input, true);
+    return this.replaceInternal(activityHashId, userId, input, true, tx);
+  }
+
+  /** Restore planned set associations after an imported activity is auto-matched. */
+  async attachImportedPlanSetGroups(activityHashId: string, userId: string) {
+    await this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
+      await lockFitnessUser(tx, userId);
+      const activity = await this.loadOwnedActivity(activityHashId, userId, tx);
+      const planned = await this.loadPlanned(activity.id, tx);
+      if (!planned) return;
+
+      const assigned = this.attachPlannedSetGroupIds(
+        activity.strengthExercises,
+        planned.structure,
+      );
+      const changes = assigned.flatMap((exercise, index) =>
+        exercise.sets.flatMap((set, setIndex) =>
+          set.plannedSetGroupId &&
+          !activity.strengthExercises[index].sets[setIndex].plannedSetGroupId
+            ? [{ id: set.id, plannedSetGroupId: set.plannedSetGroupId }]
+            : [],
+        ),
+      );
+      await this.assertPlannedSetGroupsOwned(
+        userId,
+        changes.map((set) => set.plannedSetGroupId),
+        tx,
+      );
+      for (const change of changes) {
+        await tx.activityStrengthSet.updateMany({
+          where: { id: change.id, plannedSetGroupId: null },
+          data: { plannedSetGroupId: change.plannedSetGroupId },
+        });
+      }
+      if (changes.length)
+        await tx.activityAiReview.deleteMany({
+          where: { activityId: activity.id, userId },
+        });
+    });
   }
 
   /**
@@ -391,10 +442,15 @@ export class StrengthActivityService {
     userId: string,
     input: ReplaceActivityStrengthDto,
     allowCompleted: boolean,
+    transaction?: Prisma.TransactionClient,
   ): Promise<ActivityStrengthResponse> {
-    const activity = await this.loadOwnedActivity(activityHashId, userId);
+    const activity = await this.loadOwnedActivity(
+      activityHashId,
+      userId,
+      transaction,
+    );
     if (!allowCompleted) this.assertEditable(activity);
-    const planned = await this.loadPlanned(activity.id);
+    const planned = await this.loadPlanned(activity.id, transaction);
     const exercises = this.attachPlannedSetGroupIds(
       input.exercises ?? [],
       planned?.structure,
@@ -407,49 +463,55 @@ export class StrengthActivityService {
           .map((set) => set.plannedSetGroupId)
           .filter((id): id is string => Boolean(id)),
       ),
+      transaction,
     );
 
-    await this.prisma.$transaction(async (tx) => {
+    const replacements = exercises.map((exercise, orderIndex) => ({
+      data: {
+        activityId: activity.id,
+        orderIndex,
+        exerciseCode: exercise.exerciseCode?.trim() || null,
+        name: exercise.name.trim(),
+        equipmentCode: exercise.equipmentCode?.trim() || null,
+        notes: exercise.notes?.trim() || null,
+      },
+      sets: exercise.sets.map((set) => ({
+        plannedSetGroupId: set.plannedSetGroupId ?? null,
+        setIndex: set.setIndex,
+        sourceSequenceIndex: set.sourceSequenceIndex ?? null,
+        setType: set.setType,
+        completedReps: set.completedReps ?? null,
+        completedDurationSeconds: set.completedDurationSeconds ?? null,
+        startedAt: this.parseSessionDate(set.startedAt),
+        restAfterSeconds: set.restAfterSeconds ?? null,
+        ...strengthLoadToColumns(set.load as StrengthLoadV1),
+        actualRpe: set.actualRpe ?? null,
+        actualRir: set.actualRir ?? null,
+        completedAt: this.parseCompletedAt(set.completedAt),
+        source: set.source ?? 'MANUAL',
+      })),
+    }));
+    const write = async (tx: Prisma.TransactionClient) => {
       await tx.activityStrengthExercise.deleteMany({
         where: { activityId: activity.id },
       });
-      for (const [exerciseIndex, exercise] of exercises.entries()) {
+      for (const replacement of replacements) {
         const created = await tx.activityStrengthExercise.create({
-          data: {
-            activityId: activity.id,
-            orderIndex: exerciseIndex,
-            exerciseCode: exercise.exerciseCode?.trim() || null,
-            name: exercise.name.trim(),
-            equipmentCode: exercise.equipmentCode?.trim() || null,
-            notes: exercise.notes?.trim() || null,
-          },
+          data: replacement.data,
         });
-        for (const set of exercise.sets) {
+        for (const set of replacement.sets) {
           await tx.activityStrengthSet.create({
-            data: {
-              exerciseId: created.id,
-              plannedSetGroupId: set.plannedSetGroupId ?? null,
-              setIndex: set.setIndex,
-              sourceSequenceIndex: set.sourceSequenceIndex ?? null,
-              setType: set.setType,
-              completedReps: set.completedReps ?? null,
-              completedDurationSeconds: set.completedDurationSeconds ?? null,
-              startedAt: this.parseSessionDate(set.startedAt),
-              restAfterSeconds: set.restAfterSeconds ?? null,
-              ...strengthLoadToColumns(set.load as StrengthLoadV1),
-              actualRpe: set.actualRpe ?? null,
-              actualRir: set.actualRir ?? null,
-              completedAt: this.parseCompletedAt(set.completedAt),
-              source: set.source ?? 'MANUAL',
-            } satisfies Prisma.ActivityStrengthSetUncheckedCreateInput,
+            data: { ...set, exerciseId: created.id },
           });
         }
       }
       await tx.activityAiReview?.deleteMany({
         where: { activityId: activity.id, userId },
       });
-    });
-    return this.get(activityHashId, userId);
+    };
+    if (transaction) await write(transaction);
+    else await this.prisma.$transaction(write);
+    return this.readStrength(activityHashId, userId, transaction);
   }
 
   /**
@@ -585,8 +647,12 @@ export class StrengthActivityService {
   /**
    * 加载当前用户的活动及力量动作/组。
    */
-  private async loadOwnedActivity(activityHashId: string, userId: string) {
-    const activity = await this.prisma.activity.findFirst({
+  private async loadOwnedActivity(
+    activityHashId: string,
+    userId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const activity = await (tx ?? this.prisma).activity.findFirst({
       where: { hashId: activityHashId, userId, state: 1 },
       include: {
         strengthExercises: {
@@ -613,26 +679,29 @@ export class StrengthActivityService {
   /**
    * 若活动挂了 STRENGTH 计划课次，返回预定结构与摘要。
    */
-  private async loadPlanned(activityId: number) {
-    const link = await this.planQuery.findLink({
-      where: {
-        activityId,
-        role: 'PRIMARY',
-        unlinkedAt: null,
-        planWorkout: { structureKind: 'STRENGTH' },
-      },
-      orderBy: { linkedAt: 'desc' },
-      include: {
-        planWorkout: {
-          include: {
-            strengthExercises: {
-              orderBy: { orderIndex: 'asc' },
-              include: { setGroups: { orderBy: { orderIndex: 'asc' } } },
+  private async loadPlanned(activityId: number, tx?: Prisma.TransactionClient) {
+    const link = await this.planQuery.findLink(
+      {
+        where: {
+          activityId,
+          role: 'PRIMARY',
+          unlinkedAt: null,
+          planWorkout: { structureKind: 'STRENGTH' },
+        },
+        orderBy: { linkedAt: 'desc' },
+        include: {
+          planWorkout: {
+            include: {
+              strengthExercises: {
+                orderBy: { orderIndex: 'asc' },
+                include: { setGroups: { orderBy: { orderIndex: 'asc' } } },
+              },
             },
           },
         },
       },
-    });
+      tx,
+    );
     if (!link?.planWorkout) return null;
     const structure = this.workoutPersistence.buildStrengthStructure(
       link.planWorkout.strengthExercises,
@@ -793,10 +862,17 @@ export class StrengthActivityService {
   /**
    * 覆盖写入时，按动作编码/名称把实际组对上预定 setGroup。
    */
-  private attachPlannedSetGroupIds(
-    exercises: ReplaceActivityStrengthDto['exercises'],
-    planned?: StrengthWorkoutIrV1,
-  ): ReplaceActivityStrengthDto['exercises'] {
+  private attachPlannedSetGroupIds<
+    Exercise extends {
+      name: string;
+      exerciseCode?: string | null;
+      sets: Array<{
+        setIndex: number;
+        setType: 'WORK' | 'WARMUP';
+        plannedSetGroupId?: string | null;
+      }>;
+    },
+  >(exercises: Exercise[], planned?: StrengthWorkoutIrV1): Exercise[] {
     if (!planned) return exercises;
     return exercises.map((exercise, exerciseIndex) => {
       const normalizedName = exercise.name.trim().toLowerCase();
@@ -895,13 +971,20 @@ export class StrengthActivityService {
   /**
    * 确认 plannedSetGroupId 都属于当前用户的计划组。
    */
-  private async assertPlannedSetGroupsOwned(userId: string, ids: string[]) {
+  private async assertPlannedSetGroupsOwned(
+    userId: string,
+    ids: string[],
+    tx?: Prisma.TransactionClient,
+  ) {
     const unique = [...new Set(ids)];
     if (unique.length === 0) return;
-    const rows = await this.planQuery.findSetGroups({
-      where: { id: { in: unique }, exercise: { workout: { userId } } },
-      select: { id: true },
-    });
+    const rows = await this.planQuery.findSetGroups(
+      {
+        where: { id: { in: unique }, exercise: { workout: { userId } } },
+        select: { id: true },
+      },
+      tx,
+    );
     if (rows.length !== unique.length) {
       throw new UnprocessableEntityException(
         'plannedSetGroupId does not belong to the current user',

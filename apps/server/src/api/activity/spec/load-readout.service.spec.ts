@@ -325,10 +325,13 @@ describe('LoadReadoutService.batchGetActualLoad', () => {
 
     const readouts = await service.batchGetActualLoad([101, 102, 201]);
 
-    expect(prisma.activity.findMany).toHaveBeenCalledWith({
-      where: readyActivityWhere({ id: { in: [101, 102, 201] } }),
-      select: expect.any(Object),
-    });
+    expect(prisma.activity.findMany).toHaveBeenCalledWith(
+      {
+        where: readyActivityWhere({ id: { in: [101, 102, 201] } }),
+        select: expect.any(Object),
+      },
+      undefined,
+    );
     expect(analysisConfigs.listVersions).toHaveBeenCalledTimes(2);
     expect(prisma.userProfile.findUnique).not.toHaveBeenCalled();
     expect(readouts.get(101)).toEqual({

@@ -1,4 +1,6 @@
+import { planScheduleInvalid } from './plan-schedule-error';
 import { PlanCalendarValidationService } from './plan-calendar-validation.service';
+import { setPlanWorkoutChangeSource, type PlanWorkoutChangeSource } from './plan-workout-change';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { UnprocessableEntityException } from '@nestjs/common';
 import {
@@ -19,7 +21,11 @@ import {
   type WorkoutPlanStepDraft,
 } from '@/api/workout/workout.service';
 import { PlanLoadEstimatorService } from './plan-load-estimator.service';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementCutoff,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
 import { Prisma, SportType, type PlanWorkoutStatus } from '@prisma/client';
@@ -32,7 +38,15 @@ import { PlanWorkoutTargetResolver } from './plan-workout-target-resolver.servic
 const WORKOUT_TREE_INCLUDE = {
   plan: {
     include: {
-      supersededBy: { select: { status: true, startDate: true } },
+      supersededBy: {
+        select: {
+          userId: true,
+          status: true,
+          startDate: true,
+          scheduledActivationAt: true,
+          activationBlockedAt: true,
+        },
+      },
     },
   },
   steps: {
@@ -80,8 +94,14 @@ export class PlanExternalSyncService {
     );
   }
 
-  runTransaction<T>(fn: (tx: PlanDb) => Promise<T>): Promise<T> {
-    return this.prisma.$transaction((tx) => fn(tx));
+  runTransaction<T>(
+    fn: (tx: PlanDb) => Promise<T>,
+    changeSource?: PlanWorkoutChangeSource,
+  ): Promise<T> {
+    return this.prisma.$transaction(async (tx) => {
+      if (changeSource) await setPlanWorkoutChangeSource(tx, changeSource);
+      return fn(tx);
+    });
   }
 
   findActivePausedPlans(userId: string) {
@@ -138,7 +158,12 @@ export class PlanExternalSyncService {
           { planId: null },
           {
             plan: {
-              is: { status: { in: ['ACTIVE', 'PAUSED', 'SCHEDULED'] } },
+              is: {
+                OR: [
+                  { status: { in: ['ACTIVE', 'PAUSED'] } },
+                  scheduledReplacementReservationWhere(args.userId),
+                ],
+              },
             },
           },
         ],
@@ -154,10 +179,7 @@ export class PlanExternalSyncService {
         const starts = workout.plan.startDate?.toISOString().slice(0, 10);
         return Boolean(starts && date >= starts);
       }
-      const cutoff =
-        workout.plan.supersededBy?.status === 'SCHEDULED'
-          ? workout.plan.supersededBy.startDate?.toISOString().slice(0, 10)
-          : null;
+      const cutoff = scheduledReplacementCutoff(args.userId, workout.plan.supersededBy);
       return !cutoff || date < cutoff;
     });
     return this.workoutTargetResolver
@@ -180,6 +202,7 @@ export class PlanExternalSyncService {
     workoutId: string;
     updatedAt?: Date;
     revision?: number;
+    changeSource?: PlanWorkoutChangeSource;
   }): Promise<'deleted' | 'missing' | 'changed' | 'protected'> {
     return this.runTransaction(async (tx) => {
       await acquireHashtextAdvisoryXactLock(tx, args.userId);
@@ -216,7 +239,7 @@ export class PlanExternalSyncService {
         tx,
       );
       return result.count === 1 ? 'deleted' : 'changed';
-    });
+    }, args.changeSource);
   }
 
   findMapping<T extends Prisma.PlanWorkoutExternalMappingFindFirstArgs>(
@@ -401,6 +424,7 @@ export class PlanExternalSyncService {
       blocks: PlanBlock[];
       structureKind?: 'ENDURANCE' | 'FREEFORM';
       plannedDurationSeconds?: number | null;
+      changeSource?: PlanWorkoutChangeSource;
     },
     initializeMapping?: (
       workout: SyncedWorkout,
@@ -474,7 +498,7 @@ export class PlanExternalSyncService {
         }
       }
       return stored;
-    });
+    }, args.changeSource);
   }
 
   async updateImportedWorkout(
@@ -496,6 +520,7 @@ export class PlanExternalSyncService {
       plannedDurationSeconds?: number | null;
       dayOffset: number;
       expectedUpdatedAt?: Date;
+      changeSource?: PlanWorkoutChangeSource;
     },
     persistMapping?: (
       workout: SyncedWorkout,
@@ -668,10 +693,7 @@ export class PlanExternalSyncService {
               scheduleRuleMetadata: metadata,
             });
             if (!report.valid)
-              throw new UnprocessableEntityException({
-                code: 'PLAN_SCHEDULE_INVALID',
-                issues: report.issues,
-              });
+              throw planScheduleInvalid(report.issues);
           }
         } catch (error) {
           if (error instanceof UnprocessableEntityException) throw error;
@@ -714,7 +736,7 @@ export class PlanExternalSyncService {
         );
       }
       return stored;
-    });
+    }, args.changeSource);
   }
 
   async replaceWorkoutSteps(

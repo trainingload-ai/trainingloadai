@@ -35,6 +35,18 @@
     "cycleRationale": "„{planTitle}“ ist abgeschlossen. Abschluss {completionRate}%. Starte den nächsten Plan auf Basis dieser Zyklus-Zusammenfassung.",
     "cycleNextPlanPrompt": "Starte den nächsten Plan auf Basis der Zusammenfassung von „{planTitle}“. Abschluss {completionRate}. Lies zuerst die Zusammenfassung, dann frage mich nach Zielen und Rahmenbedingungen."
   },
+  "planReplacementRules": {
+    "restDays": "Ruhetage",
+    "unavailableDates": "Nicht verfügbare Tage",
+    "availableDates": "Ausnahmen von der Verfügbarkeit",
+    "dailyLimit": "Tägliches Trainingslimit",
+    "weekdayLimits": "Trainingslimits nach Wochentag",
+    "weeklyLimit": "Maximale Trainingstage pro Woche",
+    "relativeDays": "Verfügbare Tage in der Planwoche",
+    "weekPhases": "Trainingsphasen",
+    "requiredSports": "Erforderliche Sportarten",
+    "raceDiscipline": "Wettkampfdisziplin"
+  },
   "error": {
     "track_file_output_invalid": "Die konvertierte Datei hat die Prüfung nicht bestanden. Der Download wurde blockiert. Behalte die Originaldatei und versuche ein anderes Format oder kontaktiere den Support.",
     "track_file_conversion_service_failed": "Der Konvertierungsdienst konnte die Anfrage nicht abschließen. Es wurde kein Download gestartet. Behalte die Originaldatei und versuche ein anderes Format oder kontaktiere den Support.",
@@ -50,12 +62,14 @@
     "unauthorized": "Eine Anmeldung ist erforderlich",
     "forbidden": "Du bist nicht berechtigt, diese Aktion auszuführen",
     "not_found": "Die angeforderte Ressource wurde nicht gefunden",
+    "plan_scheduled_activation_pending": "Der Start eines anderen Plans ist bereits geplant. Sage diesen geplanten Start ab, bevor du diesen Plan aktivierst.",
     "conflict": "Die Anfrage steht im Konflikt mit dem aktuellen Status",
     "invalid_idempotency_key": "Die Kennung der Löschanfrage ist ungültig. Bitte versuche es erneut.",
     "idempotency_key_already_used": "Diese Kennung der Löschanfrage wurde bereits verwendet. Starte den Löschvorgang erneut.",
     "account_not_found": "Dieses Konto wurde nicht gefunden.",
     "account_deletion_in_progress": "Die Löschung deines Kontos wird bereits bearbeitet.",
     "account_deletion_confirmations_required": "Bestätige alle Hinweise zur Kontolöschung, bevor du fortfährst.",
+    "plan_schedule_invalid": "Prüfe den Trainingsplan und passe die betroffenen Einheiten an.",
     "unprocessable_entity": "Die Anfrage konnte nicht verarbeitet werden",
     "workout_definition_invalid": "Die Trainingsdefinition ist ungültig",
     "workout_definitions_invalid": "Eine oder mehrere Trainingsdefinitionen sind ungültig",
@@ -236,6 +250,7 @@
     "polar_webhook_signature_invalid": "Invalid Polar webhook signature",
     "polar_webhook_secret_missing": "Polar webhook secret is not configured",
     "polar_webhook_raw_body_missing": "Unable to read raw request body for webhook signature verification",
+    "import_activity_start_in_future": "Die Aktivität beginnt mehr als 24 Stunden in der Zukunft. Prüfe die Startzeit und importiere sie erneut.",
     "import_identity_conflict": "Konflikt bei der Aktivitätszuordnung. Bitte wenden Sie sich an den Support.",
     "intervals_icu_athlete_identity_missing": "Die Identität des Intervals.icu-Kontos konnte nicht überprüft werden. Bitte erneut autorisieren."
   },
@@ -428,6 +443,7 @@
     "importBatch": {
       "titleCompleted": "Importbatch abgeschlossen",
       "titleCompletedWithFailures": "Importbatch abgeschlossen, aber mit Fehlern",
+      "bodyPostProcessingFailed": "\n\nDie Aktivitätsanalyse konnte nicht abgeschlossen werden. Bereits verfügbare Aktivitäten bleiben verfügbar.",
       "bodyBatchSummary": "{totalCount} Quellobjekte verarbeitet.\n\n- Erfolgreich: {successCount}\n- Fehlgeschlagen: {failedCount}\n- Übersprungen: {skippedCount}",
       "bodyThirdPartyExportFailures": "\n\nDer Upload zu {providers} ist für {failedCount} Aktivitäten fehlgeschlagen. Prüfe die Verbindungseinstellungen oder versuche es in der Aktivität erneut."
     }

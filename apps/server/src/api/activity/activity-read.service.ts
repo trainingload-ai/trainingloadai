@@ -77,8 +77,9 @@ export class ActivityReadService {
    */
   findMany<T extends Prisma.ActivityFindManyArgs>(
     args?: Prisma.SelectSubset<T, Prisma.ActivityFindManyArgs>,
+    tx?: PrismaClientSlice<'activity'>,
   ) {
-    return this.prisma.activity.findMany(args);
+    return this.activity(tx).findMany(args);
   }
 
   /**

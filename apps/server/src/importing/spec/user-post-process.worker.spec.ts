@@ -19,7 +19,9 @@ function featureAccess(allowed: boolean) {
 }
 
 function createImportingJobs(prisma: unknown) {
-  return new ImportingJobService(importingJobRepository(prisma as never));
+  const jobs = new ImportingJobService(importingJobRepository(prisma as never));
+  jest.spyOn(jobs, 'rejectFutureActivities').mockResolvedValue(undefined);
+  return jobs;
 }
 
 function userQueries(prisma: Record<string, unknown>) {
@@ -119,13 +121,11 @@ describe('UserPostProcessWorkerService', () => {
       failedProviders: [],
       failedCount: 0,
     }));
-    const sendBatchNotification = jest.fn(async () => undefined);
     const completeClaimedJob = jest.fn(async () => undefined);
     const resolveFinalBatchStatus = jest.fn(async () => 'COMPLETED');
     Object.assign(service as object, {
       runBatchAiReviewWhenAllowed,
       runBatchThirdPartyExports,
-      sendBatchNotification,
       completeClaimedJob,
       resolveFinalBatchStatus,
       logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
@@ -150,12 +150,11 @@ describe('UserPostProcessWorkerService', () => {
     expect(runBatchAiReviewWhenAllowed).not.toHaveBeenCalled();
     expect(emitAsync).not.toHaveBeenCalled();
     expect(runBatchThirdPartyExports).not.toHaveBeenCalled();
-    expect(sendBatchNotification).toHaveBeenCalledWith({
-      batchJobId: 'batch-maintenance',
-      userId: 'user-1',
-      exportOutcome: { failedProviders: [], failedCount: 0 },
-    });
-    expect(completeClaimedJob).toHaveBeenCalled();
+    expect(completeClaimedJob).toHaveBeenCalledWith(
+      expect.objectContaining({ batchJobId: 'batch-maintenance', userId: 'user-1' }),
+      'COMPLETED',
+      { failedProviders: [], failedCount: 0 },
+    );
   });
 
   it('claims expired RUNNING jobs with a fresh lease token', async () => {
@@ -451,13 +450,11 @@ describe('UserPostProcessWorkerService', () => {
       failedProviders: [],
       failedCount: 0,
     }));
-    const sendBatchNotification = jest.fn(async () => undefined);
     const completeClaimedJob = jest.fn(async () => undefined);
     const resolveFinalBatchStatus = jest.fn(async () => 'COMPLETED');
     Object.assign(service as object, {
       runBatchAiReviewWhenAllowed,
       runBatchThirdPartyExports,
-      sendBatchNotification,
       completeClaimedJob,
       resolveFinalBatchStatus,
       logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
@@ -522,8 +519,10 @@ describe('UserPostProcessWorkerService', () => {
         activityIds: [42],
       }),
     );
-    expect(sendBatchNotification).toHaveBeenCalledWith(
+    expect(completeClaimedJob).toHaveBeenCalledWith(
       expect.objectContaining({ batchJobId: 'batch-later', userId: 'user-1' }),
+      'COMPLETED',
+      expect.any(Object),
     );
 
     await processJob({
@@ -546,11 +545,10 @@ describe('UserPostProcessWorkerService', () => {
         activityIds: [7],
       }),
     );
-    expect(sendBatchNotification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        batchJobId: 'batch-earlier',
-        userId: 'user-1',
-      }),
+    expect(completeClaimedJob).toHaveBeenCalledWith(
+      expect.objectContaining({ batchJobId: 'batch-earlier', userId: 'user-1' }),
+      'COMPLETED',
+      expect.any(Object),
     );
     expect(completeClaimedJob).toHaveBeenCalledTimes(2);
   });
@@ -560,6 +558,7 @@ describe('UserPostProcessWorkerService', () => {
     const prisma = {
       $transaction: jest.fn(async (callback: (tx: unknown) => unknown) =>
         callback({
+          $queryRaw: jest.fn(async () => []),
           userPostProcessJob: {
             updateMany: jest.fn(async () => ({ count: 0 })),
           },
@@ -603,6 +602,7 @@ describe('UserPostProcessWorkerService', () => {
     const refreshUserFitnessProfilePost = jest.fn();
     const emitAsync = jest.fn();
     const prisma = {
+      $queryRaw: jest.fn(async () => []),
       $transaction: jest.fn(async (callback: (tx: unknown) => unknown) =>
         callback(prisma as never),
       ),
@@ -678,6 +678,7 @@ describe('UserPostProcessWorkerService', () => {
     }));
     const emitAsync = jest.fn(async () => []);
     const prisma = {
+      $queryRaw: jest.fn(async () => []),
       $transaction: jest.fn(async (callback: (tx: unknown) => unknown) =>
         callback(prisma as never),
       ),
@@ -733,20 +734,24 @@ describe('UserPostProcessWorkerService', () => {
   });
 
   it('moves the batch to a terminal failure state when post-processing is dead', async () => {
+    const createdAt = new Date('2026-07-01T00:00:00.000Z');
+    const ensureNotification = jest.fn(async () => ({ created: true }));
     const prisma = {
+      $queryRaw: jest.fn(async () => []),
+      $transaction: jest.fn(async (callback: (tx: unknown) => unknown) =>
+        callback(prisma),
+      ),
       userPostProcessJob: {
         findUnique: jest.fn(async () => ({
           recomputeFrom: new Date(),
           recomputeTo: new Date(),
           affectedSportTypes: ['RUN'],
         })),
-        update: jest
-          .fn<(...args: unknown[]) => Promise<{ attempts: number }>>()
-          .mockResolvedValueOnce({ attempts: 1 })
-          .mockResolvedValue({ attempts: 1 }),
+        findFirst: jest.fn(async () => ({ attempts: 0 })),
+        updateMany: jest.fn(async () => ({ count: 1 })),
       },
       importBatchJob: {
-        findUnique: jest.fn(async () => ({ successCount: 1 })),
+        findUnique: jest.fn(async () => ({ status: 'PARTIAL_FAILED', successCount: 1, createdAt })),
         update: jest.fn(async () => ({})),
       },
       importItemJob: {
@@ -769,7 +774,7 @@ describe('UserPostProcessWorkerService', () => {
         }),
       } as never,
       {} as never,
-      {} as never,
+      { ensureImportBatchFailureNotification: ensureNotification } as never,
       {} as never,
       {} as never,
       undefined,
@@ -791,8 +796,8 @@ describe('UserPostProcessWorkerService', () => {
       batchJobId: 'batch-dead',
     });
 
-    expect(prisma.userPostProcessJob.update).toHaveBeenCalledWith({
-      where: { id: 'post-dead' },
+    expect(prisma.userPostProcessJob.updateMany).toHaveBeenCalledWith({
+      where: { id: 'post-dead', userId: 'user-1', status: 'RUNNING' },
       data: expect.objectContaining({ status: 'DEAD' }),
     });
     expect(prisma.importBatchJob.update).toHaveBeenCalledWith({
@@ -804,11 +809,25 @@ describe('UserPostProcessWorkerService', () => {
     });
     expect(prisma.activity.updateMany).toHaveBeenCalledWith({
       where: {
-        id: { in: [42] },
+        userId: 'user-1',
+        importItemJobs: {
+          some: { batchJobId: 'batch-dead', userId: 'user-1', status: 'DONE', analysisRequired: true },
+          none: {
+            userId: 'user-1',
+            status: { notIn: ['SKIPPED', 'DEAD'] },
+            analysisRequired: true,
+            batchJob: { createdAt: { gt: createdAt } },
+          },
+        },
         processingStatus: { not: 'READY' },
+        readyAt: null,
       },
       data: expect.objectContaining({ processingStatus: 'FAILED' }),
     });
+    expect(ensureNotification).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ batchStatus: 'PARTIAL_FAILED' }) }),
+      prisma,
+    );
   });
 
   it('logs an AI review enqueue failure and lets post-processing continue', async () => {
@@ -1056,11 +1075,12 @@ describe('UserPostProcessWorkerService', () => {
     ).sendBatchNotification({
       batchJobId: 'batch-1',
       userId: 'user-1',
+      lang: 'en',
       exportOutcome: {
         failedProviders: ['Wahoo', 'Suunto'],
         failedCount: 2,
       },
-    });
+    }, prisma);
 
     expect(ensureNotification).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1073,6 +1093,7 @@ describe('UserPostProcessWorkerService', () => {
           thirdPartyExportFailedCount: 2,
         }),
       }),
+      prisma,
     );
   });
 });

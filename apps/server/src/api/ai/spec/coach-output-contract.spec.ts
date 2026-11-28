@@ -5,6 +5,9 @@ import { APIConnectionTimeoutError } from 'openai';
 import { ConflictException } from '@nestjs/common';
 import { COACH_QUESTION_STALE_ERROR_CODE } from '@shared/coach-turn-error';
 import { AiController } from '../ai.controller';
+import { CoachTurnOrchestrator } from '../coach-turn-orchestrator.service';
+import type { AiService } from '../ai.service';
+import type { CoachActivityEvent, CoachRunStatus } from '@shared/ai-coach-run-contract';
 import type { CoachUiStreamYield } from '../core/coach-ui-message-stream';
 import { coachQueryYieldsToUIMessageStream } from '../core/coach-ui-message-stream';
 import { CoachRunProjector } from '../core/coach-run-projector';
@@ -47,6 +50,14 @@ async function* fromEvents(events: CoachUiStreamYield[]) {
   yield* events;
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
+
 function setup(events: CoachUiStreamYield[]) {
   const aiService = {
     coachAppendUserTurn: jest.fn(async () => 'session-1'),
@@ -56,7 +67,9 @@ function setup(events: CoachUiStreamYield[]) {
       async (_args: unknown) => 'failure-message-1',
     ),
     coachStream: jest.fn(
-      async (): Promise<AsyncIterable<CoachUiStreamYield>> =>
+      async (
+        _input: Parameters<AiService['coachStream']>[0],
+      ): Promise<AsyncIterable<CoachUiStreamYield>> =>
         fromEvents(events),
     ),
   };
@@ -119,6 +132,9 @@ function setup(events: CoachUiStreamYield[]) {
   };
   const controller = Object.create(AiController.prototype) as AiController;
   const runSnapshots: unknown[] = [];
+  const checkpoint = async (handle: CoachRunHandle) => {
+    runSnapshots.push(JSON.parse(JSON.stringify(handle.projector.envelope().message)));
+  };
   const coachRuns = {
     existingRequestBranch: jest.fn(async () => undefined),
     recoverStaleOperation: jest.fn(async (_userId: string, _operationId: string) => false),
@@ -128,6 +144,7 @@ function setup(events: CoachUiStreamYield[]) {
         revision: 0,
         userId: 'user-1',
         sessionId: 'session-1',
+        operationId: 'operation-1',
         previousExecutionMs: 0,
         projector: new CoachRunProjector({
           run: {
@@ -143,17 +160,26 @@ function setup(events: CoachUiStreamYield[]) {
         }),
       },
     })),
-    checkpoint: jest.fn(async (handle: CoachRunHandle) => {
-      runSnapshots.push(
-        JSON.parse(JSON.stringify(handle.projector.envelope().message)),
-      );
+    checkpointStreamTerminal: jest.fn(async (handle: CoachRunHandle, _status?: CoachRunStatus) =>
+      checkpoint(handle),
+    ),
+    checkpointStreamProgress: jest.fn(checkpoint),
+    checkpointMutationStart: jest.fn(async (
+      handle: CoachRunHandle, activity: CoachActivityEvent,
+    ) => {
+      const chunks = handle.projector.consume({ type: 'activity', activity });
+      await checkpoint(handle);
+      return chunks;
     }),
-    heartbeat: jest.fn(async () => null),
+    recordLateOutcome: jest.fn(async (
+      _handle: CoachRunHandle, _activity: CoachActivityEvent,
+    ) => undefined),
+    heartbeat: jest.fn(async (): Promise<'user_cancelled' | 'ownership_lost' | null> => null),
   };
   const planStarts = {
     calendarCoachSession: jest.fn<PlanStartService['calendarCoachSession']>(),
   };
-  Object.assign(controller, {
+  const coachTurns = Object.assign(Object.create(CoachTurnOrchestrator.prototype), {
     prisma: {
       aiCoachSession: { findUnique: jest.fn(async () => null) },
     },
@@ -167,6 +193,7 @@ function setup(events: CoachUiStreamYield[]) {
     i18n: { t: (key: string) => key },
     logger,
   });
+  Object.assign(controller, { coachTurns, i18n: { t: (key: string) => key }, logger });
   const wire: string[] = [];
   const response = Object.assign(new EventEmitter(), {
     writableEnded: false,
@@ -218,6 +245,290 @@ function setup(events: CoachUiStreamYield[]) {
 }
 
 describe('durable Coach output contract', () => {
+  it('renews an idle streaming attempt every five seconds without checkpointing', async () => {
+    jest.useFakeTimers();
+    const fixture = setup([]);
+    const streaming = deferred<void>();
+    const finish = deferred<void>();
+    async function* idleStream() {
+      streaming.resolve();
+      await finish.promise;
+      yield success;
+    }
+    fixture.aiService.coachStream.mockImplementationOnce(async () => idleStream());
+    const completion = fixture.run({
+      protocolVersion: 2,
+      runCommand: { kind: 'start', requestId: 'idle-heartbeat' },
+    });
+
+    try {
+      await streaming.promise;
+      await jest.advanceTimersByTimeAsync(4_999);
+      expect(fixture.coachRuns.heartbeat).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(1);
+      expect(fixture.coachRuns.heartbeat).toHaveBeenCalledTimes(1);
+      expect(fixture.runSnapshots).toHaveLength(1);
+    } finally {
+      finish.resolve();
+      await completion;
+      jest.useRealTimers();
+    }
+  });
+
+  it('coalesces text and read-tool progress while persisting write-tool receipts immediately', async () => {
+    jest.useFakeTimers();
+    const fixture = setup([]);
+    const progress = deferred<void>();
+    const startWrite = deferred<void>();
+    const writeStarted = deferred<void>();
+    const writeCompleted = deferred<void>();
+    const completeWrite = deferred<void>();
+    const finish = deferred<void>();
+    const readTool = {
+      key: 'read', kind: 'tool', labelKey: 'tool', toolCallId: 'read-1',
+    } as const;
+    const writeTool = {
+      key: 'write',
+      kind: 'tool',
+      labelKey: 'tool',
+      mutation: true,
+      toolCallId: 'write-1',
+    } as const;
+    async function* stream(
+      onActivity: Parameters<AiService['coachStream']>[0]['onActivity'],
+    ): AsyncGenerator<CoachUiStreamYield> {
+      yield { type: 'stream_event', event: { type: 'text_delta', text: 'Plan ready.' } };
+      yield { type: 'assistant', message: { content: [
+        { type: 'tool_use', id: 'read-1', name: 'training_test', input: {} },
+      ] } };
+      for (const status of ['queued', 'running', 'completed'] as const)
+        await onActivity({ ...readTool, status });
+      yield { type: 'user', message: { content: [
+        { type: 'tool_result', tool_use_id: 'read-1', content: { ok: true } },
+      ] } };
+      yield { type: 'assistant', message: { content: [
+        { type: 'tool_use', id: 'pmc', name: 'PmcRange', input: {} },
+        { type: 'tool_use', id: 'zones', name: 'ProfileZones', input: {} },
+      ] } };
+      progress.resolve();
+      await startWrite.promise;
+      await onActivity({ ...writeTool, status: 'running' });
+      writeStarted.resolve();
+      await completeWrite.promise;
+      await onActivity({ ...writeTool, status: 'completed' });
+      writeCompleted.resolve();
+      await finish.promise;
+      yield success;
+    }
+    fixture.aiService.coachStream.mockImplementationOnce(async ({ onActivity }) =>
+      stream(onActivity),
+    );
+    const completion = fixture.run({
+      protocolVersion: 2,
+      runCommand: { kind: 'start', requestId: 'coalesced-progress' },
+    });
+
+    try {
+      await progress.promise;
+      expect(fixture.response.write.mock.calls.flat().join('')).toContain('Plan ready.');
+      expect(fixture.response.write.mock.calls.flat().join('')).toContain('PmcRange');
+      expect(fixture.coachRuns.heartbeat.mock.calls).toHaveLength(0);
+      expect(fixture.runSnapshots).toHaveLength(1);
+      await jest.advanceTimersByTimeAsync(1_999);
+      expect(fixture.runSnapshots).toHaveLength(1);
+      await jest.advanceTimersByTimeAsync(1);
+      expect(fixture.runSnapshots).toHaveLength(2);
+      expect(fixture.runSnapshots.at(-1)).toMatchObject({
+        parts: expect.arrayContaining([expect.objectContaining({
+          type: 'text',
+          text: 'Plan ready.',
+        })]),
+      });
+
+      startWrite.resolve();
+      await writeStarted.promise;
+      expect(fixture.runSnapshots).toHaveLength(3);
+      completeWrite.resolve();
+      await writeCompleted.promise;
+      expect(fixture.runSnapshots).toHaveLength(4);
+      expect(fixture.runSnapshots.at(-1)).toMatchObject({
+        parts: expect.arrayContaining([expect.objectContaining({
+          type: 'data-coach-activity',
+          data: expect.objectContaining({ toolCallId: 'write-1', status: 'completed' }),
+        })]),
+      });
+    } finally {
+      startWrite.resolve();
+      completeWrite.resolve();
+      finish.resolve();
+      await completion;
+      jest.useRealTimers();
+    }
+  });
+
+  it.each(['ownership_lost', 'user_cancelled'] as const)(
+    'observes %s on the next heartbeat and retains an already started write receipt',
+    async (reason) => {
+      jest.useFakeTimers();
+      const fixture = setup([]);
+      const writing = deferred<AbortSignal>();
+      const finishWrite = deferred<void>();
+      const receipt = {
+        key: 'write',
+        kind: 'tool',
+        labelKey: 'tool',
+        toolCallId: 'write-1',
+        mutation: true,
+      } as const;
+      fixture.coachRuns.heartbeat.mockResolvedValueOnce(reason);
+      if (reason === 'ownership_lost') {
+        fixture.coachRuns.checkpointStreamTerminal.mockRejectedValueOnce(
+          new ConflictException('The stale attempt was recovered'),
+        );
+      }
+      async function* stream({ onActivity, signal }: Parameters<AiService['coachStream']>[0]) {
+        await onActivity({ ...receipt, status: 'running' });
+        writing.resolve(signal);
+        await finishWrite.promise;
+        await onActivity({ ...receipt, status: 'completed' });
+      }
+      fixture.aiService.coachStream.mockImplementationOnce(async (options) => stream(options));
+      const completion = fixture.run({
+        protocolVersion: 2,
+        runCommand: { kind: 'start', requestId: 'late-write-receipt' },
+      });
+
+      try {
+        const signal = await writing.promise;
+        await jest.advanceTimersByTimeAsync(4_999);
+        expect(signal.aborted).toBe(false);
+        await jest.advanceTimersByTimeAsync(1);
+        expect(signal.reason).toBe(reason);
+      } finally {
+        finishWrite.resolve();
+        await completion;
+        jest.useRealTimers();
+      }
+      if (reason === 'ownership_lost') {
+        expect(fixture.coachRuns.recordLateOutcome).toHaveBeenCalledWith(
+          expect.anything(), { ...receipt, status: 'completed' },
+        );
+        const receiptOrder = fixture.coachRuns.recordLateOutcome.mock.invocationCallOrder[0];
+        expect(receiptOrder).toBeGreaterThan(
+          fixture.coachRuns.checkpointStreamTerminal.mock.invocationCallOrder.at(-1),
+        );
+        expect(await completion).toContainEqual({
+          type: 'ui_chunk',
+          chunk: { type: 'error', errorText: expect.any(String) },
+        });
+        expect(fixture.operations.markDelivered).not.toHaveBeenCalled();
+      } else {
+        expect(fixture.runSnapshots.at(-1)).toMatchObject({
+          parts: expect.arrayContaining([expect.objectContaining({
+            type: 'data-coach-activity',
+            data: expect.objectContaining({ toolCallId: 'write-1', status: 'completed' }),
+          })]),
+        });
+      }
+    },
+  );
+
+  it('keeps the lease alive while an awaiting-input checkpoint is pending', async () => {
+    jest.useFakeTimers();
+    const fixture = setup([
+      {
+        type: 'assistant',
+        message: { content: [{
+          type: 'tool_use',
+          id: 'question-1',
+          name: 'AskUserQuestion',
+          input: { questions: [{
+            id: 'goal',
+            header: 'Goal',
+            question: 'What is your goal?',
+            options: [{ label: 'Run', value: 'run' }, { label: 'Ride', value: 'ride' }],
+          }] },
+        }] },
+      },
+      success,
+    ]);
+    const saving = deferred<CoachRunStatus>();
+    const persisted = deferred<void>();
+    fixture.coachRuns.checkpointStreamTerminal.mockImplementationOnce(async (_handle, status) => {
+      saving.resolve(status);
+      await persisted.promise;
+    });
+    const completion = fixture.run({
+      protocolVersion: 2,
+      runCommand: { kind: 'start', requestId: 'pending-question-checkpoint' },
+    });
+
+    try {
+      expect(await saving.promise).toBe('awaiting_input');
+      await jest.advanceTimersByTimeAsync(10_000);
+      expect(fixture.coachRuns.heartbeat.mock.calls).toHaveLength(2);
+    } finally {
+      persisted.resolve();
+      await completion;
+      jest.useRealTimers();
+    }
+  });
+
+  it('does not settle a paid turn if the lease is lost before the success checkpoint', async () => {
+    const fixture = setup([
+      { type: 'stream_event', event: { type: 'text_delta', text: 'Plan ready.' } },
+      success,
+    ]);
+    fixture.coachRuns.checkpointStreamTerminal.mockRejectedValueOnce(
+      new ConflictException('Coach execution ownership changed'),
+    );
+
+    const output = await fixture.run({
+      protocolVersion: 2,
+      runCommand: { kind: 'start', requestId: 'expired-success' },
+    });
+    expect(output).toContainEqual({
+      type: 'ui_chunk',
+      chunk: { type: 'error', errorText: expect.any(String) },
+    });
+    expect(fixture.operations.markDelivered).not.toHaveBeenCalled();
+    expect(fixture.operations.complete).not.toHaveBeenCalled();
+    expect(fixture.operations.fail).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not charge a failed paid turn after it delivered a mutation receipt', async () => {
+    const fixture = setup([
+      {
+        type: 'assistant',
+        message: { content: [{
+          type: 'tool_use',
+          id: 'mutation-applied:committed',
+          name: 'MutationApplied',
+          input: { kind: 'mutation_applied', ok: true, actionId: 'committed' },
+        }] },
+      },
+      success,
+    ]);
+    fixture.coachRuns.checkpointStreamTerminal.mockRejectedValueOnce(
+      new ConflictException('Coach execution ownership changed'),
+    );
+
+    const output = await fixture.run({
+      protocolVersion: 2,
+      runCommand: { kind: 'start', requestId: 'failed-after-mutation' },
+    });
+    expect(output).toContainEqual(expect.objectContaining({
+      type: 'ui_chunk',
+      chunk: expect.objectContaining({
+        type: 'data-coach-tool',
+        data: expect.objectContaining({ name: 'MutationApplied' }),
+      }),
+    }));
+    expect(fixture.operations.markDelivered).not.toHaveBeenCalled();
+    expect(fixture.operations.complete).not.toHaveBeenCalled();
+    expect(fixture.operations.fail).toHaveBeenCalledTimes(1);
+  });
+
   it('ends an obsolete answer with the stale-question code before calling the model', async () => {
     const { run, coachRuns, aiService, aiUsage, logger } = setup([]);
     coachRuns.begin.mockRejectedValueOnce(
@@ -540,7 +851,46 @@ const modelUnavailableResult = expect.objectContaining({
   result: 'common.error.ai_coach_model_unavailable',
 });
 
+describe('Activity review language through the controller', () => {
+  it.each([
+    [undefined, 'en'],
+    ['zh-CN', 'zh'],
+    ['zh-TW', 'zh-hant'],
+    ['ja', 'ja'],
+    ['de', 'de'],
+    ['pt-BR', 'pt-BR'],
+  ])('uses the supported language for %s when reading the review cache', async (locale, expected) => {
+    const probeActivityAiAnalysisRoute = jest.fn(async () => ({
+      kind: 'CACHED',
+      content: 'review',
+    }));
+    const controller: AiController = Object.assign(Object.create(AiController.prototype), {
+      aiService: { probeActivityAiAnalysisRoute },
+    });
+
+    await controller.streamActivityAiAnalysis('activity', 'athlete', null, true, locale, 'operation');
+
+    expect(probeActivityAiAnalysisRoute).toHaveBeenCalledWith(
+      'activity',
+      'athlete',
+      true,
+      expected,
+      false,
+    );
+  });
+});
+
 describe('AI coach client output contract through the controller', () => {
+  it('uses Traditional Chinese for a Chinese prompt with a Taiwan locale', async () => {
+    const fixture = setup([success]);
+
+    await fixture.run({ lang: 'zh-TW', q: '今天適合怎麼訓練？' });
+
+    expect(fixture.aiService.coachStream).toHaveBeenCalledWith(
+      expect.objectContaining({ lang: 'zh-hant' }),
+    );
+  });
+
   it.each([
     ['empty success', [success]],
     ['missing terminal', []],

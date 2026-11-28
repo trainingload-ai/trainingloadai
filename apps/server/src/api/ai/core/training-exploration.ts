@@ -1,3 +1,4 @@
+import { publicRuntimeText } from '@/utils/public-runtime-copy';
 import { combineExplorationAxes } from '@shared/training-chart-model';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
@@ -357,7 +358,7 @@ export async function queryTrainingExploration(
       String(input.title ?? '')
         .trim()
         .slice(0, 80) ||
-      (ctx.lang.startsWith('zh') ? '训练分析' : 'Training analysis'),
+      publicRuntimeText(ctx.lang, 'trainingAnalysis'),
     subtitle:
       String(input.subtitle ?? '')
         .trim()

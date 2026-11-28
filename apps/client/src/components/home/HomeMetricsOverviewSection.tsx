@@ -29,7 +29,7 @@ import {
   getDashboardMetricTitle,
 } from "@/app/[locale]/(main)/dashboard/components/Overview/overview-model";
 import {
-  getHealthOverviewCopy,
+  useHealthOverviewCopy,
   HealthMetricCard,
   HealthMetricCardEmpty,
   HealthMetricCardLoading,
@@ -130,7 +130,7 @@ export function HomeMetricsOverviewSection() {
   const recordsT = useTranslations("HealthRecords");
   const locale = useLocale();
   const copy = locale.startsWith("zh") ? COPY.zh : COPY.en;
-  const healthCopy = getHealthOverviewCopy(locale);
+  const healthCopy = useHealthOverviewCopy();
   const tDashboard = useTranslations("dashboard");
   const tFitness = useTranslations("dashboard.fitnessStatus");
   const tOverview = useTranslations("dashboard.overview");

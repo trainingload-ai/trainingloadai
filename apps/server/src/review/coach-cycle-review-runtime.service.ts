@@ -1,21 +1,12 @@
-/**
- * 周期 Runtime：计划 COMPLETED 且 finalize 之后，提案「开启下一计划」。
- *
- * 不能 Nest 注入进 PlanModule（会环）。监听 plan.finalized，
- * 这里再 openBranch(allowFinalized) + squash open_next。
- * CANCELLED 不提案。实例策略未授权也不提案。不受 AI_REVIEW_MODE.planReview 通知开关限制。
- * apply 时不改已完成计划，只记 ADAPTATION_APPLIED。
- */
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import { Interval } from '@nestjs/schedule';
+import { randomUUID } from 'node:crypto';
 import { PrismaService } from '@/prisma/prisma.service';
+import type { PrismaTx } from '@/prisma/prisma-db';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { CoachBranchingService } from '@/api/ai/coach-branching.service';
 import { UserService } from '@/api/user/user.service';
 import { I18nService } from 'nestjs-i18n';
-import {
-  PLAN_FINALIZED_EVENT,
-  type PlanFinalizedEvent,
-} from '@/api/plan/events/plan.events';
 import { PlanQueryService } from '@/api/plan/application/plan-query.service';
 import { coachRuntimeText } from './coach-runtime-copy';
 import {
@@ -32,15 +23,33 @@ export type CycleReviewRuntimeResult = {
     | 'no_summary'
     | 'duplicate'
     | 'successor_exists'
+    | 'lease_lost'
     | 'propose';
   decisionId?: string;
 };
 
 const OPEN_REASON = 'runtime_cycle_review';
+const CYCLE_REVIEW_POLL_MS = 5_000;
+const CYCLE_REVIEW_LEASE_MS = 60_000;
+
+type CycleReviewTarget = {
+  userId: string;
+  planId: string;
+  planStatus: 'COMPLETED' | 'CANCELLED';
+};
+
+type ClaimedCycleReview = {
+  contextId: string;
+  userId: string;
+  planId: string;
+  attempts: number;
+  claimToken: string;
+};
 
 @Injectable()
 export class CoachCycleReviewRuntimeService {
   private readonly logger = new Logger(CoachCycleReviewRuntimeService.name);
+  private draining = false;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -52,40 +61,130 @@ export class CoachCycleReviewRuntimeService {
     private readonly planQuery: PlanQueryService,
   ) {}
 
-  @OnEvent(PLAN_FINALIZED_EVENT)
-  async handlePlanFinalized(event: PlanFinalizedEvent) {
+  @Interval(CYCLE_REVIEW_POLL_MS)
+  async drain() {
+    if (this.draining) return;
+    this.draining = true;
     try {
-      await this.runAfterFinalize(event);
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : String(error);
-      this.logger.warn(
-        `[cycle-runtime] plan.finalized failed userId=${event.userId} planId=${event.planId}: ${msg}`,
-      );
+      for (let processed = 0; processed < 10; processed += 1) {
+        const job = await this.claimNext();
+        if (!job) return;
+        try {
+          await this.runAfterFinalize({ ...job, planStatus: 'COMPLETED' }, job);
+        } catch (error) {
+          const lastError = (
+            error instanceof Error ? error.message : String(error)
+          ).slice(0, 1000);
+          await this.prisma.coachCycleReviewJob.updateMany({
+            where: {
+              contextId: job.contextId,
+              claimToken: job.claimToken,
+              completedAt: null,
+            },
+            data: {
+              claimToken: null,
+              leaseExpiresAt: null,
+              availableAt: new Date(
+                Date.now() + 10_000 * 2 ** Math.min(job.attempts - 1, 6),
+              ),
+              lastError,
+            },
+          });
+          this.logger.warn(
+            `Cycle review failed for plan ${job.planId}: ${lastError}`,
+          );
+        }
+      }
+    } finally {
+      this.draining = false;
     }
   }
 
-  /** 已完成计划：打开 FINALIZED 上的短分支，提案 PLAN_LIFECYCLE / open_next。 */
-  async runAfterFinalize(args: {
-    userId: string;
-    planId: string;
-    planStatus: 'COMPLETED' | 'CANCELLED';
-  }): Promise<CycleReviewRuntimeResult> {
+  private async claimNext(now = new Date()) {
+    const claimToken = randomUUID();
+    const leaseExpiresAt = new Date(now.getTime() + CYCLE_REVIEW_LEASE_MS);
+    const [job] = await this.prisma.$queryRaw<ClaimedCycleReview[]>`
+      WITH picked AS (
+        SELECT context_id FROM t_coach_cycle_review_job
+        WHERE completed_at IS NULL
+          AND available_at <= (${now}::timestamptz AT TIME ZONE 'UTC')
+          AND (lease_expires_at IS NULL OR lease_expires_at <= (${now}::timestamptz AT TIME ZONE 'UTC'))
+        ORDER BY available_at, context_id
+        LIMIT 1
+        FOR UPDATE SKIP LOCKED
+      )
+      UPDATE t_coach_cycle_review_job j
+      SET claim_token = ${claimToken},
+          lease_expires_at = (${leaseExpiresAt}::timestamptz AT TIME ZONE 'UTC'),
+          attempts = j.attempts + 1
+      FROM picked
+      JOIN t_coach_context c ON c.id = picked.context_id
+      WHERE j.context_id = picked.context_id
+      RETURNING j.context_id AS "contextId", c.user_id AS "userId",
+        c.plan_id AS "planId", j.attempts, j.claim_token AS "claimToken"
+    `;
+    return job;
+  }
+
+  async runAfterFinalize(
+    args: CycleReviewTarget,
+    claim?: Pick<ClaimedCycleReview, 'contextId' | 'claimToken'>,
+  ): Promise<CycleReviewRuntimeResult> {
     if (args.planStatus !== 'COMPLETED') {
       return { skipped: true, reason: 'not_completed' };
     }
 
+    const lang = await this.userService.getPreferredLocale(args.userId);
     const access = await this.featureAccess.evaluate(args.userId, [
       'ai.planAdvice',
     ]);
-    if (!access.features['ai.planAdvice'].allowed) {
-      return { skipped: true, reason: 'not_allowed' };
+    const allowed = access.features['ai.planAdvice'].allowed;
+    const result = await this.prisma.$transaction(
+      async (tx): Promise<CycleReviewRuntimeResult> => {
+        await acquireHashtextAdvisoryXactLock(tx, args.userId);
+        if (claim) {
+          const completed = await tx.coachCycleReviewJob.updateMany({
+            where: {
+              contextId: claim.contextId,
+              context: { userId: args.userId, planId: args.planId },
+              claimToken: claim.claimToken,
+              completedAt: null,
+              leaseExpiresAt: { gt: new Date() },
+            },
+            data: {
+              completedAt: new Date(),
+              claimToken: null,
+              leaseExpiresAt: null,
+              lastError: null,
+            },
+          });
+          if (completed.count !== 1)
+            return { skipped: true, reason: 'lease_lost' };
+        }
+        if (!allowed) return { skipped: true, reason: 'not_allowed' };
+        return this.publishNextPlanProposal(args, lang, tx);
+      },
+    );
+    if (result.decisionId) {
+      this.logger.log(
+        `[cycle-runtime] proposed open_next userId=${args.userId} planId=${args.planId} decisionId=${result.decisionId}`,
+      );
     }
+    return result;
+  }
 
+  private async publishNextPlanProposal(
+    args: CycleReviewTarget,
+    lang: Awaited<ReturnType<UserService['getPreferredLocale']>>,
+    tx: PrismaTx,
+  ): Promise<CycleReviewRuntimeResult> {
     if (
       !(
-        await this.planQuery.findNextCycleEligiblePlanIds(args.userId, [
-          args.planId,
-        ])
+        await this.planQuery.findNextCycleEligiblePlanIds(
+          args.userId,
+          [args.planId],
+          tx,
+        )
       ).length
     ) {
       return { skipped: true, reason: 'successor_exists' };
@@ -94,25 +193,25 @@ export class CoachCycleReviewRuntimeService {
     const context = await this.planQuery.findContextByPlan(
       args.userId,
       args.planId,
+      tx,
     );
     if (!context) {
       return { skipped: true, reason: 'no_context' };
     }
 
-    const pending = await this.prisma.coachDecision.findFirst({
+    const existing = await tx.coachDecision.findFirst({
       where: {
         contextId: context.id,
-        state: 'PROPOSED',
         decisionType: 'PLAN_LIFECYCLE',
         branch: { openReason: OPEN_REASON },
       },
       select: { id: true },
     });
-    if (pending) {
+    if (existing) {
       return { skipped: true, reason: 'duplicate' };
     }
 
-    const summary = await this.prisma.coachSummary.findUnique({
+    const summary = await tx.coachSummary.findUnique({
       where: { contextId: context.id },
       select: {
         id: true,
@@ -126,8 +225,7 @@ export class CoachCycleReviewRuntimeService {
       return { skipped: true, reason: 'no_summary' };
     }
 
-    const plan = await this.planQuery.findPlanTitle(args.planId);
-    const lang = await this.userService.getPreferredLocale(args.userId);
+    const plan = await this.planQuery.findPlanTitle(args.planId, tx);
     const planTitle =
       plan?.title?.trim() ||
       coachRuntimeText(this.i18n, lang, 'cycleFallbackPlanTitle');
@@ -147,49 +245,52 @@ export class CoachCycleReviewRuntimeService {
       },
     );
 
-    const opened = await this.branching.openBranch({
-      userId: args.userId,
-      planId: args.planId,
-      openReason: OPEN_REASON,
-      allowFinalized: true,
-      sourceNode: {
-        page: OPEN_REASON,
+    const opened = await this.branching.openBranch(
+      {
+        userId: args.userId,
         planId: args.planId,
-        summaryId: summary.id,
-      },
-    });
-    const squashed = await this.branching.squashBranch({
-      userId: args.userId,
-      branchId: opened.branch.id,
-      riskTier: 'HIGH',
-      decisionType: 'PLAN_LIFECYCLE',
-      payload: {
-        planId: args.planId,
-        action: 'open_next',
-        summaryId: summary.id,
-        summaryMarkdown: summary.markdown,
-        planTitle,
-        completionRate,
-        progressLabel: summary.progressLabel,
-        nextPlanPrompt,
-      },
-      rationale,
-      options: [
-        {
-          optionKey: 'apply',
-          title: coachRuntimeText(this.i18n, lang, 'optionStartNextPlan'),
-          isSelected: true,
+        contextId: context.id,
+        openReason: OPEN_REASON,
+        allowFinalized: true,
+        sourceNode: {
+          page: OPEN_REASON,
+          planId: args.planId,
+          summaryId: summary.id,
         },
-        {
-          optionKey: 'keep',
-          title: coachRuntimeText(this.i18n, lang, 'optionNotNow'),
-          isSelected: false,
+      },
+      tx,
+    );
+    const squashed = await this.branching.squashBranch(
+      {
+        userId: args.userId,
+        branchId: opened.branch.id,
+        riskTier: 'HIGH',
+        decisionType: 'PLAN_LIFECYCLE',
+        payload: {
+          planId: args.planId,
+          action: 'open_next',
+          summaryId: summary.id,
+          summaryMarkdown: summary.markdown,
+          planTitle,
+          completionRate,
+          progressLabel: summary.progressLabel,
+          nextPlanPrompt,
         },
-      ],
-    });
-
-    this.logger.log(
-      `[cycle-runtime] proposed open_next userId=${args.userId} planId=${args.planId} decisionId=${squashed.decision.id}`,
+        rationale,
+        options: [
+          {
+            optionKey: 'apply',
+            title: coachRuntimeText(this.i18n, lang, 'optionStartNextPlan'),
+            isSelected: true,
+          },
+          {
+            optionKey: 'keep',
+            title: coachRuntimeText(this.i18n, lang, 'optionNotNow'),
+            isSelected: false,
+          },
+        ],
+      },
+      tx,
     );
 
     return {

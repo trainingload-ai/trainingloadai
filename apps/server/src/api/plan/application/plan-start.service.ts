@@ -1,3 +1,4 @@
+import { planScheduleInvalid, readPlanScheduleIssues } from './plan-schedule-error';
 import { findConsumedTemplatePlan } from '@/api/plan-template/persistence/plan-template-preview.repository';
 import type { WorkoutStructure } from '@shared/workout-structure';
 import { RollingPlanAuthorizationService } from './rolling-plan-authorization.service';
@@ -906,7 +907,7 @@ export class PlanStartService {
         periodWeeks: source.periodWeeks, constraints, qualityContract, projectDates: true,
       });
       if (!schedule.valid)
-        throw new UnprocessableEntityException({ code: 'PLAN_SCHEDULE_INVALID', data: { issues: schedule.issues } });
+        throw planScheduleInvalid(schedule.issues);
 
       const activated = await this.plans.activatePlan(
         userId, planId, startDate, { source: 'manual', action: 'official_template_start' },
@@ -1318,15 +1319,11 @@ export class PlanStartService {
           tx,
         );
       } catch (err) {
-        const response =
-          err instanceof UnprocessableEntityException
-            ? (err.getResponse() as {
-                message?: string;
-                issues?: Array<{ date?: string; code?: string; message?: string }>;
-              })
-            : null;
-        if (response?.issues?.length) {
-          for (const issue of response.issues) {
+        const issues = err instanceof UnprocessableEntityException
+          ? readPlanScheduleIssues(err.getResponse()) as Array<{ date?: string; code?: string; message?: string }> | undefined
+          : undefined;
+        if (issues?.length) {
+          for (const issue of issues) {
             conflicts.push({
               date: issue.date,
               code: issue.code ?? 'PLAN_SCHEDULE_INVALID',
@@ -3578,10 +3575,7 @@ export class PlanStartService {
               tx,
             );
           if (!report.valid)
-            throw new UnprocessableEntityException({
-              code: 'PLAN_SCHEDULE_INVALID',
-              issues: report.issues,
-            });
+            throw planScheduleInvalid(report.issues);
           const calendarDraftStartDate =
             source.planningMode === 'ROLLING'
               ? (range?.from ?? startDate)

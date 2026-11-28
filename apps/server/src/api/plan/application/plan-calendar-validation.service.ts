@@ -1,5 +1,6 @@
 import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { planScheduleInvalid } from './plan-schedule-error';
 import {
   addCalendarDays,
   calendarIsoWeekday,
@@ -15,10 +16,12 @@ import {
   type PlanQualityContract,
 } from '@shared/plan-quality';
 import type { PlanDb } from '../persistence/plan-db';
+import { scheduledReplacementCutoff } from '../persistence/plan.repository';
 
 type Candidate = {
   userId: string;
   planId: string;
+  replacesPlanId?: string;
   startDate: string;
   periodWeeks: number | null;
   planningMode?: 'FIXED' | 'ROLLING';
@@ -57,14 +60,11 @@ export class PlanCalendarValidationService {
     if (issues.length) {
       const summary = issues
         .slice(0, 5)
-        .map((issue) => (issue.date ? `${issue.code}@${issue.date}` : issue.code))
+        .map((issue) =>
+          issue.date ? `${issue.code}@${issue.date}` : issue.code,
+        )
         .join(', ');
-      throw new UnprocessableEntityException({
-        code: 'PLAN_SCHEDULE_INVALID',
-        message: `PLAN_SCHEDULE_INVALID: ${summary}`,
-        issues,
-        data: { issues },
-      });
+      throw planScheduleInvalid(issues, `PLAN_SCHEDULE_INVALID: ${summary}`);
     }
   }
 
@@ -93,13 +93,16 @@ export class PlanCalendarValidationService {
     ];
     if (!dates.length && !input.validationRange)
       return { relatedConflicts: [] as RelatedCalendarConflict[] };
-    const others = await this.calendar.otherWorkouts(
+    const existing = await this.calendar.otherWorkouts(
       input.userId,
       input.planId,
       dates,
       input.validationRange,
       tx,
     );
+    const others = input.replacesPlanId
+      ? existing.filter((workout) => workout.planId !== input.replacesPlanId)
+      : existing;
     if (input.validationRange) {
       for (const row of others.filter((w) => this.inCalendar(w))) {
         const date = ymd(row.scheduledDate)!;
@@ -136,17 +139,24 @@ export class PlanCalendarValidationService {
             ]
           : [];
       });
+    if (input.replacesPlanId) this.reject(relatedConflicts);
     this.reject(
       dates.flatMap((date) =>
         this.dailyIssues(
           [date],
           rows,
-          planDailyMinuteLimit(rulesAt(date).qualityContract, calendarIsoWeekday(date)),
+          planDailyMinuteLimit(
+            rulesAt(date).qualityContract,
+            calendarIsoWeekday(date),
+          ),
         ),
       ),
     );
     // Other effective plans can impose a stricter athlete time budget too.
-    await this.assertDates(input.userId, dates, rows, tx, input.planId);
+    await this.assertDates(input.userId, dates, rows, tx, {
+      excludePlanId: input.planId,
+      replacesPlanId: input.replacesPlanId,
+    });
     return { relatedConflicts };
   }
 
@@ -179,39 +189,47 @@ export class PlanCalendarValidationService {
           durationSeconds: w.plannedDurationSeconds,
         })),
       tx,
-      undefined,
-      changedWorkoutIds,
+      { changedWorkoutIds },
     );
   }
 
   private inCalendar(w: {
     scheduledDate: Date | null;
     plan: {
+      userId: string;
       status: string;
       startDate: Date | null;
-      activationBlockedAt?: Date | null;
+      activationBlockedAt: Date | null;
+      scheduledActivationAt: Date | null;
+      supersedes: { userId: string; status: string } | null;
       supersededBy: {
+        userId: string;
         status: string;
         startDate: Date | null;
-        activationBlockedAt?: Date | null;
+        activationBlockedAt: Date | null;
+        scheduledActivationAt: Date | null;
       } | null;
     } | null;
   }) {
     if (!w.plan) return true;
     if (!['ACTIVE', 'PAUSED', 'SCHEDULED'].includes(w.plan.status))
       return false;
-    if (w.plan.status === 'SCHEDULED' && w.plan.activationBlockedAt)
+    if (
+      w.plan.status === 'SCHEDULED' &&
+      (w.plan.activationBlockedAt ||
+        !w.plan.scheduledActivationAt ||
+        w.plan.supersedes?.userId !== w.plan.userId ||
+        !['ACTIVE', 'PAUSED', 'COMPLETED'].includes(w.plan.supersedes.status))
+    )
       return false;
     const date = ymd(w.scheduledDate);
     const start = ymd(w.plan.startDate);
     if (!date || (start && date < start)) return false;
-    const successor = w.plan.supersededBy;
-    return !(
-      successor?.status === 'SCHEDULED' &&
-      !successor.activationBlockedAt &&
-      ymd(successor.startDate) &&
-      date >= ymd(successor.startDate)!
+    const cutoff = scheduledReplacementCutoff(
+      w.plan.userId,
+      w.plan.supersededBy,
     );
+    return !cutoff || date < cutoff;
   }
 
   private dailyIssues(
@@ -246,13 +264,21 @@ export class PlanCalendarValidationService {
     dates: string[],
     rows: CalendarRow[],
     tx: PlanDb,
-    excludePlanId?: string,
-    changedWorkoutIds: string[] = [],
+    options: {
+      excludePlanId?: string;
+      replacesPlanId?: string;
+      changedWorkoutIds?: string[];
+    } = {},
   ) {
-    const changed = new Set(changedWorkoutIds);
-    const plans = await this.calendar.activePlans(userId, excludePlanId, tx);
+    const changed = new Set(options.changedWorkoutIds);
+    const plans = await this.calendar.activePlans(
+      userId,
+      options.excludePlanId,
+      tx,
+    );
     const issues: Issue[] = [];
     for (const plan of plans) {
+      if (plan.id === options.replacesPlanId) continue;
       const metadata = plan.generationMetadata as Record<
         string,
         unknown
@@ -264,10 +290,7 @@ export class PlanCalendarValidationService {
         (start && plan.planningMode !== 'ROLLING'
           ? addCalendarDays(start, plan.periodWeeks * 7 - 1)
           : null);
-      const cutoff =
-        plan.supersededBy?.status === 'SCHEDULED'
-          ? ymd(plan.supersededBy.startDate)
-          : null;
+      const cutoff = scheduledReplacementCutoff(plan.userId, plan.supersededBy);
       const activeDates = dates.filter(
         (d) =>
           start && d >= start && (!end || d <= end) && (!cutoff || d < cutoff),

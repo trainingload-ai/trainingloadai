@@ -220,7 +220,32 @@
       "id": "0044_import_item_utc_availability",
       "file": "0044_import_item_utc_availability/migration.sql",
       "sha256": "59f7dad8a05c7c41790a3d7f81fff4e27db27ab1146b1abd52bbc1c07a6ad980"
+    },
+    {
+      "id": "0045_coach_cycle_review_queue",
+      "file": "0045_coach_cycle_review_queue/migration.sql",
+      "sha256": "eb6fc7e66423bbbe479b7bd92d15115831a2e5b465b391e3098e6bc8943eaee9"
+    },
+    {
+      "id": "0046_fixed_plan_completion",
+      "file": "0046_fixed_plan_completion/migration.sql",
+      "sha256": "83ba1dba8aeab54cfed8f342bb4edc7a6f22cdd7909aa993881c674836b78da6"
+    },
+    {
+      "id": "0047_coach_mutation_invocation",
+      "file": "0047_coach_mutation_invocation/migration.sql",
+      "sha256": "5425732a9e001ad92a949a53c0427645c8bfad1ff9c87a9f1a0bb563986d5b80"
+    },
+    {
+      "id": "0048_plan_workout_change_revision",
+      "file": "0048_plan_workout_change_revision/migration.sql",
+      "sha256": "497b979f68f93ae43eedb01b18c02a9d69ed458a61e425407ce76a042466c1b9"
+    },
+    {
+      "id": "0049_personal_oauth_refresh_claim",
+      "file": "0049_personal_oauth_refresh_claim/migration.sql",
+      "sha256": "7e68cc1a71e5e0a8fc81ff079f5dee5a8c9bfb1ba1c96111002d15d2df7ea703"
     }
   ],
-  "schemaChecksum": "7b196e317d3b63144be80625ed880a8fddfa256ac4b418a45d06b0edb26bf769"
+  "schemaChecksum": "712b24db13aa7a6ac889e72cdbc32b8e418e6143744030a22353461bb9d5761e"
 }

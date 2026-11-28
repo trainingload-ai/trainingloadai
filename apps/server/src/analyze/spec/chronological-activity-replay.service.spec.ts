@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { SportType } from '@prisma/client';
+import { MetricSource, SportType, UserFitnessMetricType } from '@prisma/client';
 import {
   ChronologicalActivityReplayService,
   selectCausallyClosedActivityPage,
@@ -305,6 +305,35 @@ describe('ChronologicalActivityReplayService', () => {
     effectiveTo: new Date('2026-01-02T00:00:00.000Z'),
   };
 
+  it('reads and commits evidence through the end of an admitted future activity', async () => {
+    const start = new Date('2026-01-02T00:00:00.000Z');
+    const end = new Date('2026-01-02T01:00:00.000Z');
+    const pending = replayActivity(42, start.toISOString(), end.toISOString());
+    pending.processingStatus = 'ANALYZING';
+    const harness = replayHarness({ activities: [pending] });
+
+    const result = await harness.service.replay({
+      ...request,
+      effectiveFrom: start,
+      effectiveTo: start,
+      includeActivityEnds: true,
+      includeActivityIds: [42],
+    });
+
+    expect(result).toMatchObject({ completed: true, processedActivities: 1 });
+    expect(harness.users.listTimelineFitnessMetrics).toHaveBeenCalledWith(
+      'user-1',
+      end,
+    );
+    expect(harness.users.applyTimelineProjectionBatch).toHaveBeenCalledWith(
+      expect.objectContaining({ replaceFrom: start, replaceTo: end }),
+      expect.anything(),
+    );
+    expect(harness.observations.calculate).toHaveBeenCalledWith(
+      expect.objectContaining({ effectiveAt: end, eligibleActivityIds: [42] }),
+    );
+  });
+
   it('does not read high-frequency records when every calculation fingerprint hits', async () => {
     const harness = replayHarness();
 
@@ -592,6 +621,128 @@ describe('ChronologicalActivityReplayService', () => {
             effectiveAt,
           }),
         ],
+      }),
+      harness.tx,
+    );
+  });
+
+  it('ignores a 28/32/34-style midnight AUTO LTHR batch during DATA_REPAIR', async () => {
+    const activityStart = new Date('2026-07-16T01:10:00.000Z');
+    const activity = replayActivity(
+      28,
+      activityStart.toISOString(),
+      '2026-07-16T02:05:11.000Z',
+    );
+    const harness = replayHarness({ activities: [activity] });
+    const midnightBatch = ['2026-06-01', '2026-07-01', '2026-07-16'].flatMap(
+      (day) =>
+        (['RUN', 'CYCLING'] as const).map((sport) => ({
+          id: `auto-${sport}-${day}`,
+          type: UserFitnessMetricType.LTHR,
+          sport: sport === 'RUN' ? SportType.RUN : SportType.CYCLING,
+          value: sport === 'RUN' ? 168 : 162,
+          value2: null,
+          source: MetricSource.AUTO,
+          recordedAt: new Date(`${day}T00:00:00.000Z`),
+          originPayload: null,
+          projectionFingerprint: null,
+          originChecksum: null,
+        })),
+    );
+    const activityTimed = {
+      id: 'auto-activity-end',
+      type: UserFitnessMetricType.LTHR,
+      sport: SportType.RUN,
+      value: 171,
+      value2: null,
+      source: MetricSource.AUTO,
+      recordedAt: new Date('2026-07-15T11:05:33.000Z'),
+      originPayload: { sourceActivityIds: [8801] },
+      projectionFingerprint: 'activity-end',
+      originChecksum: null,
+    };
+    const manual = {
+      id: 'manual-lthr',
+      type: UserFitnessMetricType.LTHR,
+      sport: SportType.RUN,
+      value: 164,
+      value2: null,
+      source: MetricSource.MANUAL,
+      recordedAt: new Date('2026-07-15T12:00:00.000Z'),
+      originPayload: null,
+      projectionFingerprint: null,
+      originChecksum: null,
+    };
+    harness.users.listTimelineFitnessMetrics.mockResolvedValue([
+      ...midnightBatch,
+      activityTimed,
+      manual,
+    ]);
+    let resolvedValue:
+      | { origin?: string; value?: number | null; effectiveAt?: Date }
+      | undefined;
+    harness.contexts.resolve.mockImplementation(
+      async (args: {
+        activity: { id: number; startTime: Date; endTime: Date };
+        projector: {
+          resolve: (input: {
+            metric: string;
+            sport: string;
+            at: Date;
+          }) => {
+            origin?: string;
+            value?: number | null;
+            effectiveAt?: Date;
+          };
+        };
+      }) => {
+        resolvedValue = args.projector.resolve({
+          metric: 'LTHR',
+          sport: 'RUN',
+          at: args.activity.startTime,
+        });
+        return {
+          calculationFingerprint: 'calculation-1',
+          provenanceFingerprint: 'provenance-1',
+          activityId: args.activity.id,
+          activityStart: args.activity.startTime,
+          activityEnd: args.activity.endTime,
+          sport: SportType.RUN,
+          metrics: {},
+        };
+      },
+    );
+    const warn = jest.spyOn(
+      (harness.service as unknown as { logger: { warn: (message: string) => void } })
+        .logger,
+      'warn',
+    );
+
+    await harness.service.replay({
+      userId: 'legacy-athlete',
+      sourceJobType: 'ACTIVITY_RECOMPUTE',
+      sourceJobId: 'legacy-replay',
+      effectiveFrom: activityStart,
+      effectiveTo: new Date('2026-07-17T00:00:00.000Z'),
+      dataRepair: true,
+    });
+
+    expect(resolvedValue).toEqual(
+      expect.objectContaining({
+        origin: 'MANUAL',
+        value: 164,
+        effectiveAt: manual.recordedAt,
+      }),
+    );
+    expect(
+      warn.mock.calls.filter((call) =>
+        String(call[0]).includes('忽略非因果 AUTO 日历日零点投影'),
+      ),
+    ).toHaveLength(midnightBatch.length);
+    expect(harness.users.applyTimelineProjectionBatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'legacy-athlete',
+        replacementReason: 'DATA_REPAIR_REPLAY',
       }),
       harness.tx,
     );

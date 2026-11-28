@@ -1,3 +1,4 @@
+import { publicRuntimeText } from '@/utils/public-runtime-copy';
 import { LoadReadoutService } from './load-readout.service';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { $Enums, Prisma } from '@prisma/client';
@@ -870,11 +871,8 @@ export class ActivityAiReviewService {
           actualLoadSource: load?.actualLoadSource ?? null,
         } as Prisma.InputJsonValue,
         content,
-        verdict: language === 'zh' ? '按计划恢复' : 'Recover as planned',
-        summary:
-          language === 'zh'
-            ? `实际负荷 ${actualLoad}，已计入当前训练周期。`
-            : `Actual load ${actualLoad}, included in the current training cycle.`,
+        verdict: publicRuntimeText(language, 'reviewDemoVerdict'),
+        summary: publicRuntimeText(language, 'reviewDemoSummary', { load: actualLoad }),
         provider: 'public-demo',
         model: 'curated-v1',
         attempts: 1,

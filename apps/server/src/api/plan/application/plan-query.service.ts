@@ -8,7 +8,11 @@ import {
   Optional,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementCutoff,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
 import { CoachContextRepository } from '../persistence/coach-context.repository';
@@ -614,11 +618,11 @@ export class PlanQueryService {
     });
   }
 
-  findPlanTitle(planId: string) {
-    return this.plans.findUnique({
-      where: { id: planId },
-      select: { id: true, title: true },
-    });
+  findPlanTitle(planId: string, db?: PlanDb) {
+    return this.plans.findUnique(
+      { where: { id: planId }, select: { id: true, title: true } },
+      db,
+    );
   }
 
   /** A completed cycle needs a next-plan suggestion only until a successor exists.
@@ -628,12 +632,28 @@ export class PlanQueryService {
   async findNextCycleEligiblePlanIds(
     userId: string,
     planIds: string[],
+    db?: PlanDb,
   ): Promise<string[]> {
     if (!planIds.length) return [];
-    const plans = await this.plans.findMany({
-      where: { userId, status: { not: 'DRAFT' } },
-      select: { id: true, status: true, completedAt: true, activatedAt: true },
-    });
+    const plans = await this.plans.findMany(
+      {
+        where: {
+          userId,
+          status: { not: 'DRAFT' },
+          OR: [
+            { status: { not: 'SCHEDULED' } },
+            scheduledReplacementReservationWhere(userId),
+          ],
+        },
+        select: {
+          id: true,
+          status: true,
+          completedAt: true,
+          activatedAt: true,
+        },
+      },
+      db,
+    );
     return plans
       .filter(
         (source) =>
@@ -655,7 +675,10 @@ export class PlanQueryService {
     const plans = await this.plans.findMany({
       where: {
         userId,
-        status: { in: ['ACTIVE', 'PAUSED', 'SCHEDULED'] },
+        OR: [
+          { status: { in: ['ACTIVE', 'PAUSED'] } },
+          scheduledReplacementReservationWhere(userId),
+        ],
       },
       orderBy: [{ startDate: 'asc' }, { updatedAt: 'desc' }],
       select: {
@@ -664,7 +687,13 @@ export class PlanQueryService {
         status: true,
         startDate: true,
         supersededBy: {
-          select: { status: true, startDate: true },
+          select: {
+            userId: true,
+            status: true,
+            startDate: true,
+            scheduledActivationAt: true,
+            activationBlockedAt: true,
+          },
         },
         updatedAt: true,
         workouts: {
@@ -686,10 +715,7 @@ export class PlanQueryService {
     });
     return plans.map((plan) => {
       const starts = plan.startDate?.toISOString().slice(0, 10) ?? null;
-      const cutoff =
-        plan.supersededBy?.status === 'SCHEDULED'
-          ? (plan.supersededBy.startDate?.toISOString().slice(0, 10) ?? null)
-          : null;
+      const cutoff = scheduledReplacementCutoff(userId, plan.supersededBy);
       return {
         ...plan,
         workouts: plan.workouts.filter((workout) => {
@@ -1326,11 +1352,14 @@ export class PlanQueryService {
     );
   }
 
-  findContextByPlan(userId: string, planId: string) {
-    return this.contexts.findFirst({
-      where: { userId, planId },
-      select: { id: true, planId: true, status: true },
-    });
+  findContextByPlan(userId: string, planId: string, db?: PlanDb) {
+    return this.contexts.findFirst(
+      {
+        where: { userId, planId },
+        select: { id: true, planId: true, status: true },
+      },
+      db,
+    );
   }
 
   findRecentReviewEvents(args: {

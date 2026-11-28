@@ -35,6 +35,18 @@
     "cycleRationale": "“{planTitle}” is complete. Completion {completionRate}%. Start the next plan from this cycle summary.",
     "cycleNextPlanPrompt": "Start the next plan from the “{planTitle}” cycle summary. Completion {completionRate}. Read the summary first, then ask me about goals and constraints."
   },
+  "planReplacementRules": {
+    "restDays": "Rest days",
+    "unavailableDates": "Unavailable dates",
+    "availableDates": "Availability exceptions",
+    "dailyLimit": "Daily training limit",
+    "weekdayLimits": "Weekday training limits",
+    "weeklyLimit": "Maximum training days per week",
+    "relativeDays": "Allowed days in the plan week",
+    "weekPhases": "Training phases",
+    "requiredSports": "Required sports",
+    "raceDiscipline": "Race discipline"
+  },
   "error": {
     "track_file_output_invalid": "The converted file failed validation, so its download was blocked. Keep the original file and try another format, or contact support.",
     "track_file_conversion_service_failed": "The conversion service could not complete this request. No download was started. Keep the original file and try another format, or contact support.",
@@ -55,12 +67,14 @@
     "unauthorized": "Authentication is required",
     "forbidden": "You do not have permission to perform this action",
     "not_found": "The requested resource was not found",
+    "plan_scheduled_activation_pending": "Another plan is already scheduled to start. Cancel that scheduled plan before activating this one.",
     "conflict": "The request conflicts with the current state",
     "invalid_idempotency_key": "The deletion request identifier is invalid. Please try again.",
     "idempotency_key_already_used": "This deletion request identifier has already been used. Please restart the deletion flow.",
     "account_not_found": "This account could not be found.",
     "account_deletion_in_progress": "Your account deletion request is already being processed.",
     "account_deletion_confirmations_required": "Confirm all account deletion acknowledgements before continuing.",
+    "plan_schedule_invalid": "Review the plan schedule and adjust the conflicting workouts.",
     "unprocessable_entity": "The request could not be processed",
     "workout_definition_invalid": "The workout definition is invalid",
     "workout_definitions_invalid": "One or more workout definitions are invalid",
@@ -236,6 +250,7 @@
     "polar_webhook_signature_invalid": "Invalid Polar webhook signature",
     "polar_webhook_secret_missing": "Polar webhook secret is not configured",
     "polar_webhook_raw_body_missing": "Unable to read raw request body for webhook signature verification",
+    "import_activity_start_in_future": "The activity starts more than 24 hours in the future. Check the activity time and import it again.",
     "import_identity_conflict": "Activity ownership conflict. Contact support to resolve this import.",
     "intervals_icu_athlete_identity_missing": "The Intervals.icu account identity could not be verified. Please authorize again."
   },
@@ -428,6 +443,7 @@
     "importBatch": {
       "titleCompleted": "Import batch completed",
       "titleCompletedWithFailures": "Import batch completed with failures",
+      "bodyPostProcessingFailed": "\n\nActivity analysis could not finish. Any activities that were already ready remain available.",
       "bodyBatchSummary": "Processed {totalCount} source objects.\n\n- Success: {successCount}\n- Failed: {failedCount}\n- Skipped: {skippedCount}",
       "bodyThirdPartyExportFailures": "\n\nThird-party upload failed for {providers} ({failedCount} activities). Open connection settings or retry from the activity."
     }

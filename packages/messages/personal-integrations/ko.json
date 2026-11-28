@@ -1,0 +1,63 @@
+{
+  "garmin": {
+    "description": "개인 Garmin 키로 활동과 수면 및 회복 데이터를 가져옵니다.",
+    "createKey": "Garmin Connect에서 키 만들기",
+    "apiKey": "개인 API 키"
+  },
+  "coros": {
+    "description": "COROS 계정을 연결해 훈련 데이터를 읽고 확인한 운동, 계획 및 경로를 전송합니다."
+  },
+  "manage": "연결 설정",
+  "reconcile": "다시 확인",
+  "reconciling": "서비스 결과 확인 중",
+  "reconnect": "키 교체 또는 다시 인증",
+  "loading": "로드 중…",
+  "working": "처리 중…",
+  "region": "계정 지역",
+  "timezone": "계정 시간대",
+  "account": "연결된 계정: {id}",
+  "lastSync": "최근 완료한 동기화: {date}",
+  "settings": {
+    "automatic": "자동 동기화",
+    "activities": "완료한 활동 가져오기",
+    "wellness": "수면 및 회복 데이터 읽기"
+  },
+  "save": "설정 저장",
+  "connect": "Garmin 연결",
+  "authorize": "COROS로 인증",
+  "connected": "연결됨",
+  "syncTitle": "데이터 동기화",
+  "startDate": "시작일",
+  "sync": "지금 동기화",
+  "queued": "대기열에 추가했습니다. 진행 상황은 저장되며 아래에 표시됩니다.",
+  "jobs": "최근 작업",
+  "states": {
+    "PREVIEW": "확인 대기 중",
+    "QUEUED": "대기 중",
+    "RUNNING": "달리기",
+    "WAITING": "재시도 대기",
+    "SUCCEEDED": "완료",
+    "FAILED": "실패",
+    "CANCELLED": "취소됨"
+  },
+  "disconnect": "연결 해제",
+  "confirmDisconnect": "연결 해제 확인",
+  "cancel": "취소",
+  "fields": {
+    "date": "날짜",
+    "startDate": "시작일"
+  },
+  "tools": {
+    "activities": "활동",
+    "activity": "활동 상세",
+    "heartRate": "심박수",
+    "getActivityDetail": "활동 상세",
+    "queryActivityLapData": "랩",
+    "querySleepOverview": "수면",
+    "queryAvgHeartRate": "평균 심박수",
+    "queryRestingHeartRate": "안정시 심박수",
+    "queryFitnessAssessmentOverview": "체력 평가",
+    "queryWorkoutDetails": "운동 상세",
+    "uploadRouteFile": "경로 가져오기"
+  }
+}

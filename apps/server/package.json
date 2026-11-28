@@ -151,6 +151,10 @@
       "types": "./src/ai-data-consent/ai-data-consent.service.ts",
       "default": "./src/ai-data-consent/ai-data-consent.service.ts"
     },
+    "./analyze/activity-recompute-job.writer": {
+      "types": "./src/analyze/activity-recompute-job.writer.ts",
+      "default": "./src/analyze/activity-recompute-job.writer.ts"
+    },
     "./analyze/analyze.module": {
       "types": "./src/analyze/analyze.module.ts",
       "default": "./src/analyze/analyze.module.ts"
@@ -286,6 +290,10 @@
     "./api/plan/application/plan-summary.service": {
       "types": "./src/api/plan/application/plan-summary.service.ts",
       "default": "./src/api/plan/application/plan-summary.service.ts"
+    },
+    "./api/plan/application/plan-workout-change": {
+      "types": "./src/api/plan/application/plan-workout-change.ts",
+      "default": "./src/api/plan/application/plan-workout-change.ts"
     },
     "./api/plan/application/plan-workout-command.service": {
       "types": "./src/api/plan/application/plan-workout-command.service.ts",
@@ -663,6 +671,10 @@
       "types": "./src/power/power.service.ts",
       "default": "./src/power/power.service.ts"
     },
+    "./prisma/fitness-write-lock": {
+      "types": "./src/prisma/fitness-write-lock.ts",
+      "default": "./src/prisma/fitness-write-lock.ts"
+    },
     "./prisma/hashtext-advisory-lock": {
       "types": "./src/prisma/hashtext-advisory-lock.ts",
       "default": "./src/prisma/hashtext-advisory-lock.ts"
@@ -890,6 +902,26 @@
     "./importing/activity-data-migration-backup": {
       "types": "./src/importing/activity-data-migration-backup.ts",
       "default": "./src/importing/activity-data-migration-backup.ts"
+    },
+    "./public-demo/public-demo-runtime.port": {
+      "types": "./src/public-demo/public-demo-runtime.port.ts",
+      "default": "./src/public-demo/public-demo-runtime.port.ts"
+    },
+    "./public-demo/allow-public-demo.decorator": {
+      "types": "./src/public-demo/allow-public-demo.decorator.ts",
+      "default": "./src/public-demo/allow-public-demo.decorator.ts"
+    },
+    "./public-demo/current-public-demo.decorator": {
+      "types": "./src/public-demo/current-public-demo.decorator.ts",
+      "default": "./src/public-demo/current-public-demo.decorator.ts"
+    },
+    "./public-demo/public-demo-localized-text": {
+      "types": "./src/public-demo/public-demo-localized-text.ts",
+      "default": "./src/public-demo/public-demo-localized-text.ts"
+    },
+    "./importing/raw-association-recovery": {
+      "types": "./src/importing/raw-association-recovery.ts",
+      "default": "./src/importing/raw-association-recovery.ts"
     },
     "./integrations/external-provider/provider-rate-limit": {
       "types": "./src/integrations/external-provider/provider-rate-limit.ts",

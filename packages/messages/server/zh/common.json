@@ -35,6 +35,18 @@
     "cycleRationale": "「{planTitle}」已经完成。完成率 {completionRate}%，建议基于本周期总结开启下一份计划。",
     "cycleNextPlanPrompt": "基于上一周期《{planTitle}》的总结开启下一份计划。完成率 {completionRate}%。请先读周期总结，再问我目标和约束。"
   },
+  "planReplacementRules": {
+    "restDays": "休息日",
+    "unavailableDates": "不可训练日期",
+    "availableDates": "可训练例外日期",
+    "dailyLimit": "每日训练时长上限",
+    "weekdayLimits": "各星期训练时长上限",
+    "weeklyLimit": "每周训练天数上限",
+    "relativeDays": "计划周内可训练的天数序号",
+    "weekPhases": "训练阶段",
+    "requiredSports": "必需运动项目",
+    "raceDiscipline": "参赛项目"
+  },
   "error": {
     "track_file_output_invalid": "转换结果未通过校验，已阻止下载。请保留原文件，尝试其他格式，或联系技术支持。",
     "track_file_conversion_service_failed": "转换服务未能完成处理，未启动下载。请保留原文件，尝试其他格式，或联系技术支持。",
@@ -55,12 +67,14 @@
     "unauthorized": "请先登录后再继续",
     "forbidden": "你没有权限执行此操作",
     "not_found": "未找到请求的内容",
+    "plan_scheduled_activation_pending": "已有另一份计划排期生效。请先取消那份已排期的计划，再激活当前计划。",
     "conflict": "请求与当前状态冲突",
     "invalid_idempotency_key": "删除请求标识无效，请重试。",
     "idempotency_key_already_used": "该删除请求标识已被使用，请重新开始删除流程。",
     "account_not_found": "未找到该账户。",
     "account_deletion_in_progress": "账户删除申请正在处理中。",
     "account_deletion_confirmations_required": "继续前请确认所有账户删除事项。",
+    "plan_schedule_invalid": "请检查计划排期，调整有冲突的课次。",
     "unprocessable_entity": "无法处理该请求",
     "workout_definition_invalid": "训练定义不合法",
     "workout_definitions_invalid": "一个或多个训练定义不合法",
@@ -236,6 +250,7 @@
     "polar_webhook_signature_invalid": "Polar webhook 签名无效",
     "polar_webhook_secret_missing": "Polar webhook secret 未配置",
     "polar_webhook_raw_body_missing": "无法获取原始请求体，无法校验 webhook 签名",
+    "import_activity_start_in_future": "活动开始时间比当前时间晚了超过 24 小时。请核对开始时间后重新导入。",
     "import_identity_conflict": "活动归属存在冲突，请联系支持人员处理此次导入。",
     "intervals_icu_athlete_identity_missing": "无法确认 Intervals.icu 账号身份，请重新授权。"
   },
@@ -428,6 +443,7 @@
     "importBatch": {
       "titleCompleted": "导入批次已完成",
       "titleCompletedWithFailures": "导入批次已完成，但有失败项",
+      "bodyPostProcessingFailed": "\n\n活动分析未能完成。已就绪的活动仍可查看。",
       "bodyBatchSummary": "已处理 {totalCount} 个源对象。\n\n- 成功：{successCount}\n- 失败：{failedCount}\n- 跳过：{skippedCount}",
       "bodyThirdPartyExportFailures": "\n\n向 {providers} 上传失败（{failedCount} 个活动）。请打开连接设置检查授权，或从活动页面重试。"
     }

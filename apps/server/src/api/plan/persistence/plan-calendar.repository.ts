@@ -1,9 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import type { PlanDb } from './plan-db';
+import { scheduledReplacementReservationWhere } from './plan.repository';
 
 const calendarInclude = {
   plan: {
-    include: { supersededBy: { select: { status: true, startDate: true } } },
+    include: {
+      supersedes: { select: { userId: true, status: true } },
+      supersededBy: {
+        select: {
+          userId: true,
+          status: true,
+          startDate: true,
+          scheduledActivationAt: true,
+          activationBlockedAt: true,
+        },
+      },
+    },
   },
 } as const;
 
@@ -64,10 +76,13 @@ export class PlanCalendarRepository {
     return tx.plan.findMany({
       where: {
         userId,
-        status: { in: ['ACTIVE', 'PAUSED', 'SCHEDULED'] },
+        OR: [
+          { status: { in: ['ACTIVE', 'PAUSED'] } },
+          scheduledReplacementReservationWhere(userId),
+        ],
         ...(excludePlanId ? { id: { not: excludePlanId } } : {}),
       },
-      include: { supersededBy: { select: { status: true, startDate: true } } },
+      include: calendarInclude.plan.include,
     });
   }
 }

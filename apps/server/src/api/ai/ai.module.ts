@@ -20,6 +20,7 @@ import { AiService } from './ai.service';
 import { PlanStartAssessmentService } from './plan-start-assessment.service';
 import { TrainingCoachAgent } from './agents/training-coach-agent.service';
 import { AiController } from './ai.controller';
+import { CoachTurnOrchestrator } from './coach-turn-orchestrator.service';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { ActivityModule } from '../activity/activity.module';
 import { UsersModule } from '../user/user.module';
@@ -100,6 +101,7 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
   ],
   controllers: [AiController, CoachBranchingController, AiOperationsController],
   providers: [
+    CoachTurnOrchestrator,
     AthleteStateUpdateWorker,
     DeepSeekWebEvidenceAdapter,
     ProviderWebEvidenceAdapter,

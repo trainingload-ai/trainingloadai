@@ -1,3 +1,4 @@
+import { publicRuntimeText } from '@/utils/public-runtime-copy';
 import {
   ATHLETE_STATE_UPDATE_WAKE,
   AthleteStateUpdates,
@@ -184,28 +185,21 @@ export class CoachAssessmentCaseService {
     const expiresAt = new Date(
       now.getTime() + ATHLETE_STATE_POLICY.caseMaxAgeHours * 3_600_000,
     );
-    const zh = input.locale.toLowerCase().startsWith('zh');
     const currentOutcome = needsQuestion
       ? {
           kind: 'INQUIRY',
-          title: zh ? '补充一项状态信息' : 'One quick state check',
+          title: publicRuntimeText(input.locale, 'assessmentInquiry'),
           observation:
             input.result.state === 'UNKNOWN'
-              ? zh
-                ? '现有数据还不足以可靠判断今天的恢复状态。'
-                : 'The current evidence is not enough to judge today’s recovery reliably.'
-              : zh
-                ? '现有信号提示状态可能偏离平时，但还缺一项关键证据。'
-                : 'Current signals may differ from usual, but one key fact is missing.',
+              ? publicRuntimeText(input.locale, 'assessmentInsufficient')
+              : publicRuntimeText(input.locale, 'assessmentMissingFact'),
           reason: request.reason,
         }
       : needsData
         ? {
             kind: 'WAITING_FOR_DATA',
-            title: zh ? '正在等待状态数据' : 'Waiting for state data',
-            observation: zh
-              ? '有一项关键数据正在同步，当前不需要你额外操作。'
-              : 'A material data source is still syncing; no action is needed from you yet.',
+            title: publicRuntimeText(input.locale, 'assessmentWaiting'),
+            observation: publicRuntimeText(input.locale, 'assessmentSyncing'),
           }
         : { kind: 'OUTCOME', ...(input.outcome ?? {}) };
     try {
@@ -680,22 +674,14 @@ export class CoachAssessmentCaseService {
             waitingForData
               ? {
                   kind: 'WAITING_FOR_DATA',
-                  title: input.locale.toLowerCase().startsWith('zh')
-                    ? '正在等待状态数据'
-                    : 'Waiting for state data',
-                  observation: input.locale.toLowerCase().startsWith('zh')
-                    ? '有一项关键数据正在同步，当前不需要你额外操作。'
-                    : 'A material data source is still syncing; no action is needed from you yet.',
+                  title: publicRuntimeText(input.locale, 'assessmentWaiting'),
+                  observation: publicRuntimeText(input.locale, 'assessmentSyncing'),
                 }
               : canAskAgain
                 ? {
                     kind: 'INQUIRY',
-                    title: input.locale.toLowerCase().startsWith('zh')
-                      ? '还需要确认一项信息'
-                      : 'One more detail',
-                    observation: input.locale.toLowerCase().startsWith('zh')
-                      ? '你的回答已经纳入评估，但仍有一项信息会影响今天的建议。'
-                      : 'Your answer is included, but one more fact could change today’s recommendation.',
+                    title: publicRuntimeText(input.locale, 'assessmentMoreDetail'),
+                    observation: publicRuntimeText(input.locale, 'assessmentAnswerIncluded'),
                     reason: nextRequest?.reason,
                   }
                 : { kind: 'OUTCOME', ...(safeOutcome ?? {}) },

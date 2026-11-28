@@ -1,20 +1,22 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import { PrismaService } from '@/prisma/prisma.service';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import { prismaModel, type PrismaClientSlice } from '@/prisma/prisma-db';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import {
   type ImportSourceKind,
   type ImportBatchJobStatus,
   ImportItemJobStatus,
+  Prisma,
 } from '@prisma/client';
 import {
   assertImportPublicationAuthorized,
   IMPORT_PUBLICATION_AUTHORIZATION,
   type ImportPublicationAuthorizationExtension,
 } from '../import-publication-authorization';
+import { IMPORT_ACTIVITY_START_IN_FUTURE } from '../import-item-job.types';
 
 const ACTIVE_REVISION_STATUSES = [
   'QUEUED',
@@ -334,7 +336,7 @@ export class ImportingJobRepository {
         (transaction) => this.createPostProcessJob(batchJobId, transaction),
         { timeout: 15_000 },
       );
-    await tx.$queryRaw`SELECT id FROM t_import_batch_job WHERE id=${batchJobId} FOR UPDATE`;
+    await this.lockBatch(batchJobId, tx);
     // Read committed terminal item counts and correctness replay candidates.
     const batch = await this.batchJobs(tx).findUnique({
       where: { id: batchJobId },
@@ -436,6 +438,105 @@ export class ImportingJobRepository {
 
     return job;
   }
+  async recoverFinishedBatches() {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const batches = await tx.$queryRaw<Array<{ id: string }>>`
+          SELECT b.id
+          FROM t_import_batch_job b
+          WHERE b.status IN ('QUEUED', 'RUNNING')
+            AND (SELECT COUNT(*) FROM t_import_item_job i
+              WHERE i.batch_job_id = b.id) >= GREATEST(b.total_count, 1)
+            AND NOT EXISTS (
+              SELECT 1 FROM t_import_item_job i
+              WHERE i.batch_job_id = b.id
+                AND i.status NOT IN ('DONE', 'SKIPPED', 'DEAD')
+            )
+          ORDER BY b.created_at, b.id
+          LIMIT 50
+          FOR UPDATE OF b SKIP LOCKED
+        `;
+        for (const batch of batches) {
+          await this.refreshBatchProgress(batch.id, tx);
+        }
+        return batches.length;
+      },
+      { timeout: 15_000 },
+    );
+  }
+
+  async lockBatch(batchJobId: string, tx: Prisma.TransactionClient) {
+    await tx.$queryRaw`SELECT id FROM t_import_batch_job
+      WHERE id = ${batchJobId} FOR UPDATE`;
+  }
+
+  async rejectFutureActivities(args: {
+    jobId: string;
+    batchJobId: string;
+    userId: string;
+    lockToken?: string;
+    cutoff: Date;
+  }) {
+    const futureItems = {
+      batchJobId: args.batchJobId,
+      userId: args.userId,
+      status: 'DONE',
+      activity: { userId: args.userId, startTime: { gt: args.cutoff } },
+    } satisfies Prisma.ImportItemJobWhereInput;
+    const hasFutureItem = await this.itemJobs().findFirst({
+      where: futureItems,
+      select: { id: true },
+    });
+    if (!hasFutureItem) return;
+
+    await this.prisma.$transaction(async (tx) => {
+      await lockFitnessUser(tx, args.userId);
+      await this.lockBatch(args.batchJobId, tx);
+      const lease = await tx.$queryRaw<Array<{ id: string }>>`
+        SELECT id FROM t_user_post_process_job
+        WHERE id = ${args.jobId} AND batch_job_id = ${args.batchJobId}
+          AND user_id = ${args.userId} AND status = 'RUNNING'
+          ${args.lockToken ? Prisma.sql`AND lock_token = ${args.lockToken}` : Prisma.empty}
+        FOR UPDATE
+      `;
+      if (!lease.length) {
+        throw new Error(`User post-process lease lost: ${args.jobId}`);
+      }
+
+      const rejected = await this.itemJobs(tx).findMany({
+        where: futureItems,
+        select: { id: true, activity: { select: { id: true } } },
+      });
+      if (!rejected.length) return;
+      await this.itemJobs(tx).updateMany({
+        where: { id: { in: rejected.map((item) => item.id) }, status: 'DONE' },
+        data: {
+          status: 'DEAD',
+          lastErrorCode: IMPORT_ACTIVITY_START_IN_FUTURE,
+          lastError: 'Activity start time is more than 24 hours ahead',
+        },
+      });
+      await tx.activity.updateMany({
+        where: {
+          userId: args.userId,
+          startTime: { gt: args.cutoff },
+          id: {
+            in: rejected.flatMap((item) =>
+              item.activity ? [item.activity.id] : [],
+            ),
+          },
+          processingStatus: { not: 'READY' },
+        },
+        data: {
+          processingStatus: 'FAILED',
+          processingUpdatedAt: new Date(),
+          readyAt: null,
+        },
+      });
+      await this.refreshBatchProgress(args.batchJobId, tx);
+    });
+  }
+
   /** Publish aggregate progress in the transaction that changes item state. */
   async refreshBatchProgress(
     batchJobId: string,
@@ -448,11 +549,17 @@ export class ImportingJobRepository {
       );
     }
     // Serialize count publication with terminal item writes and job creation.
-    await tx.$queryRaw`SELECT id FROM t_import_batch_job
-      WHERE id = ${batchJobId} FOR UPDATE`;
+    await this.lockBatch(batchJobId, tx);
     const batch = await this.batchJobs(tx).findUnique({
       where: { id: batchJobId },
-      select: { id: true, userId: true, totalCount: true, startedAt: true },
+      select: {
+        id: true,
+        userId: true,
+        totalCount: true,
+        startedAt: true,
+        completedAt: true,
+        postProcessJobs: { where: { status: 'DEAD' }, select: { id: true }, take: 1 },
+      },
     });
     if (!batch) throw new Error(`Import batch not found: ${batchJobId}`);
 
@@ -477,12 +584,12 @@ export class ImportingJobRepository {
     // Never shrink the declared count to the few items registered so far:
     // doing so can start post-processing before the remaining files exist.
     const totalCount = Math.max(batch.totalCount, actualTotalCount);
-    const nextStatus = summarizeBatchStatus({
-      totalCount,
-      successCount,
-      failedCount,
-      skippedCount,
-    });
+    const postProcessDead = Boolean(batch.postProcessJobs?.length);
+    const nextStatus = postProcessDead
+      ? (successCount > 0 ? 'PARTIAL_FAILED' : 'FAILED')
+      : summarizeBatchStatus({ totalCount, successCount, failedCount, skippedCount });
+    const isTerminal =
+      nextStatus === 'COMPLETED' || nextStatus === 'PARTIAL_FAILED' || nextStatus === 'FAILED';
 
     const updated = await this.batchJobs(tx).update({
       where: { id: batchJobId },
@@ -496,20 +603,13 @@ export class ImportingJobRepository {
           nextStatus === 'RUNNING'
             ? (batch.startedAt ?? new Date())
             : batch.startedAt,
-        completedAt:
-          nextStatus === 'COMPLETED' ||
-          nextStatus === 'PARTIAL_FAILED' ||
-          nextStatus === 'FAILED'
-            ? new Date()
-            : null,
+        completedAt: isTerminal
+          ? (postProcessDead && batch.completedAt ? batch.completedAt : new Date())
+          : null,
       },
     });
 
-    if (
-      nextStatus === 'COMPLETED' ||
-      nextStatus === 'PARTIAL_FAILED' ||
-      nextStatus === 'FAILED'
-    ) {
+    if (isTerminal && !postProcessDead) {
       await this.createPostProcessJob(batchJobId, tx);
     }
 

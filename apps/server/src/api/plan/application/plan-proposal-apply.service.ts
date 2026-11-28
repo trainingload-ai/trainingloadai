@@ -1,5 +1,6 @@
 import { PlanStartService } from './plan-start.service';
 import { Injectable } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
 import timezone = require('dayjs/plugin/timezone');
@@ -18,12 +19,22 @@ import type { CanonicalPlanProposal } from './plan-proposal.service';
 import type { CreatePlanDto } from '../dto/create-plan.dto';
 import type { UpdatePlanWorkoutDto } from '../dto/update-plan-workout.dto';
 import type { PlanProposalPresentation } from '@shared/plan-proposal';
-import { PlanRepository } from '../persistence/plan.repository';
+import {
+  PlanRepository,
+  scheduledReplacementReservationWhere,
+} from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanProposalRepository } from '../persistence/plan-proposal.repository';
 import { PlanLoadEstimatorService } from './plan-load-estimator.service';
 import { workoutImmutabilityReason } from './plan-workout-mutability.policy';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
+import { PlanCalendarValidationService } from './plan-calendar-validation.service';
+import {
+  addCalendarDays,
+  resolveScheduleRulesAtDate,
+} from '@shared/plan-calendar';
+import { inheritReplacementRules } from './plan-supersession-rules';
+import { isDeepStrictEqual } from 'node:util';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -69,6 +80,7 @@ export class PlanProposalApplyService {
     private readonly prescriptions: WorkoutPrescriptionService,
     private readonly loads: PlanLoadEstimatorService,
     private readonly starts: PlanStartService,
+    private readonly calendarValidation: PlanCalendarValidationService,
   ) {}
 
   async apply(args: ApplyArgs) {
@@ -340,10 +352,7 @@ export class PlanProposalApplyService {
     }
     const anotherScheduled = await this.plans.findFirst(
       {
-        where: {
-          userId: args.userId,
-          status: 'SCHEDULED',
-        },
+        where: scheduledReplacementReservationWhere(args.userId),
         select: { id: true },
       },
       args.tx,
@@ -351,16 +360,27 @@ export class PlanProposalApplyService {
     if (anotherScheduled)
       conflict('Another replacement plan is already scheduled');
 
-    const timezone = await this.users.getPreferredTimezone(
-      args.userId,
-      args.tx,
-    );
     const today =
-      activityCalendarYmdInZone(new Date(), timezone) ??
+      activityCalendarYmdInZone(new Date(), proposal.activationTimezone) ??
       new Date().toISOString().slice(0, 10);
     if (proposal.effectiveFrom < today)
       conflict('The replacement effective date is now in the past');
 
+    const rules = inheritReplacementRules(source.generationMetadata, proposal);
+    if (proposal.rules && !isDeepStrictEqual(proposal.rules, rules))
+      conflict('Source plan availability changed after preview');
+    const effectiveQuality = resolveScheduleRulesAtDate(
+      rules,
+      proposal.effectiveFrom,
+    ).qualityContract;
+    // Per-date availability is checked against the full rule timeline below.
+    const {
+      maxDailyMinutes,
+      maxMinutesByIsoWeekday,
+      maxTrainingDaysPerWeek,
+      allowedDays,
+      ...draftQuality
+    } = effectiveQuality ?? {};
     const created = await this.planService.createPlan(
       args.userId,
       {
@@ -372,6 +392,7 @@ export class PlanProposalApplyService {
           proposalPreview: true,
           supersedesPlanId: source.id,
           rationale: proposal.rationale,
+          ...(effectiveQuality ? { qualityContract: draftQuality } : {}),
         },
         periodWeeks: proposal.plan.periodWeeks,
         workouts: proposal.plan.workouts,
@@ -393,6 +414,10 @@ export class PlanProposalApplyService {
           startDate,
           endDate,
           activationTimezone: proposal.activationTimezone,
+          generationMetadata: {
+            ...record(created.plan.generationMetadata),
+            ...rules,
+          } as Prisma.InputJsonValue,
         },
       },
       args.tx,
@@ -400,7 +425,36 @@ export class PlanProposalApplyService {
     const newWorkouts = await this.workouts.findMany(
       {
         where: { planId: createdPlanId },
-        select: { id: true, dayOffset: true },
+        select: {
+          id: true,
+          dayOffset: true,
+          status: true,
+          plannedDurationSeconds: true,
+        },
+      },
+      args.tx,
+    );
+    const workoutIds = newWorkouts.map(({ id }) => id);
+    await this.calendarValidation.assertCandidate(
+      {
+        userId: args.userId,
+        planId: createdPlanId,
+        replacesPlanId: source.id,
+        startDate: proposal.effectiveFrom,
+        periodWeeks: proposal.plan.periodWeeks,
+        workouts: newWorkouts.map(({ plannedDurationSeconds, ...row }) => ({
+          ...row,
+          durationSeconds: plannedDurationSeconds,
+        })),
+        changedWorkoutIds: workoutIds,
+        scheduleRuleMetadata: rules,
+        validationRange: {
+          from: proposal.effectiveFrom,
+          until: addCalendarDays(
+            proposal.effectiveFrom,
+            proposal.plan.periodWeeks * 7 - 1,
+          ),
+        },
       },
       args.tx,
     );
@@ -443,7 +497,11 @@ export class PlanProposalApplyService {
           decisionId: args.decisionId,
           branchId: args.branchId,
         },
-        { tx: args.tx, validatedStartPreview: true },
+        {
+          tx: args.tx,
+          validatedStartPreview: true,
+          calendarTimeZone: proposal.activationTimezone,
+        },
       );
       await this.coachContext.supersedeContext({
         userId: args.userId,
@@ -511,12 +569,17 @@ export class PlanProposalApplyService {
       },
       args.tx,
     );
+    await this.calendarValidation.assertStored(
+      args.userId,
+      workoutIds,
+      args.tx,
+    );
 
     return {
       planId: source.id,
       createdPlanId,
       changedWorkoutCount: proposal.plan.workouts.length,
-      workoutIds: newWorkouts.map((workout) => workout.id),
+      workoutIds,
       status: immediate ? 'ACTIVE' : 'SCHEDULED',
       effectiveFrom: proposal.effectiveFrom,
     };

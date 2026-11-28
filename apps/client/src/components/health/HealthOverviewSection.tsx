@@ -10,7 +10,7 @@ import {
   Waves,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import {
   useHealthIntraday,
@@ -63,70 +63,39 @@ export const HEALTH_CARD_ICONS = {
   steps: Footprints,
 } satisfies Record<HealthCardKey, typeof Moon>;
 
-const COPY = {
-  zh: {
-    title: "全天健康",
-    description: "查看最近一次记录或多日趋势",
-    sleep: "睡眠",
-    hrv: "HRV",
-    restingHeartRate: "静息心率",
-    stress: "压力",
-    bodyBattery: "身体电量",
-    spo2: "血氧",
-    steps: "步数",
-    score: "睡眠评分",
-    timeAsleep: "总睡眠时间",
-    timeInBed: "卧床时间",
-    averageTimeAsleep: "平均睡眠时间",
-    average: "平均值",
-    sleepScoreShort: "评分",
-    latest: "最近一次",
-    range: "时间范围",
-    noRecentData: "近 3 天暂无数据",
-    noPeriodData: "所选时段暂无数据",
-    noComparison: "暂无环比数据",
-    comparison: "环比",
-    withinBaseline: "基线内",
-    aboveBaseline: "高于基线",
-    belowBaseline: "低于基线",
-    buildingBaseline: "正在建立基线",
-    day: "天",
-  },
-  en: {
-    title: "Daily health",
-    description: "View the latest reading or trends over several days",
-    sleep: "Sleep",
-    hrv: "HRV",
-    restingHeartRate: "Resting HR",
-    stress: "Stress",
-    bodyBattery: "Body Battery",
-    spo2: "Blood oxygen",
-    steps: "Steps",
-    score: "Sleep score",
-    timeAsleep: "Time asleep",
-    timeInBed: "Time in bed",
-    averageTimeAsleep: "Average time asleep",
-    average: "average",
-    sleepScoreShort: "Score",
-    latest: "Latest",
-    range: "Time range",
-    noRecentData: "No data in the last 3 days",
-    noPeriodData: "No data in this period",
-    noComparison: "No comparison data",
-    comparison: "vs prior",
-    withinBaseline: "Within baseline",
-    aboveBaseline: "Above baseline",
-    belowBaseline: "Below baseline",
-    buildingBaseline: "Building baseline",
-    day: "d",
-  },
-} as const;
-
-export type HealthOverviewCopy = (typeof COPY)[keyof typeof COPY];
-
-export function getHealthOverviewCopy(locale: string): HealthOverviewCopy {
-  return locale.startsWith("zh") ? COPY.zh : COPY.en;
+export function useHealthOverviewCopy() {
+  const t = useTranslations("HealthOverview");
+  return {
+    title: t("overview.title"),
+    description: t("overview.description"),
+    sleep: t("chart.sleep"),
+    hrv: t("overview.hrv"),
+    restingHeartRate: t("overview.restingHeartRate"),
+    stress: t("overview.stress"),
+    bodyBattery: t("overview.bodyBattery"),
+    spo2: t("overview.spo2"),
+    steps: t("overview.steps"),
+    score: t("overview.score"),
+    timeAsleep: t("overview.timeAsleep"),
+    timeInBed: t("timeInBed"),
+    averageTimeAsleep: t("overview.averageTimeAsleep"),
+    average: t("overview.average"),
+    sleepScoreShort: t("overview.sleepScoreShort"),
+    latest: t("overview.latest"),
+    range: t("chart.range"),
+    noRecentData: t("overview.noRecentData"),
+    noPeriodData: t("overview.noPeriodData"),
+    noComparison: t("overview.noComparison"),
+    comparison: t("overview.comparison"),
+    withinBaseline: t("overview.withinBaseline"),
+    aboveBaseline: t("overview.aboveBaseline"),
+    belowBaseline: t("overview.belowBaseline"),
+    buildingBaseline: t("overview.buildingBaseline"),
+    rangeDays: (count: number) => t("overview.rangeDays", { count }),
+  };
 }
+
+export type HealthOverviewCopy = ReturnType<typeof useHealthOverviewCopy>;
 
 function HealthRangeTabs({
   copy,
@@ -157,7 +126,7 @@ function HealthRangeTabs({
             disabled={disabled}
             className="h-6 px-1.5 text-mobile-unit pc:text-[10px] md:px-2 md:text-mobile-caption"
           >
-            {days === "latest" ? copy.latest : `${days}${copy.day}`}
+            {days === "latest" ? copy.latest : copy.rangeDays(Number(days))}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -431,7 +400,7 @@ export function HealthOverviewSection({
   appearance?: "default" | "soft";
 } = {}) {
   const locale = useLocale();
-  const copy = getHealthOverviewCopy(locale);
+  const copy = useHealthOverviewCopy();
   const query = useHealthOverview(30);
   const cards = useMemo(
     () =>

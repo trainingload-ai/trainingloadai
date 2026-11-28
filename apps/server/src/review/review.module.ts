@@ -36,7 +36,7 @@ import { HealthDataModule } from '@/health-data/health-data.module';
  * Runtime 文件分工：
  * - coach-daily-review-runtime.service.ts   日复盘：昨天漏练 → 是否推迟明天
  * - coach-period-review-runtime.service.ts  周/月复盘：窗口内未完成或疲劳 → 是否推迟下一练
- * - coach-cycle-review-runtime.service.ts   计划完成后：是否开启下一计划（监听 plan.finalized）
+ * - coach-cycle-review-runtime.service.ts   Durable next-plan proposal after plan completion.
  *
  * 后台模型调用统一经过 review-model-call-guard.ts：单次调用硬超时；同一小时内
  * 连续 3 次失败（异常/超时/无 usage）即停止本轮，剩余任务由 worker 顺延到下一个整点。

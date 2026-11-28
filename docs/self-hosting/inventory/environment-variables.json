@@ -32,7 +32,7 @@
       "references": [
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 433
+          "line": 436
         }
       ]
     },
@@ -129,7 +129,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1913
+          "line": 1917
         }
       ]
     },
@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2478
+          "line": 918
         }
       ]
     },
@@ -990,7 +990,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
-          "line": 99
+          "line": 102
         },
         {
           "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
@@ -998,7 +998,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 846
+          "line": 864
         }
       ]
     },
@@ -1015,7 +1015,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
-          "line": 92
+          "line": 95
         },
         {
           "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
@@ -1040,11 +1040,11 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 1166
+          "line": 1184
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 1295
+          "line": 1313
         }
       ]
     },
@@ -1077,12 +1077,12 @@
       ],
       "references": [
         {
-          "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1196
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2942
         },
         {
-          "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2938
+          "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
+          "line": 481
         }
       ]
     },
@@ -1098,28 +1098,28 @@
       ],
       "references": [
         {
-          "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1198
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2472
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2468
+          "line": 2533
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2529
+          "line": 2620
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2616
+          "line": 2816
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2812
+          "line": 2926
         },
         {
-          "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2922
+          "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
+          "line": 483
         }
       ]
     },
@@ -1157,7 +1157,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 296
+          "line": 195
         }
       ]
     },
@@ -1174,7 +1174,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 295
+          "line": 194
         }
       ]
     },
@@ -1212,7 +1212,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/coach-branching.service.ts",
-          "line": 2132
+          "line": 2159
         }
       ]
     },
@@ -1271,7 +1271,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 340
+          "line": 341
         }
       ]
     },
@@ -1288,7 +1288,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 366
+          "line": 367
         }
       ]
     },
@@ -1304,8 +1304,8 @@
       ],
       "references": [
         {
-          "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1234
+          "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
+          "line": 519
         }
       ]
     },
@@ -1397,8 +1397,8 @@
       ],
       "references": [
         {
-          "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 161
+          "file": "apps/server/src/api/ai/coach-turn-orchestrator.service.ts",
+          "line": 107
         }
       ]
     },
@@ -1432,7 +1432,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
-          "line": 85
+          "line": 88
         },
         {
           "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
@@ -1592,7 +1592,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 305
+          "line": 204
         }
       ]
     },
@@ -1609,7 +1609,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 304
+          "line": 203
         }
       ]
     },
@@ -1718,7 +1718,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 353
+          "line": 354
         }
       ]
     },
@@ -1735,7 +1735,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 378
+          "line": 379
         }
       ]
     },
@@ -2369,7 +2369,7 @@
         },
         {
           "file": "apps/server/src/importing/activity-data-migration.service.ts",
-          "line": 109
+          "line": 149
         },
         {
           "file": "apps/server/src/training-load/vdot-forecast-export.command.ts",
@@ -2529,7 +2529,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 346
+          "line": 347
         }
       ]
     },
@@ -2546,7 +2546,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 371
+          "line": 372
         }
       ]
     },
@@ -3654,7 +3654,7 @@
         },
         {
           "file": "apps/server/src/integrations/personal/personal-connection.service.ts",
-          "line": 382
+          "line": 390
         }
       ]
     },
@@ -3700,7 +3700,7 @@
         },
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 439
+          "line": 442
         }
       ]
     },
@@ -4137,7 +4137,7 @@
         },
         {
           "file": "apps/server/src/integrations/personal/personal-connection.service.ts",
-          "line": 382
+          "line": 390
         }
       ]
     },
@@ -4870,7 +4870,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 358
+          "line": 359
         }
       ]
     },
@@ -4887,7 +4887,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 384
+          "line": 385
         }
       ]
     },
@@ -5073,7 +5073,7 @@
       "references": [
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 438
+          "line": 441
         }
       ]
     },
@@ -5231,7 +5231,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-cron.service.ts",
-          "line": 58
+          "line": 59
         }
       ]
     },
@@ -5248,7 +5248,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-cron.service.ts",
-          "line": 94
+          "line": 95
         }
       ]
     },
@@ -5265,7 +5265,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-cron.service.ts",
-          "line": 89
+          "line": 90
         }
       ]
     },
@@ -5282,7 +5282,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-cron.service.ts",
-          "line": 68
+          "line": 69
         }
       ]
     },
@@ -5299,7 +5299,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-cron.service.ts",
-          "line": 63
+          "line": 64
         }
       ]
     },
@@ -5316,7 +5316,7 @@
       "references": [
         {
           "file": "apps/server/src/api/review/review-schedule.service.ts",
-          "line": 35
+          "line": 94
         }
       ]
     },
@@ -6557,7 +6557,7 @@
       "references": [
         {
           "file": "apps/server/src/importing/user-post-process.worker.ts",
-          "line": 77
+          "line": 96
         }
       ]
     },

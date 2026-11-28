@@ -1,3 +1,4 @@
+import { publicRuntimeText } from '@/utils/public-runtime-copy';
 import {
   isExplorationQuery,
   type ExplorationQuery,
@@ -156,9 +157,6 @@ export const presentTrainingVisualizationTool: AiToolDef<
       limit: input.limit,
     };
     const dataset = await ctx.coachTools.trainingAggregate(ctx, query);
-    const isChinese = String(ctx.lang ?? '')
-      .toLowerCase()
-      .startsWith('zh');
     const title = String(input.title ?? '')
       .trim()
       .slice(0, 80);
@@ -169,7 +167,7 @@ export const presentTrainingVisualizationTool: AiToolDef<
       dataset,
       intent: input.intent,
       preferredView: input.preferredView,
-      title: title || (isChinese ? '训练分析' : 'Training analysis'),
+      title: title || publicRuntimeText(ctx.lang, 'trainingAnalysis'),
       subtitle: subtitle || undefined,
     });
     const effective = current && 'effectiveCurrent' in current ? current : null;

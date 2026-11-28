@@ -5,6 +5,8 @@ import type { PlanQuestionReview } from './coach-plan-question-review';
 import type { CoachUserMessageBody } from './coach-query-yield';
 import type { AiToolContext } from './tool.types';
 
+export const COACH_RUN_ATTEMPT_LEASE_MS = 60_000;
+
 export type CoachTurnInput = {
   session: AiToolContext['session'];
   sid?: string;
@@ -21,6 +23,7 @@ export type CoachTurnInput = {
   executionMode?: 'interactive' | 'background';
   resumeHistory?: boolean;
   runtimeRunId?: string;
+  runtimeAttemptId?: string;
   currentUserMessageId?: string;
   calendarEdit?: PlanCalendarCoachSession;
   planQuestionRefresh?: {

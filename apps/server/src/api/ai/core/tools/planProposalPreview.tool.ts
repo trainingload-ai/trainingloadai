@@ -1,3 +1,4 @@
+import { readPlanScheduleIssues } from '@/api/plan/application/plan-schedule-error';
 import type {
   PlanProposalPreviewRequest,
   PlanProposalPreviewResult,
@@ -5,6 +6,7 @@ import type {
 import { UnprocessableEntityException } from '@nestjs/common';
 import { asRecord } from '../ai-common.util';
 import { isCalendarDate } from '@shared/plan-calendar';
+import { planQualityContractSchema } from '@shared/plan-quality';
 import {
   calendarMonthEnd,
   hasRollingWeekTargets,
@@ -185,7 +187,11 @@ export const planProposalPreviewTool: AiToolDef<
       scheduleConstraints: {
         type: 'object',
         description:
-          'Versioned schedule constraints: version=1, revision, calendarTimeZone, fixedRestWeekdays (ISO 1..7), unavailableDates, availableDateOverrides, effectiveFrom/effectiveUntil, confirmation:{source:USER,reference}. Reference is audit only; actual authorization comes from card confirmation.',
+          'Versioned schedule constraints: version=1, revision, calendarTimeZone, fixedRestWeekdays (ISO 1..7), unavailableDates, availableDateOverrides, effectiveFrom/effectiveUntil, confirmation:{source:USER,reference}. SUPERSEDE inherits the source rules unless a replacement is explicitly agreed with the athlete. Reference is audit only; actual authorization comes from card confirmation.',
+      },
+      qualityContract: {
+        ...planQualityContractSchema,
+        description: 'SUPERSEDE only. Provide only quality contract fields explicitly changed by the athlete.',
       },
       rolling: {
         type: 'object',
@@ -646,14 +652,14 @@ export const planProposalPreviewTool: AiToolDef<
       });
     } catch (error) {
       if (input.mode === 'START' && error instanceof UnprocessableEntityException) {
-        const response = asRecord(error.getResponse());
-        if (response?.code === 'PLAN_SCHEDULE_INVALID' && Array.isArray(response.issues)) {
-          const issues = response.issues.slice(0, 8).map((value) => {
+        const conflicts = readPlanScheduleIssues(error.getResponse());
+        if (conflicts) {
+          const issues = conflicts.slice(0, 8).map((value) => {
             const issue = asRecord(value);
             return isCalendarDate(issue?.date) ? `${issue.code} on ${issue.date}` : issue?.code;
           });
           throw new Error(
-            `PLAN_SCHEDULE_INVALID (${response.issues.length}): ${issues.join(', ')}. Recalculate workout positions from the selected date and retry with the existing schedule rules.`,
+            `PLAN_SCHEDULE_INVALID (${conflicts.length}): ${issues.join(', ')}. Recalculate workout positions from the selected date and retry with the existing schedule rules.`,
           );
         }
       }

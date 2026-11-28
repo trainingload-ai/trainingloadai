@@ -10,7 +10,7 @@ import {
 } from '@jest/globals';
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, type ImportSourceKind } from '@prisma/client';
 import { ImportingJobService } from '../importing-job.service';
 import { ImportBatchService } from '../import-batch.service';
 import { ImportItemWorkerService } from '../import-item.worker';
@@ -18,9 +18,12 @@ import { UserPostProcessWorkerService } from '../user-post-process.worker';
 import { FitnessEvidenceRevisionDriftError } from '@/analyze/chronological-activity-replay.service';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { NotificationRepository } from '@/notification/persistence/notification.repository';
+import { ActivityImportDraftService } from '@/api/activity/activity-import-draft.service';
+import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 
 jest.mock('@/api/activity/activity.service', () => ({
   ActivityService: class {},
+  ActivityAnalyzeMode: { LIGHT: 'LIGHT' },
 }));
 
 type Claimed = {
@@ -30,17 +33,29 @@ type Claimed = {
   lockToken: string;
 };
 type Scheduler = {
+  drain(): Promise<void>;
   claimBatch(limit: number, now?: Date): Promise<Claimed[]>;
   processJob(job: Claimed): Promise<void>;
 };
 type ItemCompletion = {
   activeLeaseTokens: Map<string, string>;
-  claimBatch(limit: number): Promise<Array<{ id: string }>>;
+  claimBatch(limit: number): Promise<ItemClaim[]>;
+  processJob(job: ItemClaim): Promise<void>;
   completeActivityItem(jobId: string, batchJobId: string): Promise<void>;
+};
+type ItemClaim = {
+  id: string;
+  userId: string;
+  batchJobId: string;
+  sourceObjectId: string;
+  sourceKind: ImportSourceKind;
+  lockToken: string;
 };
 const at = (time: Date, delta: number) => new Date(time.getTime() + delta);
 const trainingTime = (day: number) => new Date(Date.UTC(2025, 0, day));
-const realPostgres = Boolean(process.env.CORE_MIGRATION_TEST_POSTGRES_URL);
+const nativePostgres = Boolean(process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN);
+const realPostgres =
+  nativePostgres || Boolean(process.env.CORE_MIGRATION_TEST_POSTGRES_URL);
 const concurrent = realPostgres ? it : it.skip;
 
 describe('durable user post-process coalescing', () => {
@@ -54,19 +69,15 @@ describe('durable user post-process coalescing', () => {
   const users = { getPreferredLocale: async () => 'en' };
 
   beforeAll(async () => {
-    database = fork(
-      resolve(
-        __dirname,
-        realPostgres
-          ? '../../analyze/spec/activity-recompute-postgres.mjs'
-          : '../../api/ai/core/spec/coach-run-postgres.mjs',
-      ),
-      [],
-      {
-        execArgv: [],
-        stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
-      },
-    );
+    const databaseFixture = nativePostgres
+      ? '../../api/plan/spec/plan-sync-native-postgres.mjs'
+      : realPostgres
+        ? '../../analyze/spec/activity-recompute-postgres.mjs'
+        : '../../api/ai/core/spec/coach-run-postgres.mjs';
+    database = fork(resolve(__dirname, databaseFixture), [], {
+      execArgv: [],
+      stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
+    });
     const address = await new Promise<string>((done, fail) => {
       database.once(
         'message',
@@ -208,12 +219,13 @@ describe('durable user post-process coalescing', () => {
       failedProviders: [],
       failedCount: 0,
     }));
+    const notifications = new NotificationDomainService(new NotificationRepository(db as never));
     const service = new UserPostProcessWorkerService(
       db as never,
       { get: () => undefined } as never,
       { replay } as never,
       { emitAsync: async () => [] } as never,
-      new NotificationDomainService(new NotificationRepository(db as never)),
+      notifications,
       {} as never,
       {} as never,
       translate as never,
@@ -230,6 +242,7 @@ describe('durable user post-process coalescing', () => {
       service,
       worker: service as unknown as Scheduler,
       replay,
+      notifications,
       runBatchAiReviewWhenAllowed,
       runBatchThirdPartyExports,
     };
@@ -239,14 +252,14 @@ describe('durable user post-process coalescing', () => {
     const service = new ImportItemWorkerService(
       database as never,
       { get: () => undefined } as never,
-      {} as never,
+      { getFileWithKey: async () => Buffer.from('synthetic fit') } as never,
       {} as never,
       {} as never,
       undefined,
       {} as never,
       {} as never,
       {} as never,
-      {} as never,
+      { normalize: async () => ({ payloads: [] }) } as never,
       {} as never,
       {} as never,
       batches,
@@ -494,7 +507,537 @@ describe('durable user post-process coalescing', () => {
         .status,
     ).toBe('DONE');
     expect(await db.userPostProcessJob.count()).toBe(1);
+    expect(
+      await db.importBatchJob.findUnique({ where: { id: row.batch.id } }),
+    ).toMatchObject({ status: 'POST_PROCESSING', successCount: 1 });
   });
+
+  it('replays through the last accepted activity and rejects imports beyond 24 hours across retry and pagination', async () => {
+    const now = new Date('2026-01-15T12:00:00.000Z');
+    const boundary = at(now, 86_400_000);
+    const row = await seed({ createdAt: at(new Date(), -30_000), from: now });
+    const addActivity = async (position: number, startTime: Date) => {
+      const activity = await db.activity.create({
+        data: {
+          userId: 'athlete-a',
+          hashId: `future-import-${position}`,
+          sportType: 'RUN',
+          startTime,
+          processingStatus: 'ANALYZING',
+          createdByBatchJobId: row.batch.id,
+        },
+      });
+      await db.importItemJob.create({
+        data: {
+          batchJobId: row.batch.id,
+          userId: 'athlete-a',
+          sourceObjectId: row.item.sourceObjectId,
+          sourceKind: 'FILE',
+          sourceUid: `future-import-${position}`,
+          activityId: activity.id,
+          position,
+          status: 'DONE',
+        },
+      });
+      return activity.id;
+    };
+    const near = await addActivity(1, at(now, 2 * 3_600_000));
+    const exact = await addActivity(2, boundary);
+    const invalid = await addActivity(3, at(boundary, 1));
+    await db.importItemJob.create({
+      data: {
+        batchJobId: row.batch.id,
+        userId: 'athlete-a',
+        sourceObjectId: row.item.sourceObjectId,
+        sourceKind: 'FILE',
+        sourceUid: 'reused-future-activity',
+        activityId: invalid,
+        position: 4,
+        status: 'DONE',
+        analysisRequired: false,
+      },
+    });
+    await db.importBatchJob.update({
+      where: { id: row.batch.id },
+      data: { totalCount: 5, successCount: 5 },
+    });
+    await db.userPostProcessJob.update({
+      where: { id: row.post!.id },
+      data: { recomputeFrom: at(now, 1_000), recomputeTo: at(boundary, 1) },
+    });
+
+    const replay = jest
+      .fn(async (request: Record<string, unknown>) => {
+        await db.activity.updateMany({
+          where: { id: { in: request.includeActivityIds as number[] } },
+          data: { processingStatus: 'READY' },
+        });
+        return {
+          runId: 'future-replay',
+          completed: true,
+          nextCheckpoint: null,
+        };
+      })
+      .mockRejectedValueOnce(new Error('retry the replay'))
+      .mockImplementationOnce(async () => {
+        await db.activity.updateMany({
+          where: { id: { in: [row.activity.id, near] } },
+          data: { processingStatus: 'READY' },
+        });
+        const nextCheckpoint = {
+          nextEffectiveFrom: boundary.toISOString(),
+          lastActivityId: near,
+        };
+        await db.userPostProcessJob.update({
+          where: { id: row.post!.id },
+          data: { replayCheckpoint: nextCheckpoint },
+        });
+        return {
+          runId: 'future-replay',
+          completed: false,
+          nextCheckpoint: null,
+        };
+      });
+    const { worker } = scheduler(replay);
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(now.getTime());
+    try {
+      const [first] = await worker.claimBatch(1);
+      await worker.processJob(first);
+      expect(replay).toHaveBeenCalledWith(
+        expect.objectContaining({
+          effectiveFrom: now,
+          effectiveTo: boundary,
+          includeActivityIds: expect.arrayContaining([
+            row.activity.id,
+            near,
+            exact,
+          ]),
+        }),
+      );
+      expect(replay.mock.calls[0][0].includeActivityIds).not.toContain(invalid);
+      expect(
+        await db.importItemJob.count({
+          where: {
+            activityId: invalid,
+            status: 'DEAD',
+            lastErrorCode: 'IMPORT_ACTIVITY_START_IN_FUTURE',
+          },
+        }),
+      ).toBe(2);
+      expect(
+        await db.activity.findUnique({ where: { id: invalid } }),
+      ).toMatchObject({ processingStatus: 'FAILED' });
+
+      clock.mockReturnValue(now.getTime() + 1_000);
+      const [second] = await worker.claimBatch(1);
+      await worker.processJob(second);
+      expect(replay.mock.calls[1][0]).toMatchObject({ effectiveTo: boundary });
+      expect(replay.mock.calls[1][0].includeActivityIds).not.toContain(invalid);
+      const [third] = await worker.claimBatch(1);
+      await worker.processJob(third);
+      expect(replay.mock.calls[2][0]).toMatchObject({
+        effectiveFrom: boundary,
+        effectiveTo: boundary,
+      });
+      expect(replay.mock.calls[2][0].includeActivityIds).not.toContain(invalid);
+      expect(
+        await db.activity.count({
+          where: {
+            id: { in: [row.activity.id, near, exact] },
+            processingStatus: 'READY',
+          },
+        }),
+      ).toBe(3);
+      expect(
+        await db.importBatchJob.findUnique({ where: { id: row.batch.id } }),
+      ).toMatchObject({
+        status: 'PARTIAL_FAILED',
+        successCount: 3,
+        failedCount: 2,
+      });
+      expect(
+        await batches.getBatchSummary(row.batch.id, 'athlete-a'),
+      ).toMatchObject({
+        counts: {
+          readyActivities: 3,
+          processingActivities: 0,
+          analysisFailedActivities: 0,
+        },
+      });
+      expect(await db.notification.findMany()).toMatchObject([
+        { kind: 'IMPORT_BATCH_PARTIAL_FAILED' },
+      ]);
+      expect(
+        (await batches.getBatchItems(row.batch.id, 'athlete-a')).items[3],
+      ).toMatchObject({
+        lastError: 'common.error.import_activity_start_in_future',
+      });
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it('does not claim coverage for a sibling whose activity moved into the future', async () => {
+    const now = new Date();
+    const later = at(now, 6 * 3_600_000);
+    const earlier = at(now, 2 * 3_600_000);
+    const leader = await seed({ createdAt: at(now, -10_000), from: later });
+    const sibling = await seed({
+      createdAt: at(now, -5_000),
+      from: at(now, -30_000),
+    });
+    await db.activity.update({
+      where: { id: sibling.activity.id },
+      data: { startTime: earlier },
+    });
+    const { worker, replay } = scheduler();
+    const [first] = await worker.claimBatch(1, now);
+    expect(first.id).toBe(leader.post!.id);
+    await worker.processJob(first);
+    expect(replay.mock.calls[0][0]).toMatchObject({
+      effectiveTo: later,
+      includeActivityIds: [leader.activity.id],
+    });
+    const [second] = await worker.claimBatch(1, now);
+    expect(second.id).toBe(sibling.post!.id);
+    await worker.processJob(second);
+    expect(replay.mock.calls[1][0]).toMatchObject({
+      effectiveTo: earlier,
+      includeActivityIds: [sibling.activity.id],
+    });
+  });
+
+  concurrent(
+    'takes the fitness lock before writing an out-of-range activity',
+    async () => {
+      const now = new Date();
+      const row = await seed({
+        createdAt: at(now, -30_000),
+        from: at(now, 2 * 86_400_000),
+      });
+      const [job] = await scheduler().worker.claimBatch(1, now);
+      const locked = Promise.withResolvers<void>();
+      const release = Promise.withResolvers<void>();
+      const replay = db.$transaction(async (tx) => {
+        await lockFitnessUser(tx, job.userId);
+        locked.resolve();
+        await release.promise;
+        await tx.$queryRaw`SELECT id FROM t_activity WHERE id = ${row.activity.id} FOR UPDATE NOWAIT`;
+      });
+      await Promise.race([locked.promise, replay]);
+      const rejection = jobs.rejectFutureActivities({
+        ...job,
+        jobId: job.id,
+        cutoff: at(now, 86_400_000),
+      });
+      try {
+        let waitingForLock = false;
+        for (let attempt = 0; attempt < 50 && !waitingForLock; attempt++) {
+          const [lock] = await db.$queryRaw<Array<{ waiting: boolean }>>`
+          SELECT EXISTS(SELECT 1 FROM pg_locks
+            WHERE locktype = 'advisory' AND NOT granted) AS waiting
+        `;
+          waitingForLock = lock.waiting;
+          if (!waitingForLock)
+            await new Promise((done) => setTimeout(done, 10));
+        }
+        expect(waitingForLock).toBe(true);
+      } finally {
+        release.resolve();
+        await Promise.all([replay, rejection]);
+      }
+      expect(
+        await db.activity.findUnique({ where: { id: row.activity.id } }),
+      ).toMatchObject({ processingStatus: 'FAILED' });
+    },
+  );
+
+  it('recovers a historical terminal batch at startup and respects the recovery interval', async () => {
+    const now = new Date();
+    const finished = await seed({ createdAt: now, pendingItem: true });
+    const registering = await seed({ createdAt: now, pendingItem: true });
+    const retrying = await seed({ createdAt: now, pendingItem: true });
+    await db.importItemJob.updateMany({
+      where: { id: { in: [finished.item.id, registering.item.id] } },
+      data: { status: 'DONE', lockToken: null, completedAt: now },
+    });
+    await db.importBatchJob.update({
+      where: { id: registering.batch.id },
+      data: { totalCount: 2 },
+    });
+    await db.importItemJob.update({
+      where: { id: retrying.item.id },
+      data: { status: 'FAILED', lockToken: null },
+    });
+
+    const replay = jest.fn(async (_request: Record<string, unknown>) => {
+      await db.activity.update({
+        where: { id: finished.activity.id },
+        data: { processingStatus: 'READY', readyAt: now },
+      });
+      return { runId: 'recovered-run', completed: true, nextCheckpoint: null };
+    });
+    const { worker } = scheduler(replay);
+    const recover = jest.spyOn(jobs, 'recoverFinishedBatches');
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(now.getTime());
+    try {
+      await worker.drain();
+      const [recovered] = await worker.claimBatch(5, at(now, 60_000));
+      expect(recovered?.batchJobId).toBe(finished.batch.id);
+      await worker.processJob(recovered);
+      expect(await db.userPostProcessJob.findMany()).toMatchObject([
+        { batchJobId: finished.batch.id, status: 'COMPLETED' },
+      ]);
+      expect(
+        await db.importBatchJob.findUnique({
+          where: { id: finished.batch.id },
+        }),
+      ).toMatchObject({ status: 'COMPLETED', successCount: 1 });
+      expect(await db.notification.count()).toBe(1);
+      expect(
+        await db.activity.findUnique({ where: { id: finished.activity.id } }),
+      ).toMatchObject({ processingStatus: 'READY' });
+      expect(replay).toHaveBeenCalledWith(
+        expect.objectContaining({ includeActivityIds: [finished.activity.id] }),
+      );
+
+      clock.mockReturnValue(now.getTime() + 5 * 60_000 - 1);
+      await worker.drain();
+      expect(recover).toHaveBeenCalledTimes(1);
+      clock.mockReturnValue(now.getTime() + 5 * 60_000);
+      await worker.drain();
+      expect(recover).toHaveBeenCalledTimes(2);
+      expect(await db.userPostProcessJob.count()).toBe(1);
+      expect(
+        await db.importBatchJob.count({ where: { status: 'RUNNING' } }),
+      ).toBe(2);
+    } finally {
+      clock.mockRestore();
+      recover.mockRestore();
+    }
+  });
+
+  concurrent(
+    'recovers after terminal item publication across two workers and skips a locked batch',
+    async () => {
+      const now = new Date();
+      const locked = await seed({ createdAt: now, pendingItem: true });
+      const available = await seed({ createdAt: now, pendingItem: true });
+      await db.importBatchJob.updateMany({
+        where: { id: { in: [locked.batch.id, available.batch.id] } },
+        data: { status: 'QUEUED' },
+      });
+      await db.importItemJob.update({
+        where: { id: locked.item.id },
+        data: { status: 'DEAD', lockToken: null, completedAt: now },
+      });
+      await db.importItemJob.update({
+        where: { id: available.item.id },
+        data: {
+          status: 'QUEUED',
+          lockToken: null,
+          activityId: null,
+          sourceRef: { fileKey: 'synthetic.fit' },
+        },
+      });
+      const importer = completion();
+      const [claimed] = await importer.claimBatch(1);
+      expect(claimed.id).toBe(available.item.id);
+      const interrupted = jest
+        .spyOn(batches, 'refreshBatchProgress')
+        .mockRejectedValueOnce(new Error('worker stopped before aggregation'));
+      try {
+        await expect(importer.processJob(claimed)).rejects.toThrow(
+          'worker stopped before aggregation',
+        );
+      } finally {
+        interrupted.mockRestore();
+      }
+      expect(
+        await db.importItemJob.findUnique({ where: { id: available.item.id } }),
+      ).toMatchObject({ status: 'SKIPPED', lastErrorCode: 'no_payloads' });
+      expect(
+        await db.importBatchJob.findUnique({
+          where: { id: available.batch.id },
+        }),
+      ).toMatchObject({ status: 'QUEUED' });
+      expect(await db.userPostProcessJob.count()).toBe(0);
+
+      const first = scheduler().worker;
+      const second = scheduler().worker;
+      const lockAcquired = Promise.withResolvers<void>();
+      const release = Promise.withResolvers<void>();
+      const holdingLock = db.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT id FROM t_import_batch_job
+        WHERE id = ${locked.batch.id} FOR UPDATE`;
+        lockAcquired.resolve();
+        await release.promise;
+      });
+      try {
+        await Promise.race([lockAcquired.promise, holdingLock]);
+        await Promise.all([first.drain(), second.drain()]);
+        expect(await db.userPostProcessJob.findMany()).toMatchObject([
+          { batchJobId: available.batch.id },
+        ]);
+      } finally {
+        release.resolve();
+        await holdingLock;
+      }
+      const [recovered] = await first.claimBatch(5, at(now, 60_000));
+      expect(recovered.batchJobId).toBe(available.batch.id);
+      await first.processJob(recovered);
+      expect(
+        await db.importBatchJob.findUnique({
+          where: { id: available.batch.id },
+        }),
+      ).toMatchObject({ status: 'COMPLETED', skippedCount: 1 });
+      await expect(jobs.recoverFinishedBatches()).resolves.toBe(1);
+      await expect(jobs.recoverFinishedBatches()).resolves.toBe(0);
+      expect(await db.userPostProcessJob.count()).toBe(2);
+      expect(
+        await db.importBatchJob.findUnique({
+          where: { id: locked.batch.id },
+        }),
+      ).toMatchObject({ status: 'POST_PROCESSING', failedCount: 1 });
+    },
+  );
+
+  async function draftWriter(
+    interrupt?: (args: { draftId: string; itemJobId: string }) => Promise<void>,
+  ) {
+    const userId = 'athlete-a';
+    const source = await db.importSourceObject.create({
+      data: { userId, sourceKind: 'FILE', sourceUid: 'draft-source' },
+    });
+    const draft = await db.activityImportDraft.create({
+      data: {
+        userId,
+        sourceObjectId: source.id,
+        sourceUid: source.sourceUid,
+        payload: {
+          identity: { dedupeKey: 'draft-dedupe' },
+          summary: {},
+          records: [],
+          laps: [],
+        },
+      },
+    });
+    const service = new ActivityImportDraftService(
+      db as never,
+      {} as never,
+      {} as never,
+      {
+        materialize: async (args: {
+          batchJobId: string;
+          itemJobId: string;
+        }) => {
+          await interrupt?.({ ...args, draftId: draft.id });
+          const activity = await db.activity.create({
+            data: {
+              userId,
+              hashId: `draft-${args.batchJobId}`,
+              sportType: 'RUN',
+              startTime: trainingTime(20),
+              createdByBatchJobId: args.batchJobId,
+            },
+          });
+          return { activity };
+        },
+      } as never,
+      { generateParquetFileByCanonicalPayload: async () => undefined } as never,
+      {} as never,
+      batches,
+      translate as never,
+      jobs,
+    );
+    return {
+      service,
+      request: { draftId: draft.id, userId, sessionRpe: null },
+    };
+  }
+
+  it('rolls back draft completion and replay publication together before a successful retry', async () => {
+    const { service, request } = await draftWriter();
+    const createPostProcessJob =
+      repository.createPostProcessJob.bind(repository);
+    const interrupted = jest
+      .spyOn(repository, 'createPostProcessJob')
+      .mockImplementationOnce(async (batchId, tx) => {
+        await createPostProcessJob(batchId, tx);
+        throw new Error('interrupted before draft completion');
+      });
+    try {
+      await expect(service.commitDraft(request)).rejects.toThrow(
+        'interrupted before draft completion',
+      );
+    } finally {
+      interrupted.mockRestore();
+    }
+    expect(await db.userPostProcessJob.count()).toBe(0);
+    expect(await db.importItemJob.findMany()).toMatchObject([
+      { status: 'DEAD', activityId: null },
+    ]);
+    expect(await db.importBatchJob.findMany()).toMatchObject([
+      { status: 'CANCELLED', failedCount: 1 },
+    ]);
+    await expect(completion().claimBatch(1)).resolves.toEqual([]);
+    expect(
+      await db.activityImportDraft.findUnique({
+        where: { id: request.draftId },
+      }),
+    ).toMatchObject({ status: 'READY', committedActivityId: null });
+
+    const committed = await service.commitDraft(request);
+    expect(committed.preview).toMatchObject({ status: 'COMMITTED' });
+    expect(
+      await db.importItemJob.findUnique({
+        where: { id: committed.importItemId },
+      }),
+    ).toMatchObject({ status: 'DONE', activityId: committed.activityId });
+    expect(
+      await db.importBatchJob.findUnique({ where: { id: committed.batchId } }),
+    ).toMatchObject({ status: 'POST_PROCESSING', successCount: 1 });
+    expect(await db.userPostProcessJob.findMany()).toMatchObject([
+      { batchJobId: committed.batchId, status: 'PENDING' },
+    ]);
+  });
+
+  it.each(['draft', 'item'])(
+    'does not overwrite a reclaimed inline %s lease',
+    async (reclaimed) => {
+      const newClaimAt = at(new Date(), 1_000);
+      const { service, request } = await draftWriter(
+        async ({ draftId, itemJobId }) => {
+          if (reclaimed === 'draft') {
+            await db.activityImportDraft.update({
+              where: { id: draftId },
+              data: { updatedAt: newClaimAt },
+            });
+          } else {
+            await db.importItemJob.update({
+              where: { id: itemJobId },
+              data: { status: 'NORMALIZING', lockToken: 'background-owner' },
+            });
+          }
+        },
+      );
+      await expect(service.commitDraft(request)).rejects.toThrow(
+        reclaimed === 'draft' ? 'already being committed' : 'lease lost',
+      );
+      expect(await db.userPostProcessJob.count()).toBe(0);
+      if (reclaimed === 'draft') {
+        expect(
+          await db.activityImportDraft.findUnique({
+            where: { id: request.draftId },
+          }),
+        ).toMatchObject({ status: 'COMMITTING', updatedAt: newClaimAt });
+      } else {
+        expect(await db.importItemJob.findMany()).toMatchObject([
+          { status: 'NORMALIZING', lockToken: 'background-owner' },
+        ]);
+      }
+    },
+  );
 
   it('does not publish completion after the import item lease is replaced', async () => {
     const row = await seed({ createdAt: new Date(), pendingItem: true });
@@ -585,7 +1128,7 @@ describe('durable user post-process coalescing', () => {
       .mockRejectedValueOnce(new Error('synthetic process interruption'));
     const [first] = await worker.claimBatch(1, now);
     await worker.processJob(first);
-    expect(await db.notification.count()).toBe(1);
+    expect(await db.notification.count()).toBe(0);
     const failed = await db.userPostProcessJob.findUniqueOrThrow({
       where: { id: row.post!.id },
     });
@@ -604,6 +1147,209 @@ describe('durable user post-process coalescing', () => {
     ).toBe('COMPLETED');
     expect(await db.notification.count()).toBe(1);
   });
+
+  it('commits a DEAD job, partial failure and one notification together after worker reclaim', async () => {
+    const now = new Date();
+    const row = await seed({ createdAt: at(now, -20_000) });
+    const ready = await seed({ createdAt: at(now, -19_000), pendingItem: true });
+    const legacyReady = await seed({ createdAt: at(now, -18_000), pendingItem: true });
+    for (const [index, entry] of [ready, legacyReady].entries()) {
+      await db.activity.update({
+        where: { id: entry.activity.id },
+        data: { processingStatus: index === 0 ? 'READY' : 'ANALYZING', readyAt: now },
+      });
+      await db.importItemJob.update({
+        where: { id: entry.item.id },
+        data: { batchJobId: row.batch.id, position: index + 1, status: 'DONE', lockToken: null },
+      });
+    }
+    await db.importBatchJob.update({
+      where: { id: row.batch.id },
+      data: { totalCount: 3, successCount: 3 },
+    });
+    await db.userPostProcessJob.update({
+      where: { id: row.post!.id },
+      data: { attempts: 5 },
+    });
+
+    const failedReplay = jest.fn(async (_request: Record<string, unknown>): Promise<never> => {
+      throw new Error('synthetic post-processing failure');
+    });
+    const first = scheduler(failedReplay);
+    const publish = first.notifications.ensureNotification.bind(first.notifications);
+    jest.spyOn(first.notifications, 'ensureNotification').mockImplementationOnce(async (...args) => {
+      await publish(...args);
+      throw new Error('synthetic interruption after notification insertion');
+    });
+    const [original] = await first.worker.claimBatch(1, now);
+    await expect(first.worker.processJob(original)).rejects.toThrow('synthetic interruption');
+    expect(await db.userPostProcessJob.findUniqueOrThrow({ where: { id: original.id } }))
+      .toMatchObject({ status: 'RUNNING', attempts: 5, lockToken: original.lockToken });
+    expect(await db.importBatchJob.findUniqueOrThrow({ where: { id: row.batch.id } }))
+      .toMatchObject({ status: 'POST_PROCESSING', notificationSentAt: null });
+    expect(await db.activity.findUniqueOrThrow({ where: { id: row.activity.id } }))
+      .toMatchObject({ processingStatus: 'ANALYZING' });
+    expect(await db.notification.count()).toBe(0);
+
+    const second = scheduler(failedReplay);
+    const [reclaimed] = await second.worker.claimBatch(1, at(now, 16 * 60_000));
+    expect(reclaimed.lockToken).not.toBe(original.lockToken);
+    await first.worker.processJob(original);
+    expect(await db.notification.count()).toBe(0);
+    await second.worker.processJob(reclaimed);
+    await scheduler().worker.drain();
+    await jobs.refreshBatchProgress(row.batch.id);
+
+    expect(await db.userPostProcessJob.findUniqueOrThrow({ where: { id: original.id } }))
+      .toMatchObject({ status: 'DEAD', attempts: 6 });
+    expect(await db.importBatchJob.findUniqueOrThrow({ where: { id: row.batch.id } }))
+      .toMatchObject({ status: 'PARTIAL_FAILED', successCount: 3, failedCount: 0, notificationSentAt: expect.any(Date) });
+    expect(await db.activity.findUniqueOrThrow({ where: { id: row.activity.id } }))
+      .toMatchObject({ processingStatus: 'FAILED' });
+    expect(await db.activity.findUniqueOrThrow({ where: { id: ready.activity.id } }))
+      .toMatchObject({ processingStatus: 'READY', readyAt: now });
+    expect(await db.activity.findUniqueOrThrow({ where: { id: legacyReady.activity.id } }))
+      .toMatchObject({ processingStatus: 'ANALYZING', readyAt: now });
+    expect(await db.notification.findMany()).toEqual([
+      expect.objectContaining({
+        kind: 'IMPORT_BATCH_PARTIAL_FAILED',
+        dedupeKey: `import-batch:${row.batch.id}`,
+        bodyMarkdown: expect.stringContaining('Activity analysis could not finish'),
+        data: expect.objectContaining({ batchStatus: 'PARTIAL_FAILED', postProcessingFailed: true }),
+      }),
+    ]);
+  });
+
+  concurrent('waits on the fitness lock before locking a failed batch or its activities', async () => {
+    const now = new Date();
+    const row = await seed({ createdAt: at(now, -20_000) });
+    await db.userPostProcessJob.update({
+      where: { id: row.post!.id },
+      data: { attempts: 5 },
+    });
+    const { worker } = scheduler(jest.fn(async (): Promise<never> => {
+      throw new Error('synthetic post-processing failure');
+    }));
+    const [job] = await worker.claimBatch(1, now);
+
+    const locked = Promise.withResolvers<void>();
+    const release = Promise.withResolvers<void>();
+    const replay = db.$transaction(async (tx) => {
+      await lockFitnessUser(tx, job.userId);
+      locked.resolve();
+      await release.promise;
+      await tx.$queryRaw`SELECT id FROM t_import_batch_job WHERE id = ${row.batch.id} FOR UPDATE NOWAIT`;
+      await tx.$queryRaw`SELECT id FROM t_activity WHERE id = ${row.activity.id} FOR UPDATE NOWAIT`;
+    });
+    await Promise.race([locked.promise, replay]);
+    const failure = worker.processJob(job);
+    try {
+      let waitingForLock = false;
+      for (let attempt = 0; attempt < 50 && !waitingForLock; attempt++) {
+        const [lock] = await db.$queryRaw<Array<{ waiting: boolean }>>`
+          SELECT EXISTS(SELECT 1 FROM pg_locks
+            WHERE locktype = 'advisory' AND NOT granted) AS waiting
+        `;
+        waitingForLock = lock.waiting;
+        if (!waitingForLock)
+          await new Promise((done) => setTimeout(done, 10));
+      }
+      expect(waitingForLock).toBe(true);
+    } finally {
+      release.resolve();
+      await Promise.all([replay, failure]);
+    }
+    expect(await db.activity.findUniqueOrThrow({ where: { id: row.activity.id } }))
+      .toMatchObject({ processingStatus: 'FAILED' });
+  });
+
+  it('recovers old unpublished DEAD batches, retaining the maintenance silence policy', async () => {
+    const now = new Date();
+    const failed = await seed({ createdAt: at(now, -20_000) });
+    const silent = await seed({ createdAt: at(now, -19_000) });
+    await db.userPostProcessJob.updateMany({
+      where: { id: { in: [failed.post!.id, silent.post!.id] } },
+      data: { status: 'DEAD', completedAt: now },
+    });
+    await db.importBatchJob.update({
+      where: { id: failed.batch.id },
+      data: { successCount: 0, failedCount: 1 },
+    });
+    await db.importBatchJob.update({
+      where: { id: silent.batch.id },
+      data: { requestContext: { suppressCompletionNotification: true } },
+    });
+
+    await scheduler().worker.drain();
+    await scheduler().worker.drain();
+    expect(await db.importBatchJob.findUniqueOrThrow({ where: { id: failed.batch.id } }))
+      .toMatchObject({ status: 'FAILED', failedCount: 1, notificationSentAt: expect.any(Date) });
+    expect(await db.importBatchJob.findUniqueOrThrow({ where: { id: silent.batch.id } }))
+      .toMatchObject({ status: 'PARTIAL_FAILED', notificationSentAt: expect.any(Date) });
+    expect(await db.notification.findMany()).toEqual([
+      expect.objectContaining({
+        dedupeKey: `import-batch:${failed.batch.id}`,
+        data: expect.objectContaining({ batchStatus: 'FAILED' }),
+      }),
+    ]);
+  });
+
+  it('does not fail an activity already queued for analysis in a newer batch', async () => {
+    const now = new Date();
+    const failed = await seed({ createdAt: at(now, -20_000) });
+    await db.importBatchJob.update({
+      where: { id: failed.batch.id },
+      data: { createdAt: at(now, -86_400_000) },
+    });
+    await db.userPostProcessJob.update({
+      where: { id: failed.post!.id },
+      data: { status: 'DEAD', completedAt: now },
+    });
+    const newer = await seed({ createdAt: now, pendingItem: true });
+    await db.importItemJob.update({
+      where: { id: newer.item.id },
+      data: { activityId: failed.activity.id },
+    });
+    await scheduler().worker.drain();
+    expect(await db.activity.findUniqueOrThrow({ where: { id: failed.activity.id } }))
+      .toMatchObject({ processingStatus: 'ANALYZING' });
+    expect(await db.importBatchJob.findUniqueOrThrow({ where: { id: failed.batch.id } }))
+      .toMatchObject({ status: 'PARTIAL_FAILED', notificationSentAt: expect.any(Date) });
+  });
+
+  it.each([false, true])(
+    'corrects a legacy success notice for a DEAD job (marker written: %s)',
+    async (markerWritten) => {
+      const now = new Date();
+      const row = await seed({ createdAt: at(now, -20_000) });
+      await db.userPostProcessJob.update({
+        where: { id: row.post!.id },
+        data: { status: 'DEAD', completedAt: now },
+      });
+      await db.importBatchJob.update({
+        where: { id: row.batch.id },
+        data: { status: 'PARTIAL_FAILED', notificationSentAt: markerWritten ? now : null },
+      });
+      const previous = await db.notification.create({
+        data: {
+          userId: row.batch.userId,
+          kind: 'IMPORT_BATCH_COMPLETED',
+          dedupeKey: `import-batch:${row.batch.id}`,
+          title: 'Old success notice',
+        },
+      });
+      await scheduler().worker.drain();
+      await scheduler().worker.drain();
+      expect(await db.notification.findMany()).toEqual([
+        expect.objectContaining({
+          id: previous.id,
+          kind: 'IMPORT_BATCH_PARTIAL_FAILED',
+          cancelledAt: null,
+          data: expect.objectContaining({ batchStatus: 'PARTIAL_FAILED', postProcessingFailed: true }),
+        }),
+      ]);
+    },
+  );
 
   concurrent('claims each user once across competing schedulers', async () => {
     const now = new Date();

@@ -588,6 +588,7 @@ describe('plan, calendar, and multi-conversation concurrency guards', () => {
         prescriptions as never,
         {} as never,
         {} as never,
+        {} as never,
       );
 
       await expect(

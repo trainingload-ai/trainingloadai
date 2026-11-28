@@ -1,3 +1,4 @@
+import { publicRuntimeText } from '@/utils/public-runtime-copy';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import type { Prisma } from '@prisma/client';
@@ -254,16 +255,12 @@ export class AthleteStateDecisionService {
         options: [
           {
             optionKey: 'apply',
-            title: locale.toLowerCase().startsWith('zh')
-              ? '应用调整'
-              : 'Apply adjustment',
+            title: publicRuntimeText(locale, 'stateApply'),
             isSelected: true,
           },
           {
             optionKey: 'keep',
-            title: locale.toLowerCase().startsWith('zh')
-              ? '保持原计划'
-              : 'Keep current plan',
+            title: publicRuntimeText(locale, 'stateKeep'),
             isSelected: false,
           },
         ],

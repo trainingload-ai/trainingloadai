@@ -1,3 +1,5 @@
+import { publicRuntimeText, type PublicRuntimeKey } from '@/utils/public-runtime-copy';
+import { resolveSupportedLocale } from '@/utils/locale.util';
 import { TodaySuggestionGuidanceLifecycle } from './today-suggestion-guidance.service';
 import {
   TodaySuggestionGenerationService,
@@ -631,17 +633,17 @@ export class TodaySuggestionOrchestratorService {
   private factFallback(
     projection: TodaySuggestionConstraintProjection,
   ): TodaySuggestionDraft {
-    const zh = projection.locale.toLowerCase().startsWith('zh');
+    const locale = resolveSupportedLocale(projection.locale);
+    const t = (key: PublicRuntimeKey, values?: Record<string, string | number>) =>
+      publicRuntimeText(locale, key, values);
     if (
       projection.coachState?.assessmentReadStatus === 'UNAVAILABLE' ||
       (projection.lightContext?.sharedFacts as { status?: string } | undefined)
         ?.status === 'LIMITED'
     )
       return {
-        headline: zh ? '今天先保持低负担安排' : 'Keep today low demand',
-        summary: zh
-          ? '部分当前依据暂时无法核对，今天先保持低负担活动，不临时增加强度或补练。数据恢复后，今日建议会重新结合当前情况判断。'
-          : 'Some current evidence is temporarily unavailable. Keep activity low demand without increasing intensity or making up training; the advice will update when current evidence is available.',
+        headline: t('today.lowDemand'),
+        summary: t('today.insufficientEvidence'),
         recommendation: { kind: 'RECOVER' },
         confidence: 'LOW',
         evidenceCodes: [],
@@ -651,10 +653,8 @@ export class TodaySuggestionOrchestratorService {
       };
     if (projection.highConcern) {
       return {
-        headline: zh ? '今天先保持保守安排' : 'Keep today conservative',
-        summary: zh
-          ? '当前已有状态信号需要优先处理。今天先休息，暂不开始高强度训练；现有教练判断可作为进一步调整的依据。'
-          : 'Current recorded concerns take priority. Rest today and avoid starting an intense session; the existing coach decision can guide any further adjustment.',
+        headline: t('today.conservative'),
+        summary: t('today.concern'),
         recommendation: { kind: 'REST' },
         confidence: 'MEDIUM',
         evidenceCodes: ['HIGH_CONCERN'],
@@ -662,17 +662,13 @@ export class TodaySuggestionOrchestratorService {
           ? 'OPEN_DECISION'
           : 'ASK_COACH',
         secondaryIntents: [],
-        tags: [zh ? '优先恢复' : 'Recovery first'],
+        tags: [t('today.needRecovery')],
       };
     }
     if (projection.userFeedback?.feedback === 'REST_TODAY') {
       return {
-        headline: zh
-          ? '今天按你的选择休息'
-          : 'Keep today as your chosen rest day',
-        summary: zh
-          ? '今天以休息为主，不需要补做训练。明天再结合近期训练负荷和计划安排下一次训练。'
-          : 'Keep today for rest without making up training. Use your recent training load and plan to decide the next session tomorrow.',
+        headline: t('today.chosenRest'),
+        summary: t('today.chosenRestBody'),
         recommendation: { kind: 'REST' },
         confidence: 'HIGH',
         evidenceCodes: [],
@@ -680,7 +676,7 @@ export class TodaySuggestionOrchestratorService {
           ? 'VIEW_TOMORROW'
           : null,
         secondaryIntents: [],
-        tags: [zh ? '今日休息' : 'Rest today'],
+        tags: [t('today.rest')],
       };
     }
     if (
@@ -689,12 +685,8 @@ export class TodaySuggestionOrchestratorService {
       )
     ) {
       return {
-        headline: zh
-          ? '今天先恢复，不追加训练'
-          : 'Recover today without adding training',
-        summary: zh
-          ? '已记录你对今天训练情况的反馈。今天先恢复，不因平台暂时缺少记录而补练；后续有新活动数据时会自动更新判断。'
-          : 'Your training feedback is recorded. Recover without making up training because a record is missing here; new activity data will update the recommendation.',
+        headline: t('today.recover'),
+        summary: t('today.recoverBody'),
         recommendation: { kind: 'RECOVER' },
         confidence: 'MEDIUM',
         evidenceCodes: [],
@@ -702,17 +694,13 @@ export class TodaySuggestionOrchestratorService {
           ? 'VIEW_TOMORROW'
           : null,
         secondaryIntents: [],
-        tags: [zh ? '恢复' : 'Recovery'],
+        tags: [t('today.recovery')],
       };
     }
     if (projection.coachState?.decisionReadStatus === 'UNAVAILABLE') {
       return {
-        headline: zh
-          ? '暂按已确认的安排保守执行'
-          : 'Keep to the confirmed schedule conservatively',
-        summary: zh
-          ? '最新教练调整暂时不可用。今天先维持已确认的低负担安排，不临时追加或补做训练。'
-          : 'The latest coach adjustments are temporarily unavailable. Keep to confirmed low-demand activity without adding or making up training.',
+        headline: t('today.keepConfirmed'),
+        summary: t('today.decisionUnavailable'),
         recommendation: { kind: 'RECOVER' },
         confidence: 'LOW',
         evidenceCodes: [],
@@ -736,10 +724,8 @@ export class TodaySuggestionOrchestratorService {
       )
     )
       return {
-        headline: zh ? '今天先保持低负担安排' : 'Keep today low demand',
-        summary: zh
-          ? '近期的身体状态记录需要和当前课表一起判断，暂不据此增加强度或补练。今天先保持低负担安排，待完整判断恢复后再决定下一步。'
-          : 'Recent reports need to be considered with the current schedule. Avoid increasing intensity or making up training; keep today low demand until a complete judgment is available.',
+        headline: t('today.lowDemand'),
+        summary: t('today.memorySummary'),
         recommendation: { kind: 'RECOVER' },
         confidence: 'LOW',
         evidenceCodes: [],
@@ -760,16 +746,14 @@ export class TodaySuggestionOrchestratorService {
         .slice(0, 2)
         .map((candidate) =>
           candidate.planTitle
-            ? `${candidate.planTitle} · ${candidate.name || (zh ? '课程' : 'Workout')}`
-            : candidate.name || (zh ? '独立课程' : 'Independent workout'),
+            ? `${candidate.planTitle} · ${candidate.name || (t('today.workout'))}`
+            : candidate.name || (t('today.independentWorkout')),
         );
       return {
-        headline: zh
-          ? '训练已记录，课程关联需要核对'
-          : 'Training is recorded; check its workout association',
-        summary: zh
-          ? `这次活动与${names.map((name) => `「${name}」`).join('、')}都可能对应，目前尚未自动关联或据此标记课程完成。请在活动详情中核对并手动选择实际完成的课程，不必因为尚未打勾而重复训练。`
-          : `This activity may correspond to ${names.join(' or ')}. It has not been automatically associated or used to mark a workout complete. Check the activity details and manually select the workout you completed; do not repeat training just because a workout is not checked off.`,
+        headline: t('today.linkActivity'),
+        summary: t('today.linkActivityBody', {
+          workouts: new Intl.ListFormat(locale, { type: 'disjunction' }).format(names),
+        }),
         recommendation: { kind: 'RECOVER' },
         confidence: 'LOW',
         evidenceCodes: ['RECENT_ACTIVITY'],
@@ -783,12 +767,8 @@ export class TodaySuggestionOrchestratorService {
     );
     if (projection.activeDecisionId) {
       return {
-        headline: zh
-          ? '以当前课表为准，调整尚未应用'
-          : 'The current schedule stands; the adjustment is not applied',
-        summary: zh
-          ? '教练提出的调整尚未写入课表。今天继续以已确认的安排为准，不把原安排与调整方案叠加执行；确认调整后，建议会随课表更新。'
-          : 'The proposed adjustment is not applied to your schedule. Follow the confirmed schedule without combining it with the alternative; accepting the adjustment will update the advice.',
+        headline: t('today.unapplied'),
+        summary: t('today.unappliedBody'),
         recommendation: { kind: 'ADJUST_PLAN' },
         confidence: 'MEDIUM',
         evidenceCodes: projection.activePlan ? ['PLAN_CONTEXT'] : [],
@@ -804,10 +784,8 @@ export class TodaySuggestionOrchestratorService {
         (projection.minutesUntilDayEnd ?? 1_440)
     ) {
       return {
-        headline: zh ? '按今天的安排执行' : "Follow today's scheduled workout",
-        summary: zh
-          ? `今天已安排「${current.name}」。按原定内容和强度执行即可，不额外加量；若出现疼痛或明显不适，停止训练。`
-          : `${current.name} is scheduled today. Follow its prescribed content and intensity without adding volume; stop if pain or clear discomfort develops.`,
+        headline: t('today.followSchedule'),
+        summary: t('today.followScheduleBody', { workout: current.name }),
         recommendation: {
           kind: 'TRAIN',
           ...(current.plannedDurationSeconds
@@ -820,7 +798,7 @@ export class TodaySuggestionOrchestratorService {
         evidenceCodes: ['TODAY_WORKOUT_AVAILABLE'],
         preferredIntent: 'OPEN_TODAY_WORKOUT',
         secondaryIntents: [],
-        tags: [zh ? '今日安排' : "Today's schedule"],
+        tags: [t('today.scheduled')],
       };
     }
     if (
@@ -837,9 +815,7 @@ export class TodaySuggestionOrchestratorService {
       const recordedFacts: string[] = [];
       if (recent && Number.isFinite(recent.distanceKm) && recent.distanceKm > 0)
         recordedFacts.push(
-          zh
-            ? `${recent.distanceKm.toFixed(1)} 公里`
-            : `${recent.distanceKm.toFixed(1)} km`,
+          t('today.distance', { value: new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(recent.distanceKm) }),
         );
       if (
         recent &&
@@ -847,9 +823,7 @@ export class TodaySuggestionOrchestratorService {
         recent.durationMinutes > 0
       )
         recordedFacts.push(
-          zh
-            ? `约 ${Math.round(recent.durationMinutes)} 分钟`
-            : `about ${Math.round(recent.durationMinutes)} minutes`,
+          t('today.duration', { value: Math.round(recent.durationMinutes) }),
         );
       if (
         recent &&
@@ -857,32 +831,18 @@ export class TodaySuggestionOrchestratorService {
         recent.avgHeartRate > 0
       )
         recordedFacts.push(
-          zh
-            ? `平均心率 ${Math.round(recent.avgHeartRate)}`
-            : `average heart rate ${Math.round(recent.avgHeartRate)} bpm`,
+          t('today.averageHeartRate', { value: Math.round(recent.avgHeartRate) }),
         );
       const activitySummary = recordedFacts.length
-        ? zh
-          ? `今天这次活动记录为 ${recordedFacts.join('，')}。`
-          : `Today's recorded activity: ${recordedFacts.join(', ')}. `
-        : zh
-          ? '今天已有完成记录。'
-          : 'Training is recorded today. ';
+        ? t('today.recordedFacts', { facts: new Intl.ListFormat(locale, { type: 'unit' }).format(recordedFacts) })
+        : t('today.recorded');
       return {
         headline: current
-          ? zh
-            ? '今天已有活动，不自动重复训练'
-            : 'Activity is recorded; avoid repeating training'
-          : zh
-            ? '今天已有训练，接下来以恢复为主'
-            : 'Training is recorded; prioritize recovery next',
+          ? t('today.activityPresent')
+          : t('today.trainingPresent'),
         summary: current
-          ? zh
-            ? `今天已有活动记录，「${current.name}」尚未标记完成。暂不自动重复或补做这节训练；活动关联和处理结果更新后，建议会同步变化。`
-            : `Activity is recorded today, while ${current.name} is not marked complete. Do not automatically repeat or make up this session; activity processing and matching will update the advice.`
-          : zh
-            ? `${activitySummary}今天先不追加训练；如果还想活动，保持轻松走动和放松即可。${projection.activePlan ? '后续训练继续衔接已有课表。' : '现有记录不足以判断长期训练水平，不据此认定停训或要求补练。'}`
-            : `${activitySummary}Avoid extra training for now; easy walking and gentle movement are enough if you want to stay active. ${projection.activePlan ? 'Continue with the existing schedule next.' : 'The available records do not establish your long-term training level or a training break.'}`,
+          ? t('today.activityPresentBody', { workout: current.name })
+          : t('today.recoveryNext', { activity: activitySummary, followUp: t(projection.activePlan ? 'today.continueSchedule' : 'today.unknownHistory') }),
         recommendation: { kind: 'RECOVER' },
         confidence: 'MEDIUM',
         evidenceCodes: ['RECENT_ACTIVITY'],
@@ -895,10 +855,8 @@ export class TodaySuggestionOrchestratorService {
     }
     if (hasRecentTrainingActivity(projection) || current) {
       return {
-        headline: zh ? '今天保持轻松节奏' : 'Keep today easy',
-        summary: zh
-          ? '当前先以轻松活动或休息为主，不临时追加高强度训练，也不补做临近结束的课次。后续结合近期负荷和已有安排继续。'
-          : 'Keep to easy activity or rest for now, without adding intensity or squeezing in a session near the end of the day. Continue using recent load and your existing schedule.',
+        headline: t('today.easy'),
+        summary: t('today.easyBody'),
         recommendation: { kind: 'RECOVER' },
         confidence: 'LOW',
         evidenceCodes: hasRecentTrainingActivity(projection)
@@ -914,10 +872,8 @@ export class TodaySuggestionOrchestratorService {
       projection.constraints.includes('WAITING_FOR_DATA')
     ) {
       return {
-        headline: zh ? '活动数据正在更新' : 'Activity data is updating',
-        summary: zh
-          ? '活动数据仍在处理或同步。暂不据此判定漏练，也不安排补练；处理完成后会自动更新建议，无需额外反馈。'
-          : 'Activity data is still processing or syncing. This does not establish a missed workout or a need to make it up. Advice will update when processing finishes; no extra feedback is needed.',
+        headline: t('today.processing'),
+        summary: t('today.processingBody'),
         recommendation: { kind: 'RECOVER' },
         confidence: 'LOW',
         evidenceCodes: ['ACTIVITY_PROCESSING_PENDING'],
@@ -931,20 +887,12 @@ export class TodaySuggestionOrchestratorService {
     );
     const coachAvailable = todaySuggestionCoachAvailable(projection);
     return {
-      headline: zh
-        ? '暂无近期训练记录'
-        : 'No recent training records are available',
+      headline: t('today.missingActivity'),
       summary: noActivity
         ? coachAvailable
-          ? zh
-            ? '目前还没有可用于判断近期训练状态的活动记录。你可以先导入活动，或直接告诉教练今天的时间和身体感受。'
-            : 'There is no recorded activity to assess recent training yet. Import an activity or tell the coach about your available time and how you feel today.'
-          : zh
-            ? '目前还没有可用于判断近期训练状态的活动记录。你可以先导入活动，在活动列表查看处理结果。'
-            : 'There is no recorded activity to assess recent training yet. Import an activity and check its processing status in your activity list.'
-        : zh
-          ? '近期没有新的活动记录，暂不据此推断你停止了训练。已有历史记录可以保留；如需基于最近训练生成建议，可以导入近期活动。'
-          : 'No recent activities are recorded here; this does not imply you stopped training. Importing a recent activity can support advice based on your latest training.',
+          ? t('today.importOrCoach')
+          : t('today.importOnly')
+        : t('today.staleActivity'),
       recommendation: { kind: noActivity ? 'SYNC_DATA' : 'CHECK_IN' },
       confidence: 'LOW',
       evidenceCodes: projection.constraints,
@@ -960,7 +908,7 @@ export class TodaySuggestionOrchestratorService {
         : coachAvailable
           ? ['ASK_COACH']
           : [],
-      tags: [zh ? '事实不足' : 'More context needed'],
+      tags: [t('today.moreContext')],
     };
   }
 

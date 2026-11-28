@@ -26,6 +26,11 @@ import {
   datasetRepairFingerprint,
   type ActivityDatasetRepair,
 } from '@/importing/activity-dataset-repair';
+import {
+  unresolvedAssociationSegments,
+  type AssociationGap,
+  type RawSegment,
+} from './raw-association-recovery';
 import { PrismaService } from '@/prisma/prisma.service';
 import { STORAGE_PORT, type StoragePort } from '@/storage/storage.port';
 
@@ -99,7 +104,27 @@ export type FitActivityRepairScanOptions = {
   userId?: string;
   sourceKind?: ImportSourceKind;
   failFast?: boolean;
+  /** Collect every association gap in the page instead of stopping at the first. */
+  reviewAssociations?: boolean;
   migrationId?: string;
+};
+
+export type RawSourceScanDisposition =
+  | 'NO_RECOVERABLE_DATA'
+  | 'REPAIR_REQUIRED'
+  | 'UNRECOVERABLE';
+
+export type RawSourceScanOutcome = {
+  sourceObjectId: string;
+  disposition: RawSourceScanDisposition;
+  code?: string;
+  activities?: Array<{
+    activityId: number;
+    sourceUid: string;
+    primarySourceId: string;
+    recordCount: number;
+    strengthSetCount: number;
+  }>;
 };
 
 export type FitActivityRepairScanResult = {
@@ -115,9 +140,39 @@ export type FitActivityRepairScanResult = {
   lastCandidateId: string | null;
   lastScannedId: string | null;
   failures: Array<{ sourceObjectId: string; code: string }>;
+  associationGaps: AssociationGap[];
+  scannedSourceIds: string[];
   integrityAudits?: LegacyDiscoveryIntegrityAudit[];
+  sourceOutcomes: RawSourceScanOutcome[];
   hasMore: boolean;
 };
+
+type SourceObjectQuery = {
+  findMany: (args: Record<string, unknown>) => Promise<any[]>;
+};
+
+/** Eligibility shared by keyset pages and the exhaustion census. */
+export function repairSourceWhere(options: {
+  userId?: string;
+  sourceKind?: ImportSourceKind;
+  sourceObjectId?: string;
+  afterId?: string;
+}): Record<string, unknown> {
+  return {
+    ...(options.userId ? { userId: options.userId } : {}),
+    ...(options.sourceKind ? { sourceKind: options.sourceKind } : {}),
+    ...(options.sourceObjectId
+      ? { id: options.sourceObjectId }
+      : options.afterId
+        ? { id: { gt: options.afterId } }
+        : {}),
+    objectType: { notIn: HEALTH_OBJECT_TYPES },
+    OR: [{ rawStorageKey: { not: null } }, { fileKey: { not: null } }],
+    activitySources: {
+      some: { isActive: true, isPrimary: true, activity: { state: 1 } },
+    },
+  };
+}
 
 /** 只比较可从原始 FIT 恢复、但当前活动数据集中缺失的数据。 */
 export function compareRecoverableFitData(args: {
@@ -289,30 +344,41 @@ export class FitActivityDataRepairService {
       lastCandidateId: null,
       lastScannedId: null,
       failures: [],
+      associationGaps: [],
+      scannedSourceIds: [],
       integrityAudits: [],
+      sourceOutcomes: [],
       hasMore: false,
     };
     let cursorId = options.afterId;
     const pageSize = Math.min(200, options.all ? 200 : options.limit);
+    const sourceObjects = this.jobs.sourceObjects() as SourceObjectQuery;
+    const conclude = (outcome: RawSourceScanOutcome) => {
+      result.sourceOutcomes.push(outcome);
+    };
 
     scan: while (true) {
-      const page = await this.jobs.sourceObjects().findMany({
-        where: {
-          ...(options.userId ? { userId: options.userId } : {}),
-          ...(options.sourceKind ? { sourceKind: options.sourceKind } : {}),
-          ...(options.sourceObjectId
-            ? { id: options.sourceObjectId }
-            : cursorId
-              ? { id: { gt: cursorId } }
-              : {}),
-          objectType: { notIn: HEALTH_OBJECT_TYPES },
-          OR: [{ rawStorageKey: { not: null } }, { fileKey: { not: null } }],
-          activitySources: {
-            some: { isActive: true, isPrimary: true, activity: { state: 1 } },
-          },
-        },
+      // Page source ids alone. A joined activity/parquet read can truncate a
+      // parent page below `take` and look like exhaustion at the 25-row boundary.
+      const idRows = await sourceObjects.findMany({
+        where: repairSourceWhere({
+          userId: options.userId,
+          sourceKind: options.sourceKind,
+          sourceObjectId: options.sourceObjectId,
+          afterId: cursorId,
+        }),
         orderBy: { id: 'asc' },
-        take: pageSize,
+        take: pageSize + 1,
+        select: { id: true },
+      });
+      if (idRows.length === 0) break;
+      const moreIds = idRows.length > pageSize;
+      const pageIds = idRows.slice(0, pageSize).map((row) => row.id);
+      if (cursorId && pageIds.some((id) => id === cursorId)) {
+        throw new Error('RAW_SCAN_CURSOR_STALLED');
+      }
+      const loaded = await sourceObjects.findMany({
+        where: { id: { in: pageIds } },
         select: {
           id: true,
           userId: true,
@@ -329,10 +395,12 @@ export class FitActivityDataRepairService {
           importRevision: true,
           metadata: true,
           activitySources: {
-            where: { isActive: true, isPrimary: true, activity: { state: 1 } },
+            where: { isActive: true, activity: { state: 1 } },
             select: {
               id: true,
               sourceUid: true,
+              isPrimary: true,
+              sourceObjectId: true,
               sourceChecksum: true,
               canonicalSnapshotId: true,
               metadata: true,
@@ -360,7 +428,15 @@ export class FitActivityDataRepairService {
           },
         },
       });
-      if (page.length === 0) break;
+      if (loaded.length !== pageIds.length) {
+        throw new Error('RAW_SCAN_PAGE_INCOMPLETE');
+      }
+      const byId = new Map(loaded.map((row) => [row.id, row]));
+      const page = pageIds.map((id) => {
+        const row = byId.get(id);
+        if (!row) throw new Error('RAW_SCAN_PAGE_INCOMPLETE');
+        return row;
+      });
 
       for (const sourceObject of page) {
         if (!options.all && result.scanned >= options.limit) {
@@ -373,6 +449,11 @@ export class FitActivityDataRepairService {
           sourceObject.rawStorageKey ?? sourceObject.fileKey;
         if (!rawStorageKey) {
           result.unavailableRawFiles += 1;
+          conclude({
+            sourceObjectId: sourceObject.id,
+            disposition: 'UNRECOVERABLE',
+            code: 'RAW_FILE_UNAVAILABLE',
+          });
           continue;
         }
 
@@ -391,6 +472,11 @@ export class FitActivityDataRepairService {
               code: 'RAW_FILE_UNAVAILABLE',
             });
             if (options.failFast) break scan;
+            conclude({
+              sourceObjectId: sourceObject.id,
+              disposition: 'UNRECOVERABLE',
+              code: 'RAW_FILE_UNAVAILABLE',
+            });
             continue;
           }
           phase = 'RAW_CHECKSUM_MISMATCH';
@@ -403,6 +489,10 @@ export class FitActivityDataRepairService {
           });
           if (decoded.detectedFormat !== 'fit') {
             result.noRecoverableData += 1;
+            conclude({
+              sourceObjectId: sourceObject.id,
+              disposition: 'NO_RECOVERABLE_DATA',
+            });
             continue;
           }
           phase = 'RAW_CANONICAL_MAPPING_FAILED';
@@ -435,7 +525,10 @@ export class FitActivityDataRepairService {
                 : 0,
             }),
           );
-          const stored = sourceObject.activitySources.map(
+          const primarySources = sourceObject.activitySources.filter(
+            (source) => source.isPrimary !== false,
+          );
+          const stored = primarySources.map(
             (source): StoredActivityDataset => ({
               sourceUid: source.sourceUid,
               activityId: source.activityId,
@@ -482,16 +575,92 @@ export class FitActivityDataRepairService {
             );
             comparison = compareRecoverableFitData({ raw, stored });
           }
-          result.unmappedRawActivities += comparison.unmapped;
-          if (comparison.unmapped) {
+          const segments: RawSegment[] = raw.map((dataset, index) => {
+            const activity = decoded.activity.activities?.[index] as unknown as
+              | {
+                  startTime?: Date | string;
+                  endTime?: Date | string;
+                  sport?: string;
+                }
+              | undefined;
+            const start = activity?.startTime
+              ? new Date(activity.startTime).getTime()
+              : Number.NaN;
+            const end = activity?.endTime
+              ? new Date(activity.endTime).getTime()
+              : Number.NaN;
+            return {
+              segmentIndex: index,
+              sourceUid: dataset.sourceUid,
+              startTimeMs: Number.isFinite(start) ? start : null,
+              endTimeMs: Number.isFinite(end) ? end : null,
+              sportType: activity?.sport ? String(activity.sport) : null,
+              recordCount: dataset.recordCount,
+              strengthSetCount: dataset.strengthSetCount,
+            };
+          });
+          const storedSources = sourceObject.activitySources.map((source) => {
+            const metadata =
+              source.metadata &&
+              typeof source.metadata === 'object' &&
+              !Array.isArray(source.metadata)
+                ? (source.metadata as { associationRole?: unknown })
+                : {};
+            return {
+              sourceUid: source.sourceUid,
+              activityId: source.activityId,
+              sourceId: source.id,
+              sourceObjectId: source.sourceObjectId ?? sourceObject.id,
+              sourceKind: sourceObject.sourceKind,
+              isPrimary: source.isPrimary !== false,
+              associationRole:
+                metadata.associationRole === 'cover'
+                  ? ('cover' as const)
+                  : null,
+            };
+          });
+          // Core proves checksum, start time and complete materialization
+          // before including a cross-container duplicate in stored.
+          const coveredDatasetUids = new Set(
+            stored.map((dataset) => dataset.sourceUid),
+          );
+          const unresolved = unresolvedAssociationSegments({
+            segments,
+            storedSources,
+            singlePrimaryLegacyMapped:
+              segments.length === 1 && primarySources.length === 1,
+          }).filter((segment) => !coveredDatasetUids.has(segment.sourceUid));
+          result.unmappedRawActivities += unresolved.length;
+          result.scannedSourceIds.push(sourceObject.id);
+          if (unresolved.length) {
             result.failures.push({
               sourceObjectId: sourceObject.id,
               code: 'RAW_ACTIVITY_ASSOCIATION_MISSING',
             });
-            if (options.failFast) break scan;
+            result.associationGaps.push({
+              sourceObjectId: sourceObject.id,
+              sourceKind: String(sourceObject.sourceKind ?? ''),
+              segments: unresolved,
+            });
+            conclude({
+              sourceObjectId: sourceObject.id,
+              disposition: 'UNRECOVERABLE',
+              code: 'RAW_ACTIVITY_ASSOCIATION_MISSING',
+            });
+            if (options.failFast && !options.reviewAssociations) break scan;
+            continue;
           }
           if (comparison.reasons.length === 0) {
             result.noRecoverableData += 1;
+            conclude({
+              sourceObjectId: sourceObject.id,
+              disposition: comparison.unmapped
+                ? 'UNRECOVERABLE'
+                : 'NO_RECOVERABLE_DATA',
+              ...(comparison.unmapped
+                ? { code: 'RAW_ACTIVITY_ASSOCIATION_MISSING' }
+                : {}),
+            });
             continue;
           }
           const activeItem = await this.jobs.itemJobs().findFirst({
@@ -555,6 +724,11 @@ export class FitActivityDataRepairService {
               code: 'RAW_ACTIVITY_ASSOCIATION_MISSING',
             });
             if (options.failFast) break scan;
+            conclude({
+              sourceObjectId: sourceObject.id,
+              disposition: 'UNRECOVERABLE',
+              code: 'RAW_ACTIVITY_ASSOCIATION_MISSING',
+            });
             continue;
           }
           const payloadChecksums = new Map(
@@ -593,6 +767,23 @@ export class FitActivityDataRepairService {
           result.candidates.push(candidate);
           result.firstCandidateId ??= sourceObject.id;
           result.lastCandidateId = sourceObject.id;
+          conclude({
+            sourceObjectId: sourceObject.id,
+            disposition: 'REPAIR_REQUIRED',
+            activities: comparison.reasons.map((reason) => {
+              const rawActivity =
+                raw.find((item) => item.sourceUid === reason.sourceUid) ??
+                (raw.length === 1 ? raw[0] : undefined);
+              const repair = candidate.repairs?.[reason.sourceUid];
+              return {
+                activityId: reason.activityId,
+                sourceUid: reason.sourceUid,
+                primarySourceId: repair?.primarySourceId ?? '',
+                recordCount: rawActivity?.recordCount ?? 0,
+                strengthSetCount: rawActivity?.strengthSetCount ?? 0,
+              };
+            }),
+          });
           if (!options.all && result.candidates.length >= options.limit) {
             // The candidate limit can end a full page before the loop's normal
             // pagination check. Require another page, even if it proves empty.
@@ -609,17 +800,40 @@ export class FitActivityDataRepairService {
             code: phase,
           });
           if (options.failFast) break scan;
+          conclude({
+            sourceObjectId: sourceObject.id,
+            disposition: 'UNRECOVERABLE',
+            code: phase,
+          });
         }
       }
 
+      const previousCursor = cursorId;
       cursorId = page.at(-1)?.id;
-      if (options.sourceObjectId || page.length < pageSize) break;
+      if (!cursorId || cursorId === previousCursor) {
+        throw new Error('RAW_SCAN_CURSOR_STALLED');
+      }
+      if (options.sourceObjectId) break;
+      if (!moreIds) break;
       if (!options.all && result.scanned >= options.limit) {
         result.hasMore = true;
         break;
       }
     }
     return result;
+  }
+
+  /** Every eligible source id, with no page cap. Used to prove a scan did not stop early. */
+  async listEligibleSourceIds(
+    userId: string,
+    sourceObjects: SourceObjectQuery = this.jobs.sourceObjects() as SourceObjectQuery,
+  ) {
+    const rows = await sourceObjects.findMany({
+      where: repairSourceWhere({ userId }),
+      orderBy: { id: 'asc' },
+      select: { id: true },
+    });
+    return rows.map((row) => row.id as string);
   }
 
   /**

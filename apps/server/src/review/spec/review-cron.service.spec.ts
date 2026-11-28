@@ -93,6 +93,9 @@ describe('ReviewCronService authoritative feature filtering', () => {
     await harness.service.tickDaily();
 
     const candidateSql = String(harness.queryRawUnsafe.mock.calls[0]?.[0]);
+    expect(candidateSql).toContain(
+      'ORDER BY m.user_id, m.effective_date DESC, m.created_at DESC',
+    );
     expect(candidateSql).not.toContain('AI_PLAN');
     expect(candidateSql).not.toContain('t_membership_duration_account');
     expect(evaluate.mock.calls).toEqual([

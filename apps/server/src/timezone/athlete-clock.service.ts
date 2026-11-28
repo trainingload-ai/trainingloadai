@@ -3,7 +3,10 @@ import { BodyMetricType } from '@prisma/client';
 
 import { UserQueryService } from '@/api/user/user-query.service';
 import { activityCalendarYmdInZone } from '@/api/plan/plan-link-calendar.util';
-import { normalizeIanaTimezone } from './user-timezone-initializer.service';
+import {
+  normalizeIanaTimezone,
+  resolveAthleteTimezone,
+} from './athlete-timezone';
 
 export type AthleteClock = {
   instant: Date;
@@ -34,13 +37,12 @@ export class AthleteClockService {
   async resolve(args: {
     userId: string;
     clientTimezone?: string | null;
+    fallbackTimezone?: string | null;
     instant?: Date;
   }): Promise<AthleteClock> {
     const instant = args.instant ?? new Date();
-    const timezone =
-      (await this.preferredTimezone(args.userId)) ??
-      normalizeIanaTimezone(args.clientTimezone) ??
-      'UTC';
+    const timezone = (await this.preferredTimezone(args.userId)) ??
+      resolveAthleteTimezone({ requested: args.clientTimezone, fallback: args.fallbackTimezone });
     const localDate = activityCalendarYmdInZone(instant, timezone);
     if (!localDate) {
       throw new Error('ATHLETE_LOCAL_DATE_PROJECTION_FAILED');

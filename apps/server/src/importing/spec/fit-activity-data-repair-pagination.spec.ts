@@ -12,8 +12,8 @@ jest.mock('../source-adapters/trackswap-canonical.mapper', () => ({
 import { FitActivityDataRepairService } from '../fit-activity-data-repair.service';
 import { decodeTrackFile } from '../trackswap-file';
 
-function scanner() {
-  const sources = ['a', 'b', 'c'].map((id) => ({
+function scanner(ids = ['a', 'b', 'c']) {
+  const sources = ids.map((id) => ({
     id,
     userId: 'user',
     sourceUid: id,
@@ -33,9 +33,19 @@ function scanner() {
       },
     ],
   }));
-  const query = jest.fn(async ({ where, take }) =>
-    sources.filter((s) => !where.id?.gt || s.id > where.id.gt).slice(0, take),
-  );
+  const query = jest.fn(async ({ where, take, select }) => {
+    let rows = sources.filter((source) => {
+      if (where?.id?.in) return where.id.in.includes(source.id);
+      return !where?.id?.gt || source.id > where.id.gt;
+    });
+    // A joined activity/parquet select must not be what decides the page end.
+    // Returning a short parent page here used to look like exhaustion near 25.
+    if (select?.activitySources && !where?.id?.in) {
+      return rows.slice(0, Math.min(take ?? rows.length, 20));
+    }
+    if (typeof take === 'number') rows = rows.slice(0, take);
+    return rows;
+  });
   const service = new FitActivityDataRepairService(
     {} as never,
     { getFileWithKey: async () => Buffer.from('abc') } as never,
@@ -99,5 +109,61 @@ describe('bounded raw-source repair pagination', () => {
       'c',
     ]);
     expect(result.hasMore).toBe(false);
+  });
+
+  it('continues past a full migration page when a joined read would stop short', async () => {
+    const ids = Array.from({ length: 30 }, (_, index) =>
+      String(index).padStart(2, '0'),
+    );
+    const { service } = scanner(ids);
+    const seen: string[] = [];
+    let afterId: string | undefined;
+    for (let page = 0; page < 5; page += 1) {
+      const result = await service.scan({ all: false, limit: 25, afterId });
+      seen.push(...result.candidates.map((candidate) => candidate.sourceObjectId));
+      if (!result.hasMore) {
+        expect(seen).toEqual(ids);
+        expect(result.sourceOutcomes.map((outcome) => outcome.sourceObjectId)).toEqual(
+          ids.slice(25),
+        );
+        return;
+      }
+      expect(result.scanned).toBe(25);
+      afterId = result.lastScannedId!;
+    }
+    throw new Error('Pagination stopped at the page boundary');
+  });
+
+  it('keeps scanning non-repair sources after a joined page would look finished', async () => {
+    const ids = Array.from({ length: 30 }, (_, index) =>
+      String(index).padStart(2, '0'),
+    );
+    const { service } = scanner(ids);
+    jest.mocked(decodeTrackFile).mockResolvedValue({
+      detectedFormat: 'gpx',
+    } as never);
+    const seen: string[] = [];
+    let afterId: string | undefined;
+    for (let page = 0; page < 5; page += 1) {
+      const result = await service.scan({ all: false, limit: 25, afterId });
+      expect(result.candidates).toEqual([]);
+      seen.push(...result.sourceOutcomes.map((outcome) => outcome.sourceObjectId));
+      if (!result.hasMore) {
+        expect(seen).toEqual(ids);
+        expect(result.sourceOutcomes.every((outcome) => outcome.disposition === 'NO_RECOVERABLE_DATA')).toBe(true);
+        return;
+      }
+      expect(result.scanned).toBe(25);
+      afterId = result.lastScannedId!;
+    }
+    throw new Error('Non-repair pagination stopped at the page boundary');
+  });
+
+  it('hard-fails when the cursor does not advance', async () => {
+    const { service, query } = scanner();
+    query.mockImplementation(async () => [{ id: 'a' }]);
+    await expect(service.scan({ all: false, limit: 25, afterId: 'a' })).rejects.toThrow(
+      'RAW_SCAN_CURSOR_STALLED',
+    );
   });
 });

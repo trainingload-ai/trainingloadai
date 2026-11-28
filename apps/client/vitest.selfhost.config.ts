@@ -101,6 +101,7 @@ export default defineConfig({
       "src/components/routes/**/*.test.{ts,tsx}",
       "src/components/MapBoxMap/**/*.test.{ts,tsx}",
       "src/components/health/**/*.test.{ts,tsx}",
+      "src/i18n/localized-health-calendar.test.tsx",
       "src/lib/runtime-environment.test.ts",
       "src/components/layout/DesktopWindowFrame.test.tsx",
       "src/app/[locale]/(main)/ai-coach/desktop-coach-capability-state.test.tsx",

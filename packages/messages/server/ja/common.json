@@ -24,6 +24,18 @@
     "cycleRationale": "「{planTitle}」は完了しました。完了率 {completionRate}%。このサイクルのまとめから次のプランを開始してください。",
     "cycleNextPlanPrompt": "前のサイクル「{planTitle}」のまとめから次のプランを開始します。完了率 {completionRate}%。まずまとめを読み、その後目標と制約を聞いてください。"
   },
+  "planReplacementRules": {
+    "restDays": "休養日",
+    "unavailableDates": "トレーニングできない日",
+    "availableDates": "トレーニング可能日の例外",
+    "dailyLimit": "1日のトレーニング時間の上限",
+    "weekdayLimits": "曜日別のトレーニング時間の上限",
+    "weeklyLimit": "週あたりの最大トレーニング日数",
+    "relativeDays": "プラン週内のトレーニング可能日",
+    "weekPhases": "トレーニング段階",
+    "requiredSports": "必須のスポーツ",
+    "raceDiscipline": "レース種目"
+  },
   "error": {
     "track_file_output_invalid": "変換結果が検証に合格しなかったため、ダウンロードを停止しました。元のファイルを保存し、別の形式を試すか、サポートへお問い合わせください。",
     "track_file_conversion_service_failed": "変換サービスで処理を完了できず、ダウンロードは開始されませんでした。元のファイルを保存し、別の形式を試すか、サポートへお問い合わせください。",
@@ -55,12 +67,14 @@
     "unauthorized": "ログインが必要です",
     "forbidden": "この操作を行う権限がありません",
     "not_found": "リクエストされた項目が見つかりません",
+    "plan_scheduled_activation_pending": "別のプランの開始がすでに予定されています。その予定を取り消してから、このプランを開始してください。",
     "conflict": "リクエストが現在の状態と競合しています",
     "invalid_idempotency_key": "削除リクエストの識別子が無効です。もう一度お試しください。",
     "idempotency_key_already_used": "この削除リクエスト識別子はすでに使用されています。削除手続きをやり直してください。",
     "account_not_found": "このアカウントは見つかりませんでした。",
     "account_deletion_in_progress": "アカウント削除リクエストはすでに処理中です。",
     "account_deletion_confirmations_required": "続行する前に、アカウント削除に関するすべての確認事項に同意してください。",
+    "plan_schedule_invalid": "プランの日程を確認し、競合するワークアウトを調整してください。",
     "unprocessable_entity": "リクエストを処理できませんでした",
     "too_many_requests": "リクエストが多すぎます。しばらくしてからもう一度お試しください。",
     "workout_definition_invalid": "ワークアウト定義が正しくありません",
@@ -144,6 +158,7 @@
     "polar_webhook_secret_missing": "Polar webhook secret is not configured",
     "polar_webhook_raw_body_missing": "Unable to read raw request body for webhook signature verification",
     "ai_coach_model_unavailable": "モデルが一時的に応答できません。モデルを切り替えて再試行してください。",
+    "import_activity_start_in_future": "アクティビティの開始時刻が現在より24時間を超えて先に設定されています。時刻を確認して、もう一度インポートしてください。",
     "import_identity_conflict": "アクティビティの所有権が競合しています。インポートの解決についてサポートにお問い合わせください。",
     "intervals_icu_athlete_identity_missing": "Intervals.icu アカウントの本人確認ができませんでした。再度認証してください。"
   },
@@ -241,6 +256,7 @@
     "importBatch": {
       "titleCompleted": "インポートバッチが完了しました",
       "titleCompletedWithFailures": "インポートバッチは完了しましたが、失敗した項目があります",
+      "bodyPostProcessingFailed": "\n\nアクティビティの分析を完了できませんでした。準備が完了しているアクティビティは引き続き利用できます。",
       "bodyBatchSummary": "ソースオブジェクト {totalCount} 件を処理しました。\n\n- 成功：{successCount}\n- 失敗：{failedCount}\n- スキップ：{skippedCount}",
       "bodyThirdPartyExportFailures": "\n\n{providers} へのアップロードが {failedCount} 件のアクティビティで失敗しました。接続設定を確認するか、アクティビティ画面から再試行してください。"
     }

@@ -24,6 +24,18 @@
     "cycleRationale": "「{planTitle}」已經完成。完成率 {completionRate}%，建議基於本週期總結開啟下一份計畫。",
     "cycleNextPlanPrompt": "基於上一週期《{planTitle}》的總結開啟下一份計畫。完成率 {completionRate}%。請先讀週期總結，再問我目標和約束。"
   },
+  "planReplacementRules": {
+    "restDays": "休息日",
+    "unavailableDates": "不可訓練日期",
+    "availableDates": "可訓練例外日期",
+    "dailyLimit": "每日訓練時長上限",
+    "weekdayLimits": "各星期訓練時長上限",
+    "weeklyLimit": "每週訓練天數上限",
+    "relativeDays": "計畫週內可訓練的天數序號",
+    "weekPhases": "訓練階段",
+    "requiredSports": "必需運動項目",
+    "raceDiscipline": "參賽項目"
+  },
   "error": {
     "track_file_output_invalid": "轉換結果未通過驗證，已阻止下載。請保留原始檔案，嘗試其他格式，或聯絡技術支援。",
     "track_file_conversion_service_failed": "轉換服務未能完成處理，未啟動下載。請保留原始檔案，嘗試其他格式，或聯絡技術支援。",
@@ -55,12 +67,14 @@
     "unauthorized": "請先登入後再繼續",
     "forbidden": "你沒有權限執行此操作",
     "not_found": "找不到請求的內容",
+    "plan_scheduled_activation_pending": "已有另一份計畫排程生效。請先取消那份已排程的計畫，再啟用目前的計畫。",
     "conflict": "請求與目前狀態衝突",
     "invalid_idempotency_key": "刪除請求識別碼無效，請重試。",
     "idempotency_key_already_used": "此刪除請求識別碼已被使用，請重新開始刪除流程。",
     "account_not_found": "找不到此帳戶。",
     "account_deletion_in_progress": "帳戶刪除請求正在處理中。",
     "account_deletion_confirmations_required": "繼續前請確認所有帳戶刪除事項。",
+    "plan_schedule_invalid": "請檢查計畫排程，調整有衝突的課次。",
     "unprocessable_entity": "無法處理此請求",
     "too_many_requests": "請求過於頻繁，請稍後再試。",
     "workout_definition_invalid": "訓練定義不合法",
@@ -144,6 +158,7 @@
     "polar_webhook_secret_missing": "Polar webhook secret 未設定",
     "polar_webhook_raw_body_missing": "無法取得原始請求體，無法校驗 webhook 簽名",
     "ai_coach_model_unavailable": "模型暫時無法回應，請嘗試切換模型後重試。",
+    "import_activity_start_in_future": "活動開始時間比目前時間晚了超過 24 小時。請核對開始時間後重新匯入。",
     "import_identity_conflict": "活動歸屬存在衝突，請聯絡支援人員處理此次匯入。",
     "intervals_icu_athlete_identity_missing": "無法確認 Intervals.icu 帳號身分，請重新授權。"
   },
@@ -241,6 +256,7 @@
     "importBatch": {
       "titleCompleted": "匯入批次已完成",
       "titleCompletedWithFailures": "匯入批次已完成，但有失敗項",
+      "bodyPostProcessingFailed": "\n\n活動分析未能完成。已就緒的活動仍可查看。",
       "bodyBatchSummary": "已處理 {totalCount} 個來源物件。\n\n- 成功：{successCount}\n- 失敗：{failedCount}\n- 跳過：{skippedCount}",
       "bodyThirdPartyExportFailures": "\n\n向 {providers} 上傳失敗（{failedCount} 個活動）。請開啟連線設定檢查授權，或從活動頁面重試。"
     }

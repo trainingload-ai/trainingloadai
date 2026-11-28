@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SportType } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
+import type { PrismaTx } from '@/prisma/prisma-db';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { computeNormalizedSessionRpeLoad } from '@/training-load/session-rpe-load';
 import {
@@ -153,39 +154,43 @@ export class LoadReadoutService {
    */
   async batchGetActualLoad(
     activityIds: number[],
+    tx?: PrismaTx,
   ): Promise<Map<number, ActualLoadReadout>> {
     const out = new Map<number, ActualLoadReadout>();
     if (!activityIds.length) return out;
 
-    const activities = await this.activityRead.findMany({
-      where: readyActivityWhere({ id: { in: activityIds } }),
-      select: {
-        id: true,
-        userId: true,
-        startTime: true,
-        sportType: true,
-        sportDefinitionCode: true,
-        sessionRpe: true,
-        timerTime: true,
-        elapsedTime: true,
-        coggan: { select: { bikeStress: true } },
-        trimp: { select: { trimp100: true } },
-        bikeScore: { select: { bikeScore: true } },
-        govss: { select: { govss: true } },
-        swimScore: { select: { swimScore: true } },
-        fitnessMetricsSnapshot: {
-          select: {
-            resolutionVersion: true,
-            actualLoad: true,
-            actualLoadSource: true,
+    const activities = await this.activityRead.findMany(
+      {
+        where: readyActivityWhere({ id: { in: activityIds } }),
+        select: {
+          id: true,
+          userId: true,
+          startTime: true,
+          sportType: true,
+          sportDefinitionCode: true,
+          sessionRpe: true,
+          timerTime: true,
+          elapsedTime: true,
+          coggan: { select: { bikeStress: true } },
+          trimp: { select: { trimp100: true } },
+          bikeScore: { select: { bikeScore: true } },
+          govss: { select: { govss: true } },
+          swimScore: { select: { swimScore: true } },
+          fitnessMetricsSnapshot: {
+            select: {
+              resolutionVersion: true,
+              actualLoad: true,
+              actualLoadSource: true,
+            },
+          },
+          activitySources: {
+            where: { isActive: true, isPrimary: true },
+            select: { metadata: true },
           },
         },
-        activitySources: {
-          where: { isActive: true, isPrimary: true },
-          select: { metadata: true },
-        },
       },
-    });
+      tx,
+    );
     if (!activities.length) return out;
 
     const sourceCache = new Map<
@@ -203,7 +208,7 @@ export class LoadReadoutService {
         );
       sourceCache.set(
         userId,
-        await this.analysisConfigs.listVersions(userId, latestStart),
+        await this.analysisConfigs.listVersions(userId, latestStart, tx),
       );
     }
 
@@ -222,6 +227,7 @@ export class LoadReadoutService {
           await this.analysisConfigs.resolveAt(
             activity.userId,
             activity.startTime,
+            tx,
           )
         ).loadSources;
       out.set(

@@ -1,4 +1,7 @@
-import { HttpStatus } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Logger, UnprocessableEntityException } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import request = require('supertest');
+import { planScheduleInvalid } from '@/api/plan/application/plan-schedule-error';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { I18nContext } from 'nestjs-i18n';
 import { readFileSync } from 'node:fs';
@@ -20,6 +23,7 @@ const zhMessages: Record<string, string> = {
   'common.error.payload_too_large':
     '提交的内容超出大小限制。请减少内容或分批提交后重试。',
   'common.error.unprocessable_entity': '无法处理该请求',
+  'common.error.plan_schedule_invalid': '请检查计划排期，调整有冲突的课次。',
   'common.error.workout_definition_invalid': '训练定义不合法',
   'common.error.account_deletion_in_progress': '账户删除申请正在处理中',
   'common.error.track_file_tcx_timestamps_required':
@@ -373,5 +377,59 @@ describe('AllExceptionsFilter client abort handling', () => {
     expect(output).not.toContain('must-not-appear');
     expect(output).not.toContain('query-secret');
     expect(logger.error).not.toHaveBeenCalled();
+  });
+});
+
+
+const calendarIssues = [{ code: 'FIXED_REST_DAY', date: '2026-12-06' }];
+
+@Controller('calendar-contract')
+class CalendarContractController {
+  @Get('current')
+  current() {
+    throw planScheduleInvalid(calendarIssues);
+  }
+
+  @Get('legacy')
+  legacy() {
+    throw new UnprocessableEntityException({
+      code: 'PLAN_SCHEDULE_INVALID', issues: calendarIssues,
+    });
+  }
+
+  @Get('missing-issues')
+  missingIssues() {
+    throw new UnprocessableEntityException({
+      code: 'PLAN_SCHEDULE_INVALID', message: 'Invalid saved schedule constraints',
+    });
+  }
+}
+
+describe('Plan schedule error HTTP contract', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('serializes both internal shapes and keeps an actionable message when there are no issues', async () => {
+    mockI18n('zh');
+    const testModule = await Test.createTestingModule({
+      controllers: [CalendarContractController],
+    }).compile();
+    const app = testModule.createNestApplication();
+    app.useGlobalFilters(new HttpExceptionFilter({ warn: jest.fn(), error: jest.fn() } as unknown as Logger));
+    try {
+      await app.init();
+      for (const endpoint of ['current', 'legacy', 'missing-issues']) {
+        const response = await request(app.getHttpServer()).get(`/calendar-contract/${endpoint}`).expect(422);
+        expect(response.body).toMatchObject({
+          code: 422,
+          error_code: 'PLAN_SCHEDULE_INVALID',
+          errorCode: 'PLAN_SCHEDULE_INVALID',
+          message: '请检查计划排期，调整有冲突的课次。',
+          data: endpoint === 'missing-issues' ? null : { issues: calendarIssues },
+        });
+        expect(response.body).not.toHaveProperty('issues');
+      }
+    } finally {
+      await app.close();
+    }
   });
 });

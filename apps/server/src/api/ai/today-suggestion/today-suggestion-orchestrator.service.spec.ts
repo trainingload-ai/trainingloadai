@@ -52,6 +52,64 @@ describe('TodaySuggestionOrchestratorService', () => {
     expect(draft.preferredIntent).toBe('ASK_COACH');
   });
 
+  it.each([
+    [undefined, 'Keep today conservative'],
+    ['zh', '今天先保持保守安排'],
+    ['zh-hant', '今天先保持保守安排'],
+    ['ja', '今日は余裕を持った計画に'],
+    ['de', 'Heute vorsichtig planen'],
+    ['pt-BR', 'Adote um plano conservador hoje'],
+  ])('serves the localized high-concern fallback for %s', async (locale, headline) => {
+    const prisma = {
+      $transaction: async (work) => work(prisma),
+      aiTodaySuggestion: {
+        findUnique: async () => null,
+        upsert: async ({ create }) => ({ id: 'suggestion-1', ...create }),
+      },
+    };
+    const projection = {
+      userId: 'user-1',
+      locale,
+      date: '2026-10-28',
+      timezone: 'UTC',
+      edition: 'self-host',
+      allowAi: false,
+      featureAllowed: true,
+      factHash: 'facts',
+      constraintHash: 'constraints',
+      continuityHash: 'continuity',
+      validUntil: new Date(Date.now() + 60 * 60_000),
+      constraints: [],
+      lightContext: {},
+      todayWorkouts: [],
+      tomorrowWorkouts: [],
+      activityEvidence: {},
+      coachState: { athleteState: null, decisions: [] },
+      highConcern: true,
+      weatherImpact: { status: 'unavailable' },
+    } as TodaySuggestionConstraintProjection;
+    const service = new TodaySuggestionOrchestratorService(
+      prisma as never,
+      { project: async () => projection } as never,
+      {} as never,
+      {} as never,
+      new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
+      { rollover: async () => ({}) } as never,
+      uncontendedGeneration(prisma),
+    );
+    const advice = await service.get({
+      userId: projection.userId,
+      locale: locale ?? 'en',
+      allowAi: false,
+    });
+
+    expect(advice).toMatchObject({
+      headline,
+      recommendation: { kind: 'REST' },
+      delivery: { reasonCode: 'AI_DISABLED' },
+    });
+  });
+
   it('serializes identical requests into one Agent run and one generation', async () => {
     let stored: Record<string, any> | null = null;
     const prisma = {

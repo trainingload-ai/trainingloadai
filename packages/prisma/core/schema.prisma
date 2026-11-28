@@ -1202,6 +1202,7 @@ model T_user {
   thirdPartyActivity                ThirdPartyActivity[]
   pmcData                           PMCData[]
   plans                             Plan[]
+  planWorkoutChangeRevision         PlanWorkoutChangeRevision?
   planProposalPreviews              PlanProposalPreview[]
   independentWorkoutCreations       IndependentWorkoutCreation[]
   planTemplatePreviews              PlanTemplatePreview[]
@@ -1455,6 +1456,7 @@ model ExternalProviderConnection {
   planWorkoutMappings PlanWorkoutExternalMapping[]
   routeMappings       RouteExternalMapping[]
   personalJobs        PersonalProviderJob[]
+  personalOAuthRefresh PersonalOAuthRefresh?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1468,6 +1470,17 @@ model ExternalProviderConnection {
 
 /// Personal integrations use durable discovery/checkpoint and delivery jobs.
 /// Payload/result never contain credentials or signed download URLs.
+model PersonalOAuthRefresh {
+  connectionId      String                     @id @map("connection_id")
+  connection        ExternalProviderConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  credentialVersion String                     @map("credential_version")
+  claimToken        String                     @map("claim_token")
+  leaseExpiresAt    DateTime                   @map("lease_expires_at") @db.Timestamptz(3)
+  dispatchedAt      DateTime?                  @map("dispatched_at") @db.Timestamptz(3)
+
+  @@map("t_personal_oauth_refresh")
+}
+
 model PersonalProviderJob {
   id            String                     @id @default(cuid())
   connectionId  String                     @map("connection_id")
@@ -4647,6 +4660,11 @@ model CoachAction {
   /// 教练会话 sid，便于按会话过滤「我都帮你做了什么」
   sid       String? @map("sid")
 
+  invocationKey       String? @unique @map("invocation_key")
+  invocationAttemptId String? @map("invocation_attempt_id")
+  invocationInputHash String? @map("invocation_input_hash")
+  invocationPayload   Json?   @map("invocation_payload")
+
   /// 撤销窗口截止时间（仅 LOW 写入；HIGH 永远为 null）
   undoUntil DateTime? @map("undo_until")
   /// 撤销已执行时间；非空表示已撤销，禁止再次撤销
@@ -4654,6 +4672,7 @@ model CoachAction {
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([userId, sid, createdAt(sort: Desc)])
+  @@index([invocationAttemptId])
   @@map("t_coach_action")
 }
 
@@ -5396,6 +5415,28 @@ model Plan {
   @@map("t_plan")
 }
 
+model PlanFixedCompletionPolicy {
+  id          Int      @id
+  enabledFrom DateTime @map("enabled_from") @db.Timestamptz(3)
+
+  @@map("t_plan_fixed_completion_policy")
+}
+
+/// Latest committed workout change per athlete. The outbound counter ignores Garmin imports.
+model PlanWorkoutChangeRevision {
+  userId                      String   @id @map("user_id")
+  user                        T_user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revision                    BigInt
+  outboundRevision            BigInt   @map("outbound_revision")
+  source                      String
+  outboundSource              String?  @map("outbound_source")
+  calendarRevision            BigInt   @default(0) @map("calendar_revision")
+  calendarAdjustmentVersionId String?  @map("calendar_adjustment_version_id")
+  updatedAt                   DateTime @map("updated_at") @db.Timestamptz(3)
+
+  @@map("t_plan_workout_change_revision")
+}
+
 /// 用户确认前的服务端规范化计划提案。提案不可由模型在确认阶段改写，且短期过期。
 model PlanProposalPreview {
   id        String   @id @default(cuid())
@@ -5592,12 +5633,27 @@ model CoachContext {
   decisions       CoachDecision[]
   commits         CoachCommit[]
   assessmentCases CoachAssessmentCase[]
+  cycleReviewJob  CoachCycleReviewJob?
 
   @@unique([userId, planId])
   @@index([userId, headEventSeq])
   @@index([userId, status, updatedAt(sort: Desc)])
   @@index([planId])
   @@map("t_coach_context")
+}
+
+model CoachCycleReviewJob {
+  contextId      String    @id @map("context_id")
+  context        CoachContext @relation(fields: [contextId], references: [id], onDelete: Cascade)
+  availableAt    DateTime  @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)")) @map("available_at")
+  claimToken     String?   @map("claim_token")
+  leaseExpiresAt DateTime? @map("lease_expires_at")
+  completedAt    DateTime? @map("completed_at")
+  attempts       Int       @default(0)
+  lastError      String?   @map("last_error")
+
+  @@index([completedAt, availableAt])
+  @@map("t_coach_cycle_review_job")
 }
 
 /// 教练上下文事件（仅追加，不可变）

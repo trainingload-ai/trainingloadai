@@ -1,7 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { planDb, type PlanDb } from './plan-db';
+
+export function scheduledReplacementReservationWhere(
+  userId: string,
+  exceptSourcePlanId?: string,
+): Prisma.PlanWhereInput {
+  return {
+    userId,
+    status: 'SCHEDULED',
+    activationBlockedAt: null,
+    scheduledActivationAt: { not: null },
+    supersedes: {
+      userId,
+      ...(exceptSourcePlanId ? { id: { not: exceptSourcePlanId } } : {}),
+      status: { in: ['ACTIVE', 'PAUSED', 'COMPLETED'] },
+    },
+  };
+}
+
+export function scheduledReplacementCutoff(
+  userId: string,
+  successor: {
+    userId: string;
+    status: string;
+    startDate: Date | null;
+    scheduledActivationAt: Date | null;
+    activationBlockedAt: Date | null;
+  } | null,
+): string | null {
+  if (
+    successor?.userId !== userId ||
+    successor.status !== 'SCHEDULED' ||
+    successor.activationBlockedAt ||
+    !successor.scheduledActivationAt
+  ) {
+    return null;
+  }
+  return successor.startDate?.toISOString().slice(0, 10) ?? null;
+}
 
 @Injectable()
 export class PlanRepository {
@@ -30,6 +68,49 @@ export class PlanRepository {
     tx?: PlanDb,
   ) {
     return this.db(tx).plan.findMany(args);
+  }
+
+  findElapsedFixedPlans(
+    referenceTime: Date,
+    options: { tx?: PlanDb; planId?: string } = {},
+  ) {
+    return this.db(options.tx).$queryRaw<Array<{ id: string; userId: string }>>`
+      SELECT id, "userId"
+      FROM (${this.elapsedFixedPlanEligibility(referenceTime, options.planId)}) elapsed
+      WHERE eligible
+      ORDER BY "endDate", id
+      LIMIT 100
+    `;
+  }
+
+  async previewFixedPlanCompletion(referenceTime: Date) {
+    const [counts] = await this.prisma.$queryRaw<
+      Array<{ due: number; historical: number }>
+    >`
+      SELECT count(*) FILTER (WHERE eligible)::int AS due,
+        count(*) FILTER (WHERE NOT eligible)::int AS historical
+      FROM (${this.elapsedFixedPlanEligibility(referenceTime)}) elapsed
+    `;
+    return counts;
+  }
+
+  private elapsedFixedPlanEligibility(referenceTime: Date, planId?: string) {
+    return Prisma.sql`
+      SELECT p.id, p.user_id AS "userId", p.end_date AS "endDate", cutoff.eligible
+      FROM t_plan p
+      CROSS JOIN t_plan_fixed_completion_policy policy
+      LEFT JOIN pg_timezone_names zone ON lower(zone.name) = lower(btrim(p.activation_timezone))
+      CROSS JOIN LATERAL (
+        SELECT policy.enabled_from <= ${referenceTime}::timestamptz
+          AND p.end_date >= ((policy.enabled_from - interval '1 microsecond')
+            AT TIME ZONE COALESCE(zone.name, 'UTC'))::date AS eligible
+      ) cutoff
+      WHERE p.status = 'ACTIVE' AND p.planning_mode = 'FIXED'
+        AND p.end_date IS NOT NULL
+        AND (p.start_date IS NULL OR p.end_date >= p.start_date)
+        AND p.end_date < (${referenceTime}::timestamptz AT TIME ZONE COALESCE(zone.name, 'UTC'))::date
+        ${planId ? Prisma.sql`AND p.id = ${planId}` : Prisma.empty}
+    `;
   }
 
   create<T extends Prisma.PlanCreateArgs>(
