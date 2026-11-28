@@ -7,6 +7,22 @@ Under each date, use level-three headings for language tags (such as en and zh-H
 Write short paragraphs or flat bullet lists about user-visible changes.
 -->
 
+## 2026-11-28
+
+### en
+
+- Move and adjust planned workouts from the calendar. Saved changes stay in place when the calendar reloads.
+- Create standalone workouts in Coach and review the phases of a training plan before confirming it.
+- Start a training plan directly. Starting a rolling plan preserves workouts you have already saved.
+- Running training load can be estimated from pace when body weight is unavailable.
+
+### zh-Hans
+
+- 可以在训练日历里移动和调整计划训练，重新加载日历后仍会保留已保存的改动。
+- 可以在 AI 教练里创建独立训练，也可以先查看分阶段的训练计划，再确认。
+- 可以直接启动训练计划。启动滚动计划时，已保存的训练会保留。
+- 缺少体重记录时，仍可根据跑步配速估算训练负荷。
+
 ## 2026-11-20
 
 ### en
