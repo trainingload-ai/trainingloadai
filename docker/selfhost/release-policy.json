@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.1.27",
-  "releaseKind": "self-host-v1-patch",
+  "releaseVersion": "1.3.0",
+  "releaseKind": "self-host-v1-minor",
   "upgrade": {
     "supportedSourceVersions": [
       "1.1.15",
@@ -13,7 +13,8 @@
       "1.1.22",
       "1.1.24",
       "1.1.25",
-      "1.1.26"
+      "1.1.26",
+      "1.1.27"
     ],
     "applicationRollbackTo": [],
     "backupRequired": true
@@ -180,43 +181,43 @@
       },
       "0040_calendar_adjustments": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       },
       "0041_independent_workout_creation": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       },
       "0042_independent_workout_drafts": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       },
       "0043_coach_plan_validation_rejections": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       },
       "0044_import_item_utc_availability": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       },
       "0045_coach_cycle_review_queue": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       },
       "0046_fixed_plan_completion": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       },
       "0047_coach_mutation_invocation": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       },
       "0048_plan_workout_change_revision": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       },
       "0049_personal_oauth_refresh_claim": {
         "phase": "expand",
-        "releaseVersion": "1.1.27"
+        "releaseVersion": "1.3.0"
       }
     }
   }
