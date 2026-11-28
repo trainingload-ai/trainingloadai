@@ -22,8 +22,12 @@ import { ExternalProviderCredentialVault } from '../../external-provider/externa
 import { PersonalConnectionService } from '../personal-connection.service';
 import { PersonalProviderError } from '../personal-errors';
 
-describe('Personal COROS refresh / PostgreSQL', () => {
-  const native = !!process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN;
+// These scenarios require independent sessions against the same PostgreSQL database.
+const native = Boolean(process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN);
+const hasPostgres =
+  native || Boolean(process.env.CORE_MIGRATION_TEST_POSTGRES_URL);
+
+(hasPostgres ? describe : describe.skip)('Personal COROS refresh / PostgreSQL', () => {
   const vault = new ExternalProviderCredentialVault(
     new ConfigService({
       externalProviderCredentialSecret: 'fixture-only-encryption-key',
@@ -41,25 +45,24 @@ describe('Personal COROS refresh / PostgreSQL', () => {
         __dirname,
         native
           ? '../../../api/plan/spec/plan-sync-native-postgres.mjs'
-          : '../../../api/ai/core/spec/coach-run-postgres.mjs',
+          : '../../../analyze/spec/activity-recompute-postgres.mjs',
       ),
       [],
       { execArgv: [], stdio: ['ignore', 'inherit', 'inherit', 'ipc'] },
     );
-    const server = await new Promise<{
-      address: string;
-      connectionLimit?: number;
-    }>((done, reject) => {
-      database.once(
-        'message',
-        (value: { address: string; connectionLimit?: number }) => done(value),
-      );
+    const server = await new Promise<
+      { address: string; connectionLimit: number } | { databaseUrl: string }
+    >((done, reject) => {
+      database.once('message', done);
       database.once('error', reject);
       database.once('exit', (code) =>
         reject(new Error(`Test database exited: ${code}`)),
       );
     });
-    const datasourceUrl = `postgresql://postgres:postgres@${server.address}/postgres?connection_limit=${server.connectionLimit ?? 1}&sslmode=disable`;
+    const datasourceUrl =
+      'databaseUrl' in server
+        ? server.databaseUrl
+        : `postgresql://postgres:postgres@${server.address}/postgres?connection_limit=${server.connectionLimit}&sslmode=disable`;
     db = new PrismaClient({ datasourceUrl });
     replica = new PrismaClient({ datasourceUrl });
     await Promise.all([db.$connect(), replica.$connect()]);
@@ -181,13 +184,11 @@ describe('Personal COROS refresh / PostgreSQL', () => {
     const follower = service(replica, token).credential(id, true, 'old-access');
     try {
       await sleep(130);
-      if (native) {
-        const [activity] = await db.$queryRaw<{ open: bigint }[]>`
-          SELECT count(*) AS open FROM pg_stat_activity
-          WHERE datname = current_database() AND state LIKE 'idle in transaction%'
-        `;
-        expect(Number(activity.open)).toBe(0);
-      }
+      const [activity] = await db.$queryRaw<{ open: bigint }[]>`
+        SELECT count(*) AS open FROM pg_stat_activity
+        WHERE datname = current_database() AND state LIKE 'idle in transaction%'
+      `;
+      expect(Number(activity.open)).toBe(0);
       expect(token).toHaveBeenCalledTimes(1);
     } finally {
       release.resolve();
